@@ -100,7 +100,7 @@ main = do
               transformA = V3 (V3  1  0 (-1))
                               (V3  0  1   1)
                               (V3  0  0   1) !*! scaled (V3 sx sy 1)
-          -- print transformA
+
           checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
           checkingGLError $ glBindTexture GL_TEXTURE_2D (unTexture texture)
           checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MAG_FILTER GL_NEAREST
@@ -139,7 +139,7 @@ main = do
                 (1 - fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
                 (    fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
                 (1 - fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
-          print instanceBounds'
+
           setUniformValue textProgram rect rect'
           setUniformValue textProgram colour (V4 0 0 0 1)
           glActiveTexture GL_TEXTURE0
