@@ -448,4 +448,4 @@ instance (Applicative f, Ord a) => Semigroup (Interval (f a)) where
 data ArrayVertices a = ArrayVertices { arrayVertices :: [a], prevIndex :: Int, arrayRanges :: [ArrayRange] }
 
 data Geometry a where
-  Geometry :: (Foldable v, GLScalar n) => GLuint -> [v n] -> Geometry (v n)
+  Geometry :: (Foldable v, Scalar n) => GLuint -> [v n] -> Geometry (v n)
