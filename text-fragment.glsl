@@ -25,6 +25,5 @@ void main() {
     0.0);
 
   // Optionally scale by a colour
-  fragColor = vec4(1, 0, 1, 1);
-  // fragColor = colour.a == 0.0 ? 1.0 - rgba : colour * rgba;
+  fragColor = colour.a == 0.0 ? 1.0 - rgba : colour * rgba;
 }
