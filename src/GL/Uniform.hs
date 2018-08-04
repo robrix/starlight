@@ -16,25 +16,25 @@ import Linear.V4 as Linear
 
 newtype Var t = Var { varName :: String }
 
-class GLUniform t where
+class Uniform t where
   glUniform :: HasCallStack => GLint -> t -> IO ()
 
-setUniformValue :: (GLUniform t, HasCallStack) => Program -> Var t -> t -> IO ()
+setUniformValue :: (Uniform t, HasCallStack) => Program -> Var t -> t -> IO ()
 setUniformValue program var v = do
   location <- checkingGLError $ C.withCString (varName var) (glGetUniformLocation (unProgram program))
   glUniform location v
 
-instance GLUniform (Linear.V4 Float) where
+instance Uniform (Linear.V4 Float) where
   glUniform location (Linear.V4 x y z w) = checkingGLError $ glUniform4f location x y z w
 
-instance GLUniform (Linear.V4 Double) where
+instance Uniform (Linear.V4 Double) where
   glUniform location (Linear.V4 x y z w) = checkingGLError $ glUniform4d location x y z w
 
-instance GLUniform (Linear.M44 Float) where
+instance Uniform (Linear.M44 Float) where
   glUniform location matrix = checkingGLError $ A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix4fv location 1 GL_FALSE . castPtr)
 
-instance GLUniform (Linear.M33 Float) where
+instance Uniform (Linear.M33 Float) where
   glUniform location matrix = checkingGLError $ A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix3fv location 1 GL_FALSE . castPtr)
 
-instance GLUniform TextureUnit where
+instance Uniform TextureUnit where
   glUniform location textureUnit = checkingGLError $ glUniform1i location (unTextureUnit textureUnit)
