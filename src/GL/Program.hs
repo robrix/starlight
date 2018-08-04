@@ -1,6 +1,7 @@
 module GL.Program where
 
 import qualified Control.Exception as E
+import Control.Monad.IO.Class
 import Data.Foldable (for_)
 import GHC.Stack
 import GL.Error
@@ -10,6 +11,9 @@ import Graphics.GL.Types
 
 newtype Program = Program { unProgram :: GLuint }
   deriving Show
+
+useProgram :: MonadIO m => Program -> m ()
+useProgram = glUseProgram . unProgram
 
 withProgram :: (Program -> IO a) -> IO a
 withProgram = E.bracket

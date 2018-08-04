@@ -121,7 +121,7 @@ main = do
 
           checkingGLError $ glBindVertexArray (unArray array)
 
-          glUseProgram (unProgram glyphProgram)
+          useProgram glyphProgram
           let s = 1 / 2
           for_ (zip instances (tail (arrayRanges vertices))) $ \ (Instance{..}, range) ->
             for_ (zip [0..] jitterPattern) $ \ (j, offset) -> do
@@ -133,7 +133,7 @@ main = do
           glBindFramebuffer GL_FRAMEBUFFER 0
           glBlendFunc GL_ZERO GL_SRC_COLOR
 
-          glUseProgram (unProgram textProgram)
+          useProgram textProgram
           let rect' = V4
                 (    fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
                 (1 - fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
