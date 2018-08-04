@@ -73,8 +73,8 @@ main = do
             colour  = Var "colour"  :: Var (V4 Float)
             sampler = Var "sampler" :: Var TextureUnit
             matrix3 = Var "matrix3" :: Var (M33 Float)
-            instances = foldl (combineInstances (V2 72 72)) [] glyphs
-            instanceBounds' = fromMaybe (error "wtf") (sfoldMap instanceBounds instances)
+            instances = foldl (combineInstances (V2 288 288)) [] glyphs
+            instanceBounds' = fromMaybe (Interval zero zero) (sfoldMap instanceBounds instances)
             geometry = Geometry GL_TRIANGLES . instanceGeometry <$> instances
             vertices = foldl combineGeometry (ArrayVertices [] 0 []) (Geometry GL_TRIANGLE_STRIP
               [ V4 (-1) (-1) 0 1
