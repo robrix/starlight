@@ -3,7 +3,7 @@ precision highp float;
 uniform sampler2D sampler;
 uniform vec4 colour;
 in vec2 _coord2;
-out vec4 fragColor;
+out vec4 fragColour;
 void main() {
   // Get samples for -2/3 and -1/3
   vec2 valueL = texture(sampler, vec2(_coord2.x + dFdx(_coord2.x), _coord2.y)).yz * 255.0;
@@ -25,5 +25,5 @@ void main() {
     0.0);
 
   // Optionally scale by a colour
-  fragColor = colour.a == 0.0 ? 1.0 - rgba : colour * rgba;
+  fragColour = colour.a == 0.0 ? 1.0 - rgba : colour * rgba;
 }
