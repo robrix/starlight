@@ -6,4 +6,4 @@ import Graphics.GL.Types
 
 newtype Buffer n = Buffer { unBuffer :: GLuint }
 
-instance GLObject (Buffer n) where characterize = (Buffer, glGenBuffers, glDeleteBuffers)
+instance Object (Buffer n) where characterize = (Buffer, glGenBuffers, glDeleteBuffers)

@@ -6,4 +6,4 @@ import Graphics.GL.Types
 
 newtype Texture = Texture { unTexture :: GLuint }
 
-instance GLObject Texture where characterize = (Texture, glGenTextures, glDeleteTextures)
+instance Object Texture where characterize = (Texture, glGenTextures, glDeleteTextures)

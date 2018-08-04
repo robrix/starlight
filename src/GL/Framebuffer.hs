@@ -6,4 +6,4 @@ import Graphics.GL.Types
 
 newtype Framebuffer = Framebuffer { unFramebuffer :: GLuint }
 
-instance GLObject Framebuffer where characterize = (Framebuffer, glGenFramebuffers, glDeleteFramebuffers)
+instance Object Framebuffer where characterize = (Framebuffer, glGenFramebuffers, glDeleteFramebuffers)

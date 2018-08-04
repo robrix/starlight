@@ -26,4 +26,4 @@ withArray vertices body = with $ \ buffer -> do
     glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy :: Proxy n)) GL_FALSE 0 nullPtr
     body array
 
-instance GLObject (Array n) where characterize = (Array, glGenVertexArrays, glDeleteVertexArrays)
+instance Object (Array n) where characterize = (Array, glGenVertexArrays, glDeleteVertexArrays)
