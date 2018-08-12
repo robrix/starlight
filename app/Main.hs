@@ -43,6 +43,7 @@ import SDL.Event
 import SDL.Init
 import qualified SDL.Raw as SDL
 import System.Exit
+import UI.Glyph
 
 main :: HasCallStack => IO ()
 main = do
@@ -183,12 +184,6 @@ infixl 5 `translate`
 translate :: M33 Float -> V2 Float -> M33 Float
 translate (V3 r1 r2 r3) (V2 tx ty) = V3 (over _z (+ tx) r1) (over _z (+ ty) r2) r3
 
-data Instance = Instance
-  { instanceGlyph  :: {-# UNPACK #-} !Glyph
-  , instanceOffset :: {-# UNPACK #-} !(V2 Float)
-  , instanceBounds :: {-# UNPACK #-} !(Rect Float)
-  , instanceScale  :: {-# UNPACK #-} !(V2 Float)
-  }
 
 combineInstances :: V2 Float -> [Instance] -> Glyph -> [Instance]
 combineInstances scale instances@(Instance g (V2 x y) _ _:_) glyph = instances <> [ Instance glyph (V2 (x + glyphAdvanceWidth g) y) (scaleRect scale (translateRect (V2 (x + glyphAdvanceWidth g) y) (glyphBounds glyph))) scale ]
@@ -196,13 +191,6 @@ combineInstances scale [] glyph = [ Instance glyph (V2 0 0) (glyphBounds glyph) 
 
 instanceGeometry :: Instance -> [V4 Float]
 instanceGeometry Instance{..} = glyphGeometry instanceGlyph
-
-data Glyph = Glyph
-  { glyphCodePoint    :: !Char
-  , glyphAdvanceWidth :: {-# UNPACK #-} !Float
-  , glyphGeometry     :: ![V4 Float]
-  , glyphBounds       :: {-# UNPACK #-} !(Rect Float)
-  }
 
 scaleGlyph :: V2 Float -> Glyph -> Glyph
 scaleGlyph (V2 sx sy) Glyph{..} = Glyph glyphCodePoint (glyphAdvanceWidth * sx) ((* V4 sx sy 1 1) <$> glyphGeometry) (scaleRect (V2 sx sy) glyphBounds)
