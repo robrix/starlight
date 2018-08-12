@@ -14,3 +14,16 @@ _rectMin = lens rectMin (\ r v -> r { rectMin = v })
 
 _rectMax :: Lens' (Rect a) (V2 a)
 _rectMax = lens rectMax (\ r v -> r { rectMax = v })
+
+
+minX :: Rect a -> a
+minX = view _x . rectMin
+
+minY :: Rect a -> a
+minY = view _y . rectMin
+
+maxX :: Rect a -> a
+maxX = view _x . rectMax
+
+maxY :: Rect a -> a
+maxY = view _y . rectMax
