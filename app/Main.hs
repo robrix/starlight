@@ -10,16 +10,17 @@ import Data.Char
 import Data.Foldable
 import Data.Functor.Identity
 import Data.Int
-import Data.Interval
+import Data.List.NonEmpty (nonEmpty)
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
-import Data.Semigroup
+import Data.Semigroup.Foldable
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Data.Vector ((!?))
 import Data.Word
 import qualified Foreign.C.String as C
 import Foreign.Ptr
+import Geometry.Rect
 import GHC.Stack
 import GL.Array
 import GL.Error
@@ -75,7 +76,7 @@ main = do
             sampler = Var "sampler" :: Var TextureUnit
             matrix3 = Var "matrix3" :: Var (M33 Float)
             instances = foldl (combineInstances (V2 288 288)) [] glyphs
-            instanceBounds' = fromMaybe (Interval zero zero) (sfoldMap instanceBounds instances)
+            instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
             geometry = Geometry GL_TRIANGLES . instanceGeometry <$> instances
             vertices = foldl combineGeometry (ArrayVertices [] 0 []) (Geometry GL_TRIANGLE_STRIP
               [ V4 (-1) (-1) 0 1
@@ -200,20 +201,8 @@ data Instance = Instance
   , instanceScale  :: {-# UNPACK #-} !(V2 Float)
   }
 
-minX :: Rect a -> a
-minX = (^. _x) . intervalMin
-
-minY :: Rect a -> a
-minY = (^. _y) . intervalMin
-
-maxX :: Rect a -> a
-maxX = (^. _x) . intervalMax
-
-maxY :: Rect a -> a
-maxY = (^. _y) . intervalMax
-
 combineInstances :: V2 Float -> [Instance] -> Glyph -> [Instance]
-combineInstances scale instances@(Instance g (V2 x y) _ _:_) glyph = instances <> [ Instance glyph (V2 (x + glyphAdvanceWidth g) y) (scaleInterval scale (translateInterval (V2 (x + glyphAdvanceWidth g) y) (glyphBounds glyph))) scale ]
+combineInstances scale instances@(Instance g (V2 x y) _ _:_) glyph = instances <> [ Instance glyph (V2 (x + glyphAdvanceWidth g) y) (scaleRect scale (translateRect (V2 (x + glyphAdvanceWidth g) y) (glyphBounds glyph))) scale ]
 combineInstances scale [] glyph = [ Instance glyph (V2 0 0) (glyphBounds glyph) scale ]
 
 instanceGeometry :: Instance -> [V4 Float]
@@ -227,10 +216,7 @@ data Glyph = Glyph
   }
 
 scaleGlyph :: V2 Float -> Glyph -> Glyph
-scaleGlyph (V2 sx sy) Glyph{..} = Glyph glyphCodePoint (glyphAdvanceWidth * sx) ((* V4 sx sy 1 1) <$> glyphGeometry) (scaleInterval (V2 sx sy) glyphBounds)
-
-sfoldMap :: (Foldable f, Semigroup s) => (a -> s) -> f a -> Maybe s
-sfoldMap f = getOption . foldMap (Option . Just . f)
+scaleGlyph (V2 sx sy) Glyph{..} = Glyph glyphCodePoint (glyphAdvanceWidth * sx) ((* V4 sx sy 1 1) <$> glyphGeometry) (scaleRect (V2 sx sy) glyphBounds)
 
 setClearColour :: Linear.V4 Float -> IO ()
 setClearColour (V4 r g b a) = glClearColor r g b a
@@ -293,7 +279,7 @@ glyphs typeface chars = concat (zipWith toGlyph chars (glyphsForChars typeface c
   where toGlyph char (Just g) = let vertices = glyphVertices typeface g in
           [ scaleGlyph (V2 (1 / fromIntegral (unitsPerEm typeface)) (1 / fromIntegral (unitsPerEm typeface))) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds ((^. _xy) <$> vertices)) ]
         toGlyph _ Nothing = []
-        bounds vertices = Interval (foldr1 (liftA2 min) vertices) (foldr1 (liftA2 max) vertices)
+        bounds vertices = Rect (foldr1 (liftA2 min) vertices) (foldr1 (liftA2 max) vertices)
 
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
 glyphsForChars (Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyphIDs
@@ -430,8 +416,6 @@ data Triangle v n = Triangle (v n) (v n) (v n)
 data ArrayRange = ArrayRange { mode :: GLuint, firstVertexIndex :: Int, vertexCount :: Int }
 
 data GeometryArray n = GeometryArray { geometryRanges :: [ArrayRange], geometryArray :: Array n }
-
-type Rect a = Interval (V2 a)
 
 data ArrayVertices a = ArrayVertices { arrayVertices :: [a], prevIndex :: Int, arrayRanges :: [ArrayRange] }
 

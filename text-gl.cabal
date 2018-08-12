@@ -49,6 +49,7 @@ executable text-gl
                      , linear
                      , opentype
                      , sdl2
+                     , semigroupoids
                      , text
                      , text-gl
                      , vector
