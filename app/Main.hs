@@ -33,6 +33,7 @@ import GL.TextureUnit
 import GL.Uniform
 import Graphics.GL.Core41
 import Graphics.GL.Types
+import Lens.Micro hiding (set)
 import Linear.Matrix as Linear
 import Linear.V2 as Linear
 import Linear.V3 as Linear
@@ -183,16 +184,8 @@ infixl 5 `translate`
 translate :: M33 Float -> V2 Float -> M33 Float
 translate (V3 r1 r2 r3) (V2 tx ty) = V3 (over _z (+ tx) r1) (over _z (+ ty) r2) r3
 
-(^.) :: s -> ((a -> Const a a) -> s -> Const a s) -> a
-(^.) s l = getConst (l Const s)
-
 set' :: s -> ((a -> Identity a) -> s -> Identity s) -> a -> s
 set' s l a = runIdentity (l (const Identity a) s)
-
-type ASetter s t a b = (a -> Identity b) -> s -> Identity t
-
-over :: ASetter s t a b -> (a -> b) -> s -> t
-over l f = runIdentity . l (Identity . f)
 
 data Instance = Instance
   { instanceGlyph  :: {-# UNPACK #-} !Glyph

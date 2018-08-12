@@ -47,6 +47,7 @@ executable text-gl
                      , containers
                      , gl
                      , linear
+                     , microlens
                      , opentype
                      , sdl2
                      , semigroupoids
