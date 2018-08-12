@@ -32,6 +32,7 @@ library
                      , containers
                      , gl
                      , linear
+                     , microlens
                      , opentype
                      , sdl2
                      , text
