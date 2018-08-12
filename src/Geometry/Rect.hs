@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor, RecordWildCards #-}
 module Geometry.Rect where
 
 import Lens.Micro
@@ -34,5 +34,5 @@ maxY = view _y . rectMax
 scaleRect :: Num a => a -> Rect a -> Rect a
 scaleRect scale = fmap (* scale)
 
-translateRect :: Num a => a -> Rect a -> Rect a
-translateRect delta = fmap (+ delta)
+translateRect :: Num a => V2 a -> Rect a -> Rect a
+translateRect delta Rect{..} = Rect (rectMin + delta) (rectMax + delta)
