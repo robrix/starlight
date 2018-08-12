@@ -27,6 +27,7 @@ library
                      , GL.Texture
                      , GL.TextureUnit
                      , GL.Uniform
+                     , UI.Glyph
   build-depends:       base
                      , containers
                      , gl
