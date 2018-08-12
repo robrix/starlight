@@ -229,12 +229,6 @@ data Glyph = Glyph
 scaleGlyph :: V2 Float -> Glyph -> Glyph
 scaleGlyph (V2 sx sy) Glyph{..} = Glyph glyphCodePoint (glyphAdvanceWidth * sx) ((* V4 sx sy 1 1) <$> glyphGeometry) (scaleInterval (V2 sx sy) glyphBounds)
 
-scaleInterval :: Num a => a -> Interval a -> Interval a
-scaleInterval scale Interval{..} = Interval (intervalMin * scale) (intervalMax * scale)
-
-translateInterval :: Num a => a -> Interval a -> Interval a
-translateInterval delta Interval{..} = Interval (intervalMin + delta) (intervalMax + delta)
-
 sfoldMap :: (Foldable f, Semigroup s) => (a -> s) -> f a -> Maybe s
 sfoldMap f = getOption . foldMap (Option . Just . f)
 
