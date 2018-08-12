@@ -1,8 +1,10 @@
+{-# LANGUAGE RecordWildCards #-}
 module Geometry.Rect where
 
 import Lens.Micro
 import Lens.Micro.Extras
 import Linear.V2 as Linear
+import Linear
 
 data Rect a = Rect
   { rectMin :: {-# UNPACK #-} !(V2 a)
@@ -27,3 +29,7 @@ maxX = view _x . rectMax
 
 maxY :: Rect a -> a
 maxY = view _y . rectMax
+
+
+scaleRect :: Num a => a -> Rect a -> Rect a
+scaleRect scale Rect{..} = Rect (rectMin ^* scale) (rectMax ^* scale)
