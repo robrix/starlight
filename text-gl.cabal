@@ -15,7 +15,8 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     GL.Array
+  exposed-modules:     Data.Interval
+                     , GL.Array
                      , GL.Buffer
                      , GL.Error
                      , GL.Framebuffer
