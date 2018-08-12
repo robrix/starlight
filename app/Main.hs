@@ -67,8 +67,8 @@ main = do
       , SDL.SDL_FINGERUP
       , SDL.SDL_FINGERDOWN ]
 
-    withWindow name (fromIntegral <$> windowSize) flags (\ window ->
-      withContext window (\ _ ->
+    withWindow name (fromIntegral <$> windowSize) flags $ \ window ->
+      withContext window $ \ _ ->
         let rect    = Var "rect"    :: Var (V4 Float)
             colour  = Var "colour"  :: Var (V4 Float)
             sampler = Var "sampler" :: Var TextureUnit
@@ -154,7 +154,7 @@ main = do
               exitSuccess
             _ -> pure ()
 
-          SDL.glSwapWindow window))
+          SDL.glSwapWindow window
     `E.finally`
       SDL.quit
   where flags = foldr (.|.) 0
