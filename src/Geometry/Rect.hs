@@ -1,10 +1,9 @@
-{-# LANGUAGE DeriveFunctor, RecordWildCards #-}
+{-# LANGUAGE DeriveFunctor #-}
 module Geometry.Rect where
 
 import Lens.Micro
 import Lens.Micro.Extras
 import Linear.V2 as Linear
-import Linear
 
 data Rect a = Rect
   { rectMin :: {-# UNPACK #-} !(V2 a)
@@ -33,4 +32,7 @@ maxY = view _y . rectMax
 
 
 scaleRect :: Num a => a -> Rect a -> Rect a
-scaleRect scale Rect{..} = Rect (rectMin ^* scale) (rectMax ^* scale)
+scaleRect scale = fmap (* scale)
+
+translateRect :: Num a => a -> Rect a -> Rect a
+translateRect delta = fmap (+ delta)
