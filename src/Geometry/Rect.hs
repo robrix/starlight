@@ -36,3 +36,9 @@ scaleRect scale Rect{..} = Rect (rectMin * scale) (rectMax * scale)
 
 translateRect :: Num a => V2 a -> Rect a -> Rect a
 translateRect delta Rect{..} = Rect (rectMin + delta) (rectMax + delta)
+
+
+newtype Union a = Union { getUnion :: Rect a }
+
+instance Ord a => Semigroup (Union a) where
+  Union (Rect min1 max1) <> Union (Rect min2 max2) = Union (Rect (min <$> min1 <*> min2) (max <$> max1 <*> max2))
