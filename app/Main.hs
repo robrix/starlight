@@ -53,17 +53,17 @@ main = do
   CC.runInBoundThread $ C.withCString "Text" $ \ name -> do
     _ <- SDL.init SDL.SDL_INIT_EVERYTHING >>= checkWhen (< 0)
 
-    SDL.SDL_GL_CONTEXT_MAJOR_VERSION `set` 4
-    SDL.SDL_GL_CONTEXT_MINOR_VERSION `set` 1
-    SDL.SDL_GL_CONTEXT_PROFILE_MASK `set` SDL.SDL_GL_CONTEXT_PROFILE_CORE
+    SDL.SDL_GL_CONTEXT_MAJOR_VERSION .= 4
+    SDL.SDL_GL_CONTEXT_MINOR_VERSION .= 1
+    SDL.SDL_GL_CONTEXT_PROFILE_MASK .= SDL.SDL_GL_CONTEXT_PROFILE_CORE
 
-    SDL.SDL_GL_RED_SIZE   `set` 8
-    SDL.SDL_GL_GREEN_SIZE `set` 8
-    SDL.SDL_GL_BLUE_SIZE  `set` 8
-    SDL.SDL_GL_ALPHA_SIZE `set` 8
-    SDL.SDL_GL_DEPTH_SIZE `set` 16
+    SDL.SDL_GL_RED_SIZE   .= 8
+    SDL.SDL_GL_GREEN_SIZE .= 8
+    SDL.SDL_GL_BLUE_SIZE  .= 8
+    SDL.SDL_GL_ALPHA_SIZE .= 8
+    SDL.SDL_GL_DEPTH_SIZE .= 16
 
-    SDL.SDL_GL_DOUBLEBUFFER `set` fromEnum True
+    SDL.SDL_GL_DOUBLEBUFFER .= fromEnum True
 
     ignoreEventsOfTypes
       [ SDL.SDL_FINGERMOTION
@@ -393,8 +393,8 @@ checkSDLError = do
   SDL.clearError
   when (msg /= "") $ E.throw $ SDLException msg
 
-set :: SDL.GLattr -> Int -> IO ()
-set attribute value = do
+(.=) :: SDL.GLattr -> Int -> IO ()
+attribute .= value = do
   result <- SDL.glSetAttribute attribute (fromIntegral value)
   _ <- checkWhen (< 0) result
   pure ()
