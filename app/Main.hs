@@ -8,7 +8,6 @@ import Control.Monad
 import Data.Bits
 import Data.Char
 import Data.Foldable
-import Data.Functor.Identity
 import Data.Int
 import Data.List.NonEmpty (nonEmpty)
 import qualified Data.Map as Map
@@ -183,9 +182,6 @@ infixl 5 `translate`
 
 translate :: M33 Float -> V2 Float -> M33 Float
 translate (V3 r1 r2 r3) (V2 tx ty) = V3 (over _z (+ tx) r1) (over _z (+ ty) r2) r3
-
-set' :: s -> ((a -> Identity a) -> s -> Identity s) -> a -> s
-set' s l a = runIdentity (l (const Identity a) s)
 
 data Instance = Instance
   { instanceGlyph  :: {-# UNPACK #-} !Glyph
