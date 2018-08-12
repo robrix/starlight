@@ -31,8 +31,8 @@ maxY :: Rect a -> a
 maxY = view _y . rectMax
 
 
-scaleRect :: Num a => a -> Rect a -> Rect a
-scaleRect scale = fmap (* scale)
+scaleRect :: Num a => V2 a -> Rect a -> Rect a
+scaleRect scale Rect{..} = Rect (rectMin * scale) (rectMax * scale)
 
 translateRect :: Num a => V2 a -> Rect a -> Rect a
 translateRect delta Rect{..} = Rect (rectMin + delta) (rectMax + delta)
