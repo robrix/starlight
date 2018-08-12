@@ -10,6 +10,7 @@ import Data.Char
 import Data.Foldable
 import Data.Functor.Identity
 import Data.Int
+import Data.Interval
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 import Data.Semigroup
@@ -436,12 +437,7 @@ data ArrayRange = ArrayRange { mode :: GLuint, firstVertexIndex :: Int, vertexCo
 
 data GeometryArray n = GeometryArray { geometryRanges :: [ArrayRange], geometryArray :: Array n }
 
-data Interval a = Interval { intervalMin, intervalMax :: !a }
-  deriving Show
 type Rect a = Interval (V2 a)
-
-instance (Applicative f, Ord a) => Semigroup (Interval (f a)) where
-  Interval min1 max1 <> Interval min2 max2 = Interval (min <$> min1 <*> min2) (max <$> max1 <*> max2)
 
 data ArrayVertices a = ArrayVertices { arrayVertices :: [a], prevIndex :: Int, arrayRanges :: [ArrayRange] }
 
