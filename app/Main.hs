@@ -43,6 +43,7 @@ import SDL.Event
 import SDL.Init
 import qualified SDL.Raw as SDL
 import System.Exit
+import UI.Font
 import UI.Glyph
 
 main :: HasCallStack => IO ()
@@ -206,9 +207,6 @@ combineGeometry ArrayVertices{..} (Geometry mode vertices) =
     (prevIndex + count)
     (arrayRanges <> [ ArrayRange { mode = mode, firstVertexIndex = prevIndex, vertexCount = count } ])
 
-data Typeface = Typeface { typefaceName :: String, typefaceUnderlying :: O.OpentypeFont }
-
-data Font = Font { fontFace :: Typeface, fontSize :: Float }
 
 readTypeface :: FilePath -> IO (Maybe Typeface)
 readTypeface path = (toTypeface <$> O.readOTFile path) `E.catch` (\ (E.SomeException _) -> return Nothing)
