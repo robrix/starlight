@@ -29,6 +29,7 @@ library
                      , GL.Uniform
                      , UI.Font
                      , UI.Glyph
+                     , UI.Path
   build-depends:       base
                      , containers
                      , gl
