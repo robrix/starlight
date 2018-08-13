@@ -138,16 +138,6 @@ glyphVertices :: Typeface -> O.Glyph Int -> [V4 Float]
 glyphVertices typeface = (>>= uncurry triangleVertices) . (>>= pathTriangles (0, V2 0 0, V2 0 0)) . glyphPaths typeface
 
 
-encodePath :: Path V2 O.FWord -> [Word8]
-encodePath = go . fmap (toBytes @Word16 . fromIntegral)
-  where go path = case path of
-          M (V2 x y)            rest -> moveTo  : x ++ y             ++ go rest
-          L (V2 x y)            rest -> lineTo  : x ++ y             ++ go rest
-          Q (V2 x y) (V2 x' y') rest -> curveTo : x ++ y ++ x' ++ y' ++ go rest
-          _                          -> close   : []
-        (moveTo, lineTo, curveTo, close) = (0, 1, 2, 3)
-
-
 encodeGlyphPaths :: Typeface -> O.Glyph Int -> [Word8]
 encodeGlyphPaths typeface = (>>= encodePath) . glyphPaths typeface
 
