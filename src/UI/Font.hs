@@ -119,7 +119,7 @@ glyphPaths :: Typeface -> O.Glyph Int -> [Path V2 O.FWord]
 glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnderlying typeface) glyph)
 
 
-pathTriangles :: (Int, V2 O.FWord, V2 O.FWord) -> Path V2 O.FWord -> [(Triangle V2 O.FWord, Bool)]
+pathTriangles :: (Int, V2 a, V2 a) -> Path V2 a -> [(Triangle V2 a, Bool)]
 pathTriangles (count, first, current) p = case p of
   M v rest ->                                                                             pathTriangles (0,          v,     v ) rest
   L v rest
