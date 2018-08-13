@@ -8,13 +8,10 @@ import Control.Monad
 import Data.Bits
 import Data.Char
 import Data.Foldable
-import Data.Int
 import Data.List.NonEmpty (nonEmpty)
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 import Data.Semigroup.Foldable
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
 import Data.Vector ((!?))
 import Data.Word
 import qualified Foreign.C.String as C
