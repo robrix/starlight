@@ -42,6 +42,7 @@ import qualified SDL.Raw as SDL
 import System.Exit
 import UI.Font
 import UI.Glyph
+import UI.Path
 
 main :: HasCallStack => IO ()
 main = do
@@ -223,13 +224,6 @@ glyphsForChars (Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyph
           _ -> error "wtf"
         viablePlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
 
-
-data Path v n
-  = M (v n) (Path v n)
-  | L (v n) (Path v n)
-  | Q (v n) (v n) (Path v n)
-  | Z
-  deriving (Eq, Functor, Show)
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
 contourToPath [] = Z
