@@ -4,6 +4,7 @@ module UI.Font where
 import Control.Applicative (liftA2)
 import Control.Monad (guard)
 import qualified Control.Exception as E
+import Data.Bifunctor (first)
 import Data.Bytes
 import Data.Char (ord)
 import Data.Foldable (find, toList)
@@ -120,12 +121,12 @@ glyphPaths :: Typeface -> O.Glyph Int -> [Path V2 O.FWord]
 glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnderlying typeface) glyph)
 
 
-triangleVertices :: Triangle O.FWord -> Bool -> [V4 Float]
-triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) True  = [ V4 (fromIntegral ax) (fromIntegral ay) 0 1, V4 (fromIntegral bx) (fromIntegral by) 0 1, V4 (fromIntegral cx) (fromIntegral cy) 0 1 ]
-triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) False = [ V4 (fromIntegral ax) (fromIntegral ay) 0 0, V4 (fromIntegral bx) (fromIntegral by) 0.5 0, V4 (fromIntegral cx) (fromIntegral cy) 1 1 ]
+triangleVertices :: Fractional a => Triangle a -> Bool -> [V4 a]
+triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) True  = [ V4 ax ay 0 1, V4 bx by 0 1, V4 cx cy 0 1 ]
+triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) False = [ V4 ax ay 0 0, V4 bx by 0.5 0, V4 cx cy 1 1 ]
 
 glyphVertices :: Typeface -> O.Glyph Int -> [V4 Float]
-glyphVertices typeface = (>>= uncurry triangleVertices) . (>>= pathTriangles 0 zero zero) . glyphPaths typeface
+glyphVertices typeface = (>>= uncurry triangleVertices . first (fmap fromIntegral)) . (>>= pathTriangles 0 zero zero) . glyphPaths typeface
 
 
 encodeGlyphPaths :: Typeface -> O.Glyph Int -> [Word8]
