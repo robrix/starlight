@@ -9,7 +9,7 @@ data Rect a = Rect
   { rectMin :: {-# UNPACK #-} !(V2 a)
   , rectMax :: {-# UNPACK #-} !(V2 a)
   }
-  deriving Functor
+  deriving (Eq, Functor, Show)
 
 _rectMin :: Lens' (Rect a) (V2 a)
 _rectMin = lens rectMin (\ r v -> r { rectMin = v })
