@@ -226,14 +226,6 @@ glyphsForChars (Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyph
           _ -> error "wtf"
         viablePlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
 
-unitsPerEm :: Typeface -> Word16
-unitsPerEm = O.unitsPerEm . O.headTable . typefaceUnderlying
-
-ascent :: Typeface -> Int16
-ascent = O.ascent . O.hheaTable . typefaceUnderlying
-
-descent :: Typeface -> Int16
-descent = O.descent . O.hheaTable . typefaceUnderlying
 
 data Path v n
   = M (v n) (Path v n)

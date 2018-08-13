@@ -4,8 +4,10 @@ module UI.Font where
 import Control.Monad (guard)
 import qualified Control.Exception as E
 import Data.Foldable (find)
+import Data.Int
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import Data.Word
 import qualified Opentype.Fileformat as O
 
 data Typeface = Typeface { typefaceName :: String, typefaceUnderlying :: O.OpentypeFont }
@@ -60,3 +62,13 @@ safeToEnum n = do
   guard (n < fromEnum (maxBound :: n))
   guard (n > fromEnum (minBound :: n))
   pure (toEnum n)
+
+
+unitsPerEm :: Typeface -> Word16
+unitsPerEm = O.unitsPerEm . O.headTable . typefaceUnderlying
+
+ascent :: Typeface -> Int16
+ascent = O.ascent . O.hheaTable . typefaceUnderlying
+
+descent :: Typeface -> Int16
+descent = O.descent . O.hheaTable . typefaceUnderlying
