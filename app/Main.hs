@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, GADTs, FlexibleInstances, RecordWildCards, ScopedTypeVariables #-}
+{-# LANGUAGE GADTs, FlexibleInstances, RecordWildCards, ScopedTypeVariables #-}
 module Main where
 
 import Control.Applicative
