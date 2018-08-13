@@ -15,7 +15,8 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Geometry.Rect
+  exposed-modules:     Data.Bytes
+                     , Geometry.Rect
                      , Geometry.Triangle
                      , GL.Array
                      , GL.Buffer
