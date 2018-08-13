@@ -21,3 +21,7 @@ data Instance = Instance
 
 scaleGlyph :: V2 Float -> Glyph -> Glyph
 scaleGlyph (V2 sx sy) Glyph{..} = Glyph glyphCodePoint (glyphAdvanceWidth * sx) ((* V4 sx sy 1 1) <$> glyphGeometry) (scaleRect (V2 sx sy) glyphBounds)
+
+
+instanceGeometry :: Instance -> [V4 Float]
+instanceGeometry Instance{..} = glyphGeometry instanceGlyph

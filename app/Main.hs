@@ -181,9 +181,6 @@ combineInstances :: V2 Float -> [Instance] -> Glyph -> [Instance]
 combineInstances scale instances@(Instance g (V2 x y) _ _:_) glyph = instances <> [ Instance glyph (V2 (x + glyphAdvanceWidth g) y) (scaleRect scale (translateRect (V2 (x + glyphAdvanceWidth g) y) (glyphBounds glyph))) scale ]
 combineInstances scale [] glyph = [ Instance glyph (V2 0 0) (glyphBounds glyph) scale ]
 
-instanceGeometry :: Instance -> [V4 Float]
-instanceGeometry Instance{..} = glyphGeometry instanceGlyph
-
 setClearColour :: Linear.V4 Float -> IO ()
 setClearColour (V4 r g b a) = glClearColor r g b a
 
