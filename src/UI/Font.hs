@@ -20,6 +20,7 @@ import qualified Opentype.Fileformat as O
 import Lens.Micro
 import Linear.V2
 import Linear.V4
+import Linear.Vector (zero)
 import UI.Glyph
 import UI.Path
 
@@ -124,7 +125,7 @@ triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) True  = [ V4 (fromI
 triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) False = [ V4 (fromIntegral ax) (fromIntegral ay) 0 0, V4 (fromIntegral bx) (fromIntegral by) 0.5 0, V4 (fromIntegral cx) (fromIntegral cy) 1 1 ]
 
 glyphVertices :: Typeface -> O.Glyph Int -> [V4 Float]
-glyphVertices typeface = (>>= uncurry triangleVertices) . (>>= pathTriangles (0, V2 0 0, V2 0 0)) . glyphPaths typeface
+glyphVertices typeface = (>>= uncurry triangleVertices) . (>>= pathTriangles 0 zero zero) . glyphPaths typeface
 
 
 encodeGlyphPaths :: Typeface -> O.Glyph Int -> [Word8]
