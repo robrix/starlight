@@ -119,17 +119,6 @@ glyphPaths :: Typeface -> O.Glyph Int -> [Path V2 O.FWord]
 glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnderlying typeface) glyph)
 
 
-pathTriangles :: (Int, V2 a, V2 a) -> Path V2 a -> [(Triangle V2 a, Bool)]
-pathTriangles (count, first, current) p = case p of
-  M v rest ->                                                                             pathTriangles (0,          v,     v ) rest
-  L v rest
-    | count >= 2 -> (Triangle first current v,  True)                                   : pathTriangles (succ count, first, v ) rest
-    | otherwise  ->                                                                       pathTriangles (succ count, first, v ) rest
-  Q v1 v2 rest
-    | count >= 2 -> (Triangle first current v2, True) : (Triangle current v1 v2, False) : pathTriangles (succ count, first, v2) rest
-    | otherwise  ->                                     (Triangle current v1 v2, False) : pathTriangles (succ count, first, v2) rest
-  Z ->                                                                                    []
-
 triangleVertices :: Triangle V2 O.FWord -> Bool -> [V4 Float]
 triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) True  = [ V4 (fromIntegral ax) (fromIntegral ay) 0 1, V4 (fromIntegral bx) (fromIntegral by) 0 1, V4 (fromIntegral cx) (fromIntegral cy) 0 1 ]
 triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) False = [ V4 (fromIntegral ax) (fromIntegral ay) 0 0, V4 (fromIntegral bx) (fromIntegral by) 0.5 0, V4 (fromIntegral cx) (fromIntegral cy) 1 1 ]
