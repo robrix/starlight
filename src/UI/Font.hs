@@ -120,7 +120,7 @@ glyphPaths :: Typeface -> O.Glyph Int -> [Path V2 O.FWord]
 glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnderlying typeface) glyph)
 
 
-triangleVertices :: Triangle V2 O.FWord -> Bool -> [V4 Float]
+triangleVertices :: Triangle O.FWord -> Bool -> [V4 Float]
 triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) True  = [ V4 (fromIntegral ax) (fromIntegral ay) 0 1, V4 (fromIntegral bx) (fromIntegral by) 0 1, V4 (fromIntegral cx) (fromIntegral cy) 0 1 ]
 triangleVertices (Triangle (V2 ax ay) (V2 bx by) (V2 cx cy)) False = [ V4 (fromIntegral ax) (fromIntegral ay) 0 0, V4 (fromIntegral bx) (fromIntegral by) 0.5 0, V4 (fromIntegral cx) (fromIntegral cy) 1 1 ]
 

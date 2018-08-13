@@ -24,7 +24,7 @@ encodePath = go . fmap (toBytes @Word16 . fromIntegral)
         (moveTo, lineTo, curveTo, close) = (0, 1, 2, 3)
 
 
-pathTriangles :: Int -> V2 a -> V2 a -> Path V2 a -> [(Triangle V2 a, Bool)]
+pathTriangles :: Int -> V2 a -> V2 a -> Path V2 a -> [(Triangle a, Bool)]
 pathTriangles count first current p = case p of
   M v rest ->                                                                             pathTriangles 0            v     v  rest
   L v rest
