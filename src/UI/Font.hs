@@ -1,10 +1,10 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
 module UI.Font where
 
 import Control.Applicative (liftA2)
 import Control.Monad (guard)
 import qualified Control.Exception as E
-import Data.Bits ((.&.), shiftR)
+import Data.Bytes
 import Data.Char (ord)
 import Data.Foldable (find, toList)
 import Data.Int
@@ -139,19 +139,13 @@ glyphVertices typeface = (>>= uncurry triangleVertices) . (>>= pathTriangles (0,
 
 
 encodePath :: Path V2 O.FWord -> [Word8]
-encodePath = go . fmap (word16Bytes . fromIntegral)
+encodePath = go . fmap (toBytes @Word16 . fromIntegral)
   where go path = case path of
           M (V2 x y)            rest -> moveTo  : x ++ y             ++ go rest
           L (V2 x y)            rest -> lineTo  : x ++ y             ++ go rest
           Q (V2 x y) (V2 x' y') rest -> curveTo : x ++ y ++ x' ++ y' ++ go rest
           _                          -> close   : []
         (moveTo, lineTo, curveTo, close) = (0, 1, 2, 3)
-
-word16Bytes :: Word16 -> [Word8]
-word16Bytes x = [ fromIntegral $ x .&. 0xFF, fromIntegral $ (x .&. 0xFF00) `shiftR` 8 ]
-
-word32Bytes :: Word32 -> [Word8]
-word32Bytes x = [ fromIntegral $ x .&. 0xFF, fromIntegral $ (x .&. 0xFF00) `shiftR` 8, fromIntegral $ (x .&. 0xFF0000) `shiftR` 16, fromIntegral $ (x .&. 0xFF000000) `shiftR` 24 ]
 
 
 encodeGlyphPaths :: Typeface -> O.Glyph Int -> [Word8]
@@ -161,6 +155,6 @@ encodeGlyphPaths typeface = (>>= encodePath) . glyphPaths typeface
 encodeGlyphsForChars :: Typeface -> [Char] -> [Word8]
 encodeGlyphsForChars face chars = header ++ glyphHeaders ++ (charsGlyphsAndPaths >>= \ (_, _, path) -> path)
   where charsGlyphsAndPaths = zip chars (glyphsForChars face chars) >>= \ (char, glyph) -> (,,) char <$> toList glyph <*> fmap (encodeGlyphPaths face) (toList glyph)
-        header = word16Bytes (unitsPerEm face) ++ word16Bytes (fromIntegral (ascent face)) ++ word16Bytes (fromIntegral (descent face)) ++ word16Bytes (fromIntegral (length charsGlyphsAndPaths))
+        header = toBytes (unitsPerEm face) ++ toBytes @Word16 (fromIntegral (ascent face)) ++ toBytes @Word16 (fromIntegral (descent face)) ++ toBytes @Word16 (fromIntegral (length charsGlyphsAndPaths))
         glyphHeaders = snd (foldl encodeGlyphHeader (0, id) charsGlyphsAndPaths) []
-        encodeGlyphHeader (offset, makeList) (char, glyph, path) = (offset + fromIntegral (length path), makeList . (++ (word16Bytes (fromIntegral (ord char)) ++ word16Bytes (O.advanceWidth glyph) ++ word32Bytes offset ++ word16Bytes (fromIntegral (length path)))))
+        encodeGlyphHeader (offset, makeList) (char, glyph, path) = (offset + fromIntegral (length path), makeList . (++ (toBytes @Word16 (fromIntegral (ord char)) ++ toBytes (O.advanceWidth glyph) ++ toBytes @Word32 offset ++ toBytes @Word16 (fromIntegral (length path)))))
