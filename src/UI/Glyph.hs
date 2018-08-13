@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module UI.Glyph where
 
 import Geometry.Rect
@@ -17,3 +18,6 @@ data Instance = Instance
   , instanceBounds :: {-# UNPACK #-} !(Rect Float)
   , instanceScale  :: {-# UNPACK #-} !(V2 Float)
   }
+
+scaleGlyph :: V2 Float -> Glyph -> Glyph
+scaleGlyph (V2 sx sy) Glyph{..} = Glyph glyphCodePoint (glyphAdvanceWidth * sx) ((* V4 sx sy 1 1) <$> glyphGeometry) (scaleRect (V2 sx sy) glyphBounds)
