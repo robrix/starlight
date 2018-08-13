@@ -17,6 +17,7 @@ import Data.Word
 import qualified Foreign.C.String as C
 import Foreign.Ptr
 import Geometry.Rect
+import Geometry.Triangle
 import GHC.Stack
 import GL.Array
 import GL.Error
@@ -321,8 +322,6 @@ newtype SDLException = SDLException String
   deriving (Show)
 
 instance E.Exception SDLException
-
-data Triangle v n = Triangle (v n) (v n) (v n)
 
 data ArrayRange = ArrayRange { mode :: GLuint, firstVertexIndex :: Int, vertexCount :: Int }
 
