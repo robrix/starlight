@@ -208,47 +208,6 @@ combineGeometry ArrayVertices{..} (Geometry mode vertices) =
     (arrayRanges <> [ ArrayRange { mode = mode, firstVertexIndex = prevIndex, vertexCount = count } ])
 
 
-readTypeface :: FilePath -> IO (Maybe Typeface)
-readTypeface path = (toTypeface <$> O.readOTFile path) `E.catch` (\ (E.SomeException _) -> return Nothing)
-  where toTypeface font = do
-          name <- opentypeFontName font
-          pure $ Typeface name font
-
-data NameID
-  = Copyright
-  | FamilyName
-  | SubfamilyName
-  | UniqueID
-  | FullName
-  | Version
-  | PostScriptName
-  | Trademark
-  | ManufacturerName
-  | Designer
-  | Description
-  | VendorURL
-  | DesignerURL
-  | LicenseDescription
-  | LicenseURL
-  | Reserved
-  | TypographicFamilyName
-  | TypographicSubfamilyName
-  | CompatibleFullName
-  | SampleText
-  | PostScriptCIDFindFontName
-  | WWSFamilyName
-  | WWSSubfamilyName
-  | LightBackgroundPalette
-  | DarkBackgroundPalette
-  | VariationsPostScriptNamePrefix
-  deriving (Bounded, Enum, Eq, Ord, Show)
-
-opentypeFontName :: O.OpentypeFont -> Maybe String
-opentypeFontName o = T.unpack . T.decodeUtf16BE . O.nameString <$> find ((== Just FullName) . nameID) (O.nameRecords (O.nameTable o))
-
-nameID :: O.NameRecord -> Maybe NameID
-nameID = safeToEnum . fromIntegral . O.nameID
-
 glyphs :: Typeface -> [Char] -> [Glyph]
 glyphs typeface chars = concat (zipWith toGlyph chars (glyphsForChars typeface chars))
   where toGlyph char (Just g) = let vertices = glyphVertices typeface g in
@@ -275,12 +234,6 @@ ascent = O.ascent . O.hheaTable . typefaceUnderlying
 
 descent :: Typeface -> Int16
 descent = O.descent . O.hheaTable . typefaceUnderlying
-
-safeToEnum :: forall n. (Bounded n, Enum n) => Int -> Maybe n
-safeToEnum n = do
-  guard (n < fromEnum (maxBound :: n))
-  guard (n > fromEnum (minBound :: n))
-  pure (toEnum n)
 
 data Path v n
   = M (v n) (Path v n)
