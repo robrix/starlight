@@ -68,7 +68,7 @@ main = do
             colour  = Var "colour"  :: Var (V4 Float)
             sampler = Var "sampler" :: Var TextureUnit
             matrix3 = Var "matrix3" :: Var (M33 Float)
-            instances = foldl' (combineInstances (V2 288 288)) [] glyphs
+            instances = combineInstances (V2 288 288) (V2 0 0) glyphs
             instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
             geometry = Geometry GL_TRIANGLES . instanceGeometry <$> instances
             vertices = foldl combineGeometry (ArrayVertices [] 0 []) (Geometry GL_TRIANGLE_STRIP
@@ -177,10 +177,9 @@ translate :: M33 Float -> V2 Float -> M33 Float
 translate (V3 r1 r2 r3) (V2 tx ty) = V3 (over _z (+ tx) r1) (over _z (+ ty) r2) r3
 
 
-combineInstances :: V2 Float -> [Instance] -> Glyph -> [Instance]
-combineInstances scale instances glyph = case instances of
-  Instance g (V2 x y) _ _:_ -> instances <> [ Instance glyph (V2 (x + glyphAdvanceWidth g) y) (scaleRect scale (translateRect (V2 (x + glyphAdvanceWidth g) y) (glyphBounds glyph))) scale ]
-  []                        -> [ Instance glyph (V2 0 0) (glyphBounds glyph) scale ]
+combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
+combineInstances scale offset (g:gs) = Instance g offset (scaleRect scale (translateRect offset (glyphBounds g))) scale : combineInstances scale (offset + V2 (glyphAdvanceWidth g) 0) gs
+combineInstances _     _      []     = []
 
 setClearColour :: Linear.V4 Float -> IO ()
 setClearColour (V4 r g b a) = glClearColor r g b a
