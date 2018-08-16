@@ -5,6 +5,7 @@ import Lens.Micro
 import Lens.Micro.Extras
 import Linear.Matrix
 import Linear.V2
+import Linear.V3
 
 data Rect a = Rect
   { rectMin :: {-# UNPACK #-} !(V2 a)
@@ -39,8 +40,8 @@ translateRect :: Num a => V2 a -> Rect a -> Rect a
 translateRect delta Rect{..} = Rect (rectMin + delta) (rectMax + delta)
 
 transformRect :: Num a => M33 a -> Rect a -> Rect a
-transformRect m (Rect v1 v2) = Rect (m' !* v1) (m' !* v2)
-  where m' = view _m22 m
+transformRect m (Rect v1 v2) = Rect ((m !* ext v1) ^. _xy) ((m !* ext v2) ^. _xy)
+  where ext (V2 x y) = V3 x y 0
 
 
 newtype Union a = Union { getUnion :: Rect a }
