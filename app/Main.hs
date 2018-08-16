@@ -120,7 +120,7 @@ main = do
             for_ (zip [0..] jitterPattern) $ \ (j, offset) -> do
               when (j `mod` 2 == (0 :: Int)) $
                 setUniformValue glyphProgram colour (V4 (if j == 0 then 1 else 0) (if j == 2 then 1 else 0) (if j == 4 then 1 else 0) 1.0)
-              setUniformValue glyphProgram matrix3 $ (transformA `translate` instanceOffset `translate` (offset * s)) !*! scaled (V3 (instanceScale ^. _x) (instanceScale ^. _y) 1)
+              setUniformValue glyphProgram matrix3 $ transformA `translate` offset * s
               drawRange range
 
           glBindFramebuffer GL_FRAMEBUFFER 0
