@@ -120,7 +120,7 @@ main = do
             for_ (zip [0..] jitterPattern) $ \ (j, offset) -> do
               when (j `mod` 2 == (0 :: Int)) $
                 setUniformValue glyphProgram colour (V4 (if j == 0 then 1 else 0) (if j == 2 then 1 else 0) (if j == 4 then 1 else 0) 1.0)
-              setUniformValue glyphProgram matrix3 $ transformA `translate` offset * s
+              setUniformValue glyphProgram matrix3 $ transformA !*! instanceTransform `translate` offset * s
               drawRange range
 
           glBindFramebuffer GL_FRAMEBUFFER 0
@@ -178,7 +178,11 @@ translate (V3 r1 r2 r3) (V2 tx ty) = V3 (over _z (+ tx) r1) (over _z (+ ty) r2) 
 
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
-combineInstances scale offset (g:gs) = Instance g offset (scaleRect scale (translateRect offset (glyphBounds g))) scale : combineInstances scale (offset + V2 (glyphAdvanceWidth g) 0) gs
+combineInstances scale@(V2 sx sy) offset@(V2 tx ty) (g:gs)
+  = Instance g (V3 (V3 sx 0  tx)
+                   (V3 0  sy ty)
+                   (V3 0  0  1))
+  : combineInstances scale (offset + V2 (glyphAdvanceWidth g) 0) gs
 combineInstances _     _      []     = []
 
 setClearColour :: Linear.V4 Float -> IO ()
