@@ -3,7 +3,8 @@ module Geometry.Rect where
 
 import Lens.Micro
 import Lens.Micro.Extras
-import Linear.V2 as Linear
+import Linear.Matrix
+import Linear.V2
 
 data Rect a = Rect
   { rectMin :: {-# UNPACK #-} !(V2 a)
@@ -36,6 +37,10 @@ scaleRect scale Rect{..} = Rect (rectMin * scale) (rectMax * scale)
 
 translateRect :: Num a => V2 a -> Rect a -> Rect a
 translateRect delta Rect{..} = Rect (rectMin + delta) (rectMax + delta)
+
+transformRect :: Num a => M33 a -> Rect a -> Rect a
+transformRect m (Rect v1 v2) = Rect (m' !* v1) (m' !* v2)
+  where m' = view _m22 m
 
 
 newtype Union a = Union { getUnion :: Rect a }
