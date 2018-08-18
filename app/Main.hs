@@ -40,7 +40,7 @@ import UI.Glyph
 main :: HasCallStack => IO ()
 main = do
   Just tahoma <- readTypeface "/Library/Fonts/Tahoma.ttf"
-  let glyphs = Font.glyphs tahoma "hs"
+  let glyphs = Font.glyphs tahoma "s"
   [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse readFile ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
   CC.runInBoundThread $ C.withCString "Text" $ \ name -> do
     _ <- SDL.init SDL.SDL_INIT_EVERYTHING >>= checkWhen (< 0)
