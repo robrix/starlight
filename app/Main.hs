@@ -92,9 +92,6 @@ main = do
           glClear GL_COLOR_BUFFER_BIT
 
           let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
-              transformA = V3 (V3 sx 0  0)
-                              (V3 0  sy 0)
-                              (V3 0  0  1)
 
           checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
           checkingGLError $ glBindTexture GL_TEXTURE_2D (unTexture texture)
@@ -117,12 +114,14 @@ main = do
           checkingGLError $ glBindVertexArray (unArray array)
 
           useProgram glyphProgram
-          let s = 1 / 2
           for_ (zip instances (tail (arrayRanges vertices))) $ \ (Instance{..}, range) ->
-            for_ (zip [0..] jitterPattern) $ \ (j, offset) -> do
+            for_ (zip [0..] jitterPattern) $ \ (j, V2 tx ty) -> do
               when (j `mod` 2 == (0 :: Int)) $
                 setUniformValue glyphProgram colour (V4 (if j == 0 then 1 else 0) (if j == 2 then 1 else 0) (if j == 4 then 1 else 0) 1.0)
-              setUniformValue glyphProgram matrix3 $ transformA !*! instanceTransform `translate` offset * s
+              setUniformValue glyphProgram matrix3
+                $   scaled     (V3 sx sy 1)
+                !*! translated (V2 tx ty / 2)
+                !*! instanceTransform
               drawRange range
 
           checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
