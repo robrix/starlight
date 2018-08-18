@@ -92,7 +92,9 @@ main = do
           glClear GL_COLOR_BUFFER_BIT
 
           let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
-              transformA = scaled (V3 sx sy 1)
+              transformA = V3 (V3 sx 0  0)
+                              (V3 0  sy 0)
+                              (V3 0  0  1)
 
           checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
           checkingGLError $ glBindTexture GL_TEXTURE_2D (unTexture texture)
