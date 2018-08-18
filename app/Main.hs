@@ -91,7 +91,7 @@ main = do
           setClearColour (V4 1 1 1 1)
           glClear GL_COLOR_BUFFER_BIT
 
-          let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
+          let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
               transformA = scaled (V3 sx sy 1)
 
           checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
