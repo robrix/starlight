@@ -178,6 +178,11 @@ infixl 5 `translate`
 translate :: M33 Float -> V2 Float -> M33 Float
 translate (V3 r1 r2 r3) (V2 tx ty) = V3 (over _z (+ tx) r1) (over _z (+ ty) r2) r3
 
+translated :: V2 Float -> M33 Float
+translated (V2 tx ty) = V3 (V3 1 0 tx)
+                           (V3 0 1 ty)
+                           (V3 0 0 1)
+
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances scale@(V2 sx sy) offset@(V2 tx ty) (g:gs)
