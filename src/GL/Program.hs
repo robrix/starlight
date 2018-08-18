@@ -29,7 +29,7 @@ withLinkedProgram shaders body = withProgram $ \ (Program program) -> do
   body p
 
 
-withBuiltProgram :: HasCallStack => [(GLenum, String)] -> (Program -> IO a) -> IO a
+withBuiltProgram :: HasCallStack => [(ShaderType, String)] -> (Program -> IO a) -> IO a
 withBuiltProgram sources body = withCompiledShaders sources (`withLinkedProgram` body)
 
 

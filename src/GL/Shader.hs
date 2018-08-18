@@ -14,13 +14,17 @@ newtype Shader = Shader { unShader :: GLuint }
 
 data ShaderType = Vertex | Fragment
 
+toGLEnum :: ShaderType -> GLenum
+toGLEnum Vertex   = GL_VERTEX_SHADER
+toGLEnum Fragment = GL_FRAGMENT_SHADER
 
-withShader :: GLenum -> (Shader -> IO a) -> IO a
+
+withShader :: ShaderType -> (Shader -> IO a) -> IO a
 withShader shaderType = E.bracket
-  (Shader <$> glCreateShader shaderType)
+  (Shader <$> glCreateShader (toGLEnum shaderType))
   (glDeleteShader . unShader)
 
-withCompiledShader :: HasCallStack => GLenum -> String -> (Shader -> IO a) -> IO a
+withCompiledShader :: HasCallStack => ShaderType -> String -> (Shader -> IO a) -> IO a
 withCompiledShader shaderType source body = withShader shaderType $ \ (Shader shader) -> do
     C.withCString source $ \ source ->
       A.alloca $ \ p -> do
@@ -30,7 +34,7 @@ withCompiledShader shaderType source body = withShader shaderType $ \ (Shader sh
     s <- checkShader source (Shader shader)
     body s
 
-withCompiledShaders :: HasCallStack => [(GLenum, String)] -> ([Shader] -> IO a) -> IO a
+withCompiledShaders :: HasCallStack => [(ShaderType, String)] -> ([Shader] -> IO a) -> IO a
 withCompiledShaders sources body = go sources []
   where go [] shaders = body shaders
         go ((t, source):xs) shaders = withCompiledShader t source (\ shader -> go xs (shader : shaders))

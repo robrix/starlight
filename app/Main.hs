@@ -19,6 +19,7 @@ import GL.Framebuffer
 import GL.Object
 import GL.Program
 import GL.Scalar
+import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import GL.Uniform
@@ -78,8 +79,8 @@ main = do
               , V4   1    1  0 1 :: V4 Float
               ] : geometry) in
         withArray (arrayVertices vertices) $ \ array ->
-        withBuiltProgram [(GL_VERTEX_SHADER, textVertex), (GL_FRAGMENT_SHADER, textFragment)] $ \ textProgram ->
-        withBuiltProgram [(GL_VERTEX_SHADER, glyphVertex), (GL_FRAGMENT_SHADER, glyphFragment)] $ \ glyphProgram ->
+        withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
+        withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
         with $ \ texture ->
         with $ \ framebuffer ->
         forever $ do
