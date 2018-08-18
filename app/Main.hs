@@ -125,7 +125,7 @@ main = do
               setUniformValue glyphProgram matrix3 $ transformA !*! instanceTransform `translate` offset * s
               drawRange range
 
-          glBindFramebuffer GL_FRAMEBUFFER 0
+          checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
           glBlendFunc GL_ZERO GL_SRC_COLOR
 
           useProgram textProgram
