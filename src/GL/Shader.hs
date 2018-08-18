@@ -12,6 +12,9 @@ import Graphics.GL.Types
 
 newtype Shader = Shader { unShader :: GLuint }
 
+data ShaderType = Vertex | Fragment
+
+
 withShader :: GLenum -> (Shader -> IO a) -> IO a
 withShader shaderType = E.bracket
   (Shader <$> glCreateShader shaderType)
