@@ -86,7 +86,7 @@ main = do
           glViewport 0 0 (2 * width) (2 * height)
 
           glDisable GL_BLEND
-          glBlendFunc GL_ONE GL_ZERO
+          glBlendFunc GL_ONE GL_ZERO -- copy
 
           setClearColour (V4 1 1 1 1)
           glClear GL_COLOR_BUFFER_BIT
@@ -109,7 +109,7 @@ main = do
           glClear GL_COLOR_BUFFER_BIT
 
           glEnable GL_BLEND
-          glBlendFunc GL_ONE GL_ONE
+          glBlendFunc GL_ONE GL_ONE -- add
 
           checkingGLError $ glBindVertexArray (unArray array)
 
