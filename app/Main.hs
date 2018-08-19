@@ -92,7 +92,7 @@ main = do
           setClearColour white
           glClear GL_COLOR_BUFFER_BIT
 
-          let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
+          let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
 
           checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
           checkingGLError $ glBindTexture GL_TEXTURE_2D (unTexture texture)
@@ -123,9 +123,11 @@ main = do
                                                         (if j == 4 then 1 else 0)
                                                         1)
               setUniformValue glyphProgram matrix3
-                $   scaled     (V3 sx sy 1)
+                $   translated (V2 (-1) 1)
+                !*! scaled     (V3 sx sy 1)
+                !*! translated instanceOffset
                 !*! translated (V2 tx ty / 2)
-                !*! instanceTransform
+                !*! scaled     instanceScale
               drawRange range
 
           checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
@@ -190,10 +192,8 @@ translated (V2 tx ty) = V3 (V3 1 0 tx)
 
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
-combineInstances scale@(V2 sx sy) offset@(V2 tx ty) (g:gs)
-  = Instance g (V3 (V3 sx 0  tx)
-                   (V3 0  sy ty)
-                   (V3 0  0  1))
+combineInstances scale@(V2 sx sy) offset (g:gs)
+  = Instance g offset (V3 sx sy 1)
   : combineInstances scale (offset + V2 (glyphAdvanceWidth g) 0) gs
 combineInstances _     _      []     = []
 
