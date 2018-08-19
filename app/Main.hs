@@ -135,7 +135,7 @@ main = do
                 (1 - fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
 
           setUniformValue textProgram rect rect'
-          setUniformValue textProgram colour (V4 0 0 0 1)
+          setUniformValue textProgram colour (V4 0 0 0 0)
           glActiveTexture GL_TEXTURE0
           glBindTexture GL_TEXTURE_2D (unTexture texture)
           setUniformValue textProgram sampler (TextureUnit 0)
