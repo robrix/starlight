@@ -144,6 +144,11 @@ main = do
           drawRange (head (arrayRanges vertices))
           -- traverse_ drawRange (tail (arrayRanges vertices))
 
+          when (opaque textColour /= black) $ do
+            glBlendFunc GL_ONE GL_ONE
+            setUniformValue textProgram colour textColour
+            drawRange (head (arrayRanges vertices))
+
           event <- waitEvent
           case eventPayload event of
             QuitEvent -> do
@@ -172,6 +177,8 @@ main = do
         windowSize = V2 width height
         width  = 1024
         height = 768
+
+        textColour = V4 1 0 1 1
 
 translated :: V2 Float -> M33 Float
 translated (V2 tx ty) = V3 (V3 1 0 tx)
