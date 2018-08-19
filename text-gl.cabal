@@ -29,6 +29,7 @@ library
                      , GL.Texture
                      , GL.TextureUnit
                      , GL.Uniform
+                     , UI.Colour
                      , UI.Font
                      , UI.Glyph
                      , UI.Path
