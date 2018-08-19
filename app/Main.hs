@@ -173,11 +173,6 @@ main = do
         width  = 1024
         height = 768
 
-infixl 5 `translate`
-
-translate :: M33 Float -> V2 Float -> M33 Float
-translate (V3 r1 r2 r3) (V2 tx ty) = V3 (over _z (+ tx) r1) (over _z (+ ty) r2) r3
-
 translated :: V2 Float -> M33 Float
 translated (V2 tx ty) = V3 (V3 1 0 tx)
                            (V3 0 1 ty)
