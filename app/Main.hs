@@ -195,7 +195,7 @@ combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances scale@(V2 sx sy) offset (g:gs)
   = Instance g offset (V3 sx sy 1)
   : combineInstances scale (offset + V2 (glyphAdvanceWidth g) 0) gs
-combineInstances _     _      []     = []
+combineInstances _ _ [] = []
 
 combineGeometry :: ArrayVertices (v n) -> Geometry (v n) -> ArrayVertices (v n)
 combineGeometry ArrayVertices{..} (Geometry mode vertices) =
