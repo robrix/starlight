@@ -140,8 +140,8 @@ main = do
           glBindTexture GL_TEXTURE_2D (unTexture texture)
           setUniformValue textProgram sampler (TextureUnit 0)
 
-          -- drawRange (head (arrayRanges vertices))
-          traverse_ drawRange (tail (arrayRanges vertices))
+          drawRange (head (arrayRanges vertices))
+          -- traverse_ drawRange (tail (arrayRanges vertices))
 
           event <- waitEvent
           case eventPayload event of
