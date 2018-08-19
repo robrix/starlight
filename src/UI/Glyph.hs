@@ -28,8 +28,10 @@ instanceGeometry :: Instance -> [V4 Float]
 instanceGeometry Instance{..} = glyphGeometry instanceGlyph
 
 instanceBounds :: Instance -> Rect Float
-instanceBounds Instance{..} = transformRect (V3 (V3 1 0 tx)
-                                                (V3 0 1 ty)
-                                                (V3 0 0 1)
-                                            !*! scaled instanceScale) (glyphBounds instanceGlyph)
+instanceBounds Instance{..} = transformRect
+  (V3 (V3 1 0 tx)
+      (V3 0 1 ty)
+      (V3 0 0 1)
+  !*! scaled instanceScale)
+  (glyphBounds instanceGlyph)
   where V2 tx ty = instanceOffset
