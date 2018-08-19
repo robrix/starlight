@@ -89,7 +89,7 @@ main = do
           glDisable GL_BLEND
           glBlendFunc GL_ONE GL_ZERO -- copy
 
-          setClearColour (V4 1 1 1 1)
+          setClearColour white
           glClear GL_COLOR_BUFFER_BIT
 
           let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
@@ -106,7 +106,7 @@ main = do
 
           glViewport 0 0 (2 * width) (2 * height)
 
-          setClearColour (V4 0 0 0 0)
+          setClearColour transparent
           glClear GL_COLOR_BUFFER_BIT
 
           glEnable GL_BLEND
@@ -136,7 +136,7 @@ main = do
                 (1 - fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
 
           setUniformValue textProgram rect rect'
-          setUniformValue textProgram colour (V4 0 0 0 0)
+          setUniformValue textProgram colour transparent
           glActiveTexture GL_TEXTURE0
           glBindTexture GL_TEXTURE_2D (unTexture texture)
           setUniformValue textProgram sampler (TextureUnit 0)
