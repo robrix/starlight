@@ -34,6 +34,7 @@ import SDL.Event
 import SDL.Init
 import qualified SDL.Raw as SDL
 import System.Exit
+import UI.Colour
 import UI.Font as Font
 import UI.Glyph
 
@@ -185,9 +186,6 @@ combineInstances scale@(V2 sx sy) offset@(V2 tx ty) (g:gs)
                    (V3 0  0  1))
   : combineInstances scale (offset + V2 (glyphAdvanceWidth g) 0) gs
 combineInstances _     _      []     = []
-
-setClearColour :: Linear.V4 Float -> IO ()
-setClearColour (V4 r g b a) = glClearColor r g b a
 
 combineGeometry :: ArrayVertices (v n) -> Geometry (v n) -> ArrayVertices (v n)
 combineGeometry ArrayVertices{..} (Geometry mode vertices) =
