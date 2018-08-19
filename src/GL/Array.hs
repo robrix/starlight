@@ -6,7 +6,6 @@ import Data.Proxy
 import qualified Foreign.Marshal.Array as A
 import Foreign.Ptr
 import qualified Foreign.Storable as S
-import GHC.Stack
 import GL.Buffer
 import GL.Object
 import GL.Scalar
@@ -15,7 +14,7 @@ import Graphics.GL.Types
 
 newtype Array n = Array { unArray :: GLuint }
 
-withArray :: forall v n a. (Foldable v, Scalar n, HasCallStack) => [v n] -> (Array n -> IO a) -> IO a
+withArray :: forall v n a. (Foldable v, Scalar n) => [v n] -> (Array n -> IO a) -> IO a
 withArray vertices body = with $ \ buffer -> do
   glBindBuffer GL_ARRAY_BUFFER (unBuffer buffer)
   A.withArrayLen (vertices >>= toList) $ \ n p ->
