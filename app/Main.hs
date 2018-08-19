@@ -25,7 +25,6 @@ import GL.TextureUnit
 import GL.Uniform
 import Graphics.GL.Core41
 import Graphics.GL.Types
-import Lens.Micro hiding (set)
 import Linear.Matrix as Linear
 import Linear.V2 as Linear
 import Linear.V3 as Linear
