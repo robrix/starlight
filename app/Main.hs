@@ -55,6 +55,7 @@ main = do
     with $ \ texture ->
     with $ \ framebuffer ->
     draw $ do
+      checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
       glViewport 0 0 (2 * width) (2 * height)
 
       glDisable GL_BLEND
@@ -106,6 +107,7 @@ main = do
           drawRange range
 
       checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
+      glViewport 0 0 (2 * width) (2 * height)
       glBlendFunc GL_ZERO GL_SRC_COLOR
 
       useProgram textProgram
