@@ -9,7 +9,7 @@ import Linear.V4
 import Linear.Vector
 
 data Glyph = Glyph
-  { glyphCodePoint    :: !Char
+  { glyphCodePoint    :: {-# UNPACK #-} !Char
   , glyphAdvanceWidth :: {-# UNPACK #-} !Float
   , glyphGeometry     :: ![V4 Float]
   , glyphBounds       :: {-# UNPACK #-} !(Rect Float)
