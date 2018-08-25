@@ -92,7 +92,7 @@ main = do
       glEnable GL_BLEND
       glBlendFunc GL_ONE GL_ONE -- add
 
-      checkingGLError $ glBindVertexArray (unArray glyphArray)
+      bindArray glyphArray
 
       useProgram glyphProgram
       for_ (zip instances (arrayRanges glyphVertices)) $ \ (Instance{..}, range) ->
@@ -130,7 +130,7 @@ main = do
       bindTexture Texture2D texture
       setUniformValue textProgram sampler (TextureUnit 0)
 
-      checkingGLError $ glBindVertexArray (unArray screenQuadArray)
+      bindArray screenQuadArray
 
       traverse_ drawRange (arrayRanges screenQuadVertices)
       -- traverse_ drawRange (arrayRanges glyphVertices)

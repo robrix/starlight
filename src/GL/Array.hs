@@ -7,6 +7,7 @@ import qualified Foreign.Marshal.Array as A
 import Foreign.Ptr
 import qualified Foreign.Storable as S
 import GL.Buffer
+import GL.Error
 import GL.Object
 import GL.Scalar
 import Graphics.GL.Core41
@@ -24,5 +25,8 @@ withArray vertices body = with $ \ buffer -> do
     glEnableVertexAttribArray 0
     glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy :: Proxy n)) GL_FALSE 0 nullPtr
     body array
+
+bindArray :: Array n -> IO ()
+bindArray = checkingGLError . glBindVertexArray . unArray
 
 instance Object (Array n) where characterize = (Array, glGenVertexArrays, glDeleteVertexArrays)
