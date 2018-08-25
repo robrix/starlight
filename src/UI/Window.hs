@@ -10,7 +10,10 @@ import Data.Word
 import qualified Foreign.C.String as C
 import Foreign.Ptr
 import Linear.V2 as Linear
+import SDL.Event
+import SDL.Init
 import qualified SDL.Raw as SDL
+import System.Exit
 
 data Window = Window String {-# UNPACK #-} !(Linear.V2 Int)
 
@@ -40,6 +43,12 @@ withWindow (Window name size) action = CC.runInBoundThread $ do
       withSDLContext window $ \ _ ->
         action (\ draw -> forever $ do
           draw
+          event <- waitEvent
+          case eventPayload event of
+            QuitEvent -> do
+              quit
+              exitSuccess
+            _ -> pure ()
           SDL.glSwapWindow window) `E.finally` SDL.quit
   where flags = foldr (.|.) 0
           [ SDL.SDL_WINDOW_OPENGL

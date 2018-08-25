@@ -25,9 +25,6 @@ import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
-import SDL.Event
-import SDL.Init
-import System.Exit
 import UI.Colour
 import UI.Font as Font
 import UI.Glyph
@@ -132,13 +129,6 @@ main = do
         glBlendFunc GL_ONE GL_ONE
         setUniformValue textProgram colour textColour
         drawRange (head (arrayRanges vertices))
-
-      event <- waitEvent
-      case eventPayload event of
-        QuitEvent -> do
-          quit
-          exitSuccess
-        _ -> pure ()
   where drawRange :: HasCallStack => ArrayRange -> IO ()
         drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
         jitterPattern
