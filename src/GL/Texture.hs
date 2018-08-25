@@ -12,6 +12,22 @@ instance Object Texture where characterize = (Texture, glGenTextures, glDeleteTe
 
 data Target = Texture2D
 
+targetToGLEnum :: Target -> GLenum
+targetToGLEnum Texture2D = GL_TEXTURE_2D
+
+
 bindTexture :: Target -> Texture -> IO ()
-bindTexture target = checkingGLError . glBindTexture (toGLEnum target) . unTexture
-  where toGLEnum Texture2D = GL_TEXTURE_2D
+bindTexture target = checkingGLError . glBindTexture (targetToGLEnum target) . unTexture
+
+
+data Filter = Nearest | Linear
+
+filterToGLEnum :: Filter -> GLenum
+filterToGLEnum Nearest = GL_NEAREST
+filterToGLEnum Linear = GL_LINEAR
+
+setMagFilter :: Target -> Filter -> IO ()
+setMagFilter target = checkingGLError . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . filterToGLEnum
+
+setMinFilter :: Target -> Filter -> IO ()
+setMinFilter target = checkingGLError . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . filterToGLEnum
