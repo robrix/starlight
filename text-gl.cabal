@@ -33,6 +33,7 @@ library
                      , UI.Font
                      , UI.Glyph
                      , UI.Path
+                     , UI.Window
   build-depends:       base
                      , containers
                      , gl
