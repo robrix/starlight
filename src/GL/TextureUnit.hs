@@ -7,4 +7,4 @@ import Graphics.GL.Types
 newtype TextureUnit = TextureUnit { unTextureUnit :: GLint }
 
 instance Uniform TextureUnit where
-  uniform location textureUnit = glUniform1i location (unTextureUnit textureUnit)
+  uniform location = glUniform1i location . unTextureUnit
