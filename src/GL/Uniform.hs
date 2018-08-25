@@ -21,16 +21,16 @@ class Uniform t where
 setUniformValue :: (Uniform t, HasCallStack) => Program -> Var t -> t -> IO ()
 setUniformValue program var v = do
   location <- checkingGLError $ C.withCString (varName var) (glGetUniformLocation (unProgram program))
-  uniform location v
+  checkingGLError $ uniform location v
 
 instance Uniform (Linear.V4 Float) where
-  uniform location (Linear.V4 x y z w) = checkingGLError $ glUniform4f location x y z w
+  uniform location (Linear.V4 x y z w) = glUniform4f location x y z w
 
 instance Uniform (Linear.V4 Double) where
-  uniform location (Linear.V4 x y z w) = checkingGLError $ glUniform4d location x y z w
+  uniform location (Linear.V4 x y z w) = glUniform4d location x y z w
 
 instance Uniform (Linear.M44 Float) where
-  uniform location matrix = checkingGLError $ A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix4fv location 1 GL_FALSE . castPtr)
+  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix4fv location 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M33 Float) where
-  uniform location matrix = checkingGLError $ A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix3fv location 1 GL_FALSE . castPtr)
+  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix3fv location 1 GL_FALSE . castPtr)
