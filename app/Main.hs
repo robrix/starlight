@@ -39,108 +39,108 @@ main = do
   let glyphs = Font.glyphs tahoma "s"
   [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse readFile ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
   withWindow (Window "Text" (fromIntegral <$> windowSize)) $ \ draw ->
-        let rect    = Var "rect"    :: Var (V4 Float)
-            colour  = Var "colour"  :: Var (V4 Float)
-            sampler = Var "sampler" :: Var TextureUnit
-            matrix3 = Var "matrix3" :: Var (M33 Float)
-            instances = combineInstances (V2 288 288) (V2 0 0) glyphs
-            instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
-            geometry = Geometry GL_TRIANGLES . instanceGeometry <$> instances
-            vertices = foldl combineGeometry (ArrayVertices [] 0 []) (Geometry GL_TRIANGLE_STRIP
-              [ V4 (-1) (-1) 0 1
-              , V4   1  (-1) 0 1
-              , V4 (-1)   1  0 1
-              , V4   1    1  0 1 :: V4 Float
-              ] : geometry) in
-        withArray (arrayVertices vertices) $ \ array ->
-        withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
-        withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
-        with $ \ texture ->
-        with $ \ framebuffer ->
-        forever $ do
-          glViewport 0 0 (2 * width) (2 * height)
+    let rect    = Var "rect"    :: Var (V4 Float)
+        colour  = Var "colour"  :: Var (V4 Float)
+        sampler = Var "sampler" :: Var TextureUnit
+        matrix3 = Var "matrix3" :: Var (M33 Float)
+        instances = combineInstances (V2 288 288) (V2 0 0) glyphs
+        instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
+        geometry = Geometry GL_TRIANGLES . instanceGeometry <$> instances
+        vertices = foldl combineGeometry (ArrayVertices [] 0 []) (Geometry GL_TRIANGLE_STRIP
+          [ V4 (-1) (-1) 0 1
+          , V4   1  (-1) 0 1
+          , V4 (-1)   1  0 1
+          , V4   1    1  0 1 :: V4 Float
+          ] : geometry) in
+    withArray (arrayVertices vertices) $ \ array ->
+    withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
+    withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
+    with $ \ texture ->
+    with $ \ framebuffer ->
+    forever $ do
+      glViewport 0 0 (2 * width) (2 * height)
 
-          glDisable GL_BLEND
-          glBlendFunc GL_ONE GL_ZERO -- copy
+      glDisable GL_BLEND
+      glBlendFunc GL_ONE GL_ZERO -- copy
 
-          setClearColour white
-          glClear GL_COLOR_BUFFER_BIT
+      setClearColour white
+      glClear GL_COLOR_BUFFER_BIT
 
-          let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
+      let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
 
-          checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
-          checkingGLError $ glBindTexture GL_TEXTURE_2D (unTexture texture)
-          checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MAG_FILTER GL_NEAREST
-          checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MIN_FILTER GL_NEAREST
-          checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
-          checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
-          checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA width height 0 GL_RGBA GL_UNSIGNED_BYTE nullPtr
+      checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
+      checkingGLError $ glBindTexture GL_TEXTURE_2D (unTexture texture)
+      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MAG_FILTER GL_NEAREST
+      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MIN_FILTER GL_NEAREST
+      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
+      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
+      checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA width height 0 GL_RGBA GL_UNSIGNED_BYTE nullPtr
 
-          checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
+      checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
 
-          -- checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
+      -- checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
 
-          glViewport 0 0 (2 * width) (2 * height)
+      glViewport 0 0 (2 * width) (2 * height)
 
-          setClearColour transparent
-          glClear GL_COLOR_BUFFER_BIT
+      setClearColour transparent
+      glClear GL_COLOR_BUFFER_BIT
 
-          glEnable GL_BLEND
-          glBlendFunc GL_ONE GL_ONE -- add
+      glEnable GL_BLEND
+      glBlendFunc GL_ONE GL_ONE -- add
 
-          checkingGLError $ glBindVertexArray (unArray array)
+      checkingGLError $ glBindVertexArray (unArray array)
 
-          useProgram glyphProgram
-          for_ (zip instances (tail (arrayRanges vertices))) $ \ (Instance{..}, range) ->
-            for_ (zip [0..] jitterPattern) $ \ (j, V2 tx ty) -> do
-              when (j `mod` 2 == (0 :: Int)) $
-                setUniformValue glyphProgram colour (V4 (if j == 0 then 1 else 0)
-                                                        (if j == 2 then 1 else 0)
-                                                        (if j == 4 then 1 else 0)
-                                                        1)
-              setUniformValue glyphProgram matrix3
-                $   translated (V2 (-1) 1)
-                !*! scaled     (V3 sx sy 1)
-                !*! translated instanceOffset
-                !*! translated (V2 tx ty / 2)
-                !*! scaled     instanceScale
-              drawRange range
+      useProgram glyphProgram
+      for_ (zip instances (tail (arrayRanges vertices))) $ \ (Instance{..}, range) ->
+        for_ (zip [0..] jitterPattern) $ \ (j, V2 tx ty) -> do
+          when (j `mod` 2 == (0 :: Int)) $
+            setUniformValue glyphProgram colour (V4 (if j == 0 then 1 else 0)
+                                                    (if j == 2 then 1 else 0)
+                                                    (if j == 4 then 1 else 0)
+                                                    1)
+          setUniformValue glyphProgram matrix3
+            $   translated (V2 (-1) 1)
+            !*! scaled     (V3 sx sy 1)
+            !*! translated instanceOffset
+            !*! translated (V2 tx ty / 2)
+            !*! scaled     instanceScale
+          drawRange range
 
-          checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
-          glBlendFunc GL_ZERO GL_SRC_COLOR
+      checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
+      glBlendFunc GL_ZERO GL_SRC_COLOR
 
-          useProgram textProgram
-          let rect' = V4
-                (    fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
-                (1 - fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
-                (    fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
-                (1 - fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
+      useProgram textProgram
+      let rect' = V4
+            (    fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
+            (1 - fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
+            (    fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
+            (1 - fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
 
-          -- print rect'
+      -- print rect'
 
-          setUniformValue textProgram rect rect'
-          setUniformValue textProgram colour transparent
-          -- setUniformValue textProgram colour black
-          glActiveTexture GL_TEXTURE0
-          glBindTexture GL_TEXTURE_2D (unTexture texture)
-          setUniformValue textProgram sampler (TextureUnit 0)
+      setUniformValue textProgram rect rect'
+      setUniformValue textProgram colour transparent
+      -- setUniformValue textProgram colour black
+      glActiveTexture GL_TEXTURE0
+      glBindTexture GL_TEXTURE_2D (unTexture texture)
+      setUniformValue textProgram sampler (TextureUnit 0)
 
-          drawRange (head (arrayRanges vertices))
-          -- traverse_ drawRange (tail (arrayRanges vertices))
+      drawRange (head (arrayRanges vertices))
+      -- traverse_ drawRange (tail (arrayRanges vertices))
 
-          when (opaque textColour /= black) $ do
-            glBlendFunc GL_ONE GL_ONE
-            setUniformValue textProgram colour textColour
-            drawRange (head (arrayRanges vertices))
+      when (opaque textColour /= black) $ do
+        glBlendFunc GL_ONE GL_ONE
+        setUniformValue textProgram colour textColour
+        drawRange (head (arrayRanges vertices))
 
-          event <- waitEvent
-          case eventPayload event of
-            QuitEvent -> do
-              quit
-              exitSuccess
-            _ -> pure ()
+      event <- waitEvent
+      case eventPayload event of
+        QuitEvent -> do
+          quit
+          exitSuccess
+        _ -> pure ()
 
-          draw
+      draw
   where drawRange :: HasCallStack => ArrayRange -> IO ()
         drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
         jitterPattern
