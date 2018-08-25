@@ -38,7 +38,7 @@ main = do
   Just tahoma <- readTypeface "/Library/Fonts/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "s"
   [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse readFile ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
-  withWindow (Window "Text" (fromIntegral <$> windowSize)) $ \ draw ->
+  withWindow (Window "Text" (fromIntegral <$> windowSize)) $ \ swap ->
     let rect    = Var "rect"    :: Var (V4 Float)
         colour  = Var "colour"  :: Var (V4 Float)
         sampler = Var "sampler" :: Var TextureUnit
@@ -140,7 +140,7 @@ main = do
           exitSuccess
         _ -> pure ()
 
-      draw
+      swap
   where drawRange :: HasCallStack => ArrayRange -> IO ()
         drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
         jitterPattern
