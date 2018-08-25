@@ -78,6 +78,8 @@ main = do
 
           checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
 
+          -- checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
+
           glViewport 0 0 (2 * width) (2 * height)
 
           setClearColour transparent
@@ -114,8 +116,11 @@ main = do
                 (    fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
                 (1 - fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
 
+          -- print rect'
+
           setUniformValue textProgram rect rect'
           setUniformValue textProgram colour transparent
+          -- setUniformValue textProgram colour black
           glActiveTexture GL_TEXTURE0
           glBindTexture GL_TEXTURE_2D (unTexture texture)
           setUniformValue textProgram sampler (TextureUnit 0)
