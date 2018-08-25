@@ -166,20 +166,20 @@ combineGeometry ArrayVertices{..} (Geometry mode vertices) =
     (arrayRanges <> [ ArrayRange { mode = mode, firstVertexIndex = prevIndex, vertexCount = count } ])
 
 data ArrayRange = ArrayRange
-  { mode :: GLuint
+  { mode             :: GLuint
   , firstVertexIndex :: Int
-  , vertexCount :: Int
+  , vertexCount      :: Int
   }
 
 data GeometryArray n = GeometryArray
   { geometryRanges :: [ArrayRange]
-  , geometryArray :: Array n
+  , geometryArray  :: Array n
   }
 
 data ArrayVertices a = ArrayVertices
   { arrayVertices :: [a]
-  , prevIndex :: Int
-  , arrayRanges :: [ArrayRange]
+  , prevIndex     :: Int
+  , arrayRanges   :: [ArrayRange]
   }
 
 data Geometry a where
