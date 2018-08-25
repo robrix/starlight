@@ -42,14 +42,18 @@ main = do
         matrix3 = Var "matrix3" :: Var (M33 Float)
         instances = combineInstances (V2 288 288) (V2 0 0) glyphs
         instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
+        screenQuadVertices = foldl combineGeometry (ArrayVertices [] 0 [])
+          [ Geometry GL_TRIANGLE_STRIP
+            [ V2 (-1) (-1)
+            , V2   1  (-1)
+            , V2 (-1)   1
+            , V2   1    1  :: V2 Float
+            ]
+          ]
         geometry = Geometry GL_TRIANGLES . instanceGeometry <$> instances
-        vertices = foldl combineGeometry (ArrayVertices [] 0 []) (Geometry GL_TRIANGLE_STRIP
-          [ V4 (-1) (-1) 0 1
-          , V4   1  (-1) 0 1
-          , V4 (-1)   1  0 1
-          , V4   1    1  0 1 :: V4 Float
-          ] : geometry) in
-    withArray (arrayVertices vertices) $ \ array ->
+        glyphVertices = foldl combineGeometry (ArrayVertices [] 0 []) geometry in
+    withArray (arrayVertices screenQuadVertices) $ \ screenQuadArray ->
+    withArray (arrayVertices glyphVertices) $ \ glyphArray ->
     withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
     withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
     with $ \ texture ->
@@ -88,10 +92,10 @@ main = do
       glEnable GL_BLEND
       glBlendFunc GL_ONE GL_ONE -- add
 
-      checkingGLError $ glBindVertexArray (unArray array)
+      checkingGLError $ glBindVertexArray (unArray glyphArray)
 
       useProgram glyphProgram
-      for_ (zip instances (tail (arrayRanges vertices))) $ \ (Instance{..}, range) ->
+      for_ (zip instances (arrayRanges glyphVertices)) $ \ (Instance{..}, range) ->
         for_ (zip [0..] jitterPattern) $ \ (j, V2 tx ty) -> do
           when (j `mod` 2 == (0 :: Int)) $
             setUniformValue glyphProgram colour (V4 (if j == 0 then 1 else 0)
@@ -126,13 +130,15 @@ main = do
       bindTexture Texture2D texture
       setUniformValue textProgram sampler (TextureUnit 0)
 
-      drawRange (head (arrayRanges vertices))
-      -- traverse_ drawRange (tail (arrayRanges vertices))
+      checkingGLError $ glBindVertexArray (unArray screenQuadArray)
+
+      traverse_ drawRange (arrayRanges screenQuadVertices)
+      -- traverse_ drawRange (arrayRanges glyphVertices)
 
       when (opaque textColour /= black) $ do
         glBlendFunc GL_ONE GL_ONE
         setUniformValue textProgram colour textColour
-        drawRange (head (arrayRanges vertices))
+        traverse_ drawRange (arrayRanges screenQuadVertices)
   where drawRange :: HasCallStack => ArrayRange -> IO ()
         drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
         jitterPattern
