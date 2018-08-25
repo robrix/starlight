@@ -155,7 +155,7 @@ main = do
         width  = 1024
         height = 768
 
-        textColour = V4 1 0 1 1
+        textColour = black
 
 translated :: V2 Float -> M33 Float
 translated (V2 tx ty) = V3 (V3 1 0 tx)
