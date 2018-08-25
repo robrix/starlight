@@ -167,7 +167,10 @@ combineGeometry ArrayVertices{..} (Geometry mode vertices) =
 
 data ArrayRange = ArrayRange { mode :: GLuint, firstVertexIndex :: Int, vertexCount :: Int }
 
-data GeometryArray n = GeometryArray { geometryRanges :: [ArrayRange], geometryArray :: Array n }
+data GeometryArray n = GeometryArray
+  { geometryRanges :: [ArrayRange]
+  , geometryArray :: Array n
+  }
 
 data ArrayVertices a = ArrayVertices
   { arrayVertices :: [a]
