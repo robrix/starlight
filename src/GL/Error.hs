@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module GL.Error where
 
 import qualified Control.Exception as E
@@ -60,7 +61,16 @@ checkStatus get getLog error status object = withFrozenCallStack $ do
   pure object
 
 checkGLError :: HasCallStack => IO ()
-checkGLError = withFrozenCallStack $ glGetError >>= \ e -> case e of
+checkGLError = withFrozenCallStack $ glGetError >>= throwGLError
+
+checkingGLError :: HasCallStack => IO a -> IO a
+checkingGLError action = withFrozenCallStack $ do
+  result <- action
+  checkGLError
+  pure result
+
+throwGLError :: HasCallStack => GLenum -> IO ()
+throwGLError = \case
   GL_NO_ERROR -> pure ()
   GL_INVALID_ENUM -> E.throw $ GLException InvalidEnum callStack
   GL_INVALID_VALUE -> E.throw $ GLException InvalidValue callStack
@@ -68,9 +78,3 @@ checkGLError = withFrozenCallStack $ glGetError >>= \ e -> case e of
   GL_INVALID_FRAMEBUFFER_OPERATION -> E.throw $ GLException InvalidFramebufferOperation callStack
   GL_OUT_OF_MEMORY -> E.throw $ GLException OutOfMemory callStack
   _ -> E.throw $ GLException (Other "Unknown") callStack
-
-checkingGLError :: HasCallStack => IO a -> IO a
-checkingGLError action = withFrozenCallStack $ do
-  result <- action
-  checkGLError
-  pure result
