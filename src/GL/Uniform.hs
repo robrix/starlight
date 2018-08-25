@@ -8,7 +8,6 @@ import Foreign.Ptr
 import GHC.Stack
 import GL.Error
 import GL.Program
-import GL.TextureUnit
 import Graphics.GL.Core41
 import Graphics.GL.Types
 import Linear.Matrix as Linear
@@ -35,6 +34,3 @@ instance Uniform (Linear.M44 Float) where
 
 instance Uniform (Linear.M33 Float) where
   uniform location matrix = checkingGLError $ A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix3fv location 1 GL_FALSE . castPtr)
-
-instance Uniform TextureUnit where
-  uniform location textureUnit = checkingGLError $ glUniform1i location (unTextureUnit textureUnit)
