@@ -66,7 +66,7 @@ main = do
 
       let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
 
-      checkingGLError $ glBindTexture GL_TEXTURE_2D (unTexture texture)
+      bindTexture Texture2D texture
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MAG_FILTER GL_NEAREST
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MIN_FILTER GL_NEAREST
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
@@ -123,7 +123,7 @@ main = do
       setUniformValue textProgram colour transparent
       -- setUniformValue textProgram colour black
       glActiveTexture GL_TEXTURE0
-      glBindTexture GL_TEXTURE_2D (unTexture texture)
+      bindTexture Texture2D texture
       setUniformValue textProgram sampler (TextureUnit 0)
 
       drawRange (head (arrayRanges vertices))
