@@ -65,7 +65,6 @@ main = do
 
       let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
 
-      checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
       checkingGLError $ glBindTexture GL_TEXTURE_2D (unTexture texture)
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MAG_FILTER GL_NEAREST
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_MIN_FILTER GL_NEAREST
@@ -73,6 +72,7 @@ main = do
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
       checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA width height 0 GL_RGBA GL_UNSIGNED_BYTE nullPtr
 
+      checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
       checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
 
       -- checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
