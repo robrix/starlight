@@ -1,15 +1,10 @@
 {-# LANGUAGE GADTs, FlexibleInstances, RecordWildCards, ScopedTypeVariables #-}
 module Main where
 
-import qualified Control.Concurrent as CC
-import qualified Control.Exception as E
 import Control.Monad
-import Data.Bits
 import Data.Foldable
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
-import Data.Word
-import qualified Foreign.C.String as C
 import Foreign.Ptr
 import Geometry.Rect
 import GHC.Stack
@@ -32,39 +27,18 @@ import Linear.V4 as Linear
 import Linear.Vector as Linear
 import SDL.Event
 import SDL.Init
-import qualified SDL.Raw as SDL
 import System.Exit
 import UI.Colour
 import UI.Font as Font
 import UI.Glyph
+import UI.Window
 
 main :: HasCallStack => IO ()
 main = do
   Just tahoma <- readTypeface "/Library/Fonts/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "s"
   [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse readFile ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
-  CC.runInBoundThread $ C.withCString "Text" $ \ name -> do
-    _ <- SDL.init SDL.SDL_INIT_EVERYTHING >>= checkWhen (< 0)
-
-    SDL.SDL_GL_CONTEXT_MAJOR_VERSION .= 4
-    SDL.SDL_GL_CONTEXT_MINOR_VERSION .= 1
-    SDL.SDL_GL_CONTEXT_PROFILE_MASK .= SDL.SDL_GL_CONTEXT_PROFILE_CORE
-
-    SDL.SDL_GL_RED_SIZE   .= 8
-    SDL.SDL_GL_GREEN_SIZE .= 8
-    SDL.SDL_GL_BLUE_SIZE  .= 8
-    SDL.SDL_GL_ALPHA_SIZE .= 8
-    SDL.SDL_GL_DEPTH_SIZE .= 16
-
-    SDL.SDL_GL_DOUBLEBUFFER .= fromEnum True
-
-    ignoreEventsOfTypes
-      [ SDL.SDL_FINGERMOTION
-      , SDL.SDL_FINGERUP
-      , SDL.SDL_FINGERDOWN ]
-
-    withWindow name (fromIntegral <$> windowSize) flags $ \ window ->
-      withContext window $ \ _ ->
+  withWindow (Window "Text" (fromIntegral <$> windowSize)) $ \ draw ->
         let rect    = Var "rect"    :: Var (V4 Float)
             colour  = Var "colour"  :: Var (V4 Float)
             sampler = Var "sampler" :: Var TextureUnit
@@ -161,15 +135,8 @@ main = do
               exitSuccess
             _ -> pure ()
 
-          SDL.glSwapWindow window
-    `E.finally`
-      SDL.quit
-  where flags = foldr (.|.) 0
-          [ SDL.SDL_WINDOW_OPENGL
-          , SDL.SDL_WINDOW_SHOWN
-          , SDL.SDL_WINDOW_RESIZABLE
-          , SDL.SDL_WINDOW_ALLOW_HIGHDPI ]
-        drawRange :: HasCallStack => ArrayRange -> IO ()
+          draw
+  where drawRange :: HasCallStack => ArrayRange -> IO ()
         drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
         jitterPattern
           = [ V2 (-1 / 12.0) (-5 / 12.0)
@@ -204,45 +171,6 @@ combineGeometry ArrayVertices{..} (Geometry mode vertices) =
     (arrayVertices <> vertices)
     (prevIndex + count)
     (arrayRanges <> [ ArrayRange { mode = mode, firstVertexIndex = prevIndex, vertexCount = count } ])
-
-
-ignoreEventsOfTypes :: [Word32] -> IO ()
-ignoreEventsOfTypes = traverse_ (\ t -> SDL.eventState t 0 >>= checkWhen (/= 0))
-
-withWindow :: C.CString -> Linear.V2 Int -> Word32 -> (SDL.Window -> IO a) -> IO a
-withWindow name (V2 w h) flags = E.bracket
-  (SDL.createWindow name SDL.SDL_WINDOWPOS_CENTERED SDL.SDL_WINDOWPOS_CENTERED (fromIntegral w) (fromIntegral h) flags >>= checkNonNull)
-  SDL.destroyWindow
-
-withContext :: SDL.Window -> (SDL.GLContext -> IO a) -> IO a
-withContext window = E.bracket
-  (SDL.glCreateContext window >>= checkNonNull)
-  SDL.glDeleteContext
-
-checkWhen :: (a -> Bool) -> a -> IO a
-checkWhen predicate value = do
-  when (predicate value) checkSDLError
-  pure value
-
-checkNonNull :: Ptr a -> IO (Ptr a)
-checkNonNull = checkWhen (== nullPtr)
-
-checkSDLError :: IO ()
-checkSDLError = do
-  msg <- SDL.getError >>= C.peekCString
-  SDL.clearError
-  when (msg /= "") $ E.throw $ SDLException msg
-
-(.=) :: SDL.GLattr -> Int -> IO ()
-attribute .= value = do
-  result <- SDL.glSetAttribute attribute (fromIntegral value)
-  _ <- checkWhen (< 0) result
-  pure ()
-
-newtype SDLException = SDLException String
-  deriving (Show)
-
-instance E.Exception SDLException
 
 data ArrayRange = ArrayRange { mode :: GLuint, firstVertexIndex :: Int, vertexCount :: Int }
 
