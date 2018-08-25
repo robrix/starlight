@@ -21,7 +21,7 @@ withArray vertices body = with $ \ buffer -> do
   A.withArrayLen (vertices >>= toList) $ \ n p ->
     glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf (0 :: n))) (castPtr p) GL_STATIC_DRAW
   with $ \ array -> do
-    glBindVertexArray (unArray array)
+    bindArray array
     glEnableVertexAttribArray 0
     glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy :: Proxy n)) GL_FALSE 0 nullPtr
     body array
