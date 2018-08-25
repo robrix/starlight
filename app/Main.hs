@@ -114,6 +114,8 @@ main = do
       glViewport 0 0 (2 * width) (2 * height)
       glBlendFunc GL_ZERO GL_SRC_COLOR
 
+      -- print instanceBounds'
+
       useProgram textProgram
       let rect' = V4
             (    fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
