@@ -74,6 +74,8 @@ main = do
 
       checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
       checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
+      status <- glCheckFramebufferStatus GL_FRAMEBUFFER
+      unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
 
       -- checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
 
