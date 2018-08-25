@@ -169,7 +169,11 @@ data ArrayRange = ArrayRange { mode :: GLuint, firstVertexIndex :: Int, vertexCo
 
 data GeometryArray n = GeometryArray { geometryRanges :: [ArrayRange], geometryArray :: Array n }
 
-data ArrayVertices a = ArrayVertices { arrayVertices :: [a], prevIndex :: Int, arrayRanges :: [ArrayRange] }
+data ArrayVertices a = ArrayVertices
+  { arrayVertices :: [a]
+  , prevIndex :: Int
+  , arrayRanges :: [ArrayRange]
+  }
 
 data Geometry a where
   Geometry :: (Foldable v, Scalar n) => GLuint -> [v n] -> Geometry (v n)
