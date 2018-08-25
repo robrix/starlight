@@ -128,9 +128,10 @@ main = do
       setUniformValue textProgram rect rect'
       setUniformValue textProgram colour transparent
       -- setUniformValue textProgram colour black
-      glActiveTexture GL_TEXTURE0
+      let textureUnit = TextureUnit 0
+      setActiveTexture textureUnit
       bindTexture Texture2D texture
-      setUniformValue textProgram sampler (TextureUnit 0)
+      setUniformValue textProgram sampler textureUnit
 
       bindArray screenQuadArray
 
