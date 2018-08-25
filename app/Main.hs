@@ -38,7 +38,7 @@ main = do
   Just tahoma <- readTypeface "/Library/Fonts/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "s"
   [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse readFile ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
-  withWindow (Window "Text" (fromIntegral <$> windowSize)) $ \ swap ->
+  withWindow (Window "Text" (fromIntegral <$> windowSize)) $ \ draw ->
     let rect    = Var "rect"    :: Var (V4 Float)
         colour  = Var "colour"  :: Var (V4 Float)
         sampler = Var "sampler" :: Var TextureUnit
@@ -57,7 +57,7 @@ main = do
     withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
     with $ \ texture ->
     with $ \ framebuffer ->
-    forever $ do
+    draw $ do
       glViewport 0 0 (2 * width) (2 * height)
 
       glDisable GL_BLEND
@@ -139,8 +139,6 @@ main = do
           quit
           exitSuccess
         _ -> pure ()
-
-      swap
   where drawRange :: HasCallStack => ArrayRange -> IO ()
         drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
         jitterPattern

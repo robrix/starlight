@@ -14,7 +14,7 @@ import qualified SDL.Raw as SDL
 
 data Window = Window String {-# UNPACK #-} !(Linear.V2 Int)
 
-withWindow :: Window -> (IO () -> IO a) -> IO a
+withWindow :: Window -> ((IO () -> IO ()) -> IO a) -> IO a
 withWindow (Window name size) action = CC.runInBoundThread $ do
   _ <- SDL.init SDL.SDL_INIT_EVERYTHING >>= checkWhen (< 0)
 
@@ -38,7 +38,9 @@ withWindow (Window name size) action = CC.runInBoundThread $ do
   C.withCString name $ \ name ->
     withSDLWindow name size flags $ \ window ->
       withSDLContext window $ \ _ ->
-        action (SDL.glSwapWindow window) `E.finally` SDL.quit
+        action (\ draw -> forever $ do
+          draw
+          SDL.glSwapWindow window) `E.finally` SDL.quit
   where flags = foldr (.|.) 0
           [ SDL.SDL_WINDOW_OPENGL
           , SDL.SDL_WINDOW_SHOWN
