@@ -90,6 +90,11 @@ main = do
 
         useProgram glyphProgram
 
+        -- setUniformValue glyphProgram colour white
+        -- setUniformValue glyphProgram matrix3 identity
+        -- bindArray screenQuadArray
+        -- traverse_ drawRange (arrayRanges screenQuadVertices)
+
         bindArray glyphArray
 
         let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
