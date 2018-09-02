@@ -26,6 +26,19 @@ blue :: Num a => Colour a
 blue = V4 0 0 1 1
 
 
+_r :: R1 t => Lens' (t a) a
+_r = _x
+
+_g :: R2 t => Lens' (t a) a
+_g = _y
+
+_b :: R3 t => Lens' (t a) a
+_b = _z
+
+_a :: R4 t => Lens' (t a) a
+_a = _w
+
+
 opaque :: Num a => Colour a -> Colour a
 opaque = set _w 1
 
