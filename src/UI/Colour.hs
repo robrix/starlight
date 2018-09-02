@@ -40,7 +40,7 @@ _a = _w
 
 
 opaque :: Num a => Colour a -> Colour a
-opaque = set _w 1
+opaque = set _a 1
 
 
 setClearColour :: Colour Float -> IO ()
