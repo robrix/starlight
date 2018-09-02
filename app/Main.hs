@@ -95,6 +95,7 @@ main = do
       useProgram glyphProgram
 
       let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
+          scale = 1 / 2
       for_ (zip instances (arrayRanges glyphVertices)) $ \ (Instance{..}, range) ->
         for_ (zip [0..] jitterPattern) $ \ (j, V2 tx ty) -> do
           when (j `mod` 2 == (0 :: Int)) $
@@ -106,7 +107,7 @@ main = do
             $   translated (V2 (-1) 1)
             !*! scaled     (V3 sx sy 1)
             !*! translated instanceOffset
-            !*! translated (V2 tx ty / 2)
+            !*! translated (V2 tx ty * scale)
             !*! scaled     instanceScale
           drawRange range
 
