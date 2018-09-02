@@ -16,8 +16,8 @@ targetToGLEnum :: Target -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
 
 
-bindTexture :: Target -> Texture -> IO ()
-bindTexture target = checkingGLError . glBindTexture (targetToGLEnum target) . unTexture
+bindTexture :: Target -> Maybe Texture -> IO ()
+bindTexture target = checkingGLError . glBindTexture (targetToGLEnum target) . maybe 0 unTexture
 
 
 data Filter = Nearest | Linear

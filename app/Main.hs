@@ -68,7 +68,7 @@ main = do
       setClearColour white
       glClear GL_COLOR_BUFFER_BIT
 
-      bindTexture Texture2D texture
+      bindTexture Texture2D (Just texture)
       setMagFilter Texture2D Nearest
       setMinFilter Texture2D Nearest
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
@@ -128,7 +128,7 @@ main = do
       -- setUniformValue textProgram colour black
       let textureUnit = TextureUnit 0
       setActiveTexture textureUnit
-      bindTexture Texture2D texture
+      bindTexture Texture2D (Just texture)
       setUniformValue textProgram sampler textureUnit
 
       bindArray screenQuadArray
