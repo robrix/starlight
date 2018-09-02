@@ -59,7 +59,7 @@ main = do
     with $ \ texture ->
     with $ \ framebuffer ->
     draw $ do
-      checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
+      bindFramebuffer Nothing
       glViewport 0 0 (2 * width) (2 * height)
 
       glDisable GL_BLEND
@@ -75,12 +75,12 @@ main = do
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
       checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA width height 0 GL_RGBA GL_UNSIGNED_BYTE nullPtr
 
-      checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER (unFramebuffer framebuffer)
+      bindFramebuffer (Just framebuffer)
       checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
       status <- glCheckFramebufferStatus GL_FRAMEBUFFER
       unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
 
-      -- checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
+      -- bindFramebuffer Nothing
 
       glViewport 0 0 (2 * width) (2 * height)
 
@@ -110,7 +110,7 @@ main = do
             !*! scaled     instanceScale
           drawRange range
 
-      checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER 0
+      bindFramebuffer Nothing
       glViewport 0 0 (2 * width) (2 * height)
       glBlendFunc GL_ZERO GL_SRC_COLOR
 
