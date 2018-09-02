@@ -30,6 +30,12 @@ import UI.Font as Font
 import UI.Glyph
 import UI.Window
 
+-- import qualified Codec.Picture as C
+-- import qualified Codec.Picture.Types as C
+-- import qualified Data.ByteString.Lazy as B
+-- import qualified Foreign.Marshal.Alloc as A
+-- import Foreign.Storable
+
 main :: HasCallStack => IO ()
 main = do
   Just tahoma <- readTypeface "/Library/Fonts/Tahoma.ttf"
@@ -109,6 +115,16 @@ main = do
               !*! translated (V2 tx ty * scale)
               !*! scaled     instanceScale
             drawRange range
+
+        -- let w = 2 * fromIntegral width
+        --     h = 2 * fromIntegral height
+        -- A.allocaBytes (4 * w * h) $ \ pixels -> do
+        --   bindTexture Texture2D (Just texture)
+        --   checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+        --   image <- C.withImage w h $ \ x y -> do
+        --     let pixel = pixels `plusPtr` (w * y + x)
+        --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
+        --   B.writeFile "test.png" (C.encodePng image)
 
         bindFramebuffer Nothing
         glViewport 0 0 (2 * width) (2 * height)
