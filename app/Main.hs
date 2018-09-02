@@ -126,6 +126,7 @@ main = do
       -- print rect'
 
       setUniformValue textProgram rect rect'
+      -- setUniformValue textProgram rect (V4 0 0 1 1)
       setUniformValue textProgram colour transparent
       -- setUniformValue textProgram colour black
       let textureUnit = TextureUnit 0
