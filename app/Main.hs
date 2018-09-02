@@ -68,8 +68,6 @@ main = do
       setClearColour white
       glClear GL_COLOR_BUFFER_BIT
 
-      let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
-
       bindTexture Texture2D texture
       setMagFilter Texture2D Nearest
       setMinFilter Texture2D Nearest
@@ -95,6 +93,8 @@ main = do
       bindArray glyphArray
 
       useProgram glyphProgram
+
+      let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
       for_ (zip instances (arrayRanges glyphVertices)) $ \ (Instance{..}, range) ->
         for_ (zip [0..] jitterPattern) $ \ (j, V2 tx ty) -> do
           when (j `mod` 2 == (0 :: Int)) $
