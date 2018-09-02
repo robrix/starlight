@@ -70,14 +70,11 @@ main = do
       checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
       status <- glCheckFramebufferStatus GL_FRAMEBUFFER
       unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
+      bindFramebuffer Nothing
+
+      glEnable GL_BLEND
 
       draw $ do
-        bindFramebuffer Nothing
-        glViewport 0 0 (2 * width) (2 * height)
-
-        glDisable GL_BLEND
-        glBlendFunc GL_ONE GL_ZERO -- copy
-
         setClearColour white
         glClear GL_COLOR_BUFFER_BIT
 
@@ -89,7 +86,6 @@ main = do
         setClearColour transparent
         glClear GL_COLOR_BUFFER_BIT
 
-        glEnable GL_BLEND
         glBlendFunc GL_ONE GL_ONE -- add
 
         bindArray glyphArray
