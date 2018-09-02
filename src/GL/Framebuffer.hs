@@ -10,5 +10,5 @@ newtype Framebuffer = Framebuffer { unFramebuffer :: GLuint }
 instance Object Framebuffer where characterize = (Framebuffer, glGenFramebuffers, glDeleteFramebuffers)
 
 
-bindFramebuffer :: Framebuffer -> IO ()
-bindFramebuffer = checkingGLError . glBindFramebuffer GL_FRAMEBUFFER . unFramebuffer
+bindFramebuffer :: Maybe Framebuffer -> IO ()
+bindFramebuffer = checkingGLError . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
