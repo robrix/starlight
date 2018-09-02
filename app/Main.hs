@@ -97,12 +97,8 @@ main = do
       let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
           scale = 1 / 2
       for_ (zip instances (arrayRanges glyphVertices)) $ \ (Instance{..}, range) ->
-        for_ (zip [0..] jitterPattern) $ \ (j, V2 tx ty) -> do
-          when (j `mod` 2 == (0 :: Int)) $
-            setUniformValue glyphProgram colour (V4 (if j == 0 then 1 else 0)
-                                                    (if j == 2 then 1 else 0)
-                                                    (if j == 4 then 1 else 0)
-                                                    1)
+        for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
+          setUniformValue glyphProgram colour glyphColour
           setUniformValue glyphProgram matrix3
             $   translated (V2 (-1) 1)
             !*! scaled     (V3 sx sy 1)
@@ -147,12 +143,12 @@ main = do
   where drawRange :: HasCallStack => ArrayRange -> IO ()
         drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
         jitterPattern
-          = [ V2 (-1 / 12.0) (-5 / 12.0)
-            , V2 ( 1 / 12.0) ( 1 / 12.0)
-            , V2 ( 3 / 12.0) (-1 / 12.0)
-            , V2 ( 5 / 12.0) ( 5 / 12.0)
-            , V2 ( 7 / 12.0) (-3 / 12.0)
-            , V2 ( 9 / 12.0) ( 3 / 12.0)
+          = [ (red, V2 (-1 / 12.0) (-5 / 12.0))
+            , (red, V2 ( 1 / 12.0) ( 1 / 12.0))
+            , (green, V2 ( 3 / 12.0) (-1 / 12.0))
+            , (green, V2 ( 5 / 12.0) ( 5 / 12.0))
+            , (blue, V2 ( 7 / 12.0) (-3 / 12.0))
+            , (blue, V2 ( 9 / 12.0) ( 3 / 12.0))
             ]
         windowSize = V2 width height
         width  = 1024
