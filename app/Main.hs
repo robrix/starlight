@@ -88,9 +88,9 @@ main = do
 
         glBlendFunc GL_ONE GL_ONE -- add
 
-        bindArray glyphArray
-
         useProgram glyphProgram
+
+        bindArray glyphArray
 
         let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
             scale = 1 / 2
