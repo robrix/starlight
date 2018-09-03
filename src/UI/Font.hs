@@ -109,12 +109,12 @@ glyphsForChars (Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyph
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
 contourToPath [] = Z
-contourToPath (p@(O.CurvePoint x y _) : rest) = makePath Z
-  where (makePath, _) = foldl (\ (makePath, prev) point -> (makePath . pathFor prev point, point)) (M (V2 x y), p) rest
-        pathFor (O.CurvePoint _ _ True)  (O.CurvePoint _ _ False)   = id
-        pathFor (O.CurvePoint _ _ True)  (O.CurvePoint x y True)    = L (V2 x y)
-        pathFor (O.CurvePoint x y False) (O.CurvePoint x' y' False) = Q (V2 x y) (V2 (x + ((x' - x) `div` 2)) (y + ((y' - y) `div` 2)))
-        pathFor (O.CurvePoint x y False) (O.CurvePoint x' y' True)  = Q (V2 x y) (V2 x' y')
+contourToPath (p@(O.CurvePoint x y _) : ps) = M (V2 x y) (go p ps)
+  where go (O.CurvePoint _ _ True)  (p@(O.CurvePoint _  _  False) : ps) = go p ps
+        go (O.CurvePoint _ _ True)  (p@(O.CurvePoint x  y  True)  : ps) = L (V2 x y) (go p ps)
+        go (O.CurvePoint x y False) (p@(O.CurvePoint x' y' False) : ps) = Q (V2 x y) (V2 (x + ((x' - x) `div` 2)) (y + ((y' - y) `div` 2))) (go p ps)
+        go (O.CurvePoint x y False) (p@(O.CurvePoint x' y' True)  : ps) = Q (V2 x y) (V2 x' y') (go p ps)
+        go _                        []                                  = Z
 
 glyphPaths :: Typeface -> O.Glyph Int -> [Path V2 O.FWord]
 glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnderlying typeface) glyph)
