@@ -16,7 +16,7 @@ data Glyph = Glyph
   }
 
 scaleGlyph :: V2 Float -> Glyph -> Glyph
-scaleGlyph (V2 sx sy) Glyph{..} = Glyph glyphCodePoint (glyphAdvanceWidth * sx) ((* V4 sx sy 1 1) <$> glyphGeometry) (scaleRect (V2 sx sy) glyphBounds)
+scaleGlyph (V2 sx sy) Glyph{..} = Glyph glyphCodePoint (glyphAdvanceWidth * sx) ((* V4 sx sy 1 1) <$> glyphGeometry) (transformRect (scaled (V3 sx sy 1)) glyphBounds)
 
 data Instance = Instance
   { instanceGlyph  :: {-# UNPACK #-} !Glyph
