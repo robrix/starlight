@@ -2,6 +2,7 @@
 module UI.Glyph where
 
 import Geometry.Rect
+import Linear.Exts
 import Linear.Matrix
 import Linear.V2
 import Linear.V3
@@ -29,9 +30,6 @@ instanceGeometry Instance{..} = glyphGeometry instanceGlyph
 
 instanceBounds :: Instance -> Rect Float
 instanceBounds Instance{..} = transformRect
-  (V3 (V3 1 0 tx)
-      (V3 0 1 ty)
-      (V3 0 0 1)
+  (   translated instanceOffset
   !*! scaled instanceScale)
   (glyphBounds instanceGlyph)
-  where V2 tx ty = instanceOffset
