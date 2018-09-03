@@ -157,7 +157,6 @@ main = do
         bindArray screenQuadArray
 
         traverse_ drawRange (arrayRanges screenQuadVertices)
-        -- traverse_ drawRange (arrayRanges glyphVertices)
 
         when (opaque textColour /= black) $ do
           glBlendFunc GL_ONE GL_ONE
