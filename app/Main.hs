@@ -166,12 +166,12 @@ main = do
   where drawRange :: HasCallStack => ArrayRange -> IO ()
         drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
         jitterPattern
-          = [ (red, V2 (-1 / 12.0) (-5 / 12.0))
-            , (red, V2 ( 1 / 12.0) ( 1 / 12.0))
+          = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
+            , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
             , (green, V2 ( 3 / 12.0) (-1 / 12.0))
             , (green, V2 ( 5 / 12.0) ( 5 / 12.0))
-            , (blue, V2 ( 7 / 12.0) (-3 / 12.0))
-            , (blue, V2 ( 9 / 12.0) ( 3 / 12.0))
+            , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
+            , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
             ]
         windowSize = V2 width height
         width  = 1024
