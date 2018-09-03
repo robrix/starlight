@@ -13,13 +13,11 @@ import GL.Error
 import GL.Framebuffer
 import GL.Object
 import GL.Program
-import GL.Scalar
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import GL.Uniform
 import Graphics.GL.Core41
-import Graphics.GL.Types
 import Linear.Matrix as Linear
 import Linear.V2 as Linear
 import Linear.V3 as Linear
@@ -50,14 +48,13 @@ main = do
         instances = combineInstances (V2 288 288) (V2 0 0) glyphs
         instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
         screenQuadVertices = combineGeometry
-          [ Geometry GL_TRIANGLE_STRIP
-            [ V2 (-1) (-1)
+          [ [ V2 (-1) (-1)
             , V2   1  (-1)
             , V2 (-1)   1
             , V2   1    1  :: V2 Float
             ]
           ]
-        geometry = Geometry GL_TRIANGLES . instanceGeometry <$> instances
+        geometry = instanceGeometry <$> instances
         glyphVertices = combineGeometry geometry in
     withArray (arrayVertices screenQuadVertices) $ \ screenQuadArray ->
     withArray (arrayVertices glyphVertices) $ \ glyphArray ->
@@ -188,11 +185,11 @@ combineInstances scale@(V2 sx sy) offset (g:gs)
   : combineInstances scale (offset + V2 (glyphAdvanceWidth g * sx) 0) gs
 combineInstances _ _ [] = []
 
-combineGeometry :: [Geometry (v n)] -> ArrayVertices (v n)
+combineGeometry :: [[v n]] -> ArrayVertices (v n)
 combineGeometry = go 0 (ArrayVertices [] [])
-  where go :: Int -> ArrayVertices (v n) -> [Geometry (v n)] -> ArrayVertices (v n)
+  where go :: Int -> ArrayVertices (v n) -> [[v n]] -> ArrayVertices (v n)
         go _ vertices [] = vertices
-        go prevIndex ArrayVertices{..} (Geometry _ vertices : rest) =
+        go prevIndex ArrayVertices{..} (vertices : rest) =
           let count = length vertices
           in go
             (prevIndex + count)
@@ -205,6 +202,3 @@ data ArrayVertices a = ArrayVertices
   { arrayVertices :: [a]
   , arrayRanges   :: [Range]
   }
-
-data Geometry a where
-  Geometry :: (Foldable v, Scalar n) => GLuint -> [v n] -> Geometry (v n)
