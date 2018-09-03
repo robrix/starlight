@@ -49,7 +49,7 @@ main = do
         matrix3 = Var "matrix3" :: Var (M33 Float)
         instances = combineInstances (V2 288 288) (V2 0 0) glyphs
         instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
-        screenQuadVertices = foldl combineGeometry (ArrayVertices [] 0 [])
+        screenQuadVertices = combineGeometry
           [ Geometry GL_TRIANGLE_STRIP
             [ V2 (-1) (-1)
             , V2   1  (-1)
@@ -58,7 +58,7 @@ main = do
             ]
           ]
         geometry = Geometry GL_TRIANGLES . instanceGeometry <$> instances
-        glyphVertices = foldl combineGeometry (ArrayVertices [] 0 []) geometry in
+        glyphVertices = combineGeometry geometry in
     withArray (arrayVertices screenQuadVertices) $ \ screenQuadArray ->
     withArray (arrayVertices glyphVertices) $ \ glyphArray ->
     withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
@@ -191,13 +191,18 @@ combineInstances scale@(V2 sx sy) offset (g:gs)
   : combineInstances scale (offset + V2 (glyphAdvanceWidth g * sx) 0) gs
 combineInstances _ _ [] = []
 
-combineGeometry :: ArrayVertices (v n) -> Geometry (v n) -> ArrayVertices (v n)
-combineGeometry ArrayVertices{..} (Geometry mode vertices) =
-  let count = length vertices
-  in ArrayVertices
-    (arrayVertices <> vertices)
-    (prevIndex + count)
-    (arrayRanges <> [ ArrayRange mode prevIndex count ])
+combineGeometry :: [Geometry (v n)] -> ArrayVertices (v n)
+combineGeometry = go 0 (ArrayVertices [] [])
+  where go :: Int -> ArrayVertices (v n) -> [Geometry (v n)] -> ArrayVertices (v n)
+        go _ vertices [] = vertices
+        go prevIndex ArrayVertices{..} (Geometry mode vertices : rest) =
+          let count = length vertices
+          in go
+            (prevIndex + count)
+            (ArrayVertices
+              (arrayVertices <> vertices)
+              (arrayRanges <> [ ArrayRange mode prevIndex count ]))
+            rest
 
 data ArrayRange = ArrayRange
   { mode             :: {-# UNPACK #-} !GLuint
@@ -212,7 +217,6 @@ data GeometryArray n = GeometryArray
 
 data ArrayVertices a = ArrayVertices
   { arrayVertices :: [a]
-  , prevIndex     :: Int
   , arrayRanges   :: [ArrayRange]
   }
 
