@@ -185,12 +185,9 @@ combineInstances scale@(V2 sx sy) offset (g:gs)
 combineInstances _ _ [] = []
 
 combineGeometry :: [[v n]] -> ([v n], [Range])
-combineGeometry = go 0 [] []
-  where go _ vertices ranges [] = (vertices, ranges)
-        go prevIndex vertices ranges (geometry : rest) =
+combineGeometry = go 0
+  where go _ [] = ([], [])
+        go prevIndex (geometry : rest) =
           let count = length geometry
-          in go
-            (prevIndex + count)
-            (vertices <> geometry)
-            (ranges <> [ Range prevIndex count ])
-            rest
+              (vertices, ranges) = go (prevIndex + count) rest
+          in (geometry <> vertices, Range prevIndex count : ranges)
