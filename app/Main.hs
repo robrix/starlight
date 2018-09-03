@@ -201,11 +201,6 @@ combineGeometry = go 0 (ArrayVertices [] [])
               (arrayRanges <> [ Range prevIndex count ]))
             rest
 
-data GeometryArray n = GeometryArray
-  { geometryRanges :: [Range]
-  , geometryArray  :: Array n
-  }
-
 data ArrayVertices a = ArrayVertices
   { arrayVertices :: [a]
   , arrayRanges   :: [Range]
