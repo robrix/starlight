@@ -36,9 +36,6 @@ maxY = view _y . rectMax
 scaleRect :: Num a => V2 a -> Rect a -> Rect a
 scaleRect scale Rect{..} = Rect (rectMin * scale) (rectMax * scale)
 
-translateRect :: Num a => V2 a -> Rect a -> Rect a
-translateRect delta Rect{..} = Rect (rectMin + delta) (rectMax + delta)
-
 transformRect :: Num a => M33 a -> Rect a -> Rect a
 transformRect m (Rect v1 v2) = Rect ((m !* ext v1) ^. _xy) ((m !* ext v2) ^. _xy)
   where ext (V2 x y) = V3 x y 0
