@@ -8,7 +8,7 @@ data Triangle n = Triangle
   {-# UNPACK #-} !(V2 n)
   {-# UNPACK #-} !(V2 n)
   {-# UNPACK #-} !(V2 n)
-  deriving Functor
+  deriving (Functor, Show)
 
 data Kind = Solid | Curve
 
