@@ -20,7 +20,6 @@ import qualified Opentype.Fileformat as O
 import Lens.Micro
 import Linear.V2
 import Linear.V4
-import Linear.Vector (zero)
 import UI.Glyph
 import UI.Path
 
@@ -121,4 +120,4 @@ glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnd
 
 
 glyphVertices :: Typeface -> O.Glyph Int -> [V4 Float]
-glyphVertices typeface = (>>= uncurry triangleVertices . first (fmap fromIntegral)) . (>>= pathTriangles 0 zero zero) . glyphPaths typeface
+glyphVertices typeface = (>>= uncurry triangleVertices . first (fmap fromIntegral)) . (>>= pathTriangles) . glyphPaths typeface
