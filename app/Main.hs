@@ -47,16 +47,16 @@ main = do
         matrix3 = Var "matrix3" :: Var (M33 Float)
         instances = combineInstances (V2 288 288) (V2 0 0) glyphs
         instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
-        screenQuadVertices = combineGeometry
+        (screenQuadVertices, screenQuadRanges) = combineGeometry
           [ [ V2 (-1) (-1)
             , V2   1  (-1)
             , V2 (-1)   1
             , V2   1    1  :: V2 Float
             ]
           ]
-        glyphVertices = combineGeometry (instanceGeometry <$> instances) in
-    withArray (arrayVertices screenQuadVertices) $ \ screenQuadArray ->
-    withArray (arrayVertices glyphVertices) $ \ glyphArray ->
+        (glyphVertices, glyphRanges) = combineGeometry (instanceGeometry <$> instances) in
+    withArray screenQuadVertices $ \ screenQuadArray ->
+    withArray glyphVertices $ \ glyphArray ->
     withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
     withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
     with $ \ texture ->
@@ -102,7 +102,7 @@ main = do
 
         let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
             scale = 1 / 2
-        for_ (zip instances (arrayRanges glyphVertices)) $ \ (Instance{..}, range) ->
+        for_ (zip instances glyphRanges) $ \ (Instance{..}, range) ->
           for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
             setUniformValue glyphProgram colour glyphColour
             setUniformValue glyphProgram matrix3
@@ -152,12 +152,12 @@ main = do
 
         bindArray screenQuadArray
 
-        traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
+        traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
         when (opaque textColour /= black) $ do
           glBlendFunc GL_ONE GL_ONE
           setUniformValue textProgram colour textColour
-          traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
+          traverse_ (drawArrays TriangleStrip) screenQuadRanges
   where jitterPattern
           = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
             , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
@@ -184,19 +184,13 @@ combineInstances scale@(V2 sx sy) offset (g:gs)
   : combineInstances scale (offset + V2 (glyphAdvanceWidth g * sx) 0) gs
 combineInstances _ _ [] = []
 
-combineGeometry :: [[v n]] -> ArrayVertices (v n)
-combineGeometry = go 0 (ArrayVertices [] [])
-  where go _ vertices [] = vertices
-        go prevIndex ArrayVertices{..} (vertices : rest) =
-          let count = length vertices
+combineGeometry :: [[v n]] -> ([v n], [Range])
+combineGeometry = go 0 [] []
+  where go _ vertices ranges [] = (vertices, ranges)
+        go prevIndex vertices ranges (geometry : rest) =
+          let count = length geometry
           in go
             (prevIndex + count)
-            (ArrayVertices
-              (arrayVertices <> vertices)
-              (arrayRanges <> [ Range prevIndex count ]))
+            (vertices <> geometry)
+            (ranges <> [ Range prevIndex count ])
             rest
-
-data ArrayVertices a = ArrayVertices
-  { arrayVertices :: [a]
-  , arrayRanges   :: [Range]
-  }
