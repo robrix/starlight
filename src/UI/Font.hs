@@ -5,9 +5,8 @@ import Control.Applicative (liftA2)
 import Control.Monad (guard)
 import qualified Control.Exception as E
 import Data.Bifunctor (first)
-import Data.Bytes
 import Data.Char (ord)
-import Data.Foldable (find, toList)
+import Data.Foldable (find)
 import Data.Int
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
@@ -123,15 +122,3 @@ glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnd
 
 glyphVertices :: Typeface -> O.Glyph Int -> [V4 Float]
 glyphVertices typeface = (>>= uncurry triangleVertices . first (fmap fromIntegral)) . (>>= pathTriangles 0 zero zero) . glyphPaths typeface
-
-
-encodeGlyphPaths :: Typeface -> O.Glyph Int -> [Word8]
-encodeGlyphPaths typeface = (>>= encodePath) . glyphPaths typeface
-
-
-encodeGlyphsForChars :: Typeface -> [Char] -> [Word8]
-encodeGlyphsForChars face chars = header ++ glyphHeaders ++ (charsGlyphsAndPaths >>= \ (_, _, path) -> path)
-  where charsGlyphsAndPaths = zip chars (glyphsForChars face chars) >>= \ (char, glyph) -> (,,) char <$> toList glyph <*> fmap (encodeGlyphPaths face) (toList glyph)
-        header = toBytes (unitsPerEm face) ++ toBytes @Word16 (fromIntegral (ascent face)) ++ toBytes @Word16 (fromIntegral (descent face)) ++ toBytes @Word16 (fromIntegral (length charsGlyphsAndPaths))
-        glyphHeaders = snd (foldl encodeGlyphHeader (0, id) charsGlyphsAndPaths) []
-        encodeGlyphHeader (offset, makeList) (char, glyph, path) = (offset + fromIntegral (length path), makeList . (++ (toBytes @Word16 (fromIntegral (ord char)) ++ toBytes (O.advanceWidth glyph) ++ toBytes @Word32 offset ++ toBytes @Word16 (fromIntegral (length path)))))
