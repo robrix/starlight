@@ -30,3 +30,13 @@ bindArray :: Array n -> IO ()
 bindArray = checkingGLError . glBindVertexArray . unArray
 
 instance Object (Array n) where characterize = (Array, glGenVertexArrays, glDeleteVertexArrays)
+
+
+data Mode
+  = TriangleStrip
+  | Triangles
+  deriving (Eq, Show)
+
+modeToGLEnum :: Mode -> GLenum
+modeToGLEnum TriangleStrip = GL_TRIANGLE_STRIP
+modeToGLEnum Triangles     = GL_TRIANGLES
