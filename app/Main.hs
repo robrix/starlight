@@ -35,6 +35,7 @@ import UI.Window
 -- import qualified Data.ByteString.Lazy as B
 -- import qualified Foreign.Marshal.Alloc as A
 -- import Foreign.Storable
+-- import System.CPUTime
 
 main :: HasCallStack => IO ()
 main = do
@@ -124,7 +125,8 @@ main = do
         --   image <- C.withImage w h $ \ x y -> do
         --     let pixel = pixels `plusPtr` (w * y + x)
         --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
-        --   B.writeFile "test.png" (C.encodePng image)
+        --   time <- getCPUTime
+        --   B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
 
         bindFramebuffer Nothing
         glViewport 0 0 (2 * width) (2 * height)
