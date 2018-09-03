@@ -188,7 +188,7 @@ translated (V2 tx ty) = V3 (V3 1 0 tx)
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances scale@(V2 sx sy) offset (g:gs)
   = Instance g offset (V3 sx sy 1)
-  : combineInstances scale (offset + V2 (glyphAdvanceWidth g) 0) gs
+  : combineInstances scale (offset + V2 (glyphAdvanceWidth g * sx) 0) gs
 combineInstances _ _ [] = []
 
 combineGeometry :: ArrayVertices (v n) -> Geometry (v n) -> ArrayVertices (v n)
