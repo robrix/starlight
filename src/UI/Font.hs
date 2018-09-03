@@ -111,7 +111,7 @@ glyphsForChars (Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyph
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
 contourToPath [] = Z
 contourToPath (p@(O.CurvePoint x y _) : rest) = makePath Z
-  where (makePath, _) = (foldl (\ (makePath, prev) point -> (makePath . pathFor prev point, point)) (M (V2 x y), p) rest)
+  where (makePath, _) = foldl (\ (makePath, prev) point -> (makePath . pathFor prev point, point)) (M (V2 x y), p) rest
         pathFor (O.CurvePoint _ _ True)  (O.CurvePoint _ _ False)   = id
         pathFor (O.CurvePoint _ _ True)  (O.CurvePoint x y True)    = L (V2 x y)
         pathFor (O.CurvePoint x y False) (O.CurvePoint x' y' False) = Q (V2 x y) (V2 (x + ((x' - x) `div` 2)) (y + ((y' - y) `div` 2)))
