@@ -54,8 +54,7 @@ main = do
             , V2   1    1  :: V2 Float
             ]
           ]
-        geometry = instanceGeometry <$> instances
-        glyphVertices = combineGeometry geometry in
+        glyphVertices = combineGeometry (instanceGeometry <$> instances) in
     withArray (arrayVertices screenQuadVertices) $ \ screenQuadArray ->
     withArray (arrayVertices glyphVertices) $ \ glyphArray ->
     withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
