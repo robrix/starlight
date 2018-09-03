@@ -11,6 +11,7 @@ data Triangle n = Triangle
   deriving (Eq, Functor, Show)
 
 data Kind = Solid | Curve
+  deriving (Eq, Show)
 
 
 triangleVertices :: Fractional a => Triangle a -> Kind -> [V4 a]
