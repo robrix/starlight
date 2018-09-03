@@ -104,13 +104,13 @@ main = do
 
         bindArray glyphArray
 
-        let V2 sx sy = V2 2 (-2) / fmap fromIntegral windowSize
+        let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
             scale = 1 / 2
         for_ (zip instances (arrayRanges glyphVertices)) $ \ (Instance{..}, range) ->
           for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
             setUniformValue glyphProgram colour glyphColour
             setUniformValue glyphProgram matrix3
-              $   translated (V2 (-1) 1)
+              $   translated (-1)
               !*! scaled     (V3 sx sy 1)
               !*! translated instanceOffset
               !*! translated (V2 tx ty * scale)
@@ -138,10 +138,10 @@ main = do
 
         useProgram textProgram
         let rect' = V4
-              (    fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
-              (1 - fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
-              (    fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
-              (1 - fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
+              (fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
+              (fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
+              (fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
+              (fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
 
         -- print rect'
 
