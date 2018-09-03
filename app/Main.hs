@@ -100,7 +100,7 @@ main = do
         -- setUniformValue glyphProgram colour white
         -- setUniformValue glyphProgram matrix3 identity
         -- bindArray screenQuadArray
-        -- traverse_ drawRange (arrayRanges screenQuadVertices)
+        -- traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
         bindArray glyphArray
 
@@ -115,7 +115,7 @@ main = do
               !*! translated instanceOffset
               !*! translated (V2 tx ty * scale)
               !*! scaled     instanceScale
-            drawRange range
+            drawArrays Triangles range
 
         -- let w = 2 * fromIntegral width
         --     h = 2 * fromIntegral height
@@ -156,15 +156,13 @@ main = do
 
         bindArray screenQuadArray
 
-        traverse_ drawRange (arrayRanges screenQuadVertices)
+        traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
         when (opaque textColour /= black) $ do
           glBlendFunc GL_ONE GL_ONE
           setUniformValue textProgram colour textColour
-          traverse_ drawRange (arrayRanges screenQuadVertices)
-  where drawRange :: HasCallStack => ArrayRange -> IO ()
-        drawRange (ArrayRange mode from count) = checkingGLError $ glDrawArrays mode (fromIntegral from) (fromIntegral count)
-        jitterPattern
+          traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
+  where jitterPattern
           = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
             , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
             , (green, V2 ( 3 / 12.0) (-1 / 12.0))
@@ -194,29 +192,23 @@ combineGeometry :: [Geometry (v n)] -> ArrayVertices (v n)
 combineGeometry = go 0 (ArrayVertices [] [])
   where go :: Int -> ArrayVertices (v n) -> [Geometry (v n)] -> ArrayVertices (v n)
         go _ vertices [] = vertices
-        go prevIndex ArrayVertices{..} (Geometry mode vertices : rest) =
+        go prevIndex ArrayVertices{..} (Geometry _ vertices : rest) =
           let count = length vertices
           in go
             (prevIndex + count)
             (ArrayVertices
               (arrayVertices <> vertices)
-              (arrayRanges <> [ ArrayRange mode prevIndex count ]))
+              (arrayRanges <> [ Range prevIndex count ]))
             rest
 
-data ArrayRange = ArrayRange
-  { mode             :: {-# UNPACK #-} !GLuint
-  , firstVertexIndex :: {-# UNPACK #-} !Int
-  , vertexCount      :: {-# UNPACK #-} !Int
-  }
-
 data GeometryArray n = GeometryArray
-  { geometryRanges :: [ArrayRange]
+  { geometryRanges :: [Range]
   , geometryArray  :: Array n
   }
 
 data ArrayVertices a = ArrayVertices
   { arrayVertices :: [a]
-  , arrayRanges   :: [ArrayRange]
+  , arrayRanges   :: [Range]
   }
 
 data Geometry a where
