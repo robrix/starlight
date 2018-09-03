@@ -113,6 +113,7 @@ contourToPath (p@(O.CurvePoint x y _) : ps) = M (V2 x y) (go p ps)
         go (O.CurvePoint _  _  True)  (p@(O.CurvePoint x  y  True)  : ps) = L (V2 x y) (go p ps)
         go (O.CurvePoint x1 y1 False) (p@(O.CurvePoint x2 y2 False) : ps) = Q (V2 x1 y1) (V2 (x1 + ((x2 - x1) `div` 2)) (y1 + ((y2 - y1) `div` 2))) (go p ps)
         go (O.CurvePoint x1 y1 False) (p@(O.CurvePoint x2 y2 True)  : ps) = Q (V2 x1 y1) (V2 x2 y2) (go p ps)
+        go (O.CurvePoint x1 y1 False) []                                  = Q (V2 x1 y1) (V2 x y) Z
         go _                          []                                  = Z
 
 glyphPaths :: Typeface -> O.Glyph Int -> [Path V2 O.FWord]
