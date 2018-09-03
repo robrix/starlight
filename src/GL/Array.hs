@@ -40,3 +40,8 @@ data Mode
 modeToGLEnum :: Mode -> GLenum
 modeToGLEnum TriangleStrip = GL_TRIANGLE_STRIP
 modeToGLEnum Triangles     = GL_TRIANGLES
+
+data Range = Range
+  { rangeFrom  :: {-# UNPACK #-} !Int
+  , rangeCount :: {-# UNPACK #-} !Int
+  }
