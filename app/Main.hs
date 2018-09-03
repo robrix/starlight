@@ -18,6 +18,7 @@ import GL.Texture
 import GL.TextureUnit
 import GL.Uniform
 import Graphics.GL.Core41
+import Linear.Exts
 import Linear.Matrix as Linear
 import Linear.V2 as Linear
 import Linear.V3 as Linear
@@ -171,12 +172,6 @@ main = do
         height = 768
 
         textColour = black
-
-translated :: V2 Float -> M33 Float
-translated (V2 tx ty) = V3 (V3 1 0 tx)
-                           (V3 0 1 ty)
-                           (V3 0 0 1)
-
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances scale@(V2 sx sy) offset (g:gs)
