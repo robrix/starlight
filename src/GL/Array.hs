@@ -46,3 +46,6 @@ data Range = Range
   , rangeCount :: {-# UNPACK #-} !Int
   }
   deriving (Eq, Show)
+
+drawArrays :: Mode -> Range -> IO ()
+drawArrays mode (Range from count) = checkingGLError $ glDrawArrays (modeToGLEnum mode) (fromIntegral from) (fromIntegral count)
