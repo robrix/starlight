@@ -35,7 +35,7 @@ maxY = view _y . rectMax
 
 transformRect :: Num a => M33 a -> Rect a -> Rect a
 transformRect m (Rect v1 v2) = Rect ((m !* ext v1) ^. _xy) ((m !* ext v2) ^. _xy)
-  where ext (V2 x y) = V3 x y 0
+  where ext (V2 x y) = V3 x y 1
 
 
 newtype Union a = Union { getUnion :: Rect a }
