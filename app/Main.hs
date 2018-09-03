@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, FlexibleInstances, RecordWildCards, ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleInstances, RecordWildCards, ScopedTypeVariables #-}
 module Main where
 
 import Control.Monad
