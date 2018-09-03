@@ -122,6 +122,8 @@ main = do
         -- A.allocaBytes (4 * w * h) $ \ pixels -> do
         --   bindTexture Texture2D (Just texture)
         --   checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+        --   checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
+        --   checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
         --   image <- C.withImage w h $ \ x y -> do
         --     let pixel = pixels `plusPtr` (w * y + x)
         --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
