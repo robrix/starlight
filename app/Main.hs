@@ -187,8 +187,7 @@ combineInstances _ _ [] = []
 
 combineGeometry :: [[v n]] -> ArrayVertices (v n)
 combineGeometry = go 0 (ArrayVertices [] [])
-  where go :: Int -> ArrayVertices (v n) -> [[v n]] -> ArrayVertices (v n)
-        go _ vertices [] = vertices
+  where go _ vertices [] = vertices
         go prevIndex ArrayVertices{..} (vertices : rest) =
           let count = length vertices
           in go
