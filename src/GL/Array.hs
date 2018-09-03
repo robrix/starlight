@@ -45,3 +45,4 @@ data Range = Range
   { rangeFrom  :: {-# UNPACK #-} !Int
   , rangeCount :: {-# UNPACK #-} !Int
   }
+  deriving (Eq, Show)
