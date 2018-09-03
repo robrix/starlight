@@ -28,6 +28,7 @@ library
                      , GL.Texture
                      , GL.TextureUnit
                      , GL.Uniform
+                     , Linear.Exts
                      , UI.Colour
                      , UI.Font
                      , UI.Glyph
