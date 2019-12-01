@@ -1,4 +1,6 @@
-module Linear.Exts where
+module Linear.Exts
+( translated
+) where
 
 import Linear.Matrix
 import Linear.V2
