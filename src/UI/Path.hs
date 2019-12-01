@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveFunctor, TypeApplications #-}
-module UI.Path where
+module UI.Path
+( Path(..)
+, pathTriangles
+) where
 
 import Geometry.Triangle
 import Linear.V2

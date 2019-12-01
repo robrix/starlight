@@ -1,5 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
-module UI.Glyph where
+module UI.Glyph
+( Glyph(..)
+, scaleGlyph
+, Instance(..)
+, instanceGeometry
+, instanceBounds
+) where
 
 import Geometry.Rect
 import Linear.Exts

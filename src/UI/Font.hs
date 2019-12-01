@@ -1,5 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
-module UI.Font where
+module UI.Font
+( Typeface(..)
+, Font(..)
+, readTypeface
+, unitsPerEm
+, ascent
+, descent
+, glyphs
+) where
 
 import Control.Applicative (liftA2)
 import Control.Monad (guard)

@@ -1,4 +1,18 @@
-module UI.Colour where
+module UI.Colour
+( Colour
+, black
+, white
+, transparent
+, red
+, green
+, blue
+, _r
+, _g
+, _b
+, _a
+, opaque
+, setClearColour
+) where
 
 import Graphics.GL.Core41
 import Lens.Micro

@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveAnyClass #-}
-module UI.Window where
+module UI.Window
+( withWindow
+, checkWhen
+, checkNonNull
+, SDLException(..)
+) where
 
 import qualified Control.Concurrent as CC
 import qualified Control.Exception as E
