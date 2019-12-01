@@ -38,7 +38,7 @@ import UI.Window
 
 main :: HasCallStack => IO ()
 main = do
-  Just tahoma <- readTypeface "/Library/Fonts/Tahoma.ttf"
+  Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
   [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse readFile ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
   withWindow (Window "Text" (fromIntegral <$> windowSize)) $ \ draw ->
