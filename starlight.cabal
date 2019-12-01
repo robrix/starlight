@@ -1,17 +1,36 @@
-name:                text-gl
-version:             0.1.0.0
+cabal-version:       2.2
+
+name:                starlight
+version:             0.0.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/robrix/text-gl#readme
-license:             BSD3
+homepage:            https://github.com/robrix/starlight#readme
+license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Rob Rix
 maintainer:          rob.rix@me.com
 copyright:           Rob Rix
-category:            Web
+-- category:            Web
 build-type:          Simple
 extra-source-files:  README.md
-cabal-version:       >=1.10
+
+common common
+  default-language: Haskell2010
+  ghc-options:
+    -Weverything
+    -Wno-all-missed-specialisations
+    -Wno-implicit-prelude
+    -Wno-missed-specialisations
+    -Wno-missing-import-lists
+    -Wno-missing-local-signatures
+    -Wno-monomorphism-restriction
+    -Wno-name-shadowing
+    -Wno-safe
+    -Wno-unsafe
+  if (impl(ghc >= 8.6))
+    ghc-options: -Wno-star-is-type
+  if (impl(ghc >= 8.8))
+    ghc-options: -Wno-missing-deriving-strategies
 
 library
   hs-source-dirs:      src
@@ -45,7 +64,7 @@ library
                      , vector
   default-language:    Haskell2010
 
-executable text-gl
+executable starlight
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
@@ -59,11 +78,11 @@ executable text-gl
                      , opentype
                      , sdl2
                      , semigroupoids
+                     , starlight
                      , text
-                     , text-gl
                      , vector
   default-language:    Haskell2010
 
 source-repository head
   type:     git
-  location: https://github.com/robrix/text-gl
+  location: https://github.com/robrix/starlight
