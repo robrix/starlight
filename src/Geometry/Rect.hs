@@ -1,5 +1,15 @@
 {-# LANGUAGE DeriveFunctor, RecordWildCards #-}
-module Geometry.Rect where
+module Geometry.Rect
+( Rect(..)
+, _rectMin
+, _rectMax
+, minX
+, minY
+, maxX
+, maxY
+, transformRect
+, Union(..)
+) where
 
 import Lens.Micro
 import Lens.Micro.Extras

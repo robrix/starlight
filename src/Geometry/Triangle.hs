@@ -1,5 +1,9 @@
 {-# LANGUAGE DeriveFunctor #-}
-module Geometry.Triangle where
+module Geometry.Triangle
+( Triangle(..)
+, Kind(..)
+, triangleVertices
+) where
 
 import Linear.V2
 import Linear.V4
