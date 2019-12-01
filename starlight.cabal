@@ -55,6 +55,7 @@ library
                      , UI.Window
   build-depends:       base
                      , containers
+                     , fused-effects
                      , gl
                      , linear
                      , microlens
@@ -71,6 +72,7 @@ executable starlight
   build-depends:       base
                      , bytestring
                      , containers
+                     , fused-effects
                      , gl
                      , JuicyPixels
                      , linear
