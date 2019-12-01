@@ -1,4 +1,7 @@
-module GL.TextureUnit where
+module GL.TextureUnit
+( TextureUnit(..)
+, setActiveTexture
+) where
 
 import GL.Uniform
 import Graphics.GL.Core41

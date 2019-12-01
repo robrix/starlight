@@ -1,4 +1,9 @@
-module GL.Program where
+module GL.Program
+( Program(..)
+, useProgram
+, withBuiltProgram
+, checkProgram
+) where
 
 import qualified Control.Exception as E
 import Control.Monad.IO.Class

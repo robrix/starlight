@@ -1,4 +1,7 @@
-module GL.Framebuffer where
+module GL.Framebuffer
+( Framebuffer(..)
+, bindFramebuffer
+) where
 
 import GL.Error
 import GL.Object

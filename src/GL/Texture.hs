@@ -1,4 +1,13 @@
-module GL.Texture where
+module GL.Texture
+( Texture(..)
+, Target(..)
+, targetToGLEnum
+, bindTexture
+, Filter(..)
+, filterToGLEnum
+, setMagFilter
+, setMinFilter
+) where
 
 import GL.Error
 import GL.Object

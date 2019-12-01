@@ -1,4 +1,6 @@
-module GL.Scalar where
+module GL.Scalar
+( Scalar(..)
+) where
 
 import Data.Proxy
 import qualified Foreign.Storable as S

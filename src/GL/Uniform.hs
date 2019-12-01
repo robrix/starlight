@@ -1,5 +1,9 @@
 {-# LANGUAGE FlexibleInstances #-}
-module GL.Uniform where
+module GL.Uniform
+( Var(..)
+, Uniform(..)
+, setUniformValue
+) where
 
 import Data.Foldable (toList)
 import qualified Foreign.C.String as C

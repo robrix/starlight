@@ -1,5 +1,12 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module GL.Array where
+module GL.Array
+( Array(..)
+, withArray
+, bindArray
+, Mode(..)
+, Range(..)
+, drawArrays
+) where
 
 import Data.Foldable (toList)
 import Data.Proxy

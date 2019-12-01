@@ -1,5 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
-module GL.Error where
+module GL.Error
+( GLError(..)
+, GLException(..)
+, checkStatus
+, checkingGLError
+, throwGLError
+) where
 
 import qualified Control.Exception as E
 import Control.Monad

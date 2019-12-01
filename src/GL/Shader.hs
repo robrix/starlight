@@ -1,4 +1,9 @@
-module GL.Shader where
+module GL.Shader
+( Shader(..)
+, ShaderType(..)
+, withCompiledShaders
+, checkShader
+) where
 
 import qualified Control.Exception as E
 import qualified Foreign.C.String as C

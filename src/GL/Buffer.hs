@@ -1,4 +1,6 @@
-module GL.Buffer where
+module GL.Buffer
+( Buffer(..)
+) where
 
 import GL.Object
 import Graphics.GL.Core41

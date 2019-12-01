@@ -1,4 +1,9 @@
-module GL.Object where
+module GL.Object
+( Object(..)
+, withN
+, with
+, withObjects
+) where
 
 import qualified Control.Exception as E
 import qualified Foreign.Marshal.Array as A
