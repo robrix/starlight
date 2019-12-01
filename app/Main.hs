@@ -79,7 +79,7 @@ main = do
       glEnable GL_BLEND
 
       draw $ do
-        setClearColour white
+        setClearColour black
         glClear GL_COLOR_BUFFER_BIT
 
         bindFramebuffer (Just framebuffer)
@@ -171,7 +171,7 @@ main = do
         width  = 1024
         height = 768
 
-        textColour = black
+        textColour = white
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances scale@(V2 sx sy) offset (g:gs)
