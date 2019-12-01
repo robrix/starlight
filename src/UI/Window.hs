@@ -15,10 +15,8 @@ import SDL.Init
 import qualified SDL.Raw as SDL
 import System.Exit
 
-data Window = Window String {-# UNPACK #-} !(Linear.V2 Int)
-
-withWindow :: Window -> ((IO () -> IO ()) -> IO a) -> IO a
-withWindow (Window name size) action = CC.runInBoundThread $ do
+withWindow :: String -> Linear.V2 Int -> ((IO () -> IO ()) -> IO a) -> IO a
+withWindow name size action = CC.runInBoundThread $ do
   _ <- SDL.init SDL.SDL_INIT_EVERYTHING >>= checkWhen (< 0)
 
   SDL.SDL_GL_CONTEXT_MAJOR_VERSION .= 4
