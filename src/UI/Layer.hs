@@ -1,5 +1,6 @@
 module UI.Layer
 ( Layer(..)
+, Contents(..)
 , drawLayer
 ) where
 
@@ -16,6 +17,9 @@ data Layer = Layer
   , bounds      :: Rect Int32
   , draw        :: IO ()
   }
+
+data Contents
+  = Colour (Colour Float)
 
 drawLayer :: Layer -> IO ()
 drawLayer layer = do
