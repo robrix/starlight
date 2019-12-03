@@ -82,9 +82,7 @@ main = do
 
       draw $ do
         traverse_ drawLayer
-          [ Layer (Just framebuffer) $ do
-            colourLayer transparent
-
+          [ Layer (Just framebuffer) transparent $ do
             glViewport 0 0 (2 * width) (2 * height)
 
             glBlendFunc GL_ONE GL_ONE -- add
@@ -123,9 +121,7 @@ main = do
             --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
             --   time <- getCPUTime
             --   B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
-          , Layer Nothing $ do
-            colourLayer black
-
+          , Layer Nothing black $ do
             glViewport 0 0 (2 * width) (2 * height)
             glBlendFunc GL_ZERO GL_SRC_COLOR
 
@@ -188,17 +184,17 @@ combineGeometry = go 0
           in (geometry <> vertices, Range prevIndex count : ranges)
 
 
-colourLayer :: Colour Float -> IO ()
-colourLayer c = do
-  setClearColour c
-  glClear GL_COLOR_BUFFER_BIT
-
 data Layer = Layer
   { framebuffer :: Maybe Framebuffer
+  , background  :: Colour Float
   , draw        :: IO ()
   }
 
 drawLayer :: Layer -> IO ()
 drawLayer layer = do
   bindFramebuffer (framebuffer layer)
+
+  setClearColour (background layer)
+  glClear GL_COLOR_BUFFER_BIT
+
   draw layer
