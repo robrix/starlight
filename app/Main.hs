@@ -199,5 +199,6 @@ drawLayer layer = do
 
   let Rect (V2 x y) (V2 w h) = bounds layer
   glViewport x y (2 * w) (2 * h)
+  glScissor x y (2 * w) (2 * h)
 
   draw layer
