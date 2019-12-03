@@ -5,6 +5,7 @@ module Main
 
 import Control.Monad
 import Data.Foldable
+import Data.Int (Int32)
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
 import Foreign.Ptr
@@ -82,9 +83,7 @@ main = do
 
       draw $ do
         traverse_ drawLayer
-          [ Layer (Just framebuffer) transparent $ do
-            glViewport 0 0 (2 * width) (2 * height)
-
+          [ Layer (Just framebuffer) transparent (Rect 0 windowSize) $ do
             glBlendFunc GL_ONE GL_ONE -- add
 
             useProgram glyphProgram
@@ -121,8 +120,7 @@ main = do
             --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
             --   time <- getCPUTime
             --   B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
-          , Layer Nothing black $ do
-            glViewport 0 0 (2 * width) (2 * height)
+          , Layer Nothing black (Rect 0 windowSize) $ do
             glBlendFunc GL_ZERO GL_SRC_COLOR
 
             -- print instanceBounds'
@@ -187,6 +185,7 @@ combineGeometry = go 0
 data Layer = Layer
   { framebuffer :: Maybe Framebuffer
   , background  :: Colour Float
+  , bounds      :: Rect Int32
   , draw        :: IO ()
   }
 
@@ -196,5 +195,8 @@ drawLayer layer = do
 
   setClearColour (background layer)
   glClear GL_COLOR_BUFFER_BIT
+
+  let Rect (V2 x y) (V2 w h) = bounds layer
+  glViewport x y (2 * w) (2 * h)
 
   draw layer
