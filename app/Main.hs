@@ -5,7 +5,6 @@ module Main
 
 import Control.Monad
 import Data.Foldable
-import Data.Int (Int32)
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
 import Foreign.Ptr
@@ -30,6 +29,7 @@ import Linear.Vector as Linear
 import UI.Colour
 import UI.Font as Font
 import UI.Glyph
+import UI.Layer
 import UI.Window
 
 -- import qualified Codec.Picture as C
@@ -181,24 +181,3 @@ combineGeometry = go 0
           let count = length geometry
               (vertices, ranges) = go (prevIndex + count) rest
           in (geometry <> vertices, Range prevIndex count : ranges)
-
-
-data Layer = Layer
-  { framebuffer :: Maybe Framebuffer
-  , background  :: Colour Float
-  , bounds      :: Rect Int32
-  , draw        :: IO ()
-  }
-
-drawLayer :: Layer -> IO ()
-drawLayer layer = do
-  bindFramebuffer (framebuffer layer)
-
-  let Rect (V2 x y) (V2 w h) = (2 *) <$> bounds layer
-  glViewport x y w h
-  glScissor x y w h
-
-  setClearColour (background layer)
-  glClear GL_COLOR_BUFFER_BIT
-
-  draw layer
