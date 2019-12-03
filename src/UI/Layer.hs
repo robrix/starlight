@@ -20,6 +20,7 @@ data Layer = Layer
 
 data Contents
   = Colour (Colour Float)
+  | Composite [Contents]
 
 drawLayer :: Layer -> IO ()
 drawLayer layer = do
