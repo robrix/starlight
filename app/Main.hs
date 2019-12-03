@@ -194,11 +194,11 @@ drawLayer :: Layer -> IO ()
 drawLayer layer = do
   bindFramebuffer (framebuffer layer)
 
-  setClearColour (background layer)
-  glClear GL_COLOR_BUFFER_BIT
-
   let Rect (V2 x y) (V2 w h) = (2 *) <$> bounds layer
   glViewport x y w h
   glScissor x y w h
+
+  setClearColour (background layer)
+  glClear GL_COLOR_BUFFER_BIT
 
   draw layer
