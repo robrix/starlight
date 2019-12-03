@@ -197,8 +197,8 @@ drawLayer layer = do
   setClearColour (background layer)
   glClear GL_COLOR_BUFFER_BIT
 
-  let Rect (V2 x y) (V2 w h) = bounds layer
-  glViewport x y (2 * w) (2 * h)
-  glScissor x y (2 * w) (2 * h)
+  let Rect (V2 x y) (V2 w h) = (2 *) <$> bounds layer
+  glViewport x y w h
+  glScissor x y w h
 
   draw layer
