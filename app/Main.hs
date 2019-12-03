@@ -81,84 +81,83 @@ main = do
       glEnable GL_BLEND
 
       draw $ do
-        colourLayer black
+        traverse_ drawLayer
+          [ Layer Nothing (colourLayer black)
+          , Layer (Just framebuffer) $ do
+            colourLayer transparent
 
-        bindFramebuffer (Just framebuffer)
-        -- bindFramebuffer Nothing
+            glViewport 0 0 (2 * width) (2 * height)
 
-        colourLayer transparent
+            glBlendFunc GL_ONE GL_ONE -- add
 
-        glViewport 0 0 (2 * width) (2 * height)
+            useProgram glyphProgram
 
-        glBlendFunc GL_ONE GL_ONE -- add
+            -- setUniformValue glyphProgram colour white
+            -- setUniformValue glyphProgram matrix3 identity
+            -- bindArray screenQuadArray
+            -- traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
-        useProgram glyphProgram
+            bindArray glyphArray
 
-        -- setUniformValue glyphProgram colour white
-        -- setUniformValue glyphProgram matrix3 identity
-        -- bindArray screenQuadArray
-        -- traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
+            let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
+                scale = 1 / 2
+            for_ (zip instances glyphRanges) $ \ (Instance{..}, range) ->
+              for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
+                setUniformValue glyphProgram colour glyphColour
+                setUniformValue glyphProgram matrix3
+                  $   translated (-1)
+                  !*! scaled     (V3 sx sy 1)
+                  !*! translated instanceOffset
+                  !*! translated (V2 tx ty * scale)
+                  !*! scaled     instanceScale
+                drawArrays Triangles range
 
-        bindArray glyphArray
+            -- let w = 2 * fromIntegral width
+            --     h = 2 * fromIntegral height
+            -- A.allocaBytes (4 * w * h) $ \ pixels -> do
+            --   bindTexture Texture2D (Just texture)
+            --   checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+            --   checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
+            --   checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+            --   image <- C.withImage w h $ \ x y -> do
+            --     let pixel = pixels `plusPtr` (w * y + x)
+            --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
+            --   time <- getCPUTime
+            --   B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
+          , Layer Nothing $ do
+            glViewport 0 0 (2 * width) (2 * height)
+            glBlendFunc GL_ZERO GL_SRC_COLOR
 
-        let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
-            scale = 1 / 2
-        for_ (zip instances glyphRanges) $ \ (Instance{..}, range) ->
-          for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-            setUniformValue glyphProgram colour glyphColour
-            setUniformValue glyphProgram matrix3
-              $   translated (-1)
-              !*! scaled     (V3 sx sy 1)
-              !*! translated instanceOffset
-              !*! translated (V2 tx ty * scale)
-              !*! scaled     instanceScale
-            drawArrays Triangles range
+            -- print instanceBounds'
 
-        -- let w = 2 * fromIntegral width
-        --     h = 2 * fromIntegral height
-        -- A.allocaBytes (4 * w * h) $ \ pixels -> do
-        --   bindTexture Texture2D (Just texture)
-        --   checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-        --   checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
-        --   checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-        --   image <- C.withImage w h $ \ x y -> do
-        --     let pixel = pixels `plusPtr` (w * y + x)
-        --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
-        --   time <- getCPUTime
-        --   B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
+            useProgram textProgram
+            let rect' = V4
+                  (fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
+                  (fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
+                  (fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
+                  (fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
 
-        bindFramebuffer Nothing
-        glViewport 0 0 (2 * width) (2 * height)
-        glBlendFunc GL_ZERO GL_SRC_COLOR
+            -- print rect'
 
-        -- print instanceBounds'
+            setUniformValue textProgram rect rect'
+            -- setUniformValue textProgram rect (V4 0 0 1 1)
+            setUniformValue textProgram colour transparent
+            -- setUniformValue textProgram colour black
+            let textureUnit = TextureUnit 0
+            setActiveTexture textureUnit
+            bindTexture Texture2D (Just texture)
+            setUniformValue textProgram sampler textureUnit
 
-        useProgram textProgram
-        let rect' = V4
-              (fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
-              (fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
-              (fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
-              (fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
+            bindArray screenQuadArray
 
-        -- print rect'
+            traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
-        setUniformValue textProgram rect rect'
-        -- setUniformValue textProgram rect (V4 0 0 1 1)
-        setUniformValue textProgram colour transparent
-        -- setUniformValue textProgram colour black
-        let textureUnit = TextureUnit 0
-        setActiveTexture textureUnit
-        bindTexture Texture2D (Just texture)
-        setUniformValue textProgram sampler textureUnit
+            when (opaque textColour /= black) $ do
+              glBlendFunc GL_ONE GL_ONE
+              setUniformValue textProgram colour textColour
+              traverse_ (drawArrays TriangleStrip) screenQuadRanges
+          ]
 
-        bindArray screenQuadArray
-
-        traverse_ (drawArrays TriangleStrip) screenQuadRanges
-
-        when (opaque textColour /= black) $ do
-          glBlendFunc GL_ONE GL_ONE
-          setUniformValue textProgram colour textColour
-          traverse_ (drawArrays TriangleStrip) screenQuadRanges
   where jitterPattern
           = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
             , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
@@ -192,3 +191,13 @@ colourLayer :: Colour Float -> IO ()
 colourLayer c = do
   setClearColour c
   glClear GL_COLOR_BUFFER_BIT
+
+data Layer = Layer
+  { framebuffer :: Maybe Framebuffer
+  , draw        :: IO ()
+  }
+
+drawLayer :: Layer -> IO ()
+drawLayer layer = do
+  bindFramebuffer (framebuffer layer)
+  draw layer
