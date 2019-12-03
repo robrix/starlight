@@ -82,8 +82,7 @@ main = do
 
       draw $ do
         traverse_ drawLayer
-          [ Layer Nothing (colourLayer black)
-          , Layer (Just framebuffer) $ do
+          [ Layer (Just framebuffer) $ do
             colourLayer transparent
 
             glViewport 0 0 (2 * width) (2 * height)
@@ -125,6 +124,8 @@ main = do
             --   time <- getCPUTime
             --   B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
           , Layer Nothing $ do
+            colourLayer black
+
             glViewport 0 0 (2 * width) (2 * height)
             glBlendFunc GL_ZERO GL_SRC_COLOR
 
