@@ -86,9 +86,9 @@ main = do
         bindFramebuffer (Just framebuffer)
         -- bindFramebuffer Nothing
 
-        glViewport 0 0 (2 * width) (2 * height)
-
         colourLayer transparent
+
+        glViewport 0 0 (2 * width) (2 * height)
 
         glBlendFunc GL_ONE GL_ONE -- add
 
