@@ -81,16 +81,14 @@ main = do
       glEnable GL_BLEND
 
       draw $ do
-        setClearColour black
-        glClear GL_COLOR_BUFFER_BIT
+        colourLayer black
 
         bindFramebuffer (Just framebuffer)
         -- bindFramebuffer Nothing
 
         glViewport 0 0 (2 * width) (2 * height)
 
-        setClearColour transparent
-        glClear GL_COLOR_BUFFER_BIT
+        colourLayer transparent
 
         glBlendFunc GL_ONE GL_ONE -- add
 
@@ -188,3 +186,9 @@ combineGeometry = go 0
           let count = length geometry
               (vertices, ranges) = go (prevIndex + count) rest
           in (geometry <> vertices, Range prevIndex count : ranges)
+
+
+colourLayer :: Colour Float -> IO ()
+colourLayer c = do
+  setClearColour c
+  glClear GL_COLOR_BUFFER_BIT
