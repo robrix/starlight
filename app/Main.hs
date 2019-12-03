@@ -80,6 +80,7 @@ main = do
       bindFramebuffer Nothing
 
       glEnable GL_BLEND
+      glEnable GL_SCISSOR_TEST
 
       draw $ do
         traverse_ drawLayer
