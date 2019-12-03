@@ -52,6 +52,7 @@ library
                      , UI.Colour
                      , UI.Font
                      , UI.Glyph
+                     , UI.Layer
                      , UI.Path
                      , UI.Window
   build-depends:       base
