@@ -8,7 +8,7 @@ module UI.Window
 
 import Control.Carrier.Lift
 import qualified Control.Concurrent as CC
-import qualified Control.Exception.Exts as E
+import qualified Control.Exception.Lift as E
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.Bits

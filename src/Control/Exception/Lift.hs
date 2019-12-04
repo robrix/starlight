@@ -1,5 +1,5 @@
 {-# LANGUAGE RankNTypes #-}
-module Control.Exception.Exts
+module Control.Exception.Lift
 ( E.Exception(..)
 , throwIO
 , catch
