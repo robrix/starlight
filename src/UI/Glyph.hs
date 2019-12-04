@@ -3,7 +3,6 @@ module UI.Glyph
 ( Glyph(..)
 , scaleGlyph
 , Instance(..)
-, instanceGeometry
 , instanceBounds
 ) where
 
@@ -30,9 +29,6 @@ data Instance = Instance
   , offset :: {-# UNPACK #-} !(V2 Float)
   , scale  :: {-# UNPACK #-} !(V3 Float)
   }
-
-instanceGeometry :: Instance -> [V4 Float]
-instanceGeometry Instance{..} = geometry glyph
 
 instanceBounds :: Instance -> Rect Float
 instanceBounds Instance{..} = transformRect
