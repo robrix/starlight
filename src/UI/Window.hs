@@ -62,7 +62,7 @@ withWindow name size action = CC.runInBoundThread $ do
           , SDL.SDL_WINDOW_ALLOW_HIGHDPI ]
 
 
-withSDLWindow :: C.CString -> Linear.V2 Int -> Word32 -> (SDL.Window -> IO a) -> IO a
+withSDLWindow :: (Has (Lift IO) sig m, MonadIO m) => C.CString -> Linear.V2 Int -> Word32 -> (SDL.Window -> m a) -> m a
 withSDLWindow name (V2 w h) flags = E.bracket
   (SDL.createWindow name SDL.SDL_WINDOWPOS_CENTERED SDL.SDL_WINDOWPOS_CENTERED (fromIntegral w) (fromIntegral h) flags >>= checkNonNull)
   SDL.destroyWindow
