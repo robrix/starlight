@@ -36,6 +36,7 @@ library
   import:              common
   hs-source-dirs:      src
   exposed-modules:
+    Control.Concurrent.Exts
     Control.Exception.Exts
     Geometry.Rect
     Geometry.Triangle
