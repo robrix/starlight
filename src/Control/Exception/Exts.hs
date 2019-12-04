@@ -1,2 +1,5 @@
 module Control.Exception.Exts
-() where
+( E.Exception(..)
+) where
+
+import Control.Exception as E
