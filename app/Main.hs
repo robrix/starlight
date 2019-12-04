@@ -151,7 +151,7 @@ main = do
               setUniformValue textProgram colour textColour
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
-      draw $ do
+      draw $
         traverse_ drawLayer
           [ Layer (Just framebuffer) transparent (Rect 0 windowSize) drawGlyphs
           , Layer Nothing black (Rect 0 windowSize) drawText
