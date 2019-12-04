@@ -172,9 +172,10 @@ main = do
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances (V2 sx sy) = go where
   go offset (g:gs)
-    = Instance g offset (V3 sx sy 1)
+    = Instance g offset scale
     : go (offset + V2 (glyphAdvanceWidth g * sx) 0) gs
   go _ [] = []
+  scale = V3 sx sy 1
 
 combineGeometry :: [[v n]] -> ([v n], [Range])
 combineGeometry = go 0
