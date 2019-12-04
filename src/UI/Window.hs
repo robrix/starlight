@@ -90,7 +90,7 @@ newtype SDLException = SDLException String
   deriving (E.Exception, Show)
 
 
-(.=) :: SDL.GLattr -> Int -> IO ()
+(.=) :: MonadIO m => SDL.GLattr -> Int -> m ()
 attribute .= value = do
   result <- SDL.glSetAttribute attribute (fromIntegral value)
   _ <- checkWhen (< 0) result
