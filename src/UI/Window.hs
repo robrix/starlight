@@ -74,7 +74,7 @@ checkSDLError :: IO ()
 checkSDLError = do
   msg <- SDL.getError >>= C.peekCString
   SDL.clearError
-  when (msg /= "") $ E.throw $ SDLException msg
+  when (msg /= "") $ E.throwIO $ SDLException msg
 
 checkWhen :: (a -> Bool) -> a -> IO a
 checkWhen predicate value = do
