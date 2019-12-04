@@ -77,7 +77,7 @@ checkSDLError = do
   SDL.clearError
   when (msg /= "") . liftIO . E.throwIO $ SDLException msg
 
-checkWhen :: (a -> Bool) -> a -> IO a
+checkWhen :: MonadIO m => (a -> Bool) -> a -> m a
 checkWhen predicate value = do
   when (predicate value) checkSDLError
   pure value
