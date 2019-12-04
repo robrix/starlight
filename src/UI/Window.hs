@@ -97,5 +97,5 @@ attribute .= value = do
   pure ()
 
 
-ignoreEventsOfTypes :: [Word32] -> IO ()
+ignoreEventsOfTypes :: MonadIO m => [Word32] -> m ()
 ignoreEventsOfTypes = traverse_ (\ t -> SDL.eventState t 0 >>= checkWhen (/= 0))
