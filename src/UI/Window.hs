@@ -7,7 +7,7 @@ module UI.Window
 ) where
 
 import Control.Carrier.Lift
-import qualified Control.Concurrent as CC
+import qualified Control.Concurrent.Lift as CC
 import qualified Control.Exception.Lift as E
 import Control.Monad
 import Control.Monad.IO.Class
@@ -23,8 +23,7 @@ import qualified SDL.Raw as SDL
 import System.Exit
 
 withWindow :: (Has (Lift IO) sig m, MonadIO m) => String -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
-withWindow name size action = liftWith $ \ ctx hdl ->
-  CC.runInBoundThread (hdl (E.bracket_ init quit run <$ ctx)) where
+withWindow name size action = CC.runInBoundThread (E.bracket_ init quit run) where
   init = do
     initializeAll
 
