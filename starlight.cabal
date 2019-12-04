@@ -35,7 +35,8 @@ common common
 library
   import:              common
   hs-source-dirs:      src
-  exposed-modules:     Geometry.Rect
+  exposed-modules:     Control.Exception.Exts
+                     , Geometry.Rect
                      , Geometry.Triangle
                      , GL.Array
                      , GL.Buffer
