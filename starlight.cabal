@@ -35,27 +35,28 @@ common common
 library
   import:              common
   hs-source-dirs:      src
-  exposed-modules:     Control.Exception.Exts
-                     , Geometry.Rect
-                     , Geometry.Triangle
-                     , GL.Array
-                     , GL.Buffer
-                     , GL.Error
-                     , GL.Framebuffer
-                     , GL.Object
-                     , GL.Program
-                     , GL.Scalar
-                     , GL.Shader
-                     , GL.Texture
-                     , GL.TextureUnit
-                     , GL.Uniform
-                     , Linear.Exts
-                     , UI.Colour
-                     , UI.Font
-                     , UI.Glyph
-                     , UI.Layer
-                     , UI.Path
-                     , UI.Window
+  exposed-modules:
+    Control.Exception.Exts
+    Geometry.Rect
+    Geometry.Triangle
+    GL.Array
+    GL.Buffer
+    GL.Error
+    GL.Framebuffer
+    GL.Object
+    GL.Program
+    GL.Scalar
+    GL.Shader
+    GL.Texture
+    GL.TextureUnit
+    GL.Uniform
+    Linear.Exts
+    UI.Colour
+    UI.Font
+    UI.Glyph
+    UI.Layer
+    UI.Path
+    UI.Window
   build-depends:       base
                      , containers
                      , fused-effects
