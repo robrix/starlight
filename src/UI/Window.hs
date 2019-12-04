@@ -24,7 +24,7 @@ import System.Exit
 
 withWindow :: (Has (Lift IO) sig m, MonadIO m) => String -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
 withWindow name size action = liftWith $ \ ctx hdl -> CC.runInBoundThread . hdl . (<$ ctx) $ do
-  _ <- SDL.init SDL.SDL_INIT_EVERYTHING >>= checkWhen (< 0)
+  initializeAll
 
   SDL.SDL_GL_CONTEXT_MAJOR_VERSION .= 4
   SDL.SDL_GL_CONTEXT_MINOR_VERSION .= 1
