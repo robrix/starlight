@@ -63,7 +63,7 @@ checkStatus get getLog error status object = withFrozenCallStack $ do
     log <- A.allocaBytes (fromIntegral l) $ \ bytes -> do
       getLog object l nullPtr bytes
       C.peekCString bytes
-    E.throw $ GLException (error log) callStack
+    E.throwIO $ GLException (error log) callStack
   pure object
 
 checkGLError :: HasCallStack => IO ()
@@ -78,9 +78,9 @@ checkingGLError action = withFrozenCallStack $ do
 throwGLError :: HasCallStack => GLenum -> IO ()
 throwGLError = \case
   GL_NO_ERROR -> pure ()
-  GL_INVALID_ENUM -> E.throw $ GLException InvalidEnum callStack
-  GL_INVALID_VALUE -> E.throw $ GLException InvalidValue callStack
-  GL_INVALID_OPERATION -> E.throw $ GLException InvalidOperation callStack
-  GL_INVALID_FRAMEBUFFER_OPERATION -> E.throw $ GLException InvalidFramebufferOperation callStack
-  GL_OUT_OF_MEMORY -> E.throw $ GLException OutOfMemory callStack
-  _ -> E.throw $ GLException (Other "Unknown") callStack
+  GL_INVALID_ENUM -> E.throwIO $ GLException InvalidEnum callStack
+  GL_INVALID_VALUE -> E.throwIO $ GLException InvalidValue callStack
+  GL_INVALID_OPERATION -> E.throwIO $ GLException InvalidOperation callStack
+  GL_INVALID_FRAMEBUFFER_OPERATION -> E.throwIO $ GLException InvalidFramebufferOperation callStack
+  GL_OUT_OF_MEMORY -> E.throwIO $ GLException OutOfMemory callStack
+  _ -> E.throwIO $ GLException (Other "Unknown") callStack
