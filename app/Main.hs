@@ -170,10 +170,11 @@ main = do
         textColour = white
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
-combineInstances scale@(V2 sx sy) offset (g:gs)
-  = Instance g offset (V3 sx sy 1)
-  : combineInstances scale (offset + V2 (glyphAdvanceWidth g * sx) 0) gs
-combineInstances _ _ [] = []
+combineInstances (V2 sx sy) = go where
+  go offset (g:gs)
+    = Instance g offset (V3 sx sy 1)
+    : go (offset + V2 (glyphAdvanceWidth g * sx) 0) gs
+  go _ [] = []
 
 combineGeometry :: [[v n]] -> ([v n], [Range])
 combineGeometry = go 0
