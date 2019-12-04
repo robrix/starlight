@@ -1,4 +1,4 @@
-module Control.Concurrent.Exts
+module Control.Concurrent.Lift
 ( runInBoundThread
 ) where
 
