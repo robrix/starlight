@@ -48,8 +48,8 @@ withWindow name size action = liftWith $ \ ctx hdl -> CC.runInBoundThread . hdl 
       withSDLContext window $ \ _ ->
         action (\ draw -> forever $ do
           draw
-          event <- waitEvent
-          case eventPayload event of
+          Event _ payload <- waitEvent
+          case payload of
             QuitEvent -> do
               quit
               liftIO exitSuccess
