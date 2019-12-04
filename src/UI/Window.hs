@@ -25,7 +25,7 @@ import System.Exit
 withWindow :: (Has (Lift IO) sig m, MonadIO m) => String -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
 withWindow name size action = withSDL $ liftWith $ \ ctx hdl -> C.withCString name $ \ name ->
   hdl . (<$ ctx) . withSDLWindow name size flags $ \ window ->
-    withSDLContext window $ \ _ ->
+    withGLContext window $ \ _ ->
       action (\ draw -> forever $ do
         draw
         Event _ payload <- waitEvent
@@ -66,8 +66,8 @@ withSDLWindow name (V2 w h) flags = E.bracket
   (SDL.createWindow name SDL.SDL_WINDOWPOS_CENTERED SDL.SDL_WINDOWPOS_CENTERED (fromIntegral w) (fromIntegral h) flags >>= checkNonNull)
   SDL.destroyWindow
 
-withSDLContext :: (Has (Lift IO) sig m, MonadIO m) => SDL.Window -> (SDL.GLContext -> m a) -> m a
-withSDLContext window = E.bracket
+withGLContext :: (Has (Lift IO) sig m, MonadIO m) => SDL.Window -> (SDL.GLContext -> m a) -> m a
+withGLContext window = E.bracket
   (SDL.glCreateContext window >>= checkNonNull)
   SDL.glDeleteContext
 
