@@ -6,8 +6,9 @@ module UI.Window
 , SDLException(..)
 ) where
 
+import Control.Carrier.Lift
 import qualified Control.Concurrent as CC
-import qualified Control.Exception as E
+import qualified Control.Exception.Exts as E
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.Bits
@@ -66,7 +67,7 @@ withSDLWindow name (V2 w h) flags = E.bracket
   (SDL.createWindow name SDL.SDL_WINDOWPOS_CENTERED SDL.SDL_WINDOWPOS_CENTERED (fromIntegral w) (fromIntegral h) flags >>= checkNonNull)
   SDL.destroyWindow
 
-withSDLContext :: SDL.Window -> (SDL.GLContext -> IO a) -> IO a
+withSDLContext :: (Has (Lift IO) sig m, MonadIO m) => SDL.Window -> (SDL.GLContext -> m a) -> m a
 withSDLContext window = E.bracket
   (SDL.glCreateContext window >>= checkNonNull)
   SDL.glDeleteContext
