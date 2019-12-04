@@ -24,42 +24,42 @@ import System.Exit
 
 withWindow :: (Has (Lift IO) sig m, MonadIO m) => String -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
 withWindow name size action = liftWith $ \ ctx hdl ->
-  CC.runInBoundThread (hdl (E.bracket_ init quit run <$ ctx))
-  where init = do
-          initializeAll
+  CC.runInBoundThread (hdl (E.bracket_ init quit run <$ ctx)) where
+  init = do
+    initializeAll
 
-          SDL.SDL_GL_CONTEXT_MAJOR_VERSION .= 4
-          SDL.SDL_GL_CONTEXT_MINOR_VERSION .= 1
-          SDL.SDL_GL_CONTEXT_PROFILE_MASK .= SDL.SDL_GL_CONTEXT_PROFILE_CORE
+    SDL.SDL_GL_CONTEXT_MAJOR_VERSION .= 4
+    SDL.SDL_GL_CONTEXT_MINOR_VERSION .= 1
+    SDL.SDL_GL_CONTEXT_PROFILE_MASK .= SDL.SDL_GL_CONTEXT_PROFILE_CORE
 
-          SDL.SDL_GL_RED_SIZE   .= 8
-          SDL.SDL_GL_GREEN_SIZE .= 8
-          SDL.SDL_GL_BLUE_SIZE  .= 8
-          SDL.SDL_GL_ALPHA_SIZE .= 8
-          SDL.SDL_GL_DEPTH_SIZE .= 16
+    SDL.SDL_GL_RED_SIZE   .= 8
+    SDL.SDL_GL_GREEN_SIZE .= 8
+    SDL.SDL_GL_BLUE_SIZE  .= 8
+    SDL.SDL_GL_ALPHA_SIZE .= 8
+    SDL.SDL_GL_DEPTH_SIZE .= 16
 
-          SDL.SDL_GL_DOUBLEBUFFER .= fromEnum True
+    SDL.SDL_GL_DOUBLEBUFFER .= fromEnum True
 
-          ignoreEventsOfTypes
-            [ SDL.SDL_FINGERMOTION
-            , SDL.SDL_FINGERUP
-            , SDL.SDL_FINGERDOWN ]
+    ignoreEventsOfTypes
+      [ SDL.SDL_FINGERMOTION
+      , SDL.SDL_FINGERUP
+      , SDL.SDL_FINGERDOWN ]
 
-        run = liftWith $ \ ctx hdl -> C.withCString name $ \ name ->
-          hdl . (<$ ctx) . withSDLWindow name size flags $ \ window ->
-            withSDLContext window $ \ _ ->
-              action (\ draw -> forever $ do
-                draw
-                Event _ payload <- waitEvent
-                case payload of
-                  QuitEvent -> liftIO exitSuccess
-                  _ -> SDL.glSwapWindow window)
+  run = liftWith $ \ ctx hdl -> C.withCString name $ \ name ->
+    hdl . (<$ ctx) . withSDLWindow name size flags $ \ window ->
+      withSDLContext window $ \ _ ->
+        action (\ draw -> forever $ do
+          draw
+          Event _ payload <- waitEvent
+          case payload of
+            QuitEvent -> liftIO exitSuccess
+            _ -> SDL.glSwapWindow window)
 
-        flags = foldr (.|.) 0
-          [ SDL.SDL_WINDOW_OPENGL
-          , SDL.SDL_WINDOW_SHOWN
-          , SDL.SDL_WINDOW_RESIZABLE
-          , SDL.SDL_WINDOW_ALLOW_HIGHDPI ]
+  flags = foldr (.|.) 0
+    [ SDL.SDL_WINDOW_OPENGL
+    , SDL.SDL_WINDOW_SHOWN
+    , SDL.SDL_WINDOW_RESIZABLE
+    , SDL.SDL_WINDOW_ALLOW_HIGHDPI ]
 
 
 withSDLWindow :: (Has (Lift IO) sig m, MonadIO m) => C.CString -> Linear.V2 Int -> Word32 -> (SDL.Window -> m a) -> m a
