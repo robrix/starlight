@@ -152,6 +152,7 @@ main = do
               glBlendFunc GL_ONE GL_ONE
               setUniformValue textProgram colour textColour
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
+          , Layer Nothing blue (Rect ((`div` 2) <$> windowSize) ((`div` 2) <$> windowSize)) $ pure ()
           ]
 
   where jitterPattern
