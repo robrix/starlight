@@ -23,7 +23,7 @@ import qualified SDL.Raw as SDL
 import System.Exit
 
 withWindow :: (Has (Lift IO) sig m, MonadIO m) => String -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
-withWindow name size action = liftWith $ \ ctx hdl -> CC.runInBoundThread $ hdl . (<$ ctx) $ do
+withWindow name size action = liftWith $ \ ctx hdl -> CC.runInBoundThread . hdl . (<$ ctx) $ do
   _ <- SDL.init SDL.SDL_INIT_EVERYTHING >>= checkWhen (< 0)
 
   SDL.SDL_GL_CONTEXT_MAJOR_VERSION .= 4
@@ -44,7 +44,7 @@ withWindow name size action = liftWith $ \ ctx hdl -> CC.runInBoundThread $ hdl 
     , SDL.SDL_FINGERDOWN ]
 
   liftWith $ \ ctx hdl -> C.withCString name $ \ name ->
-    hdl . (<$ ctx) $ withSDLWindow name size flags $ \ window ->
+    hdl . (<$ ctx) . withSDLWindow name size flags $ \ window ->
       withSDLContext window $ \ _ ->
         action (\ draw -> forever $ do
           draw
