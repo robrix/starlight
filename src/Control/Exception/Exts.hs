@@ -5,6 +5,7 @@ module Control.Exception.Exts
 , catch
 , mask
 , bracket
+, bracket_
 , finally
 , onException
 ) where
@@ -36,6 +37,15 @@ bracket acquire release m = mask $ \ restore -> do
   a <- acquire
   r <- restore (m a) `onException` release a
   r <$ release a
+
+-- | See @"Control.Exception".'E.bracket_'@.
+bracket_
+  :: Has (Lift IO) sig m
+  => m a
+  -> m b
+  -> m c
+  -> m c
+bracket_ before after thing = bracket before (const after) (const thing)
 
 -- | See @"Control.Exception".'E.finally'@.
 finally
