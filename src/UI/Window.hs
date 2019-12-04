@@ -82,7 +82,7 @@ checkWhen predicate value = do
   when (predicate value) checkSDLError
   pure value
 
-checkNonNull :: Ptr a -> IO (Ptr a)
+checkNonNull :: MonadIO m => Ptr a -> m (Ptr a)
 checkNonNull = checkWhen (== nullPtr)
 
 
