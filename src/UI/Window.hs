@@ -9,6 +9,7 @@ module UI.Window
 import qualified Control.Concurrent as CC
 import qualified Control.Exception as E
 import Control.Monad
+import Control.Monad.IO.Class
 import Data.Bits
 import Data.Foldable
 import Data.Word
@@ -70,11 +71,11 @@ withSDLContext window = E.bracket
   (SDL.glCreateContext window >>= checkNonNull)
   SDL.glDeleteContext
 
-checkSDLError :: IO ()
+checkSDLError :: MonadIO m => m ()
 checkSDLError = do
-  msg <- SDL.getError >>= C.peekCString
+  msg <- SDL.getError >>= liftIO . C.peekCString
   SDL.clearError
-  when (msg /= "") $ E.throwIO $ SDLException msg
+  when (msg /= "") . liftIO . E.throwIO $ SDLException msg
 
 checkWhen :: (a -> Bool) -> a -> IO a
 checkWhen predicate value = do
