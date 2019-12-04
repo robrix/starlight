@@ -53,8 +53,7 @@ withWindow name size action = liftWith $ \ ctx hdl ->
                 Event _ payload <- waitEvent
                 case payload of
                   QuitEvent -> liftIO exitSuccess
-                  _ -> pure ()
-                SDL.glSwapWindow window)
+                  _ -> SDL.glSwapWindow window)
 
         flags = foldr (.|.) 0
           [ SDL.SDL_WINDOW_OPENGL
