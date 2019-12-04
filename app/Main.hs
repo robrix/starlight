@@ -104,9 +104,9 @@ main = do
                 setUniformValue glyphProgram matrix3
                   $   translated (-1)
                   !*! scaled     (V3 sx sy 1)
-                  !*! translated instanceOffset
+                  !*! translated offset
                   !*! translated (V2 tx ty * windowScale)
-                  !*! scaled     instanceScale
+                  !*! scaled     scale
                 drawArrays Triangles range
 
             -- let w = 2 * fromIntegral width
