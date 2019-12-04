@@ -82,9 +82,7 @@ main = do
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
 
-      draw $ do
-        traverse_ drawLayer
-          [ Layer (Just framebuffer) transparent (Rect 0 windowSize) $ do
+      let drawGlyphs = do
             glBlendFunc GL_ONE GL_ONE -- add
 
             useProgram glyphProgram
@@ -121,7 +119,7 @@ main = do
             --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
             --   time <- getCPUTime
             --   B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
-          , Layer Nothing black (Rect 0 windowSize) $ do
+          drawText = do
             glBlendFunc GL_ZERO GL_SRC_COLOR
 
             -- print instanceBounds'
@@ -152,6 +150,11 @@ main = do
               glBlendFunc GL_ONE GL_ONE
               setUniformValue textProgram colour textColour
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
+
+      draw $ do
+        traverse_ drawLayer
+          [ Layer (Just framebuffer) transparent (Rect 0 windowSize) drawGlyphs
+          , Layer Nothing black (Rect 0 windowSize) drawText
           , Layer Nothing blue (Rect ((`div` 2) <$> windowSize) ((`div` 2) <$> windowSize)) $ pure ()
           ]
 
