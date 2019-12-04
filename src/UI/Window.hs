@@ -23,7 +23,24 @@ import qualified SDL.Raw as SDL
 import System.Exit
 
 withWindow :: (Has (Lift IO) sig m, MonadIO m) => String -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
-withWindow name size action = CC.runInBoundThread (E.bracket_ init quit run) where
+withWindow name size action = withSDL $ liftWith $ \ ctx hdl -> C.withCString name $ \ name ->
+  hdl . (<$ ctx) . withSDLWindow name size flags $ \ window ->
+    withSDLContext window $ \ _ ->
+      action (\ draw -> forever $ do
+        draw
+        Event _ payload <- waitEvent
+        case payload of
+          QuitEvent -> liftIO exitSuccess
+          _ -> SDL.glSwapWindow window) where
+
+  flags = foldr (.|.) 0
+    [ SDL.SDL_WINDOW_OPENGL
+    , SDL.SDL_WINDOW_SHOWN
+    , SDL.SDL_WINDOW_RESIZABLE
+    , SDL.SDL_WINDOW_ALLOW_HIGHDPI ]
+
+withSDL :: (Has (Lift IO) sig m, MonadIO m) => m a -> m a
+withSDL = CC.runInBoundThread . E.bracket_ init quit where
   init = do
     initializeAll
 
@@ -43,23 +60,6 @@ withWindow name size action = CC.runInBoundThread (E.bracket_ init quit run) whe
       [ SDL.SDL_FINGERMOTION
       , SDL.SDL_FINGERUP
       , SDL.SDL_FINGERDOWN ]
-
-  run = liftWith $ \ ctx hdl -> C.withCString name $ \ name ->
-    hdl . (<$ ctx) . withSDLWindow name size flags $ \ window ->
-      withSDLContext window $ \ _ ->
-        action (\ draw -> forever $ do
-          draw
-          Event _ payload <- waitEvent
-          case payload of
-            QuitEvent -> liftIO exitSuccess
-            _ -> SDL.glSwapWindow window)
-
-  flags = foldr (.|.) 0
-    [ SDL.SDL_WINDOW_OPENGL
-    , SDL.SDL_WINDOW_SHOWN
-    , SDL.SDL_WINDOW_RESIZABLE
-    , SDL.SDL_WINDOW_ALLOW_HIGHDPI ]
-
 
 withSDLWindow :: (Has (Lift IO) sig m, MonadIO m) => C.CString -> Linear.V2 Int -> Word32 -> (SDL.Window -> m a) -> m a
 withSDLWindow name (V2 w h) flags = E.bracket
