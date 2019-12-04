@@ -97,7 +97,7 @@ main = do
             bindArray glyphArray
 
             let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
-                scale = 1 / 2
+                windowScale = 1 / 2
             for_ (zip instances glyphRanges) $ \ (Instance{..}, range) ->
               for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
                 setUniformValue glyphProgram colour glyphColour
@@ -105,7 +105,7 @@ main = do
                   $   translated (-1)
                   !*! scaled     (V3 sx sy 1)
                   !*! translated instanceOffset
-                  !*! translated (V2 tx ty * scale)
+                  !*! translated (V2 tx ty * windowScale)
                   !*! scaled     instanceScale
                 drawArrays Triangles range
 
