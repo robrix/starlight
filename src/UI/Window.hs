@@ -44,17 +44,19 @@ withSDL = CC.runInBoundThread . E.bracket_ init quit where
   init = do
     initializeAll
 
-    SDL.SDL_GL_CONTEXT_MAJOR_VERSION .= 4
-    SDL.SDL_GL_CONTEXT_MINOR_VERSION .= 1
-    SDL.SDL_GL_CONTEXT_PROFILE_MASK .= SDL.SDL_GL_CONTEXT_PROFILE_CORE
+    foldl' ((. uncurry (.=)) . (>>)) (pure ())
+      [ (SDL.SDL_GL_CONTEXT_MAJOR_VERSION, 4)
+      , (SDL.SDL_GL_CONTEXT_MINOR_VERSION, 1)
+      , (SDL.SDL_GL_CONTEXT_PROFILE_MASK, SDL.SDL_GL_CONTEXT_PROFILE_CORE)
 
-    SDL.SDL_GL_RED_SIZE   .= 8
-    SDL.SDL_GL_GREEN_SIZE .= 8
-    SDL.SDL_GL_BLUE_SIZE  .= 8
-    SDL.SDL_GL_ALPHA_SIZE .= 8
-    SDL.SDL_GL_DEPTH_SIZE .= 16
+      , (SDL.SDL_GL_RED_SIZE  , 8)
+      , (SDL.SDL_GL_GREEN_SIZE, 8)
+      , (SDL.SDL_GL_BLUE_SIZE , 8)
+      , (SDL.SDL_GL_ALPHA_SIZE, 8)
+      , (SDL.SDL_GL_DEPTH_SIZE, 16)
 
-    SDL.SDL_GL_DOUBLEBUFFER .= fromEnum True
+      , (SDL.SDL_GL_DOUBLEBUFFER, fromEnum True)
+      ]
 
     ignoreEventsOfTypes
       [ SDL.SDL_FINGERMOTION
