@@ -91,10 +91,7 @@ newtype SDLException = SDLException String
 
 
 (.=) :: MonadIO m => SDL.GLattr -> Int -> m ()
-attribute .= value = do
-  result <- SDL.glSetAttribute attribute (fromIntegral value)
-  _ <- checkWhen (< 0) result
-  pure ()
+attr .= val = SDL.glSetAttribute attr (fromIntegral val) >>= void . checkWhen (< 0)
 
 
 ignoreEventsOfTypes :: MonadIO m => [Word32] -> m ()
