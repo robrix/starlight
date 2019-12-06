@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 module UI.Window
 ( withWindow
-, SDLException(..)
 ) where
 
 import Control.Carrier.Lift
