@@ -40,12 +40,18 @@ instance Object (Array n) where characterize = (Array, glGenVertexArrays, glDele
 
 
 data Mode
-  = TriangleStrip
+  = Lines
+  | LineStrip
+  | LineLoop
+  | TriangleStrip
   | Triangles
   deriving (Eq, Show)
 
 modeToGLEnum :: Mode -> GLenum
 modeToGLEnum = \case
+  Lines         -> GL_LINES
+  LineStrip     -> GL_LINE_STRIP
+  LineLoop      -> GL_LINE_LOOP
   TriangleStrip -> GL_TRIANGLE_STRIP
   Triangles     -> GL_TRIANGLES
 
