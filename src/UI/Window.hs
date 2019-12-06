@@ -1,8 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 module UI.Window
 ( withWindow
-, checkWhen
-, checkNonNull
 , SDLException(..)
 ) where
 
