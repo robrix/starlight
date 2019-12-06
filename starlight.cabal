@@ -58,36 +58,38 @@ library
     UI.Layer
     UI.Path
     UI.Window
-  build-depends:       base
-                     , containers
-                     , fused-effects
-                     , gl
-                     , linear
-                     , microlens
-                     , opentype
-                     , sdl2
-                     , text
-                     , vector
+  build-depends:
+      base
+    , containers
+    , fused-effects
+    , gl
+    , linear
+    , microlens
+    , opentype
+    , sdl2
+    , text
+    , vector
 
 executable starlight
   import:              common
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , bytestring
-                     , containers
-                     , fused-effects
-                     , gl
-                     , JuicyPixels
-                     , linear
-                     , microlens
-                     , opentype
-                     , sdl2
-                     , semigroupoids
-                     , starlight
-                     , text
-                     , vector
+  build-depends:
+      base
+    , bytestring
+    , containers
+    , fused-effects
+    , gl
+    , JuicyPixels
+    , linear
+    , microlens
+    , opentype
+    , sdl2
+    , semigroupoids
+    , starlight
+    , text
+    , vector
 
 source-repository head
   type:     git
