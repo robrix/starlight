@@ -3,6 +3,7 @@ module Control.Exception.Lift
 ( E.Exception(..)
 , throwIO
 , catch
+, handle
 , mask
 , bracket
 , bracket_
@@ -20,6 +21,10 @@ throwIO = sendM . E.throwIO
 -- | See @"Control.Exception".'E.catch'@.
 catch :: (E.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
 catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `E.catch` (run . (<$ ctx) . h)
+
+-- | See @"Control.Exception".'E.handle'@.
+handle :: (E.Exception e, Has (Lift IO) sig m) => (e -> m a) -> m a -> m a
+handle h m = liftWith $ \ ctx run -> (run . (<$ ctx) . h) `E.handle` run (m <$ ctx)
 
 -- | See @"Control.Exception".'E.mask'@.
 mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
