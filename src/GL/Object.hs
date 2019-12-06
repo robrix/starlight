@@ -3,7 +3,6 @@ module GL.Object
 , Object(..)
 , withN
 , with
-, withObjects
 ) where
 
 import qualified Control.Exception as E
