@@ -1,4 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
 module GL.Object
 ( Object(..)
 , withN
@@ -8,21 +7,21 @@ module GL.Object
 import qualified Control.Exception as E
 import qualified Foreign.Marshal.Array as A
 import Foreign.Ptr
+import Foreign.Storable
 import Graphics.GL.Types
 
-class Object t where
-  construct :: GLuint -> t
+class Storable t => Object t where
   gen :: GLsizei -> Ptr t -> IO ()
   delete :: GLsizei -> Ptr t -> IO ()
 
-withN :: forall t a . Object t => Int -> ([t] -> IO a) -> IO a
-withN n = E.bracket acquire release . (. fmap (construct @t)) where
+withN :: Object t => Int -> ([t] -> IO a) -> IO a
+withN n = E.bracket acquire release where
   acquire = A.allocaArray n $ \ p -> do
-    gen @t (fromIntegral n) (castPtr p)
+    gen (fromIntegral n) p
     A.peekArray n p
   release buffers = A.allocaArray n $ \ p -> do
     A.pokeArray p buffers
-    delete @t (fromIntegral n) (castPtr p)
+    delete (fromIntegral n) p
 
 with :: Object t => (t -> IO a) -> IO a
 with = withN 1 . (. head)

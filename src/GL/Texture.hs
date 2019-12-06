@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, TypeApplications #-}
 module GL.Texture
 ( Texture(..)
 , Target(..)
@@ -11,15 +11,16 @@ module GL.Texture
 ) where
 
 import Data.Coerce
+import Foreign.Storable
 import GL.Error
 import GL.Object
 import Graphics.GL.Core41
 import Graphics.GL.Types
 
 newtype Texture = Texture { unTexture :: GLuint }
+  deriving (Storable)
 
 instance Object Texture where
-  construct = coerce
   gen = coerce (glGenTextures @IO)
   delete = coerce (glDeleteTextures @IO)
 

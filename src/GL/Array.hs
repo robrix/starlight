@@ -1,4 +1,4 @@
-{-# LANGUAGE LambdaCase, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, LambdaCase, ScopedTypeVariables, TypeApplications #-}
 module GL.Array
 ( Array(..)
 , withArray
@@ -22,6 +22,7 @@ import Graphics.GL.Core41
 import Graphics.GL.Types
 
 newtype Array n = Array { unArray :: GLuint }
+  deriving (S.Storable)
 
 withArray :: forall v n a. (Foldable v, Scalar n) => [v n] -> (Array n -> IO a) -> IO a
 withArray vertices body = with $ \ buffer -> do
@@ -38,7 +39,6 @@ bindArray :: Array n -> IO ()
 bindArray = checkingGLError . glBindVertexArray . unArray
 
 instance Object (Array n) where
-  construct = coerce
   gen = coerce (glGenVertexArrays @IO)
   delete = coerce (glDeleteVertexArrays @IO)
 
