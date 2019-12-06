@@ -1,4 +1,4 @@
-{-# LANGUAGE LambdaCase, ScopedTypeVariables #-}
+{-# LANGUAGE LambdaCase, ScopedTypeVariables, TypeApplications #-}
 module GL.Array
 ( Array(..)
 , withArray
@@ -26,11 +26,11 @@ withArray :: forall v n a. (Foldable v, Scalar n) => [v n] -> (Array n -> IO a) 
 withArray vertices body = with $ \ buffer -> do
   glBindBuffer GL_ARRAY_BUFFER (unBuffer buffer)
   A.withArrayLen (vertices >>= toList) $ \ n p ->
-    glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf (0 :: n))) (castPtr p) GL_STATIC_DRAW
+    glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) GL_STATIC_DRAW
   with $ \ array -> do
     bindArray array
     glEnableVertexAttribArray 0
-    glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy :: Proxy n)) GL_FALSE 0 nullPtr
+    glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
     body array
 
 bindArray :: Array n -> IO ()
