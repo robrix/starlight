@@ -1,6 +1,7 @@
 module Foreign.Marshal.Array.Lift
 ( allocaArray
 , peekArray
+, pokeArray
 ) where
 
 import Control.Carrier.Lift
@@ -13,3 +14,6 @@ allocaArray n with = liftWith $ \ ctx hdl -> A.allocaArray n (hdl . (<$ ctx) . w
 
 peekArray :: (Has (Lift IO) sig m, Storable a) => Int -> Ptr a -> m [a]
 peekArray n = sendM . A.peekArray n
+
+pokeArray :: (Has (Lift IO) sig m, Storable a) => Ptr a -> [a] -> m ()
+pokeArray p = sendM . A.pokeArray p
