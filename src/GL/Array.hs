@@ -8,6 +8,7 @@ module GL.Array
 , drawArrays
 ) where
 
+import Data.Coerce
 import Data.Foldable (toList)
 import Data.Proxy
 import qualified Foreign.Marshal.Array as A
@@ -36,7 +37,10 @@ withArray vertices body = with $ \ buffer -> do
 bindArray :: Array n -> IO ()
 bindArray = checkingGLError . glBindVertexArray . unArray
 
-instance Object (Array n) where characterize = (Array, glGenVertexArrays, glDeleteVertexArrays)
+instance Object (Array n) where
+  construct = coerce
+  gen = coerce (glGenVertexArrays @IO)
+  delete = coerce (glDeleteVertexArrays @IO)
 
 
 data Mode

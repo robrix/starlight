@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeApplications #-}
 module GL.Texture
 ( Texture(..)
 , Target(..)
@@ -9,6 +10,7 @@ module GL.Texture
 , setMinFilter
 ) where
 
+import Data.Coerce
 import GL.Error
 import GL.Object
 import Graphics.GL.Core41
@@ -16,7 +18,10 @@ import Graphics.GL.Types
 
 newtype Texture = Texture { unTexture :: GLuint }
 
-instance Object Texture where characterize = (Texture, glGenTextures, glDeleteTextures)
+instance Object Texture where
+  construct = coerce
+  gen = coerce (glGenTextures @IO)
+  delete = coerce (glDeleteTextures @IO)
 
 
 data Target = Texture2D

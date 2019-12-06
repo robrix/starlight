@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
 module GL.Object
 ( Object(..)
 , withN
@@ -5,15 +6,18 @@ module GL.Object
 ) where
 
 import qualified Control.Exception as E
+import Data.Coerce (coerce)
 import qualified Foreign.Marshal.Array as A
 import Foreign.Ptr
 import Graphics.GL.Types
 
 class Object t where
-  characterize :: (GLuint -> t, GLsizei -> Ptr GLuint -> IO (), GLsizei -> Ptr GLuint -> IO ())
+  construct :: GLuint -> t
+  gen :: GLsizei -> Ptr t -> IO ()
+  delete :: GLsizei -> Ptr t -> IO ()
 
-withN :: Object t => Int -> ([t] -> IO a) -> IO a
-withN n = let (construct, gen, delete) = characterize in withObjects gen delete n . (. fmap construct)
+withN :: forall t a . Object t => Int -> ([t] -> IO a) -> IO a
+withN n = withObjects (coerce (gen @t)) (coerce (delete @t)) n . (. fmap (construct @t))
 
 with :: Object t => (t -> IO a) -> IO a
 with = withN 1 . (. head)
