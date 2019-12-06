@@ -31,13 +31,13 @@ withShader shaderType = E.bracket
 
 withCompiledShader :: HasCallStack => ShaderType -> String -> (Shader -> IO a) -> IO a
 withCompiledShader shaderType source body = withShader shaderType $ \ (Shader shader) -> do
-    C.withCString source $ \ source ->
-      A.alloca $ \ p -> do
-        S.poke p source
-        glShaderSource shader 1 p nullPtr
-    glCompileShader shader
-    s <- checkShader source (Shader shader)
-    body s
+  C.withCString source $ \ source ->
+    A.alloca $ \ p -> do
+      S.poke p source
+      glShaderSource shader 1 p nullPtr
+  glCompileShader shader
+  s <- checkShader source (Shader shader)
+  body s
 
 withCompiledShaders :: HasCallStack => [(ShaderType, String)] -> ([Shader] -> IO a) -> IO a
 withCompiledShaders sources body = go sources []
