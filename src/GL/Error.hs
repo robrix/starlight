@@ -7,7 +7,8 @@ module GL.Error
 , throwGLError
 ) where
 
-import qualified Control.Exception as E
+import Control.Carrier.Lift
+import qualified Control.Exception.Lift as E
 import Control.Monad
 import qualified Foreign.C.String as C
 import qualified Foreign.Marshal.Alloc as A
@@ -75,7 +76,7 @@ checkingGLError action = withFrozenCallStack $ do
   checkGLError
   pure result
 
-throwGLError :: HasCallStack => GLenum -> IO ()
+throwGLError :: (Has (Lift IO) sig m, HasCallStack) => GLenum -> m ()
 throwGLError = \case
   GL_NO_ERROR -> pure ()
   GL_INVALID_ENUM -> E.throwIO $ GLException InvalidEnum callStack
