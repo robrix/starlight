@@ -51,6 +51,18 @@ main = do
         matrix3 = Var "matrix3" :: Var (M33 Float)
         instances = combineInstances (V2 288 288) (V2 0 0) glyphs
         instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
+        (shipVertices, shipRanges) = combineGeometry
+          [ [ V3 0      1      0
+            , V3 (-0.5) 0      0
+            , V3 0      (-0.5) 0
+            , V3 0.5    0      0 :: V3 Float
+            ]
+          , [ V3 0 1 0
+            , V3 (-1) 0 0
+            , V3 0 (-1) 0
+            , V3 1 0 0
+            ]
+          ]
         (screenQuadVertices, screenQuadRanges) = combineGeometry
           [ [ V2 (-1) (-1)
             , V2   1  (-1)
@@ -59,6 +71,7 @@ main = do
             ]
           ]
         (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances) in
+    withArray shipVertices $ \ shipArray ->
     withArray screenQuadVertices $ \ screenQuadArray ->
     withArray glyphVertices $ \ glyphArray ->
     withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
@@ -151,7 +164,9 @@ main = do
               setUniformValue textProgram colour textColour
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
-          drawShip = pure ()
+          drawShip = do
+            bindArray shipArray
+            traverse_ (drawArrays LineLoop) shipRanges
 
       draw $
         traverse_ drawLayer
