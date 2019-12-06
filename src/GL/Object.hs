@@ -26,5 +26,5 @@ withN n = E.bracket acquire release where
     A.pokeArray p buffers
     delete (fromIntegral n) p
 
-with :: Object t => (t -> IO a) -> IO a
+with :: (MonadIO m, Has (Lift IO) sig m, Object t) => (t -> m a) -> m a
 with = withN 1 . (. head)
