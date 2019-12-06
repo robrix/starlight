@@ -1,6 +1,5 @@
 module GL.Object
-( Name(..)
-, Object(..)
+( Object(..)
 , withN
 , with
 ) where
@@ -9,9 +8,6 @@ import qualified Control.Exception as E
 import qualified Foreign.Marshal.Array as A
 import Foreign.Ptr
 import Graphics.GL.Types
-
-newtype Name n = Name { unName :: GLuint }
-  deriving (Eq, Ord, Show)
 
 class Object t where
   characterize :: (GLuint -> t, GLsizei -> Ptr GLuint -> IO (), GLsizei -> Ptr GLuint -> IO ())
