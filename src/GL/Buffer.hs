@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, TypeApplications #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Buffer
 ( Buffer(..)
 ) where
@@ -13,5 +13,5 @@ newtype Buffer n = Buffer { unBuffer :: GLuint }
   deriving (Storable)
 
 instance Object (Buffer n) where
-  gen = coerce (glGenBuffers @IO)
-  delete = coerce (glDeleteBuffers @IO)
+  gen n = glGenBuffers n . coerce
+  delete n = glDeleteBuffers n . coerce

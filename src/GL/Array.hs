@@ -39,8 +39,8 @@ bindArray :: Array n -> IO ()
 bindArray = checkingGLError . glBindVertexArray . unArray
 
 instance Object (Array n) where
-  gen = coerce (glGenVertexArrays @IO)
-  delete = coerce (glDeleteVertexArrays @IO)
+  gen n = glGenVertexArrays n . coerce
+  delete n = glDeleteVertexArrays n . coerce
 
 
 data Mode

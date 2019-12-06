@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, TypeApplications #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Texture
 ( Texture(..)
 , Target(..)
@@ -21,8 +21,8 @@ newtype Texture = Texture { unTexture :: GLuint }
   deriving (Storable)
 
 instance Object Texture where
-  gen = coerce (glGenTextures @IO)
-  delete = coerce (glDeleteTextures @IO)
+  gen n = glGenTextures n . coerce
+  delete n = glDeleteTextures n . coerce
 
 
 data Target = Texture2D

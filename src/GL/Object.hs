@@ -5,14 +5,15 @@ module GL.Object
 ) where
 
 import qualified Control.Exception as E
+import Control.Monad.IO.Class
 import qualified Foreign.Marshal.Array as A
 import Foreign.Ptr
 import Foreign.Storable
 import Graphics.GL.Types
 
 class Storable t => Object t where
-  gen :: GLsizei -> Ptr t -> IO ()
-  delete :: GLsizei -> Ptr t -> IO ()
+  gen :: MonadIO m => GLsizei -> Ptr t -> m ()
+  delete :: MonadIO m => GLsizei -> Ptr t -> m ()
 
 withN :: Object t => Int -> ([t] -> IO a) -> IO a
 withN n = E.bracket acquire release where

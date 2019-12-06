@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, TypeApplications #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Framebuffer
 ( Framebuffer(..)
 , bindFramebuffer
@@ -15,8 +15,8 @@ newtype Framebuffer = Framebuffer { unFramebuffer :: GLuint }
   deriving (Storable)
 
 instance Object Framebuffer where
-  gen = coerce (glGenFramebuffers @IO)
-  delete = coerce (glDeleteFramebuffers @IO)
+  gen n = glGenFramebuffers n . coerce
+  delete n = glDeleteFramebuffers n . coerce
 
 
 bindFramebuffer :: Maybe Framebuffer -> IO ()
