@@ -8,90 +8,45 @@ import qualified Control.Concurrent.Lift as CC
 import qualified Control.Exception.Lift as E
 import Control.Monad
 import Control.Monad.IO.Class
-import Data.Bits
-import Data.Foldable
-import Data.Word
-import qualified Foreign.C.String as C
-import Foreign.Ptr
+import Data.Text (Text)
 import Linear.V2 as Linear
+import Linear.V4 as Linear
 import SDL.Event
 import SDL.Init
-import qualified SDL.Raw as SDL
+import SDL.Video
 import System.Exit
 
-withWindow :: (Has (Lift IO) sig m, MonadIO m) => String -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
-withWindow name size action = withSDL $ liftWith $ \ ctx hdl -> C.withCString name $ \ name ->
-  hdl . (<$ ctx) . withSDLWindow name size flags $ \ window ->
+withWindow :: (Has (Lift IO) sig m, MonadIO m) => Text -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
+withWindow name size action = withSDL $
+  withSDLWindow name size $ \ window ->
     withGLContext window $ \ _ ->
       action (\ draw -> forever $ do
         draw
         Event _ payload <- waitEvent
         case payload of
           QuitEvent -> liftIO exitSuccess
-          _ -> SDL.glSwapWindow window) where
-
-  flags = foldr (.|.) 0
-    [ SDL.SDL_WINDOW_OPENGL
-    , SDL.SDL_WINDOW_SHOWN
-    , SDL.SDL_WINDOW_RESIZABLE
-    , SDL.SDL_WINDOW_ALLOW_HIGHDPI ]
+          _ -> glSwapWindow window) where
 
 withSDL :: (Has (Lift IO) sig m, MonadIO m) => m a -> m a
-withSDL = CC.runInBoundThread . E.bracket_ init quit where
-  init = do
-    initializeAll
+withSDL = CC.runInBoundThread . E.bracket_ initializeAll quit
 
-    foldl' ((. uncurry (.=)) . (>>)) (pure ())
-      [ (SDL.SDL_GL_CONTEXT_MAJOR_VERSION, 4)
-      , (SDL.SDL_GL_CONTEXT_MINOR_VERSION, 1)
-      , (SDL.SDL_GL_CONTEXT_PROFILE_MASK, SDL.SDL_GL_CONTEXT_PROFILE_CORE)
+withSDLWindow :: (Has (Lift IO) sig m, MonadIO m) => Text -> Linear.V2 Int -> (Window -> m a) -> m a
+withSDLWindow name size = E.bracket
+  (createWindow name windowConfig)
+  destroyWindow where
+  windowConfig = defaultWindow
+    { windowInitialSize = fromIntegral <$> size
+    , windowResizable = True
+    , windowPosition = Centered
+    , windowGraphicsContext = OpenGLContext glConfig
+    , windowHighDPI = True
+    }
+  glConfig = defaultOpenGL
+    { glProfile = Core Normal 4 1
+    , glColorPrecision = V4 8 8 8 8
+    }
 
-      , (SDL.SDL_GL_RED_SIZE  , 8)
-      , (SDL.SDL_GL_GREEN_SIZE, 8)
-      , (SDL.SDL_GL_BLUE_SIZE , 8)
-      , (SDL.SDL_GL_ALPHA_SIZE, 8)
-      , (SDL.SDL_GL_DEPTH_SIZE, 16)
-
-      , (SDL.SDL_GL_DOUBLEBUFFER, fromEnum True)
-      ]
-
-    ignoreEventsOfTypes
-      [ SDL.SDL_FINGERMOTION
-      , SDL.SDL_FINGERUP
-      , SDL.SDL_FINGERDOWN ]
-
-withSDLWindow :: (Has (Lift IO) sig m, MonadIO m) => C.CString -> Linear.V2 Int -> Word32 -> (SDL.Window -> m a) -> m a
-withSDLWindow name (V2 w h) flags = E.bracket
-  (SDL.createWindow name SDL.SDL_WINDOWPOS_CENTERED SDL.SDL_WINDOWPOS_CENTERED (fromIntegral w) (fromIntegral h) flags >>= checkNonNull)
-  SDL.destroyWindow
-
-withGLContext :: (Has (Lift IO) sig m, MonadIO m) => SDL.Window -> (SDL.GLContext -> m a) -> m a
+withGLContext :: (Has (Lift IO) sig m, MonadIO m) => Window -> (GLContext -> m a) -> m a
 withGLContext window = E.bracket
-  (SDL.glCreateContext window >>= checkNonNull)
-  SDL.glDeleteContext
-
-checkSDLError :: MonadIO m => m ()
-checkSDLError = do
-  msg <- SDL.getError >>= liftIO . C.peekCString
-  SDL.clearError
-  when (msg /= "") . liftIO . E.throwIO $ SDLException msg
-
-checkWhen :: MonadIO m => (a -> Bool) -> a -> m a
-checkWhen predicate value = do
-  when (predicate value) checkSDLError
-  pure value
-
-checkNonNull :: MonadIO m => Ptr a -> m (Ptr a)
-checkNonNull = checkWhen (== nullPtr)
-
-
-newtype SDLException = SDLException String
-  deriving (E.Exception, Show)
-
-
-(.=) :: MonadIO m => SDL.GLattr -> Int -> m ()
-attr .= val = SDL.glSetAttribute attr (fromIntegral val) >>= void . checkWhen (< 0)
-
-
-ignoreEventsOfTypes :: MonadIO m => [Word32] -> m ()
-ignoreEventsOfTypes = traverse_ (\ t -> SDL.eventState t 0 >>= checkWhen (/= 0))
+  (glCreateContext window)
+  glDeleteContext

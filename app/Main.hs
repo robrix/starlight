@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 module Main
 ( main
 ) where
