@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE LambdaCase, ScopedTypeVariables #-}
 module GL.Array
 ( Array(..)
 , withArray
@@ -45,8 +45,9 @@ data Mode
   deriving (Eq, Show)
 
 modeToGLEnum :: Mode -> GLenum
-modeToGLEnum TriangleStrip = GL_TRIANGLE_STRIP
-modeToGLEnum Triangles     = GL_TRIANGLES
+modeToGLEnum = \case
+  TriangleStrip -> GL_TRIANGLE_STRIP
+  Triangles     -> GL_TRIANGLES
 
 data Range = Range
   { rangeFrom  :: {-# UNPACK #-} !Int
