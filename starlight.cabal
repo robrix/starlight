@@ -39,6 +39,7 @@ library
     Control.Concurrent.Lift
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
+    Foreign.C.String.Lift
     Foreign.Marshal.Alloc.Lift
     Foreign.Marshal.Array.Lift
     Geometry.Rect
