@@ -33,6 +33,9 @@ data Type = Texture2D
 class KnownType (ty :: Type) where
   typeVal :: proxy ty -> Type
 
+instance KnownType 'Texture2D where
+  typeVal _ = Texture2D
+
 targetToGLEnum :: Type -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
 
