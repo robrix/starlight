@@ -2,7 +2,6 @@
 module GL.Array
 ( Array(..)
 , withArray
-, bindArray
 , Mode(..)
 , Range(..)
 , drawArrays
@@ -34,9 +33,6 @@ withArray vertices body = with $ \ buffer -> runLiftIO $ do
     glEnableVertexAttribArray 0
     glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
     LiftIO (body array)
-
-bindArray :: Has (Lift IO) sig m => Array n -> m ()
-bindArray = checkingGLError . runLiftIO . glBindVertexArray . unArray
 
 instance Object (Array n) where
   gen n = glGenVertexArrays n . coerce
