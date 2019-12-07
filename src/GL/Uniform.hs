@@ -5,9 +5,10 @@ module GL.Uniform
 , setUniformValue
 ) where
 
+import Control.Monad.IO.Class.Lift
 import Data.Foldable (toList)
-import qualified Foreign.C.String as C
-import qualified Foreign.Marshal.Array as A
+import qualified Foreign.C.String.Lift as C
+import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr
 import GHC.Stack
 import GL.Error
@@ -20,7 +21,7 @@ import Linear.V4 as Linear
 newtype Var t = Var { varName :: String }
 
 class Uniform t where
-  uniform :: HasCallStack => GLint -> t -> IO ()
+  uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
 setUniformValue :: (Uniform t, HasCallStack) => Program -> Var t -> t -> IO ()
 setUniformValue program var v = do
@@ -28,13 +29,13 @@ setUniformValue program var v = do
   checkingGLError $ uniform location v
 
 instance Uniform (Linear.V4 Float) where
-  uniform location (Linear.V4 x y z w) = glUniform4f location x y z w
+  uniform location (Linear.V4 x y z w) = runLifting $ glUniform4f location x y z w
 
 instance Uniform (Linear.V4 Double) where
-  uniform location (Linear.V4 x y z w) = glUniform4d location x y z w
+  uniform location (Linear.V4 x y z w) = runLifting $ glUniform4d location x y z w
 
 instance Uniform (Linear.M44 Float) where
-  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix4fv location 1 GL_FALSE . castPtr)
+  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLifting . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M33 Float) where
-  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (glUniformMatrix3fv location 1 GL_FALSE . castPtr)
+  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLifting . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
