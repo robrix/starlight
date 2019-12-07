@@ -1,6 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Exception.Lift
 ( E.Exception(..)
+, E.SomeException(..)
 , throwIO
 , catch
 , handle
