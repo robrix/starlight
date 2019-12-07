@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Carrier.Alloc
 ( -- * Alloc carrier
   runAlloc
@@ -29,8 +29,10 @@ instance Has (Lift IO) sig m => Algebra (Alloc :+: sig) (AllocC m) where
   alg = \case
     L (Gen n k) -> do
       bs <- acquire
+      AllocC $ modify @[m ()] (release bs :)
       k bs where
       acquire = A.allocaArray n $ \ p -> runLiftIO $ do
         GL.gen (fromIntegral n) p
         A.peekArray n p
+      release buffers = A.withArray buffers $ runLiftIO . GL.delete (fromIntegral n)
     R other     -> AllocC (send (handleCoercible other))
