@@ -3,7 +3,7 @@ module GL.Texture
 ( Texture(..)
 , Type(..)
 , KnownType(..)
-, targetToGLEnum
+, typeToGLEnum
 , Filter(..)
 , filterToGLEnum
 , setMagFilter
@@ -28,7 +28,7 @@ instance Object (Texture ty) where
 
 instance KnownType ty => Bind (Texture ty) where
   nullObject = Texture 0
-  bindObject = checkingGLError . runLiftIO . glBindTexture (targetToGLEnum (typeVal (Proxy :: Proxy ty))) . unTexture
+  bindObject = checkingGLError . runLiftIO . glBindTexture (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . unTexture
 
 
 data Type = Texture2D
@@ -39,8 +39,8 @@ class KnownType (ty :: Type) where
 instance KnownType 'Texture2D where
   typeVal _ = Texture2D
 
-targetToGLEnum :: Type -> GLenum
-targetToGLEnum Texture2D = GL_TEXTURE_2D
+typeToGLEnum :: Type -> GLenum
+typeToGLEnum Texture2D = GL_TEXTURE_2D
 
 
 data Filter = Nearest | Linear
@@ -50,7 +50,7 @@ filterToGLEnum Nearest = GL_NEAREST
 filterToGLEnum Linear = GL_LINEAR
 
 setMagFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
-setMagFilter target = checkingGLError . runLiftIO . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . filterToGLEnum
+setMagFilter target = checkingGLError . runLiftIO . glTexParameteri (typeToGLEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . filterToGLEnum
 
 setMinFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
-setMinFilter target = checkingGLError . runLiftIO . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . filterToGLEnum
+setMinFilter target = checkingGLError . runLiftIO . glTexParameteri (typeToGLEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . filterToGLEnum
