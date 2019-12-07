@@ -15,7 +15,7 @@ import Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr
 import qualified Foreign.Storable as S
-import GL.Buffer
+import qualified GL.Buffer as GL
 import GL.Error
 import GL.Object
 import GL.Scalar
@@ -27,7 +27,7 @@ newtype Array n = Array { unArray :: GLuint }
 
 withArray :: forall v n m a sig . (Foldable v, Scalar n, Has (Lift IO) sig m) => [v n] -> (Array n -> m a) -> m a
 withArray vertices body = with $ \ buffer -> runLiftIO $ do
-  glBindBuffer GL_ARRAY_BUFFER (unBuffer buffer)
+  glBindBuffer GL_ARRAY_BUFFER (GL.unBuffer buffer)
   A.withArrayLen (vertices >>= toList) $ \ n p ->
     glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) GL_STATIC_DRAW
   with $ \ array -> do
