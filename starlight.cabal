@@ -42,6 +42,7 @@ library
     Foreign.C.String.Lift
     Foreign.Marshal.Alloc.Lift
     Foreign.Marshal.Array.Lift
+    Foreign.Marshal.Utils.Lift
     Geometry.Rect
     Geometry.Triangle
     GL.Array
