@@ -42,8 +42,8 @@ filterToGLEnum :: Filter -> GLenum
 filterToGLEnum Nearest = GL_NEAREST
 filterToGLEnum Linear = GL_LINEAR
 
-setMagFilter :: Target -> Filter -> IO ()
-setMagFilter target = checkingGLError . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . filterToGLEnum
+setMagFilter :: Has (Lift IO) sig m => Target -> Filter -> m ()
+setMagFilter target = checkingGLError . runLifting . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . filterToGLEnum
 
 setMinFilter :: Target -> Filter -> IO ()
 setMinFilter target = checkingGLError . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . filterToGLEnum
