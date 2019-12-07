@@ -2,6 +2,7 @@
 module GL.Texture
 ( Texture(..)
 , Type(..)
+, KnownType(..)
 , targetToGLEnum
 , bindTexture
 , Filter(..)
@@ -28,6 +29,9 @@ instance Object (Texture ty) where
 
 
 data Type = Texture2D
+
+class KnownType (ty :: Type) where
+  typeVal :: proxy ty -> Type
 
 targetToGLEnum :: Type -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
