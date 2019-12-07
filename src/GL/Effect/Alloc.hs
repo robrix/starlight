@@ -1,10 +1,12 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
 module GL.Effect.Alloc
-( Alloc(..)
+( -- * Alloc effect
+  Alloc(..)
+, gen
 ) where
 
 import Control.Algebra
-import GL.Object
+import GL.Object (Object)
 
 data Alloc m k
   = forall t . Object t => Gen (t -> m k)
@@ -16,3 +18,6 @@ instance HFunctor Alloc where
 
 instance Effect Alloc where
   thread ctx hdl (Gen k) = Gen (hdl . (<$ ctx) . k)
+
+gen :: (Object t, Has Alloc sig m) => m t
+gen = send (Gen pure)
