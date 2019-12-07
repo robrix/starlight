@@ -4,6 +4,7 @@ module GL.Framebuffer
 , bindFramebuffer
 ) where
 
+import Control.Monad.IO.Class.Lift
 import Data.Coerce
 import Foreign.Storable
 import GL.Error
@@ -19,5 +20,5 @@ instance Object Framebuffer where
   delete n = glDeleteFramebuffers n . coerce
 
 
-bindFramebuffer :: Maybe Framebuffer -> IO ()
-bindFramebuffer = checkingGLError . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
+bindFramebuffer :: Has (Lift IO) sig m => Maybe Framebuffer -> m ()
+bindFramebuffer = checkingGLError . runLifting . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
