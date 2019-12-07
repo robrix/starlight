@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
+{-# LANGUAGE DataKinds, OverloadedStrings, RecordWildCards, TypeApplications #-}
 module Main
 ( main
 ) where
@@ -14,6 +14,7 @@ import Foreign.Ptr
 import Geometry.Rect
 import GHC.Stack
 import GL.Array
+import GL.Carrier.Program
 import GL.Error
 import GL.Framebuffer
 import GL.Object
@@ -47,7 +48,7 @@ main :: HasCallStack => IO ()
 main = evalState (Nothing :: Maybe UTCTime) $ do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
-  [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse (liftIO . readFile) ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
+  [glyphVertex, glyphFragment] <- traverse (liftIO . readFile) ["glyph-vertex.glsl", "glyph-fragment.glsl"]
   runWindow "Text" (fromIntegral <$> windowSize) $
     let rect    = Var "rect"    :: Var (V4 Float)
         colour  = Var "colour"  :: Var (V4 Float)
@@ -78,10 +79,10 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     withArray shipVertices $ \ shipArray ->
     withArray screenQuadVertices $ \ screenQuadArray ->
     withArray glyphVertices $ \ glyphArray ->
-    withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
+    -- withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
     withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
     with $ \ texture ->
-    with $ \ framebuffer -> do
+    with $ \ framebuffer -> runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
       bindTexture Texture2D (Just texture)
       setMagFilter Texture2D Nearest
       setMinFilter Texture2D Nearest
@@ -141,7 +142,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
             -- print instanceBounds'
 
-            useProgram textProgram
+            use @"text"
             let rect' = V4
                   (fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
                   (fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
@@ -150,14 +151,14 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
             -- print rect'
 
-            setUniformValue textProgram rect rect'
-            -- setUniformValue textProgram rect (V4 0 0 1 1)
-            setUniformValue textProgram colour transparent
-            -- setUniformValue textProgram colour black
+            set @"text" rect rect'
+            -- set @"text" rect (V4 0 0 1 1)
+            set @"text" colour transparent
+            -- set @"text" colour black
             let textureUnit = TextureUnit 0
             setActiveTexture textureUnit
             bindTexture Texture2D (Just texture)
-            setUniformValue textProgram sampler textureUnit
+            set @"text" sampler textureUnit
 
             bindArray screenQuadArray
 
@@ -165,7 +166,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
             when (opaque textColour /= black) $ do
               glBlendFunc GL_ONE GL_ONE
-              setUniformValue textProgram colour textColour
+              set @"text" colour textColour
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do
