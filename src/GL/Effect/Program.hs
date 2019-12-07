@@ -2,6 +2,7 @@
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
+, use
   -- * Re-exports
 , Algebra
 , Has
@@ -17,3 +18,6 @@ data Program m k
 
 instance HFunctor Program
 instance Effect   Program
+
+use :: Has Program sig m => m ()
+use = send (Use (pure ()))
