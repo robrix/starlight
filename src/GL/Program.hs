@@ -38,5 +38,5 @@ withBuiltProgram :: HasCallStack => [(ShaderType, String)] -> (Program -> IO a) 
 withBuiltProgram sources body = withCompiledShaders sources (`withLinkedProgram` body)
 
 
-checkProgram :: HasCallStack => Program -> IO Program
-checkProgram = fmap Program . checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS . unProgram
+checkProgram :: (Has (Lift IO) sig m, HasCallStack) => Program -> m Program
+checkProgram = runLifting . fmap Program . checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS . unProgram
