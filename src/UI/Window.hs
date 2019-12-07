@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
 module UI.Window
 ( withSDL
 , withSDLWindow
