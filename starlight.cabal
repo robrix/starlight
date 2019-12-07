@@ -44,7 +44,6 @@ library
     Foreign.Marshal.Alloc.Lift
     Foreign.Marshal.Array.Lift
     Foreign.Marshal.Utils.Lift
-    Geometry.Dimension
     Geometry.Rect
     Geometry.Triangle
     GL.Array
