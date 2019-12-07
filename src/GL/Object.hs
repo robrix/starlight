@@ -1,9 +1,10 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, ScopedTypeVariables #-}
 module GL.Object
 ( Object(..)
 , withN
 , with
 , Bind(..)
+, bind
 ) where
 
 import qualified Control.Exception.Lift as E
@@ -30,4 +31,10 @@ with = withN 1 . (. head)
 
 
 class Bind t where
-  bind :: (Has (Lift IO) sig m, HasCallStack) => t -> m a -> m a
+  bindObject :: (Has (Lift IO) sig m, HasCallStack) => Maybe t -> m ()
+
+bind :: forall t m a sig . (Bind t, Has (Lift IO) sig m, HasCallStack) => t -> m a -> m a
+bind t m = do
+  bindObject (Just t)
+  a <- m
+  a <$ bindObject (Nothing :: Maybe t)

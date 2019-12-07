@@ -17,7 +17,7 @@ import GL.Array
 import GL.Carrier.Alloc
 import GL.Carrier.Program.Live
 import GL.Error
-import GL.Framebuffer
+import GL.Object (bind)
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit

@@ -21,10 +21,7 @@ instance Object Framebuffer where
   delete n = glDeleteFramebuffers n . coerce
 
 instance Bind Framebuffer where
-  bind (Framebuffer t) m = runLiftIO $ do
-    checkingGLError $ glBindFramebuffer GL_FRAMEBUFFER t
-    a <- LiftIO m
-    a <$ checkingGLError (glBindFramebuffer GL_FRAMEBUFFER 0)
+  bindObject = checkingGLError . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
 
 
 bindFramebuffer :: Has (Lift IO) sig m => Maybe Framebuffer -> m ()
