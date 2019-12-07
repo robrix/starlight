@@ -36,6 +36,7 @@ library
   import:              common
   hs-source-dirs:      src
   exposed-modules:
+    Control.Carrier.State.IORef
     Control.Concurrent.Lift
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
