@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures #-}
 module GL.Buffer
 ( Buffer(..)
 , Type(..)
@@ -12,14 +12,14 @@ import GL.Object
 import Graphics.GL.Core41
 import Graphics.GL.Types
 
-newtype Buffer n = Buffer { unBuffer :: GLuint }
+newtype Buffer (ty :: Type) n = Buffer { unBuffer :: GLuint }
   deriving (Storable)
 
-instance Object (Buffer n) where
+instance Object (Buffer ty n) where
   gen n = glGenBuffers n . coerce
   delete n = glDeleteBuffers n . coerce
 
-instance Bind (Buffer n) where
+instance Bind (Buffer ty n) where
   nullObject = Buffer 0
   bindObject = checkingGLError . runLiftIO . glBindBuffer GL_ARRAY_BUFFER . unBuffer
 
