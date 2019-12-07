@@ -3,6 +3,7 @@ module GL.Effect.Program
 ( -- * Program effect
   Program(..)
 , use
+, set
   -- * Re-exports
 , Algebra
 , Has
@@ -31,3 +32,6 @@ instance Effect   (Program name) where
 
 use :: forall name sig m . Has (Program name) sig m => m ()
 use = send (Use @name (pure ()))
+
+set :: forall name a m sig . (Has (Program name) sig m, Uniform a) => Var a -> a -> m ()
+set v a = send (Set @name v a (pure ()))
