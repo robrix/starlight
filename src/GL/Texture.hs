@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures #-}
 module GL.Texture
 ( Texture(..)
-, Target(..)
+, Type(..)
 , targetToGLEnum
 , bindTexture
 , Filter(..)
@@ -19,7 +19,7 @@ import GL.Object
 import Graphics.GL.Core41
 import Graphics.GL.Types
 
-newtype Texture (ty :: Target) = Texture { unTexture :: GLuint }
+newtype Texture (ty :: Type) = Texture { unTexture :: GLuint }
   deriving (Storable)
 
 instance Object (Texture ty) where
@@ -27,13 +27,13 @@ instance Object (Texture ty) where
   delete n = glDeleteTextures n . coerce
 
 
-data Target = Texture2D
+data Type = Texture2D
 
-targetToGLEnum :: Target -> GLenum
+targetToGLEnum :: Type -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
 
 
-bindTexture :: (Has (Lift IO) sig m, HasCallStack) => Target -> Maybe (Texture ty) -> m ()
+bindTexture :: (Has (Lift IO) sig m, HasCallStack) => Type -> Maybe (Texture ty) -> m ()
 bindTexture target = checkingGLError . runLiftIO . glBindTexture (targetToGLEnum target) . maybe 0 unTexture
 
 
@@ -43,8 +43,8 @@ filterToGLEnum :: Filter -> GLenum
 filterToGLEnum Nearest = GL_NEAREST
 filterToGLEnum Linear = GL_LINEAR
 
-setMagFilter :: Has (Lift IO) sig m => Target -> Filter -> m ()
+setMagFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
 setMagFilter target = checkingGLError . runLiftIO . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . filterToGLEnum
 
-setMinFilter :: Has (Lift IO) sig m => Target -> Filter -> m ()
+setMinFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
 setMinFilter target = checkingGLError . runLiftIO . glTexParameteri (targetToGLEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . filterToGLEnum
