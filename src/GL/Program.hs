@@ -25,13 +25,13 @@ withProgram = E.bracket
   (runLifting (Program <$> glCreateProgram))
   (runLifting . glDeleteProgram . unProgram)
 
-withLinkedProgram :: HasCallStack => [Shader] -> (Program -> IO a) -> IO a
-withLinkedProgram shaders body = withProgram $ \ (Program program) -> do
+withLinkedProgram :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> (Program -> m a) -> m a
+withLinkedProgram shaders body = withProgram $ \ (Program program) -> runLifting $ do
   for_ shaders (glAttachShader program . unShader)
   glLinkProgram program
   for_ shaders (glDetachShader program . unShader)
   p <- checkProgram (Program program)
-  body p
+  Lifting (body p)
 
 
 withBuiltProgram :: HasCallStack => [(ShaderType, String)] -> (Program -> IO a) -> IO a
