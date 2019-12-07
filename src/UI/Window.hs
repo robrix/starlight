@@ -33,10 +33,10 @@ withWindow name size action = withSDL $
 withSDL :: Has (Lift IO) sig m => m a -> m a
 withSDL = CC.runInBoundThread . E.bracket_ (runLifting initializeAll) (runLifting quit)
 
-withSDLWindow :: (Has (Lift IO) sig m, MonadIO m) => Text -> Linear.V2 Int -> (Window -> m a) -> m a
+withSDLWindow :: Has (Lift IO) sig m => Text -> Linear.V2 Int -> (Window -> m a) -> m a
 withSDLWindow name size = E.bracket
-  (createWindow name windowConfig)
-  destroyWindow where
+  (runLifting (createWindow name windowConfig))
+  (runLifting . destroyWindow) where
   windowConfig = defaultWindow
     { windowInitialSize = fromIntegral <$> size
     , windowResizable = True
