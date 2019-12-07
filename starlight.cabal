@@ -47,6 +47,7 @@ library
     Geometry.Triangle
     GL.Array
     GL.Buffer
+    GL.Carrier.Alloc
     GL.Carrier.Program
     GL.Carrier.Program.Live
     GL.Effect.Alloc
