@@ -11,6 +11,6 @@ module UI.Effect.Window
 import Control.Algebra
 
 data Window m k
-  = forall a . Draw (m a) (m k)
+  = forall a . Draw (m a) (a -> m k)
 
 deriving instance Functor m => Functor (Window m)
