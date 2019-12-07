@@ -1,6 +1,8 @@
 module GL.Program
 ( Program(..)
 , useProgram
+, withProgram
+, withLinkedProgram
 , withBuiltProgram
 , checkProgram
 ) where
