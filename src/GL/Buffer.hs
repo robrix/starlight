@@ -35,7 +35,7 @@ instance KnownType ty => Bind (Buffer ty n) where
 
 realloc :: forall ty n v m sig . (KnownType ty, Scalar n, Foldable v, Has (Lift IO) sig m) => Buffer ty n -> [v n] -> m ()
 realloc buffer vertices = bind buffer $ A.withArrayLen (vertices >>= toList) $ \ n p ->
-  runLiftIO (glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) GL_STATIC_DRAW)
+  runLiftIO (glBufferData (typeToGLEnum (typeVal (Proxy :: Proxy ty))) (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) GL_STATIC_DRAW)
 
 
 data Type
