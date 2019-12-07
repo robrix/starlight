@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, LambdaCase, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, LambdaCase, ScopedTypeVariables, TypeApplications #-}
 module GL.Array
 ( Array(..)
 , withArray
@@ -25,8 +25,7 @@ newtype Array n = Array { unArray :: GLuint }
   deriving (S.Storable)
 
 withArray :: forall v n m a sig . (Foldable v, Scalar n, Has (Lift IO) sig m) => [v n] -> (Array n -> m a) -> m a
-withArray vertices body = with $ \ buffer -> runLiftIO $ do
-  glBindBuffer GL_ARRAY_BUFFER (GL.unBuffer buffer)
+withArray vertices body = with $ \ buffer -> runLiftIO . bind @(GL.Buffer 'GL.Array n) buffer $ do
   A.withArrayLen (vertices >>= toList) $ \ n p ->
     glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) GL_STATIC_DRAW
   with $ \ array -> bind array $ do
