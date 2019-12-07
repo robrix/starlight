@@ -9,9 +9,8 @@ module GL.Shader
 import qualified Control.Exception.Lift as E
 import Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String.Lift as C
-import qualified Foreign.Marshal.Alloc.Lift as A
+import qualified Foreign.Marshal.Utils.Lift as U
 import Foreign.Ptr
-import qualified Foreign.Storable as S
 import GHC.Stack
 import GL.Error
 import Graphics.GL.Core41
@@ -34,8 +33,7 @@ withShader shaderType = E.bracket
 withCompiledShader :: (Has (Lift IO) sig m, HasCallStack) => ShaderType -> String -> (Shader -> m a) -> m a
 withCompiledShader shaderType source body = withShader shaderType $ \ (Shader shader) -> runLifting $ do
   C.withCString source $ \ source ->
-    A.alloca $ \ p -> do
-      sendM (S.poke p source)
+    U.with source $ \ p ->
       glShaderSource shader 1 p nullPtr
   glCompileShader shader
   s <- checkShader source (Shader shader)
