@@ -2,6 +2,7 @@
 module Control.Monad.IO.Class.Lift
 ( Lifting(..)
 , module Control.Carrier.Lift
+, MonadIO(..)
 ) where
 
 import Control.Algebra
