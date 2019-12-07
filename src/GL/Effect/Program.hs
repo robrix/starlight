@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -9,7 +9,8 @@ module GL.Effect.Program
 ) where
 
 import Control.Algebra
+import GHC.Generics (Generic1)
 
 data Program m k
   = Use (m k)
-  deriving (Functor)
+  deriving (Functor, Generic1)
