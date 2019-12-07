@@ -9,9 +9,7 @@ module GL.Array
 
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
-import Data.Foldable (toList)
 import Data.Proxy
-import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr
 import qualified Foreign.Storable as S
 import qualified GL.Buffer as GL
@@ -25,10 +23,9 @@ newtype Array n = Array { unArray :: GLuint }
   deriving (S.Storable)
 
 withArray :: forall v n m a sig . (Foldable v, Scalar n, Has (Lift IO) sig m) => [v n] -> (Array n -> m a) -> m a
-withArray vertices body = with $ \ buffer -> runLiftIO . bind @(GL.Buffer 'GL.Array n) buffer $ do
-  A.withArrayLen (vertices >>= toList) $ \ n p ->
-    glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) GL_STATIC_DRAW
-  with $ \ array -> bind array $ do
+withArray vertices body = with $ \ buffer -> runLiftIO $ do
+  GL.realloc buffer vertices GL.Static GL.Draw
+  with $ \ array -> bind array . bind @(GL.Buffer 'GL.Array n) buffer $ do
     glEnableVertexAttribArray 0
     glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
     LiftIO (body array)
