@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Framebuffer
 ( Framebuffer(..)
+, Bind(..)
 , bindFramebuffer
 ) where
 
