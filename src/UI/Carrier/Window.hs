@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module UI.Carrier.Window
 ( -- * Window carrier
   runWindow
@@ -7,11 +7,15 @@ module UI.Carrier.Window
 , module UI.Effect.Window
 ) where
 
+import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.Reader
-import Control.Monad.IO.Class
+import Control.Monad.IO.Class.Lift
+import Data.Function (fix)
 import Data.Text (Text)
 import Linear.V2
+import qualified SDL.Event as SDL
+import qualified SDL.Video as SDL
 import UI.Effect.Window
 import qualified UI.Window as UI
 
@@ -24,3 +28,13 @@ runWindow name size (WindowC m) = UI.withSDL $
 
 newtype WindowC m a = WindowC (ReaderC UI.Window m a)
   deriving (Applicative, Functor, Monad, MonadIO)
+
+instance Has (Lift IO) sig m => Algebra (Window :+: sig) (WindowC m) where
+  alg = \case
+    L (Draw m k) -> WindowC ask >>= \ window -> fix $ \ loop -> do
+      a <- m
+      SDL.Event _ payload <- runLifting SDL.waitEvent
+      case payload of
+        SDL.QuitEvent -> k a
+        _             -> runLifting (SDL.glSwapWindow window) *> loop
+    R other      -> WindowC (send (handleCoercible other))
