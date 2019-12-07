@@ -49,6 +49,7 @@ library
     GL.Buffer
     GL.Carrier.Program
     GL.Carrier.Program.Live
+    GL.Effect.Alloc
     GL.Effect.Program
     GL.Error
     GL.Framebuffer
