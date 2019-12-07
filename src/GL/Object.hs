@@ -31,4 +31,4 @@ with = withN 1 . (. head)
 
 
 class Bind t where
-  bindObject :: Has (Lift IO) sig m => Maybe t -> m ()
+  bind :: Has (Lift IO) sig m => t -> m a -> m a
