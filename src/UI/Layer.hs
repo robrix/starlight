@@ -4,6 +4,7 @@ module UI.Layer
 , drawLayer
 ) where
 
+import Control.Monad.IO.Class.Lift
 import Data.Int (Int32)
 import Geometry.Rect
 import GL.Framebuffer
@@ -22,8 +23,8 @@ data Contents
   = Colour (Colour Float)
   | Composite [Contents]
 
-drawLayer :: Layer -> IO ()
-drawLayer layer = do
+drawLayer :: Has (Lift IO) sig m => Layer -> m ()
+drawLayer layer = runLifting $ do
   bindFramebuffer (framebuffer layer)
 
   let Rect (V2 x y) (V2 w h) = (2 *) <$> bounds layer
@@ -33,4 +34,4 @@ drawLayer layer = do
   setClearColour (background layer)
   glClear GL_COLOR_BUFFER_BIT
 
-  draw layer
+  sendM (draw layer)
