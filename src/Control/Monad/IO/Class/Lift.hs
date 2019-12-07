@@ -1,2 +1,5 @@
 module Control.Monad.IO.Class.Lift
-() where
+( module Control.Carrier.Lift
+) where
+
+import Control.Carrier.Lift
