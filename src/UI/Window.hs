@@ -15,15 +15,15 @@ import SDL.Event
 import SDL.Init
 import SDL.Video
 
-withWindow :: (Has (Lift IO) sig m, MonadIO m) => Text -> Linear.V2 Int -> ((m () -> m ()) -> m a) -> m a
+withWindow :: (Has (Lift IO) sig m, MonadIO m) => Text -> Linear.V2 Int -> ((m a -> m a) -> m b) -> m b
 withWindow name size action = withSDL $
   withSDLWindow name size $ \ window ->
     withGLContext window $ \ _ ->
       action $ \ draw -> fix $ \ loop -> do
-        draw
+        a <- draw
         Event _ payload <- waitEvent
         case payload of
-          QuitEvent -> pure ()
+          QuitEvent -> pure a
           _ -> glSwapWindow window *> loop
 
 withSDL :: (Has (Lift IO) sig m, MonadIO m) => m a -> m a
