@@ -14,6 +14,7 @@ import Foreign.Ptr
 import Geometry.Rect
 import GHC.Stack
 import GL.Array
+import GL.Carrier.Alloc
 import GL.Carrier.Program.Live
 import GL.Error
 import GL.Framebuffer
@@ -47,7 +48,7 @@ main :: HasCallStack => IO ()
 main = evalState (Nothing :: Maybe UTCTime) $ do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
-  runWindow "Text" (fromIntegral <$> windowSize) $
+  runWindow "Text" (fromIntegral <$> windowSize) . runAlloc $
     let rect    = Var "rect"    :: Var (V4 Float)
         colour  = Var "colour"  :: Var (V4 Float)
         sampler = Var "sampler" :: Var TextureUnit
