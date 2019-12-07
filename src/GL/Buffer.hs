@@ -4,6 +4,7 @@ module GL.Buffer
 , Type(..)
 , KnownType(..)
 , typeToGLEnum
+, Update(..)
 , Usage(..)
 ) where
 
@@ -41,6 +42,12 @@ instance KnownType 'Array where
 typeToGLEnum :: Type -> GLenum
 typeToGLEnum Array = GL_ARRAY_BUFFER
 
+
+data Update
+  = Static
+  | Dynamic
+  | Stream
+  deriving (Eq, Ord, Show)
 
 data Usage
   = Draw
