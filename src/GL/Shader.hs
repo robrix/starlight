@@ -42,9 +42,9 @@ withCompiledShader shaderType source body = withShader shaderType $ \ (Shader sh
   Lifting (body s)
 
 withCompiledShaders :: (Has (Lift IO) sig m, HasCallStack) => [(ShaderType, String)] -> ([Shader] -> m a) -> m a
-withCompiledShaders sources body = go sources []
-  where go [] shaders = body shaders
-        go ((t, source):xs) shaders = withCompiledShader t source (\ shader -> go xs (shader : shaders))
+withCompiledShaders sources body = go [] sources
+  where go shaders [] = body shaders
+        go shaders ((t, source):xs) = withCompiledShader t source (\ shader -> go (shader : shaders) xs)
 
 checkShader :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m Shader
 checkShader source = withFrozenCallStack $ runLifting . fmap Shader . checkStatus glGetShaderiv glGetShaderInfoLog (Source source) GL_COMPILE_STATUS . unShader
