@@ -12,18 +12,18 @@ import Graphics.GL.Core41
 import Linear.V2
 import UI.Colour
 
-data Layer = Layer
+data Layer m = Layer
   { framebuffer :: Maybe Framebuffer
   , background  :: Colour Float
   , bounds      :: Rect Int32
-  , draw        :: IO ()
+  , draw        :: m ()
   }
 
 data Contents
   = Colour (Colour Float)
   | Composite [Contents]
 
-drawLayer :: Has (Lift IO) sig m => Layer -> m ()
+drawLayer :: Has (Lift IO) sig m => Layer m -> m ()
 drawLayer layer = runLifting $ do
   bindFramebuffer (framebuffer layer)
 
@@ -34,4 +34,4 @@ drawLayer layer = runLifting $ do
   setClearColour (background layer)
   glClear GL_COLOR_BUFFER_BIT
 
-  sendM (draw layer)
+  Lifting (draw layer)
