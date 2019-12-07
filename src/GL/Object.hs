@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 module GL.Object
 ( Object(..)
-, Bind(..)
 , withN
 , with
+, Bind(..)
 ) where
 
 import qualified Control.Exception.Lift as E
@@ -17,9 +17,6 @@ class Storable t => Object t where
   gen :: MonadIO m => GLsizei -> Ptr t -> m ()
   delete :: MonadIO m => GLsizei -> Ptr t -> m ()
 
-class Bind t where
-  bindObject :: Has (Lift IO) sig m => Maybe t -> m ()
-
 withN :: (Has (Lift IO) sig m, Object t) => Int -> ([t] -> m a) -> m a
 withN n = E.bracket acquire release where
   acquire = A.allocaArray n $ \ p -> runLiftIO $ do
@@ -31,3 +28,7 @@ withN n = E.bracket acquire release where
 
 with :: (Has (Lift IO) sig m, Object t) => (t -> m a) -> m a
 with = withN 1 . (. head)
+
+
+class Bind t where
+  bindObject :: Has (Lift IO) sig m => Maybe t -> m ()
