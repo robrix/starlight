@@ -20,10 +20,10 @@ newtype Program = Program { unProgram :: GLuint }
 useProgram :: Has (Lift IO) sig m => Program -> m ()
 useProgram = runLifting . glUseProgram . unProgram
 
-withProgram :: (Program -> IO a) -> IO a
+withProgram :: Has (Lift IO) sig m => (Program -> m a) -> m a
 withProgram = E.bracket
-  (Program <$> glCreateProgram)
-  (glDeleteProgram . unProgram)
+  (runLifting (Program <$> glCreateProgram))
+  (runLifting . glDeleteProgram . unProgram)
 
 withLinkedProgram :: HasCallStack => [Shader] -> (Program -> IO a) -> IO a
 withLinkedProgram shaders body = withProgram $ \ (Program program) -> do
