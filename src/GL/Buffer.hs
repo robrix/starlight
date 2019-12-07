@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Buffer
 ( Buffer(..)
+, Type(..)
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -21,3 +22,7 @@ instance Object (Buffer n) where
 instance Bind (Buffer n) where
   nullObject = Buffer 0
   bindObject = checkingGLError . runLiftIO . glBindBuffer GL_ARRAY_BUFFER . unBuffer
+
+
+data Type
+  = Array
