@@ -59,6 +59,7 @@ library
     GL.TextureUnit
     GL.Uniform
     Linear.Exts
+    UI.Carrier.Window
     UI.Colour
     UI.Effect.Window
     UI.Font
