@@ -4,7 +4,6 @@ module GL.Texture
 , Type(..)
 , KnownType(..)
 , targetToGLEnum
-, bindTexture
 , Filter(..)
 , filterToGLEnum
 , setMagFilter
@@ -15,7 +14,6 @@ import Control.Monad.IO.Class.Lift
 import Data.Coerce
 import Data.Proxy
 import Foreign.Storable
-import GHC.Stack
 import GL.Error
 import GL.Object
 import Graphics.GL.Core41
@@ -43,10 +41,6 @@ instance KnownType 'Texture2D where
 
 targetToGLEnum :: Type -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
-
-
-bindTexture :: forall ty m sig . (KnownType ty, Has (Lift IO) sig m, HasCallStack) => Maybe (Texture ty) -> m ()
-bindTexture = checkingGLError . runLiftIO . glBindTexture (targetToGLEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unTexture
 
 
 data Filter = Nearest | Linear
