@@ -23,9 +23,7 @@ withN n = E.bracket acquire release where
   acquire = A.allocaArray n $ \ p -> runLiftIO $ do
     gen (fromIntegral n) p
     A.peekArray n p
-  release buffers = A.allocaArray n $ \ p -> runLiftIO $ do
-    A.pokeArray p buffers
-    delete (fromIntegral n) p
+  release buffers = A.withArray buffers $ runLiftIO . delete (fromIntegral n)
 
 with :: (Has (Lift IO) sig m, Object t) => (t -> m a) -> m a
 with = withN 1 . (. head)
