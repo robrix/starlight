@@ -3,6 +3,7 @@ module GL.Effect.Alloc
 ( -- * Alloc effect
   Alloc(..)
 , genN
+, gen
 ) where
 
 import Control.Algebra
@@ -21,3 +22,6 @@ instance Effect Alloc where
 
 genN :: (Object t, Has Alloc sig m) => Int -> m [t]
 genN n = send (Gen n pure)
+
+gen :: (Object t, Has Alloc sig m) => m t
+gen = send (Gen 1 (pure . head))
