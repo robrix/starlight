@@ -49,5 +49,5 @@ withSDLWindow name size = E.bracket
     , glColorPrecision = V4 8 8 8 8
     }
 
-withGLContext :: (Has (Lift IO) sig m, MonadIO m) => Window -> (GLContext -> m a) -> m a
-withGLContext window = E.bracket (glCreateContext window) glDeleteContext
+withGLContext :: Has (Lift IO) sig m => Window -> (GLContext -> m a) -> m a
+withGLContext window = E.bracket (runLifting (glCreateContext window)) (runLifting . glDeleteContext)
