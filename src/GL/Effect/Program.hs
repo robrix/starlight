@@ -19,5 +19,6 @@ data Program m k
 instance HFunctor Program
 instance Effect   Program
 
+
 use :: Has Program sig m => m ()
 use = send (Use (pure ()))
