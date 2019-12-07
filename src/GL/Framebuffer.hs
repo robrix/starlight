@@ -2,7 +2,6 @@
 module GL.Framebuffer
 ( Framebuffer(..)
 , Bind(..)
-, bindFramebuffer
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -23,7 +22,3 @@ instance Object Framebuffer where
 instance Bind Framebuffer where
   nullObject = Framebuffer 0
   bindObject = checkingGLError . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . unFramebuffer
-
-
-bindFramebuffer :: Has (Lift IO) sig m => Maybe Framebuffer -> m ()
-bindFramebuffer = checkingGLError . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
