@@ -2,6 +2,7 @@
 module GL.Buffer
 ( Buffer(..)
 , realloc
+, copy
 , Type(..)
 , KnownType(..)
 , typeToGLEnum
@@ -15,7 +16,7 @@ import Data.Coerce
 import Data.Foldable (toList)
 import Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
-import Foreign.Ptr (castPtr)
+import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable as S
 import GL.Error
 import GL.Object
@@ -37,6 +38,9 @@ instance KnownType ty => Bind (Buffer ty) where
 realloc :: forall ty n v m buffer sig . (KnownType ty, Scalar n, Foldable v, Has (Lift IO) sig m) => buffer ty -> [v n] -> Update -> Usage -> m ()
 realloc _ vertices update usage = A.withArrayLen (vertices >>= toList) $ \ n p ->
   runLiftIO (glBufferData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) (hintToGLEnum update usage))
+
+copy :: forall ty a m buffer sig . (KnownType ty, Has (Lift IO) sig m) => buffer ty -> Int -> Int -> Ptr a -> m ()
+copy _ offset size = checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr
 
 
 data Type
