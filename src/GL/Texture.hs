@@ -33,6 +33,7 @@ instance KnownType ty => Bind (Texture ty) where
 
 data Type
   = Texture2D
+  deriving (Eq, Ord, Show)
 
 class KnownType (ty :: Type) where
   typeVal :: proxy ty -> Type
