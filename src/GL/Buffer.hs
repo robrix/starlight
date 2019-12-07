@@ -30,3 +30,6 @@ data Type
 
 class KnownType (ty :: Type) where
   typeVal :: proxy ty -> Type
+
+instance KnownType 'Array where
+  typeVal _ = Array
