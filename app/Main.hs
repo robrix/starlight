@@ -88,11 +88,10 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
       checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (2 * width) (2 * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
       bindTexture Texture2D Nothing
 
-      bindFramebuffer (Just framebuffer)
-      checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
-      status <- glCheckFramebufferStatus GL_FRAMEBUFFER
-      unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
-      bindFramebuffer Nothing
+      bind framebuffer $ do
+        checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
+        status <- glCheckFramebufferStatus GL_FRAMEBUFFER
+        unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
