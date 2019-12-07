@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 module GL.Object
 ( Object(..)
+, Bind(..)
 , withN
 , with
 ) where
@@ -15,6 +16,9 @@ import Graphics.GL.Types
 class Storable t => Object t where
   gen :: MonadIO m => GLsizei -> Ptr t -> m ()
   delete :: MonadIO m => GLsizei -> Ptr t -> m ()
+
+class Bind t where
+  bindObject :: Has (Lift IO) sig m => Maybe t -> m ()
 
 withN :: (Has (Lift IO) sig m, Object t) => Int -> ([t] -> m a) -> m a
 withN n = E.bracket acquire release where
