@@ -3,6 +3,7 @@ module GL.Buffer
 ( Buffer(..)
 , Type(..)
 , KnownType(..)
+, typeToGLEnum
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -33,3 +34,6 @@ class KnownType (ty :: Type) where
 
 instance KnownType 'Array where
   typeVal _ = Array
+
+typeToGLEnum :: Type -> GLenum
+typeToGLEnum Array = GL_ARRAY_BUFFER
