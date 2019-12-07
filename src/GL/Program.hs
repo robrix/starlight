@@ -5,8 +5,8 @@ module GL.Program
 , checkProgram
 ) where
 
-import qualified Control.Exception as E
-import Control.Monad.IO.Class
+import qualified Control.Exception.Lift as E
+import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import GHC.Stack
 import GL.Error
@@ -17,8 +17,8 @@ import Graphics.GL.Types
 newtype Program = Program { unProgram :: GLuint }
   deriving Show
 
-useProgram :: MonadIO m => Program -> m ()
-useProgram = glUseProgram . unProgram
+useProgram :: Has (Lift IO) sig m => Program -> m ()
+useProgram = runLifting . glUseProgram . unProgram
 
 withProgram :: (Program -> IO a) -> IO a
 withProgram = E.bracket
