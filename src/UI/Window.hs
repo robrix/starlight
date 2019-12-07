@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 module UI.Window
 ( withWindow
+, Window
 ) where
 
 import Control.Carrier.Lift
