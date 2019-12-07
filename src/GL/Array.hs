@@ -24,9 +24,9 @@ newtype Array n = Array { unArray :: GLuint }
   deriving (S.Storable)
 
 withArray :: forall v n m a sig . (Foldable v, Scalar n, Has (Lift IO) sig m) => [v n] -> (Array n -> m a) -> m a
-withArray vertices body = with $ \ buffer -> runLiftIO $ do
+withArray vertices body = with $ \ buffer -> runLiftIO . bind @(GL.Buffer 'GL.Array n) buffer $ do
   GL.realloc buffer vertices GL.Static GL.Draw
-  with $ \ array -> bind array . bind @(GL.Buffer 'GL.Array n) buffer $ do
+  with $ \ array -> bind array $ do
     glEnableVertexAttribArray 0
     glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
     LiftIO (body array)

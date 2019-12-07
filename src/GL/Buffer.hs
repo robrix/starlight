@@ -34,8 +34,8 @@ instance KnownType ty => Bind (Buffer ty n) where
   nullObject = Buffer 0
   bindObject = checkingGLError . runLiftIO . glBindBuffer (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . unBuffer
 
-realloc :: forall ty n v m sig . (KnownType ty, Scalar n, Foldable v, Has (Lift IO) sig m) => Buffer ty n -> [v n] -> Update -> Usage -> m ()
-realloc buffer vertices update usage = bind buffer $ A.withArrayLen (vertices >>= toList) $ \ n p ->
+realloc :: forall ty n v m buffer sig . (KnownType ty, Scalar n, Foldable v, Has (Lift IO) sig m) => buffer ty n -> [v n] -> Update -> Usage -> m ()
+realloc _ vertices update usage = A.withArrayLen (vertices >>= toList) $ \ n p ->
   runLiftIO (glBufferData (typeToGLEnum (typeVal (Proxy :: Proxy ty))) (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) (hintToGLEnum update usage))
 
 
