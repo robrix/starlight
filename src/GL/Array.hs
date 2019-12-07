@@ -66,5 +66,5 @@ data Range = Range
   }
   deriving (Eq, Show)
 
-drawArrays :: Mode -> Range -> IO ()
-drawArrays mode (Range from count) = checkingGLError $ glDrawArrays (modeToGLEnum mode) (fromIntegral from) (fromIntegral count)
+drawArrays :: Has (Lift IO) sig m => Mode -> Range -> m ()
+drawArrays mode (Range from count) = checkingGLError . runLifting $ glDrawArrays (modeToGLEnum mode) (fromIntegral from) (fromIntegral count)
