@@ -18,7 +18,6 @@ import GL.Carrier.Program
 import GL.Error
 import GL.Framebuffer
 import GL.Object
-import GL.Program
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit
@@ -48,7 +47,6 @@ main :: HasCallStack => IO ()
 main = evalState (Nothing :: Maybe UTCTime) $ do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
-  [glyphVertex, glyphFragment] <- traverse (liftIO . readFile) ["glyph-vertex.glsl", "glyph-fragment.glsl"]
   runWindow "Text" (fromIntegral <$> windowSize) $
     let rect    = Var "rect"    :: Var (V4 Float)
         colour  = Var "colour"  :: Var (V4 Float)
@@ -80,9 +78,9 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     withArray screenQuadVertices $ \ screenQuadArray ->
     withArray glyphVertices $ \ glyphArray ->
     -- withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
-    withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
+    -- withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
     with $ \ texture ->
-    with $ \ framebuffer -> runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
+    with $ \ framebuffer -> runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
       bindTexture Texture2D (Just texture)
       setMagFilter Texture2D Nearest
       setMinFilter Texture2D Nearest
@@ -103,10 +101,10 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
       let drawGlyphs = do
             glBlendFunc GL_ONE GL_ONE -- add
 
-            useProgram glyphProgram
+            use @"glyph"
 
-            -- setUniformValue glyphProgram colour white
-            -- setUniformValue glyphProgram matrix3 identity
+            -- set @"glyph" colour white
+            -- set @"glyph" matrix3 identity
             -- bindArray screenQuadArray
             -- traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
@@ -116,8 +114,8 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
                 windowScale = 1 / 2
             for_ (zip instances glyphRanges) $ \ (Instance{..}, range) ->
               for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                setUniformValue glyphProgram colour glyphColour
-                setUniformValue glyphProgram matrix3
+                set @"glyph" colour glyphColour
+                set @"glyph" matrix3
                   $   translated (-1)
                   !*! scaled     (V3 sx sy 1)
                   !*! translated offset
