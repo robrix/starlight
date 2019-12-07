@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures #-}
+{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures, ScopedTypeVariables #-}
 module GL.Texture
 ( Texture(..)
 , Type(..)
@@ -13,6 +13,7 @@ module GL.Texture
 
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
+import Data.Proxy
 import Foreign.Storable
 import GHC.Stack
 import GL.Error
@@ -40,8 +41,8 @@ targetToGLEnum :: Type -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
 
 
-bindTexture :: (Has (Lift IO) sig m, HasCallStack) => Type -> Maybe (Texture ty) -> m ()
-bindTexture target = checkingGLError . runLiftIO . glBindTexture (targetToGLEnum target) . maybe 0 unTexture
+bindTexture :: forall ty m sig . (KnownType ty, Has (Lift IO) sig m, HasCallStack) => Maybe (Texture ty) -> m ()
+bindTexture = checkingGLError . runLiftIO . glBindTexture (targetToGLEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unTexture
 
 
 data Filter = Nearest | Linear

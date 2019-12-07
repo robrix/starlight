@@ -78,15 +78,15 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     withArray screenQuadVertices $ \ screenQuadArray ->
     withArray glyphVertices $ \ glyphArray ->
     runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
-      texture <- gen
+      texture <- gen @(Texture 'Texture2D)
       framebuffer <- gen
-      bindTexture Texture2D (Just texture)
+      bindTexture (Just texture)
       setMagFilter Texture2D Nearest
       setMinFilter Texture2D Nearest
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
       checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (2 * width) (2 * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
-      bindTexture Texture2D Nothing
+      bindTexture @'Texture2D Nothing
 
       bind framebuffer $ do
         checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
@@ -124,7 +124,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
             -- let w = 2 * fromIntegral width
             --     h = 2 * fromIntegral height
             -- A.allocaBytes (4 * w * h) $ \ pixels -> do
-            --   bindTexture Texture2D (Just texture)
+            --   bindTexture (Just texture)
             --   checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
             --   checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
             --   checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
@@ -153,7 +153,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
             -- set @"text" colour black
             let textureUnit = TextureUnit 0
             setActiveTexture textureUnit
-            bindTexture Texture2D (Just texture)
+            bindTexture (Just texture)
             set @"text" sampler textureUnit
 
             bindArray screenQuadArray
