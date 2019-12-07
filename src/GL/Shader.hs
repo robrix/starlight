@@ -25,10 +25,10 @@ toGLEnum Vertex   = GL_VERTEX_SHADER
 toGLEnum Fragment = GL_FRAGMENT_SHADER
 
 
-withShader :: ShaderType -> (Shader -> IO a) -> IO a
+withShader :: Has (Lift IO) sig m => ShaderType -> (Shader -> m a) -> m a
 withShader shaderType = E.bracket
-  (Shader <$> glCreateShader (toGLEnum shaderType))
-  (glDeleteShader . unShader)
+  (runLifting (Shader <$> glCreateShader (toGLEnum shaderType)))
+  (runLifting . glDeleteShader . unShader)
 
 withCompiledShader :: HasCallStack => ShaderType -> String -> (Shader -> IO a) -> IO a
 withCompiledShader shaderType source body = withShader shaderType $ \ (Shader shader) -> do
