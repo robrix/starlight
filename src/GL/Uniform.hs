@@ -23,9 +23,9 @@ newtype Var t = Var { varName :: String }
 class Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
-setUniformValue :: (Uniform t, HasCallStack) => Program -> Var t -> t -> IO ()
+setUniformValue :: (Uniform t, Has (Lift IO) sig m, HasCallStack) => Program -> Var t -> t -> m ()
 setUniformValue program var v = do
-  location <- checkingGLError $ C.withCString (varName var) (glGetUniformLocation (unProgram program))
+  location <- checkingGLError . runLifting $ C.withCString (varName var) (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v
 
 instance Uniform (Linear.V4 Float) where
