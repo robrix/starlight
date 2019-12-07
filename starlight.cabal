@@ -83,6 +83,7 @@ executable starlight
       base
     , bytestring
     , containers
+    , directory
     , fused-effects
     , gl
     , JuicyPixels
@@ -93,6 +94,7 @@ executable starlight
     , semigroupoids
     , starlight
     , text
+    , time
     , vector
 
 source-repository head

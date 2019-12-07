@@ -3,10 +3,13 @@ module Main
 ( main
 ) where
 
+import Control.Carrier.State.Strict
 import Control.Monad
+import Control.Monad.IO.Class
 import Data.Foldable
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
+import Data.Time.Clock
 import Foreign.Ptr
 import Geometry.Rect
 import GHC.Stack
@@ -26,6 +29,7 @@ import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
+import System.Directory
 import UI.Colour
 import UI.Font as Font
 import UI.Glyph
@@ -40,10 +44,10 @@ import UI.Window
 -- import System.CPUTime
 
 main :: HasCallStack => IO ()
-main = do
+main = evalState (Nothing :: Maybe UTCTime) $ do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
-  [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse readFile ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
+  [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse (liftIO . readFile) ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
   withWindow "Text" (fromIntegral <$> windowSize) $ \ draw ->
     let rect    = Var "rect"    :: Var (V4 Float)
         colour  = Var "colour"  :: Var (V4 Float)
@@ -168,7 +172,12 @@ main = do
             bindArray shipArray
             traverse_ (drawArrays LineLoop) shipRanges
 
-      draw $
+      draw $ do
+        prev <- get
+        current <- liftIO (Just <$> getModificationTime "text-vertex.glsl")
+        when (prev /= current) $ do
+          liftIO $ putStrLn "text-vertex.glsl modified"
+          put current
         traverse_ drawLayer
           [ Layer (Just framebuffer) transparent (Rect 0 windowSize) drawGlyphs
           , Layer Nothing black (Rect 0 windowSize) drawText
