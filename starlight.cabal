@@ -38,6 +38,7 @@ library
   exposed-modules:
     Control.Concurrent.Lift
     Control.Exception.Lift
+    Control.Monad.IO.Class.Lift
     Foreign.Marshal.Array.Lift
     Geometry.Rect
     Geometry.Triangle
