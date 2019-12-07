@@ -10,6 +10,7 @@ module GL.Texture
 , setMinFilter
 ) where
 
+import Control.Monad.IO.Class.Lift
 import Data.Coerce
 import Foreign.Storable
 import GL.Error
@@ -31,8 +32,8 @@ targetToGLEnum :: Target -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
 
 
-bindTexture :: Target -> Maybe Texture -> IO ()
-bindTexture target = checkingGLError . glBindTexture (targetToGLEnum target) . maybe 0 unTexture
+bindTexture :: Has (Lift IO) sig m => Target -> Maybe Texture -> m ()
+bindTexture target = checkingGLError . runLifting . glBindTexture (targetToGLEnum target) . maybe 0 unTexture
 
 
 data Filter = Nearest | Linear
