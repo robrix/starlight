@@ -11,7 +11,7 @@ import qualified Control.Exception.Lift as E
 import Control.Monad
 import Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String as C
-import qualified Foreign.Marshal.Alloc as A
+import qualified Foreign.Marshal.Alloc.Lift as A
 import Foreign.Ptr
 import qualified Foreign.Storable as S
 import GHC.Stack
@@ -46,24 +46,24 @@ instance Show GLException where
 instance E.Exception GLException
 
 
-checkStatus :: HasCallStack
-            => (GLenum -> GLuint -> Ptr GLint -> IO ())
-            -> (GLuint -> GLsizei -> Ptr GLsizei -> Ptr GLchar -> IO ())
+checkStatus :: (Has (Lift IO) sig m, HasCallStack)
+            => (GLenum -> GLuint -> Ptr GLint -> m ())
+            -> (GLuint -> GLsizei -> Ptr GLsizei -> Ptr GLchar -> m ())
             -> (String -> GLError)
             -> GLenum
             -> GLuint
-            -> IO GLuint
+            -> m GLuint
 checkStatus get getLog error status object = withFrozenCallStack $ do
   success <- A.alloca $ \ p -> do
     get object status p
-    S.peek p
+    sendM (S.peek p)
   when (success == GL_FALSE) $ do
     l <- A.alloca $ \ p -> do
       get object GL_INFO_LOG_LENGTH p
-      S.peek p
+      sendM (S.peek p)
     log <- A.allocaBytes (fromIntegral l) $ \ bytes -> do
       getLog object l nullPtr bytes
-      C.peekCString bytes
+      sendM (C.peekCString bytes)
     E.throwIO $ GLException (error log) callStack
   pure object
 
