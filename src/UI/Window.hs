@@ -19,16 +19,16 @@ import SDL.Event
 import SDL.Init
 import SDL.Video
 
-withWindow :: (Has (Lift IO) sig m, MonadIO m) => Text -> Linear.V2 Int -> ((m a -> m a) -> m b) -> m b
+withWindow :: Has (Lift IO) sig m => Text -> Linear.V2 Int -> ((m a -> m a) -> m b) -> m b
 withWindow name size action = withSDL $
   withSDLWindow name size $ \ window ->
     withGLContext window $ \ _ ->
       action $ \ draw -> fix $ \ loop -> do
         a <- draw
-        Event _ payload <- waitEvent
+        Event _ payload <- runLifting waitEvent
         case payload of
           QuitEvent -> pure a
-          _ -> glSwapWindow window *> loop
+          _ -> runLifting (glSwapWindow window) *> loop
 
 withSDL :: Has (Lift IO) sig m => m a -> m a
 withSDL = CC.runInBoundThread . E.bracket_ (runLifting initializeAll) (runLifting quit)
