@@ -16,3 +16,4 @@ data Program m k
   deriving (Functor, Generic1)
 
 instance HFunctor Program
+instance Effect   Program
