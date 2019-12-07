@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures #-}
 module GL.Texture
 ( Texture(..)
 , Target(..)
@@ -19,10 +19,10 @@ import GL.Object
 import Graphics.GL.Core41
 import Graphics.GL.Types
 
-newtype Texture = Texture { unTexture :: GLuint }
+newtype Texture (ty :: Target) = Texture { unTexture :: GLuint }
   deriving (Storable)
 
-instance Object Texture where
+instance Object (Texture ty) where
   gen n = glGenTextures n . coerce
   delete n = glDeleteTextures n . coerce
 
@@ -33,7 +33,7 @@ targetToGLEnum :: Target -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
 
 
-bindTexture :: (Has (Lift IO) sig m, HasCallStack) => Target -> Maybe Texture -> m ()
+bindTexture :: (Has (Lift IO) sig m, HasCallStack) => Target -> Maybe (Texture ty) -> m ()
 bindTexture target = checkingGLError . runLiftIO . glBindTexture (targetToGLEnum target) . maybe 0 unTexture
 
 
