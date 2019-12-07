@@ -2,6 +2,7 @@
 module GL.Buffer
 ( Buffer(..)
 , Type(..)
+, KnownType(..)
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -26,3 +27,6 @@ instance Bind (Buffer ty n) where
 
 data Type
   = Array
+
+class KnownType (ty :: Type) where
+  typeVal :: proxy ty -> Type
