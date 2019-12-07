@@ -31,7 +31,8 @@ instance KnownType ty => Bind (Texture ty) where
   bindObject = checkingGLError . runLiftIO . glBindTexture (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . unTexture
 
 
-data Type = Texture2D
+data Type
+  = Texture2D
 
 class KnownType (ty :: Type) where
   typeVal :: proxy ty -> Type
