@@ -14,7 +14,7 @@ import Foreign.Ptr
 import Geometry.Rect
 import GHC.Stack
 import GL.Array
-import GL.Carrier.Program
+import GL.Carrier.Program.Live
 import GL.Error
 import GL.Framebuffer
 import GL.Object
