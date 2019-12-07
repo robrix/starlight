@@ -1,4 +1,4 @@
-{-# LANGUAGE ExplicitForAll, GeneralizedNewtypeDeriving, PolyKinds #-}
+{-# LANGUAGE ExplicitForAll, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
 module GL.Carrier.Program
 ( -- * Program carrier
   runProgram
@@ -7,6 +7,7 @@ module GL.Carrier.Program
 , module GL.Effect.Program
 ) where
 
+import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Monad.IO.Class
@@ -22,3 +23,8 @@ runProgram shaders (ProgramC m) = do
 
 newtype ProgramC name m a = ProgramC (ReaderC GL.Program m a)
   deriving (Applicative, Functor, Monad, MonadIO)
+
+instance Has (Lift IO) sig m => Algebra (Program name :+: sig) (ProgramC name m) where
+  alg = \case
+    L (Use k) -> ProgramC ask >>= GL.useProgram >> k
+    R other   -> ProgramC (send (handleCoercible other))
