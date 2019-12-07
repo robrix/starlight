@@ -1,8 +1,9 @@
-{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications #-}
 module GL.Buffer
 ( Buffer(..)
 , realloc
 , copy
+, copyFrom
 , Type(..)
 , KnownType(..)
 , typeToGLEnum
@@ -19,12 +20,14 @@ import Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable as S
+import GHC.TypeLits
 import GL.Error
 import GL.Object
 import GL.Range
 import GL.Scalar
 import Graphics.GL.Core41
 import Graphics.GL.Types
+import Linear.V
 
 newtype Buffer (ty :: Type) = Buffer { unBuffer :: GLuint }
   deriving (Storable)
@@ -43,6 +46,11 @@ realloc _ vertices update usage = A.withArrayLen (vertices >>= toList) $ \ n p -
 
 copy :: forall ty a m buffer sig . (KnownType ty, Has (Lift IO) sig m) => buffer ty -> Range -> Ptr a -> m ()
 copy _ (Range offset size) = checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr
+
+copyFrom :: forall ty v n m buffer sig . (KnownType ty, KnownNat (Size v), Foldable v, Scalar n, Has (Lift IO) sig m) => buffer ty -> Int -> [v n] -> m ()
+copyFrom _ offset vertices = A.withArray (vertices >>= toList) $
+  checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr where
+  size = length vertices * fromIntegral (natVal (Proxy @(Size v))) * S.sizeOf @n 0
 
 
 data Type
