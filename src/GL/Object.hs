@@ -31,10 +31,11 @@ with = withN 1 . (. head)
 
 
 class Bind t where
-  bindObject :: (Has (Lift IO) sig m, HasCallStack) => Maybe t -> m ()
+  nullObject :: t
+  bindObject :: (Has (Lift IO) sig m, HasCallStack) => t -> m ()
 
 bind :: forall t m a sig . (Bind t, Has (Lift IO) sig m, HasCallStack) => t -> m a -> m a
 bind t m = do
-  bindObject (Just t)
+  bindObject t
   a <- m
-  a <$ bindObject (Nothing :: Maybe t)
+  a <$ bindObject (nullObject :: t)

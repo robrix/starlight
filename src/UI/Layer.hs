@@ -26,7 +26,7 @@ data Contents
   | Composite [Contents]
 
 drawLayer :: Has (Lift IO) sig m => Layer m -> m ()
-drawLayer layer = runLiftIO . bind (fromMaybe (Framebuffer 0) (framebuffer layer)) $ do
+drawLayer layer = runLiftIO . bind (fromMaybe nullObject (framebuffer layer)) $ do
   let Rect (V2 x y) (V2 w h) = (2 *) <$> bounds layer
   glViewport x y w h
   glScissor x y w h
