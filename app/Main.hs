@@ -18,7 +18,6 @@ import GL.Carrier.Alloc
 import GL.Carrier.Program.Live
 import GL.Error
 import GL.Framebuffer
-import GL.Object
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit
@@ -78,8 +77,9 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     withArray shipVertices $ \ shipArray ->
     withArray screenQuadVertices $ \ screenQuadArray ->
     withArray glyphVertices $ \ glyphArray ->
-    with $ \ texture ->
-    with $ \ framebuffer -> runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
+    runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
+      texture <- gen
+      framebuffer <- gen
       bindTexture Texture2D (Just texture)
       setMagFilter Texture2D Nearest
       setMinFilter Texture2D Nearest
