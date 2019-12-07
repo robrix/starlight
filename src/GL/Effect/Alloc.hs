@@ -4,6 +4,10 @@ module GL.Effect.Alloc
   Alloc(..)
 , genN
 , gen
+  -- * Re-exports
+, Algebra
+, Has
+, run
 ) where
 
 import Control.Algebra
