@@ -30,8 +30,7 @@ withArray vertices body = with $ \ buffer -> runLiftIO $ do
   glBindBuffer GL_ARRAY_BUFFER (GL.unBuffer buffer)
   A.withArrayLen (vertices >>= toList) $ \ n p ->
     glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) GL_STATIC_DRAW
-  with $ \ array -> do
-    bindArray array
+  with $ \ array -> bind array $ do
     glEnableVertexAttribArray 0
     glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
     LiftIO (body array)

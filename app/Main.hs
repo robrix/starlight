@@ -102,36 +102,37 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
             -- set @"glyph" colour white
             -- set @"glyph" matrix3 identity
-            -- bindArray screenQuadArray
-            -- traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
+            -- bind screenQuadArray $
+            --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
-            bindArray glyphArray
+            bind glyphArray $ do
 
-            let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
-                windowScale = 1 / 2
-            for_ (zip instances glyphRanges) $ \ (Instance{..}, range) ->
-              for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                set @"glyph" colour glyphColour
-                set @"glyph" matrix3
-                  $   translated (-1)
-                  !*! scaled     (V3 sx sy 1)
-                  !*! translated offset
-                  !*! translated (V2 tx ty * windowScale)
-                  !*! scaled     scale
-                drawArrays Triangles range
+              let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
+                  windowScale = 1 / 2
+              for_ (zip instances glyphRanges) $ \ (Instance{..}, range) ->
+                for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
+                  set @"glyph" colour glyphColour
+                  set @"glyph" matrix3
+                    $   translated (-1)
+                    !*! scaled     (V3 sx sy 1)
+                    !*! translated offset
+                    !*! translated (V2 tx ty * windowScale)
+                    !*! scaled     scale
+                  drawArrays Triangles range
 
-            -- let w = 2 * fromIntegral width
-            --     h = 2 * fromIntegral height
-            -- A.allocaBytes (4 * w * h) $ \ pixels -> do
-            --   bind texture $ do
-            --     checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-            --     checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
-            --     checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-            --     image <- C.withImage w h $ \ x y -> do
-            --       let pixel = pixels `plusPtr` (w * y + x)
-            --       C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
-            --     time <- getCPUTime
-            --     B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
+              -- let w = 2 * fromIntegral width
+              --     h = 2 * fromIntegral height
+              -- A.allocaBytes (4 * w * h) $ \ pixels -> do
+              --   bind texture $ do
+              --     checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+              --     checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
+              --     checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+              --     image <- C.withImage w h $ \ x y -> do
+              --       let pixel = pixels `plusPtr` (w * y + x)
+              --       C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
+              --     time <- getCPUTime
+              --     B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
+
           drawText = do
             glBlendFunc GL_ZERO GL_SRC_COLOR
 
@@ -155,18 +156,17 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
             bind texture $ do
               set @"text" sampler textureUnit
 
-              bindArray screenQuadArray
-
-              traverse_ (drawArrays TriangleStrip) screenQuadRanges
-
-              when (opaque textColour /= black) $ do
-                glBlendFunc GL_ONE GL_ONE
-                set @"text" colour textColour
+              bind screenQuadArray $ do
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
+                when (opaque textColour /= black) $ do
+                  glBlendFunc GL_ONE GL_ONE
+                  set @"text" colour textColour
+                  traverse_ (drawArrays TriangleStrip) screenQuadRanges
+
           drawShip = do
-            bindArray shipArray
-            traverse_ (drawArrays LineLoop) shipRanges
+            bind shipArray $
+              traverse_ (drawArrays LineLoop) shipRanges
 
       draw $ do
         prev <- get
