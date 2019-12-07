@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module GL.Shader
 ( Shader(..)
 , ShaderType(..)
@@ -40,7 +41,7 @@ withCompiledShader shaderType source body = withShader shaderType $ \ (Shader sh
   s <- checkShader source (Shader shader)
   Lifting (body s)
 
-withCompiledShaders :: HasCallStack => [(ShaderType, String)] -> ([Shader] -> IO a) -> IO a
+withCompiledShaders :: (Has (Lift IO) sig m, HasCallStack) => [(ShaderType, String)] -> ([Shader] -> m a) -> m a
 withCompiledShaders sources body = go sources []
   where go [] shaders = body shaders
         go ((t, source):xs) shaders = withCompiledShader t source (\ shader -> go xs (shader : shaders))
