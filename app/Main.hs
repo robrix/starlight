@@ -33,8 +33,8 @@ import System.Directory
 import UI.Colour
 import UI.Font as Font
 import UI.Glyph
-import UI.Layer
-import UI.Window
+import UI.Layer hiding (draw)
+import UI.Carrier.Window
 
 -- import qualified Codec.Picture as C
 -- import qualified Codec.Picture.Types as C
@@ -48,7 +48,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
   [textVertex, textFragment, glyphVertex, glyphFragment] <- traverse (liftIO . readFile) ["text-vertex.glsl", "text-fragment.glsl", "glyph-vertex.glsl", "glyph-fragment.glsl"]
-  withWindow "Text" (fromIntegral <$> windowSize) $ \ draw ->
+  runWindow "Text" (fromIntegral <$> windowSize) $
     let rect    = Var "rect"    :: Var (V4 Float)
         colour  = Var "colour"  :: Var (V4 Float)
         sampler = Var "sampler" :: Var TextureUnit
