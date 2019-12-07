@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications #-}
 module GL.Buffer
 ( Buffer(..)
 , realloc
@@ -7,6 +7,7 @@ module GL.Buffer
 , typeToGLEnum
 , Update(..)
 , Usage(..)
+, hintToGLEnum
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -63,3 +64,15 @@ data Usage
   | Read
   | Copy
   deriving (Eq, Ord, Show)
+
+hintToGLEnum :: Update -> Usage -> GLenum
+hintToGLEnum = curry $ \case
+  (Static,  Draw) -> GL_STATIC_DRAW
+  (Static,  Read) -> GL_STATIC_READ
+  (Static,  Copy) -> GL_STATIC_COPY
+  (Dynamic, Draw) -> GL_DYNAMIC_DRAW
+  (Dynamic, Read) -> GL_DYNAMIC_READ
+  (Dynamic, Copy) -> GL_DYNAMIC_COPY
+  (Stream,  Draw) -> GL_STREAM_DRAW
+  (Stream,  Read) -> GL_STREAM_READ
+  (Stream,  Copy) -> GL_STREAM_COPY
