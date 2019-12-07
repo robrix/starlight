@@ -1,2 +1,6 @@
 module GL.Carrier.Alloc
-() where
+( -- * Alloc effect
+  module GL.Effect.Alloc
+) where
+
+import GL.Effect.Alloc
