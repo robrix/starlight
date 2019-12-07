@@ -6,6 +6,7 @@ module Geometry.Dimension
 import Linear.V0
 import Linear.V1
 import Linear.V2
+import Linear.V3
 
 -- | Finite, fixed-length containers.
 class Dimension (v :: * -> *) where
@@ -19,3 +20,6 @@ instance Dimension V1 where
 
 instance Dimension V2 where
   dimension _ = 2
+
+instance Dimension V3 where
+  dimension _ = 3
