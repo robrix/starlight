@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 module UI.Window
-( withWindow
-, withSDL
+( withSDL
 , withSDLWindow
 , withGLContext
 , Window
@@ -11,24 +10,11 @@ import Control.Carrier.Lift
 import qualified Control.Concurrent.Lift as CC
 import qualified Control.Exception.Lift as E
 import Control.Monad.IO.Class.Lift
-import Data.Function (fix)
 import Data.Text (Text)
 import Linear.V2 as Linear
 import Linear.V4 as Linear
-import SDL.Event
 import SDL.Init
 import SDL.Video
-
-withWindow :: Has (Lift IO) sig m => Text -> Linear.V2 Int -> ((m a -> m a) -> m b) -> m b
-withWindow name size action = withSDL $
-  withSDLWindow name size $ \ window ->
-    withGLContext window $ \ _ ->
-      action $ \ draw -> fix $ \ loop -> do
-        a <- draw
-        Event _ payload <- runLifting waitEvent
-        case payload of
-          QuitEvent -> pure a
-          _ -> runLifting (glSwapWindow window) *> loop
 
 withSDL :: Has (Lift IO) sig m => m a -> m a
 withSDL = CC.runInBoundThread . E.bracket_ (runLifting initializeAll) (runLifting quit)
