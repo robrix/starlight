@@ -13,6 +13,7 @@ module GL.Texture
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
 import Foreign.Storable
+import GHC.Stack
 import GL.Error
 import GL.Object
 import Graphics.GL.Core41
@@ -32,7 +33,7 @@ targetToGLEnum :: Target -> GLenum
 targetToGLEnum Texture2D = GL_TEXTURE_2D
 
 
-bindTexture :: Has (Lift IO) sig m => Target -> Maybe Texture -> m ()
+bindTexture :: (Has (Lift IO) sig m, HasCallStack) => Target -> Maybe Texture -> m ()
 bindTexture target = checkingGLError . runLiftIO . glBindTexture (targetToGLEnum target) . maybe 0 unTexture
 
 
