@@ -43,6 +43,10 @@ instance Object (Array n) where
   gen n = glGenVertexArrays n . coerce
   delete n = glDeleteVertexArrays n . coerce
 
+instance Bind (Array n) where
+  nullObject = Array 0
+  bindObject = checkingGLError . runLiftIO . glBindVertexArray . unArray
+
 
 data Mode
   = Lines
