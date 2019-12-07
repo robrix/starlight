@@ -1,8 +1,14 @@
+{-# LANGUAGE ExistentialQuantification #-}
 module UI.Effect.Window
-( -- * Re-exports
-  Algebra
+( -- * Window effect
+  Window(..)
+  -- * Re-exports
+, Algebra
 , Has
 , run
 ) where
 
 import Control.Algebra
+
+data Window m k
+  = forall a . Draw (m a) (m k)
