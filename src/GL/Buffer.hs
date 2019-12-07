@@ -4,6 +4,7 @@ module GL.Buffer
 , Type(..)
 , KnownType(..)
 , typeToGLEnum
+, Usage(..)
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -39,3 +40,10 @@ instance KnownType 'Array where
 
 typeToGLEnum :: Type -> GLenum
 typeToGLEnum Array = GL_ARRAY_BUFFER
+
+
+data Usage
+  = Draw
+  | Read
+  | Copy
+  deriving (Eq, Ord, Show)
