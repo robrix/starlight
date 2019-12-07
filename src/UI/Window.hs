@@ -46,6 +46,4 @@ withSDLWindow name size = E.bracket
     }
 
 withGLContext :: (Has (Lift IO) sig m, MonadIO m) => Window -> (GLContext -> m a) -> m a
-withGLContext window = E.bracket
-  (glCreateContext window)
-  glDeleteContext
+withGLContext window = E.bracket (glCreateContext window) glDeleteContext
