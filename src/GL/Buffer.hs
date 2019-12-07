@@ -29,6 +29,7 @@ instance KnownType ty => Bind (Buffer ty n) where
 
 data Type
   = Array
+  deriving (Eq, Ord, Show)
 
 class KnownType (ty :: Type) where
   typeVal :: proxy ty -> Type
