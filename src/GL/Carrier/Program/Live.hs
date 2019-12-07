@@ -23,9 +23,9 @@ runProgram :: forall name sig m a . Has (Lift IO) sig m => [(ShaderType, FilePat
 runProgram shaders (ProgramC m) = do
   shaders' <- traverse (traverse (sendM . readFile)) shaders
   GL.withBuiltProgram shaders' $ \ program ->
-    runReader program (evalState (map (\ (_, p) -> (p, Nothing)) shaders) m)
+    runReader program (evalState (map (\ (t, p) -> (t, p, Nothing)) shaders) m)
 
-newtype ProgramC name m a = ProgramC (StateC [(FilePath, Maybe UTCTime)] (ReaderC GL.Program m) a)
+newtype ProgramC name m a = ProgramC (StateC [(ShaderType, FilePath, Maybe UTCTime)] (ReaderC GL.Program m) a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance MonadTrans (ProgramC name) where
