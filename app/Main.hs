@@ -80,13 +80,12 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
       texture <- gen @(Texture 'Texture2D)
       framebuffer <- gen
-      bindTexture (Just texture)
-      setMagFilter Texture2D Nearest
-      setMinFilter Texture2D Nearest
-      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
-      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
-      checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (2 * width) (2 * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
-      bindTexture @'Texture2D Nothing
+      bind texture $ do
+        setMagFilter Texture2D Nearest
+        setMinFilter Texture2D Nearest
+        checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
+        checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
+        checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (2 * width) (2 * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
 
       bind framebuffer $ do
         checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
@@ -124,15 +123,15 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
             -- let w = 2 * fromIntegral width
             --     h = 2 * fromIntegral height
             -- A.allocaBytes (4 * w * h) $ \ pixels -> do
-            --   bindTexture (Just texture)
-            --   checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-            --   checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
-            --   checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-            --   image <- C.withImage w h $ \ x y -> do
-            --     let pixel = pixels `plusPtr` (w * y + x)
-            --     C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
-            --   time <- getCPUTime
-            --   B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
+            --   bind texture $ do
+            --     checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+            --     checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
+            --     checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+            --     image <- C.withImage w h $ \ x y -> do
+            --       let pixel = pixels `plusPtr` (w * y + x)
+            --       C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
+            --     time <- getCPUTime
+            --     B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
           drawText = do
             glBlendFunc GL_ZERO GL_SRC_COLOR
 
@@ -153,17 +152,17 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
             -- set @"text" colour black
             let textureUnit = TextureUnit 0
             setActiveTexture textureUnit
-            bindTexture (Just texture)
-            set @"text" sampler textureUnit
+            bind texture $ do
+              set @"text" sampler textureUnit
 
-            bindArray screenQuadArray
+              bindArray screenQuadArray
 
-            traverse_ (drawArrays TriangleStrip) screenQuadRanges
-
-            when (opaque textColour /= black) $ do
-              glBlendFunc GL_ONE GL_ONE
-              set @"text" colour textColour
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
+
+              when (opaque textColour /= black) $ do
+                glBlendFunc GL_ONE GL_ONE
+                set @"text" colour textColour
+                traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do
             bindArray shipArray
