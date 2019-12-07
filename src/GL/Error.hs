@@ -7,9 +7,9 @@ module GL.Error
 , throwGLError
 ) where
 
-import Control.Carrier.Lift
 import qualified Control.Exception.Lift as E
 import Control.Monad
+import Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String as C
 import qualified Foreign.Marshal.Alloc as A
 import Foreign.Ptr
@@ -67,8 +67,8 @@ checkStatus get getLog error status object = withFrozenCallStack $ do
     E.throwIO $ GLException (error log) callStack
   pure object
 
-checkGLError :: HasCallStack => IO ()
-checkGLError = withFrozenCallStack $ glGetError >>= throwGLError
+checkGLError :: (Has (Lift IO) sig m, HasCallStack) => m ()
+checkGLError = runLifting . withFrozenCallStack $ glGetError >>= throwGLError
 
 checkingGLError :: HasCallStack => IO a -> IO a
 checkingGLError action = withFrozenCallStack $ do
