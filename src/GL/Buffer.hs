@@ -9,6 +9,7 @@ module GL.Buffer
 , Update(..)
 , Usage(..)
 , hintToGLEnum
+, Range(..)
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -20,6 +21,7 @@ import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable as S
 import GL.Error
 import GL.Object
+import GL.Range
 import GL.Scalar
 import Graphics.GL.Core41
 import Graphics.GL.Types
