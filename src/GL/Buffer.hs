@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures #-}
+{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures, ScopedTypeVariables #-}
 module GL.Buffer
 ( Buffer(..)
 , Type(..)
@@ -8,6 +8,7 @@ module GL.Buffer
 
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
+import Data.Proxy
 import Foreign.Storable
 import GL.Error
 import GL.Object
@@ -21,9 +22,9 @@ instance Object (Buffer ty n) where
   gen n = glGenBuffers n . coerce
   delete n = glDeleteBuffers n . coerce
 
-instance Bind (Buffer ty n) where
+instance KnownType ty => Bind (Buffer ty n) where
   nullObject = Buffer 0
-  bindObject = checkingGLError . runLiftIO . glBindBuffer GL_ARRAY_BUFFER . unBuffer
+  bindObject = checkingGLError . runLiftIO . glBindBuffer (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . unBuffer
 
 
 data Type
