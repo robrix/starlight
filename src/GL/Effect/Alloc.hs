@@ -13,3 +13,6 @@ deriving instance Functor m => Functor (Alloc m)
 
 instance HFunctor Alloc where
   hmap f (Gen k) = Gen (f . k)
+
+instance Effect Alloc where
+  thread ctx hdl (Gen k) = Gen (hdl . (<$ ctx) . k)
