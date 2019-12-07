@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
+{-# LANGUAGE AllowAmbiguousTypes, DeriveFunctor, DeriveGeneric, PolyKinds, ScopedTypeVariables, TypeApplications #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -12,13 +12,13 @@ module GL.Effect.Program
 import Control.Algebra
 import GHC.Generics (Generic1)
 
-data Program m k
+data Program name m k
   = Use (m k)
   deriving (Functor, Generic1)
 
-instance HFunctor Program
-instance Effect   Program
+instance HFunctor (Program name)
+instance Effect   (Program name)
 
 
-use :: Has Program sig m => m ()
-use = send (Use (pure ()))
+use :: forall name sig m . Has (Program name) sig m => m ()
+use = send (Use @name (pure ()))
