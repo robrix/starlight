@@ -9,7 +9,6 @@ module GL.Program
 ) where
 
 import qualified Control.Exception.Lift as E
-import Control.Monad ((<=<))
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import GHC.Stack
@@ -30,9 +29,11 @@ withProgram = E.bracket
   (runLiftIO . glDeleteProgram . unProgram)
 
 withLinkedProgram :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> (Program -> m a) -> m a
-withLinkedProgram shaders body = withProgram $ body <=< link shaders
+withLinkedProgram shaders body = withProgram $ \ program -> do
+  link shaders program
+  body program
 
-link :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> Program -> m Program
+link :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> Program -> m ()
 link shaders (Program program) = runLiftIO $ do
   for_ shaders (glAttachShader program . unShader)
   glLinkProgram program
@@ -43,5 +44,5 @@ withBuiltProgram :: (Has (Lift IO) sig m, HasCallStack) => [(ShaderType, String)
 withBuiltProgram sources body = withCompiledShaders sources (`withLinkedProgram` body)
 
 
-checkProgram :: (Has (Lift IO) sig m, HasCallStack) => Program -> m Program
-checkProgram = runLiftIO . fmap Program . checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS . unProgram
+checkProgram :: (Has (Lift IO) sig m, HasCallStack) => Program -> m ()
+checkProgram = runLiftIO . checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS . unProgram

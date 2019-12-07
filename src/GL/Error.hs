@@ -52,7 +52,7 @@ checkStatus :: (Has (Lift IO) sig m, HasCallStack)
             -> (String -> GLError)
             -> GLenum
             -> GLuint
-            -> m GLuint
+            -> m ()
 checkStatus get getLog error status object = withFrozenCallStack $ do
   success <- A.alloca $ \ p -> do
     get object status p
@@ -65,7 +65,6 @@ checkStatus get getLog error status object = withFrozenCallStack $ do
       getLog object l nullPtr bytes
       sendM (C.peekCString bytes)
     E.throwIO $ GLException (error log) callStack
-  pure object
 
 checkGLError :: (Has (Lift IO) sig m, HasCallStack) => m ()
 checkGLError = runLiftIO . withFrozenCallStack $ glGetError >>= throwGLError

@@ -9,7 +9,6 @@ module GL.Shader
 ) where
 
 import qualified Control.Exception.Lift as E
-import Control.Monad ((<=<))
 import Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String.Lift as C
 import qualified Foreign.Marshal.Utils.Lift as U
@@ -34,9 +33,11 @@ withShader shaderType = E.bracket
   (runLiftIO . glDeleteShader . unShader)
 
 withCompiledShader :: (Has (Lift IO) sig m, HasCallStack) => ShaderType -> String -> (Shader -> m a) -> m a
-withCompiledShader shaderType source body = withShader shaderType $ body <=< compile source
+withCompiledShader shaderType source body = withShader shaderType $ \ shader -> do
+  compile source shader
+  body shader
 
-compile :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m Shader
+compile :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m ()
 compile source (Shader shader) = runLiftIO $ do
   C.withCString source $ \ source ->
     U.with source $ \ p ->
@@ -50,5 +51,5 @@ withCompiledShaders sources body = go [] sources where
     []             -> body shaders
     (t, source):xs -> withCompiledShader t source (\ shader -> go (shader : shaders) xs)
 
-checkShader :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m Shader
-checkShader source = withFrozenCallStack $ runLiftIO . fmap Shader . checkStatus glGetShaderiv glGetShaderInfoLog (Source source) GL_COMPILE_STATUS . unShader
+checkShader :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m ()
+checkShader source = withFrozenCallStack $ runLiftIO . checkStatus glGetShaderiv glGetShaderInfoLog (Source source) GL_COMPILE_STATUS . unShader
