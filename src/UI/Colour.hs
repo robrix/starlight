@@ -14,6 +14,7 @@ module UI.Colour
 , setClearColour
 ) where
 
+import Control.Monad.IO.Class.Lift
 import Graphics.GL.Core41
 import Lens.Micro
 import Linear.V4
@@ -57,5 +58,5 @@ opaque :: Num a => Colour a -> Colour a
 opaque = set _a 1
 
 
-setClearColour :: Colour Float -> IO ()
-setClearColour (V4 r g b a) = glClearColor r g b a
+setClearColour :: Has (Lift IO) sig m => Colour Float -> m ()
+setClearColour (V4 r g b a) = runLifting $ glClearColor r g b a
