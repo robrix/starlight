@@ -12,6 +12,7 @@ import Data.Coerce
 import Data.Proxy
 import Foreign.Ptr
 import qualified Foreign.Storable as S
+import GHC.Stack
 import qualified GL.Buffer as GL
 import GL.Error
 import GL.Object
@@ -61,5 +62,5 @@ data Range = Range
   }
   deriving (Eq, Show)
 
-drawArrays :: Has (Lift IO) sig m => Mode -> Range -> m ()
+drawArrays :: (Has (Lift IO) sig m, HasCallStack) => Mode -> Range -> m ()
 drawArrays mode (Range from count) = checkingGLError . runLiftIO $ glDrawArrays (modeToGLEnum mode) (fromIntegral from) (fromIntegral count)
