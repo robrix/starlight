@@ -34,7 +34,7 @@ withLinkedProgram shaders body = withProgram $ \ (Program program) -> runLifting
   Lifting (body p)
 
 
-withBuiltProgram :: HasCallStack => [(ShaderType, String)] -> (Program -> IO a) -> IO a
+withBuiltProgram :: (Has (Lift IO) sig m, HasCallStack) => [(ShaderType, String)] -> (Program -> m a) -> m a
 withBuiltProgram sources body = withCompiledShaders sources (`withLinkedProgram` body)
 
 
