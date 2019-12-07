@@ -1,2 +1,9 @@
 module Foreign.C.String.Lift
-() where
+( withCString
+) where
+
+import Control.Carrier.Lift
+import qualified Foreign.C.String as C
+
+withCString :: Has (Lift IO) sig m => String -> (C.CString -> m a) -> m a
+withCString s with = liftWith $ \ ctx hdl -> C.withCString s (hdl . (<$ ctx) . with)
