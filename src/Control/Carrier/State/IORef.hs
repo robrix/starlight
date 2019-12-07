@@ -16,14 +16,13 @@ import Control.Effect.State
 import Control.Monad.IO.Class.Lift
 import Data.IORef
 
-runStateRef :: Has (Lift IO) sig m => s -> StateC s m a -> m (IORef s, a)
-runStateRef s (StateC m) = do
-  ref <- sendM (newIORef s)
-  (,) ref <$> runReader ref m
+runStateRef :: IORef s -> StateC s m a -> m a
+runStateRef ref (StateC m) = runReader ref m
 
 runState :: Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
 runState s m = do
-  (ref, a) <- runStateRef s m
+  ref <- sendM (newIORef s)
+  a <- runStateRef ref m
   s' <- sendM (readIORef ref)
   pure (s', a)
 
