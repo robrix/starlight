@@ -77,8 +77,6 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     withArray shipVertices $ \ shipArray ->
     withArray screenQuadVertices $ \ screenQuadArray ->
     withArray glyphVertices $ \ glyphArray ->
-    -- withBuiltProgram [(Vertex, textVertex), (Fragment, textFragment)] $ \ textProgram ->
-    -- withBuiltProgram [(Vertex, glyphVertex), (Fragment, glyphFragment)] $ \ glyphProgram ->
     with $ \ texture ->
     with $ \ framebuffer -> runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
       bindTexture Texture2D (Just texture)
