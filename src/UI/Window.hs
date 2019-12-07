@@ -10,7 +10,7 @@ module UI.Window
 import Control.Carrier.Lift
 import qualified Control.Concurrent.Lift as CC
 import qualified Control.Exception.Lift as E
-import Control.Monad.IO.Class
+import Control.Monad.IO.Class.Lift
 import Data.Function (fix)
 import Data.Text (Text)
 import Linear.V2 as Linear
@@ -30,8 +30,8 @@ withWindow name size action = withSDL $
           QuitEvent -> pure a
           _ -> glSwapWindow window *> loop
 
-withSDL :: (Has (Lift IO) sig m, MonadIO m) => m a -> m a
-withSDL = CC.runInBoundThread . E.bracket_ initializeAll quit
+withSDL :: Has (Lift IO) sig m => m a -> m a
+withSDL = CC.runInBoundThread . E.bracket_ (runLifting initializeAll) (runLifting quit)
 
 withSDLWindow :: (Has (Lift IO) sig m, MonadIO m) => Text -> Linear.V2 Int -> (Window -> m a) -> m a
 withSDLWindow name size = E.bracket
