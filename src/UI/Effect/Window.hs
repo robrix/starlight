@@ -14,3 +14,6 @@ data Window m k
   = forall a . Draw (m a) (a -> m k)
 
 deriving instance Functor m => Functor (Window m)
+
+instance HFunctor Window where
+  hmap f (Draw m k) = Draw (f m) (f . k)
