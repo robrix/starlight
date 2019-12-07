@@ -16,12 +16,12 @@ import SDL.Init
 import SDL.Video
 
 withSDL :: Has (Lift IO) sig m => m a -> m a
-withSDL = CC.runInBoundThread . E.bracket_ (runLifting initializeAll) (runLifting quit)
+withSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO quit)
 
 withSDLWindow :: Has (Lift IO) sig m => Text -> Linear.V2 Int -> (Window -> m a) -> m a
 withSDLWindow name size = E.bracket
-  (runLifting (createWindow name windowConfig))
-  (runLifting . destroyWindow) where
+  (runLiftIO (createWindow name windowConfig))
+  (runLiftIO . destroyWindow) where
   windowConfig = defaultWindow
     { windowInitialSize = fromIntegral <$> size
     , windowResizable = True
@@ -35,4 +35,4 @@ withSDLWindow name size = E.bracket
     }
 
 withGLContext :: Has (Lift IO) sig m => Window -> (GLContext -> m a) -> m a
-withGLContext window = E.bracket (runLifting (glCreateContext window)) (runLifting . glDeleteContext)
+withGLContext window = E.bracket (runLiftIO (glCreateContext window)) (runLiftIO . glDeleteContext)

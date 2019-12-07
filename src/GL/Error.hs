@@ -68,7 +68,7 @@ checkStatus get getLog error status object = withFrozenCallStack $ do
   pure object
 
 checkGLError :: (Has (Lift IO) sig m, HasCallStack) => m ()
-checkGLError = runLifting . withFrozenCallStack $ glGetError >>= throwGLError
+checkGLError = runLiftIO . withFrozenCallStack $ glGetError >>= throwGLError
 
 checkingGLError :: (Has (Lift IO) sig m, HasCallStack) => m a -> m a
 checkingGLError action = withFrozenCallStack $ do

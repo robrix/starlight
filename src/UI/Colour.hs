@@ -59,4 +59,4 @@ opaque = set _a 1
 
 
 setClearColour :: Has (Lift IO) sig m => Colour Float -> m ()
-setClearColour (V4 r g b a) = runLifting $ glClearColor r g b a
+setClearColour (V4 r g b a) = runLiftIO $ glClearColor r g b a

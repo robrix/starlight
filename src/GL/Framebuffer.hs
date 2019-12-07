@@ -21,4 +21,4 @@ instance Object Framebuffer where
 
 
 bindFramebuffer :: Has (Lift IO) sig m => Maybe Framebuffer -> m ()
-bindFramebuffer = checkingGLError . runLifting . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
+bindFramebuffer = checkingGLError . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer

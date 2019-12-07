@@ -26,7 +26,7 @@ newtype Array n = Array { unArray :: GLuint }
   deriving (S.Storable)
 
 withArray :: forall v n m a sig . (Foldable v, Scalar n, Has (Lift IO) sig m) => [v n] -> (Array n -> m a) -> m a
-withArray vertices body = with $ \ buffer -> runLifting $ do
+withArray vertices body = with $ \ buffer -> runLiftIO $ do
   glBindBuffer GL_ARRAY_BUFFER (unBuffer buffer)
   A.withArrayLen (vertices >>= toList) $ \ n p ->
     glBufferData GL_ARRAY_BUFFER (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) GL_STATIC_DRAW
@@ -34,10 +34,10 @@ withArray vertices body = with $ \ buffer -> runLifting $ do
     bindArray array
     glEnableVertexAttribArray 0
     glVertexAttribPointer 0 (fromIntegral (length (head vertices))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
-    Lifting (body array)
+    LiftIO (body array)
 
 bindArray :: Has (Lift IO) sig m => Array n -> m ()
-bindArray = checkingGLError . runLifting . glBindVertexArray . unArray
+bindArray = checkingGLError . runLiftIO . glBindVertexArray . unArray
 
 instance Object (Array n) where
   gen n = glGenVertexArrays n . coerce
@@ -67,4 +67,4 @@ data Range = Range
   deriving (Eq, Show)
 
 drawArrays :: Has (Lift IO) sig m => Mode -> Range -> m ()
-drawArrays mode (Range from count) = checkingGLError . runLifting $ glDrawArrays (modeToGLEnum mode) (fromIntegral from) (fromIntegral count)
+drawArrays mode (Range from count) = checkingGLError . runLiftIO $ glDrawArrays (modeToGLEnum mode) (fromIntegral from) (fromIntegral count)

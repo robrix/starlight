@@ -24,7 +24,7 @@ data Contents
   | Composite [Contents]
 
 drawLayer :: Has (Lift IO) sig m => Layer m -> m ()
-drawLayer layer = runLifting $ do
+drawLayer layer = runLiftIO $ do
   bindFramebuffer (framebuffer layer)
 
   let Rect (V2 x y) (V2 w h) = (2 *) <$> bounds layer
@@ -34,4 +34,4 @@ drawLayer layer = runLifting $ do
   setClearColour (background layer)
   glClear GL_COLOR_BUFFER_BIT
 
-  Lifting (draw layer)
+  LiftIO (draw layer)

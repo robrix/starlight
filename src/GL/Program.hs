@@ -18,20 +18,20 @@ newtype Program = Program { unProgram :: GLuint }
   deriving Show
 
 useProgram :: Has (Lift IO) sig m => Program -> m ()
-useProgram = runLifting . glUseProgram . unProgram
+useProgram = runLiftIO . glUseProgram . unProgram
 
 withProgram :: Has (Lift IO) sig m => (Program -> m a) -> m a
 withProgram = E.bracket
-  (runLifting (Program <$> glCreateProgram))
-  (runLifting . glDeleteProgram . unProgram)
+  (runLiftIO (Program <$> glCreateProgram))
+  (runLiftIO . glDeleteProgram . unProgram)
 
 withLinkedProgram :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> (Program -> m a) -> m a
-withLinkedProgram shaders body = withProgram $ \ (Program program) -> runLifting $ do
+withLinkedProgram shaders body = withProgram $ \ (Program program) -> runLiftIO $ do
   for_ shaders (glAttachShader program . unShader)
   glLinkProgram program
   for_ shaders (glDetachShader program . unShader)
   p <- checkProgram (Program program)
-  Lifting (body p)
+  LiftIO (body p)
 
 
 withBuiltProgram :: (Has (Lift IO) sig m, HasCallStack) => [(ShaderType, String)] -> (Program -> m a) -> m a
@@ -39,4 +39,4 @@ withBuiltProgram sources body = withCompiledShaders sources (`withLinkedProgram`
 
 
 checkProgram :: (Has (Lift IO) sig m, HasCallStack) => Program -> m Program
-checkProgram = runLifting . fmap Program . checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS . unProgram
+checkProgram = runLiftIO . fmap Program . checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS . unProgram

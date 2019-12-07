@@ -25,17 +25,17 @@ class Uniform t where
 
 setUniformValue :: (Uniform t, Has (Lift IO) sig m, HasCallStack) => Program -> Var t -> t -> m ()
 setUniformValue program var v = do
-  location <- checkingGLError . runLifting $ C.withCString (varName var) (glGetUniformLocation (unProgram program))
+  location <- checkingGLError . runLiftIO $ C.withCString (varName var) (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v
 
 instance Uniform (Linear.V4 Float) where
-  uniform location (Linear.V4 x y z w) = runLifting $ glUniform4f location x y z w
+  uniform location (Linear.V4 x y z w) = runLiftIO $ glUniform4f location x y z w
 
 instance Uniform (Linear.V4 Double) where
-  uniform location (Linear.V4 x y z w) = runLifting $ glUniform4d location x y z w
+  uniform location (Linear.V4 x y z w) = runLiftIO $ glUniform4d location x y z w
 
 instance Uniform (Linear.M44 Float) where
-  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLifting . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
+  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M33 Float) where
-  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLifting . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
+  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)

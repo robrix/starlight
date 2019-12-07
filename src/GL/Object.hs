@@ -18,10 +18,10 @@ class Storable t => Object t where
 
 withN :: (Has (Lift IO) sig m, Object t) => Int -> ([t] -> m a) -> m a
 withN n = E.bracket acquire release where
-  acquire = A.allocaArray n $ \ p -> runLifting $ do
+  acquire = A.allocaArray n $ \ p -> runLiftIO $ do
     gen (fromIntegral n) p
     A.peekArray n p
-  release buffers = A.allocaArray n $ \ p -> runLifting $ do
+  release buffers = A.allocaArray n $ \ p -> runLiftIO $ do
     A.pokeArray p buffers
     delete (fromIntegral n) p
 

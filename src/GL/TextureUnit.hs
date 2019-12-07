@@ -11,8 +11,8 @@ import Graphics.GL.Types
 newtype TextureUnit = TextureUnit { unTextureUnit :: GLint }
 
 instance Uniform TextureUnit where
-  uniform location = runLifting . glUniform1i location . unTextureUnit
+  uniform location = runLiftIO . glUniform1i location . unTextureUnit
 
 
 setActiveTexture :: Has (Lift IO) sig m => TextureUnit -> m ()
-setActiveTexture (TextureUnit i) = runLifting $ glActiveTexture (fromIntegral (GL_TEXTURE0 + i))
+setActiveTexture (TextureUnit i) = runLiftIO $ glActiveTexture (fromIntegral (GL_TEXTURE0 + i))

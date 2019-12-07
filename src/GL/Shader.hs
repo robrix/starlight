@@ -27,17 +27,17 @@ toGLEnum Fragment = GL_FRAGMENT_SHADER
 
 withShader :: Has (Lift IO) sig m => ShaderType -> (Shader -> m a) -> m a
 withShader shaderType = E.bracket
-  (runLifting (Shader <$> glCreateShader (toGLEnum shaderType)))
-  (runLifting . glDeleteShader . unShader)
+  (runLiftIO (Shader <$> glCreateShader (toGLEnum shaderType)))
+  (runLiftIO . glDeleteShader . unShader)
 
 withCompiledShader :: (Has (Lift IO) sig m, HasCallStack) => ShaderType -> String -> (Shader -> m a) -> m a
-withCompiledShader shaderType source body = withShader shaderType $ \ (Shader shader) -> runLifting $ do
+withCompiledShader shaderType source body = withShader shaderType $ \ (Shader shader) -> runLiftIO $ do
   C.withCString source $ \ source ->
     U.with source $ \ p ->
       glShaderSource shader 1 p nullPtr
   glCompileShader shader
   s <- checkShader source (Shader shader)
-  Lifting (body s)
+  LiftIO (body s)
 
 withCompiledShaders :: (Has (Lift IO) sig m, HasCallStack) => [(ShaderType, String)] -> ([Shader] -> m a) -> m a
 withCompiledShaders sources body = go [] sources where
@@ -46,4 +46,4 @@ withCompiledShaders sources body = go [] sources where
     (t, source):xs -> withCompiledShader t source (\ shader -> go (shader : shaders) xs)
 
 checkShader :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m Shader
-checkShader source = withFrozenCallStack $ runLifting . fmap Shader . checkStatus glGetShaderiv glGetShaderInfoLog (Source source) GL_COMPILE_STATUS . unShader
+checkShader source = withFrozenCallStack $ runLiftIO . fmap Shader . checkStatus glGetShaderiv glGetShaderInfoLog (Source source) GL_COMPILE_STATUS . unShader
