@@ -23,18 +23,18 @@ import GL.Scalar
 import Graphics.GL.Core41
 import Graphics.GL.Types
 
-newtype Buffer (ty :: Type) n = Buffer { unBuffer :: GLuint }
+newtype Buffer (ty :: Type) = Buffer { unBuffer :: GLuint }
   deriving (Storable)
 
-instance Object (Buffer ty n) where
+instance Object (Buffer ty) where
   gen n = glGenBuffers n . coerce
   delete n = glDeleteBuffers n . coerce
 
-instance KnownType ty => Bind (Buffer ty n) where
+instance KnownType ty => Bind (Buffer ty) where
   nullObject = Buffer 0
   bindObject = checkingGLError . runLiftIO . glBindBuffer (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . unBuffer
 
-realloc :: forall ty n v m buffer sig . (KnownType ty, Scalar n, Foldable v, Has (Lift IO) sig m) => buffer ty n -> [v n] -> Update -> Usage -> m ()
+realloc :: forall ty n v m buffer sig . (KnownType ty, Scalar n, Foldable v, Has (Lift IO) sig m) => buffer ty -> [v n] -> Update -> Usage -> m ()
 realloc _ vertices update usage = A.withArrayLen (vertices >>= toList) $ \ n p ->
   runLiftIO (glBufferData (typeToGLEnum (typeVal (Proxy :: Proxy ty))) (fromIntegral (n * S.sizeOf @n 0)) (castPtr p) (hintToGLEnum update usage))
 
