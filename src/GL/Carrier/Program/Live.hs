@@ -20,16 +20,14 @@ import qualified GL.Program as GL
 import GL.Uniform
 
 runProgram :: forall name sig m a . Has (Lift IO) sig m => [(ShaderType, FilePath)] -> ProgramC name m a -> m a
-runProgram shaders (ProgramC m) = do
-  shaders' <- traverse (traverse (sendM . readFile)) shaders
-  GL.withBuiltProgram shaders' $ \ program ->
-    runReader program (evalState (map (\ (t, p) -> (t, p, Nothing)) shaders) m)
+runProgram shaders (ProgramC m) = GL.withProgram $ \ program ->
+  runReader program (runReader shaders (evalState (Nothing <$ shaders) m))
 
-newtype ProgramC name m a = ProgramC (StateC [(ShaderType, FilePath, Maybe UTCTime)] (ReaderC GL.Program m) a)
+newtype ProgramC name m a = ProgramC (StateC [Maybe UTCTime] (ReaderC [(ShaderType, FilePath)] (ReaderC GL.Program m)) a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance MonadTrans (ProgramC name) where
-  lift = ProgramC . lift . lift
+  lift = ProgramC . lift . lift . lift
 
 instance (Has (Lift IO) sig m, Effect sig) => Algebra (Program name :+: sig) (ProgramC name m) where
   alg = \case
