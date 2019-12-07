@@ -2,6 +2,7 @@
 module GL.Shader
 ( Shader(..)
 , ShaderType(..)
+, withShader
 , compile
 , withCompiledShaders
 , checkShader
