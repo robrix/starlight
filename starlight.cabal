@@ -47,6 +47,7 @@ library
     Geometry.Triangle
     GL.Array
     GL.Buffer
+    GL.Effect.Program
     GL.Error
     GL.Framebuffer
     GL.Object
