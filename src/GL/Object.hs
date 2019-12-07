@@ -8,6 +8,7 @@ module GL.Object
 
 import qualified Control.Exception.Lift as E
 import Control.Monad.IO.Class.Lift
+import GHC.Stack
 import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr
 import Foreign.Storable
@@ -31,4 +32,4 @@ with = withN 1 . (. head)
 
 
 class Bind t where
-  bind :: Has (Lift IO) sig m => t -> m a -> m a
+  bind :: (Has (Lift IO) sig m, HasCallStack) => t -> m a -> m a
