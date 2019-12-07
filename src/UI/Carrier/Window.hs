@@ -31,10 +31,12 @@ newtype WindowC m a = WindowC (ReaderC UI.Window m a)
 
 instance Has (Lift IO) sig m => Algebra (Window :+: sig) (WindowC m) where
   alg = \case
-    L (Draw m k) -> WindowC ask >>= \ window -> fix $ \ loop -> do
-      a <- m
-      SDL.Event _ payload <- runLifting SDL.waitEvent
-      case payload of
-        SDL.QuitEvent -> k a
-        _             -> runLifting (SDL.glSwapWindow window) *> loop
+    L (Draw m k) -> do
+      window <- WindowC ask
+      fix $ \ loop -> do
+        a <- m
+        SDL.Event _ payload <- runLifting SDL.waitEvent
+        case payload of
+          SDL.QuitEvent -> k a
+          _             -> runLifting (SDL.glSwapWindow window) *> loop
     R other      -> WindowC (send (handleCoercible other))
