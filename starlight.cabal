@@ -98,6 +98,7 @@ executable starlight
     , starlight
     , text
     , time
+    , transformers
     , vector
 
 source-repository head

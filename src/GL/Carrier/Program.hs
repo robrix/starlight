@@ -11,6 +11,7 @@ import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import GL.Effect.Program
 import GL.Shader
 import qualified GL.Program as GL
@@ -22,7 +23,7 @@ runProgram shaders (ProgramC m) = do
     runReader program m
 
 newtype ProgramC name m a = ProgramC (ReaderC GL.Program m a)
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (Program name :+: sig) (ProgramC name m) where
   alg = \case
