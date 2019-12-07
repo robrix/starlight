@@ -60,6 +60,7 @@ library
     GL.Uniform
     Linear.Exts
     UI.Colour
+    UI.Effect.Window
     UI.Font
     UI.Glyph
     UI.Layer
