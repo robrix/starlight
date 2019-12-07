@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
 module UI.Effect.Window
 ( -- * Window effect
   Window(..)
@@ -12,3 +12,5 @@ import Control.Algebra
 
 data Window m k
   = forall a . Draw (m a) (m k)
+
+deriving instance Functor m => Functor (Window m)
