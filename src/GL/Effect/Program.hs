@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -11,3 +12,4 @@ import Control.Algebra
 
 data Program m k
   = Use (m k)
+  deriving (Functor)
