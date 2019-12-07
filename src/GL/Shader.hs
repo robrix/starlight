@@ -5,9 +5,10 @@ module GL.Shader
 , checkShader
 ) where
 
-import qualified Control.Exception as E
+import qualified Control.Exception.Lift as E
+import Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String as C
-import qualified Foreign.Marshal.Alloc as A
+import qualified Foreign.Marshal.Alloc.Lift as A
 import Foreign.Ptr
 import qualified Foreign.Storable as S
 import GHC.Stack
@@ -44,5 +45,5 @@ withCompiledShaders sources body = go sources []
   where go [] shaders = body shaders
         go ((t, source):xs) shaders = withCompiledShader t source (\ shader -> go xs (shader : shaders))
 
-checkShader :: HasCallStack => String -> Shader -> IO Shader
-checkShader source = withFrozenCallStack $ fmap Shader . checkStatus glGetShaderiv glGetShaderInfoLog (Source source) GL_COMPILE_STATUS . unShader
+checkShader :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m Shader
+checkShader source = withFrozenCallStack $ runLifting . fmap Shader . checkStatus glGetShaderiv glGetShaderInfoLog (Source source) GL_COMPILE_STATUS . unShader
