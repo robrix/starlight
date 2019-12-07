@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.State.IORef
 ( -- * State carrier
   runState
@@ -9,6 +9,7 @@ module Control.Carrier.State.IORef
 , module Control.Effect.State
 ) where
 
+import Control.Algebra
 import Control.Carrier.Reader
 import Control.Effect.State
 import Control.Monad.IO.Class.Lift
@@ -29,3 +30,9 @@ execState s = fmap fst . runState s
 
 newtype StateC s m a = StateC (ReaderC (IORef s) m a)
   deriving (Applicative, Functor, Monad, MonadIO)
+
+instance Has (Lift IO) sig m => Algebra (State s :+: sig) (StateC s m) where
+  alg = \case
+    L (Get   k) -> StateC ask >>= sendM . readIORef         >>= k
+    L (Put s k) -> StateC ask >>= sendM . flip writeIORef s >>  k
+    R other     -> StateC (send (handleCoercible other))
