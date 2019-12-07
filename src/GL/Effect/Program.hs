@@ -1,2 +1,7 @@
 module GL.Effect.Program
-() where
+( -- * Program effect
+  Program(..)
+) where
+
+data Program m k
+  = Use (m k)
