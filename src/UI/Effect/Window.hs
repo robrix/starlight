@@ -2,6 +2,7 @@
 module UI.Effect.Window
 ( -- * Window effect
   Window(..)
+, draw
   -- * Re-exports
 , Algebra
 , Has
@@ -20,3 +21,6 @@ instance HFunctor Window where
 
 instance Effect Window where
   thread ctx hdl (Draw m k) = Draw (hdl (m <$ ctx)) (hdl . fmap k)
+
+draw :: Has Window sig m => m a -> m a
+draw m = send (Draw m pure)
