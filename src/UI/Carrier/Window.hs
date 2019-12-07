@@ -1,2 +1,6 @@
 module UI.Carrier.Window
-() where
+( -- * Window effect
+  module UI.Effect.Window
+) where
+
+import UI.Effect.Window
