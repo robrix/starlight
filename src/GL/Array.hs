@@ -16,6 +16,7 @@ import GHC.Stack
 import qualified GL.Buffer as GL
 import GL.Error
 import GL.Object
+import GL.Range
 import GL.Scalar
 import Graphics.GL.Core41
 import Graphics.GL.Types
@@ -56,11 +57,6 @@ modeToGLEnum = \case
   TriangleStrip -> GL_TRIANGLE_STRIP
   Triangles     -> GL_TRIANGLES
 
-data Range = Range
-  { from :: {-# UNPACK #-} !Int
-  , size :: {-# UNPACK #-} !Int
-  }
-  deriving (Eq, Show)
 
 drawArrays :: (Has (Lift IO) sig m, HasCallStack) => Mode -> Range -> m ()
 drawArrays mode (Range from count) = checkingGLError . runLiftIO $ glDrawArrays (modeToGLEnum mode) (fromIntegral from) (fromIntegral count)
