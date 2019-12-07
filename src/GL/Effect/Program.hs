@@ -14,3 +14,5 @@ import GHC.Generics (Generic1)
 data Program m k
   = Use (m k)
   deriving (Functor, Generic1)
+
+instance HFunctor Program
