@@ -1,6 +1,9 @@
 {-# LANGUAGE DeriveAnyClass #-}
 module UI.Window
 ( withWindow
+, withSDL
+, withSDLWindow
+, withGLContext
 , Window
 ) where
 
