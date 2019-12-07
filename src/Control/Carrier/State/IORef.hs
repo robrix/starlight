@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.State.IORef
 ( -- * State carrier
-  runState
+  runStateRef
+, runState
 , evalState
 , execState
 , StateC(..)
@@ -15,10 +16,14 @@ import Control.Effect.State
 import Control.Monad.IO.Class.Lift
 import Data.IORef
 
-runState :: Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
-runState s (StateC m) = do
+runStateRef :: Has (Lift IO) sig m => s -> StateC s m a -> m (IORef s, a)
+runStateRef s (StateC m) = do
   ref <- sendM (newIORef s)
-  a <- runReader ref m
+  (,) ref <$> runReader ref m
+
+runState :: Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
+runState s m = do
+  (ref, a) <- runStateRef s m
   s' <- sendM (readIORef ref)
   pure (s', a)
 
