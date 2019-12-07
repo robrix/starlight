@@ -2,11 +2,13 @@
 module GL.Shader
 ( Shader(..)
 , ShaderType(..)
+, compile
 , withCompiledShaders
 , checkShader
 ) where
 
 import qualified Control.Exception.Lift as E
+import Control.Monad ((<=<))
 import Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String.Lift as C
 import qualified Foreign.Marshal.Utils.Lift as U
@@ -31,13 +33,15 @@ withShader shaderType = E.bracket
   (runLiftIO . glDeleteShader . unShader)
 
 withCompiledShader :: (Has (Lift IO) sig m, HasCallStack) => ShaderType -> String -> (Shader -> m a) -> m a
-withCompiledShader shaderType source body = withShader shaderType $ \ (Shader shader) -> runLiftIO $ do
+withCompiledShader shaderType source body = withShader shaderType $ body <=< compile source
+
+compile :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m Shader
+compile source (Shader shader) = runLiftIO $ do
   C.withCString source $ \ source ->
     U.with source $ \ p ->
       glShaderSource shader 1 p nullPtr
   glCompileShader shader
-  s <- checkShader source (Shader shader)
-  LiftIO (body s)
+  checkShader source (Shader shader)
 
 withCompiledShaders :: (Has (Lift IO) sig m, HasCallStack) => [(ShaderType, String)] -> ([Shader] -> m a) -> m a
 withCompiledShaders sources body = go [] sources where
