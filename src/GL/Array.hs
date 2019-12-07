@@ -57,8 +57,8 @@ modeToGLEnum = \case
   Triangles     -> GL_TRIANGLES
 
 data Range = Range
-  { rangeFrom  :: {-# UNPACK #-} !Int
-  , rangeCount :: {-# UNPACK #-} !Int
+  { from :: {-# UNPACK #-} !Int
+  , size :: {-# UNPACK #-} !Int
   }
   deriving (Eq, Show)
 
