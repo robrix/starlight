@@ -5,9 +5,12 @@ module Control.Carrier.State.IORef
 , evalState
 , execState
 , StateC(..)
+  -- * State effect
+, module Control.Effect.State
 ) where
 
 import Control.Carrier.Reader
+import Control.Effect.State
 import Control.Monad.IO.Class.Lift
 import Data.IORef
 
