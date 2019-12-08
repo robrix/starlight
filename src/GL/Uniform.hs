@@ -1,8 +1,9 @@
-{-# LANGUAGE DataKinds, FlexibleInstances, KindSignatures, ScopedTypeVariables #-}
+{-# LANGUAGE DataKinds, FlexibleInstances, KindSignatures, MultiParamTypeClasses, ScopedTypeVariables, TypeOperators #-}
 module GL.Uniform
 ( Var(..)
 , Uniform(..)
 , setUniformValue
+, HasVar
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -41,3 +42,6 @@ instance Uniform (Linear.M44 Float) where
 
 instance Uniform (Linear.M33 Float) where
   uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
+
+
+class HasVar (sig :: [Symbol ::: *]) (sym :: Symbol) t
