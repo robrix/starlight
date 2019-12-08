@@ -18,7 +18,7 @@ import Graphics.GL.Core41
 import Graphics.GL.Types
 
 newtype Program = Program { unProgram :: GLuint }
-  deriving Show
+  deriving (Eq, Ord, Show)
 
 useProgram :: Has (Lift IO) sig m => Program -> m ()
 useProgram = runLiftIO . glUseProgram . unProgram
