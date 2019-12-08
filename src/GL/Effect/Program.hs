@@ -6,7 +6,7 @@ module GL.Effect.Program
 , use
 , set
   -- * Re-exports
-, (GL.:::)
+, (GL.:::)(..)
 , Algebra
 , Has
 , run
