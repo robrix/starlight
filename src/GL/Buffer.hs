@@ -49,8 +49,9 @@ copy _ (Range offset size) = checkingGLError . runLiftIO . glBufferSubData (type
 
 copyFrom :: forall ty v n m buffer sig . (KnownType ty, KnownNat (Size v), Foldable v, Scalar n, Has (Lift IO) sig m) => buffer ty -> Int -> [v n] -> m ()
 copyFrom _ offset vertices = A.withArray (vertices >>= toList) $
-  checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr where
-  size = length vertices * fromIntegral (natVal (Proxy @(Size v))) * S.sizeOf @n 0
+  checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral (offset * vsize)) (fromIntegral size) . castPtr where
+  size = length vertices * vsize
+  vsize = fromIntegral (natVal (Proxy @(Size v))) * S.sizeOf @n 0
 
 
 data Type
