@@ -44,7 +44,7 @@ instance Uniform (Linear.M33 Float) where
   uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
 
 
-class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (sig :: [Symbol ::: *]) | sym sig -> t
+class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (tys :: [Symbol ::: *]) | sym tys -> t
 
 instance {-# OVERLAPPABLE #-} (KnownSymbol sym, Uniform t) => HasUniform sym t (sym '::: t ': tys)
 instance {-# OVERLAPPABLE #-} HasUniform sym t tys => HasUniform sym t (ty ': tys)
