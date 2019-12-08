@@ -1,4 +1,4 @@
-{-# LANGUAGE ExplicitForAll, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module GL.Carrier.Program.Live
 ( -- * Program carrier
   runProgram
@@ -9,42 +9,57 @@ module GL.Carrier.Program.Live
 
 import Control.Algebra
 import Control.Carrier.Lift
-import Control.Carrier.Reader
 import Control.Carrier.State.Strict
+import Control.Effect.Finally
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
-import Control.Monad.Trans.Class
+import qualified Data.Map as Map
 import Data.Time.Clock (UTCTime)
 import Data.Traversable (for)
-import Foreign.Marshal.Utils (withMany)
 import GL.Effect.Program
+import qualified GL.Enum as GL
 import GL.Shader
 import qualified GL.Program as GL
 import GL.Uniform
+import Graphics.GL.Core41
 import System.Directory
 
-runProgram :: forall name sig m a . Has (Lift IO) sig m => [(ShaderType, FilePath)] -> ProgramC name m a -> m a
-runProgram shaders (ProgramC m) = GL.withProgram $ \ program ->
-  withMany withShader (map fst shaders) $ \ shaders' ->
-    runReader program (runReader (zipWith ((,) . snd) shaders shaders') (evalState (Nothing <$ shaders) m))
+runProgram :: Has (Lift IO) sig m => ProgramC m a -> m a
+runProgram (ProgramC m) = evalState Map.empty m
 
-newtype ProgramC name m a = ProgramC (StateC [Maybe UTCTime] (ReaderC [(FilePath, Shader)] (ReaderC GL.Program m)) a)
+newtype ProgramC m a = ProgramC (StateC (Map.Map GL.Program [ShaderState]) m a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance MonadTrans (ProgramC name) where
-  lift = ProgramC . lift . lift . lift
-
-instance (Has (Lift IO) sig m, Effect sig) => Algebra (Program name :+: sig) (ProgramC name m) where
+instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Program :+: sig) (ProgramC m) where
   alg = \case
-    L (Use k)     -> do
-      (program, shaders, prevTimes) <- ProgramC ((,,) <$> ask <*> ask <*> get)
-      times <- traverse (fmap Just . sendM . getModificationTime . fst) (shaders :: [(FilePath, Shader)])
+    L (Build s   k) -> do
+      program <- GL.Program <$> runLiftIO glCreateProgram
+      onExit $ runLiftIO (glDeleteProgram (GL.unProgram program))
+      shaders <- for s $ \ (type', path) -> do
+        shader <- Shader <$> runLiftIO (glCreateShader (GL.glEnum type'))
+        onExit $ runLiftIO (glDeleteShader (unShader shader))
+        pure $! ShaderState shader path Nothing
+      ProgramC $ modify (Map.insert program shaders)
+      k program
+    L (Use p     k) -> do
+      shaders <- maybe (error "no state found for program") id <$> ProgramC (gets (Map.lookup p))
+      let prevTimes = map time shaders
+      times <- traverse (fmap Just . sendM . getModificationTime . path) shaders
       when (times /= prevTimes) $ do
-        shaders <- for shaders $ \ (path, shader) -> do
-          source <- sendM $ readFile path
-          shader <$ compile source shader
-        GL.link shaders program
-      GL.useProgram program
+        shaders <- for (zip times shaders) $ \ (newTime, ShaderState shader path oldTime) -> do
+          when (newTime /= oldTime) $ do
+            source <- sendM $ readFile path
+            compile source shader
+          pure (ShaderState shader path newTime)
+        ProgramC (modify (Map.insert p shaders))
+        GL.link (map shader shaders) p
+      GL.useProgram p
       k
-    L (Set v a k) -> ProgramC ask >>= \ p -> setUniformValue p v a >> k
-    R other       -> ProgramC (send (handleCoercible other))
+    L (Set p v a k) -> setUniformValue p v a >> k
+    R other         -> ProgramC (send (handleCoercible other))
+
+data ShaderState = ShaderState
+  { shader :: !Shader
+  , path   :: !FilePath
+  , time   :: !(Maybe UTCTime)
+  }

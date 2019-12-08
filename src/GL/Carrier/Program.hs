@@ -1,4 +1,4 @@
-{-# LANGUAGE ExplicitForAll, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module GL.Carrier.Program
 ( -- * Program carrier
   runProgram
@@ -8,26 +8,34 @@ module GL.Carrier.Program
 ) where
 
 import Control.Algebra
-import Control.Carrier.Lift
-import Control.Carrier.Reader
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import Control.Effect.Finally
+import Control.Monad.IO.Class.Lift
+import Data.Traversable (for)
 import GL.Effect.Program
+import qualified GL.Enum as GL
 import GL.Shader
 import qualified GL.Program as GL
 import GL.Uniform
+import Graphics.GL.Core41
 
-runProgram :: forall name sig m a . Has (Lift IO) sig m => [(ShaderType, FilePath)] -> ProgramC name m a -> m a
-runProgram shaders (ProgramC m) = do
-  shaders <- traverse (traverse (sendM . readFile)) shaders
-  GL.withBuiltProgram shaders $ \ program ->
-    runReader program m
+runProgram :: ProgramC m a -> m a
+runProgram (ProgramC m) = m
 
-newtype ProgramC name m a = ProgramC (ReaderC GL.Program m a)
-  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
+newtype ProgramC m a = ProgramC (m a)
+  deriving (Applicative, Functor, Monad, MonadIO)
 
-instance Has (Lift IO) sig m => Algebra (Program name :+: sig) (ProgramC name m) where
+instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (ProgramC m) where
   alg = \case
-    L (Use k)     -> ProgramC ask >>= GL.useProgram >> k
-    L (Set v a k) -> ProgramC ask >>= \ p -> setUniformValue p v a >> k
-    R other       -> ProgramC (send (handleCoercible other))
+    L (Build s   k) -> do
+      program <- GL.Program <$> runLiftIO glCreateProgram
+      onExit $ runLiftIO (glDeleteProgram (GL.unProgram program))
+      shaders <- for s $ \ (type', path) -> do
+        shader <- Shader <$> runLiftIO (glCreateShader (GL.glEnum type'))
+        onExit $ runLiftIO (glDeleteShader (unShader shader))
+        source <- sendM (readFile path)
+        shader <$ compile source shader
+      GL.link shaders program
+      k program
+    L (Use p     k) -> GL.useProgram p >> k
+    L (Set p v a k) -> setUniformValue p v a >> k
+    R other         -> ProgramC (send (handleCoercible other))

@@ -77,9 +77,11 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
   runWindow "Text" (fromIntegral <$> windowSize)
     . runFinally
-    . runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
-    . runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")]
+    . runProgram
     $ do
+      glyph <- build [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
+      text  <- build [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
+
       texture <- gen1 @(Texture 'Texture2D)
       framebuffer <- gen1
 
@@ -125,10 +127,10 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
       let drawGlyphs = do
             glBlendFunc GL_ONE GL_ONE -- add
 
-            use @"glyph"
+            use glyph
 
-            -- set @"glyph" colour white
-            -- set @"glyph" matrix3 identity
+            -- set glyph colour white
+            -- set glyph matrix3 identity
             -- bind screenQuadArray $
             --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
@@ -138,8 +140,8 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
                   windowScale = 1 / 2
               for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
                 for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                  set @"glyph" colour glyphColour
-                  set @"glyph" matrix3
+                  set glyph colour glyphColour
+                  set glyph matrix3
                     $   translated (-1)
                     !*! scaled     (V3 sx sy 1)
                     !*! translated offset
@@ -165,7 +167,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
             -- print instanceBounds'
 
-            use @"text"
+            use text
             let rect' = V4
                   (fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
                   (fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
@@ -174,21 +176,21 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
             -- print rect'
 
-            set @"text" rect rect'
-            -- set @"text" rect (V4 0 0 1 1)
-            set @"text" colour transparent
-            -- set @"text" colour black
+            set text rect rect'
+            -- set text rect (V4 0 0 1 1)
+            set text colour transparent
+            -- set text colour black
             let textureUnit = TextureUnit 0
             setActiveTexture textureUnit
             bind texture $ do
-              set @"text" sampler textureUnit
+              set text sampler textureUnit
 
               bind screenQuadArray $ do
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
                 when (opaque textColour /= black) $ do
                   glBlendFunc GL_ONE GL_ONE
-                  set @"text" colour textColour
+                  set text colour textColour
                   traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do
