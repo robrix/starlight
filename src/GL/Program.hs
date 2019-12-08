@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeOperators #-}
 module GL.Program
 ( Program(..)
 , createProgram
@@ -20,6 +21,9 @@ import Graphics.GL.Core41
 import Graphics.GL.Types
 
 newtype Program = Program { unProgram :: GLuint }
+  deriving (Eq, Ord, Show)
+
+data a ::: b = a ::: b
   deriving (Eq, Ord, Show)
 
 createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m Program
