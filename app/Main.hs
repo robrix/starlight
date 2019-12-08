@@ -16,10 +16,9 @@ import Geometry.Rect
 import GHC.Stack
 import GL.Array
 import GL.Buffer
-import GL.Carrier.Alloc
 import GL.Carrier.Program.Live
 import GL.Error
-import GL.Object (bind)
+import GL.Object
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit
@@ -78,7 +77,6 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
   runWindow "Text" (fromIntegral <$> windowSize)
     . runFinally
-    . runAlloc
     . runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
     . runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")]
     $ do
