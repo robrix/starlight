@@ -16,3 +16,4 @@ data Finalize m k
   deriving (Functor, Generic1)
 
 instance HFunctor Finalize
+instance Effect Finalize
