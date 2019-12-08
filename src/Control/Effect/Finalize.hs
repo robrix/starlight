@@ -14,3 +14,5 @@ import GHC.Generics (Generic1)
 data Finalize m k
   = Finalize (IO ()) (m k)
   deriving (Functor, Generic1)
+
+instance HFunctor Finalize
