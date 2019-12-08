@@ -27,8 +27,8 @@ newtype Array n = Array { unArray :: GLuint }
   deriving (S.Storable)
 
 instance Object (Array n) where
-  gen n = glGenVertexArrays n . coerce
-  delete n = glDeleteVertexArrays n . coerce
+  gen n = runLiftIO . glGenVertexArrays n . coerce
+  delete n = runLiftIO . glDeleteVertexArrays n . coerce
 
 instance Bind (Array n) where
   nullObject = Array 0

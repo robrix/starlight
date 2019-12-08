@@ -23,8 +23,8 @@ newtype Texture (ty :: Type) = Texture { unTexture :: GLuint }
   deriving (Storable)
 
 instance Object (Texture ty) where
-  gen n = glGenTextures n . coerce
-  delete n = glDeleteTextures n . coerce
+  gen n = runLiftIO . glGenTextures n . coerce
+  delete n = runLiftIO . glDeleteTextures n . coerce
 
 instance KnownType ty => Bind (Texture ty) where
   nullObject = Texture 0

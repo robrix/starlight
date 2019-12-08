@@ -29,8 +29,8 @@ newtype Buffer (ty :: Type) v = Buffer { unBuffer :: GLuint }
   deriving (Storable)
 
 instance Object (Buffer ty v) where
-  gen n = glGenBuffers n . coerce
-  delete n = glDeleteBuffers n . coerce
+  gen n = runLiftIO . glGenBuffers n . coerce
+  delete n = runLiftIO . glDeleteBuffers n . coerce
 
 instance KnownType ty => Bind (Buffer ty v) where
   nullObject = Buffer 0

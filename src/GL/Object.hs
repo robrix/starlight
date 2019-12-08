@@ -5,15 +5,15 @@ module GL.Object
 , bind
 ) where
 
-import Control.Monad.IO.Class.Lift
+import Control.Carrier.Lift
 import GHC.Stack
 import Foreign.Ptr
 import Foreign.Storable
 import Graphics.GL.Types
 
 class Storable t => Object t where
-  gen :: MonadIO m => GLsizei -> Ptr t -> m ()
-  delete :: MonadIO m => GLsizei -> Ptr t -> m ()
+  gen :: (Has (Lift IO) sig m, HasCallStack) => GLsizei -> Ptr t -> m ()
+  delete :: (Has (Lift IO) sig m, HasCallStack) => GLsizei -> Ptr t -> m ()
 
 class Bind t where
   nullObject :: t

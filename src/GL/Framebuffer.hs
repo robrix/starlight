@@ -16,8 +16,8 @@ newtype Framebuffer = Framebuffer { unFramebuffer :: GLuint }
   deriving (Storable)
 
 instance Object Framebuffer where
-  gen n = glGenFramebuffers n . coerce
-  delete n = glDeleteFramebuffers n . coerce
+  gen n = runLiftIO . glGenFramebuffers n . coerce
+  delete n = runLiftIO . glDeleteFramebuffers n . coerce
 
 instance Bind Framebuffer where
   nullObject = Framebuffer 0
