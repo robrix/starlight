@@ -3,7 +3,7 @@ module GL.Effect.Alloc
 ( -- * Alloc effect
   Alloc(..)
 , genN
-, gen
+, gen1
   -- * Re-exports
 , Algebra
 , Has
@@ -27,5 +27,5 @@ instance Effect Alloc where
 genN :: (Object t, Has Alloc sig m) => Int -> m [t]
 genN n = send (Gen n pure)
 
-gen :: (Object t, Has Alloc sig m) => m t
-gen = send (Gen 1 (pure . head))
+gen1 :: (Object t, Has Alloc sig m) => m t
+gen1 = send (Gen 1 (pure . head))

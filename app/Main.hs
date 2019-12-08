@@ -82,27 +82,27 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     . runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
     . runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")]
     $ do
-      texture <- gen @(Texture 'Texture2D)
-      framebuffer <- gen
+      texture <- gen1 @(Texture 'Texture2D)
+      framebuffer <- gen1
 
-      glyphBuffer <- gen
-      glyphArray <- gen
+      glyphBuffer <- gen1
+      glyphArray <- gen1
       bind glyphBuffer $ do
         realloc glyphBuffer (length glyphVertices) Static GL.Buffer.Draw
         copy glyphBuffer 0 glyphVertices
 
         bind glyphArray $ configureArray glyphBuffer glyphArray
 
-      screenQuadBuffer <- gen
-      screenQuadArray <- gen
+      screenQuadBuffer <- gen1
+      screenQuadArray <- gen1
       bind screenQuadBuffer $ do
         realloc screenQuadBuffer (length screenQuadVertices) Static GL.Buffer.Draw
         copy screenQuadBuffer 0 screenQuadVertices
 
         bind screenQuadArray $ configureArray screenQuadBuffer screenQuadArray
 
-      shipBuffer <- gen
-      shipArray <- gen
+      shipBuffer <- gen1
+      shipArray <- gen1
       bind shipBuffer $ do
         realloc shipBuffer (length shipVertices) Static GL.Buffer.Draw
         copy shipBuffer 0 shipVertices
