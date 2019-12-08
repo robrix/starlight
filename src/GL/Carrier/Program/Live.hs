@@ -17,11 +17,9 @@ import qualified Data.Map as Map
 import Data.Time.Clock (UTCTime)
 import Data.Traversable (for)
 import GL.Effect.Program
-import qualified GL.Enum as GL
 import GL.Shader
 import qualified GL.Program as GL
 import GL.Uniform
-import Graphics.GL.Core41
 import System.Directory
 
 runProgram :: Has (Lift IO) sig m => ProgramC m a -> m a
@@ -35,8 +33,7 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
     L (Build s   k) -> do
       program <- GL.createProgram
       shaders <- for s $ \ (type', path) -> do
-        shader <- Shader <$> runLiftIO (glCreateShader (GL.glEnum type'))
-        onExit $ runLiftIO (glDeleteShader (unShader shader))
+        shader <- createShader type'
         pure $! ShaderState shader path Nothing
       ProgramC $ modify (Map.insert program shaders)
       k program
