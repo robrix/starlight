@@ -2,6 +2,7 @@
 module Control.Effect.Finalize
 ( -- * Finalize effect
   Finalize(..)
+, finalize
   -- * Re-exports
 , Algebra
 , Has
@@ -17,3 +18,7 @@ data Finalize m k
 
 instance HFunctor Finalize
 instance Effect Finalize
+
+
+finalize :: Has Finalize sig m => IO () -> m ()
+finalize m = send (Finalize m (pure ()))
