@@ -26,7 +26,7 @@ data Var (name :: Symbol) t = Var
 class Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
-setUniformValue :: forall name t ty m sig . (KnownSymbol name, Uniform t, Has (Lift IO) sig m, HasCallStack) => Program ty -> Var name t -> t -> m ()
+setUniformValue :: forall name t ty m sig . (HasVar ty name t, Uniform t, Has (Lift IO) sig m, HasCallStack) => Program ty -> Var name t -> t -> m ()
 setUniformValue program _ v = do
   location <- checkingGLError . runLiftIO $ C.withCString (symbolVal (Proxy :: Proxy name)) (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v

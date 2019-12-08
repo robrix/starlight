@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, NamedFieldPuns, OverloadedStrings, TypeApplications #-}
+{-# LANGUAGE DataKinds, NamedFieldPuns, OverloadedStrings, TypeApplications, TypeOperators #-}
 module Main
 ( main
 ) where
@@ -79,8 +79,10 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     . runFinally
     . runProgram
     $ do
-      glyph <- build [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
-      text  <- build [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
+      glyph <- build @'[ "matrix3" '::: M33 Float, "colour" '::: V4 Float ]
+        [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
+      text  <- build @'[ "rect" '::: V4 Float, "sampler" '::: TextureUnit, "colour" '::: V4 Float ]
+        [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
 
       texture <- gen1 @(Texture 'Texture2D)
       framebuffer <- gen1
