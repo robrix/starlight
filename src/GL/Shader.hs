@@ -2,12 +2,14 @@
 module GL.Shader
 ( Shader(..)
 , ShaderType(..)
+, createShader
 , withShader
 , compile
 , withCompiledShaders
 , checkShader
 ) where
 
+import Control.Effect.Finally
 import qualified Control.Exception.Lift as E
 import Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String.Lift as C
@@ -32,6 +34,11 @@ toGLEnum :: ShaderType -> GLenum
 toGLEnum Vertex   = GL_VERTEX_SHADER
 toGLEnum Fragment = GL_FRAGMENT_SHADER
 
+
+createShader :: (Has Finally sig m, Has (Lift IO) sig m) => ShaderType -> m Shader
+createShader type' = do
+  shader <- runLiftIO (glCreateShader (GL.glEnum type'))
+  Shader shader <$ onExit (runLiftIO (glDeleteShader shader))
 
 withShader :: Has (Lift IO) sig m => ShaderType -> (Shader -> m a) -> m a
 withShader shaderType = E.bracket
