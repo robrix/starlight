@@ -1,2 +1,6 @@
 module Control.Carrier.Finally
-() where
+( -- * Finally effect
+  module Control.Effect.Finally
+) where
+
+import Control.Effect.Finally
