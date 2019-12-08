@@ -19,7 +19,6 @@ import Data.Traversable (for)
 import GL.Effect.Program
 import GL.Shader
 import qualified GL.Program as GL
-import GL.Uniform
 import System.Directory
 
 runProgram :: Has (Lift IO) sig m => ProgramC m a -> m a
@@ -51,7 +50,7 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
         GL.link (map shader shaders) p
       GL.useProgram p
       k
-    L (Set p v k) -> setUniformValue p v >> k
+    L (Set p v k) -> GL.setUniformValue p v >> k
     R other       -> ProgramC (send (handleCoercible other))
     where
       lookup = IntMap.lookup . fromIntegral . GL.unProgram

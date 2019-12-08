@@ -19,7 +19,6 @@ import GL.Object
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit
-import GL.Uniform
 import Graphics.GL.Core41
 import Linear.Exts
 import Linear.Matrix as Linear

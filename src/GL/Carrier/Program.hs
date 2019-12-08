@@ -14,7 +14,6 @@ import Data.Traversable (for)
 import GL.Effect.Program
 import GL.Shader
 import qualified GL.Program as GL
-import GL.Uniform
 
 runProgram :: ProgramC m a -> m a
 runProgram (ProgramC m) = m
@@ -33,5 +32,5 @@ instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (
       GL.link shaders program
       k program
     L (Use p   k) -> GL.useProgram p >> k
-    L (Set p v k) -> setUniformValue p v >> k
+    L (Set p v k) -> GL.setUniformValue p v >> k
     R other       -> ProgramC (send (handleCoercible other))

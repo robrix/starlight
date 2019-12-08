@@ -7,6 +7,7 @@ module GL.Effect.Program
 , set
   -- * Re-exports
 , (GL.:::)(..)
+, GL.Var(..)
 , Algebra
 , Has
 , run
@@ -15,12 +16,11 @@ module GL.Effect.Program
 import Control.Algebra
 import qualified GL.Program as GL
 import GL.Shader
-import GL.Uniform
 
 data Program m k
   = forall ty . Build [(ShaderType, FilePath)] (GL.Program ty -> m k)
   | forall ty . Use (GL.Program ty) (m k)
-  | forall name a ty . HasUniform name a ty => Set (GL.Program ty) (Var name a) (m k)
+  | forall name a ty . GL.HasUniform name a ty => Set (GL.Program ty) (GL.Var name a) (m k)
 
 deriving instance Functor m => Functor (Program m)
 
@@ -43,5 +43,5 @@ build s = send (Build s pure)
 use :: Has Program sig m => (GL.Program ty) -> m ()
 use p = send (Use p (pure ()))
 
-set :: (HasUniform name a ty, Has Program sig m) => GL.Program ty -> Var name a -> m ()
+set :: (GL.HasUniform name a ty, Has Program sig m) => GL.Program ty -> GL.Var name a -> m ()
 set p v = send (Set p v (pure ()))
