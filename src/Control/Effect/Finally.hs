@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
 module Control.Effect.Finally
 ( -- * Finally effect
   Finally(..)
@@ -10,15 +10,18 @@ module Control.Effect.Finally
 ) where
 
 import Control.Algebra
-import GHC.Generics (Generic1)
 
 data Finally m k
-  = Finally (IO ()) (m k)
-  deriving (Functor, Generic1)
+  = forall a . Finally (m a) (m k)
 
-instance HFunctor Finally
-instance Effect Finally
+deriving instance Functor m => Functor (Finally m)
+
+instance HFunctor Finally where
+  hmap f (Finally m k) = Finally (f m) (f k)
+
+instance Effect Finally where
+  thread ctx hdl (Finally m k) = Finally (hdl (m <$ ctx)) (hdl (k <$ ctx))
 
 
-finally :: Has Finally sig m => IO () -> m ()
+finally :: Has Finally sig m => m () -> m ()
 finally m = send (Finally m (pure ()))
