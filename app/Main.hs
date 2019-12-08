@@ -14,6 +14,7 @@ import Foreign.Ptr
 import Geometry.Rect
 import GHC.Stack
 import GL.Array
+import GL.Buffer
 import GL.Carrier.Alloc
 import GL.Carrier.Program.Live
 import GL.Error
@@ -76,10 +77,17 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
         (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances) in
     withArray shipVertices $ \ shipArray ->
     withArray screenQuadVertices $ \ screenQuadArray ->
-    withArray glyphVertices $ \ glyphArray ->
     runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
       texture <- gen @(Texture 'Texture2D)
       framebuffer <- gen
+      glyphBuffer <- gen
+      glyphArray <- gen
+      bind glyphBuffer $ do
+        realloc glyphBuffer (length glyphVertices) Static GL.Buffer.Draw
+        copy glyphBuffer 0 glyphVertices
+
+        bind glyphArray $ configureArray glyphBuffer glyphArray
+
       bind texture $ do
         setMagFilter Texture2D Nearest
         setMinFilter Texture2D Nearest
