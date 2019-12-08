@@ -46,4 +46,4 @@ instance Uniform (Linear.M33 Float) where
 
 class HasVar (sig :: [Symbol ::: *]) (sym :: Symbol) t
 
-instance HasVar (sym '::: t ': tys) sym t
+instance {-# OVERLAPPABLE #-} HasVar (sym '::: t ': tys) sym t
