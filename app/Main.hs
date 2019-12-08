@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, OverloadedStrings, RecordWildCards, TypeApplications #-}
+{-# LANGUAGE DataKinds, NamedFieldPuns, OverloadedStrings, TypeApplications #-}
 module Main
 ( main
 ) where
@@ -136,7 +136,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
               let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
                   windowScale = 1 / 2
-              for_ (zip instances glyphRanges) $ \ (Instance{..}, range) ->
+              for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
                 for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
                   set @"glyph" colour glyphColour
                   set @"glyph" matrix3
