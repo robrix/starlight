@@ -8,9 +8,10 @@ module GL.Carrier.Alloc
 ) where
 
 import Control.Algebra
+import Control.Carrier.Lift
 import Control.Carrier.State.IORef
 import qualified Control.Exception.Lift as E
-import Control.Monad.IO.Class.Lift
+import Control.Monad.IO.Class
 import Data.Foldable (sequenceA_)
 import Data.IORef
 import qualified Foreign.Marshal.Array.Lift as A
