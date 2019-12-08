@@ -76,7 +76,6 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
           ]
         (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances) in
     withArray shipVertices $ \ shipArray ->
-    withArray screenQuadVertices $ \ screenQuadArray ->
     runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
       texture <- gen @(Texture 'Texture2D)
       framebuffer <- gen
@@ -87,6 +86,14 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
         copy glyphBuffer 0 glyphVertices
 
         bind glyphArray $ configureArray glyphBuffer glyphArray
+
+      screenQuadBuffer <- gen
+      screenQuadArray <- gen
+      bind screenQuadBuffer $ do
+        realloc screenQuadBuffer (length screenQuadVertices) Static GL.Buffer.Draw
+        copy screenQuadBuffer 0 screenQuadVertices
+
+        bind screenQuadArray $ configureArray screenQuadBuffer screenQuadArray
 
       bind texture $ do
         setMagFilter Texture2D Nearest
