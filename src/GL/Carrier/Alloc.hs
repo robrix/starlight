@@ -10,6 +10,7 @@ module GL.Carrier.Alloc
 import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.State.IORef
+import Control.Effect.Finally
 import qualified Control.Exception.Lift as E
 import Control.Monad.IO.Class
 import Data.Foldable (sequenceA_)
@@ -26,11 +27,11 @@ runAlloc (AllocC m) = do
 newtype AllocC m a = AllocC (StateC [m ()] m a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance Has (Lift IO) sig m => Algebra (Alloc :+: sig) (AllocC m) where
+instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Alloc :+: sig) (AllocC m) where
   alg = \case
     L (Gen n k) -> do
       bs <- acquire
-      AllocC $ modify @[m ()] (release bs :)
+      onExit (release bs)
       k bs where
       acquire = A.allocaArray n $ \ p -> do
         GL.gen (fromIntegral n) p
