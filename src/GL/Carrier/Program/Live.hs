@@ -33,8 +33,7 @@ newtype ProgramC m a = ProgramC (StateC (Map.Map GL.Program [ShaderState]) m a)
 instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Program :+: sig) (ProgramC m) where
   alg = \case
     L (Build s   k) -> do
-      program <- GL.Program <$> runLiftIO glCreateProgram
-      onExit $ runLiftIO (glDeleteProgram (GL.unProgram program))
+      program <- GL.createProgram
       shaders <- for s $ \ (type', path) -> do
         shader <- Shader <$> runLiftIO (glCreateShader (GL.glEnum type'))
         onExit $ runLiftIO (glDeleteShader (unShader shader))
