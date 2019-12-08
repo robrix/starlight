@@ -21,13 +21,13 @@ import Graphics.GL.Types
 import Linear.Matrix as Linear
 import Linear.V4 as Linear
 
-data Var (name :: Symbol) t = Var
+newtype Var (name :: Symbol) t = Var t
 
 class Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
-setUniformValue :: forall name t ty m sig . (HasVar ty name t, Uniform t, Has (Lift IO) sig m, HasCallStack) => Program ty -> Var name t -> t -> m ()
-setUniformValue program _ v = do
+setUniformValue :: forall name t ty m sig . (HasVar ty name t, Uniform t, Has (Lift IO) sig m, HasCallStack) => Program ty -> Var name t -> m ()
+setUniformValue program (Var v) = do
   location <- checkingGLError . runLiftIO $ C.withCString (symbolVal (Proxy :: Proxy name)) (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v
 

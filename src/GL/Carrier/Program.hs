@@ -24,7 +24,7 @@ newtype ProgramC m a = ProgramC (m a)
 
 instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (ProgramC m) where
   alg = \case
-    L (Build s   k) -> do
+    L (Build s k) -> do
       program <- GL.createProgram
       shaders <- for s $ \ (type', path) -> do
         shader <- createShader type'
@@ -32,6 +32,6 @@ instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (
         shader <$ compile source shader
       GL.link shaders program
       k program
-    L (Use p     k) -> GL.useProgram p >> k
-    L (Set p v a k) -> setUniformValue p v a >> k
-    R other         -> ProgramC (send (handleCoercible other))
+    L (Use p   k) -> GL.useProgram p >> k
+    L (Set p v k) -> setUniformValue p v >> k
+    R other       -> ProgramC (send (handleCoercible other))

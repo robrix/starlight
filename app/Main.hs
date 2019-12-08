@@ -48,10 +48,6 @@ main :: HasCallStack => IO ()
 main = evalState (Nothing :: Maybe UTCTime) $ do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
-      rect    = Var :: Var "rect"    (V4 Float)
-      colour  = Var :: Var "colour"  (V4 Float)
-      sampler = Var :: Var "sampler" TextureUnit
-      matrix3 = Var :: Var "matrix3" (M33 Float)
       instances = combineInstances (V2 288 288) (V2 0 0) glyphs
       instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
       (shipVertices, shipRanges) = combineGeometry
@@ -142,8 +138,8 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
                   windowScale = 1 / 2
               for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
                 for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                  set glyph colour glyphColour
-                  set glyph matrix3
+                  set glyph (Var @"colour" glyphColour)
+                  set glyph . Var @"matrix3"
                     $   translated (-1)
                     !*! scaled     (V3 sx sy 1)
                     !*! translated offset
@@ -178,21 +174,21 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
 
             -- print rect'
 
-            set text rect rect'
-            -- set text rect (V4 0 0 1 1)
-            set text colour transparent
+            set text (Var @"rect" rect')
+            -- set text (Var @"rect" (V4 0 0 1 1))
+            set text (Var @"colour" transparent)
             -- set text colour black
             let textureUnit = TextureUnit 0
             setActiveTexture textureUnit
             bind texture $ do
-              set text sampler textureUnit
+              set text (Var @"sampler" textureUnit)
 
               bind screenQuadArray $ do
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
                 when (opaque textColour /= black) $ do
                   glBlendFunc GL_ONE GL_ONE
-                  set text colour textColour
+                  set text (Var @"colour" textColour)
                   traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do

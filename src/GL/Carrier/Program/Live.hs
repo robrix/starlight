@@ -30,14 +30,14 @@ newtype ProgramC m a = ProgramC (StateC (IntMap.IntMap [ShaderState]) m a)
 
 instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Program :+: sig) (ProgramC m) where
   alg = \case
-    L (Build s   k) -> do
+    L (Build s k) -> do
       program <- GL.createProgram
       shaders <- for s $ \ (type', path) -> do
         shader <- createShader type'
         pure $! ShaderState shader path Nothing
       ProgramC $ modify (insert program shaders)
       k program
-    L (Use p     k) -> do
+    L (Use p   k) -> do
       shaders <- maybe (error "no state found for program") id <$> ProgramC (gets (lookup p))
       let prevTimes = map time shaders
       times <- traverse (fmap Just . sendM . getModificationTime . path) shaders
@@ -51,8 +51,8 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
         GL.link (map shader shaders) p
       GL.useProgram p
       k
-    L (Set p v a k) -> setUniformValue p v a >> k
-    R other         -> ProgramC (send (handleCoercible other))
+    L (Set p v k) -> setUniformValue p v >> k
+    R other       -> ProgramC (send (handleCoercible other))
     where
       lookup = IntMap.lookup . fromIntegral . GL.unProgram
       insert p v = IntMap.insert (fromIntegral (GL.unProgram p)) v
