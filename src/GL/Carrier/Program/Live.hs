@@ -13,7 +13,7 @@ import Control.Carrier.State.Strict
 import Control.Effect.Finally
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
-import qualified Data.Map as Map
+import qualified Data.IntMap as IntMap
 import Data.Time.Clock (UTCTime)
 import Data.Traversable (for)
 import GL.Effect.Program
@@ -23,9 +23,9 @@ import GL.Uniform
 import System.Directory
 
 runProgram :: Has (Lift IO) sig m => ProgramC m a -> m a
-runProgram (ProgramC m) = evalState Map.empty m
+runProgram (ProgramC m) = evalState IntMap.empty m
 
-newtype ProgramC m a = ProgramC (StateC (Map.Map GL.Program [ShaderState]) m a)
+newtype ProgramC m a = ProgramC (StateC (IntMap.IntMap [ShaderState]) m a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Program :+: sig) (ProgramC m) where
@@ -35,10 +35,10 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
       shaders <- for s $ \ (type', path) -> do
         shader <- createShader type'
         pure $! ShaderState shader path Nothing
-      ProgramC $ modify (Map.insert program shaders)
+      ProgramC $ modify (insert program shaders)
       k program
     L (Use p     k) -> do
-      shaders <- maybe (error "no state found for program") id <$> ProgramC (gets (Map.lookup p))
+      shaders <- maybe (error "no state found for program") id <$> ProgramC (gets (lookup p))
       let prevTimes = map time shaders
       times <- traverse (fmap Just . sendM . getModificationTime . path) shaders
       when (times /= prevTimes) $ do
@@ -47,12 +47,15 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
             source <- sendM $ readFile path
             compile source shader
           pure (ShaderState shader path newTime)
-        ProgramC (modify (Map.insert p shaders))
+        ProgramC (modify (insert p shaders))
         GL.link (map shader shaders) p
       GL.useProgram p
       k
     L (Set p v a k) -> setUniformValue p v a >> k
     R other         -> ProgramC (send (handleCoercible other))
+    where
+      lookup = IntMap.lookup . fromIntegral . GL.unProgram
+      insert p v = IntMap.insert (fromIntegral (GL.unProgram p)) v
 
 data ShaderState = ShaderState
   { shader :: !Shader
