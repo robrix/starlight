@@ -38,7 +38,7 @@ library
   exposed-modules:
     Control.Carrier.State.IORef
     Control.Concurrent.Lift
-    Control.Effect.Finalize
+    Control.Effect.Finally
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
     Foreign.C.String.Lift
