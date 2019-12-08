@@ -20,7 +20,7 @@ import GL.Uniform
 data Program m k
   = forall ty . Build [(ShaderType, FilePath)] (GL.Program ty -> m k)
   | forall ty . Use (GL.Program ty) (m k)
-  | forall name a ty . (HasUniform ty name a, Uniform a) => Set (GL.Program ty) (Var name a) (m k)
+  | forall name a ty . HasUniform ty name a => Set (GL.Program ty) (Var name a) (m k)
 
 deriving instance Functor m => Functor (Program m)
 
@@ -43,5 +43,5 @@ build s = send (Build s pure)
 use :: Has Program sig m => (GL.Program ty) -> m ()
 use p = send (Use p (pure ()))
 
-set :: (HasUniform ty name a, Uniform a, Has Program sig m) => GL.Program ty -> Var name a -> m ()
+set :: (HasUniform ty name a, Has Program sig m) => GL.Program ty -> Var name a -> m ()
 set p v = send (Set p v (pure ()))

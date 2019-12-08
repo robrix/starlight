@@ -26,7 +26,7 @@ newtype Var (name :: Symbol) t = Var t
 class Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
-setUniformValue :: forall name t ty m sig . (HasUniform ty name t, Uniform t, Has (Lift IO) sig m, HasCallStack) => Program ty -> Var name t -> m ()
+setUniformValue :: forall name t ty m sig . (HasUniform ty name t, Has (Lift IO) sig m, HasCallStack) => Program ty -> Var name t -> m ()
 setUniformValue program (Var v) = do
   location <- checkingGLError . runLiftIO $ C.withCString (symbolVal (Proxy :: Proxy name)) (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v
@@ -44,7 +44,7 @@ instance Uniform (Linear.M33 Float) where
   uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
 
 
-class KnownSymbol sym => HasUniform (sig :: [Symbol ::: *]) (sym :: Symbol) t | sym sig -> t
+class (KnownSymbol sym, Uniform t) => HasUniform (sig :: [Symbol ::: *]) (sym :: Symbol) t | sym sig -> t
 
-instance {-# OVERLAPPABLE #-} KnownSymbol sym => HasUniform (sym '::: t ': tys) sym t
+instance {-# OVERLAPPABLE #-} (KnownSymbol sym, Uniform t) => HasUniform (sym '::: t ': tys) sym t
 instance {-# OVERLAPPABLE #-} HasUniform tys sym t => HasUniform (ty ': tys) sym t
