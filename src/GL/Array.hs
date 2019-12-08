@@ -46,7 +46,7 @@ instance Bind (Array n) where
 
 
 configureArray :: forall v n m sig . (KnownNat (Size v), Scalar n, Has (Lift IO) sig m) => GL.Buffer 'GL.Array (v n) -> Array (v n) -> m ()
-configureArray buffer array = runLiftIO . bind buffer . bind array $ do
+configureArray _ _ = runLiftIO $ do
   glEnableVertexAttribArray 0
   glVertexAttribPointer 0 (fromIntegral (natVal (Proxy @(Size v)))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
 
