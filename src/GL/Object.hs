@@ -1,12 +1,16 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleContexts, ScopedTypeVariables #-}
 module GL.Object
 ( Object(..)
 , Bind(..)
 , bind
+, genN
+, gen1
 ) where
 
 import Control.Carrier.Lift
+import Control.Effect.Finally
 import GHC.Stack
+import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr
 import Foreign.Storable
 import Graphics.GL.Types
@@ -24,3 +28,16 @@ bind t m = do
   bindObject t
   a <- m
   a <$ bindObject (nullObject :: t)
+
+
+genN :: (Object t, Has Finally sig m, Has (Lift IO) sig m) => Int -> m [t]
+genN n = do
+  ts <- acquire
+  ts <$ onExit (release ts) where
+  acquire = A.allocaArray n $ \ p -> do
+    gen (fromIntegral n) p
+    A.peekArray n p
+  release ts = A.withArray ts $ delete (fromIntegral n)
+
+gen1 :: (Object t, Has Finally sig m, Has (Lift IO) sig m) => m t
+gen1 = head <$> genN 1
