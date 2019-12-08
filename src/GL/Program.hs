@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, KindSignatures, TypeOperators #-}
 module GL.Program
 ( Program(..)
+, (:::)(..)
 , createProgram
 , useProgram
 , withProgram
