@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Control.Carrier.Finally
 ( -- * Finally carrier
   FinallyC(..)
@@ -6,5 +7,7 @@ module Control.Carrier.Finally
 ) where
 
 import Control.Effect.Finally
+import Control.Monad.IO.Class
 
 newtype FinallyC m a = FinallyC (m a)
+  deriving (Applicative, Functor, Monad, MonadIO)
