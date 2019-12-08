@@ -3,14 +3,11 @@ module GL.Shader
 ( Shader(..)
 , ShaderType(..)
 , createShader
-, withShader
 , compile
-, withCompiledShaders
 , checkShader
 ) where
 
 import Control.Effect.Finally
-import qualified Control.Exception.Lift as E
 import Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String.Lift as C
 import qualified Foreign.Marshal.Utils.Lift as U
@@ -30,25 +27,11 @@ instance GL.Enum ShaderType where
     Vertex   -> GL_VERTEX_SHADER
     Fragment -> GL_FRAGMENT_SHADER
 
-toGLEnum :: ShaderType -> GLenum
-toGLEnum Vertex   = GL_VERTEX_SHADER
-toGLEnum Fragment = GL_FRAGMENT_SHADER
-
 
 createShader :: (Has Finally sig m, Has (Lift IO) sig m) => ShaderType -> m Shader
 createShader type' = do
   shader <- runLiftIO (glCreateShader (GL.glEnum type'))
   Shader shader <$ onExit (runLiftIO (glDeleteShader shader))
-
-withShader :: Has (Lift IO) sig m => ShaderType -> (Shader -> m a) -> m a
-withShader shaderType = E.bracket
-  (runLiftIO (Shader <$> glCreateShader (toGLEnum shaderType)))
-  (runLiftIO . glDeleteShader . unShader)
-
-withCompiledShader :: (Has (Lift IO) sig m, HasCallStack) => ShaderType -> String -> (Shader -> m a) -> m a
-withCompiledShader shaderType source body = withShader shaderType $ \ shader -> do
-  compile source shader
-  body shader
 
 compile :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m ()
 compile source (Shader shader) = runLiftIO $ do
@@ -57,12 +40,6 @@ compile source (Shader shader) = runLiftIO $ do
       glShaderSource shader 1 p nullPtr
   glCompileShader shader
   checkShader source (Shader shader)
-
-withCompiledShaders :: (Has (Lift IO) sig m, HasCallStack) => [(ShaderType, String)] -> ([Shader] -> m a) -> m a
-withCompiledShaders sources body = go [] sources where
-  go shaders = \case
-    []             -> body shaders
-    (t, source):xs -> withCompiledShader t source (\ shader -> go (shader : shaders) xs)
 
 checkShader :: (Has (Lift IO) sig m, HasCallStack) => String -> Shader -> m ()
 checkShader source = withFrozenCallStack $ runLiftIO . checkStatus glGetShaderiv glGetShaderInfoLog (Source source) GL_COMPILE_STATUS . unShader
