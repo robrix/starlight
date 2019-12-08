@@ -1,5 +1,6 @@
 module GL.Program
 ( Program(..)
+, createProgram
 , useProgram
 , withProgram
 , withLinkedProgram
@@ -8,6 +9,7 @@ module GL.Program
 , checkProgram
 ) where
 
+import Control.Effect.Finally
 import qualified Control.Exception.Lift as E
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
@@ -19,6 +21,11 @@ import Graphics.GL.Types
 
 newtype Program = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)
+
+createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m Program
+createProgram = do
+  program <- runLiftIO glCreateProgram
+  Program program <$ onExit (runLiftIO (glDeleteProgram program))
 
 useProgram :: Has (Lift IO) sig m => Program -> m ()
 useProgram = runLiftIO . glUseProgram . unProgram
