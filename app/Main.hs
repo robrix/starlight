@@ -4,13 +4,10 @@ module Main
 ) where
 
 import Control.Carrier.Finally
-import Control.Carrier.State.Strict
 import Control.Monad
-import Control.Monad.IO.Class
 import Data.Foldable
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
-import Data.Time.Clock
 import Foreign.Ptr
 import Geometry.Rect
 import GHC.Stack
@@ -30,7 +27,6 @@ import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
-import System.Directory
 import UI.Colour
 import UI.Font as Font
 import UI.Glyph
@@ -45,7 +41,7 @@ import UI.Carrier.Window
 -- import System.CPUTime
 
 main :: HasCallStack => IO ()
-main = evalState (Nothing :: Maybe UTCTime) $ do
+main = do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
       instances = combineInstances (V2 288 288) (V2 0 0) glyphs
@@ -194,12 +190,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
             bind shipArray $
               traverse_ (drawArrays LineLoop) shipRanges
 
-      draw $ do
-        prev <- get
-        current <- liftIO (Just <$> getModificationTime "text-vertex.glsl")
-        when (prev /= current) $ do
-          liftIO $ putStrLn "text-vertex.glsl modified"
-          put current
+      draw $
         traverse_ drawLayer
           [ Layer (Just framebuffer) transparent (Rect 0 windowSize) drawGlyphs
           , Layer Nothing black (Rect 0 windowSize) drawText
