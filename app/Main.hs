@@ -82,6 +82,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
     $ do
       texture <- gen @(Texture 'Texture2D)
       framebuffer <- gen
+
       glyphBuffer <- gen
       glyphArray <- gen
       bind glyphBuffer $ do
