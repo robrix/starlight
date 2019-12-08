@@ -19,7 +19,6 @@ import qualified SDL.Video as SDL
 import UI.Effect.Window
 import qualified UI.Window as UI
 
-
 runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> WindowC m a -> m a
 runWindow name size (WindowC m) = UI.withSDL $
   UI.withSDLWindow name size $ \ window ->
