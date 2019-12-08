@@ -14,6 +14,7 @@ import qualified Foreign.C.String.Lift as C
 import qualified Foreign.Marshal.Utils.Lift as U
 import Foreign.Ptr
 import GHC.Stack
+import qualified GL.Enum as GL
 import GL.Error
 import Graphics.GL.Core41
 import Graphics.GL.Types
@@ -21,6 +22,11 @@ import Graphics.GL.Types
 newtype Shader = Shader { unShader :: GLuint }
 
 data ShaderType = Vertex | Fragment
+
+instance GL.Enum ShaderType where
+  glEnum = \case
+    Vertex   -> GL_VERTEX_SHADER
+    Fragment -> GL_FRAGMENT_SHADER
 
 toGLEnum :: ShaderType -> GLenum
 toGLEnum Vertex   = GL_VERTEX_SHADER
