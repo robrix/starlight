@@ -1,2 +1,8 @@
 module Control.Effect.Finalize
-() where
+( -- * Re-exports
+  Algebra
+, Has
+, run
+) where
+
+import Control.Algebra
