@@ -133,7 +133,6 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
             --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
             bind glyphArray $ do
-
               let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
                   windowScale = 1 / 2
               for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
