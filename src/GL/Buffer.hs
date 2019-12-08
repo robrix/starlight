@@ -15,19 +15,15 @@ module GL.Buffer
 
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
-import Data.Foldable (toList)
 import Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable as S
-import GHC.TypeLits
 import GL.Error
 import GL.Object
 import GL.Range
-import GL.Scalar
 import Graphics.GL.Core41
 import Graphics.GL.Types
-import Linear.V
 
 newtype Buffer (ty :: Type) v = Buffer { unBuffer :: GLuint }
   deriving (Storable)
@@ -47,11 +43,10 @@ realloc _ vertices update usage = A.withArrayLen vertices $ \ n p ->
 copy :: forall ty a m buffer sig . (KnownType ty, Has (Lift IO) sig m) => buffer ty a -> Range -> Ptr a -> m ()
 copy _ (Range offset size) = checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr
 
-copyFrom :: forall ty v n m buffer sig . (KnownType ty, KnownNat (Size v), Foldable v, Scalar n, Has (Lift IO) sig m) => buffer ty (v n) -> Int -> [v n] -> m ()
-copyFrom _ offset vertices = A.withArray (vertices >>= toList) $
-  checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral (offset * vsize)) (fromIntegral size) . castPtr where
+copyFrom :: forall ty v m buffer sig . (KnownType ty, S.Storable v, Has (Lift IO) sig m) => buffer ty v -> Int -> [v] -> m ()
+copyFrom buffer offset vertices = A.withArray vertices $ copy buffer (Range (offset * vsize) size) where
   size = length vertices * vsize
-  vsize = fromIntegral (natVal (Proxy @(Size v))) * S.sizeOf @n 0
+  vsize = S.sizeOf @v undefined
 
 
 data Type
