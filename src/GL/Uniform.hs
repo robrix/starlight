@@ -1,9 +1,9 @@
-{-# LANGUAGE DataKinds, FlexibleInstances, FunctionalDependencies, KindSignatures, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, KindSignatures, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Uniform
 ( Var(..)
 , Uniform(..)
 , setUniformValue
-, HasUniform
+, HasUniform(..)
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -44,7 +44,11 @@ instance Uniform (Linear.M33 Float) where
   uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
 
 
-class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (tys :: [Symbol ::: *]) | sym tys -> t
+class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (tys :: [Symbol ::: *]) | sym tys -> t where
+  uniformLocation :: GLint
 
-instance {-# OVERLAPPABLE #-} (KnownSymbol sym, Uniform t) => HasUniform sym t (sym '::: t ': tys)
-instance {-# OVERLAPPABLE #-} HasUniform sym t tys => HasUniform sym t (ty ': tys)
+instance {-# OVERLAPPABLE #-} (KnownSymbol sym, Uniform t) => HasUniform sym t (sym '::: t ': tys) where
+  uniformLocation = 0
+
+instance {-# OVERLAPPABLE #-} HasUniform sym t tys => HasUniform sym t (ty ': tys) where
+  uniformLocation = 1 + uniformLocation @sym @t @tys
