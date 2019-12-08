@@ -48,34 +48,38 @@ main :: HasCallStack => IO ()
 main = evalState (Nothing :: Maybe UTCTime) $ do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
-  runWindow "Text" (fromIntegral <$> windowSize) . runAlloc $
-    let rect    = Var "rect"    :: Var (V4 Float)
-        colour  = Var "colour"  :: Var (V4 Float)
-        sampler = Var "sampler" :: Var TextureUnit
-        matrix3 = Var "matrix3" :: Var (M33 Float)
-        instances = combineInstances (V2 288 288) (V2 0 0) glyphs
-        instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
-        (shipVertices, shipRanges) = combineGeometry
-          [ [ V3 0      1      0
-            , V3 (-0.5) 0      0
-            , V3 0      (-0.5) 0
-            , V3 0.5    0      0 :: V3 Float
-            ]
-          , [ V3 0 1 0
-            , V3 (-1) 0 0
-            , V3 0 (-1) 0
-            , V3 1 0 0
-            ]
+      rect    = Var "rect"    :: Var (V4 Float)
+      colour  = Var "colour"  :: Var (V4 Float)
+      sampler = Var "sampler" :: Var TextureUnit
+      matrix3 = Var "matrix3" :: Var (M33 Float)
+      instances = combineInstances (V2 288 288) (V2 0 0) glyphs
+      instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
+      (shipVertices, shipRanges) = combineGeometry
+        [ [ V3 0      1      0
+          , V3 (-0.5) 0      0
+          , V3 0      (-0.5) 0
+          , V3 0.5    0      0 :: V3 Float
           ]
-        (screenQuadVertices, screenQuadRanges) = combineGeometry
-          [ [ V2 (-1) (-1)
-            , V2   1  (-1)
-            , V2 (-1)   1
-            , V2   1    1  :: V2 Float
-            ]
+        , [ V3 0 1 0
+          , V3 (-1) 0 0
+          , V3 0 (-1) 0
+          , V3 1 0 0
           ]
-        (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances) in
-    runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")] $ runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")] $ do
+        ]
+      (screenQuadVertices, screenQuadRanges) = combineGeometry
+        [ [ V2 (-1) (-1)
+          , V2   1  (-1)
+          , V2 (-1)   1
+          , V2   1    1  :: V2 Float
+          ]
+        ]
+      (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances)
+
+  runWindow "Text" (fromIntegral <$> windowSize)
+    . runAlloc
+    . runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
+    . runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")]
+    $ do
       texture <- gen @(Texture 'Texture2D)
       framebuffer <- gen
       glyphBuffer <- gen
