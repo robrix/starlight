@@ -2,7 +2,6 @@
 module GL.Object
 ( Object(..)
 , withN
-, with
 , Bind(..)
 , bind
 ) where
@@ -25,9 +24,6 @@ withN n = E.bracket acquire release where
     gen (fromIntegral n) p
     A.peekArray n p
   release buffers = A.withArray buffers $ runLiftIO . delete (fromIntegral n)
-
-with :: (Has (Lift IO) sig m, Object t) => (t -> m a) -> m a
-with = withN 1 . (. head)
 
 
 class Bind t where
