@@ -28,6 +28,8 @@ newtype Program (ty :: [Symbol ::: *]) = Program { unProgram :: GLuint }
 data a ::: b = a ::: b
   deriving (Eq, Ord, Show)
 
+infix 9 :::
+
 createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m (Program ty)
 createProgram = do
   program <- runLiftIO glCreateProgram
