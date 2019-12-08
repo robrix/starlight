@@ -44,5 +44,5 @@ build s = send (Build s pure)
 use :: Has Program sig m => (GL.Program ty) -> m ()
 use p = send (Use p (pure ()))
 
-set :: (KnownSymbol name, Uniform a, Has Program sig m) => (GL.Program ty) -> Var name a -> a -> m ()
+set :: (KnownSymbol name, Uniform a, Has Program sig m) => GL.Program ty -> Var name a -> a -> m ()
 set p v a = send (Set p v a (pure ()))
