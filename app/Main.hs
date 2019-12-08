@@ -3,6 +3,7 @@ module Main
 ( main
 ) where
 
+import Control.Carrier.Finally
 import Control.Carrier.State.Strict
 import Control.Monad
 import Control.Monad.IO.Class
@@ -76,6 +77,7 @@ main = evalState (Nothing :: Maybe UTCTime) $ do
       (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances)
 
   runWindow "Text" (fromIntegral <$> windowSize)
+    . runFinally
     . runAlloc
     . runProgram @"glyph" [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
     . runProgram @"text" [(Vertex, "text-vertex.glsl"), (Fragment, "text-fragment.glsl")]
