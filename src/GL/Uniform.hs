@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, FlexibleInstances, KindSignatures, MultiParamTypeClasses, ScopedTypeVariables, TypeOperators #-}
+{-# LANGUAGE DataKinds, FlexibleInstances, FunctionalDependencies, KindSignatures, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module GL.Uniform
 ( Var(..)
 , Uniform(..)
@@ -44,7 +44,7 @@ instance Uniform (Linear.M33 Float) where
   uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
 
 
-class KnownSymbol sym => HasVar (sig :: [Symbol ::: *]) (sym :: Symbol) t
+class KnownSymbol sym => HasVar (sig :: [Symbol ::: *]) (sym :: Symbol) t | sym sig -> t
 
 instance {-# OVERLAPPABLE #-} KnownSymbol sym => HasVar (sym '::: t ': tys) sym t
 instance {-# OVERLAPPABLE #-} HasVar tys sym t => HasVar (ty ': tys) sym t
