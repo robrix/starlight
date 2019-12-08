@@ -29,7 +29,7 @@ newtype Array n = Array { unArray :: GLuint }
 withArray :: forall v n m a sig . (KnownNat (Size v), S.Storable (v n), Scalar n, Has (Lift IO) sig m) => [v n] -> (Array (v n) -> m a) -> m a
 withArray vertices body = with $ \ buffer -> runLiftIO . bind @(GL.Buffer 'GL.Array (v n)) buffer $ do
   GL.realloc buffer (length vertices) GL.Static GL.Draw
-  GL.copyFrom buffer 0 vertices
+  GL.copy buffer 0 vertices
   with $ \ array -> bind array $ do
     glEnableVertexAttribArray 0
     glVertexAttribPointer 0 (fromIntegral (natVal (Proxy @(Size v)))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
