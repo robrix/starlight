@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 module Control.Effect.Finalize
 ( -- * Finalize effect
   Finalize(..)
@@ -11,3 +12,4 @@ import Control.Algebra
 
 data Finalize m k
   = Finalize (IO ()) (m k)
+  deriving (Functor)
