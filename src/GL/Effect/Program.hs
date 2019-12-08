@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, LambdaCase, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, ExplicitForAll, LambdaCase, StandaloneDeriving #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -38,7 +38,7 @@ instance Effect   Program where
     Set p v a k -> Set p v a (hdl (k <$ ctx))
 
 
-build :: Has Program sig m => [(ShaderType, FilePath)] -> m (GL.Program ty)
+build :: forall ty m sig . Has Program sig m => [(ShaderType, FilePath)] -> m (GL.Program ty)
 build s = send (Build s pure)
 
 use :: Has Program sig m => (GL.Program ty) -> m ()
