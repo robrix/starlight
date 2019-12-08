@@ -2,7 +2,7 @@
 module GL.Buffer
 ( Buffer(..)
 , realloc
-, copy
+, copyPtr
 , copyFrom
 , Type(..)
 , KnownType(..)
@@ -39,11 +39,11 @@ instance KnownType ty => Bind (Buffer ty v) where
 realloc :: forall ty v m buffer sig . (KnownType ty, S.Storable v, Has (Lift IO) sig m) => buffer ty v -> Int -> Update -> Usage -> m ()
 realloc _ n update usage = runLiftIO (glBufferData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral (n * S.sizeOf @v undefined)) nullPtr (hintToGLEnum update usage))
 
-copy :: forall ty a m buffer sig . (KnownType ty, Has (Lift IO) sig m) => buffer ty a -> Range -> Ptr a -> m ()
-copy _ (Range offset size) = checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr
+copyPtr :: forall ty a m buffer sig . (KnownType ty, Has (Lift IO) sig m) => buffer ty a -> Range -> Ptr a -> m ()
+copyPtr _ (Range offset size) = checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr
 
 copyFrom :: forall ty v m buffer sig . (KnownType ty, S.Storable v, Has (Lift IO) sig m) => buffer ty v -> Int -> [v] -> m ()
-copyFrom buffer offset vertices = A.withArray vertices $ copy buffer (Range (offset * vsize) size) where
+copyFrom buffer offset vertices = A.withArray vertices $ copyPtr buffer (Range (offset * vsize) size) where
   size = length vertices * vsize
   vsize = S.sizeOf @v undefined
 
