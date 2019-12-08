@@ -31,8 +31,8 @@ instance Has (Lift IO) sig m => Algebra (Alloc :+: sig) (AllocC m) where
       bs <- acquire
       AllocC $ modify @[m ()] (release bs :)
       k bs where
-      acquire = A.allocaArray n $ \ p -> runLiftIO $ do
+      acquire = A.allocaArray n $ \ p -> do
         GL.gen (fromIntegral n) p
         A.peekArray n p
-      release buffers = A.withArray buffers $ runLiftIO . GL.delete (fromIntegral n)
+      release buffers = A.withArray buffers $ GL.delete (fromIntegral n)
     R other     -> AllocC (send (handleCoercible other))
