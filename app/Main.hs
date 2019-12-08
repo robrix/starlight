@@ -48,10 +48,10 @@ main :: HasCallStack => IO ()
 main = evalState (Nothing :: Maybe UTCTime) $ do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
-      rect    = Var "rect"    :: Var (V4 Float)
-      colour  = Var "colour"  :: Var (V4 Float)
-      sampler = Var "sampler" :: Var TextureUnit
-      matrix3 = Var "matrix3" :: Var (M33 Float)
+      rect    = Var :: Var "rect"    (V4 Float)
+      colour  = Var :: Var "colour"  (V4 Float)
+      sampler = Var :: Var "sampler" TextureUnit
+      matrix3 = Var :: Var "matrix3" (M33 Float)
       instances = combineInstances (V2 288 288) (V2 0 0) glyphs
       instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
       (shipVertices, shipRanges) = combineGeometry

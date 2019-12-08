@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DataKinds, FlexibleInstances, KindSignatures, ScopedTypeVariables #-}
 module GL.Uniform
 ( Var(..)
 , Uniform(..)
@@ -7,10 +7,12 @@ module GL.Uniform
 
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (toList)
+import Data.Proxy
 import qualified Foreign.C.String.Lift as C
 import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr
 import GHC.Stack
+import GHC.TypeLits
 import GL.Error
 import GL.Program
 import Graphics.GL.Core41
@@ -18,14 +20,14 @@ import Graphics.GL.Types
 import Linear.Matrix as Linear
 import Linear.V4 as Linear
 
-newtype Var t = Var { varName :: String }
+data Var (name :: Symbol) t = Var
 
 class Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
-setUniformValue :: (Uniform t, Has (Lift IO) sig m, HasCallStack) => Program -> Var t -> t -> m ()
-setUniformValue program var v = do
-  location <- checkingGLError . runLiftIO $ C.withCString (varName var) (glGetUniformLocation (unProgram program))
+setUniformValue :: forall name t m sig . (KnownSymbol name, Uniform t, Has (Lift IO) sig m, HasCallStack) => Program -> Var name t -> t -> m ()
+setUniformValue program _ v = do
+  location <- checkingGLError . runLiftIO $ C.withCString (symbolVal (Proxy :: Proxy name)) (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v
 
 instance Uniform (Linear.V4 Float) where

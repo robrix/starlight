@@ -12,6 +12,7 @@ module GL.Effect.Program
 ) where
 
 import Control.Algebra
+import GHC.TypeLits
 import qualified GL.Program as GL
 import GL.Shader
 import GL.Uniform
@@ -19,7 +20,7 @@ import GL.Uniform
 data Program m k
   = Build [(ShaderType, FilePath)] (GL.Program -> m k)
   | Use GL.Program (m k)
-  | forall a . Uniform a => Set GL.Program (Var a) a (m k)
+  | forall name a . (KnownSymbol name, Uniform a) => Set GL.Program (Var name a) a (m k)
 
 deriving instance Functor m => Functor (Program m)
 
@@ -42,5 +43,5 @@ build s = send (Build s pure)
 use :: Has Program sig m => GL.Program -> m ()
 use p = send (Use p (pure ()))
 
-set :: (Has Program sig m, Uniform a) => GL.Program -> Var a -> a -> m ()
+set :: (KnownSymbol name, Uniform a, Has Program sig m) => GL.Program -> Var name a -> a -> m ()
 set p v a = send (Set p v a (pure ()))
