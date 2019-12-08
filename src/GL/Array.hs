@@ -2,6 +2,7 @@
 module GL.Array
 ( Array(..)
 , withArray
+, configureArray
 , Mode(..)
 , Range(..)
 , drawArrays
@@ -42,6 +43,12 @@ instance Object (Array n) where
 instance Bind (Array n) where
   nullObject = Array 0
   bindObject = checkingGLError . runLiftIO . glBindVertexArray . unArray
+
+
+configureArray :: forall v n m sig . (KnownNat (Size v), Scalar n, Has (Lift IO) sig m) => GL.Buffer 'GL.Array (v n) -> Array (v n) -> m ()
+configureArray buffer array = runLiftIO . bind buffer . bind array $ do
+  glEnableVertexAttribArray 0
+  glVertexAttribPointer 0 (fromIntegral (natVal (Proxy @(Size v)))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
 
 
 data Mode
