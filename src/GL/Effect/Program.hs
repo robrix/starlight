@@ -53,7 +53,7 @@ set p v = send (Set p v (pure ()))
 class HasProgram (ty :: [Symbol GL.::: *]) (m :: * -> *) | m -> ty
 
 
-newtype ProgramT (ty :: [Symbol GL.::: *]) m a = ProgramT (m a)
+newtype ProgramT (ty :: [Symbol GL.::: *]) m a = ProgramT { runProgramT :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance Algebra sig m => Algebra sig (ProgramT ty m) where
