@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, ExistentialQuantification, ExplicitForAll, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, ExistentialQuantification, ExplicitForAll, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -15,6 +15,7 @@ module GL.Effect.Program
 ) where
 
 import Control.Algebra
+import Control.Carrier.Reader
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.TypeLits
@@ -45,22 +46,21 @@ build :: forall ty m sig . Has Program sig m => [(ShaderType, FilePath)] -> m (G
 build s = send (Build s pure)
 
 use :: Has Program sig m => GL.Program ty -> ProgramT ty m a -> m a
-use p (ProgramT m) = send (Use p m pure)
+use p (ProgramT m) = send (Use p (runReader p m) pure)
 
-set :: (GL.HasUniform name a ty, Has Program sig m) => GL.Program ty -> GL.Var name a -> m ()
-set p v = send (Set p v (pure ()))
-
-
-class HasProgram (ty :: [Symbol GL.::: *]) (m :: * -> *) | m -> ty
+set :: (GL.HasUniform name a ty, HasProgram ty m, Has Program sig m) => GL.Var name a -> m ()
+set v = askProgram >>= \ p -> send (Set p v (pure ()))
 
 
-newtype ProgramT (ty :: [Symbol GL.::: *]) m a = ProgramT { runProgramT :: m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+class HasProgram (ty :: [Symbol GL.::: *]) (m :: * -> *) | m -> ty where
+  askProgram :: m (GL.Program ty)
 
-instance MonadTrans (ProgramT ty) where
-  lift = ProgramT
+
+newtype ProgramT (ty :: [Symbol GL.::: *]) m a = ProgramT { runProgramT :: ReaderC (GL.Program ty) m a }
+  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 instance Algebra sig m => Algebra sig (ProgramT ty m) where
   alg = ProgramT . send . handleCoercible
 
-instance HasProgram ty (ProgramT ty m)
+instance Algebra sig m => HasProgram ty (ProgramT ty m) where
+  askProgram = ProgramT ask

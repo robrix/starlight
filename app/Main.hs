@@ -122,8 +122,8 @@ main = do
 
             use glyph $ do
 
-              -- set glyph colour white
-              -- set glyph matrix3 identity
+              -- set (Var @"colour" white)
+              -- set (Var @"matrix3" identity)
               -- bind screenQuadArray $
               --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
@@ -132,8 +132,8 @@ main = do
                     windowScale = 1 / 2
                 for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
                   for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                    set glyph (Var @"colour" glyphColour)
-                    set glyph . Var @"matrix3"
+                    set (Var @"colour" glyphColour)
+                    set . Var @"matrix3"
                       $   translated (-1)
                       !*! scaled     (V3 sx sy 1)
                       !*! translated offset
@@ -168,21 +168,21 @@ main = do
 
               -- print rect'
 
-              set text (Var @"rect" rect')
-              -- set text (Var @"rect" (V4 0 0 1 1))
-              set text (Var @"colour" transparent)
-              -- set text colour black
+              set (Var @"rect" rect')
+              -- set (Var @"rect" (V4 0 0 1 1))
+              set (Var @"colour" transparent)
+              -- set (Var @"colour" black)
               let textureUnit = TextureUnit 0
               setActiveTexture textureUnit
               bind texture $ do
-                set text (Var @"sampler" textureUnit)
+                set (Var @"sampler" textureUnit)
 
                 bind screenQuadArray $ do
                   traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
                   when (opaque textColour /= black) $ do
                     glBlendFunc GL_ONE GL_ONE
-                    set text (Var @"colour" textColour)
+                    set (Var @"colour" textColour)
                     traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do
