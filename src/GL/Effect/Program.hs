@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, ExplicitForAll, LambdaCase, StandaloneDeriving #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, ExistentialQuantification, ExplicitForAll, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -14,6 +14,7 @@ module GL.Effect.Program
 ) where
 
 import Control.Algebra
+import GHC.TypeLits
 import qualified GL.Program as GL
 import GL.Shader
 
@@ -45,3 +46,15 @@ use p m = send (Use p m pure)
 
 set :: (GL.HasUniform name a ty, Has Program sig m) => GL.Program ty -> GL.Var name a -> m ()
 set p v = send (Set p v (pure ()))
+
+
+class HasProgram (ty :: [Symbol GL.::: *]) (m :: * -> *) | m -> ty
+
+
+newtype ProgramT (ty :: [Symbol GL.::: *]) m a = ProgramT (m a)
+  deriving (Applicative, Functor, Monad)
+
+instance Algebra sig m => Algebra sig (ProgramT ty m) where
+  alg = ProgramT . send . handleCoercible
+
+instance HasProgram ty (ProgramT ty m)
