@@ -14,6 +14,7 @@ module GL.Effect.Program
 ) where
 
 import Control.Algebra
+import Control.Monad.IO.Class
 import GHC.TypeLits
 import qualified GL.Program as GL
 import GL.Shader
@@ -52,7 +53,7 @@ class HasProgram (ty :: [Symbol GL.::: *]) (m :: * -> *) | m -> ty
 
 
 newtype ProgramT (ty :: [Symbol GL.::: *]) m a = ProgramT (m a)
-  deriving (Applicative, Functor, Monad)
+  deriving (Applicative, Functor, Monad, MonadIO)
 
 instance Algebra sig m => Algebra sig (ProgramT ty m) where
   alg = ProgramT . send . handleCoercible
