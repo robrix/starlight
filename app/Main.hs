@@ -1,27 +1,32 @@
-{-# LANGUAGE DataKinds, NamedFieldPuns, OverloadedStrings, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, NamedFieldPuns, OverloadedStrings, TypeApplications, TypeOperators #-}
 module Main
 ( main
 ) where
 
 import Control.Carrier.Finally
+import Control.Effect.Lift
 import Control.Monad
 import Data.Foldable
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
 import Foreign.Ptr
+import Foreign.Storable (Storable)
 import Geometry.Rect
 import GHC.Stack
+import GHC.TypeLits
 import GL.Array
 import GL.Buffer
 import GL.Carrier.Program.Live
 import GL.Error
 import GL.Object
+import GL.Scalar
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import Graphics.GL.Core41
 import Linear.Exts
 import Linear.Matrix as Linear
+import Linear.V (Size)
 import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
@@ -78,33 +83,9 @@ main = do
       texture <- gen1 @(Texture 'Texture2D)
       framebuffer <- gen1
 
-      glyphBuffer <- gen1
-      glyphArray <- gen1
-      bind (Just glyphBuffer)
-
-      realloc glyphBuffer (length glyphVertices) Static GL.Buffer.Draw
-      copy glyphBuffer 0 glyphVertices
-
-      bind (Just glyphArray)
-      configureArray glyphBuffer glyphArray
-
-      screenQuadBuffer <- gen1
-      screenQuadArray <- gen1
-      bind (Just screenQuadBuffer)
-      realloc screenQuadBuffer (length screenQuadVertices) Static GL.Buffer.Draw
-      copy screenQuadBuffer 0 screenQuadVertices
-
-      bind (Just screenQuadArray)
-      configureArray screenQuadBuffer screenQuadArray
-
-      shipBuffer <- gen1
-      shipArray <- gen1
-      bind (Just shipBuffer)
-      realloc shipBuffer (length shipVertices) Static GL.Buffer.Draw
-      copy shipBuffer 0 shipVertices
-
-      bind (Just shipArray)
-      configureArray shipBuffer shipArray
+      (_, glyphArray) <- loadVertices glyphVertices
+      (_, screenQuadArray) <- loadVertices screenQuadVertices
+      (_, shipArray) <- loadVertices shipVertices
 
       bind (Just texture)
       setMagFilter Texture2D Nearest
@@ -232,3 +213,16 @@ combineGeometry = go 0
           let count = length geometry
               (vertices, ranges) = go (prevIndex + count) rest
           in (geometry <> vertices, Range prevIndex count : ranges)
+
+loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Buffer 'GL.Buffer.Array (v n), Array (v n))
+loadVertices vertices = do
+  buffer <- gen1
+  array <- gen1
+
+  bind (Just buffer)
+  realloc buffer (length vertices) Static GL.Buffer.Draw
+  copy buffer 0 vertices
+
+  bind (Just array)
+  configureArray buffer array
+  pure (buffer, array)
