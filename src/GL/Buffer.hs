@@ -6,7 +6,6 @@ module GL.Buffer
 , copy
 , Type(..)
 , KnownType(..)
-, typeToGLEnum
 , Update(..)
 , Usage(..)
 , hintToGLEnum
@@ -19,6 +18,7 @@ import Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr (Ptr, castPtr, nullPtr)
 import Foreign.Storable as S
+import GL.Enum as GL
 import GL.Error
 import GL.Object
 import GL.Range
@@ -33,13 +33,13 @@ instance Object (Buffer ty v) where
   delete n = runLiftIO . glDeleteBuffers n . coerce
 
 instance KnownType ty => Bind (Buffer ty v) where
-  bind = checkingGLError . runLiftIO . glBindBuffer (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unBuffer
+  bind = checkingGLError . runLiftIO . glBindBuffer (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unBuffer
 
 realloc :: forall ty v m buffer sig . (KnownType ty, S.Storable v, Has (Lift IO) sig m) => buffer ty v -> Int -> Update -> Usage -> m ()
-realloc _ n update usage = runLiftIO (glBufferData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral (n * S.sizeOf @v undefined)) nullPtr (hintToGLEnum update usage))
+realloc _ n update usage = runLiftIO (glBufferData (glEnum (typeVal (Proxy @ty))) (fromIntegral (n * S.sizeOf @v undefined)) nullPtr (hintToGLEnum update usage))
 
 copyPtr :: forall ty a m buffer sig . (KnownType ty, Has (Lift IO) sig m) => buffer ty a -> Range -> Ptr a -> m ()
-copyPtr _ (Range offset size) = checkingGLError . runLiftIO . glBufferSubData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr
+copyPtr _ (Range offset size) = checkingGLError . runLiftIO . glBufferSubData (glEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr
 
 copy :: forall ty v m buffer sig . (KnownType ty, S.Storable v, Has (Lift IO) sig m) => buffer ty v -> Int -> [v] -> m ()
 copy buffer offset vertices = A.withArray vertices $ copyPtr buffer (Range (offset * vsize) size) where
@@ -57,8 +57,9 @@ class KnownType (ty :: Type) where
 instance KnownType 'Array where
   typeVal _ = Array
 
-typeToGLEnum :: Type -> GLenum
-typeToGLEnum Array = GL_ARRAY_BUFFER
+instance GL.Enum Type where
+  glEnum = \case
+    Array -> GL_ARRAY_BUFFER
 
 
 data Update
