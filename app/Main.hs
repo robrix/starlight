@@ -79,6 +79,8 @@ main = do
         [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
       text  <- build @'[ "rect" '::: V4 Float, "sampler" '::: TextureUnit, "colour" '::: V4 Float ]
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
+      stars <- build @'[]
+        [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
 
       texture <- gen1 @(Texture 'Texture2D)
       framebuffer <- gen1
@@ -172,7 +174,8 @@ main = do
                 set @"colour" textColour
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
-          drawStars = pure ()
+          drawStars = use stars $
+            traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do
             bind (Just shipArray)
