@@ -31,8 +31,7 @@ instance Object (Array n) where
   delete n = runLiftIO . glDeleteVertexArrays n . coerce
 
 instance Bind (Array n) where
-  nullObject = Array 0
-  bindObject = checkingGLError . runLiftIO . glBindVertexArray . unArray
+  bind = checkingGLError . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
 configureArray :: forall v n m sig . (KnownNat (Size v), Scalar n, Has (Lift IO) sig m) => GL.Buffer 'GL.Array (v n) -> Array (v n) -> m ()

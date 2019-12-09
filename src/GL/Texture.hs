@@ -27,8 +27,7 @@ instance Object (Texture ty) where
   delete n = runLiftIO . glDeleteTextures n . coerce
 
 instance KnownType ty => Bind (Texture ty) where
-  nullObject = Texture 0
-  bindObject = checkingGLError . runLiftIO . glBindTexture (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . unTexture
+  bind = checkingGLError . runLiftIO . glBindTexture (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unTexture
 
 
 data Type

@@ -2,7 +2,6 @@
 module GL.Object
 ( Object(..)
 , Bind(..)
-, bind
 , genN
 , gen1
 ) where
@@ -20,15 +19,7 @@ class Storable t => Object t where
   delete :: (Has (Lift IO) sig m, HasCallStack) => GLsizei -> Ptr t -> m ()
 
 class Bind t where
-  nullObject :: t
-  bindObject :: (Has (Lift IO) sig m, HasCallStack) => t -> m ()
-
-bind :: forall t m a sig . (Bind t, Has (Lift IO) sig m, HasCallStack) => t -> m a -> m a
-bind t m = do
-  bindObject t
-  a <- m
-  a <$ bindObject (nullObject :: t)
-
+  bind :: (Has (Lift IO) sig m, HasCallStack) => Maybe t -> m ()
 
 genN :: (Object t, Has Finally sig m, Has (Lift IO) sig m) => Int -> m [t]
 genN n = do

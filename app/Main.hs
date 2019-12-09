@@ -80,39 +80,43 @@ main = do
 
       glyphBuffer <- gen1
       glyphArray <- gen1
-      bind glyphBuffer $ do
-        realloc glyphBuffer (length glyphVertices) Static GL.Buffer.Draw
-        copy glyphBuffer 0 glyphVertices
+      bind (Just glyphBuffer)
 
-        bind glyphArray $ configureArray glyphBuffer glyphArray
+      realloc glyphBuffer (length glyphVertices) Static GL.Buffer.Draw
+      copy glyphBuffer 0 glyphVertices
+
+      bind (Just glyphArray)
+      configureArray glyphBuffer glyphArray
 
       screenQuadBuffer <- gen1
       screenQuadArray <- gen1
-      bind screenQuadBuffer $ do
-        realloc screenQuadBuffer (length screenQuadVertices) Static GL.Buffer.Draw
-        copy screenQuadBuffer 0 screenQuadVertices
+      bind (Just screenQuadBuffer)
+      realloc screenQuadBuffer (length screenQuadVertices) Static GL.Buffer.Draw
+      copy screenQuadBuffer 0 screenQuadVertices
 
-        bind screenQuadArray $ configureArray screenQuadBuffer screenQuadArray
+      bind (Just screenQuadArray)
+      configureArray screenQuadBuffer screenQuadArray
 
       shipBuffer <- gen1
       shipArray <- gen1
-      bind shipBuffer $ do
-        realloc shipBuffer (length shipVertices) Static GL.Buffer.Draw
-        copy shipBuffer 0 shipVertices
+      bind (Just shipBuffer)
+      realloc shipBuffer (length shipVertices) Static GL.Buffer.Draw
+      copy shipBuffer 0 shipVertices
 
-        bind shipArray $ configureArray shipBuffer shipArray
+      bind (Just shipArray)
+      configureArray shipBuffer shipArray
 
-      bind texture $ do
-        setMagFilter Texture2D Nearest
-        setMinFilter Texture2D Nearest
-        checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
-        checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
-        checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (2 * width) (2 * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
+      bind (Just texture)
+      setMagFilter Texture2D Nearest
+      setMinFilter Texture2D Nearest
+      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
+      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
+      checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (2 * width) (2 * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
 
-      bind framebuffer $ do
-        checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
-        status <- glCheckFramebufferStatus GL_FRAMEBUFFER
-        unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
+      bind (Just framebuffer)
+      checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
+      status <- glCheckFramebufferStatus GL_FRAMEBUFFER
+      unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -127,32 +131,32 @@ main = do
               -- bind screenQuadArray $
               --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
-              bind glyphArray $ do
-                let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
-                    windowScale = 1 / 2
-                for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
-                  for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                    set @"colour" glyphColour
-                    set @"matrix3"
-                      $   translated (-1)
-                      !*! scaled     (V3 sx sy 1)
-                      !*! translated offset
-                      !*! translated (V2 tx ty * windowScale)
-                      !*! scaled     scale
-                    drawArrays Triangles range
+              bind (Just glyphArray)
+              let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
+                  windowScale = 1 / 2
+              for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
+                for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
+                  set @"colour" glyphColour
+                  set @"matrix3"
+                    $   translated (-1)
+                    !*! scaled     (V3 sx sy 1)
+                    !*! translated offset
+                    !*! translated (V2 tx ty * windowScale)
+                    !*! scaled     scale
+                  drawArrays Triangles range
 
-                -- let w = 2 * fromIntegral width
-                --     h = 2 * fromIntegral height
-                -- A.allocaBytes (4 * w * h) $ \ pixels -> do
-                --   bind texture $ do
-                --     checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-                --     checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
-                --     checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-                --     image <- C.withImage w h $ \ x y -> do
-                --       let pixel = pixels `plusPtr` (w * y + x)
-                --       C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
-                --     time <- getCPUTime
-                --     B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
+              -- let w = 2 * fromIntegral width
+              --     h = 2 * fromIntegral height
+              -- A.allocaBytes (4 * w * h) $ \ pixels -> do
+              --   bind texture $ do
+              --     checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+              --     checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
+              --     checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+              --     image <- C.withImage w h $ \ x y -> do
+              --       let pixel = pixels `plusPtr` (w * y + x)
+              --       C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
+              --     time <- getCPUTime
+              --     B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
 
           drawText = do
             glBlendFunc GL_ZERO GL_SRC_COLOR
@@ -174,19 +178,22 @@ main = do
               -- set @"colour" black
               let textureUnit = TextureUnit 0
               setActiveTexture textureUnit
-              bind texture $ do
-                set @"sampler" textureUnit
+              bind (Just texture)
 
-                bind screenQuadArray $ do
-                  traverse_ (drawArrays TriangleStrip) screenQuadRanges
+              set @"sampler" textureUnit
 
-                  when (opaque textColour /= black) $ do
-                    glBlendFunc GL_ONE GL_ONE
-                    set @"colour" textColour
-                    traverse_ (drawArrays TriangleStrip) screenQuadRanges
+              bind (Just screenQuadArray)
+
+              traverse_ (drawArrays TriangleStrip) screenQuadRanges
+
+              when (opaque textColour /= black) $ do
+                glBlendFunc GL_ONE GL_ONE
+                set @"colour" textColour
+                traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do
-            bind shipArray . use text $
+            bind (Just shipArray)
+            use text $
               traverse_ (drawArrays LineLoop) shipRanges
 
       draw $

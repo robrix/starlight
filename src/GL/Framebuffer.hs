@@ -20,5 +20,4 @@ instance Object Framebuffer where
   delete n = runLiftIO . glDeleteFramebuffers n . coerce
 
 instance Bind Framebuffer where
-  nullObject = Framebuffer 0
-  bindObject = checkingGLError . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . unFramebuffer
+  bind = checkingGLError . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer

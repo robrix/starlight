@@ -33,8 +33,7 @@ instance Object (Buffer ty v) where
   delete n = runLiftIO . glDeleteBuffers n . coerce
 
 instance KnownType ty => Bind (Buffer ty v) where
-  nullObject = Buffer 0
-  bindObject = checkingGLError . runLiftIO . glBindBuffer (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . unBuffer
+  bind = checkingGLError . runLiftIO . glBindBuffer (typeToGLEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unBuffer
 
 realloc :: forall ty v m buffer sig . (KnownType ty, S.Storable v, Has (Lift IO) sig m) => buffer ty v -> Int -> Update -> Usage -> m ()
 realloc _ n update usage = runLiftIO (glBufferData (typeToGLEnum (typeVal (Proxy @ty))) (fromIntegral (n * S.sizeOf @v undefined)) nullPtr (hintToGLEnum update usage))
