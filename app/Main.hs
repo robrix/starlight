@@ -122,8 +122,8 @@ main = do
 
             use glyph $ do
 
-              -- set (Var @"colour" white)
-              -- set (Var @"matrix3" identity)
+              -- set @"colour" white
+              -- set @"matrix3" identity
               -- bind screenQuadArray $
               --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
@@ -132,8 +132,8 @@ main = do
                     windowScale = 1 / 2
                 for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
                   for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                    set (Var @"colour" glyphColour)
-                    set . Var @"matrix3"
+                    set @"colour" glyphColour
+                    set @"matrix3"
                       $   translated (-1)
                       !*! scaled     (V3 sx sy 1)
                       !*! translated offset
@@ -168,21 +168,21 @@ main = do
 
               -- print rect'
 
-              set (Var @"rect" rect')
-              -- set (Var @"rect" (V4 0 0 1 1))
-              set (Var @"colour" transparent)
-              -- set (Var @"colour" black)
+              set @"rect" rect'
+              -- set @"rect" (V4 0 0 1 1)
+              set @"colour" transparent
+              -- set @"colour" black
               let textureUnit = TextureUnit 0
               setActiveTexture textureUnit
               bind texture $ do
-                set (Var @"sampler" textureUnit)
+                set @"sampler" textureUnit
 
                 bind screenQuadArray $ do
                   traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
                   when (opaque textColour /= black) $ do
                     glBlendFunc GL_ONE GL_ONE
-                    set (Var @"colour" textColour)
+                    set @"colour" textColour
                     traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do

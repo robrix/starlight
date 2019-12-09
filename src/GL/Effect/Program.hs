@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, ExistentialQuantification, ExplicitForAll, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes, DataKinds, DeriveFunctor, ExistentialQuantification, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -48,8 +48,8 @@ build s = send (Build s pure)
 use :: Has Program sig m => GL.Program ty -> ProgramT ty m a -> m a
 use p (ProgramT m) = send (Use p (runReader p m) pure)
 
-set :: (GL.HasUniform name a ty, HasProgram ty m, Has Program sig m) => GL.Var name a -> m ()
-set v = askProgram >>= \ p -> send (Set p v (pure ()))
+set :: forall name a ty m sig . (GL.HasUniform name a ty, HasProgram ty m, Has Program sig m) => a -> m ()
+set v = askProgram >>= \ p -> send (Set p (GL.Var @name v) (pure ()))
 
 
 class HasProgram (ty :: [Symbol GL.::: *]) (m :: * -> *) | m -> ty where
