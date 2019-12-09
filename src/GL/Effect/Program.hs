@@ -5,6 +5,7 @@ module GL.Effect.Program
 , build
 , use
 , set
+, ProgramT(..)
   -- * Re-exports
 , (GL.:::)(..)
 , GL.Var(..)
