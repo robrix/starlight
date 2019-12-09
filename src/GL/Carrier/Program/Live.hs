@@ -36,7 +36,7 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
         pure $! ShaderState shader path Nothing
       ProgramC $ modify (insert program shaders)
       k program
-    L (Use p   k) -> do
+    L (Use p m k) -> do
       shaders <- maybe (error "no state found for program") id <$> ProgramC (gets (lookup p))
       let prevTimes = map time shaders
       times <- traverse (fmap Just . sendM . getModificationTime . path) shaders
@@ -49,7 +49,9 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
         ProgramC (modify (insert p shaders))
         GL.link (map shader shaders) p
       GL.useProgram p
-      k
+      a <- m
+      GL.useProgram (GL.Program 0)
+      k a
     L (Set p v k) -> GL.setUniformValue p v >> k
     R other       -> ProgramC (send (handleCoercible other))
     where

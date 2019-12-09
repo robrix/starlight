@@ -120,73 +120,73 @@ main = do
       let drawGlyphs = do
             glBlendFunc GL_ONE GL_ONE -- add
 
-            use glyph
+            use glyph $ do
 
-            -- set glyph colour white
-            -- set glyph matrix3 identity
-            -- bind screenQuadArray $
-            --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
+              -- set glyph colour white
+              -- set glyph matrix3 identity
+              -- bind screenQuadArray $
+              --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
 
-            bind glyphArray $ do
-              let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
-                  windowScale = 1 / 2
-              for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
-                for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                  set glyph (Var @"colour" glyphColour)
-                  set glyph . Var @"matrix3"
-                    $   translated (-1)
-                    !*! scaled     (V3 sx sy 1)
-                    !*! translated offset
-                    !*! translated (V2 tx ty * windowScale)
-                    !*! scaled     scale
-                  drawArrays Triangles range
+              bind glyphArray $ do
+                let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
+                    windowScale = 1 / 2
+                for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
+                  for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
+                    set glyph (Var @"colour" glyphColour)
+                    set glyph . Var @"matrix3"
+                      $   translated (-1)
+                      !*! scaled     (V3 sx sy 1)
+                      !*! translated offset
+                      !*! translated (V2 tx ty * windowScale)
+                      !*! scaled     scale
+                    drawArrays Triangles range
 
-              -- let w = 2 * fromIntegral width
-              --     h = 2 * fromIntegral height
-              -- A.allocaBytes (4 * w * h) $ \ pixels -> do
-              --   bind texture $ do
-              --     checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-              --     checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
-              --     checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-              --     image <- C.withImage w h $ \ x y -> do
-              --       let pixel = pixels `plusPtr` (w * y + x)
-              --       C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
-              --     time <- getCPUTime
-              --     B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
+                -- let w = 2 * fromIntegral width
+                --     h = 2 * fromIntegral height
+                -- A.allocaBytes (4 * w * h) $ \ pixels -> do
+                --   bind texture $ do
+                --     checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+                --     checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
+                --     checkingGLError $ glReadPixels 0 0 (2 * width) (2 * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
+                --     image <- C.withImage w h $ \ x y -> do
+                --       let pixel = pixels `plusPtr` (w * y + x)
+                --       C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
+                --     time <- getCPUTime
+                --     B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
 
           drawText = do
             glBlendFunc GL_ZERO GL_SRC_COLOR
 
             -- print instanceBounds'
 
-            use text
-            let rect' = V4
-                  (fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
-                  (fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
-                  (fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
-                  (fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
+            use text $ do
+              let rect' = V4
+                    (fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
+                    (fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
+                    (fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
+                    (fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
 
-            -- print rect'
+              -- print rect'
 
-            set text (Var @"rect" rect')
-            -- set text (Var @"rect" (V4 0 0 1 1))
-            set text (Var @"colour" transparent)
-            -- set text colour black
-            let textureUnit = TextureUnit 0
-            setActiveTexture textureUnit
-            bind texture $ do
-              set text (Var @"sampler" textureUnit)
+              set text (Var @"rect" rect')
+              -- set text (Var @"rect" (V4 0 0 1 1))
+              set text (Var @"colour" transparent)
+              -- set text colour black
+              let textureUnit = TextureUnit 0
+              setActiveTexture textureUnit
+              bind texture $ do
+                set text (Var @"sampler" textureUnit)
 
-              bind screenQuadArray $ do
-                traverse_ (drawArrays TriangleStrip) screenQuadRanges
-
-                when (opaque textColour /= black) $ do
-                  glBlendFunc GL_ONE GL_ONE
-                  set text (Var @"colour" textColour)
+                bind screenQuadArray $ do
                   traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
+                  when (opaque textColour /= black) $ do
+                    glBlendFunc GL_ONE GL_ONE
+                    set text (Var @"colour" textColour)
+                    traverse_ (drawArrays TriangleStrip) screenQuadRanges
+
           drawShip = do
-            bind shipArray $
+            bind shipArray . use text $
               traverse_ (drawArrays LineLoop) shipRanges
 
       draw $

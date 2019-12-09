@@ -31,6 +31,10 @@ instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (
         shader <$ compile source shader
       GL.link shaders program
       k program
-    L (Use p   k) -> GL.useProgram p >> k
+    L (Use p m k) -> do
+      GL.useProgram p
+      a <- m
+      GL.useProgram (GL.Program 0)
+      k a
     L (Set p v k) -> GL.setUniformValue p v >> k
     R other       -> ProgramC (send (handleCoercible other))

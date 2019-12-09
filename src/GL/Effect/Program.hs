@@ -19,29 +19,29 @@ import GL.Shader
 
 data Program m k
   = forall ty . Build [(ShaderType, FilePath)] (GL.Program ty -> m k)
-  | forall ty . Use (GL.Program ty) (m k)
+  | forall ty a . Use (GL.Program ty) (m a) (a -> m k)
   | forall name a ty . GL.HasUniform name a ty => Set (GL.Program ty) (GL.Var name a) (m k)
 
 deriving instance Functor m => Functor (Program m)
 
 instance HFunctor Program where
   hmap f = \case
-    Build s k -> Build s (f . k)
-    Use p   k -> Use p   (f k)
-    Set p v k -> Set p v (f k)
+    Build s k -> Build s     (f . k)
+    Use p m k -> Use p (f m) (f . k)
+    Set p v k -> Set p v     (f k)
 
 instance Effect   Program where
   thread ctx hdl = \case
-    Build s k -> Build s (hdl . (<$ ctx) . k)
-    Use p   k -> Use p   (hdl (k <$ ctx))
-    Set p v k -> Set p v (hdl (k <$ ctx))
+    Build s k -> Build s                (hdl . (<$ ctx) . k)
+    Use p m k -> Use p (hdl (m <$ ctx)) (hdl . fmap k)
+    Set p v k -> Set p v                (hdl (k <$ ctx))
 
 
 build :: forall ty m sig . Has Program sig m => [(ShaderType, FilePath)] -> m (GL.Program ty)
 build s = send (Build s pure)
 
-use :: Has Program sig m => (GL.Program ty) -> m ()
-use p = send (Use p (pure ()))
+use :: Has Program sig m => (GL.Program ty) -> m a -> m a
+use p m = send (Use p m pure)
 
 set :: (GL.HasUniform name a ty, Has Program sig m) => GL.Program ty -> GL.Var name a -> m ()
 set p v = send (Set p v (pure ()))
