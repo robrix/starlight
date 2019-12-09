@@ -172,6 +172,8 @@ main = do
                 set @"colour" textColour
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
+          drawStars = pure ()
+
           drawShip = do
             bind (Just shipArray)
             use text $
@@ -181,6 +183,7 @@ main = do
         traverse_ drawLayer
           [ Layer (Just framebuffer) transparent (Rect 0 windowSize) drawGlyphs
           , Layer Nothing black (Rect 0 windowSize) drawText
+          , Layer Nothing black (Rect 0 windowSize) drawStars
           , Layer Nothing blue (Rect ((`div` 4) <$> windowSize) ((`div` 2) <$> windowSize)) drawShip
           ]
 
