@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, LambdaCase #-}
 module GL.Shader
 ( Shader(..)
-, ShaderType(..)
+, Type(..)
 , createShader
 , compile
 , checkShader
@@ -20,15 +20,15 @@ import Graphics.GL.Types
 
 newtype Shader = Shader { unShader :: GLuint }
 
-data ShaderType = Vertex | Fragment
+data Type = Vertex | Fragment
 
-instance GL.Enum ShaderType where
+instance GL.Enum Type where
   glEnum = \case
     Vertex   -> GL_VERTEX_SHADER
     Fragment -> GL_FRAGMENT_SHADER
 
 
-createShader :: (Has Finally sig m, Has (Lift IO) sig m) => ShaderType -> m Shader
+createShader :: (Has Finally sig m, Has (Lift IO) sig m) => Type -> m Shader
 createShader type' = do
   shader <- runLiftIO (glCreateShader (GL.glEnum type'))
   Shader shader <$ onExit (runLiftIO (glDeleteShader shader))

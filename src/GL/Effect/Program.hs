@@ -20,10 +20,10 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.TypeLits
 import qualified GL.Program as GL
-import GL.Shader
+import GL.Shader as Shader
 
 data Program m k
-  = forall ty . Build [(ShaderType, FilePath)] (GL.Program ty -> m k)
+  = forall ty . Build [(Shader.Type, FilePath)] (GL.Program ty -> m k)
   | forall ty a . Use (GL.Program ty) (m a) (a -> m k)
   | forall name a ty . GL.HasUniform name a ty => Set (GL.Program ty) (GL.Var name a) (m k)
 
@@ -42,7 +42,7 @@ instance Effect   Program where
     Set p v k -> Set p v                (hdl (k <$ ctx))
 
 
-build :: forall ty m sig . Has Program sig m => [(ShaderType, FilePath)] -> m (GL.Program ty)
+build :: forall ty m sig . Has Program sig m => [(Shader.Type, FilePath)] -> m (GL.Program ty)
 build s = send (Build s pure)
 
 use :: Has Program sig m => GL.Program ty -> ProgramT ty m a -> m a
