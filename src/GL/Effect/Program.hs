@@ -40,7 +40,7 @@ instance Effect   Program where
 build :: forall ty m sig . Has Program sig m => [(ShaderType, FilePath)] -> m (GL.Program ty)
 build s = send (Build s pure)
 
-use :: Has Program sig m => (GL.Program ty) -> m a -> m a
+use :: Has Program sig m => GL.Program ty -> m a -> m a
 use p m = send (Use p m pure)
 
 set :: (GL.HasUniform name a ty, Has Program sig m) => GL.Program ty -> GL.Var name a -> m ()
