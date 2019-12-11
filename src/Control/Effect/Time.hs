@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
 module Control.Effect.Time
-( Time(..)
+( -- * Time effect
+  Time(..)
 , now
 ) where
 
