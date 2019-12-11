@@ -14,8 +14,7 @@ import Control.Monad.IO.Class.Lift
 import Data.Function (fix)
 import Data.Text (Text)
 import Linear.V2
-import qualified SDL.Event as SDL
-import qualified SDL.Video as SDL
+import qualified SDL as SDL
 import UI.Effect.Window
 import qualified UI.Window as UI
 
@@ -39,4 +38,8 @@ instance Has (Lift IO) sig m => Algebra (Window :+: sig) (WindowC m) where
           k a
         else
           runLiftIO (SDL.glSwapWindow window) >> loop
+    L (Size   k) -> do
+      window <- WindowC ask
+      size <- sendIO (SDL.get (SDL.windowSize window))
+      k (fromIntegral <$> size)
     R other      -> WindowC (send (handleCoercible other))
