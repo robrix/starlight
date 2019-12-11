@@ -4,12 +4,12 @@ module Main
 ) where
 
 import Control.Carrier.Finally
+import Control.Carrier.Time
 import Control.Effect.Lift
 import Control.Monad
 import Data.Foldable
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
-import Data.Time.Clock
 import Foreign.Ptr
 import Foreign.Storable (Storable)
 import Geometry.Rect
@@ -74,6 +74,7 @@ main = do
 
   runWindow "Text" (fromIntegral <$> windowSize)
     . runFinally
+    . runTime
     . runProgram
     $ do
       glyph <- build @'[ "matrix3" '::: M33 Float, "colour" '::: V4 Float ]
@@ -83,7 +84,7 @@ main = do
       stars <- build @'[ "iResolution" '::: V3 Float, "iTime" '::: Float, "iMouse" '::: V4 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
 
-      startTime <- sendM getCurrentTime
+      startTime <- now
 
       texture <- gen1 @(Texture 'Texture2D)
       framebuffer <- gen1
@@ -178,12 +179,10 @@ main = do
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawStars = use stars $ do
-            now <- sendM getCurrentTime
-
-            let delta = toRational (diffUTCTime startTime now)
+            delta <- since startTime
 
             set @"iResolution" (V3 (fromIntegral width / 4) (fromIntegral height / 4) 8)
-            set @"iTime" (fromRational delta)
+            set @"iTime" (fromRational (toRational delta))
 
             traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
