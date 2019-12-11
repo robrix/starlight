@@ -1,7 +1,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Control.Carrier.Time
 ( -- * Time carrier
-  TimeC(..)
+  runTime
+, TimeC(TimeC)
   -- * Time effect
 , module Control.Effect.Time
 ) where
@@ -9,5 +10,5 @@ module Control.Carrier.Time
 import Control.Effect.Time
 import Control.Monad.IO.Class
 
-newtype TimeC m a = TimeC (m a)
+newtype TimeC m a = TimeC { runTime :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
