@@ -40,6 +40,7 @@ library
     Control.Carrier.State.IORef
     Control.Concurrent.Lift
     Control.Effect.Finally
+    Control.Effect.Time
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
     Foreign.C.String.Lift
