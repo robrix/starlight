@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
 module Control.Effect.Time
 ( Time(..)
+, now
 ) where
 
 import Control.Algebra
@@ -13,3 +14,7 @@ data Time m k
 
 instance HFunctor Time
 instance Effect Time
+
+
+now :: Has Time sig m => m UTCTime
+now = send (Now pure)
