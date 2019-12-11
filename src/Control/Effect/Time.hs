@@ -3,6 +3,10 @@ module Control.Effect.Time
 ( -- * Time effect
   Time(..)
 , now
+  -- * Re-exports
+, Algebra
+, Has
+, run
 ) where
 
 import Control.Algebra
