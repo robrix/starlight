@@ -34,8 +34,9 @@ instance Has (Lift IO) sig m => Algebra (Window :+: sig) (WindowC m) where
       window <- WindowC ask
       fix $ \ loop -> do
         a <- m
-        SDL.Event _ payload <- runLiftIO SDL.waitEvent
-        case payload of
-          SDL.QuitEvent -> k a
-          _             -> runLiftIO (SDL.glSwapWindow window) *> loop
+        events <- runLiftIO SDL.pollEvents
+        if any ((== SDL.QuitEvent) . SDL.eventPayload) events then
+          k a
+        else
+          runLiftIO (SDL.glSwapWindow window) >> loop
     R other      -> WindowC (send (handleCoercible other))
