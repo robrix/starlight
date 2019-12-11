@@ -5,7 +5,6 @@ module UI.Layer
 ) where
 
 import Control.Monad.IO.Class.Lift
-import Data.Int (Int32)
 import Geometry.Rect
 import GL.Framebuffer
 import Graphics.GL.Core41
@@ -15,7 +14,7 @@ import UI.Colour
 data Layer m = Layer
   { framebuffer :: Maybe Framebuffer
   , background  :: Colour Float
-  , bounds      :: Rect Int32
+  , bounds      :: Rect Int
   , draw        :: m ()
   }
 
@@ -27,7 +26,7 @@ drawLayer :: Has (Lift IO) sig m => Layer m -> m ()
 drawLayer layer = runLiftIO $ do
   bind (framebuffer layer)
 
-  let Rect (V2 x y) (V2 w h) = (2 *) <$> bounds layer
+  let Rect (V2 x y) (V2 w h) = fromIntegral . (2 *) <$> bounds layer
   glViewport x y w h
   glScissor x y w h
 

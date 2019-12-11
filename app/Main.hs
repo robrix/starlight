@@ -36,7 +36,7 @@ import UI.Colour
 import UI.Font as Font
 import UI.Glyph
 import UI.Layer hiding (draw)
-import UI.Carrier.Window
+import UI.Carrier.Window as Window
 
 -- import qualified Codec.Picture as C
 -- import qualified Codec.Picture.Types as C
@@ -191,7 +191,8 @@ main = do
             use text $
               traverse_ (drawArrays LineLoop) shipRanges
 
-      draw $
+      draw $ do
+        windowSize <- Window.size
         traverse_ drawLayer
           [ Layer (Just framebuffer) transparent (Rect 0 windowSize) drawGlyphs
           , Layer Nothing black (Rect 0 windowSize) drawText
