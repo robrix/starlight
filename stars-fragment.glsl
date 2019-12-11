@@ -1,5 +1,7 @@
 #version 410
 
+// from https://www.shadertoy.com/view/XlfGRj
+
 uniform vec3      iResolution;           // viewport resolution (in pixels)
 uniform float     iTime;                 // shader playback time (in seconds)
 // uniform float     iTimeDelta;            // render time (in seconds)
