@@ -9,6 +9,7 @@ import Control.Monad
 import Data.Foldable
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
+import Data.Time.Clock
 import Foreign.Ptr
 import Foreign.Storable (Storable)
 import Geometry.Rect
@@ -79,8 +80,10 @@ main = do
         [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
       text  <- build @'[ "rect" '::: V4 Float, "sampler" '::: TextureUnit, "colour" '::: V4 Float ]
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
-      stars <- build @'[]
+      stars <- build @'[ "iResolution" '::: V3 Float, "iTime" '::: Float, "iMouse" '::: V4 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
+
+      startTime <- sendM getCurrentTime
 
       texture <- gen1 @(Texture 'Texture2D)
       framebuffer <- gen1
@@ -174,7 +177,14 @@ main = do
                 set @"colour" textColour
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
-          drawStars = use stars $
+          drawStars = use stars $ do
+            now <- sendM getCurrentTime
+
+            let delta = toRational (diffUTCTime startTime now)
+
+            set @"iResolution" (V3 (fromIntegral width) (fromIntegral height) 10)
+            set @"iTime" (fromRational delta)
+
             traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawShip = do
