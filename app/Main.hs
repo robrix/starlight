@@ -72,8 +72,8 @@ main = do
         ]
       (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances)
 
-  runFinally
-    . runWindow "Text" (fromIntegral <$> windowSize)
+  runWindow "Text" (fromIntegral <$> windowSize)
+    . runFinally
     . runTime
     . runProgram
     $ do
