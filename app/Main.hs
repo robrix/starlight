@@ -200,8 +200,7 @@ main = do
         traverse_ drawLayer
           [ Layer (Just framebuffer) (Just transparent) (Rect 0 windowSize) drawGlyphs
           , Layer Nothing (Just black) (Rect 0 windowSize) drawText
-          , Layer Nothing (Just black) (Rect 0 windowSize) drawStars
-          , Layer Nothing Nothing (Rect ((`div` 4) <$> windowSize) ((`div` 2) <$> windowSize)) drawShip
+          , Layer Nothing (Just black) (Rect 0 windowSize) (drawStars >> drawShip)
           ]
 
   where jitterPattern
