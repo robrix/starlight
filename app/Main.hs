@@ -36,7 +36,7 @@ import UI.Colour
 import UI.Font as Font
 import UI.Glyph
 import UI.Layer hiding (draw)
-import UI.Carrier.Window as Window
+import qualified UI.Carrier.Window as Window
 
 -- import qualified Codec.Picture as C
 -- import qualified Codec.Picture.Types as C
@@ -72,7 +72,7 @@ main = do
         ]
       (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances)
 
-  runWindow "Text" (fromIntegral <$> windowSize)
+  Window.runWindow "Text" (fromIntegral <$> windowSize)
     . runFinally
     . runTime
     . runProgram
@@ -191,7 +191,7 @@ main = do
             use text $
               traverse_ (drawArrays LineLoop) shipRanges
 
-      draw $ do
+      Window.draw $ do
         windowSize <- Window.size
         traverse_ drawLayer
           [ Layer (Just framebuffer) transparent (Rect 0 windowSize) drawGlyphs

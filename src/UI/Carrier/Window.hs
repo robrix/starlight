@@ -42,4 +42,8 @@ instance Has (Lift IO) sig m => Algebra (Window :+: sig) (WindowC m) where
       window <- WindowC ask
       size <- sendIO (SDL.get (SDL.windowSize window))
       k (fromIntegral <$> size)
+    L (Scale  k) -> do
+      window <- WindowC ask
+      config <- sendIO (SDL.getWindowConfig window)
+      k $! if SDL.windowHighDPI config then 2 else 1
     R other      -> WindowC (send (handleCoercible other))
