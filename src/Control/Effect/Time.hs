@@ -12,3 +12,4 @@ data Time m k
   deriving (Functor, Generic1)
 
 instance HFunctor Time
+instance Effect Time
