@@ -16,7 +16,7 @@ import Linear.V2
 
 data Window m k
   = forall a . Draw (m a) (a -> m k)
-  | Size (V2 Int -> m k)
+  | Size (V2 Integer -> m k)
   | Scale (Integer -> m k)
 
 deriving instance Functor m => Functor (Window m)
@@ -36,8 +36,8 @@ instance Effect Window where
 draw :: Has Window sig m => m a -> m a
 draw m = send (Draw m pure)
 
-size :: Has Window sig m => m (V2 Int)
-size = send (Size pure)
+size :: (Num a, Has Window sig m) => m (V2 a)
+size = send (Size (pure . fmap fromInteger))
 
 scale :: (Num a, Has Window sig m) => m a
 scale = send (Scale (pure . fromInteger))
