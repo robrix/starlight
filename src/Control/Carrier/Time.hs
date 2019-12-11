@@ -1,2 +1,6 @@
 module Control.Carrier.Time
-() where
+( -- * Time effect
+  module Control.Effect.Time
+) where
+
+import Control.Effect.Time
