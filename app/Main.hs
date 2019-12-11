@@ -123,7 +123,7 @@ main = do
               windowSize <- Window.size
 
               bind (Just glyphArray)
-              let V2 sx sy = V2 2 2 / windowSize
+              let V2 sx sy = windowScale / windowSize
               for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
                 for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
                   set @"colour" glyphColour
