@@ -182,7 +182,7 @@ main = do
 
             let delta = toRational (diffUTCTime startTime now)
 
-            set @"iResolution" (V3 (fromIntegral width) (fromIntegral height) 10)
+            set @"iResolution" (V3 (fromIntegral width / 4) (fromIntegral height / 4) 8)
             set @"iTime" (fromRational delta)
 
             traverse_ (drawArrays TriangleStrip) screenQuadRanges
