@@ -14,7 +14,7 @@ import qualified UI.Effect.Window as W
 
 data Layer m = Layer
   { framebuffer :: Maybe Framebuffer
-  , background  :: Colour Float
+  , background  :: Maybe (Colour Float)
   , bounds      :: Rect Int
   , draw        :: m ()
   }
@@ -32,7 +32,10 @@ drawLayer layer = runLiftIO $ do
   glViewport x y w h
   glScissor x y w h
 
-  setClearColour (background layer)
-  glClear GL_COLOR_BUFFER_BIT
+  case background layer of
+    Just colour -> do
+      setClearColour colour
+      glClear GL_COLOR_BUFFER_BIT
+    _ -> pure ()
 
   LiftIO (draw layer)

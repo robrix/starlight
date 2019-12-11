@@ -198,10 +198,10 @@ main = do
       Window.draw $ do
         windowSize <- Window.size
         traverse_ drawLayer
-          [ Layer (Just framebuffer) transparent (Rect 0 windowSize) drawGlyphs
-          , Layer Nothing transparent (Rect 0 windowSize) drawText
-          , Layer Nothing black (Rect 0 windowSize) drawStars
-          , Layer Nothing blue (Rect ((`div` 4) <$> windowSize) ((`div` 2) <$> windowSize)) drawShip
+          [ Layer (Just framebuffer) (Just transparent) (Rect 0 windowSize) drawGlyphs
+          , Layer Nothing Nothing (Rect 0 windowSize) drawText
+          , Layer Nothing (Just black) (Rect 0 windowSize) drawStars
+          , Layer Nothing Nothing (Rect ((`div` 4) <$> windowSize) ((`div` 2) <$> windowSize)) drawShip
           ]
 
   where jitterPattern
