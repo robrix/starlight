@@ -39,5 +39,5 @@ draw m = send (Draw m pure)
 size :: Has Window sig m => m (V2 Int)
 size = send (Size pure)
 
-scale :: (Has Window sig m, Num a) => m a
+scale :: (Num a, Has Window sig m) => m a
 scale = send (Scale (pure . fromInteger))
