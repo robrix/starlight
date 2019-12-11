@@ -3,6 +3,7 @@ module Control.Effect.Time
 ( -- * Time effect
   Time(..)
 , now
+, since
   -- * Re-exports
 , Algebra
 , Has
@@ -23,3 +24,6 @@ instance Effect Time
 
 now :: Has Time sig m => m UTCTime
 now = send (Now pure)
+
+since :: Has Time sig m => UTCTime -> m NominalDiffTime
+since t = send (Now (pure . diffUTCTime t))
