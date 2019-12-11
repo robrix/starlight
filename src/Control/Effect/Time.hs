@@ -1,2 +1,8 @@
 module Control.Effect.Time
-() where
+( Time(..)
+) where
+
+import Data.Time.Clock
+
+data Time m k
+  = Now (UTCTime -> m k)
