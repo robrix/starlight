@@ -72,7 +72,7 @@ main = do
         ]
       (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances)
 
-  Window.runWindow "Text" (fromIntegral <$> windowSize)
+  Window.runWindow "Text" (V2 1024 768)
     . runFinally
     . runTime
     . runProgram
@@ -97,6 +97,7 @@ main = do
       setMagFilter Texture2D Nearest
       setMinFilter Texture2D Nearest
       scale <- Window.scale
+      V2 width height <- Window.size
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
       checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (scale * width) (scale * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
@@ -118,10 +119,11 @@ main = do
               -- set @"matrix3" identity
               -- bind screenQuadArray $
               --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
+              windowScale <- Window.scale
+              windowSize <- Window.size
 
               bind (Just glyphArray)
-              let V2 sx sy = V2 2 2 / fmap fromIntegral windowSize
-                  windowScale = 1 / 2
+              let V2 sx sy = V2 2 2 / windowSize
               for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
                 for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
                   set @"colour" glyphColour
@@ -129,7 +131,7 @@ main = do
                     $   translated (-1)
                     !*! scaled     (V3 sx sy 1)
                     !*! translated offset
-                    !*! translated (V2 tx ty * windowScale)
+                    !*! translated (V2 tx ty * (1 / windowScale))
                     !*! scaled     scale
                   drawArrays Triangles range
 
@@ -209,9 +211,6 @@ main = do
             , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
             , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
             ]
-        windowSize = V2 width height
-        width  = 1024
-        height = 768
 
         textColour = white
 
