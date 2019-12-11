@@ -183,8 +183,9 @@ main = do
 
           drawStars = use stars $ do
             delta <- since startTime
+            V2 width height <- Window.size
 
-            set @"iResolution" (V3 (fromIntegral width / 4) (fromIntegral height / 4) 8)
+            set @"iResolution" (V3 (width / 4) (height / 4) 8)
             set @"iTime" (fromRational (toRational delta))
 
             traverse_ (drawArrays TriangleStrip) screenQuadRanges
