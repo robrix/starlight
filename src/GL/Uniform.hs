@@ -11,6 +11,7 @@ import GHC.Stack
 import Graphics.GL.Core41
 import Graphics.GL.Types
 import Linear.Matrix as Linear
+import Linear.V3 as Linear
 import Linear.V4 as Linear
 
 class Uniform t where
@@ -18,6 +19,9 @@ class Uniform t where
 
 instance Uniform Float where
   uniform = fmap runLiftIO . glUniform1f
+
+instance Uniform (Linear.V3 Float) where
+  uniform location (Linear.V3 x y z) = runLiftIO $ glUniform3f location x y z
 
 instance Uniform (Linear.V4 Float) where
   uniform location (Linear.V4 x y z w) = runLiftIO $ glUniform4f location x y z w
