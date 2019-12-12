@@ -83,6 +83,8 @@ main = do
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
       stars <- build @'[ "iResolution" '::: V3 Float, "iTime" '::: Float, "iMouse" '::: V4 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
+      ship <- build @'[ "colour" '::: V4 Float ]
+        [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
       startTime <- now
 
@@ -192,7 +194,8 @@ main = do
 
           drawShip = do
             bind (Just shipArray)
-            use text $
+            use ship $ do
+              set @"colour" $ V4 1 1 1 0
               traverse_ (drawArrays LineLoop) shipRanges
 
       Window.draw $ do
