@@ -195,7 +195,7 @@ main = do
           drawShip = do
             bind (Just shipArray)
             use ship $ do
-              set @"colour" $ V4 1 1 1 0
+              set @"colour" $ V4 1 1 1 1
               traverse_ (drawArrays LineLoop) shipRanges
 
       Window.draw $ do
