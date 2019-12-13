@@ -2,13 +2,13 @@
 
 // from https://www.shadertoy.com/view/XlfGRj
 
-uniform vec3      iResolution;           // viewport resolution (in pixels)
-uniform float     iTime;                 // shader playback time (in seconds)
+uniform vec3      resolution;           // viewport resolution (in pixels)
+uniform float     time;                 // shader playback time (in seconds)
 // uniform float     iTimeDelta;            // render time (in seconds)
 // uniform int       iFrame;                // shader playback frame
 // uniform float     iChannelTime[4];       // channel playback time (in seconds)
 // uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)
-uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: click
+uniform vec4      mouse;                // mouse pixel coords. xy: current (if MLB down), zw: click
 // uniform samplerXX iChannel0..3;          // input channel. XX = 2D/Cube
 // uniform vec4      iDate;                 // (year, month, day, time in seconds)
 // uniform float     iSampleRate;           // sound sample rate (i.e., 44100)
@@ -46,14 +46,14 @@ void main()
 {
   vec2 fragCoord = gl_FragCoord.xy;
 	//get coords and direction
-	vec2 uv=fragCoord.xy/iResolution.xy-.5;
-	uv.y*=iResolution.y/iResolution.x;
+	vec2 uv=fragCoord.xy/resolution.xy-.5;
+	uv.y*=resolution.y/resolution.x;
 	vec3 dir=vec3(uv*zoom,1.);
-	float time=iTime*speed+.25;
+	float time=time*speed+.25;
 
 	//mouse rotation
-	float a1=.5+iMouse.x/iResolution.x*2.;
-	float a2=.8+iMouse.y/iResolution.y*2.;
+	float a1=.5+mouse.x/resolution.x*2.;
+	float a2=.8+mouse.y/resolution.y*2.;
 	mat2 rot1=mat2(cos(a1),sin(a1),-sin(a1),cos(a1));
 	mat2 rot2=mat2(cos(a2),sin(a2),-sin(a2),cos(a2));
 	dir.xz*=rot1;
