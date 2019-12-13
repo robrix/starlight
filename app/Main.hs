@@ -72,7 +72,7 @@ main = do
         ]
       (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances)
 
-  Window.runWindow "Text" (V2 1024 768)
+  Window.runWindow "Starlight" (V2 1024 768)
     . runFinally
     . runTime
     . runProgram
