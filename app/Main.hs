@@ -83,7 +83,7 @@ main = do
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
       stars <- build @'[ "iResolution" '::: V3 Float, "iTime" '::: Float, "iMouse" '::: V4 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
-      ship <- build @'[ "colour" '::: V4 Float ]
+      ship <- build @'[ "colour" '::: V4 Float, "matrix3" '::: M33 Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
       startTime <- now
@@ -194,8 +194,20 @@ main = do
 
           drawShip = do
             bind (Just shipArray)
+
+            windowScale <- Window.scale
+            windowSize <- Window.size
+            let V2 sx sy = windowScale / windowSize
+
             use ship $ do
               set @"colour" $ V4 1 1 1 1
+              set @"matrix3"
+                $   translated 0
+                !*! scaled     (V3 sx sy 1)
+                !*! translated 0
+                -- !*! translated (V2 tx ty * (1 / windowScale))
+                !*! scaled     100
+
               traverse_ (drawArrays LineLoop) shipRanges
 
       Window.draw $ do
