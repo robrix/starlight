@@ -3,12 +3,14 @@ module Main
 ( main
 ) where
 
+import Control.Carrier.Empty.Maybe
 import Control.Carrier.Finally
 import Control.Carrier.State.Strict
 import Control.Carrier.Time
 import Control.Effect.Lift
 import Control.Monad
 import Data.Foldable
+import Data.Function (fix)
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
 import Foreign.Ptr
@@ -38,7 +40,7 @@ import qualified SDL
 import UI.Colour
 import UI.Font as Font
 import UI.Glyph
-import UI.Layer hiding (draw)
+import UI.Layer
 import qualified UI.Carrier.Window as Window
 
 -- import qualified Codec.Picture as C
@@ -196,7 +198,7 @@ main = do
             windowSize <- Window.size
             events <- Window.poll
 
-            when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) Window.stop
+            when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) empty
 
             PlayerState{ rotation } <- get
 
@@ -224,14 +226,15 @@ main = do
 
               traverse_ (drawArrays LineLoop) shipRanges
 
-      Window.loop $ do
+      fix $ \ loop -> do
         windowSize <- Window.size
         let rect = Rect 0 windowSize
-        traverse_ drawLayer
-          [ Layer (Just framebuffer) (Just transparent) rect drawGlyphs
-          , Layer Nothing (Just black) rect drawText
-          , Layer Nothing (Just black) rect drawCanvas
+        res <- runEmpty $ sequence_
+          [ drawLayer (Just framebuffer) (Just transparent) rect drawGlyphs
+          , drawLayer Nothing (Just black) rect drawText
+          , drawLayer Nothing (Just black) rect drawCanvas
           ]
+        maybe (pure ()) (const (Window.swap >> loop)) res
 
   where jitterPattern
           = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))

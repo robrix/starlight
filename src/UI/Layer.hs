@@ -1,6 +1,5 @@
 module UI.Layer
-( Layer(..)
-, Contents(..)
+( Contents(..)
 , drawLayer
 ) where
 
@@ -12,30 +11,29 @@ import Linear.V2
 import UI.Colour
 import qualified UI.Effect.Window as W
 
-data Layer m = Layer
-  { framebuffer :: Maybe Framebuffer
-  , background  :: Maybe (Colour Float)
-  , bounds      :: Rect Int
-  , draw        :: m ()
-  }
-
 data Contents
   = Colour (Colour Float)
   | Composite [Contents]
 
-drawLayer :: (Has (Lift IO) sig m, Has W.Window sig m) => Layer m -> m ()
-drawLayer layer = runLiftIO $ do
-  bind (framebuffer layer)
+drawLayer
+  :: (Has (Lift IO) sig m, Has W.Window sig m)
+  => Maybe Framebuffer
+  -> Maybe (Colour Float)
+  -> Rect Int
+  -> m a
+  -> m a
+drawLayer framebuffer background bounds draw = runLiftIO $ do
+  bind framebuffer
 
   s <- W.scale
-  let Rect (V2 x y) (V2 w h) = fromIntegral . (s *) <$> bounds layer
+  let Rect (V2 x y) (V2 w h) = fromIntegral . (s *) <$> bounds
   glViewport x y w h
   glScissor x y w h
 
-  case background layer of
+  case background of
     Just colour -> do
       setClearColour colour
       glClear GL_COLOR_BUFFER_BIT
     _ -> pure ()
 
-  LiftIO (draw layer)
+  LiftIO draw

@@ -10,9 +10,7 @@ module UI.Carrier.Window
 import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.Reader
-import Control.Carrier.State.Strict
 import Control.Monad.IO.Class.Lift
-import Data.Function (fix)
 import Data.Text (Text)
 import Linear.V2
 import qualified SDL
@@ -23,24 +21,13 @@ runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> WindowC m a -> m a
 runWindow name size (WindowC m) = UI.withSDL $
   UI.withSDLWindow name size $ \ window ->
     UI.withGLContext window $ \ _ ->
-      evalState False (runReader window m)
+      runReader window m
 
-newtype WindowC m a = WindowC (ReaderC UI.Window (StateC Bool m) a)
+newtype WindowC m a = WindowC (ReaderC UI.Window m a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (Has (Lift IO) sig m, Effect sig) => Algebra (Window :+: sig) (WindowC m) where
   alg = \case
-    L (Loop m k) -> do
-      window <- WindowC ask
-      WindowC (put False)
-      fix $ \ loop -> do
-        a <- m
-        stop <- WindowC get
-        if stop then
-          k a
-        else
-          runLiftIO (SDL.glSwapWindow window) >> loop
-    L (Stop   k) -> WindowC (put True) >> k
     L (Swap   k) -> WindowC ask >>= runLiftIO . SDL.glSwapWindow >> k
     L (Poll   k) -> runLiftIO SDL.pollEvents >>= k
     L (Size   k) -> do
