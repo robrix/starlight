@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, StandaloneDeriving #-}
 module GL.Uniform
 ( Uniform(..)
 ) where
@@ -10,6 +10,7 @@ import Foreign.Ptr
 import GHC.Stack
 import Graphics.GL.Core41
 import Graphics.GL.Types
+import Linear.Affine as Linear
 import Linear.Matrix as Linear
 import Linear.V2 as Linear
 import Linear.V3 as Linear
@@ -38,3 +39,5 @@ instance Uniform (Linear.M44 Float) where
 
 instance Uniform (Linear.M33 Float) where
   uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
+
+deriving instance Uniform (f a) => Uniform (Linear.Point f a)
