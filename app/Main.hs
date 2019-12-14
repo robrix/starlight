@@ -33,6 +33,7 @@ import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
+import qualified SDL
 import UI.Colour
 import UI.Font as Font
 import UI.Glyph
@@ -192,6 +193,9 @@ main = do
           drawCanvas = do
             windowScale <- Window.scale
             windowSize <- Window.size
+            events <- Window.poll
+
+            when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) Window.stop
 
             PlayerState{ rotation = theta' } <- get
 

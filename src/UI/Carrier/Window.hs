@@ -35,11 +35,8 @@ instance (Has (Lift IO) sig m, Effect sig) => Algebra (Window :+: sig) (WindowC 
       WindowC (put False)
       fix $ \ loop -> do
         a <- m
-        events <- runLiftIO SDL.pollEvents
         stop <- WindowC get
-        if any ((== SDL.QuitEvent) . SDL.eventPayload) events then
-          k a
-        else if stop then
+        if stop then
           k a
         else
           runLiftIO (SDL.glSwapWindow window) >> loop
