@@ -68,6 +68,7 @@ library
     GL.Uniform
     Linear.Exts
     Physics.Duration
+    Physics.Impulse
     Physics.Radians
     UI.Carrier.Window
     UI.Colour
