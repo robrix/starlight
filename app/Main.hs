@@ -4,6 +4,7 @@ module Main
 ) where
 
 import Control.Carrier.Finally
+import Control.Carrier.State.Strict
 import Control.Carrier.Time
 import Control.Effect.Lift
 import Control.Monad
@@ -76,6 +77,7 @@ main = do
     . runFinally
     . runTime
     . runProgram
+    . evalState PlayerState { position = 0, velocity = 0, acceleration = 0, rotation = 0 }
     $ do
       glyph <- build @'[ "matrix3" '::: M33 Float, "colour" '::: V4 Float ]
         [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
@@ -186,6 +188,8 @@ main = do
           drawCanvas = do
             windowScale <- Window.scale
             windowSize <- Window.size
+
+            PlayerState{} <- get
 
             use stars $ do
               delta <- since startTime
