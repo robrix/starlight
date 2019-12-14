@@ -37,6 +37,7 @@ import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
 import Physics.Duration
+import Physics.Impulse
 import Physics.Radians
 import qualified SDL
 import UI.Colour
@@ -271,10 +272,10 @@ _rotation :: Lens.Lens' PlayerState (Radians Float)
 _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
 
 
-accumRotation :: Float -> Radians Float -> SDL.Event -> Radians Float
+accumRotation :: Impulse (Radians Float) -> Radians Float -> SDL.Event -> Radians Float
 accumRotation impulse theta event = case SDL.eventPayload event of
-  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeLeft _)) -> theta + Radians impulse
-  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeRight _)) -> theta - Radians impulse
+  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeLeft _)) -> theta + getImpulse impulse
+  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeRight _)) -> theta - getImpulse impulse
   _ -> theta
 
 
