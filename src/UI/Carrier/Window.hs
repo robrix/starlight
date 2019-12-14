@@ -15,7 +15,7 @@ import Control.Monad.IO.Class.Lift
 import Data.Function (fix)
 import Data.Text (Text)
 import Linear.V2
-import qualified SDL as SDL
+import qualified SDL
 import UI.Effect.Window
 import qualified UI.Window as UI
 
