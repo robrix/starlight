@@ -85,7 +85,7 @@ main = do
     . runFinally
     . runTime
     . runProgram
-    . evalState PlayerState { position = 0, velocity = 0, acceleration = 0, rotation = 0 }
+    . evalState PlayerState { position = 0, velocity = 0, rotation = 0 }
     $ (\ m -> now >>= \ now -> evalState now m)
     $ do
       glyph <- build @'[ "matrix3" '::: M33 Float, "colour" '::: V4 Float ]
@@ -258,7 +258,6 @@ main = do
 data PlayerState = PlayerState
   { position     :: !(Point V2 Float)
   , velocity     :: !(Delta (Point V2 Float))
-  , acceleration :: !(Delta (Delta (Point V2 Float)))
   , rotation     :: !(Radians Float)
   }
   deriving (Eq, Ord, Show)
@@ -268,9 +267,6 @@ _position = Lens.lens position (\ s v -> s { position = v })
 
 _velocity :: Lens.Lens' PlayerState (Delta (Point V2 Float))
 _velocity = Lens.lens velocity (\ s v -> s { velocity = v })
-
-_acceleration :: Lens.Lens' PlayerState (Delta (Delta (Point V2 Float)))
-_acceleration = Lens.lens acceleration (\ s v -> s { acceleration = v })
 
 _rotation :: Lens.Lens' PlayerState (Radians Float)
 _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
