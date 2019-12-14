@@ -29,6 +29,7 @@ import GL.Texture
 import GL.TextureUnit
 import Graphics.GL.Core41
 import qualified Lens.Micro as Lens
+import Linear.Affine
 import Linear.Exts
 import Linear.Matrix as Linear
 import Linear.V (Size)
@@ -256,20 +257,20 @@ main = do
         textColour = white
 
 data PlayerState = PlayerState
-  { position     :: !(V2 Float)
-  , velocity     :: !(Delta (V2 Float))
-  , acceleration :: !(Delta (Delta (V2 Float)))
+  { position     :: !(Point V2 Float)
+  , velocity     :: !(Delta (Point V2 Float))
+  , acceleration :: !(Delta (Delta (Point V2 Float)))
   , rotation     :: !(Radians Float)
   }
   deriving (Eq, Ord, Show)
 
-_position :: Lens.Lens' PlayerState (V2 Float)
+_position :: Lens.Lens' PlayerState (Point V2 Float)
 _position = Lens.lens position (\ s v -> s { position = v })
 
-_velocity :: Lens.Lens' PlayerState (Delta (V2 Float))
+_velocity :: Lens.Lens' PlayerState (Delta (Point V2 Float))
 _velocity = Lens.lens velocity (\ s v -> s { velocity = v })
 
-_acceleration :: Lens.Lens' PlayerState (Delta (Delta (V2 Float)))
+_acceleration :: Lens.Lens' PlayerState (Delta (Delta (Point V2 Float)))
 _acceleration = Lens.lens acceleration (\ s v -> s { acceleration = v })
 
 _rotation :: Lens.Lens' PlayerState (Radians Float)
