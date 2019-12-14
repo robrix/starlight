@@ -96,7 +96,7 @@ main = do
       stars <- build
         @'[ "resolution" '::: V3 Float
           , "time"       '::: Duration Float
-          , "origin"     '::: V2 Float ]
+          , "origin"     '::: Point V2 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
       ship <- build
         @'[ "colour"      '::: V4 Float
