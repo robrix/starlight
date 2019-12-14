@@ -213,8 +213,8 @@ main = do
             let (linear, theta) = let t = getDelta (getSeconds delta)
                                       (accel, angular) = foldl' (accumImpulses 5 pi) (0, 0) events
                                       phi = Radians t * getDelta angular + rotation
-                                      r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity in
-                  (r, phi)
+                                      r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity
+                  in (r, phi)
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
