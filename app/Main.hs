@@ -187,7 +187,7 @@ main = do
             delta <- since startTime
             V2 width height <- Window.size
 
-            set @"resolution" (V3 (width / 4) (height / 4) 8)
+            set @"resolution" (V3 width height 8)
             set @"time" (fromRational (toRational delta))
 
             traverse_ (drawArrays TriangleStrip) screenQuadRanges
