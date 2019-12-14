@@ -1,0 +1,2 @@
+module Physics.Duration
+() where

@@ -67,6 +67,7 @@ library
     GL.TextureUnit
     GL.Uniform
     Linear.Exts
+    Physics.Duration
     Physics.Radians
     UI.Carrier.Window
     UI.Colour
