@@ -229,6 +229,12 @@ main = do
 
         textColour = white
 
+data PlayerState = PlayerState
+  { position     :: !(V2 Float)
+  , velocity     :: !(V2 Float)
+  , acceleration :: !(V2 Float)
+  }
+
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances (V2 sx sy) = go where
   go offset (g:gs)
