@@ -183,16 +183,16 @@ main = do
                 set @"colour" textColour
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
-          drawStars = use stars $ do
-            delta <- since startTime
-            V2 width height <- Window.size
+          drawCanvas = do
+            use stars $ do
+              delta <- since startTime
+              V2 width height <- Window.size
 
-            set @"resolution" (V3 width height 8)
-            set @"time" (fromRational (toRational delta))
+              set @"resolution" (V3 width height 8)
+              set @"time" (fromRational (toRational delta))
 
-            traverse_ (drawArrays TriangleStrip) screenQuadRanges
+              traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
-          drawShip = do
             bind (Just shipArray)
 
             windowScale <- Window.scale
@@ -215,7 +215,7 @@ main = do
         traverse_ drawLayer
           [ Layer (Just framebuffer) (Just transparent) (Rect 0 windowSize) drawGlyphs
           , Layer Nothing (Just black) (Rect 0 windowSize) drawText
-          , Layer Nothing (Just black) (Rect 0 windowSize) (drawStars >> drawShip)
+          , Layer Nothing (Just black) (Rect 0 windowSize) drawCanvas
           ]
 
   where jitterPattern
