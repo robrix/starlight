@@ -206,16 +206,19 @@ main = do
 
             when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) empty
 
-            PlayerState{ position, rotation } <- get
+            PlayerState{ position, velocity, rotation } <- get
 
             delta <- fromRational . toRational <$> since prevFrame
 
-            let theta = let t = getDelta (getSeconds delta)
-                            (_, angular) = foldl' (accumImpulses 5 pi) (0, 0) events in
-                  Radians t * getDelta angular + rotation
+            let (linear, theta) = let t = getDelta (getSeconds delta)
+                                      (accel, angular) = foldl' (accumImpulses 5 pi) (0, 0) events
+                                      phi = Radians t * getDelta angular + rotation
+                                      r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity in
+                  (r, phi)
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
+            modify (_velocity Lens..~ linear)
             modify (_rotation Lens..~ theta)
 
             use stars $ do
