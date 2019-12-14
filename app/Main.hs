@@ -193,18 +193,16 @@ main = do
 
             delta <- fromRational . toRational <$> since startTime
             let theta = theta' + delta
+                V2 sx sy = windowScale / windowSize
+                V2 width height = windowSize
 
             use stars $ do
-              let V2 width height = windowSize
-
               set @"resolution" (V3 width height 8)
               set @"time" delta
 
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
             bind (Just shipArray)
-
-            let V2 sx sy = windowScale / windowSize
 
             use ship $ do
               set @"colour" $ V4 1 1 1 1
