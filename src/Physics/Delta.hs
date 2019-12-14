@@ -1,2 +1,5 @@
 module Physics.Delta
-() where
+( Delta(..)
+) where
+
+newtype Delta a = Delta { getDelta :: a }
