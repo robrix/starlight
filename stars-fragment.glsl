@@ -37,7 +37,7 @@ void main()
 	vec2 uv=fragCoord.xy/resolution.xy-.5;
 	uv.y*=resolution.y/resolution.x;
 	vec3 dir=vec3(uv*zoom,1.);
-	float time=time*speed+.25;
+	// float time=time*speed+.25;
 
 	//mouse rotation
 	float a1=.5;
@@ -47,8 +47,8 @@ void main()
 	mat2 rot2=mat2(1,0,0,1);
 	// dir.xz*=rot1;
 	// dir.xy*=rot2;
-	vec3 from=vec3(1.,.5,0.5);
-	from+=vec3(time,time,-2.);
+	// vec3 from=vec3(1.,.5,0.5);
+	// from+=vec3(time,time,-2.);
 	// from.xz*=rot1;
 	// from.xy*=rot2;
 
