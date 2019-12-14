@@ -27,7 +27,6 @@ import GL.Scalar
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit
-import GL.Uniform
 import Graphics.GL.Core41
 import qualified Lens.Micro as Lens
 import Linear.Exts
@@ -268,10 +267,6 @@ _acceleration = Lens.lens acceleration (\ s v -> s { acceleration = v })
 
 _rotation :: Lens.Lens' PlayerState Float
 _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
-
-
-newtype Radians a = Radians { getRadians :: a }
-  deriving (Eq, Floating, Fractional, Num, Ord, Real, RealFloat, RealFrac, Show, Uniform)
 
 
 accumRotation :: Float -> Float -> SDL.Event -> Float
