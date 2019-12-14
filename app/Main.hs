@@ -211,7 +211,7 @@ main = do
               set @"matrix3"
                 $   translated 0
                 !*! scaled     (V3 sx sy 1)
-                !*! translated 0
+                -- !*! translated 0
                 -- !*! translated (V2 tx ty * (1 / windowScale))
                 !*! scaled     100
                 !*! V3 (V3 cosT (-sinT) 0)
