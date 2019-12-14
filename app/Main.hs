@@ -38,7 +38,6 @@ import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
 import Physics.Delta
-import Physics.Impulse
 import Physics.Radians
 import Physics.Seconds
 import qualified SDL
@@ -212,7 +211,7 @@ main = do
 
             delta <- fromRational . toRational <$> since prevFrame
 
-            let theta = Radians (getSeconds delta) * getImpulse (foldl' (accumImpulses pi) 0 events) + rotation
+            let theta = Radians (getSeconds delta) * getDelta (foldl' (accumImpulses pi) 0 events) + rotation
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
@@ -277,7 +276,7 @@ _rotation :: Lens.Lens' PlayerState (Radians Float)
 _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
 
 
-accumImpulses :: Impulse (Radians Float) -> Impulse (Radians Float) -> SDL.Event -> Impulse (Radians Float)
+accumImpulses :: Delta (Radians Float) -> Delta (Radians Float) -> SDL.Event -> Delta (Radians Float)
 accumImpulses impulse theta event = case SDL.eventPayload event of
   SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
     SDL.KeycodeLeft  -> theta + impulse
