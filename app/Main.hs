@@ -85,7 +85,11 @@ main = do
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
       stars <- build @'[ "resolution" '::: V3 Float, "time" '::: Float, "origin" '::: V2 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
-      ship <- build @'[ "colour" '::: V4 Float, "matrix3" '::: M33 Float ]
+      ship <- build
+        @'[ "colour"      '::: V4 Float
+          , "translation" '::: V2 Float
+          , "scale"       '::: V2 Float
+          , "rotation"    '::: Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
       startTime <- now
@@ -193,7 +197,7 @@ main = do
 
             delta <- fromRational . toRational <$> since startTime
             let theta = theta' + delta
-                V2 sx sy = windowScale / windowSize
+                scale = windowScale / windowSize
                 V2 width height = windowSize
 
             use stars $ do
@@ -206,14 +210,9 @@ main = do
 
             use ship $ do
               set @"colour" $ V4 1 1 1 1
-              -- FIXME: compute this in the shader
-              set @"matrix3"
-                $   translated 0
-                !*! scaled     (V3 sx sy 1)
-                -- !*! translated 0
-                -- !*! translated (V2 tx ty * (1 / windowScale))
-                !*! scaled     100
-                !*! rotated    theta
+              set @"translation" 0
+              set @"scale" (scale * 100)
+              set @"rotation" theta
 
               traverse_ (drawArrays LineLoop) shipRanges
 
