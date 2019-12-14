@@ -273,8 +273,10 @@ _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
 
 
 accumImpulses :: Delta (Delta Float) -> Delta (Radians Float) -> (Delta (Delta Float), Delta (Radians Float)) -> SDL.Event -> (Delta (Delta Float), Delta (Radians Float))
-accumImpulses _ angular (accel, theta) event = case SDL.eventPayload event of
+accumImpulses linear angular (accel, theta) event = case SDL.eventPayload event of
   SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
+    SDL.KeycodeUp    -> (accel + linear, theta)
+    SDL.KeycodeDown  -> (accel - linear, theta)
     SDL.KeycodeLeft  -> (accel, theta + angular)
     SDL.KeycodeRight -> (accel, theta - angular)
     _                -> (accel, theta)
