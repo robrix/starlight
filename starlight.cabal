@@ -67,6 +67,7 @@ library
     GL.TextureUnit
     GL.Uniform
     Linear.Exts
+    Physics.Delta
     Physics.Duration
     Physics.Impulse
     Physics.Radians
