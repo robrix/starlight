@@ -218,6 +218,7 @@ main = do
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
+            modify (_position Lens..~ (position + getDelta linear))
             modify (_velocity Lens..~ linear)
             modify (_rotation Lens..~ theta)
 
