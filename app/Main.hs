@@ -189,9 +189,10 @@ main = do
             windowScale <- Window.scale
             windowSize <- Window.size
 
-            PlayerState{ rotation = theta } <- get
+            PlayerState{ rotation = theta' } <- get
 
             delta <- fromRational . toRational <$> since startTime
+            let theta = theta' + delta
 
             use stars $ do
               let V2 width height = windowSize
