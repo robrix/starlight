@@ -206,6 +206,7 @@ main = do
 
             use ship $ do
               set @"colour" $ V4 1 1 1 1
+              -- FIXME: compute this in the shader
               set @"matrix3"
                 $   translated 0
                 !*! scaled     (V3 sx sy 1)
