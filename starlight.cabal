@@ -68,7 +68,6 @@ library
     GL.Uniform
     Linear.Exts
     Physics.Delta
-    Physics.Duration
     Physics.Impulse
     Physics.Radians
     Physics.Seconds

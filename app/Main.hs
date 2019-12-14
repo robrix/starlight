@@ -38,9 +38,9 @@ import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
 import Physics.Delta
-import Physics.Duration
 import Physics.Impulse
 import Physics.Radians
+import Physics.Seconds
 import qualified SDL
 import UI.Colour
 import UI.Font as Font
@@ -95,7 +95,7 @@ main = do
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
       stars <- build
         @'[ "resolution" '::: V3 Float
-          , "time"       '::: Duration Float
+          , "time"       '::: Seconds Float
           , "origin"     '::: Point V2 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
       ship <- build
@@ -212,7 +212,7 @@ main = do
 
             delta <- fromRational . toRational <$> since prevFrame
 
-            let theta = Radians (getDuration delta) * getImpulse (foldl' (accumImpulses pi) 0 events) + rotation
+            let theta = Radians (getSeconds delta) * getImpulse (foldl' (accumImpulses pi) 0 events) + rotation
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
