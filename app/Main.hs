@@ -216,7 +216,7 @@ main = do
 
               traverse_ (drawArrays LineLoop) shipRanges
 
-      Window.draw $ do
+      Window.loop $ do
         windowSize <- Window.size
         traverse_ drawLayer
           [ Layer (Just framebuffer) (Just transparent) (Rect 0 windowSize) drawGlyphs

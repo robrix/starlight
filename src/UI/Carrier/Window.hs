@@ -29,7 +29,7 @@ newtype WindowC m a = WindowC (ReaderC UI.Window m a)
 
 instance Has (Lift IO) sig m => Algebra (Window :+: sig) (WindowC m) where
   alg = \case
-    L (Draw m k) -> do
+    L (Loop m k) -> do
       window <- WindowC ask
       fix $ \ loop -> do
         a <- m
