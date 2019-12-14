@@ -1,2 +1,5 @@
 module Physics.Seconds
-() where
+( Seconds(..)
+) where
+
+newtype Seconds a = Seconds { getSeconds :: a }
