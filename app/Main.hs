@@ -82,6 +82,7 @@ main = do
     . runTime
     . runProgram
     . evalState PlayerState { position = 0, velocity = 0, acceleration = 0, rotation = 0 }
+    $ (\ m -> now >>= \ now -> evalState now m)
     $ do
       glyph <- build @'[ "matrix3" '::: M33 Float, "colour" '::: V4 Float ]
         [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
@@ -95,8 +96,6 @@ main = do
           , "scale"       '::: V2 Float
           , "rotation"    '::: Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
-
-      startTime <- now
 
       texture <- gen1 @(Texture 'Texture2D)
       framebuffer <- gen1
@@ -194,6 +193,7 @@ main = do
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawCanvas = do
+            prevFrame <- get
             windowScale <- Window.scale
             windowSize <- Window.size
             events <- Window.poll
@@ -202,9 +202,9 @@ main = do
 
             PlayerState{ rotation } <- get
 
-            delta <- fromRational . toRational <$> since startTime
+            delta <- fromRational . toRational <$> since prevFrame
 
-            let theta = delta * foldl' (accumRotation 0.05) 0 events + rotation
+            let theta = delta * foldl' (accumRotation pi) 0 events + rotation
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
@@ -234,6 +234,7 @@ main = do
           , drawLayer Nothing (Just black) rect drawText
           , drawLayer Nothing (Just black) rect drawCanvas
           ]
+        now >>= put
         maybe (pure ()) (const (Window.swap >> loop)) res
 
   where jitterPattern
