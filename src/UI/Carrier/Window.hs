@@ -38,6 +38,7 @@ instance Has (Lift IO) sig m => Algebra (Window :+: sig) (WindowC m) where
           k a
         else
           runLiftIO (SDL.glSwapWindow window) >> loop
+    L (Stop   k) -> k
     L (Size   k) -> do
       window <- WindowC ask
       size <- sendIO (SDL.get (SDL.windowSize window))
