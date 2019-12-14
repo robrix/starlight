@@ -1,2 +1,5 @@
 module Physics.Impulse
-() where
+( Impulse(..)
+) where
+
+newtype Impulse a = Impulse { getImpulse :: a }
