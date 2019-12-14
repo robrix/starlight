@@ -36,6 +36,7 @@ import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
+import Physics.Radians
 import qualified SDL
 import UI.Colour
 import UI.Font as Font
@@ -94,7 +95,7 @@ main = do
         @'[ "colour"      '::: V4 Float
           , "translation" '::: V2 Float
           , "scale"       '::: V2 Float
-          , "rotation"    '::: Float ]
+          , "rotation"    '::: Radians Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
       texture <- gen1 @(Texture 'Texture2D)
@@ -204,7 +205,7 @@ main = do
 
             delta <- fromRational . toRational <$> since prevFrame
 
-            let theta = delta * foldl' (accumRotation pi) 0 events + rotation
+            let theta = Radians delta * foldl' (accumRotation pi) 0 events + rotation
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
@@ -252,7 +253,7 @@ data PlayerState = PlayerState
   { position     :: !(V2 Float)
   , velocity     :: !(V2 Float)
   , acceleration :: !(V2 Float)
-  , rotation     :: !Float
+  , rotation     :: !(Radians Float)
   }
   deriving (Eq, Ord, Show)
 
@@ -265,14 +266,14 @@ _velocity = Lens.lens velocity (\ s v -> s { velocity = v })
 _acceleration :: Lens.Lens' PlayerState (V2 Float)
 _acceleration = Lens.lens acceleration (\ s v -> s { acceleration = v })
 
-_rotation :: Lens.Lens' PlayerState Float
+_rotation :: Lens.Lens' PlayerState (Radians Float)
 _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
 
 
-accumRotation :: Float -> Float -> SDL.Event -> Float
+accumRotation :: Float -> Radians Float -> SDL.Event -> Radians Float
 accumRotation impulse theta event = case SDL.eventPayload event of
-  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeLeft _)) -> theta + impulse
-  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeRight _)) -> theta - impulse
+  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeLeft _)) -> theta + Radians impulse
+  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeRight _)) -> theta - Radians impulse
   _ -> theta
 
 
