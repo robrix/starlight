@@ -250,6 +250,7 @@ data PlayerState = PlayerState
   , acceleration :: !(V2 Float)
   , rotation     :: !Float
   }
+  deriving (Eq, Ord, Show)
 
 _position :: Lens.Lens' PlayerState (V2 Float)
 _position = Lens.lens position (\ s v -> s { position = v })
