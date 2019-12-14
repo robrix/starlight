@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, NamedFieldPuns, OverloadedStrings, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, GeneralizedNewtypeDeriving, NamedFieldPuns, OverloadedStrings, TypeApplications, TypeOperators #-}
 module Main
 ( main
 ) where
@@ -267,6 +267,10 @@ _acceleration = Lens.lens acceleration (\ s v -> s { acceleration = v })
 
 _rotation :: Lens.Lens' PlayerState Float
 _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
+
+
+newtype Radians a = Radians { getRadians :: a }
+  deriving (Eq, Floating, Fractional, Num, Ord, Real, RealFloat, RealFrac, Show)
 
 
 accumRotation :: Float -> Float -> SDL.Event -> Float
