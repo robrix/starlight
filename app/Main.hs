@@ -206,7 +206,7 @@ main = do
 
             when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) empty
 
-            PlayerState{ rotation } <- get
+            PlayerState{ position, rotation } <- get
 
             delta <- fromRational . toRational <$> since prevFrame
 
@@ -220,6 +220,7 @@ main = do
 
             use stars $ do
               set @"resolution" (V3 width height 8)
+              set @"origin" position
 
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
