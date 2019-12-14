@@ -36,6 +36,7 @@ import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
+import Physics.Duration
 import Physics.Radians
 import qualified SDL
 import UI.Colour
@@ -89,7 +90,7 @@ main = do
         [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
       text  <- build @'[ "rect" '::: V4 Float, "sampler" '::: TextureUnit, "colour" '::: V4 Float ]
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
-      stars <- build @'[ "resolution" '::: V3 Float, "time" '::: Float, "origin" '::: V2 Float ]
+      stars <- build @'[ "resolution" '::: V3 Float, "time" '::: Duration Float, "origin" '::: V2 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
       ship <- build
         @'[ "colour"      '::: V4 Float
@@ -205,7 +206,7 @@ main = do
 
             delta <- fromRational . toRational <$> since prevFrame
 
-            let theta = Radians delta * foldl' (accumRotation pi) 0 events + rotation
+            let theta = Radians (getDuration delta) * foldl' (accumRotation pi) 0 events + rotation
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
