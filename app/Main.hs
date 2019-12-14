@@ -189,7 +189,7 @@ main = do
             windowScale <- Window.scale
             windowSize <- Window.size
 
-            PlayerState{} <- get
+            PlayerState{ rotation = theta } <- get
 
             use stars $ do
               delta <- since startTime
@@ -206,12 +206,17 @@ main = do
 
             use ship $ do
               set @"colour" $ V4 1 1 1 1
+              let cosT = cos theta
+                  sinT = sin theta
               set @"matrix3"
                 $   translated 0
                 !*! scaled     (V3 sx sy 1)
                 !*! translated 0
                 -- !*! translated (V2 tx ty * (1 / windowScale))
                 !*! scaled     100
+                !*! V3 (V3 cosT (-sinT) 0)
+                       (V3 sinT cosT    0)
+                       (V3 0    0       1)
 
               traverse_ (drawArrays LineLoop) shipRanges
 
