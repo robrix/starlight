@@ -3,7 +3,7 @@
 // from https://www.shadertoy.com/view/XlfGRj
 
 uniform vec3 resolution; // viewport resolution (in pixels)
-uniform float time;      // shader playback time (in seconds)
+// uniform float time;      // shader playback time (in seconds)
 // uniform vec4 mouse;      // mouse pixel coords. xy: current (if MLB down), zw: click
 uniform vec2 origin;
 

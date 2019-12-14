@@ -94,7 +94,6 @@ main = do
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
       stars <- build
         @'[ "resolution" '::: V3 Float
-          , "time"       '::: Seconds Float
           , "origin"     '::: Point V2 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
       ship <- build
@@ -219,7 +218,6 @@ main = do
 
             use stars $ do
               set @"resolution" (V3 width height 8)
-              set @"time" delta
 
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
