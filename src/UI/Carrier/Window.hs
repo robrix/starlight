@@ -11,7 +11,6 @@ import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
-import Control.Monad.Fix
 import Control.Monad.IO.Class.Lift
 import Data.Function (fix)
 import Data.Text (Text)
@@ -27,7 +26,7 @@ runWindow name size (WindowC m) = UI.withSDL $
       evalState False (runReader window m)
 
 newtype WindowC m a = WindowC (ReaderC UI.Window (StateC Bool m) a)
-  deriving (Applicative, Functor, Monad, MonadFix, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (Has (Lift IO) sig m, Effect sig) => Algebra (Window :+: sig) (WindowC m) where
   alg = \case
