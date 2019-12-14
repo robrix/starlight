@@ -1,2 +1,5 @@
 module Physics.Duration
-() where
+( Duration(..)
+) where
+
+newtype Duration a = Duration { getDuration :: a }
