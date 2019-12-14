@@ -211,7 +211,7 @@ main = do
             delta <- fromRational . toRational <$> since prevFrame
 
             let (linear, theta) = let t = getDelta (getSeconds delta)
-                                      (accel, angular) = foldl' (accumImpulses 5 pi) (0, 0) events
+                                      (accel, angular) = foldl' (accumImpulses 0.01 pi) (0, 0) events
                                       phi = Radians t * getDelta angular + rotation
                                       r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity
                   in (r, phi)
