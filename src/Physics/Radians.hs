@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveTraversable, GeneralizedNewtypeDeriving #-}
 module Physics.Radians
 ( Radians(..)
 ) where
@@ -6,4 +6,4 @@ module Physics.Radians
 import GL.Uniform
 
 newtype Radians a = Radians { getRadians :: a }
-  deriving (Eq, Floating, Fractional, Num, Ord, Real, RealFloat, RealFrac, Show, Uniform)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Traversable, Uniform)
