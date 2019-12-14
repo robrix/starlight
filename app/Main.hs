@@ -210,7 +210,7 @@ main = do
 
             delta <- fromRational . toRational <$> since prevFrame
 
-            let theta = Radians (getSeconds delta) * getDelta (foldl' (accumImpulses pi) 0 events) + rotation
+            let theta = Radians (getDelta (getSeconds delta)) * getDelta (foldl' (accumImpulses pi) 0 events) + rotation
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
