@@ -41,6 +41,7 @@ instance (Has (Lift IO) sig m, Effect sig) => Algebra (Window :+: sig) (WindowC 
         else
           runLiftIO (SDL.glSwapWindow window) >> loop
     L (Stop   k) -> WindowC (put True) >> k
+    L (Swap   k) -> WindowC ask >>= runLiftIO . SDL.glSwapWindow >> k
     L (Poll   k) -> runLiftIO SDL.pollEvents >>= k
     L (Size   k) -> do
       window <- WindowC ask
