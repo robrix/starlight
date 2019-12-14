@@ -204,7 +204,7 @@ main = do
 
             delta <- fromRational . toRational <$> since startTime
 
-            let theta = delta * foldl' (accumRotation 0.1) 0 events + rotation
+            let theta = delta * foldl' (accumRotation 0.05) 0 events + rotation
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
