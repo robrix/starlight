@@ -26,6 +26,7 @@ import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import Graphics.GL.Core41
+import qualified Lens.Micro as Lens
 import Linear.Exts
 import Linear.Matrix as Linear
 import Linear.V (Size)
@@ -246,6 +247,19 @@ data PlayerState = PlayerState
   , acceleration :: !(V2 Float)
   , rotation     :: !Float
   }
+
+_position :: Lens.Lens' PlayerState (V2 Float)
+_position = Lens.lens position (\ s v -> s { position = v })
+
+_velocity :: Lens.Lens' PlayerState (V2 Float)
+_velocity = Lens.lens velocity (\ s v -> s { velocity = v })
+
+_acceleration :: Lens.Lens' PlayerState (V2 Float)
+_acceleration = Lens.lens acceleration (\ s v -> s { acceleration = v })
+
+_rotation :: Lens.Lens' PlayerState Float
+_rotation = Lens.lens rotation (\ s r -> s { rotation = r })
+
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances (V2 sx sy) = go where
