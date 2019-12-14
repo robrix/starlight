@@ -70,6 +70,7 @@ library
     Physics.Delta
     Physics.Duration
     Physics.Impulse
+    Physics.Position
     Physics.Radians
     UI.Carrier.Window
     UI.Colour
