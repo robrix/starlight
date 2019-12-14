@@ -222,10 +222,11 @@ main = do
 
       Window.loop $ do
         windowSize <- Window.size
+        let rect = Rect 0 windowSize
         traverse_ drawLayer
-          [ Layer (Just framebuffer) (Just transparent) (Rect 0 windowSize) drawGlyphs
-          , Layer Nothing (Just black) (Rect 0 windowSize) drawText
-          , Layer Nothing (Just black) (Rect 0 windowSize) drawCanvas
+          [ Layer (Just framebuffer) (Just transparent) rect drawGlyphs
+          , Layer Nothing (Just black) rect drawText
+          , Layer Nothing (Just black) rect drawCanvas
           ]
 
   where jitterPattern
