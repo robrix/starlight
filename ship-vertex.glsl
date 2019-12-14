@@ -5,7 +5,6 @@ uniform vec2 scale;
 uniform float rotation;
 in vec2 position2;
 void main() {
-  mat3 matrix3;
   mat3 translation_;
   translation_[0] = vec3(1, 0, translation.x);
   translation_[1] = vec3(0, 1, translation.y);
