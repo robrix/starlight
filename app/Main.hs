@@ -191,12 +191,13 @@ main = do
 
             PlayerState{ rotation = theta } <- get
 
+            delta <- fromRational . toRational <$> since startTime
+
             use stars $ do
-              delta <- since startTime
               let V2 width height = windowSize
 
               set @"resolution" (V3 width height 8)
-              set @"time" (fromRational (toRational delta))
+              set @"time" delta
 
               traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
