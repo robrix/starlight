@@ -36,6 +36,7 @@ import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
+import Physics.Delta
 import Physics.Duration
 import Physics.Impulse
 import Physics.Radians
@@ -256,8 +257,8 @@ main = do
 
 data PlayerState = PlayerState
   { position     :: !(V2 Float)
-  , velocity     :: !(V2 Float)
-  , acceleration :: !(V2 Float)
+  , velocity     :: !(Delta (V2 Float))
+  , acceleration :: !(Delta (Delta (V2 Float)))
   , rotation     :: !(Radians Float)
   }
   deriving (Eq, Ord, Show)
@@ -265,10 +266,10 @@ data PlayerState = PlayerState
 _position :: Lens.Lens' PlayerState (V2 Float)
 _position = Lens.lens position (\ s v -> s { position = v })
 
-_velocity :: Lens.Lens' PlayerState (V2 Float)
+_velocity :: Lens.Lens' PlayerState (Delta (V2 Float))
 _velocity = Lens.lens velocity (\ s v -> s { velocity = v })
 
-_acceleration :: Lens.Lens' PlayerState (V2 Float)
+_acceleration :: Lens.Lens' PlayerState (Delta (Delta (V2 Float)))
 _acceleration = Lens.lens acceleration (\ s v -> s { acceleration = v })
 
 _rotation :: Lens.Lens' PlayerState (Radians Float)
