@@ -198,11 +198,11 @@ main = do
 
             when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) Window.stop
 
-            PlayerState{ rotation = theta' } <- get
+            PlayerState{ rotation } <- get
 
             delta <- fromRational . toRational <$> since startTime
 
-            let theta = delta * foldl' accumRotation 0 events + theta'
+            let theta = delta * foldl' accumRotation 0 events + rotation
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
