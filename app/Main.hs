@@ -184,9 +184,12 @@ main = do
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawCanvas = do
+            windowScale <- Window.scale
+            windowSize <- Window.size
+
             use stars $ do
               delta <- since startTime
-              V2 width height <- Window.size
+              let V2 width height = windowSize
 
               set @"resolution" (V3 width height 8)
               set @"time" (fromRational (toRational delta))
@@ -195,8 +198,6 @@ main = do
 
             bind (Just shipArray)
 
-            windowScale <- Window.scale
-            windowSize <- Window.size
             let V2 sx sy = windowScale / windowSize
 
             use ship $ do
