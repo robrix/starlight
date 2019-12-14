@@ -71,6 +71,7 @@ library
     Physics.Duration
     Physics.Impulse
     Physics.Radians
+    Physics.Seconds
     UI.Carrier.Window
     UI.Colour
     UI.Effect.Window
