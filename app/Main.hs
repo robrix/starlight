@@ -201,9 +201,12 @@ main = do
             PlayerState{ rotation = theta' } <- get
 
             delta <- fromRational . toRational <$> since startTime
-            let theta = theta' + delta
+
+            let theta = delta * foldl' accumRotation 0 events + theta'
                 scale = windowScale / windowSize
                 V2 width height = windowSize
+
+            modify (_rotation Lens..~ theta)
 
             use stars $ do
               set @"resolution" (V3 width height 8)
@@ -259,6 +262,13 @@ _acceleration = Lens.lens acceleration (\ s v -> s { acceleration = v })
 
 _rotation :: Lens.Lens' PlayerState Float
 _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
+
+
+accumRotation :: Float -> SDL.Event -> Float
+accumRotation theta event = case SDL.eventPayload event of
+  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeLeft _)) -> theta + 1
+  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ SDL.KeycodeRight _)) -> theta - 1
+  _ -> theta
 
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
