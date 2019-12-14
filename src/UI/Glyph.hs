@@ -12,7 +12,6 @@ import Linear.Matrix
 import Linear.V2
 import Linear.V3
 import Linear.V4
-import Linear.Vector
 
 data Glyph = Glyph
   { codePoint    :: {-# UNPACK #-} !Char

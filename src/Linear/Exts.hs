@@ -1,11 +1,13 @@
 module Linear.Exts
 ( translated
 , rotated
+, scaled
 ) where
 
 import Linear.Matrix
 import Linear.V2
 import Linear.V3
+import Linear.Vector
 
 translated :: V2 Float -> M33 Float
 translated (V2 tx ty) = V3
