@@ -4,7 +4,8 @@
 
 uniform vec3 resolution; // viewport resolution (in pixels)
 uniform float time;      // shader playback time (in seconds)
-uniform vec4 mouse;      // mouse pixel coords. xy: current (if MLB down), zw: click
+// uniform vec4 mouse;      // mouse pixel coords. xy: current (if MLB down), zw: click
+uniform vec2 origin;
 
 
 // Star Nest by Pablo Roman Andrioli
@@ -39,22 +40,26 @@ void main()
 	float time=time*speed+.25;
 
 	//mouse rotation
-	float a1=.5+mouse.x/resolution.x*2.;
-	float a2=.8+mouse.y/resolution.y*2.;
-	mat2 rot1=mat2(cos(a1),sin(a1),-sin(a1),cos(a1));
-	mat2 rot2=mat2(cos(a2),sin(a2),-sin(a2),cos(a2));
-	dir.xz*=rot1;
-	dir.xy*=rot2;
+	float a1=.5;
+	float a2=.8;
+	// mat2 rot1=mat2(0.8775825619,0.4794255386,-0.4794255386,0.8775825619);
+	mat2 rot1=mat2(1,0,0,1);
+	mat2 rot2=mat2(1,0,0,1);
+	// dir.xz*=rot1;
+	// dir.xy*=rot2;
 	vec3 from=vec3(1.,.5,0.5);
-	from+=vec3(time*2.,time,-2.);
-	from.xz*=rot1;
-	from.xy*=rot2;
+	from+=vec3(time,time,-2.);
+	// from.xz*=rot1;
+	// from.xy*=rot2;
+
+	vec3 origin = vec3(origin, 0);
 
 	//volumetric rendering
 	float s=0.1,fade=1.;
 	vec3 v=vec3(0.);
 	for (int r=0; r<volsteps; r++) {
-		vec3 p=from+s*dir*.5;
+		// vec3 p=from+s*dir*.5;
+		vec3 p = origin + dir * s * 0.5;
 		p = abs(vec3(tile)-mod(p,vec3(tile*2.))); // tiling fold
 		float pa,a=pa=0.;
 		for (int i=0; i<iterations; i++) {

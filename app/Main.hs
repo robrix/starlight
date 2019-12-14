@@ -81,7 +81,7 @@ main = do
         [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
       text  <- build @'[ "rect" '::: V4 Float, "sampler" '::: TextureUnit, "colour" '::: V4 Float ]
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
-      stars <- build @'[ "resolution" '::: V3 Float, "time" '::: Float, "mouse" '::: V4 Float ]
+      stars <- build @'[ "resolution" '::: V3 Float, "time" '::: Float, "origin" '::: V2 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
       ship <- build @'[ "colour" '::: V4 Float, "matrix3" '::: M33 Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
