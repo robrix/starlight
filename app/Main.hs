@@ -296,7 +296,7 @@ loadVertices vertices = do
   array <- gen1
 
   bind (Just buffer)
-  realloc buffer (length vertices) Static GL.Buffer.Draw
+  realloc buffer (length vertices) Static Draw
   copy buffer 0 vertices
 
   bind (Just array)
