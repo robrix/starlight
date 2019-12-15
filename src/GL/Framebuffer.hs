@@ -1,16 +1,20 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, LambdaCase #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, LambdaCase, ScopedTypeVariables #-}
 module GL.Framebuffer
 ( Framebuffer(..)
 , Attachment(..)
+, attachTexture
 , Bind(..)
 ) where
 
+import Control.Monad (unless)
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
+import Data.Proxy
 import Foreign.Storable
-import qualified GL.Enum as GL
+import GL.Enum as GL
 import GL.Error
 import GL.Object
+import qualified GL.Texture as GL
 import Graphics.GL.Core41
 import Graphics.GL.Types
 
@@ -31,3 +35,10 @@ data Attachment
 instance GL.Enum Attachment where
   glEnum = \case
     Colour n -> GL_COLOR_ATTACHMENT0 + fromIntegral n
+
+
+attachTexture :: forall ty sig m . Has (Lift IO) sig m => GL.KnownType ty => Attachment -> GL.Texture ty -> m ()
+attachTexture attachment (GL.Texture texture) = runLiftIO $ do
+  checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER (glEnum attachment) (glEnum (GL.typeVal (Proxy :: Proxy ty))) texture 0
+  status <- glCheckFramebufferStatus GL_FRAMEBUFFER
+  unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
