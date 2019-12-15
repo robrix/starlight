@@ -69,9 +69,9 @@ setMinFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
 setMinFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . glEnum
 
 
-setParameter :: (Parameter param val, Has (Lift IO) sig m) => Type -> param -> val -> m ()
+setParameter :: (Parameter val param, Has (Lift IO) sig m) => Type -> param -> val -> m ()
 setParameter target param = checkingGLError . runLiftIO . glTexParameteri (glEnum target) (glEnum param) . fromIntegral . glEnum
 
-class (GL.Enum param, GL.Enum val) => Parameter param val | param -> val
+class (GL.Enum param, GL.Enum val) => Parameter val param | param -> val
 
-instance Parameter FilterType Filter
+instance Parameter Filter FilterType
