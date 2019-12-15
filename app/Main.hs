@@ -114,8 +114,8 @@ main = do
       setParameter Texture2D MinFilter Nearest
       scale <- Window.scale
       V2 width height <- Window.size
-      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE
-      checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_T GL_CLAMP_TO_EDGE
+      setParameter Texture2D WrapS ClampToEdge
+      setParameter Texture2D WrapT ClampToEdge
       checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (scale * width) (scale * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
 
       bind (Just framebuffer)
