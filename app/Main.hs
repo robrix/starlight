@@ -106,12 +106,12 @@ main = do
           , "rotation"    '::: Radians Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
-      texture <- gen1 @(Texture 'Texture2D)
+      texture     <- gen1 @(Texture 'Texture2D)
       framebuffer <- gen1
 
-      (_, glyphArray) <- loadVertices glyphVertices
+      (_, glyphArray)      <- loadVertices glyphVertices
       (_, screenQuadArray) <- loadVertices screenQuadVertices
-      (_, shipArray) <- loadVertices shipVertices
+      (_, shipArray)       <- loadVertices shipVertices
 
       bind (Just texture)
       setParameter Texture2D MagFilter Nearest
@@ -138,7 +138,7 @@ main = do
               -- bind screenQuadArray $
               --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
               windowScale <- Window.scale
-              windowSize <- Window.size
+              windowSize  <- Window.size
 
               bind (Just glyphArray)
               let V2 sx sy = windowScale / windowSize
@@ -297,7 +297,7 @@ combineGeometry = go 0
 loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Buffer 'GL.Buffer.Array (v n), Array (v n))
 loadVertices vertices = do
   buffer <- gen1
-  array <- gen1
+  array  <- gen1
 
   bind (Just buffer)
   realloc buffer (length vertices) Static Draw
