@@ -291,6 +291,9 @@ handleInput = do
 
 data Impulse = Impulse !(Delta (Delta Float)) !(Delta (Radians Float))
 
+instance Semigroup Impulse where
+  Impulse v1 r1 <> Impulse v2 r2 = Impulse (v1 + v2) (r1 + r2)
+
 accumImpulses :: Impulse -> Impulse -> SDL.Event -> Impulse
 accumImpulses (Impulse linear angular) (Impulse accel theta) event = case SDL.eventPayload event of
   SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
