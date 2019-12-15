@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
 module UI.Font
-( Typeface(..)
+( Typeface(name)
 , Font(..)
 , readTypeface
 , unitsPerEm
