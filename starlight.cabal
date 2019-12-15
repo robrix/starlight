@@ -108,7 +108,6 @@ executable starlight
     , microlens
     , opentype
     , sdl2
-    , semigroupoids
     , starlight
     , text
     , time

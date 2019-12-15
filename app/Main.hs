@@ -13,8 +13,6 @@ import Control.Effect.Lift
 import Control.Monad
 import Data.Foldable
 import Data.Function (fix)
-import Data.List.NonEmpty (nonEmpty)
-import Data.Semigroup.Foldable
 import Data.Time.Clock (UTCTime)
 import Foreign.Ptr
 import Foreign.Storable (Storable)
@@ -62,7 +60,7 @@ main = do
   Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
       instances = combineInstances (V2 288 288) (V2 0 0) glyphs
-      instanceBounds' = maybe (Rect zero zero) (getUnion . foldMap1 (Union . instanceBounds)) (nonEmpty instances)
+      instanceBounds' = maybe (Rect zero zero) getUnion (foldMap (Just . Union . instanceBounds) instances)
       (shipVertices, shipRanges) = combineGeometry
         [ [ V3 1      0      0
           , V3 0      (-0.5) 0
