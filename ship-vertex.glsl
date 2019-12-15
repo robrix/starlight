@@ -18,8 +18,8 @@ void main() {
   float cosT = cos(rotation)
       , sinT = sin(rotation);
   mat3 rotation = mat3
-    ( cosT, -sinT, 0
-    , sinT, cosT,  0
+    ( cosT, sinT,  0
+    , -sinT, cosT, 0
     , 0,    0,     1);
 
   gl_Position = vec4(translation * scale * rotation * vec3(position2, 0.0), 1.0);
