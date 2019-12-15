@@ -292,15 +292,6 @@ handleInput = do
   get
 
 
-data Impulse = Impulse !(Delta (Delta (Point V2)) Float) !(Delta Radians Float)
-
-instance Semigroup Impulse where
-  Impulse v1 r1 <> Impulse v2 r2 = Impulse (v1 + v2) (r1 + r2)
-
-instance Monoid Impulse where
-  mempty = Impulse 0 0
-
-
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
 combineInstances (V2 sx sy) = go where
   go offset (g:gs)
