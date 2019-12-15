@@ -76,10 +76,7 @@ nameID = safeToEnum . fromIntegral . O.nameID
 
 
 safeToEnum :: forall n. (Bounded n, Enum n) => Int -> Maybe n
-safeToEnum n = do
-  guard (n < fromEnum (maxBound :: n))
-  guard (n > fromEnum (minBound :: n))
-  pure (toEnum n)
+safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (minBound @n))
 
 
 unitsPerEm :: Typeface -> Word16
