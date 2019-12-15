@@ -237,9 +237,9 @@ main = do
         textColour = white
 
 data PlayerState = PlayerState
-  { position     :: !(Point V2 Float)
-  , velocity     :: !(Delta (Point V2) Float)
-  , rotation     :: !(Radians Float)
+  { position :: !(Point V2 Float)
+  , velocity :: !(Delta (Point V2) Float)
+  , rotation :: !(Radians Float)
   }
   deriving (Eq, Ord, Show)
 
