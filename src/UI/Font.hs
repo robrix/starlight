@@ -44,7 +44,7 @@ readTypeface = fmap toTypeface . sendM . O.readOTFile where
       glyphID <- table Map.!? fromIntegral (ord char)
       g <- glyphTable !? fromIntegral glyphID
       let vertices = glyphVertices g
-      pure $! scaleGlyph scale $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
+      pure $! scaleGlyph scale $ Glyph (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
     cmap = find supportedPlatform (O.getCmaps (O.cmapTable o))
     scale = 1 ^/ fromIntegral (O.unitsPerEm (O.headTable o))
     glyphTable = case O.outlineTables o of

@@ -16,14 +16,13 @@ import Linear.V4
 import Linear.Vector
 
 data Glyph = Glyph
-  { codePoint    :: {-# UNPACK #-} !Char
-  , advanceWidth :: {-# UNPACK #-} !Float
+  { advanceWidth :: {-# UNPACK #-} !Float
   , geometry     :: ![V4 Float]
   , bounds_      :: {-# UNPACK #-} !(Rect Float)
   }
 
 scaleGlyph :: V2 Float -> Glyph -> Glyph
-scaleGlyph (V2 sx sy) Glyph{..} = Glyph codePoint (advanceWidth * sx) (V4 sx sy 1 1 *^ geometry) (transformRect (scaled (V3 sx sy 1)) bounds_)
+scaleGlyph (V2 sx sy) Glyph{..} = Glyph (advanceWidth * sx) (V4 sx sy 1 1 *^ geometry) (transformRect (scaled (V3 sx sy 1)) bounds_)
 
 data Instance = Instance
   { glyph  :: {-# UNPACK #-} !Glyph
