@@ -3,16 +3,11 @@ module Geometry.Rect
 ( Rect(..)
 , _min
 , _max
-, minX
-, minY
-, maxX
-, maxY
 , transformRect
 , Union(..)
 ) where
 
 import Lens.Micro
-import Lens.Micro.Extras
 import Linear.Matrix
 import Linear.V2
 import Linear.V3
@@ -28,19 +23,6 @@ _min = lens rectMin (\ r v -> r { rectMin = v })
 
 _max :: Lens' (Rect a) (V2 a)
 _max = lens rectMax (\ r v -> r { rectMax = v })
-
-
-minX :: Rect a -> a
-minX = view (_min . _x)
-
-minY :: Rect a -> a
-minY = view (_min . _y)
-
-maxX :: Rect a -> a
-maxX = view (_max . _x)
-
-maxY :: Rect a -> a
-maxY = view (_max . _y)
 
 
 transformRect :: Num a => M33 a -> Rect a -> Rect a

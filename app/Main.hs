@@ -28,7 +28,7 @@ import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import Graphics.GL.Core41
-import Lens.Micro (Lens', lens)
+import Lens.Micro (Lens', (^.), lens)
 import Linear.Affine
 import Linear.Exts
 import Linear.Matrix as Linear
@@ -167,10 +167,10 @@ main = do
 
             use text $ do
               set @"rect" $ V4
-                (fromIntegral (floor   (minX instanceBounds) :: Int) / fromIntegral width)
-                (fromIntegral (ceiling (maxY instanceBounds) :: Int) / fromIntegral height)
-                (fromIntegral (ceiling (maxX instanceBounds) :: Int) / fromIntegral width)
-                (fromIntegral (floor   (minY instanceBounds) :: Int) / fromIntegral height)
+                (fromIntegral (floor   (instanceBounds ^. _min . _x) :: Int) / fromIntegral width)
+                (fromIntegral (ceiling (instanceBounds ^. _max . _y) :: Int) / fromIntegral height)
+                (fromIntegral (ceiling (instanceBounds ^. _max . _x) :: Int) / fromIntegral width)
+                (fromIntegral (floor   (instanceBounds ^. _min . _y) :: Int) / fromIntegral height)
               -- set @"rect" (V4 0 0 1 1)
               set @"colour" transparent
               -- set @"colour" black
