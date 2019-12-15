@@ -3,12 +3,14 @@ module Main
 ( main
 ) where
 
+import Control.Algebra (Effect)
 import Control.Carrier.Empty.Maybe
 import Control.Carrier.Finally
 import Control.Carrier.State.Strict
 import Control.Carrier.Time
 import Control.Effect.Lift
 import Control.Monad
+import Control.Monad.IO.Class
 import Data.Foldable
 import Data.Function (fix)
 import Data.List.NonEmpty (nonEmpty)
@@ -263,11 +265,13 @@ _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
 
 
 handleInput
-  :: ( Has Empty sig m
+  :: ( Effect sig
+     , Has Empty sig m
      , Has (State PlayerState) sig m
      , Has (State UTCTime) sig m
      , Has Time sig m
      , Has Window.Window sig m
+     , MonadIO m
      )
   => m PlayerState
 handleInput = do
@@ -280,8 +284,17 @@ handleInput = do
 
   delta <- fromRational . toRational <$> since prevFrame
 
+  let Impulse linear angular = Impulse 0.01 pi
+  (Impulse accel angular, _) <- runState @Impulse mempty . SDL.mapEvents $ \ event -> case SDL.eventPayload event of
+    SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
+      SDL.KeycodeUp    -> modify $ (<> Impulse linear    0)
+      SDL.KeycodeDown  -> modify $ (<> Impulse (-linear) 0)
+      SDL.KeycodeLeft  -> modify $ (<> Impulse 0 angular)
+      SDL.KeycodeRight -> modify $ (<> Impulse 0 (-angular))
+      _                -> pure ()
+    _ -> pure ()
+
   let t = getDelta (getSeconds delta)
-      Impulse accel angular = foldl' (accumImpulses (Impulse 0.01 pi)) (Impulse 0 0) events
       phi = Radians t * getDelta angular + rotation
       r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity
       state = PlayerState (position + getDelta r) r phi
@@ -296,16 +309,6 @@ instance Semigroup Impulse where
 
 instance Monoid Impulse where
   mempty = Impulse 0 0
-
-accumImpulses :: Impulse -> Impulse -> SDL.Event -> Impulse
-accumImpulses (Impulse linear angular) (Impulse accel theta) event = case SDL.eventPayload event of
-  SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
-    SDL.KeycodeUp    -> Impulse (accel + linear) theta
-    SDL.KeycodeDown  -> Impulse (accel - linear) theta
-    SDL.KeycodeLeft  -> Impulse accel (theta + angular)
-    SDL.KeycodeRight -> Impulse accel (theta - angular)
-    _                -> Impulse accel theta
-  _ -> Impulse accel theta
 
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
