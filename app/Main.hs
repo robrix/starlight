@@ -57,7 +57,7 @@ import qualified UI.Carrier.Window as Window
 
 main :: HasCallStack => IO ()
 main = do
-  Just tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
+  tahoma <- readTypeface "/System/Library/Fonts/Supplemental/Tahoma.ttf"
   let glyphs = Font.glyphs tahoma "hello"
       instances = combineInstances (V2 288 288) (V2 0 0) glyphs
       instanceBounds' = maybe (Rect zero zero) getUnion (foldMap (Just . Union . instanceBounds) instances)

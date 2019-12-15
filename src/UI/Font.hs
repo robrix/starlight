@@ -12,7 +12,6 @@ module UI.Font
 import Control.Applicative (liftA2)
 import Control.Monad (guard)
 import Control.Monad.IO.Class.Lift
-import qualified Control.Exception.Lift as E
 import Data.Bifunctor (first)
 import Data.Char (ord)
 import Data.Foldable (find)
@@ -32,16 +31,13 @@ import Linear.V4
 import UI.Glyph
 import UI.Path
 
-data Typeface = Typeface { typefaceName :: String, typefaceUnderlying :: O.OpentypeFont }
+data Typeface = Typeface { typefaceName :: Maybe String, typefaceUnderlying :: O.OpentypeFont }
 
 data Font = Font { fontFace :: Typeface, fontSize :: Float }
 
 
-readTypeface :: Has (Lift IO) sig m => FilePath -> m (Maybe Typeface)
-readTypeface path = sendM (toTypeface <$> O.readOTFile path) `E.catch` (\ (E.SomeException _) -> return Nothing)
-  where toTypeface font = do
-          name <- opentypeFontName font
-          pure $ Typeface name font
+readTypeface :: Has (Lift IO) sig m => FilePath -> m Typeface
+readTypeface path = sendM ((Typeface . opentypeFontName <*> id) <$> O.readOTFile path)
 
 data NameID
   = Copyright
