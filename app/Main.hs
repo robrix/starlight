@@ -86,9 +86,14 @@ main = do
     . evalState PlayerState { position = 0, velocity = 0, rotation = 0 }
     $ (\ m -> now >>= \ now -> evalState now m)
     $ do
-      glyph <- build @'[ "matrix3" '::: M33 Float, "colour" '::: V4 Float ]
+      glyph <- build
+        @'[ "matrix3" '::: M33 Float
+          , "colour"  '::: V4 Float ]
         [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
-      text  <- build @'[ "rect" '::: V4 Float, "sampler" '::: TextureUnit, "colour" '::: V4 Float ]
+      text  <- build
+        @'[ "rect"    '::: V4 Float
+          , "sampler" '::: TextureUnit
+          , "colour"  '::: V4 Float ]
         [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
       stars <- build
         @'[ "resolution" '::: V3 Float
