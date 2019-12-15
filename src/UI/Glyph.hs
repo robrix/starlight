@@ -42,3 +42,6 @@ instance HasBounds Glyph where
 
 instance HasBounds Instance where
   bounds = transformRect . translated . offset <*> bounds . glyph
+
+instance HasBounds t => HasBounds [t] where
+  bounds = maybe (Rect 0 0) getUnion . foldMap (Just . Union . bounds)
