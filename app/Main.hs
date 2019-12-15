@@ -7,6 +7,7 @@ import Control.Carrier.Empty.Maybe
 import Control.Carrier.Finally
 import Control.Carrier.State.Strict
 import Control.Carrier.Time
+import qualified Control.Effect.Lens as Lens
 import Control.Effect.Lift
 import Control.Monad
 import Data.Foldable
@@ -282,7 +283,7 @@ handleInput = do
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
       SDL.KeycodeUp    -> do
-        rotation <- gets (Lens.^. _rotation)
+        rotation <- Lens.use _rotation
         modify (_velocity Lens.+~ t *^ Delta (P (cartesian2 rotation thrust)))
       SDL.KeycodeLeft  -> modify (_rotation Lens.+~ t *^ angular)
       SDL.KeycodeRight -> modify (_rotation Lens.+~ t *^ (-angular))
