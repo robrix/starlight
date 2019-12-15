@@ -31,7 +31,7 @@ import Linear.V4
 import UI.Glyph
 import UI.Path
 
-data Typeface = Typeface { typefaceName :: Maybe String, typefaceUnderlying :: O.OpentypeFont }
+data Typeface = Typeface { name :: Maybe String, _font :: O.OpentypeFont }
 
 data Font = Font { face :: Typeface, size :: Float }
 
@@ -80,13 +80,13 @@ safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (mi
 
 
 unitsPerEm :: Typeface -> Word16
-unitsPerEm = O.unitsPerEm . O.headTable . typefaceUnderlying
+unitsPerEm = O.unitsPerEm . O.headTable . _font
 
 ascent :: Typeface -> Int16
-ascent = O.ascent . O.hheaTable . typefaceUnderlying
+ascent = O.ascent . O.hheaTable . _font
 
 descent :: Typeface -> Int16
-descent = O.descent . O.hheaTable . typefaceUnderlying
+descent = O.descent . O.hheaTable . _font
 
 
 glyphs :: Typeface -> [Char] -> [Glyph]
@@ -119,7 +119,7 @@ contourToPath (p@(O.CurvePoint x y _) : ps) = M (V2 x y) : go p ps
         go _                          []                                  = []
 
 glyphPaths :: Typeface -> O.Glyph Int -> [Path V2 O.FWord]
-glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnderlying typeface) glyph)
+glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (_font typeface) glyph)
 
 
 glyphVertices :: Typeface -> O.Glyph Int -> [V4 Float]
