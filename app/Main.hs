@@ -110,8 +110,8 @@ main = do
       (_, shipArray) <- loadVertices shipVertices
 
       bind (Just texture)
-      setMagFilter Texture2D Nearest
-      setMinFilter Texture2D Nearest
+      setParameter Texture2D MagFilter Nearest
+      setParameter Texture2D MinFilter Nearest
       scale <- Window.scale
       V2 width height <- Window.size
       checkingGLError $ glTexParameteri GL_TEXTURE_2D GL_TEXTURE_WRAP_S GL_CLAMP_TO_EDGE

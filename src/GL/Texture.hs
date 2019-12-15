@@ -5,8 +5,6 @@ module GL.Texture
 , KnownType(..)
 , FilterType(..)
 , Filter(..)
-, setMagFilter
-, setMinFilter
 , setParameter
 , Parameter
 ) where
@@ -61,12 +59,6 @@ instance GL.Enum Filter where
   glEnum = \case
     Nearest -> GL_NEAREST
     Linear  -> GL_LINEAR
-
-setMagFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
-setMagFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . glEnum
-
-setMinFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
-setMinFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . glEnum
 
 
 setParameter :: (Parameter val param, Has (Lift IO) sig m) => Type -> param -> val -> m ()
