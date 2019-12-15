@@ -29,7 +29,7 @@ newtype WindowC m a = WindowC (ReaderC UI.Window m a)
 instance (Has (Lift IO) sig m, Effect sig) => Algebra (Window :+: sig) (WindowC m) where
   alg = \case
     L (Swap   k) -> WindowC ask >>= runLiftIO . SDL.glSwapWindow >> k
-    L (Poll   k) -> runLiftIO SDL.pollEvents >>= k
+    L (Poll   k) -> runLiftIO SDL.pollEvent >>= k
     L (Size   k) -> do
       window <- WindowC ask
       size <- sendIO (SDL.get (SDL.windowSize window))

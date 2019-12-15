@@ -19,7 +19,7 @@ import qualified SDL
 
 data Window m k
   = Swap (m k)
-  | Poll ([SDL.Event] -> m k)
+  | Poll (Maybe SDL.Event -> m k)
   | Size (V2 Integer -> m k)
   | Scale (Integer -> m k)
   deriving (Functor, Generic1)
@@ -30,7 +30,7 @@ instance Effect Window
 swap :: Has Window sig m => m ()
 swap = send (Swap (pure ()))
 
-poll :: Has Window sig m => m [SDL.Event]
+poll :: Has Window sig m => m (Maybe SDL.Event)
 poll = send (Poll pure)
 
 size :: (Num a, Has Window sig m) => m (V2 a)
