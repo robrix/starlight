@@ -13,6 +13,7 @@ import Data.Foldable
 import Data.Function (fix)
 import Data.List.NonEmpty (nonEmpty)
 import Data.Semigroup.Foldable
+import Data.Time.Clock (UTCTime)
 import Foreign.Ptr
 import Foreign.Storable (Storable)
 import Geometry.Rect
@@ -199,26 +200,12 @@ main = do
                 traverse_ (drawArrays TriangleStrip) screenQuadRanges
 
           drawCanvas = do
-            prevFrame <- get
             windowScale <- Window.scale
             windowSize <- Window.size
-            events <- Window.poll
-
-            when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) empty
-
-            PlayerState{ position, velocity, rotation } <- get
-
-            delta <- fromRational . toRational <$> since prevFrame
-
-            let (linear, theta) = let t = getDelta (getSeconds delta)
-                                      (accel, angular) = foldl' (accumImpulses 0.01 pi) (0, 0) events
-                                      phi = Radians t * getDelta angular + rotation
-                                      r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity
-                  in (r, phi)
-                scale = windowScale / windowSize
+            let scale = windowScale / windowSize
                 V2 width height = windowSize
 
-            put (PlayerState (position + getDelta linear) linear theta)
+            PlayerState { position, rotation } <- handleInput
 
             use stars $ do
               set @"resolution" (V3 width height 8)
@@ -232,7 +219,7 @@ main = do
               set @"colour" $ V4 1 1 1 1
               set @"translation" 0
               set @"scale" (scale * 100)
-              set @"rotation" theta
+              set @"rotation" rotation
 
               traverse_ (drawArrays LineLoop) shipRanges
 
@@ -273,6 +260,34 @@ _velocity = Lens.lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens.Lens' PlayerState (Radians Float)
 _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
+
+
+handleInput
+  :: ( Has Empty sig m
+     , Has (State PlayerState) sig m
+     , Has (State UTCTime) sig m
+     , Has Time sig m
+     , Has Window.Window sig m
+     )
+  => m PlayerState
+handleInput = do
+  prevFrame <- get
+  events <- Window.poll
+
+  when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) empty
+
+  PlayerState{ position, velocity, rotation } <- get
+
+  delta <- fromRational . toRational <$> since prevFrame
+
+  let (linear, theta) = let t = getDelta (getSeconds delta)
+                            (accel, angular) = foldl' (accumImpulses 0.01 pi) (0, 0) events
+                            phi = Radians t * getDelta angular + rotation
+                            r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity
+        in (r, phi)
+
+      state = PlayerState (position + getDelta linear) linear theta
+  state <$ put state
 
 
 accumImpulses :: Delta (Delta Float) -> Delta (Radians Float) -> (Delta (Delta Float), Delta (Radians Float)) -> SDL.Event -> (Delta (Delta Float), Delta (Radians Float))
