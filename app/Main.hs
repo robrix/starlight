@@ -142,7 +142,7 @@ main = do
 
               bind (Just glyphArray)
               let V2 sx sy = windowScale / windowSize
-              for_ (zip instances glyphRanges) $ \ (Instance{ offset, scale }, range) ->
+              for_ (zip instances glyphRanges) $ \ (Instance{ offset }, range) ->
                 for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
                   set @"colour" glyphColour
                   set @"matrix3"
@@ -150,7 +150,6 @@ main = do
                     !*! scaled     (V3 sx sy 1)
                     !*! translated offset
                     !*! translated (V2 tx ty * (1 / windowScale))
-                    !*! scaled     scale
                   drawArrays Triangles range
 
               -- let w = scale * fromIntegral width

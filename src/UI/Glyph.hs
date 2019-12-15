@@ -9,7 +9,6 @@ module UI.Glyph
 
 import Geometry.Rect
 import Linear.Exts
-import Linear.Matrix
 import Linear.V2
 import Linear.V3
 import Linear.V4
@@ -27,18 +26,16 @@ scaleGlyph (V2 sx sy) Glyph{..} = Glyph codePoint (advanceWidth * sx) ((* V4 sx 
 data Instance = Instance
   { glyph  :: {-# UNPACK #-} !Glyph
   , offset :: {-# UNPACK #-} !(V2 Float)
-  , scale  :: {-# UNPACK #-} !(V3 Float)
   }
 
 instanceBounds :: Instance -> Rect Float
 instanceBounds Instance{..} = transformRect
-  (   translated offset
-  !*! scaled scale)
+  (translated offset)
   (bounds glyph)
 
 combineInstances :: V2 Float -> [Glyph] -> [Instance]
 combineInstances = go where
   go offset (g:gs)
-    = Instance g offset 1
+    = Instance g offset
     : go (offset + V2 (advanceWidth g) 0) gs
   go _ [] = []
