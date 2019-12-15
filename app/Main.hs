@@ -218,9 +218,7 @@ main = do
                 scale = windowScale / windowSize
                 V2 width height = windowSize
 
-            modify (_position Lens.+~ getDelta linear)
-            modify (_velocity Lens..~ linear)
-            modify (_rotation Lens..~ theta)
+            put (PlayerState (position + getDelta linear) linear theta)
 
             use stars $ do
               set @"resolution" (V3 width height 8)
