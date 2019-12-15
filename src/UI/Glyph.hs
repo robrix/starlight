@@ -7,6 +7,7 @@ module UI.Glyph
 , combineInstances
 ) where
 
+import Data.Foldable (foldl')
 import Geometry.Rect
 import Linear.Exts
 import Linear.V2
@@ -34,8 +35,5 @@ instanceBounds Instance{..} = transformRect
   (bounds glyph)
 
 combineInstances :: [Glyph] -> [Instance]
-combineInstances = go 0 where
-  go offset (g:gs)
-    = Instance g offset
-    : go (offset + V2 (advanceWidth g) 0) gs
-  go _ [] = []
+combineInstances = ($ []) . snd . foldl' go (0, id) where
+  go (offset, is) g = (offset + V2 (advanceWidth g) 0, (Instance g offset :) . is)
