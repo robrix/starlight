@@ -4,6 +4,7 @@ module GL.Texture
 , Type(..)
 , InternalFormat(..)
 , PixelFormat(..)
+, PixelType(..)
 , KnownType(..)
 , FilterType(..)
 , Filter(..)
@@ -62,6 +63,14 @@ data PixelFormat
 instance GL.Enum PixelFormat where
   glEnum = \case
     RGBA -> GL_RGBA
+
+data PixelType
+  = Packed8888 Bool
+
+instance GL.Enum PixelType where
+  glEnum = \case
+    Packed8888 False -> GL_UNSIGNED_INT_8_8_8_8
+    Packed8888 True  -> GL_UNSIGNED_INT_8_8_8_8_REV
 
 
 data FilterType = MinFilter | MagFilter
