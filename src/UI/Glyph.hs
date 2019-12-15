@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE FlexibleInstances, RecordWildCards #-}
 module UI.Glyph
 ( Glyph(..)
 , scaleGlyph
@@ -45,3 +45,6 @@ instance HasBounds Instance where
 
 instance HasBounds t => HasBounds [t] where
   bounds = maybe (Rect 0 0) getUnion . foldMap (Just . Union . bounds)
+
+instance HasBounds (V2 Float) where
+  bounds = Rect <*> id
