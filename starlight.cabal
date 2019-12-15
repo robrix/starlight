@@ -82,6 +82,7 @@ library
       base
     , containers
     , fused-effects
+    , fused-effects-lens
     , gl
     , linear
     , microlens
