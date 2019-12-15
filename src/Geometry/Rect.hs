@@ -1,8 +1,8 @@
 {-# LANGUAGE DeriveFunctor #-}
 module Geometry.Rect
 ( Rect(..)
-, _rectMin
-, _rectMax
+, _min
+, _max
 , minX
 , minY
 , maxX
@@ -23,11 +23,11 @@ data Rect a = Rect
   }
   deriving (Eq, Functor, Show)
 
-_rectMin :: Lens' (Rect a) (V2 a)
-_rectMin = lens rectMin (\ r v -> r { rectMin = v })
+_min :: Lens' (Rect a) (V2 a)
+_min = lens rectMin (\ r v -> r { rectMin = v })
 
-_rectMax :: Lens' (Rect a) (V2 a)
-_rectMax = lens rectMax (\ r v -> r { rectMax = v })
+_max :: Lens' (Rect a) (V2 a)
+_max = lens rectMax (\ r v -> r { rectMax = v })
 
 
 minX :: Rect a -> a
