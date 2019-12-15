@@ -2,11 +2,11 @@
 module GL.Texture
 ( Texture(..)
 , Type(..)
+, KnownType(..)
 , InternalFormat(..)
 , PixelFormat(..)
 , PixelType(..)
 , setImageFormat
-, KnownType(..)
 , FilterType(..)
 , Filter(..)
 , WrapCoord(..)
