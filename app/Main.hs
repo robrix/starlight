@@ -58,8 +58,7 @@ import qualified UI.Carrier.Window as Window
 main :: HasCallStack => IO ()
 main = do
   tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 288
-  let glyphs = Font.glyphs tahoma "hello"
-      Run instances instanceBounds = layoutGlyphs glyphs
+  let Run instances instanceBounds = Font.layoutString tahoma "hello"
       (shipVertices, shipRanges) = combineGeometry
         [ [ V3 1      0      0
           , V3 0      (-0.5) 0

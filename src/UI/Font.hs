@@ -4,7 +4,7 @@ module UI.Font
 , Font(..)
 , readTypeface
 , readFontOfSize
-, glyphs
+, layoutString
 ) where
 
 import Control.Monad ((<=<), guard, join)
@@ -92,8 +92,8 @@ safeToEnum :: forall n. (Bounded n, Enum n) => Int -> Maybe n
 safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (minBound @n))
 
 
-glyphs :: Font -> [Char] -> [Glyph]
-glyphs (Font face size) = map (scaleGlyph (pure size)) . catMaybes . map (join . (allGlyphs face Map.!?))
+layoutString :: Font -> String -> Run
+layoutString (Font face size) = layoutGlyphs . map (scaleGlyph (pure size)) . catMaybes . map (join . (allGlyphs face Map.!?))
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
