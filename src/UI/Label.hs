@@ -1,2 +1,10 @@
 module UI.Label
-() where
+( Label(..)
+) where
+
+import UI.Font
+
+data Label = Label
+  { font :: !Font
+  , text :: !String
+  }
