@@ -102,18 +102,18 @@ supportedCMap = find supportedPlatform . O.getCmaps . O.cmapTable . _font
 
 
 glyphs :: Font -> [Char] -> [Glyph]
-glyphs (Font face size) chars = catMaybes (zipWith (fmap . toGlyph) chars (glyphsForChars face chars))
-  where toGlyph char g = let vertices = glyphVertices face g in
-          scaleGlyph (size *^ scale) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
-        scale = 1 ^/ fromIntegral (unitsPerEm face)
+glyphs font = catMaybes . glyphsForChars font
 
-glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
-glyphsForChars face = map lookupGlyph
+glyphsForChars :: Font -> [Char] -> [Maybe Glyph]
+glyphsForChars (Font face size) = map lookupGlyph
   where lookupGlyph char = do
           table <- O.glyphMap <$> cmap
           glyphID <- table Map.!? fromIntegral (ord char)
-          glyphTable face !? fromIntegral glyphID
+          g <- glyphTable face !? fromIntegral glyphID
+          let vertices = glyphVertices face g
+          pure $! scaleGlyph (size *^ scale) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
         cmap = supportedCMap face
+        scale = 1 ^/ fromIntegral (unitsPerEm face)
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
