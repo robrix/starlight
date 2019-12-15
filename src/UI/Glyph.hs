@@ -4,7 +4,7 @@ module UI.Glyph
 , scaleGlyph
 , Instance(..)
 , instanceBounds
-, combineInstances
+, layoutGlyphs
 ) where
 
 import Data.Foldable (foldl')
@@ -34,6 +34,6 @@ instanceBounds Instance{..} = transformRect
   (translated offset)
   (bounds glyph)
 
-combineInstances :: [Glyph] -> [Instance]
-combineInstances = ($ []) . snd . foldl' go (0, id) where
+layoutGlyphs :: [Glyph] -> [Instance]
+layoutGlyphs = ($ []) . snd . foldl' go (0, id) where
   go (offset, is) g = (offset + V2 (advanceWidth g) 0, (Instance g offset :) . is)
