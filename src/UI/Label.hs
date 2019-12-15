@@ -1,0 +1,2 @@
+module UI.Label
+() where

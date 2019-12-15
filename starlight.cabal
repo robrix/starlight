@@ -75,6 +75,7 @@ library
     UI.Effect.Window
     UI.Font
     UI.Glyph
+    UI.Label
     UI.Layer
     UI.Path
     UI.Window
