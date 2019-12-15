@@ -82,7 +82,7 @@ library
       base
     , containers
     , fused-effects      ^>= 1
-    , fused-effects-lens ^>= 1
+    , fused-effects-lens ^>= 1.1
     , gl
     , linear
     , microlens

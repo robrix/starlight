@@ -7,6 +7,7 @@ import Control.Carrier.Empty.Maybe
 import Control.Carrier.Finally
 import Control.Carrier.State.Strict
 import Control.Carrier.Time
+import Control.Effect.Lens ((+=))
 import qualified Control.Effect.Lens as Lens
 import Control.Effect.Lift
 import Control.Monad
@@ -30,7 +31,7 @@ import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import Graphics.GL.Core41
-import qualified Lens.Micro as Lens
+import Lens.Micro (Lens', lens)
 import Linear.Affine
 import Linear.Exts
 import Linear.Matrix as Linear
@@ -224,7 +225,7 @@ main = do
 
               traverse_ (drawArrays LineLoop) shipRanges
 
-            modify (_position Lens.+~ getDelta velocity)
+            _position += getDelta velocity
 
       fix $ \ loop -> do
         windowSize <- Window.size
@@ -255,14 +256,14 @@ data PlayerState = PlayerState
   }
   deriving (Eq, Ord, Show)
 
-_position :: Lens.Lens' PlayerState (Point V2 Float)
-_position = Lens.lens position (\ s v -> s { position = v })
+_position :: Lens' PlayerState (Point V2 Float)
+_position = lens position (\ s v -> s { position = v })
 
-_velocity :: Lens.Lens' PlayerState (Delta (Point V2) Float)
-_velocity = Lens.lens velocity (\ s v -> s { velocity = v })
+_velocity :: Lens' PlayerState (Delta (Point V2) Float)
+_velocity = lens velocity (\ s v -> s { velocity = v })
 
-_rotation :: Lens.Lens' PlayerState (Radians Float)
-_rotation = Lens.lens rotation (\ s r -> s { rotation = r })
+_rotation :: Lens' PlayerState (Radians Float)
+_rotation = lens rotation (\ s r -> s { rotation = r })
 
 
 handleInput
@@ -284,9 +285,9 @@ handleInput = do
     SDL.KeyboardEvent (SDL.KeyboardEventData _ _ _ (SDL.Keysym _ kc _)) -> case kc of
       SDL.KeycodeUp    -> do
         rotation <- Lens.use _rotation
-        modify (_velocity Lens.+~ Delta (P (cartesian2 rotation thrust)))
-      SDL.KeycodeLeft  -> modify (_rotation Lens.+~ angular)
-      SDL.KeycodeRight -> modify (_rotation Lens.+~ -angular)
+        _velocity += Delta (P (cartesian2 rotation thrust))
+      SDL.KeycodeLeft  -> _rotation += angular
+      SDL.KeycodeRight -> _rotation += -angular
       _                -> pure ()
     _ -> pure ()
 
