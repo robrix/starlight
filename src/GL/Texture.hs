@@ -5,6 +5,7 @@ module GL.Texture
 , InternalFormat(..)
 , PixelFormat(..)
 , PixelType(..)
+, setImageFormat
 , KnownType(..)
 , FilterType(..)
 , Filter(..)
@@ -17,12 +18,14 @@ module GL.Texture
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
 import Data.Proxy
+import Foreign.Ptr (nullPtr)
 import Foreign.Storable
 import GL.Enum as GL
 import GL.Error
 import GL.Object
 import Graphics.GL.Core41
 import Graphics.GL.Types
+import Linear.V2
 
 newtype Texture (ty :: Type) = Texture { unTexture :: GLuint }
   deriving (Storable)
@@ -71,6 +74,9 @@ instance GL.Enum PixelType where
   glEnum = \case
     Packed8888 False -> GL_UNSIGNED_INT_8_8_8_8
     Packed8888 True  -> GL_UNSIGNED_INT_8_8_8_8_REV
+
+setImageFormat :: Has (Lift IO) sig m => Type -> InternalFormat -> V2 Int -> PixelFormat -> PixelType -> m ()
+setImageFormat target internalFormat (V2 width height) pixelFormat pixelType = checkingGLError . runLiftIO $ glTexImage2D (glEnum target) 0 (fromIntegral (glEnum internalFormat)) (fromIntegral width) (fromIntegral height) 0 (glEnum pixelFormat) (glEnum pixelType) nullPtr
 
 
 data FilterType = MinFilter | MagFilter
