@@ -1,2 +1,5 @@
 module Physics.Distance
-() where
+( Distance(..)
+) where
+
+newtype Distance a = Distance { getDistance :: a }
