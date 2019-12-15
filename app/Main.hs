@@ -276,17 +276,17 @@ handleInput
 handleInput = do
   t <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
 
-  let thrust = 0.01
-      angular = pi
+  let thrust  = t *  0.01
+      angular = t *^ pi
 
   Window.input $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
       SDL.KeycodeUp    -> do
         rotation <- Lens.use _rotation
-        modify (_velocity Lens.+~ t *^ Delta (P (cartesian2 rotation thrust)))
-      SDL.KeycodeLeft  -> modify (_rotation Lens.+~ t *^ angular)
-      SDL.KeycodeRight -> modify (_rotation Lens.+~ t *^ (-angular))
+        modify (_velocity Lens.+~ Delta (P (cartesian2 rotation thrust)))
+      SDL.KeycodeLeft  -> modify (_rotation Lens.+~ angular)
+      SDL.KeycodeRight -> modify (_rotation Lens.+~ -angular)
       _                -> pure ()
     _ -> pure ()
 
