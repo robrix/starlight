@@ -13,6 +13,7 @@ import Linear.Exts
 import Linear.V2
 import Linear.V3
 import Linear.V4
+import Linear.Vector
 
 data Glyph = Glyph
   { codePoint    :: {-# UNPACK #-} !Char
@@ -22,7 +23,7 @@ data Glyph = Glyph
   }
 
 scaleGlyph :: V2 Float -> Glyph -> Glyph
-scaleGlyph (V2 sx sy) Glyph{..} = Glyph codePoint (advanceWidth * sx) ((* V4 sx sy 1 1) <$> geometry) (transformRect (scaled (V3 sx sy 1)) bounds_)
+scaleGlyph (V2 sx sy) Glyph{..} = Glyph codePoint (advanceWidth * sx) (V4 sx sy 1 1 *^ geometry) (transformRect (scaled (V3 sx sy 1)) bounds_)
 
 data Instance = Instance
   { glyph  :: {-# UNPACK #-} !Glyph
