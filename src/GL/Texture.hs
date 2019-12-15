@@ -73,3 +73,5 @@ setParameter :: (Parameter param val, Has (Lift IO) sig m) => Type -> param -> v
 setParameter target param = checkingGLError . runLiftIO . glTexParameteri (glEnum target) (glEnum param) . fromIntegral . glEnum
 
 class (GL.Enum param, GL.Enum val) => Parameter param val | param -> val
+
+instance Parameter FilterType Filter
