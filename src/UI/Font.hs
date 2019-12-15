@@ -10,7 +10,7 @@ module UI.Font
 , glyphs
 ) where
 
-import Control.Monad ((<=<), guard)
+import Control.Monad ((<=<), guard, join)
 import Control.Monad.IO.Class.Lift
 import Data.Bifunctor (first)
 import Data.Char (ord)
@@ -27,7 +27,7 @@ import qualified Opentype.Fileformat as O
 import Lens.Micro
 import Linear.V2
 import Linear.V4
-import Linear.Vector ((*^), (^/))
+import Linear.Vector ((^/))
 import UI.Glyph
 import UI.Path
 
@@ -101,19 +101,19 @@ supportedCMap = find supportedPlatform . O.getCmaps . O.cmapTable . _font
   where supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
 
 
-glyphs :: Font -> [Char] -> [Glyph]
-glyphs font = catMaybes . glyphsForChars font
-
-glyphsForChars :: Font -> [Char] -> [Maybe Glyph]
-glyphsForChars (Font face size) = map lookupGlyph
+allGlyphs :: Typeface -> Map.Map Char (Maybe Glyph)
+allGlyphs face = Map.fromList (map ((,) <*> lookupGlyph) [minBound..maxBound])
   where lookupGlyph char = do
           table <- O.glyphMap <$> cmap
           glyphID <- table Map.!? fromIntegral (ord char)
           g <- glyphTable face !? fromIntegral glyphID
           let vertices = glyphVertices face g
-          pure $! scaleGlyph (size *^ scale) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
+          pure $! scaleGlyph scale $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
         cmap = supportedCMap face
         scale = 1 ^/ fromIntegral (unitsPerEm face)
+
+glyphs :: Font -> [Char] -> [Glyph]
+glyphs (Font face size) = map (scaleGlyph (pure size)) . catMaybes . map (join . (allGlyphs face Map.!?))
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
