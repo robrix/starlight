@@ -68,7 +68,6 @@ library
     GL.Uniform
     Linear.Exts
     Physics.Delta
-    Physics.Distance
     Physics.Radians
     Physics.Seconds
     UI.Carrier.Window
