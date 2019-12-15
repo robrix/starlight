@@ -169,15 +169,11 @@ main = do
             -- print instanceBounds
 
             use text $ do
-              let rect' = V4
-                    (fromIntegral (floor   (minX instanceBounds) :: Int) / fromIntegral width)
-                    (fromIntegral (ceiling (maxY instanceBounds) :: Int) / fromIntegral height)
-                    (fromIntegral (ceiling (maxX instanceBounds) :: Int) / fromIntegral width)
-                    (fromIntegral (floor   (minY instanceBounds) :: Int) / fromIntegral height)
-
-              -- print rect'
-
-              set @"rect" rect'
+              set @"rect" $ V4
+                (fromIntegral (floor   (minX instanceBounds) :: Int) / fromIntegral width)
+                (fromIntegral (ceiling (maxY instanceBounds) :: Int) / fromIntegral height)
+                (fromIntegral (ceiling (maxX instanceBounds) :: Int) / fromIntegral width)
+                (fromIntegral (floor   (minY instanceBounds) :: Int) / fromIntegral height)
               -- set @"rect" (V4 0 0 1 1)
               set @"colour" transparent
               -- set @"colour" black
