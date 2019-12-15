@@ -4,7 +4,6 @@ module UI.Font
 , Font(..)
 , readTypeface
 , readFontOfSize
-, unitsPerEm
 , ascent
 , descent
 , glyphs
@@ -21,7 +20,6 @@ import Data.Maybe (catMaybes)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Data.Vector ((!?))
-import Data.Word
 import Geometry.Triangle
 import qualified Opentype.Fileformat as O
 import Lens.Micro
@@ -96,9 +94,6 @@ nameID = safeToEnum . fromIntegral . O.nameID
 safeToEnum :: forall n. (Bounded n, Enum n) => Int -> Maybe n
 safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (minBound @n))
 
-
-unitsPerEm :: Typeface -> Word16
-unitsPerEm = O.unitsPerEm . O.headTable . _font
 
 ascent :: Typeface -> Int16
 ascent = O.ascent . O.hheaTable . _font
