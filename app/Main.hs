@@ -14,7 +14,6 @@ import Control.Monad
 import Data.Foldable
 import Data.Function (fix)
 import Data.Time.Clock (UTCTime)
-import Foreign.Ptr
 import Foreign.Storable (Storable)
 import Geometry.Rect
 import GHC.Stack
@@ -113,10 +112,10 @@ main = do
       setParameter Texture2D MagFilter Nearest
       setParameter Texture2D MinFilter Nearest
       scale <- Window.scale
-      V2 width height <- Window.size
+      size@(V2 width height) <- Window.size
       setParameter Texture2D WrapS ClampToEdge
       setParameter Texture2D WrapT ClampToEdge
-      checkingGLError $ glTexImage2D GL_TEXTURE_2D 0 GL_RGBA8 (scale * width) (scale * height) 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV nullPtr
+      setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
 
       bind (Just framebuffer)
       checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
