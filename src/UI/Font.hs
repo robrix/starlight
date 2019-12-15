@@ -112,8 +112,8 @@ glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars fa
 
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
 glyphsForChars face chars = map (>>= (glyphs !?) . fromIntegral) glyphIDs
-  where glyphIDs = maybe (Nothing <$ chars) (flip lookupAll (fmap (fromIntegral . ord :: Char -> Word32) chars) . O.glyphMap) (supportedCMap face)
-        lookupAll = fmap . flip Map.lookup
+  where glyphIDs = maybe (Nothing <$ chars) (lookupAll (map (fromIntegral . ord :: Char -> Word32) chars) . O.glyphMap) (supportedCMap face)
+        lookupAll chars table = map (`Map.lookup` table) chars
         glyphs = glyphTable face
 
 
