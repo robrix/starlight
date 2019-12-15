@@ -10,7 +10,6 @@ module UI.Font
 , glyphs
 ) where
 
-import Control.Applicative (liftA2)
 import Control.Monad ((<=<), guard)
 import Control.Monad.IO.Class.Lift
 import Data.Bifunctor (first)
@@ -22,7 +21,6 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Data.Vector (Vector, (!?))
 import Data.Word
-import Geometry.Rect
 import Geometry.Triangle
 import qualified Opentype.Fileformat as O
 import Lens.Micro
@@ -107,7 +105,6 @@ glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars fa
   where toGlyph char (Just g) = let vertices = glyphVertices face g in
           [ scaleGlyph (size *^ scale) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices)) ]
         toGlyph _ Nothing = []
-        bounds vertices = Rect (foldr1 (liftA2 min) vertices) (foldr1 (liftA2 max) vertices)
         scale = 1 ^/ fromIntegral (unitsPerEm face)
 
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
