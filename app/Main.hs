@@ -270,15 +270,11 @@ handleInput
      , Has (State PlayerState) sig m
      , Has (State UTCTime) sig m
      , Has Time sig m
-     , Has Window.Window sig m
      , MonadIO m
      )
   => m PlayerState
 handleInput = do
   prevFrame <- get
-  events <- Window.poll
-
-  when (any ((== SDL.QuitEvent) . SDL.eventPayload) events) empty
 
   PlayerState{ position, velocity, rotation } <- get
 
@@ -286,6 +282,7 @@ handleInput = do
 
   let Impulse linear angular = Impulse 0.01 pi
   (Impulse accel angular, _) <- runState @Impulse mempty . SDL.mapEvents $ \ event -> case SDL.eventPayload event of
+    SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
       SDL.KeycodeUp    -> modify $ (<> Impulse linear    0)
       SDL.KeycodeDown  -> modify $ (<> Impulse (-linear) 0)
