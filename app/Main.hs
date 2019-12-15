@@ -216,8 +216,7 @@ main = do
             _position += getDelta velocity
 
       fix $ \ loop -> do
-        windowSize <- Window.size
-        let rect = Rect 0 windowSize
+        rect <- Rect 0 <$> Window.size
         res <- runEmpty $ sequence_
           [ drawLayer (Just framebuffer) (Just transparent) rect drawGlyphs
           , drawLayer Nothing (Just black) rect drawText
