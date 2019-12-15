@@ -98,6 +98,10 @@ glyphTable (Typeface _ o) = case O.outlineTables o of
   O.QuadTables _ (O.GlyfTable glyphs) -> glyphs
   _ -> error "wtf"
 
+supportedCMap :: Typeface -> Maybe O.CMap
+supportedCMap = find supportedPlatform . O.getCmaps . O.cmapTable . _font
+  where supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
+
 
 glyphs :: Font -> [Char] -> [Glyph]
 glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars face chars))
@@ -108,13 +112,12 @@ glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars fa
         scale = 1 ^/ fromIntegral (unitsPerEm face)
 
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
-glyphsForChars face@(Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyphIDs
+glyphsForChars face chars = map (>>= (glyphs !?) . fromIntegral) glyphIDs
   where glyphIDs = fromMaybe (Nothing <$ chars) $ do
-          cmap <- find viablePlatform (O.getCmaps (O.cmapTable o))
+          cmap <- supportedCMap face
           Just $ lookupAll (O.glyphMap cmap) (fmap (fromIntegral . ord :: Char -> Word32) chars)
         lookupAll = fmap . flip Map.lookup
         glyphs = glyphTable face
-        viablePlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
