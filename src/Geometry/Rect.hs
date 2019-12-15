@@ -31,16 +31,16 @@ _max = lens rectMax (\ r v -> r { rectMax = v })
 
 
 minX :: Rect a -> a
-minX = view _x . rectMin
+minX = view (_min . _x)
 
 minY :: Rect a -> a
-minY = view _y . rectMin
+minY = view (_min . _y)
 
 maxX :: Rect a -> a
-maxX = view _x . rectMax
+maxX = view (_max . _x)
 
 maxY :: Rect a -> a
-maxY = view _y . rectMax
+maxY = view (_max . _y)
 
 
 transformRect :: Num a => M33 a -> Rect a -> Rect a
