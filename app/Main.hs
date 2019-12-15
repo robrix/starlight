@@ -167,10 +167,10 @@ main = do
 
             use text $ do
               set @"rect" $ V4
-                (fromIntegral (floor   (instanceBounds ^. _min . _x) :: Int) / fromIntegral width)
-                (fromIntegral (ceiling (instanceBounds ^. _max . _y) :: Int) / fromIntegral height)
-                (fromIntegral (ceiling (instanceBounds ^. _max . _x) :: Int) / fromIntegral width)
-                (fromIntegral (floor   (instanceBounds ^. _min . _y) :: Int) / fromIntegral height)
+                (fromIntegral @Int (floor   (instanceBounds ^. _min . _x)) / fromIntegral width)
+                (fromIntegral @Int (ceiling (instanceBounds ^. _max . _y)) / fromIntegral height)
+                (fromIntegral @Int (ceiling (instanceBounds ^. _max . _x)) / fromIntegral width)
+                (fromIntegral @Int (floor   (instanceBounds ^. _min . _y)) / fromIntegral height)
               -- set @"rect" (V4 0 0 1 1)
               set @"colour" transparent
               -- set @"colour" black
