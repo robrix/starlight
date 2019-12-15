@@ -281,7 +281,7 @@ handleInput = do
   delta <- fromRational . toRational <$> since prevFrame
 
   let Impulse linear angular = Impulse 0.01 pi
-  (Impulse accel angular, _) <- runState @Impulse mempty . SDL.mapEvents $ \ event -> case SDL.eventPayload event of
+  Impulse accel angular <- execState @Impulse mempty . SDL.mapEvents $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
       SDL.KeycodeUp    -> modify $ (<> Impulse linear    0)
