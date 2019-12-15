@@ -36,10 +36,9 @@ instanceBounds Instance{..} = transformRect
   !*! scaled scale)
   (bounds glyph)
 
-combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
-combineInstances (V2 sx sy) = go where
+combineInstances :: V2 Float -> [Glyph] -> [Instance]
+combineInstances = go where
   go offset (g:gs)
-    = Instance g offset scale
-    : go (offset + V2 (advanceWidth g * sx) 0) gs
+    = Instance g offset 1
+    : go (offset + V2 (advanceWidth g) 0) gs
   go _ [] = []
-  scale = V3 sx sy 1
