@@ -8,8 +8,6 @@ cd $(dirname "$0")/..
 
 repl_builddir=dist-repl
 
-if [[ ! -d $repl_builddir ]]; then
-  cabal build --builddir="$repl_builddir" all --only-dependencies
-fi
+cabal build --builddir="$repl_builddir" all --only-dependencies
 
 cabal exec --builddir="$repl_builddir" env -- -u GHC_ENVIRONMENT ghci -ghci-script=.ghci.starlight $(script/ghci-flags --builddir "$repl_builddir") -no-ignore-dot-ghci $@
