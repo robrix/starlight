@@ -26,4 +26,4 @@ now :: Has Time sig m => m UTCTime
 now = send (Now pure)
 
 since :: Has Time sig m => UTCTime -> m NominalDiffTime
-since t = send (Now (pure . diffUTCTime t))
+since t = send (Now (pure . flip diffUTCTime t))
