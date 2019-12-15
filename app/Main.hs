@@ -21,7 +21,7 @@ import GHC.TypeLits
 import GL.Array
 import GL.Buffer
 import GL.Carrier.Program.Live
-import GL.Error
+import GL.Framebuffer as GL
 import GL.Object
 import GL.Scalar
 import GL.Shader
@@ -118,9 +118,7 @@ main = do
       setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
 
       bind (Just framebuffer)
-      checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER GL_COLOR_ATTACHMENT0 GL_TEXTURE_2D (unTexture texture) 0
-      status <- glCheckFramebufferStatus GL_FRAMEBUFFER
-      unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)
+      attachTexture (GL.Colour 0) texture
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
