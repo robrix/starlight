@@ -3,7 +3,6 @@ module Main
 ( main
 ) where
 
-import Control.Algebra (Effect)
 import Control.Carrier.Empty.Maybe
 import Control.Carrier.Finally
 import Control.Carrier.State.Strict
@@ -206,7 +205,7 @@ main = do
             let scale = windowScale / windowSize
                 V2 width height = windowSize
 
-            PlayerState { position, rotation } <- handleInput
+            PlayerState { position, velocity, rotation } <- handleInput
 
             use stars $ do
               set @"resolution" (V3 width height 8)
@@ -223,6 +222,8 @@ main = do
               set @"rotation" rotation
 
               traverse_ (drawArrays LineLoop) shipRanges
+
+            modify (_position Lens.+~ getDelta velocity)
 
       fix $ \ loop -> do
         windowSize <- Window.size
@@ -264,8 +265,7 @@ _rotation = Lens.lens rotation (\ s r -> s { rotation = r })
 
 
 handleInput
-  :: ( Effect sig
-     , Has Empty sig m
+  :: ( Has Empty sig m
      , Has (State PlayerState) sig m
      , Has (State UTCTime) sig m
      , Has Time sig m
@@ -273,29 +273,23 @@ handleInput
      )
   => m PlayerState
 handleInput = do
-  prevFrame <- get
+  t <- fmap (getSeconds . getDelta . fromRational . toRational) . since =<< get
 
-  PlayerState{ position, velocity, rotation } <- get
+  let thrust = 0.01
+      angular = pi
 
-  delta <- fromRational . toRational <$> since prevFrame
-
-  let (linear, angular) = (Delta (Delta (P (cartesian2 rotation 0.01))), pi)
-  Impulse accel angular <- execState @Impulse mempty . Window.input $ \ event -> case SDL.eventPayload event of
+  Window.input $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
-      SDL.KeycodeUp    -> modify (<> Impulse linear    0)
-      SDL.KeycodeDown  -> modify (<> Impulse (-linear) 0)
-      SDL.KeycodeLeft  -> modify (<> Impulse 0 angular)
-      SDL.KeycodeRight -> modify (<> Impulse 0 (-angular))
+      SDL.KeycodeUp    -> do
+        rotation <- gets (Lens.^. _rotation)
+        modify (_velocity Lens.+~ t *^ Delta (P (cartesian2 rotation thrust)))
+      SDL.KeycodeLeft  -> modify (_rotation Lens.+~ t *^ angular)
+      SDL.KeycodeRight -> modify (_rotation Lens.+~ t *^ (-angular))
       _                -> pure ()
     _ -> pure ()
 
-  let t = getSeconds (getDelta delta)
-      phi = getDelta (t *^ angular) + rotation
-      r = getDelta (t *^ accel) + velocity
-      state = PlayerState (position + getDelta r) r phi
-
-  state <$ put state
+  get
 
 
 data Impulse = Impulse !(Delta (Delta (Point V2)) Float) !(Delta Radians Float)
