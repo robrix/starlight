@@ -4,6 +4,7 @@ module UI.Effect.Window
   Window(..)
 , swap
 , poll
+, input
 , size
 , scale
   -- * Re-exports
@@ -13,6 +14,7 @@ module UI.Effect.Window
 ) where
 
 import Control.Algebra
+import Control.Monad ((<=<))
 import GHC.Generics (Generic1)
 import Linear.V2
 import qualified SDL
@@ -32,6 +34,10 @@ swap = send (Swap (pure ()))
 
 poll :: Has Window sig m => m (Maybe SDL.Event)
 poll = send (Poll pure)
+
+input :: Has Window sig m => (SDL.Event -> m ()) -> m ()
+input h = go where
+  go = poll >>= maybe (pure ()) (const go <=< h)
 
 size :: (Num a, Has Window sig m) => m (V2 a)
 size = send (Size (pure . fmap fromInteger))
