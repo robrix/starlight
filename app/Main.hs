@@ -219,7 +219,7 @@ main = do
             use ship $ do
               set @"colour" $ V4 1 1 1 1
               set @"translation" 0
-              set @"scale" (scale * 100)
+              set @"scale" (scale * 50)
               set @"rotation" rotation
 
               traverse_ (drawArrays LineLoop) shipRanges
