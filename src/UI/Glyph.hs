@@ -1,9 +1,10 @@
-{-# LANGUAGE FlexibleInstances, RecordWildCards #-}
+{-# LANGUAGE DuplicateRecordFields, FlexibleInstances, RecordWildCards #-}
 module UI.Glyph
 ( Glyph(..)
 , scaleGlyph
 , Instance(..)
 , layoutGlyphs
+, Run(..)
 , HasBounds(..)
 ) where
 
@@ -30,9 +31,15 @@ data Instance = Instance
   , offset :: {-# UNPACK #-} !(V2 Float)
   }
 
-layoutGlyphs :: [Glyph] -> [Instance]
-layoutGlyphs = ($ []) . snd . foldl' go (0, id) where
+
+layoutGlyphs :: [Glyph] -> Run
+layoutGlyphs = (Run <*> bounds) . ($ []) . snd . foldl' go (0, id) where
   go (offset, is) g = (offset + V2 (advanceWidth g) 0, (Instance g offset :) . is)
+
+data Run = Run
+  { instances :: ![Instance]
+  , bounds_   :: {-# UNPACK #-} !(Rect Float)
+  }
 
 
 class HasBounds t where
