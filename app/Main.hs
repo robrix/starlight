@@ -274,7 +274,7 @@ handleInput
      )
   => m PlayerState
 handleInput = do
-  t <- fmap (getSeconds . getDelta . fromRational . toRational) . since =<< get
+  t <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
 
   let thrust = 0.01
       angular = pi
