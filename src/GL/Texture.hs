@@ -6,6 +6,7 @@ module GL.Texture
 , FilterType(..)
 , Filter(..)
 , WrapCoord(..)
+, Wrap(..)
 , setParameter
 , Parameter
 ) where
@@ -69,6 +70,20 @@ instance GL.Enum WrapCoord where
     WrapR -> GL_TEXTURE_WRAP_R
     WrapS -> GL_TEXTURE_WRAP_S
     WrapT -> GL_TEXTURE_WRAP_T
+
+
+data Wrap
+  = Repeat
+  | MirroredRepeat
+  | ClampToEdge
+  | ClampToBorder
+
+instance GL.Enum Wrap where
+  glEnum = \case
+    Repeat -> GL_REPEAT
+    MirroredRepeat -> GL_MIRRORED_REPEAT
+    ClampToEdge -> GL_CLAMP_TO_EDGE
+    ClampToBorder -> GL_CLAMP_TO_BORDER
 
 
 setParameter :: (Parameter val param, Has (Lift IO) sig m) => Type -> param -> val -> m ()
