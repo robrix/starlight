@@ -2,6 +2,7 @@
 module GL.Texture
 ( Texture(..)
 , Type(..)
+, InternalFormat(..)
 , KnownType(..)
 , FilterType(..)
 , Filter(..)
@@ -45,6 +46,14 @@ instance KnownType 'Texture2D where
 instance GL.Enum Type where
   glEnum = \case
     Texture2D -> GL_TEXTURE_2D
+
+
+data InternalFormat
+  = RGBA8
+
+instance GL.Enum InternalFormat where
+  glEnum = \case
+    RGBA8 -> GL_RGBA8
 
 
 data FilterType = MinFilter | MagFilter
