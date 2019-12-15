@@ -4,6 +4,7 @@ module UI.Glyph
 , scaleGlyph
 , Instance(..)
 , instanceBounds
+, combineInstances
 ) where
 
 import Geometry.Rect
@@ -34,3 +35,11 @@ instanceBounds Instance{..} = transformRect
   (   translated offset
   !*! scaled scale)
   (bounds glyph)
+
+combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
+combineInstances (V2 sx sy) = go where
+  go offset (g:gs)
+    = Instance g offset scale
+    : go (offset + V2 (advanceWidth g * sx) 0) gs
+  go _ [] = []
+  scale = V3 sx sy 1
