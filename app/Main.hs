@@ -281,7 +281,7 @@ handleInput = do
   delta <- fromRational . toRational <$> since prevFrame
 
   let t = getDelta (getSeconds delta)
-      (accel, angular) = foldl' (accumImpulses 0.01 pi) (0, 0) events
+      Impulse accel angular = foldl' (accumImpulses (Impulse 0.01 pi)) (Impulse 0 0) events
       phi = Radians t * getDelta angular + rotation
       r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity
       state = PlayerState (position + getDelta r) r phi
@@ -289,15 +289,17 @@ handleInput = do
   state <$ put state
 
 
-accumImpulses :: Delta (Delta Float) -> Delta (Radians Float) -> (Delta (Delta Float), Delta (Radians Float)) -> SDL.Event -> (Delta (Delta Float), Delta (Radians Float))
-accumImpulses linear angular (accel, theta) event = case SDL.eventPayload event of
+data Impulse = Impulse !(Delta (Delta Float)) !(Delta (Radians Float))
+
+accumImpulses :: Impulse -> Impulse -> SDL.Event -> Impulse
+accumImpulses (Impulse linear angular) (Impulse accel theta) event = case SDL.eventPayload event of
   SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
-    SDL.KeycodeUp    -> (accel + linear, theta)
-    SDL.KeycodeDown  -> (accel - linear, theta)
-    SDL.KeycodeLeft  -> (accel, theta + angular)
-    SDL.KeycodeRight -> (accel, theta - angular)
-    _                -> (accel, theta)
-  _ -> (accel, theta)
+    SDL.KeycodeUp    -> Impulse (accel + linear) theta
+    SDL.KeycodeDown  -> Impulse (accel - linear) theta
+    SDL.KeycodeLeft  -> Impulse accel (theta + angular)
+    SDL.KeycodeRight -> Impulse accel (theta - angular)
+    _                -> Impulse accel theta
+  _ -> Impulse accel theta
 
 
 combineInstances :: V2 Float -> V2 Float -> [Glyph] -> [Instance]
