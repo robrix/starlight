@@ -18,7 +18,6 @@ import Data.Char (ord)
 import Data.Foldable (find)
 import Data.Int
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Data.Vector (Vector, (!?))
@@ -113,9 +112,7 @@ glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars fa
 
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
 glyphsForChars face chars = map (>>= (glyphs !?) . fromIntegral) glyphIDs
-  where glyphIDs = fromMaybe (Nothing <$ chars) $ do
-          cmap <- supportedCMap face
-          Just $ lookupAll (O.glyphMap cmap) (fmap (fromIntegral . ord :: Char -> Word32) chars)
+  where glyphIDs = maybe (Nothing <$ chars) (flip lookupAll (fmap (fromIntegral . ord :: Char -> Word32) chars) . O.glyphMap) (supportedCMap face)
         lookupAll = fmap . flip Map.lookup
         glyphs = glyphTable face
 
