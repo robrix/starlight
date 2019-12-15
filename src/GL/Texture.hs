@@ -4,7 +4,6 @@ module GL.Texture
 , Type(..)
 , KnownType(..)
 , Filter(..)
-, filterToGLEnum
 , setMagFilter
 , setMinFilter
 ) where
@@ -47,12 +46,13 @@ instance GL.Enum Type where
 
 data Filter = Nearest | Linear
 
-filterToGLEnum :: Filter -> GLenum
-filterToGLEnum Nearest = GL_NEAREST
-filterToGLEnum Linear = GL_LINEAR
+instance GL.Enum Filter where
+  glEnum = \case
+    Nearest -> GL_NEAREST
+    Linear  -> GL_LINEAR
 
 setMagFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
-setMagFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . filterToGLEnum
+setMagFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum target) GL_TEXTURE_MAG_FILTER . fromIntegral . glEnum
 
 setMinFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
-setMinFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . filterToGLEnum
+setMinFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . glEnum
