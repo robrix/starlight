@@ -113,7 +113,7 @@ glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars fa
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
 glyphsForChars face chars = maybe (Nothing <$ chars) lookupGlyphs (supportedCMap face)
   where lookupGlyphs cmap = let table = O.glyphMap cmap in
-          map ((glyphTable face !?) . fromIntegral <=< (`Map.lookup` table) . fromIntegral . ord) chars
+          map ((glyphTable face !?) . fromIntegral <=< (table Map.!?) . fromIntegral . ord) chars
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
