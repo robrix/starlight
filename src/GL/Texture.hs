@@ -5,6 +5,7 @@ module GL.Texture
 , KnownType(..)
 , FilterType(..)
 , Filter(..)
+, WrapCoord(..)
 , setParameter
 , Parameter
 ) where
@@ -59,6 +60,15 @@ instance GL.Enum Filter where
   glEnum = \case
     Nearest -> GL_NEAREST
     Linear  -> GL_LINEAR
+
+
+data WrapCoord = WrapR | WrapS | WrapT
+
+instance GL.Enum WrapCoord where
+  glEnum = \case
+    WrapR -> GL_TEXTURE_WRAP_R
+    WrapS -> GL_TEXTURE_WRAP_S
+    WrapT -> GL_TEXTURE_WRAP_T
 
 
 setParameter :: (Parameter val param, Has (Lift IO) sig m) => Type -> param -> val -> m ()
