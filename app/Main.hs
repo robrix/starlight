@@ -234,7 +234,7 @@ main = do
           , drawLayer Nothing (Just black) rect drawText
           , drawLayer Nothing (Just black) rect drawCanvas
           ]
-        now >>= put
+        put =<< now
         maybe (pure ()) (const (Window.swap >> loop)) res
 
   where jitterPattern
