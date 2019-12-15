@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Framebuffer
 ( Framebuffer(..)
+, Attachment(..)
 , Bind(..)
 ) where
 
@@ -21,3 +22,7 @@ instance Object Framebuffer where
 
 instance Bind Framebuffer where
   bind = checkingGLError . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
+
+
+data Attachment
+  = Colour Int
