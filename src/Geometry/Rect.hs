@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, RecordWildCards #-}
+{-# LANGUAGE DeriveFunctor #-}
 module Geometry.Rect
 ( Rect(..)
 , _rectMin
