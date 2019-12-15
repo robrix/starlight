@@ -92,3 +92,4 @@ setParameter target param = checkingGLError . runLiftIO . glTexParameteri (glEnu
 class (GL.Enum param, GL.Enum val) => Parameter val param | param -> val
 
 instance Parameter Filter FilterType
+instance Parameter Wrap WrapCoord
