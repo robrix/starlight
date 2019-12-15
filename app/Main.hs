@@ -10,7 +10,6 @@ import Control.Carrier.State.Strict
 import Control.Carrier.Time
 import Control.Effect.Lift
 import Control.Monad
-import Control.Monad.IO.Class
 import Data.Foldable
 import Data.Function (fix)
 import Data.List.NonEmpty (nonEmpty)
@@ -270,7 +269,7 @@ handleInput
      , Has (State PlayerState) sig m
      , Has (State UTCTime) sig m
      , Has Time sig m
-     , MonadIO m
+     , Has Window.Window sig m
      )
   => m PlayerState
 handleInput = do
@@ -281,7 +280,7 @@ handleInput = do
   delta <- fromRational . toRational <$> since prevFrame
 
   let Impulse linear angular = Impulse 0.01 pi
-  Impulse accel angular <- execState @Impulse mempty . SDL.mapEvents $ \ event -> case SDL.eventPayload event of
+  Impulse accel angular <- execState @Impulse mempty . Window.input $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
       SDL.KeycodeUp    -> modify $ (<> Impulse linear    0)
