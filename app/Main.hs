@@ -281,7 +281,7 @@ handleInput = do
 
   Window.input $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
-    SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
+    SDL.KeyboardEvent (SDL.KeyboardEventData _ _ _ (SDL.Keysym _ kc _)) -> case kc of
       SDL.KeycodeUp    -> do
         rotation <- Lens.use _rotation
         modify (_velocity Lens.+~ Delta (P (cartesian2 rotation thrust)))
