@@ -105,7 +105,7 @@ supportedCMap = find supportedPlatform . O.getCmaps . O.cmapTable . _font
 glyphs :: Font -> [Char] -> [Glyph]
 glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars face chars))
   where toGlyph char (Just g) = let vertices = glyphVertices face g in
-          [ scaleGlyph (size *^ scale) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds ((^. _xy) <$> vertices)) ]
+          [ scaleGlyph (size *^ scale) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices)) ]
         toGlyph _ Nothing = []
         bounds vertices = Rect (foldr1 (liftA2 min) vertices) (foldr1 (liftA2 max) vertices)
         scale = 1 ^/ fromIntegral (unitsPerEm face)
