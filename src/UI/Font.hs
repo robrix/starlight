@@ -17,6 +17,7 @@ import Data.Char (ord)
 import Data.Foldable (find)
 import Data.Int
 import qualified Data.Map as Map
+import Data.Maybe (catMaybes)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Data.Vector (Vector, (!?))
@@ -101,10 +102,9 @@ supportedCMap = find supportedPlatform . O.getCmaps . O.cmapTable . _font
 
 
 glyphs :: Font -> [Char] -> [Glyph]
-glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars face chars))
-  where toGlyph char (Just g) = let vertices = glyphVertices face g in
-          [ scaleGlyph (size *^ scale) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices)) ]
-        toGlyph _ Nothing = []
+glyphs (Font face size) chars = catMaybes (zipWith (fmap . toGlyph) chars (glyphsForChars face chars))
+  where toGlyph char g = let vertices = glyphVertices face g in
+          scaleGlyph (size *^ scale) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
         scale = 1 ^/ fromIntegral (unitsPerEm face)
 
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
