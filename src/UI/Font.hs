@@ -33,7 +33,7 @@ import UI.Path
 
 data Typeface = Typeface { typefaceName :: Maybe String, typefaceUnderlying :: O.OpentypeFont }
 
-data Font = Font { fontFace :: Typeface, fontSize :: Float }
+data Font = Font { face :: Typeface, size :: Float }
 
 
 readTypeface :: Has (Lift IO) sig m => FilePath -> m Typeface
