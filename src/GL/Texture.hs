@@ -3,6 +3,7 @@ module GL.Texture
 ( Texture(..)
 , Type(..)
 , KnownType(..)
+, FilterType(..)
 , Filter(..)
 , setMagFilter
 , setMinFilter
@@ -42,6 +43,14 @@ instance KnownType 'Texture2D where
 instance GL.Enum Type where
   glEnum = \case
     Texture2D -> GL_TEXTURE_2D
+
+
+data FilterType = MinFilter | MagFilter
+
+instance GL.Enum FilterType where
+  glEnum = \case
+    MinFilter -> GL_TEXTURE_MIN_FILTER
+    MagFilter -> GL_TEXTURE_MAG_FILTER
 
 
 data Filter = Nearest | Linear
