@@ -4,8 +4,6 @@ module UI.Font
 , Font(..)
 , readTypeface
 , readFontOfSize
-, ascent
-, descent
 , glyphs
 ) where
 
@@ -14,7 +12,6 @@ import Control.Monad.IO.Class.Lift
 import Data.Bifunctor (first)
 import Data.Char (ord)
 import Data.Foldable (find)
-import Data.Int
 import qualified Data.Map as Map
 import Data.Maybe (catMaybes)
 import qualified Data.Text as T
@@ -93,13 +90,6 @@ nameID = safeToEnum . fromIntegral . O.nameID
 
 safeToEnum :: forall n. (Bounded n, Enum n) => Int -> Maybe n
 safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (minBound @n))
-
-
-ascent :: Typeface -> Int16
-ascent = O.ascent . O.hheaTable . _font
-
-descent :: Typeface -> Int16
-descent = O.descent . O.hheaTable . _font
 
 
 glyphs :: Font -> [Char] -> [Glyph]
