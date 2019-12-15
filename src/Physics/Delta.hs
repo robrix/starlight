@@ -5,5 +5,5 @@ module Physics.Delta
 
 import GL.Uniform
 
-newtype Delta a = Delta { getDelta :: a }
+newtype Delta f a = Delta { getDelta :: f a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Traversable, Uniform)

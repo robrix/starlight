@@ -248,7 +248,7 @@ main = do
 
 data PlayerState = PlayerState
   { position     :: !(Point V2 Float)
-  , velocity     :: !(Delta (Point V2 Float))
+  , velocity     :: !(Delta (Point V2) Float)
   , rotation     :: !(Radians Float)
   }
   deriving (Eq, Ord, Show)
@@ -256,7 +256,7 @@ data PlayerState = PlayerState
 _position :: Lens.Lens' PlayerState (Point V2 Float)
 _position = Lens.lens position (\ s v -> s { position = v })
 
-_velocity :: Lens.Lens' PlayerState (Delta (Point V2 Float))
+_velocity :: Lens.Lens' PlayerState (Delta (Point V2) Float)
 _velocity = Lens.lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens.Lens' PlayerState (Radians Float)
@@ -279,7 +279,7 @@ handleInput = do
 
   delta <- fromRational . toRational <$> since prevFrame
 
-  let Impulse linear angular = Impulse 0.01 pi
+  let (linear, angular) = (Delta (Delta (P (cartesian2 rotation 0.01))), pi)
   Impulse accel angular <- execState @Impulse mempty . Window.input $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
@@ -290,15 +290,15 @@ handleInput = do
       _                -> pure ()
     _ -> pure ()
 
-  let t = getDelta (getSeconds delta)
-      phi = Radians t * getDelta angular + rotation
-      r = (P . cartesian2 phi . (t *) <$> getDelta accel) + velocity
+  let t = getSeconds (getDelta delta)
+      phi = getDelta (t *^ angular) + rotation
+      r = getDelta (t *^ accel) + velocity
       state = PlayerState (position + getDelta r) r phi
 
   state <$ put state
 
 
-data Impulse = Impulse !(Delta (Delta Float)) !(Delta (Radians Float))
+data Impulse = Impulse !(Delta (Delta (Point V2)) Float) !(Delta Radians Float)
 
 instance Semigroup Impulse where
   Impulse v1 r1 <> Impulse v2 r2 = Impulse (v1 + v2) (r1 + r2)
