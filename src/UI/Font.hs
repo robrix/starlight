@@ -10,7 +10,7 @@ module UI.Font
 ) where
 
 import Control.Applicative (liftA2)
-import Control.Monad (guard)
+import Control.Monad ((<=<), guard)
 import Control.Monad.IO.Class.Lift
 import Data.Bifunctor (first)
 import Data.Char (ord)
@@ -123,4 +123,4 @@ glyphPaths typeface glyph = fmap contourToPath (O.getScaledContours (typefaceUnd
 
 
 glyphVertices :: Typeface -> O.Glyph Int -> [V4 Float]
-glyphVertices typeface = (>>= uncurry triangleVertices . first (fmap fromIntegral)) . (>>= pathTriangles) . glyphPaths typeface
+glyphVertices typeface = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< glyphPaths typeface
