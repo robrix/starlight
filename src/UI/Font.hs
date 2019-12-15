@@ -21,7 +21,7 @@ import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import Data.Vector ((!?))
+import Data.Vector (Vector, (!?))
 import Data.Word
 import Geometry.Rect
 import Geometry.Triangle
@@ -93,6 +93,11 @@ ascent = O.ascent . O.hheaTable . _font
 descent :: Typeface -> Int16
 descent = O.descent . O.hheaTable . _font
 
+glyphTable :: Typeface -> Vector (O.Glyph Int)
+glyphTable (Typeface _ o) = case O.outlineTables o of
+  O.QuadTables _ (O.GlyfTable glyphs) -> glyphs
+  _ -> error "wtf"
+
 
 glyphs :: Font -> [Char] -> [Glyph]
 glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars face chars))
@@ -103,14 +108,12 @@ glyphs (Font face size) chars = concat (zipWith toGlyph chars (glyphsForChars fa
         scale = 1 ^/ fromIntegral (unitsPerEm face)
 
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
-glyphsForChars (Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyphIDs
+glyphsForChars face@(Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyphIDs
   where glyphIDs = fromMaybe (Nothing <$ chars) $ do
           cmap <- find viablePlatform (O.getCmaps (O.cmapTable o))
           Just $ lookupAll (O.glyphMap cmap) (fmap (fromIntegral . ord :: Char -> Word32) chars)
         lookupAll = fmap . flip Map.lookup
-        glyphs = case O.outlineTables o of
-          O.QuadTables _ (O.GlyfTable glyphs) -> glyphs
-          _ -> error "wtf"
+        glyphs = glyphTable face
         viablePlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
 
 
