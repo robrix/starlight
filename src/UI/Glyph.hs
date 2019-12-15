@@ -3,7 +3,6 @@ module UI.Glyph
 ( Glyph(..)
 , scaleGlyph
 , Instance(..)
-, instanceBounds
 , layoutGlyphs
 , HasBounds(..)
 ) where
@@ -29,11 +28,6 @@ data Instance = Instance
   { glyph  :: {-# UNPACK #-} !Glyph
   , offset :: {-# UNPACK #-} !(V2 Float)
   }
-
-instanceBounds :: Instance -> Rect Float
-instanceBounds Instance{..} = transformRect
-  (translated offset)
-  (bounds glyph)
 
 layoutGlyphs :: [Glyph] -> [Instance]
 layoutGlyphs = ($ []) . snd . foldl' go (0, id) where

@@ -60,7 +60,7 @@ main = do
   tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 288
   let glyphs = Font.glyphs tahoma "hello"
       instances = layoutGlyphs glyphs
-      instanceBounds' = maybe (Rect zero zero) getUnion (foldMap (Just . Union . instanceBounds) instances)
+      instanceBounds = maybe (Rect zero zero) getUnion (foldMap (Just . Union . bounds) instances)
       (shipVertices, shipRanges) = combineGeometry
         [ [ V3 1      0      0
           , V3 0      (-0.5) 0
@@ -168,14 +168,14 @@ main = do
           drawText = do
             glBlendFunc GL_ZERO GL_SRC_COLOR
 
-            -- print instanceBounds'
+            -- print instanceBounds
 
             use text $ do
               let rect' = V4
-                    (fromIntegral (floor   (minX instanceBounds') :: Int) / fromIntegral width)
-                    (fromIntegral (ceiling (maxY instanceBounds') :: Int) / fromIntegral height)
-                    (fromIntegral (ceiling (maxX instanceBounds') :: Int) / fromIntegral width)
-                    (fromIntegral (floor   (minY instanceBounds') :: Int) / fromIntegral height)
+                    (fromIntegral (floor   (minX instanceBounds) :: Int) / fromIntegral width)
+                    (fromIntegral (ceiling (maxY instanceBounds) :: Int) / fromIntegral height)
+                    (fromIntegral (ceiling (maxX instanceBounds) :: Int) / fromIntegral width)
+                    (fromIntegral (floor   (minY instanceBounds) :: Int) / fromIntegral height)
 
               -- print rect'
 
