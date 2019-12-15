@@ -33,8 +33,8 @@ instanceBounds Instance{..} = transformRect
   (translated offset)
   (bounds glyph)
 
-combineInstances :: V2 Float -> [Glyph] -> [Instance]
-combineInstances = go where
+combineInstances :: [Glyph] -> [Instance]
+combineInstances = go 0 where
   go offset (g:gs)
     = Instance g offset
     : go (offset + V2 (advanceWidth g) 0) gs

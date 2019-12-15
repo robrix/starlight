@@ -59,7 +59,7 @@ main :: HasCallStack => IO ()
 main = do
   tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 288
   let glyphs = Font.glyphs tahoma "hello"
-      instances = combineInstances 0 glyphs
+      instances = combineInstances glyphs
       instanceBounds' = maybe (Rect zero zero) getUnion (foldMap (Just . Union . instanceBounds) instances)
       (shipVertices, shipRanges) = combineGeometry
         [ [ V3 1      0      0
