@@ -3,6 +3,7 @@ module UI.Font
 ( Typeface(name)
 , Font(..)
 , readTypeface
+, readFontOfSize
 , unitsPerEm
 , ascent
 , descent
@@ -39,6 +40,9 @@ data Font = Font { face :: Typeface, size :: Float }
 
 readTypeface :: Has (Lift IO) sig m => FilePath -> m Typeface
 readTypeface path = sendM ((Typeface . opentypeFontName <*> id) <$> O.readOTFile path)
+
+readFontOfSize :: Has (Lift IO) sig m => FilePath -> Float -> m Font
+readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 data NameID
   = Copyright
