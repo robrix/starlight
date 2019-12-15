@@ -42,14 +42,15 @@ readTypeface = fmap toTypeface . sendM . O.readOTFile where
     lookupGlyph char = do
       table <- O.glyphMap <$> cmap
       glyphID <- table Map.!? fromIntegral (ord char)
+      glyphTable <- glyphTable
       g <- glyphTable !? fromIntegral glyphID
       let vertices = glyphVertices g
       pure $! scaleGlyph scale $ Glyph (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
     cmap = find supportedPlatform (O.getCmaps (O.cmapTable o))
     scale = 1 ^/ fromIntegral (O.unitsPerEm (O.headTable o))
     glyphTable = case O.outlineTables o of
-      O.QuadTables _ (O.GlyfTable glyphs) -> glyphs
-      _ -> error "wtf"
+      O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
+      _                                   -> Nothing
     supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
     glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours o
 
