@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, LambdaCase #-}
 module GL.Framebuffer
 ( Framebuffer(..)
 , Attachment(..)
@@ -8,6 +8,7 @@ module GL.Framebuffer
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
 import Foreign.Storable
+import qualified GL.Enum as GL
 import GL.Error
 import GL.Object
 import Graphics.GL.Core41
@@ -26,3 +27,7 @@ instance Bind Framebuffer where
 
 data Attachment
   = Colour Int
+
+instance GL.Enum Attachment where
+  glEnum = \case
+    Colour n -> GL_COLOR_ATTACHMENT0 + fromIntegral n
