@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables #-}
+{-# LANGUAGE DataKinds, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables #-}
 module GL.Texture
 ( Texture(..)
 , Type(..)
@@ -7,6 +7,7 @@ module GL.Texture
 , Filter(..)
 , setMagFilter
 , setMinFilter
+, Parameter
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -65,3 +66,6 @@ setMagFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum targ
 
 setMinFilter :: Has (Lift IO) sig m => Type -> Filter -> m ()
 setMinFilter target = checkingGLError . runLiftIO . glTexParameteri (glEnum target) GL_TEXTURE_MIN_FILTER . fromIntegral . glEnum
+
+
+class (GL.Enum param, GL.Enum val) => Parameter param val | param -> val
