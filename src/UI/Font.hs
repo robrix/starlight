@@ -28,6 +28,7 @@ import qualified Opentype.Fileformat as O
 import Lens.Micro
 import Linear.V2
 import Linear.V4
+import Linear.Vector ((^/))
 import UI.Glyph
 import UI.Path
 
@@ -92,9 +93,10 @@ descent = O.descent . O.hheaTable . _font
 glyphs :: Typeface -> [Char] -> [Glyph]
 glyphs typeface chars = concat (zipWith toGlyph chars (glyphsForChars typeface chars))
   where toGlyph char (Just g) = let vertices = glyphVertices typeface g in
-          [ scaleGlyph (V2 (1 / fromIntegral (unitsPerEm typeface)) (1 / fromIntegral (unitsPerEm typeface))) $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds ((^. _xy) <$> vertices)) ]
+          [ scaleGlyph scale $ Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds ((^. _xy) <$> vertices)) ]
         toGlyph _ Nothing = []
         bounds vertices = Rect (foldr1 (liftA2 min) vertices) (foldr1 (liftA2 max) vertices)
+        scale = 1 ^/ fromIntegral (unitsPerEm typeface)
 
 glyphsForChars :: Typeface -> [Char] -> [Maybe (O.Glyph Int)]
 glyphsForChars (Typeface _ o) chars = map (>>= (glyphs !?) . fromIntegral) glyphIDs
