@@ -283,10 +283,10 @@ handleInput = do
   Impulse accel angular <- execState @Impulse mempty . Window.input $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym _ kc _)) -> case kc of
-      SDL.KeycodeUp    -> modify $ (<> Impulse linear    0)
-      SDL.KeycodeDown  -> modify $ (<> Impulse (-linear) 0)
-      SDL.KeycodeLeft  -> modify $ (<> Impulse 0 angular)
-      SDL.KeycodeRight -> modify $ (<> Impulse 0 (-angular))
+      SDL.KeycodeUp    -> modify (<> Impulse linear    0)
+      SDL.KeycodeDown  -> modify (<> Impulse (-linear) 0)
+      SDL.KeycodeLeft  -> modify (<> Impulse 0 angular)
+      SDL.KeycodeRight -> modify (<> Impulse 0 (-angular))
       _                -> pure ()
     _ -> pure ()
 
