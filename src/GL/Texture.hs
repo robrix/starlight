@@ -80,10 +80,10 @@ data Wrap
 
 instance GL.Enum Wrap where
   glEnum = \case
-    Repeat -> GL_REPEAT
+    Repeat         -> GL_REPEAT
     MirroredRepeat -> GL_MIRRORED_REPEAT
-    ClampToEdge -> GL_CLAMP_TO_EDGE
-    ClampToBorder -> GL_CLAMP_TO_BORDER
+    ClampToEdge    -> GL_CLAMP_TO_EDGE
+    ClampToBorder  -> GL_CLAMP_TO_BORDER
 
 
 setParameter :: (Parameter val param, Has (Lift IO) sig m) => Type -> param -> val -> m ()
