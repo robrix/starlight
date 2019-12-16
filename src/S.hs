@@ -1,8 +1,9 @@
-{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DeriveTraversable, LambdaCase #-}
 module S
 ( S(..)
 , Scope
 , lam
+, unlam
 , close
 ) where
 
@@ -33,15 +34,21 @@ newtype Scope a = Scope { unScope :: S (Maybe a) }
 
 
 lam :: Eq a => a -> S a -> S a
-lam n = Lam . abstract1 n
+lam n = Lam . abstract n
+
+unlam :: Has Empty sig m => a -> S a -> m (a, S a)
+unlam a = \case
+  Lam b -> pure (a, instantiate (pure a) b)
+  _     -> empty
 
 
 close :: Has Empty sig m => S a -> m (S Void)
 close = traverse (const empty)
 
 
-abstract :: (a -> Maybe b) -> S a -> Scope b
-abstract f = Scope . fmap f
+abstract :: Eq a => a -> S a -> Scope a
+abstract a = Scope . fmap (\b -> if a == b then Nothing else Just b)
 
-abstract1 :: Eq a => a -> S a -> Scope a
-abstract1 a = abstract (\b -> if a == b then Nothing else Just b)
+
+instantiate :: S a -> Scope a -> S a
+instantiate k e = unScope e >>= maybe k pure
