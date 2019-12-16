@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, DisambiguateRecordFields, FlexibleContexts, NamedFieldPuns, TypeApplications, TypeOperators #-}
 module UI.Label
-( Label
+( Label(colour, bcolour)
 , label
 , setLabel
 , drawLabel
