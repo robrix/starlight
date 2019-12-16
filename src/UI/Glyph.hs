@@ -35,17 +35,17 @@ data Instance = Instance
 
 
 layoutGlyphs :: [Glyph] -> Run
-layoutGlyphs = (Run <*> bounds) . ($ []) . (\ LayoutState { instances } -> instances) . foldl' go (LayoutState 0 0 id) where
+layoutGlyphs = (Run <*> bounds) . ($ []) . result . foldl' go (LayoutState 0 0 id) where
   go (LayoutState offset i is) g = let di = length (geometry g) in LayoutState
-    { offset    = offset + V2 (advanceWidth g) 0
-    , index     = i + di
-    , instances = (Instance g offset (Range i di) :) . is
+    { offset = offset + V2 (advanceWidth g) 0
+    , index  = i + di
+    , result = (Instance g offset (Range i di) :) . is
     }
 
 data LayoutState = LayoutState
-  { offset    :: {-# UNPACK #-} !(V2 Float)
-  , index     :: {-# UNPACK #-} !Int
-  , instances :: !([Instance] -> [Instance])
+  { offset :: {-# UNPACK #-} !(V2 Float)
+  , index  :: {-# UNPACK #-} !Int
+  , result :: !([Instance] -> [Instance])
   }
 
 data Run = Run
