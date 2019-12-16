@@ -10,6 +10,7 @@ module UI.Glyph
 
 import Data.Foldable (foldl')
 import Geometry.Rect
+import GL.Range
 import Linear.Exts
 import Linear.V2
 import Linear.V3
@@ -29,18 +30,21 @@ scaleGlyph (V2 sx sy) Glyph{..} = Glyph (advanceWidth * sx) (V4 sx sy 1 1 *^ geo
 data Instance = Instance
   { glyph  :: {-# UNPACK #-} !Glyph
   , offset :: {-# UNPACK #-} !(V2 Float)
+  , range  :: {-# UNPACK #-} !Range
   }
 
 
 layoutGlyphs :: [Glyph] -> Run
-layoutGlyphs = (Run <*> bounds) . ($ []) . (\ LayoutState { instances } -> instances) . foldl' go (LayoutState 0 id) where
-  go (LayoutState offset is) g = LayoutState
+layoutGlyphs = (Run <*> bounds) . ($ []) . (\ LayoutState { instances } -> instances) . foldl' go (LayoutState 0 0 id) where
+  go (LayoutState offset i is) g = let di = length (geometry g) in LayoutState
     { offset    = offset + V2 (advanceWidth g) 0
-    , instances = (Instance g offset :) . is
+    , index     = i + di
+    , instances = (Instance g offset (Range i di) :) . is
     }
 
 data LayoutState = LayoutState
   { offset    :: {-# UNPACK #-} !(V2 Float)
+  , index     :: {-# UNPACK #-} !Int
   , instances :: !([Instance] -> [Instance])
   }
 
