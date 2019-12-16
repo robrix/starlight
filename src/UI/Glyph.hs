@@ -39,7 +39,7 @@ layoutGlyphs = (Run <*> bounds) . ($ []) . result . foldl' go (LayoutState 0 0 i
   go (LayoutState offset i is) g = let di = length (geometry g) in LayoutState
     { offset = offset + advanceWidth g
     , index  = i + di
-    , result = (Instance g offset (Range i di) :) . is
+    , result = is . (Instance g offset (Range i di) :)
     }
 
 data LayoutState = LayoutState
