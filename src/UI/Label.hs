@@ -130,7 +130,7 @@ setLabel l@Label { fbuffer, glyphP, glyphB, glyphA } font string = runLiftIO $ d
 
   s <- Window.scale
   let Run instances b = layoutString font string
-      (vertices, ranges) = combineGeometry (geometry . UI.Glyph.glyph <$> instances)
+      vertices = geometry . UI.Glyph.glyph =<< instances
       bounds = clamp b
       Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ clamp b
 
@@ -150,7 +150,7 @@ setLabel l@Label { fbuffer, glyphP, glyphB, glyphA } font string = runLiftIO $ d
 
     bind (Just glyphA)
     let V2 sx sy = windowScale / windowSize
-    for_ (zip instances ranges) $ \ (Instance{ offset }, range) ->
+    for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
         set @"colour" colour
         set @"matrix3"
@@ -214,12 +214,3 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds } = runLiftIO $
       glBlendFunc GL_ONE GL_ONE
       set @"colour" colour
       drawArrays TriangleStrip range
-
-
-combineGeometry :: [[v n]] -> ([v n], [Range])
-combineGeometry = go 0 where
-  go _ [] = ([], [])
-  go prevIndex (geometry : rest) =
-    let count = length geometry
-        (vertices, ranges) = go (prevIndex + count) rest
-    in (geometry <> vertices, Range prevIndex count : ranges)
