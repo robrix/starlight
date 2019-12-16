@@ -119,8 +119,10 @@ setLabel
   -> Font
   -> String
   -> m ()
-setLabel Label { glyphP, glyphB, glyphA } font string = do
+setLabel Label { fbuffer, glyphP, glyphB, glyphA } font string = do
   runLiftIO $ glBlendFunc GL_ONE GL_ONE -- add
+
+  bind (Just fbuffer)
 
   let Run instances _ = layoutString font string
       (vertices, ranges) = combineGeometry (geometry . UI.Glyph.glyph <$> instances)
@@ -162,6 +164,8 @@ drawLabel
   -> m ()
 drawLabel Label { texture, textP, colour, quadA } = do
   runLiftIO (glBlendFunc GL_ZERO GL_SRC_COLOR)
+
+  bind @Framebuffer Nothing
 
   use textP $ do
     set @"rect" $ V4 0 1 1 0
