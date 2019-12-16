@@ -114,7 +114,8 @@ label = do
   pure $ Label { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0 }
 
 setLabel
-  :: ( Has (Lift IO) sig m
+  :: ( HasCallStack
+     , Has (Lift IO) sig m
      , Has Program sig m
      , Has Window.Window sig m
      )
@@ -171,7 +172,8 @@ setLabel l@Label { fbuffer, glyphP, glyphB, glyphA } font string = runLiftIO $ d
 
 
 drawLabel
-  :: ( Has (Lift IO) sig m
+  :: ( HasCallStack
+     , Has (Lift IO) sig m
      , Has Program sig m
      , Has Window.Window sig m
      )
