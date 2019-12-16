@@ -1,4 +1,4 @@
-{-# LANGUAGE DuplicateRecordFields, FlexibleInstances, RecordWildCards #-}
+{-# LANGUAGE DisambiguateRecordFields, DuplicateRecordFields, FlexibleInstances, NamedFieldPuns, RecordWildCards #-}
 module UI.Glyph
 ( Glyph(..)
 , scaleGlyph
@@ -33,8 +33,16 @@ data Instance = Instance
 
 
 layoutGlyphs :: [Glyph] -> Run
-layoutGlyphs = (Run <*> bounds) . ($ []) . snd . foldl' go (0, id) where
-  go (offset, is) g = (offset + V2 (advanceWidth g) 0, (Instance g offset :) . is)
+layoutGlyphs = (Run <*> bounds) . ($ []) . (\ LayoutState { instances } -> instances) . foldl' go (LayoutState 0 id) where
+  go (LayoutState offset is) g = LayoutState
+    { offset    = offset + V2 (advanceWidth g) 0
+    , instances = (Instance g offset :) . is
+    }
+
+data LayoutState = LayoutState
+  { offset    :: {-# UNPACK #-} !(V2 Float)
+  , instances :: !([Instance] -> [Instance])
+  }
 
 data Run = Run
   { instances :: ![Instance]
@@ -49,7 +57,7 @@ instance HasBounds Glyph where
   bounds = bounds_
 
 instance HasBounds Instance where
-  bounds = transformRect . translated . offset <*> bounds . glyph
+  bounds = transformRect . translated . (\ Instance { offset } -> offset) <*> bounds . glyph
 
 instance HasBounds t => HasBounds [t] where
   bounds = maybe (Rect 0 0) getUnion . foldMap (Just . Union . bounds)
