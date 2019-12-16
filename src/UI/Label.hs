@@ -42,6 +42,7 @@ data Label = Label
     '[ "matrix3" '::: M33 Float
      , "colour"  '::: V4 Float ])
   , colour  :: !(Colour Float)
+  , bcolour :: !(Maybe (Colour Float))
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
   , glyphB  :: !(Buffer 'GL.Buffer.Array (V4 Float))
@@ -108,7 +109,7 @@ label = do
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
 
-  pure $ Label { textP, glyphP, colour = black, texture, fbuffer, glyphB, glyphA, quadA }
+  pure $ Label { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA }
 
 setLabel
   :: ( Has (Lift IO) sig m
@@ -162,10 +163,16 @@ drawLabel
      )
   => Label
   -> m ()
-drawLabel Label { texture, textP, colour, quadA } = do
+drawLabel Label { texture, textP, colour, bcolour, quadA } = do
   runLiftIO (glBlendFunc GL_ZERO GL_SRC_COLOR)
 
   bind @Framebuffer Nothing
+
+  case bcolour of
+    Just colour -> do
+      setClearColour colour
+      glClear GL_COLOR_BUFFER_BIT
+    _ -> pure ()
 
   use textP $ do
     set @"rect" $ V4 0 1 1 0
