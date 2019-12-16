@@ -6,6 +6,7 @@ module Geometry.Rect
 , clamp
 , transformRect
 , viewport
+, scissor
 , Union(..)
 ) where
 
@@ -40,6 +41,10 @@ transformRect m (Rect v1 v2) = Rect ((m !* ext v1) ^. _xy) ((m !* ext v2) ^. _xy
 
 viewport :: Has (Lift IO) sig m => Rect Int -> m ()
 viewport r = runLiftIO (glViewport x1 y1 x2 y2) where
+  Rect (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
+
+scissor :: Has (Lift IO) sig m => Rect Int -> m ()
+scissor r = runLiftIO (glScissor x1 y1 x2 y2) where
   Rect (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
 
 
