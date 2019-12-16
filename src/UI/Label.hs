@@ -144,9 +144,8 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runL
 
   use glyphP $ do
     windowScale <- Window.scale
-    windowSize  <- Window.size
 
-    let V2 sx sy = windowScale / windowSize
+    let V2 sx sy = windowScale / fmap fromIntegral size
     for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
         set @"colour" colour
