@@ -70,6 +70,7 @@ library
     Physics.Delta
     Physics.Radians
     Physics.Seconds
+    S
     UI.Carrier.Window
     UI.Colour
     UI.Effect.Window
