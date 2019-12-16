@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveTraversable, LambdaCase #-}
 module S
 ( S(..)
+, Scope
 , Var(..)
 ) where
 
