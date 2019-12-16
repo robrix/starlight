@@ -59,7 +59,6 @@ label
      , Has Finally sig m
      , Has (Lift IO) sig m
      , Has Program sig m
-     , Has Window.Window sig m
      )
   => m Label
 label = do
@@ -97,18 +96,6 @@ label = do
     bind (Just array)
     array <$ configureArray buffer array
 
-  bind (Just texture)
-  setParameter Texture2D MagFilter Nearest
-  setParameter Texture2D MinFilter Nearest
-  scale <- Window.scale
-  size  <- Window.size
-  setParameter Texture2D WrapS ClampToEdge
-  setParameter Texture2D WrapT ClampToEdge
-  setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
-
-  bind (Just fbuffer)
-  attachTexture (GL.Colour 0) texture
-
   pure $ Label { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0 }
 
 setLabel
@@ -121,16 +108,25 @@ setLabel
   -> Font
   -> String
   -> m Label
-setLabel l@Label { fbuffer, glyphP, glyphB, glyphA } font string = runLiftIO $ do
+setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runLiftIO $ do
   glBlendFunc GL_ONE GL_ONE -- add
-
-  bind (Just fbuffer)
 
   s <- Window.scale
   let Run instances b = layoutString font string
       vertices = geometry . UI.Glyph.glyph =<< instances
       bounds = clamp b
       Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ clamp b
+
+  bind (Just texture)
+  setParameter Texture2D MagFilter Nearest
+  setParameter Texture2D MinFilter Nearest
+  scale <- Window.scale
+  setParameter Texture2D WrapS ClampToEdge
+  setParameter Texture2D WrapT ClampToEdge
+  setImageFormat Texture2D RGBA8 (scale *^ (rectMax bounds - rectMin bounds)) RGBA (Packed8888 True)
+
+  bind (Just fbuffer)
+  attachTexture (GL.Colour 0) texture
 
   glViewport x y w h
   glScissor  x y w h
