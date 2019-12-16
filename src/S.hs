@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveTraversable, GADTs, LambdaCase, StandaloneDeriving #-}
+{-# LANGUAGE DataKinds, DeriveTraversable, EmptyCase, GADTs, LambdaCase, StandaloneDeriving #-}
 module S
 ( S(..)
 , Scope
@@ -7,6 +7,7 @@ module S
 , close
 , Nat(..)
 , Fin(..)
+, absurd
 ) where
 
 import Control.Effect.Empty
@@ -64,3 +65,6 @@ data Fin n where
 deriving instance Eq   (Fin n)
 deriving instance Ord  (Fin n)
 deriving instance Show (Fin n)
+
+absurd :: Fin 'Z -> a
+absurd f = case f of {}
