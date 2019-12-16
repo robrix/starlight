@@ -1,15 +1,16 @@
-{-# LANGUAGE DeriveTraversable, LambdaCase #-}
+{-# LANGUAGE DataKinds, DeriveTraversable, GADTs, LambdaCase, StandaloneDeriving #-}
 module S
 ( S(..)
 , Scope
 , lam
 , unlam
 , close
+, Nat(..)
+, Fin(..)
 ) where
 
 import Control.Effect.Empty
 import Control.Monad (ap)
-import Data.Void
 
 data S a
   = Var a
@@ -42,7 +43,7 @@ unlam a = \case
   _     -> empty
 
 
-close :: Has Empty sig m => S a -> m (S Void)
+close :: Has Empty sig m => S a -> m (S (Fin 'Z))
 close = traverse (const empty)
 
 
@@ -52,3 +53,14 @@ abstract a = Scope . fmap (\b -> if a == b then Nothing else Just b)
 
 instantiate :: S a -> Scope a -> S a
 instantiate k e = unScope e >>= maybe k pure
+
+
+data Nat = Z | S Nat
+
+data Fin n where
+  FZ :: Fin ('S n)
+  FS :: Fin n -> Fin ('S n)
+
+deriving instance Eq   (Fin n)
+deriving instance Ord  (Fin n)
+deriving instance Show (Fin n)
