@@ -78,9 +78,6 @@ label = do
   glyphA <- gen1
   glyphB <- gen1
 
-  bind (Just glyphA)
-  configureArray glyphB glyphA
-
   quadA <- do
     let vertices =
           [ V2 (-1) (-1)
@@ -144,11 +141,13 @@ setLabel l@Label { fbuffer, glyphP, glyphB, glyphA } font string = runLiftIO $ d
   realloc glyphB (length vertices) Static Draw
   copy glyphB 0 vertices
 
+  bind (Just glyphA)
+  configureArray glyphB glyphA
+
   use glyphP $ do
     windowScale <- Window.scale
     windowSize  <- Window.size
 
-    bind (Just glyphA)
     let V2 sx sy = windowScale / windowSize
     for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
