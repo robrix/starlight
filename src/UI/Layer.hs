@@ -29,7 +29,7 @@ drawLayer framebuffer background bounds draw = runLiftIO $ do
   s <- W.scale
   let Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ bounds
   glViewport x y w h
-  glScissor x y w h
+  glScissor  x y w h
 
   case background of
     Just colour -> do
