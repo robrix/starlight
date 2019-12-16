@@ -115,7 +115,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runL
       vertices = geometry . UI.Glyph.glyph =<< instances
       bounds = clamp b
       Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ clamp b
-      size = rectMax bounds - rectMin bounds
+      boundsSize = rectMax bounds - rectMin bounds
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest
@@ -123,7 +123,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runL
   scale <- Window.scale
   setParameter Texture2D WrapS ClampToEdge
   setParameter Texture2D WrapT ClampToEdge
-  setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
+  setImageFormat Texture2D RGBA8 (scale *^ boundsSize) RGBA (Packed8888 True)
 
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
@@ -144,7 +144,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runL
   use glyphP $ do
     scale <- Window.scale
 
-    let V2 sx sy = scale / fmap fromIntegral size
+    let V2 sx sy = scale / fmap fromIntegral boundsSize
     for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
         set @"colour" colour
