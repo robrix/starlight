@@ -23,7 +23,6 @@ import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import Graphics.GL.Core41
-import Lens.Micro ((^.))
 import Linear.Exts
 import Linear.Matrix
 import Linear.V2
@@ -181,7 +180,6 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds } = runLiftIO $
   bind @Framebuffer Nothing
 
   s <- Window.scale
-  V2 width height <- Window.size
   let Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ bounds
   glViewport x y w h
   glScissor  x y w h
@@ -193,11 +191,7 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds } = runLiftIO $
     _ -> pure ()
 
   use textP $ do
-    set @"rect" $ V4
-      (fromIntegral @Int (bounds ^. _min . _x) / width)
-      (fromIntegral @Int (bounds ^. _max . _y) / height)
-      (fromIntegral @Int (bounds ^. _max . _x) / width)
-      (fromIntegral @Int (bounds ^. _min . _y) / height)
+    set @"rect" $ V4 0 1 1 0
 
     set @"colour" transparent
 
