@@ -12,6 +12,7 @@ import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import GHC.Stack
+import Geometry.Rect
 import GL.Array
 import GL.Buffer
 import GL.Effect.Program
@@ -31,7 +32,7 @@ import Linear.Vector
 import UI.Colour
 import qualified UI.Effect.Window as Window
 import UI.Font
-import UI.Glyph
+import UI.Glyph (Instance(..), Run(..), geometry)
 
 data Label = Label
   { textP   :: !(GL.Program
@@ -48,6 +49,7 @@ data Label = Label
   , glyphB  :: !(Buffer 'GL.Buffer.Array (V4 Float))
   , glyphA  :: !(Array (V4 Float))
   , quadA   :: !(Array (V2 Float))
+  , bounds  :: !(Rect Int)
   }
 
 
@@ -109,7 +111,7 @@ label = do
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
 
-  pure $ Label { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA }
+  pure $ Label { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0 }
 
 setLabel
   :: ( Has (Lift IO) sig m
@@ -119,14 +121,20 @@ setLabel
   => Label
   -> Font
   -> String
-  -> m ()
-setLabel Label { fbuffer, glyphP, glyphB, glyphA } font string = do
-  runLiftIO $ glBlendFunc GL_ONE GL_ONE -- add
+  -> m Label
+setLabel l@Label { fbuffer, glyphP, glyphB, glyphA } font string = runLiftIO $ do
+  glBlendFunc GL_ONE GL_ONE -- add
 
   bind (Just fbuffer)
 
-  let Run instances _ = layoutString font string
+  s <- Window.scale
+  let Run instances b = layoutString font string
       (vertices, ranges) = combineGeometry (geometry . UI.Glyph.glyph <$> instances)
+      bounds = clamp b
+      Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ clamp b
+
+  glViewport x y w h
+  glScissor  x y w h
 
   setClearColour transparent
   glClear GL_COLOR_BUFFER_BIT
@@ -149,7 +157,9 @@ setLabel Label { fbuffer, glyphP, glyphB, glyphA } font string = do
           !*! scaled     (V3 sx sy 1)
           !*! translated offset
           !*! translated (V2 tx ty * (1 / windowScale))
-        drawArrays Triangles range where
+        drawArrays Triangles range
+
+  pure l { bounds = bounds } where
   jitterPattern
     = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
       , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
@@ -163,13 +173,19 @@ setLabel Label { fbuffer, glyphP, glyphB, glyphA } font string = do
 drawLabel
   :: ( Has (Lift IO) sig m
      , Has Program sig m
+     , Has Window.Window sig m
      )
   => Label
   -> m ()
-drawLabel Label { texture, textP, colour, bcolour, quadA } = do
-  runLiftIO (glBlendFunc GL_ZERO GL_SRC_COLOR)
+drawLabel Label { texture, textP, colour, bcolour, quadA, bounds } = runLiftIO $ do
+  glBlendFunc GL_ZERO GL_SRC_COLOR
 
   bind @Framebuffer Nothing
+
+  s <- Window.scale
+  let Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ bounds
+  glViewport x y w h
+  glScissor  x y w h
 
   case bcolour of
     Just colour -> do
@@ -193,7 +209,7 @@ drawLabel Label { texture, textP, colour, bcolour, quadA } = do
     drawArrays TriangleStrip range
 
     when (opaque colour /= black) $ do
-      runLiftIO $ glBlendFunc GL_ONE GL_ONE
+      glBlendFunc GL_ONE GL_ONE
       set @"colour" colour
       drawArrays TriangleStrip range
 
