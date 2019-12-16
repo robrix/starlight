@@ -29,7 +29,7 @@ scaleGlyph (V2 sx sy) Glyph{..} = Glyph (advanceWidth * sx) (V4 sx sy 1 1 *^ geo
 
 data Instance = Instance
   { glyph  :: {-# UNPACK #-} !Glyph
-  , offset :: {-# UNPACK #-} !(V2 Float)
+  , offset :: {-# UNPACK #-} !Float
   , range  :: {-# UNPACK #-} !Range
   }
 
@@ -37,13 +37,13 @@ data Instance = Instance
 layoutGlyphs :: [Glyph] -> Run
 layoutGlyphs = (Run <*> bounds) . ($ []) . result . foldl' go (LayoutState 0 0 id) where
   go (LayoutState offset i is) g = let di = length (geometry g) in LayoutState
-    { offset = offset + V2 (advanceWidth g) 0
+    { offset = offset + advanceWidth g
     , index  = i + di
     , result = (Instance g offset (Range i di) :) . is
     }
 
 data LayoutState = LayoutState
-  { offset :: {-# UNPACK #-} !(V2 Float)
+  { offset :: {-# UNPACK #-} !Float
   , index  :: {-# UNPACK #-} !Int
   , result :: !([Instance] -> [Instance])
   }
@@ -61,7 +61,7 @@ instance HasBounds Glyph where
   bounds = bounds_
 
 instance HasBounds Instance where
-  bounds = transformRect . translated . (\ Instance { offset } -> offset) <*> bounds . glyph
+  bounds = transformRect . translated . (\ Instance { offset } -> V2 offset 0) <*> bounds . glyph
 
 instance HasBounds t => HasBounds [t] where
   bounds = maybe (Rect 0 0) getUnion . foldMap (Just . Union . bounds)
