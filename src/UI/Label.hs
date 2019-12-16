@@ -116,8 +116,8 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
 
   let Run instances b = layoutString font string
       vertices = geometry . UI.Glyph.glyph =<< instances
-      bounds = clamp b
-      Rect (V2 x y) (V2 w h) = fromIntegral <$> scale *^ clamp b
+      bounds = clamp (size font *^ b)
+      Rect (V2 x y) (V2 w h) = fromIntegral <$> scale *^ bounds
       boundsSize = rectMax bounds - rectMin bounds
 
   bind (Just texture)
@@ -151,8 +151,9 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
         set @"matrix3"
           $   translated (-1)
           !*! scaled     (V3 sx sy 1)
-          !*! translated (V2 offset 0)
+          !*! translated (V2 (offset * size font) 0)
           !*! translated (V2 tx ty * (1 / fromIntegral scale))
+          !*! scaled     (V3 (size font) (size font) 1)
         drawArrays Triangles range
 
   pure l { bounds = bounds } where
