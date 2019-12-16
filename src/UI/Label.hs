@@ -34,11 +34,11 @@ import UI.Font
 import UI.Glyph
 
 data Label = Label
-  { text    :: !(GL.Program
+  { textP   :: !(GL.Program
     '[ "rect"    '::: V4 Float
      , "sampler" '::: TextureUnit
      , "colour"  '::: V4 Float ])
-  , glyph   :: !(GL.Program
+  , glyphP  :: !(GL.Program
     '[ "matrix3" '::: M33 Float
      , "colour"  '::: V4 Float ])
   , colour  :: !(Colour Float)
@@ -62,11 +62,11 @@ label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
-  glyph <- build
+  glyphP <- build
     @'[ "matrix3" '::: M33 Float
       , "colour"  '::: V4 Float ]
     [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
-  text  <- build
+  textP  <- build
     @'[ "rect"    '::: V4 Float
       , "sampler" '::: TextureUnit
       , "colour"  '::: V4 Float ]
@@ -108,7 +108,7 @@ label = do
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
 
-  pure $ Label { text, glyph, colour = black, texture, fbuffer, glyphB, glyphA, quadA }
+  pure $ Label { textP, glyphP, colour = black, texture, fbuffer, glyphB, glyphA, quadA }
 
 setLabel
   :: ( Has (Lift IO) sig m
@@ -119,7 +119,7 @@ setLabel
   -> Font
   -> String
   -> m ()
-setLabel Label { glyph, glyphB, glyphA } font string = do
+setLabel Label { glyphP, glyphB, glyphA } font string = do
   runLiftIO $ glBlendFunc GL_ONE GL_ONE -- add
 
   let Run instances _ = layoutString font string
@@ -129,7 +129,7 @@ setLabel Label { glyph, glyphB, glyphA } font string = do
   realloc glyphB (length vertices) Static Draw
   copy glyphB 0 vertices
 
-  use glyph $ do
+  use glyphP $ do
     windowScale <- Window.scale
     windowSize  <- Window.size
 
@@ -160,10 +160,10 @@ drawLabel
      )
   => Label
   -> m ()
-drawLabel Label { texture, text, colour, quadA } = do
+drawLabel Label { texture, textP, colour, quadA } = do
   runLiftIO (glBlendFunc GL_ZERO GL_SRC_COLOR)
 
-  use text $ do
+  use textP $ do
     set @"rect" $ V4 0 1 1 0
 
     set @"colour" transparent
