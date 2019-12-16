@@ -24,6 +24,7 @@ import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import Graphics.GL.Core41
+import Lens.Micro ((^.))
 import Linear.Exts
 import Linear.Matrix
 import Linear.V2
@@ -190,7 +191,13 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
     _ -> pure ()
 
   use textP $ do
-    set @"rect" $ V4 0 1 1 0
+    let b = fromIntegral <$> bounds
+        V2 w h = rectMax b - rectMin b
+    set @"rect" $ V4
+      (b ^. _min . _x / w)
+      (b ^. _max . _y / h)
+      (b ^. _max . _x / w)
+      (b ^. _min . _y / h)
 
     set @"colour" transparent
 
