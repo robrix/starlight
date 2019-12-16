@@ -151,9 +151,9 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
         set @"matrix3"
           $   translated (-1)
           !*! scaled     (V3 sx sy 1)
-          !*! translated (V2 (offset * size font) 0)
           !*! translated (V2 tx ty * (1 / fromIntegral scale))
           !*! scaled     (V3 (size font) (size font) 1)
+          !*! translated (V2 offset 0)
         drawArrays Triangles range
 
   pure l { bounds = bounds } where
