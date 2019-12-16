@@ -10,7 +10,6 @@ import Control.Carrier.Time
 import Control.Effect.Lens ((+=))
 import qualified Control.Effect.Lens as Lens
 import Control.Effect.Lift
-import Control.Monad
 import Data.Foldable
 import Data.Function (fix)
 import Data.Time.Clock (UTCTime)
@@ -25,13 +24,9 @@ import GL.Framebuffer as GL
 import GL.Object
 import GL.Scalar
 import GL.Shader
-import GL.Texture
-import GL.TextureUnit
 import Graphics.GL.Core41
-import Lens.Micro (Lens', (^.), lens)
+import Lens.Micro (Lens', lens)
 import Linear.Affine
-import Linear.Exts
-import Linear.Matrix as Linear
 import Linear.V (Size)
 import Linear.V2 as Linear
 import Linear.V3 as Linear
@@ -43,36 +38,25 @@ import Physics.Seconds
 import qualified SDL
 import UI.Colour
 import UI.Font as Font
-import UI.Glyph
 import UI.Layer
 import qualified UI.Carrier.Window as Window
-
--- import qualified Codec.Picture as C
--- import qualified Codec.Picture.Types as C
--- import qualified Data.ByteString.Lazy as B
--- import qualified Foreign.Marshal.Alloc as A
--- import Foreign.Storable
--- import System.CPUTime
 
 main :: HasCallStack => IO ()
 main = do
   tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 288
-  let Run instances instanceBounds = Font.layoutString tahoma "hello"
-      (shipVertices, shipRanges) = combineGeometry
+  let (shipVertices, shipRanges) = combineGeometry
         [ [ V3 1      0      0
           , V3 0      (-0.5) 0
           , V3 (-0.5) 0      0
           , V3 0      0.5    0 :: V3 Float
           ]
         ]
-      (screenQuadVertices, screenQuadRanges) = combineGeometry
-        [ [ V2 (-1) (-1)
-          , V2   1  (-1)
-          , V2 (-1)   1
-          , V2   1    1  :: V2 Float
-          ]
+      screenQuadVertices =
+        [ V2 (-1) (-1)
+        , V2   1  (-1)
+        , V2 (-1)   1
+        , V2   1    1  :: V2 Float
         ]
-      (glyphVertices, glyphRanges) = combineGeometry (geometry . glyph <$> instances)
 
   Window.runWindow "Starlight" (V2 1024 768)
     . runFinally
@@ -81,15 +65,6 @@ main = do
     . evalState PlayerState { position = 0, velocity = 0, rotation = 0 }
     $ (\ m -> now >>= \ now -> evalState now m)
     $ do
-      glyph <- build
-        @'[ "matrix3" '::: M33 Float
-          , "colour"  '::: V4 Float ]
-        [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
-      text  <- build
-        @'[ "rect"    '::: V4 Float
-          , "sampler" '::: TextureUnit
-          , "colour"  '::: V4 Float ]
-        [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
       stars <- build
         @'[ "resolution" '::: V3 Float
           , "origin"     '::: Point V2 Float ]
@@ -101,95 +76,13 @@ main = do
           , "rotation"    '::: Radians Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
-      texture     <- gen1 @(Texture 'Texture2D)
-      framebuffer <- gen1
-
-      (_, glyphArray)      <- loadVertices glyphVertices
       (_, screenQuadArray) <- loadVertices screenQuadVertices
       (_, shipArray)       <- loadVertices shipVertices
-
-      bind (Just texture)
-      setParameter Texture2D MagFilter Nearest
-      setParameter Texture2D MinFilter Nearest
-      scale <- Window.scale
-      size@(V2 width height) <- Window.size
-      setParameter Texture2D WrapS ClampToEdge
-      setParameter Texture2D WrapT ClampToEdge
-      setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
-
-      bind (Just framebuffer)
-      attachTexture (GL.Colour 0) texture
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
 
-      let drawGlyphs = do
-            glBlendFunc GL_ONE GL_ONE -- add
-
-            use glyph $ do
-
-              -- set @"colour" white
-              -- set @"matrix3" identity
-              -- bind screenQuadArray $
-              --   traverse_ (drawArrays TriangleStrip) (arrayRanges screenQuadVertices)
-              windowScale <- Window.scale
-              windowSize  <- Window.size
-
-              bind (Just glyphArray)
-              let V2 sx sy = windowScale / windowSize
-              for_ (zip instances glyphRanges) $ \ (Instance{ offset }, range) ->
-                for_ jitterPattern $ \ (glyphColour, V2 tx ty) -> do
-                  set @"colour" glyphColour
-                  set @"matrix3"
-                    $   translated (-1)
-                    !*! scaled     (V3 sx sy 1)
-                    !*! translated offset
-                    !*! translated (V2 tx ty * (1 / windowScale))
-                  drawArrays Triangles range
-
-              -- let w = scale * fromIntegral width
-              --     h = scale * fromIntegral height
-              -- A.allocaBytes (4 * w * h) $ \ pixels -> do
-              --   bind texture $ do
-              --     checkingGLError $ glGetTexImage GL_TEXTURE_2D 0 GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-              --     checkingGLError $ glBindFramebuffer GL_READ_FRAMEBUFFER (unFramebuffer framebuffer)
-              --     checkingGLError $ glReadPixels 0 0 (scale * width) (scale * height) GL_RGBA GL_UNSIGNED_INT_8_8_8_8_REV pixels
-              --     image <- C.withImage w h $ \ x y -> do
-              --       let pixel = pixels `plusPtr` (w * y + x)
-              --       C.unpackPixel <$> peek pixel :: IO C.PixelRGBA8
-              --     time <- getCPUTime
-              --     B.writeFile ("test-" ++ show time ++ ".png") (C.encodePng image)
-
-          drawText = do
-            glBlendFunc GL_ZERO GL_SRC_COLOR
-
-            -- print instanceBounds
-
-            use text $ do
-              set @"rect" $ V4
-                (fromIntegral @Int (floor   (instanceBounds ^. _min . _x)) / fromIntegral width)
-                (fromIntegral @Int (ceiling (instanceBounds ^. _max . _y)) / fromIntegral height)
-                (fromIntegral @Int (ceiling (instanceBounds ^. _max . _x)) / fromIntegral width)
-                (fromIntegral @Int (floor   (instanceBounds ^. _min . _y)) / fromIntegral height)
-              -- set @"rect" (V4 0 0 1 1)
-              set @"colour" transparent
-              -- set @"colour" black
-              let textureUnit = TextureUnit 0
-              setActiveTexture textureUnit
-              bind (Just texture)
-
-              set @"sampler" textureUnit
-
-              bind (Just screenQuadArray)
-
-              traverse_ (drawArrays TriangleStrip) screenQuadRanges
-
-              when (opaque textColour /= black) $ do
-                glBlendFunc GL_ONE GL_ONE
-                set @"colour" textColour
-                traverse_ (drawArrays TriangleStrip) screenQuadRanges
-
-          drawCanvas = do
+      let drawCanvas = do
             windowScale <- Window.scale
             windowSize <- Window.size
             let scale = windowScale / windowSize
@@ -197,11 +90,13 @@ main = do
 
             PlayerState { position, velocity, rotation } <- handleInput
 
+            bind (Just screenQuadArray)
+
             use stars $ do
               set @"resolution" (V3 width height 8)
               set @"origin" position
 
-              traverse_ (drawArrays TriangleStrip) screenQuadRanges
+              drawArrays TriangleStrip (Range 0 4)
 
             bind (Just shipArray)
 
@@ -217,24 +112,9 @@ main = do
 
       fix $ \ loop -> do
         rect <- Rect 0 <$> Window.size
-        res <- runEmpty $ sequence_
-          [ drawLayer (Just framebuffer) (Just transparent) rect drawGlyphs
-          , drawLayer Nothing (Just black) rect drawText
-          , drawLayer Nothing (Just black) rect drawCanvas
-          ]
+        res <- runEmpty $ drawLayer Nothing (Just black) rect drawCanvas
         put =<< now
         maybe (pure ()) (const (Window.swap >> loop)) res
-
-  where jitterPattern
-          = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
-            , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
-            , (green, V2 ( 3 / 12.0) (-1 / 12.0))
-            , (green, V2 ( 5 / 12.0) ( 5 / 12.0))
-            , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
-            , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
-            ]
-
-        textColour = white
 
 data PlayerState = PlayerState
   { position :: !(Point V2 Float)
