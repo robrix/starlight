@@ -130,8 +130,8 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
 
-  viewport $ scale *^ bounds
-  scissor  $ scale *^ bounds
+  viewport $ scale *^ Rect 0 boundsSize
+  scissor  $ scale *^ Rect 0 boundsSize
 
   setClearColour transparent
   glClear GL_COLOR_BUFFER_BIT
@@ -179,8 +179,9 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
 
   bind @Framebuffer Nothing
 
-  viewport $ scale *^ bounds
-  scissor  $ scale *^ bounds
+  let boundsSize = rectMax bounds - rectMin bounds
+  viewport $ scale *^ Rect 0 boundsSize
+  scissor  $ scale *^ Rect 0 boundsSize
 
   case bcolour of
     Just colour -> do
