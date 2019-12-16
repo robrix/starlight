@@ -10,7 +10,6 @@ import Control.Carrier.Time
 import Control.Effect.Lens ((+=))
 import qualified Control.Effect.Lens as Lens
 import Control.Effect.Lift
-import Data.Foldable
 import Data.Function (fix)
 import Data.Time.Clock (UTCTime)
 import Foreign.Storable (Storable)
@@ -44,13 +43,13 @@ import qualified UI.Carrier.Window as Window
 main :: HasCallStack => IO ()
 main = do
   tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 288
-  let (shipVertices, shipRanges) = combineGeometry
-        [ [ V3 1      0      0
-          , V3 0      (-0.5) 0
-          , V3 (-0.5) 0      0
-          , V3 0      0.5    0 :: V3 Float
-          ]
+  let shipVertices =
+        [ V3 1      0      0
+        , V3 0      (-0.5) 0
+        , V3 (-0.5) 0      0
+        , V3 0      0.5    0 :: V3 Float
         ]
+      shipRange = Range 0 4
       screenQuadVertices =
         [ V2 (-1) (-1)
         , V2   1  (-1)
@@ -106,7 +105,7 @@ main = do
               set @"scale" (scale * 50)
               set @"rotation" rotation
 
-              traverse_ (drawArrays LineLoop) shipRanges
+              drawArrays LineLoop shipRange
 
             _position += getDelta velocity
 
@@ -160,14 +159,6 @@ handleInput = do
 
   get
 
-
-combineGeometry :: [[v n]] -> ([v n], [Range])
-combineGeometry = go 0
-  where go _ [] = ([], [])
-        go prevIndex (geometry : rest) =
-          let count = length geometry
-              (vertices, ranges) = go (prevIndex + count) rest
-          in (geometry <> vertices, Range prevIndex count : ranges)
 
 loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Buffer 'GL.Buffer.Array (v n), Array (v n))
 loadVertices vertices = do
