@@ -142,9 +142,9 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runL
   configureArray glyphB glyphA
 
   use glyphP $ do
-    windowScale <- Window.scale
+    scale <- Window.scale
 
-    let V2 sx sy = windowScale / fmap fromIntegral size
+    let V2 sx sy = scale / fmap fromIntegral size
     for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
         set @"colour" colour
@@ -152,7 +152,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runL
           $   translated (-1)
           !*! scaled     (V3 sx sy 1)
           !*! translated offset
-          !*! translated (V2 tx ty * (1 / windowScale))
+          !*! translated (V2 tx ty * (1 / scale))
         drawArrays Triangles range
 
   pure l { bounds = bounds } where
