@@ -37,6 +37,7 @@ import Physics.Seconds
 import qualified SDL
 import UI.Colour
 import UI.Font as Font
+import UI.Label
 import UI.Layer
 import qualified UI.Carrier.Window as Window
 
@@ -75,11 +76,15 @@ main = do
           , "rotation"    '::: Radians Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
+      label <- label
+
       (_, screenQuadArray) <- loadVertices screenQuadVertices
       (_, shipArray)       <- loadVertices shipVertices
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
+
+      label <- setLabel label { colour = white } tahoma "hello"
 
       let drawCanvas = do
             windowScale <- Window.scale
@@ -112,6 +117,7 @@ main = do
       fix $ \ loop -> do
         rect <- Rect 0 <$> Window.size
         res <- runEmpty $ drawLayer Nothing (Just black) rect drawCanvas
+        drawLabel label
         put =<< now
         maybe (pure ()) (const (Window.swap >> loop)) res
 
