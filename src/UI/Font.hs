@@ -22,7 +22,6 @@ import Geometry.Triangle
 import qualified Opentype.Fileformat as O
 import Lens.Micro
 import Linear.V2
-import Linear.Vector ((^/))
 import UI.Glyph
 import UI.Path
 
@@ -45,9 +44,8 @@ readTypeface = fmap toTypeface . sendM . O.readOTFile where
       glyphTable <- glyphTable
       g <- glyphTable !? fromIntegral glyphID
       let vertices = glyphVertices g
-      pure $! scaleGlyph scale $ Glyph (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
+      pure $! Glyph (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
     cmap = find supportedPlatform (O.getCmaps (O.cmapTable o))
-    scale = 1 ^/ fromIntegral (O.unitsPerEm (O.headTable o))
     glyphTable = case O.outlineTables o of
       O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
       _                                   -> Nothing
