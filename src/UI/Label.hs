@@ -118,7 +118,6 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
   let Run instances b = layoutString font string
       vertices = geometry . UI.Glyph.glyph =<< instances
       bounds = clamp (size font *^ b)
-      Rect (V2 x y) (V2 w h) = fromIntegral <$> scale *^ bounds
       boundsSize = rectMax bounds - rectMin bounds
 
   bind (Just texture)
@@ -131,8 +130,8 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
 
-  glViewport x y w h
-  glScissor  x y w h
+  viewport $ scale *^ bounds
+  scissor  $ scale *^ bounds
 
   setClearColour transparent
   glClear GL_COLOR_BUFFER_BIT
@@ -180,9 +179,8 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
 
   bind @Framebuffer Nothing
 
-  let Rect (V2 x y) (V2 w h) = fromIntegral <$> scale *^ bounds
-  glViewport x y w h
-  glScissor  x y w h
+  viewport $ scale *^ bounds
+  scissor  $ scale *^ bounds
 
   case bcolour of
     Just colour -> do
