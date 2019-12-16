@@ -2,6 +2,7 @@
 module UI.Font
 ( Typeface(name)
 , Font(..)
+, fontScale
 , readTypeface
 , readFontOfSize
 , layoutString
@@ -28,6 +29,10 @@ import UI.Path
 data Typeface = Typeface { name :: Maybe String, allGlyphs :: Map.Map Char (Maybe Glyph), _font :: O.OpentypeFont }
 
 data Font = Font { face :: Typeface, size :: Float }
+
+fontScale :: Font -> Float
+fontScale (Font (Typeface _ _ o) size) = size * scale where
+  scale = 1 / fromIntegral (O.unitsPerEm (O.headTable o))
 
 
 readTypeface :: Has (Lift IO) sig m => FilePath -> m Typeface
