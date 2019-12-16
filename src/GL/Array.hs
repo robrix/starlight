@@ -3,7 +3,6 @@ module GL.Array
 ( Array(..)
 , configureArray
 , Mode(..)
-, Range(..)
 , drawArrays
 ) where
 

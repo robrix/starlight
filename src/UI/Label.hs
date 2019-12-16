@@ -19,6 +19,7 @@ import GL.Effect.Program
 import GL.Framebuffer as GL
 import GL.Object
 import qualified GL.Program as GL
+import GL.Range (Range(Range))
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit

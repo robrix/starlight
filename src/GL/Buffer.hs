@@ -9,7 +9,6 @@ module GL.Buffer
 , Update(..)
 , Usage(..)
 , hintToGLEnum
-, Range(..)
 ) where
 
 import Control.Monad.IO.Class.Lift

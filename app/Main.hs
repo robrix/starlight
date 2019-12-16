@@ -21,6 +21,7 @@ import GL.Buffer
 import GL.Carrier.Program.Live
 import GL.Framebuffer as GL
 import GL.Object
+import GL.Range
 import GL.Scalar
 import GL.Shader
 import Graphics.GL.Core41
