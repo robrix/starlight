@@ -3,9 +3,12 @@ module S
 ( S(..)
 , Scope
 , lam
+, close
 ) where
 
+import Control.Effect.Empty
 import Control.Monad (ap)
+import Data.Void
 
 data S a
   = Var a
@@ -31,6 +34,10 @@ newtype Scope a = Scope { unScope :: S (Maybe a) }
 
 lam :: Eq a => a -> S a -> S a
 lam n = Lam . abstract1 n
+
+
+close :: Has Empty sig m => S a -> m (S Void)
+close = traverse (const empty)
 
 
 abstract :: (a -> Maybe b) -> S a -> Scope b
