@@ -51,6 +51,7 @@ data Label = Label
   , glyphA  :: !(Array (V4 Float))
   , quadA   :: !(Array (V2 Float))
   , bounds  :: !(Rect Int)
+  , scale   :: !Int
   }
 
 
@@ -59,6 +60,7 @@ label
      , Has Finally sig m
      , Has (Lift IO) sig m
      , Has Program sig m
+     , Has Window.Window sig m
      )
   => m Label
 label = do
@@ -96,32 +98,31 @@ label = do
     bind (Just array)
     array <$ configureArray buffer array
 
-  pure $ Label { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0 }
+  scale <- Window.scale
+
+  pure $ Label { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale }
 
 setLabel
   :: ( HasCallStack
      , Has (Lift IO) sig m
      , Has Program sig m
-     , Has Window.Window sig m
      )
   => Label
   -> Font
   -> String
   -> m Label
-setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runLiftIO $ do
+setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string = runLiftIO $ do
   glBlendFunc GL_ONE GL_ONE -- add
 
-  s <- Window.scale
   let Run instances b = layoutString font string
       vertices = geometry . UI.Glyph.glyph =<< instances
       bounds = clamp b
-      Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ clamp b
+      Rect (V2 x y) (V2 w h) = fromIntegral <$> scale *^ clamp b
       boundsSize = rectMax bounds - rectMin bounds
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest
   setParameter Texture2D MinFilter Nearest
-  scale <- Window.scale
   setParameter Texture2D WrapS ClampToEdge
   setParameter Texture2D WrapT ClampToEdge
   setImageFormat Texture2D RGBA8 (scale *^ boundsSize) RGBA (Packed8888 True)
@@ -143,9 +144,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runL
   configureArray glyphB glyphA
 
   use glyphP $ do
-    scale <- Window.scale
-
-    let V2 sx sy = scale / fmap fromIntegral boundsSize
+    let V2 sx sy = fromIntegral scale / fmap fromIntegral boundsSize
     for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
         set @"colour" colour
@@ -153,7 +152,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA } font string = runL
           $   translated (-1)
           !*! scaled     (V3 sx sy 1)
           !*! translated (V2 offset 0)
-          !*! translated (V2 tx ty * (1 / scale))
+          !*! translated (V2 tx ty * (1 / fromIntegral scale))
         drawArrays Triangles range
 
   pure l { bounds = bounds } where
@@ -171,17 +170,15 @@ drawLabel
   :: ( HasCallStack
      , Has (Lift IO) sig m
      , Has Program sig m
-     , Has Window.Window sig m
      )
   => Label
   -> m ()
-drawLabel Label { texture, textP, colour, bcolour, quadA, bounds } = runLiftIO $ do
+drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runLiftIO $ do
   glBlendFunc GL_ZERO GL_SRC_COLOR
 
   bind @Framebuffer Nothing
 
-  s <- Window.scale
-  let Rect (V2 x y) (V2 w h) = fromIntegral <$> s *^ bounds
+  let Rect (V2 x y) (V2 w h) = fromIntegral <$> scale *^ bounds
   glViewport x y w h
   glScissor  x y w h
 
