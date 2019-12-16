@@ -128,6 +128,9 @@ setLabel Label { fbuffer, glyphP, glyphB, glyphA } font string = do
   let Run instances _ = layoutString font string
       (vertices, ranges) = combineGeometry (geometry . UI.Glyph.glyph <$> instances)
 
+  setClearColour transparent
+  glClear GL_COLOR_BUFFER_BIT
+
   bind (Just glyphB)
   realloc glyphB (length vertices) Static Draw
   copy glyphB 0 vertices
