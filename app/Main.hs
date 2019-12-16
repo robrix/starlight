@@ -64,11 +64,6 @@ main = do
           , V3 (-0.5) 0      0
           , V3 0      0.5    0 :: V3 Float
           ]
-        -- , [ V3 0 1 0
-        --   , V3 (-1) 0 0
-        --   , V3 0 (-1) 0
-        --   , V3 1 0 0
-        --   ]
         ]
       (screenQuadVertices, screenQuadRanges) = combineGeometry
         [ [ V2 (-1) (-1)
