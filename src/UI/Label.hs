@@ -117,21 +117,20 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
 
   let Run instances b = layoutString font string
       vertices = geometry . UI.Glyph.glyph =<< instances
-      bounds = clamp (fontScale font *^ b)
-      boundsSize = rectMax bounds - rectMin bounds
+      bounds = let b' = clamp (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest
   setParameter Texture2D MinFilter Nearest
   setParameter Texture2D WrapS ClampToEdge
   setParameter Texture2D WrapT ClampToEdge
-  setImageFormat Texture2D RGBA8 (scale *^ boundsSize) RGBA (Packed8888 True)
+  setImageFormat Texture2D RGBA8 (scale *^ rectMax bounds) RGBA (Packed8888 True)
 
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
 
-  viewport $ scale *^ Rect 0 boundsSize
-  scissor  $ scale *^ Rect 0 boundsSize
+  viewport $ scale *^ bounds
+  scissor  $ scale *^ bounds
 
   setClearColour transparent
   glClear GL_COLOR_BUFFER_BIT
@@ -144,7 +143,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
   configureArray glyphB glyphA
 
   use glyphP $ do
-    let V2 sx sy = fromIntegral scale / fmap fromIntegral boundsSize
+    let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
     for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
         set @"colour" colour
@@ -179,9 +178,8 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
 
   bind @Framebuffer Nothing
 
-  let boundsSize = rectMax bounds - rectMin bounds
-  viewport $ scale *^ Rect 0 boundsSize
-  scissor  $ scale *^ Rect 0 boundsSize
+  viewport $ scale *^ bounds
+  scissor  $ scale *^ bounds
 
   case bcolour of
     Just colour -> do
