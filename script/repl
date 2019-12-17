@@ -6,8 +6,6 @@ set -e
 
 cd $(dirname "$0")/..
 
-repl_builddir=dist-repl
+cabal build all --only-dependencies
 
-cabal build --builddir="$repl_builddir" all --only-dependencies
-
-cabal exec --builddir="$repl_builddir" env -- -u GHC_ENVIRONMENT ghci -ghci-script=.ghci.starlight $(script/ghci-flags --builddir "$repl_builddir") -no-ignore-dot-ghci $@
+cabal exec env -- -u GHC_ENVIRONMENT ghci -ghci-script=.ghci.starlight $(script/ghci-flags) -no-ignore-dot-ghci $@
