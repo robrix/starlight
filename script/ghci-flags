@@ -7,7 +7,6 @@ cd $(dirname "$0")/..
 
 root="$(pwd)"
 ghc_version="$(ghc --numeric-version)"
-package_version="starlight-0.0.0.0"
 
 if [ "$1" == "--builddir" ]; then
   repl_builddir="$2"
@@ -19,16 +18,16 @@ fi
 echo "-O0"
 echo "-ignore-dot-ghci"
 
-echo "-outputdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/$package_version/build"
-echo "-odir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/$package_version/build"
-echo "-hidir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/$package_version/build"
-echo "-stubdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/$package_version/build"
+echo "-outputdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
+echo "-odir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
+echo "-hidir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
+echo "-stubdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
 
 echo "-i$root/app"
 echo "-i$root/src"
 
 echo "-optP-include"
-echo "-optP$root/$repl_builddir/build/x86_64-osx/ghc-$ghc_version/$package_version/build/autogen/cabal_macros.h"
+echo "-optP$root/$repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl/autogen/cabal_macros.h"
 
 echo "-hide-all-packages"
 
