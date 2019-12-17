@@ -91,7 +91,6 @@ library
     , opentype
     , sdl2
     , text
-    , vector
 
 executable starlight
   import:              common
@@ -100,21 +99,13 @@ executable starlight
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
-    , bytestring
-    , containers
-    , directory
     , fused-effects
     , gl
-    , JuicyPixels
     , linear
     , microlens
-    , opentype
     , sdl2
     , starlight
-    , text
     , time
-    , transformers
-    , vector
 
 source-repository head
   type:     git
