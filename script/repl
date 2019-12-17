@@ -6,6 +6,6 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-cabal build all --only-dependencies
+cabal v2-build all --only-dependencies
 
-cabal exec env -- -u GHC_ENVIRONMENT ghci -ghci-script=.ghci.starlight $(script/ghci-flags) -no-ignore-dot-ghci $@
+cabal v2-exec env -- -u GHC_ENVIRONMENT ghci -ghci-script=.ghci.starlight $(script/ghci-flags) -no-ignore-dot-ghci $@
