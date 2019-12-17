@@ -24,5 +24,6 @@
 :seti -Wno-safe
 :seti -Wno-unsafe
 :seti -Wno-star-is-type
+:seti -Wno-missing-deriving-strategies
 
 :load Main
