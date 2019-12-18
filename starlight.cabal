@@ -71,6 +71,7 @@ library
     Physics.Radians
     Physics.Seconds
     S
+    Starlight.Body
     UI.Carrier.Window
     UI.Colour
     UI.Effect.Window
