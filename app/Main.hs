@@ -14,7 +14,6 @@ import Control.Monad (when)
 import Data.Coerce (coerce)
 import Data.Function (fix)
 import qualified Data.IntSet as IntSet
-import Data.Time.Clock (UTCTime)
 import Foreign.Storable (Storable)
 import Geometry.Rect
 import GHC.Stack
@@ -92,12 +91,34 @@ main = do
       label <- setLabel label { colour = white } tahoma "hello"
 
       let drawCanvas = do
+            input <- input
+            t <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
+
+            let thrust  = t *  0.01
+                angular = t *^ pi
+
+            when (pressed SDL.KeycodeUp input) $ do
+              rotation <- Lens.use _rotation
+              _velocity += Delta (P (cartesian2 rotation thrust))
+            when (pressed SDL.KeycodeDown input) $ do
+              rotation <- Lens.use _rotation
+              velocity <- Lens.use _velocity
+              let angle = fst (polar2 (negated (unP (getDelta velocity))))
+                  delta = rotation - angle
+                  (+-=) = if delta < 0 then (+=) else (-=)
+              _rotation +-= min angular (abs delta)
+
+            when (pressed SDL.KeycodeLeft  input) $
+              _rotation += angular
+            when (pressed SDL.KeycodeRight input) $
+              _rotation -= angular
+
             windowScale <- Window.scale
             windowSize <- Window.size
             let scale = windowScale / windowSize
                 V2 width height = windowSize
 
-            PlayerState { position, velocity, rotation } <- handleInput
+            PlayerState { position, velocity, rotation } <- get
 
             bind (Just screenQuadArray)
 
@@ -143,45 +164,19 @@ _rotation :: Lens' PlayerState (Radians Float)
 _rotation = lens rotation (\ s r -> s { rotation = r })
 
 
-handleInput
+input
   :: ( Has Empty sig m
      , Has (State Input) sig m
-     , Has (State PlayerState) sig m
-     , Has (State UTCTime) sig m
-     , Has Time sig m
      , Has Window.Window sig m
      )
-  => m PlayerState
-handleInput = do
-  t <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
-
-  let thrust  = t *  0.01
-      angular = t *^ pi
-
+  => m Input
+input = do
   Window.input $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ pressed _ (SDL.Keysym _ kc _)) -> case pressed of
       SDL.Pressed  -> press   kc
       SDL.Released -> release kc
     _ -> pure ()
-
-  input <- get @Input
-  when (pressed SDL.KeycodeUp input) $ do
-    rotation <- Lens.use _rotation
-    _velocity += Delta (P (cartesian2 rotation thrust))
-  when (pressed SDL.KeycodeDown input) $ do
-    rotation <- Lens.use _rotation
-    velocity <- Lens.use _velocity
-    let angle = fst (polar2 (negated (unP (getDelta velocity))))
-        delta = rotation - angle
-        (+-=) = if delta < 0 then (+=) else (-=)
-    _rotation +-= min angular (abs delta)
-
-  when (pressed SDL.KeycodeLeft  input) $
-    _rotation += angular
-  when (pressed SDL.KeycodeRight input) $
-    _rotation -= angular
-
   get
 
 
