@@ -7,10 +7,13 @@ import Control.Carrier.Empty.Maybe
 import Control.Carrier.Finally
 import Control.Carrier.State.Strict
 import Control.Carrier.Time
-import Control.Effect.Lens ((+=))
+import Control.Effect.Lens ((+=), (-=))
 import qualified Control.Effect.Lens as Lens
 import Control.Effect.Lift
+import Control.Monad (when)
+import Data.Coerce (coerce)
 import Data.Function (fix)
+import qualified Data.IntSet as IntSet
 import Data.Time.Clock (UTCTime)
 import Foreign.Storable (Storable)
 import Geometry.Rect
@@ -63,6 +66,7 @@ main = do
     . runFinally
     . runTime
     . runProgram
+    . evalState @Input mempty
     . evalState PlayerState { position = 0, velocity = 0, rotation = 0 }
     $ (\ m -> now >>= \ now -> evalState now m)
     $ do
@@ -141,6 +145,7 @@ _rotation = lens rotation (\ s r -> s { rotation = r })
 
 handleInput
   :: ( Has Empty sig m
+     , Has (State Input) sig m
      , Has (State PlayerState) sig m
      , Has (State UTCTime) sig m
      , Has Time sig m
@@ -155,16 +160,38 @@ handleInput = do
 
   Window.input $ \ event -> case SDL.eventPayload event of
     SDL.QuitEvent -> empty
-    SDL.KeyboardEvent (SDL.KeyboardEventData _ _ _ (SDL.Keysym _ kc _)) -> case kc of
-      SDL.KeycodeUp    -> do
-        rotation <- Lens.use _rotation
-        _velocity += Delta (P (cartesian2 rotation thrust))
-      SDL.KeycodeLeft  -> _rotation += angular
-      SDL.KeycodeRight -> _rotation += -angular
-      _                -> pure ()
+    SDL.KeyboardEvent (SDL.KeyboardEventData _ pressed _ (SDL.Keysym _ kc _)) -> case pressed of
+      SDL.Pressed  -> press   kc
+      SDL.Released -> release kc
     _ -> pure ()
 
+  input <- get @Input
+  when (pressed SDL.KeycodeUp input) $ do
+    rotation <- Lens.use _rotation
+    _velocity += Delta (P (cartesian2 rotation thrust))
+  when (pressed SDL.KeycodeLeft  input) $
+    _rotation += angular
+  when (pressed SDL.KeycodeRight input) $
+    _rotation -= angular
+
   get
+
+
+newtype Input = Input
+  { unInput :: IntSet.IntSet
+  }
+  deriving (Monoid, Semigroup)
+
+inInput :: (IntSet.IntSet -> IntSet.IntSet) -> Input -> Input
+inInput = coerce
+
+press, release :: Has (State Input) sig m => SDL.Keycode -> m ()
+press   = modify . inInput . IntSet.insert . fromIntegral . SDL.unwrapKeycode
+release = modify . inInput . IntSet.delete . fromIntegral . SDL.unwrapKeycode
+
+pressed :: SDL.Keycode -> Input -> Bool
+pressed code = IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput
+
 
 
 loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Buffer 'GL.Buffer.Array (v n), Array (v n))
