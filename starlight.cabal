@@ -104,6 +104,7 @@ executable starlight
   build-depends:
       base
     , fused-effects
+    , fused-effects-lens
     , gl
     , linear
     , microlens
