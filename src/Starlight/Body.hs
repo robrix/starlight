@@ -1,2 +1,11 @@
 module Starlight.Body
-() where
+( Orbit(..)
+) where
+
+data Orbit = Orbit
+  { eccentricity             :: Float
+  , semimajor                :: Float
+  , inclination              :: Float
+  , longitudeOfAscendingNode :: Float
+  , period                   :: Float
+  }
