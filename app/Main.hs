@@ -13,6 +13,7 @@ import Control.Effect.Lift
 import Control.Monad (when)
 import Data.Coerce (coerce)
 import Data.Function (fix)
+import Data.Maybe (isJust)
 import qualified Data.IntSet as IntSet
 import Foreign.Storable (Storable)
 import Geometry.Rect
@@ -142,10 +143,11 @@ main = do
 
       fix $ \ loop -> do
         rect <- Rect 0 <$> Window.size
-        res <- runEmpty $ drawLayer Nothing (Just black) rect drawCanvas
+        continue <- fmap isJust . runEmpty $ drawLayer Nothing (Just black) rect drawCanvas
         drawLabel label
         put =<< now
-        maybe (pure ()) (const (Window.swap >> loop)) res
+        when continue $
+          Window.swap >> loop
 
 data PlayerState = PlayerState
   { position :: !(Point V2 Float)
