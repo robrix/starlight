@@ -153,6 +153,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
           !*! translated (V2 tx ty * (1 / fromIntegral scale))
           !*! scaled     (V3 (fontScale font) (fontScale font) 1)
           !*! translated (V2 offset 0)
+          !*! translated (negated (rectMin b))
         drawArrays Triangles range
 
   pure l { bounds = bounds } where
