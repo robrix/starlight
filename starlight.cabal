@@ -91,6 +91,7 @@ library
     , opentype
     , sdl2
     , text
+    , time ^>= 1.9
 
 executable starlight
   import:              common
