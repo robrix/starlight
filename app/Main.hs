@@ -169,6 +169,14 @@ handleInput = do
   when (pressed SDL.KeycodeUp input) $ do
     rotation <- Lens.use _rotation
     _velocity += Delta (P (cartesian2 rotation thrust))
+  when (pressed SDL.KeycodeDown input) $ do
+    rotation <- Lens.use _rotation
+    velocity <- Lens.use _velocity
+    let angle = fst (polar2 (negated (unP (getDelta velocity))))
+        delta = rotation - angle
+        (+-=) = if delta < 0 then (+=) else (-=)
+    _rotation +-= min angular (abs delta)
+
   when (pressed SDL.KeycodeLeft  input) $
     _rotation += angular
   when (pressed SDL.KeycodeRight input) $
