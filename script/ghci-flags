@@ -5,7 +5,6 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-root="$(pwd)"
 ghc_version="$(ghc --numeric-version)"
 
 # recent hie-bios requires us to output to the file at $HIE_BIOS_OUTPUT, but older builds & script/repl don’t set that var, so we default it to stdout
