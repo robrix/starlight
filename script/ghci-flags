@@ -22,11 +22,11 @@ function flags {
   echo "-hidir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
   echo "-stubdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
 
-  echo "-i$root/app"
-  echo "-i$root/src"
+  echo "-iapp"
+  echo "-isrc"
 
   echo "-optP-include"
-  echo "-optP$root/$repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl/autogen/cabal_macros.h"
+  echo "-optP$repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl/autogen/cabal_macros.h"
 
   echo "-hide-all-packages"
 
