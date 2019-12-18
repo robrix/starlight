@@ -10,22 +10,22 @@ ghc_version="$(ghc --numeric-version)"
 # recent hie-bios requires us to output to the file at $HIE_BIOS_OUTPUT, but older builds & script/repl don’t set that var, so we default it to stdout
 output_file="${HIE_BIOS_OUTPUT:-/dev/stdout}"
 
-repl_builddir=dist-newstyle
+build_products_dir="dist-newstyle/build/x86_64-osx/ghc-$ghc_version/build-repl"
 
 function flags {
   echo "-O0"
   echo "-ignore-dot-ghci"
 
-  echo "-outputdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
-  echo "-odir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
-  echo "-hidir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
-  echo "-stubdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl"
+  echo "-outputdir $build_products_dir"
+  echo "-odir $build_products_dir"
+  echo "-hidir $build_products_dir"
+  echo "-stubdir $build_products_dir"
+
+  echo "-optP-include"
+  echo "-optP$build_products_dir/autogen/cabal_macros.h"
 
   echo "-iapp"
   echo "-isrc"
-
-  echo "-optP-include"
-  echo "-optP$repl_builddir/build/x86_64-osx/ghc-$ghc_version/build-repl/autogen/cabal_macros.h"
 
   echo "-hide-all-packages"
 
