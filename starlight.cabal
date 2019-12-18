@@ -94,6 +94,7 @@ library
     , text
     , time ^>= 1.9
     , transformers ^>= 0.5
+    , vector ^>= 0.12
 
 executable starlight
   import:              common
