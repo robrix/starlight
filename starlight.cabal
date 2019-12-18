@@ -92,6 +92,7 @@ library
     , sdl2
     , text
     , time ^>= 1.9
+    , transformers ^>= 0.5
 
 executable starlight
   import:              common
