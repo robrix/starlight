@@ -57,7 +57,7 @@ main = do
         , V3 0      0.5    0 :: V3 Float
         ]
       shipRange = Range 0 4
-      screenQuadVertices =
+      quadVertices =
         [ V2 (-1) (-1)
         , V2   1  (-1)
         , V2 (-1)   1
@@ -88,9 +88,9 @@ main = do
 
       label <- label
 
-      (_, screenQuadArray) <- loadVertices screenQuadVertices
-      (_, shipArray)       <- loadVertices shipVertices
-      (_, starArray)       <- loadVertices starVertices
+      (_, quadArray) <- loadVertices quadVertices
+      (_, shipArray) <- loadVertices shipVertices
+      (_, starArray) <- loadVertices starVertices
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -135,7 +135,7 @@ main = do
               , velocity
               , rotation } <- get
 
-            bind (Just screenQuadArray)
+            bind (Just quadArray)
 
             use stars $ do
               scale <- Window.scale
