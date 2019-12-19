@@ -181,14 +181,13 @@ input
      , Has Window.Window sig m
      )
   => m Input
-input = do
-  Window.input $ \ event -> case SDL.eventPayload event of
+input = Window.input go >> get where
+  go (SDL.Event _ p) = case p of
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ pressed _ (SDL.Keysym _ kc _)) -> case pressed of
       SDL.Pressed  -> press   kc
       SDL.Released -> release kc
     _ -> pure ()
-  get
 
 
 newtype Input = Input
