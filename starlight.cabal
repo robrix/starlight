@@ -78,7 +78,6 @@ library
     UI.Font
     UI.Glyph
     UI.Label
-    UI.Layer
     UI.Path
     UI.Window
   build-depends:
