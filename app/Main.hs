@@ -132,7 +132,10 @@ main = do
             let scale = windowScale / windowSize
                 V2 width height = windowSize
 
-            PlayerState { position, velocity, rotation } <- get
+            PlayerState
+              { position
+              , velocity
+              , rotation } <- get
 
             bind (Just screenQuadArray)
 
