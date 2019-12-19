@@ -30,6 +30,8 @@ import GL.Shader
 import Graphics.GL.Core41
 import Lens.Micro (Lens', lens)
 import Linear.Affine
+import Linear.Exts
+import Linear.Matrix
 import Linear.V (Size)
 import Linear.V2 as Linear
 import Linear.V3 as Linear
@@ -79,9 +81,7 @@ main = do
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
       ship <- build
         @'[ "colour"      '::: V4 Float
-          , "translation" '::: V2 Float
-          , "scale"       '::: V2 Float
-          , "rotation"    '::: Radians Float ]
+          , "matrix3"     '::: M33 Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
       label <- label
@@ -127,10 +127,8 @@ main = do
             when (pressed SDL.KeycodeRight input) $
               _rotation -= angular
 
-            windowScale <- Window.scale
             windowSize <- Window.size
-            let scale = windowScale / windowSize
-                V2 width height = windowSize
+            let V2 width height = windowSize
 
             PlayerState
               { position
@@ -148,10 +146,15 @@ main = do
             bind (Just shipArray)
 
             use ship $ do
+              scale <- Window.scale
+              size <- Window.size
+              let V2 sx sy = scale / size
               set @"colour" $ V4 1 1 1 1
-              set @"translation" 0
-              set @"scale" (scale * 50)
-              set @"rotation" rotation
+              set @"matrix3"
+                $   scaled     (V3 sx sy 1)
+                !*! translated 0
+                !*! scaled     (V3 50 50 1)
+                !*! rotated    (getRadians rotation)
 
               drawArrays LineLoop shipRange
 
