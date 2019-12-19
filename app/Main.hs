@@ -127,8 +127,6 @@ main = do
             when (pressed SDL.KeycodeRight input) $
               _rotation -= angular
 
-            windowSize <- Window.size
-
             PlayerState
               { position
               , velocity
@@ -137,7 +135,9 @@ main = do
             bind (Just screenQuadArray)
 
             use stars $ do
-              set @"resolution" windowSize
+              scale <- Window.scale
+              size <- Window.size
+              set @"resolution" (size ^* (1 / scale))
               set @"origin" position
 
               drawArrays TriangleStrip (Range 0 4)
