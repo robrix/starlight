@@ -114,7 +114,7 @@ main = do
             let thrust  = t *  0.01
                 angular = t *^ pi
 
-            when (pressed SDL.KeycodeUp input) $ do
+            when (pressed SDL.KeycodeUp   input) $ do
               rotation <- Lens.use _rotation
               _velocity += Delta (P (cartesian2 rotation thrust))
             when (pressed SDL.KeycodeDown input) $ do
