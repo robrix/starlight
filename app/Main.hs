@@ -16,6 +16,7 @@ import Data.Function (fix)
 import Data.Maybe (isJust)
 import qualified Data.IntSet as IntSet
 import Foreign.Storable (Storable)
+import Geometry.Circle
 import Geometry.Rect
 import GHC.Stack
 import GHC.TypeLits
@@ -62,6 +63,7 @@ main = do
         , V2 (-1)   1
         , V2   1    1  :: V2 Float
         ]
+      starVertices = circle 1 32
 
   Window.runWindow "Starlight" (V2 1024 768)
     . runFinally
@@ -88,6 +90,7 @@ main = do
 
       (_, screenQuadArray) <- loadVertices screenQuadVertices
       (_, shipArray)       <- loadVertices shipVertices
+      (_, starArray)       <- loadVertices starVertices
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -156,6 +159,15 @@ main = do
                 !*! rotated    (getRadians rotation)
 
               drawArrays LineLoop shipRange
+
+              bind (Just starArray)
+              set @"matrix3"
+                $   translated (negated (unP position))
+                !*! scaled     (V3 sx sy 1)
+                !*! scaled     (V3 50 50 1)
+                !*! rotated    0
+
+              drawArrays LineLoop (Range 0 (length starVertices))
 
             _position += getDelta velocity
 
