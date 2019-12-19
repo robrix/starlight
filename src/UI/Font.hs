@@ -31,7 +31,10 @@ data Typeface = Typeface
   , _font     :: O.OpentypeFont
   }
 
-data Font = Font { face :: Typeface, size :: Float }
+data Font = Font
+  { face :: Typeface
+  , size :: Float
+  }
 
 fontScale :: Font -> Float
 fontScale (Font (Typeface _ _ o) size) = size * scale where
