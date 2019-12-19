@@ -17,6 +17,7 @@ import UI.Colour
 data Body = Body
   { name   :: String
   , radius :: Float
+  , mass   :: Float
   , colour :: Maybe (Colour Float)
   , orbit  :: Maybe Orbit
   }
@@ -33,6 +34,7 @@ sol :: Body
 sol = Body
   { name   = "Sol"
   , radius = 695500.0 -- km
+  , mass   = 1.9885e30 -- kg
   , colour = Just (V4 1 1 0 1)
   , orbit  = Nothing
   }
@@ -41,6 +43,7 @@ mercury :: Body
 mercury = Body
   { name   = "Mercury"
   , radius = 2439.7 -- km
+  , mass   = 3.302e23 -- kg
   , colour = Nothing
   , orbit  = Just Orbit
     { semimajor                = 5.79092257e7 -- km
@@ -55,6 +58,7 @@ venus :: Body
 venus = Body
   { name   = "Venus"
   , radius = 6051.9 -- km
+  , mass   = 48.685e23 -- kg
   , colour = Nothing
   , orbit  = Just Orbit
     { semimajor                = 1.08209019e8 -- km
@@ -69,6 +73,7 @@ earth :: Body
 earth = Body
   { name   = "Earth"
   , radius = 6378.14 -- km
+  , mass   = 5.97219e24 -- kg
   , colour = Nothing
   , orbit  = Just Orbit
     { semimajor                = 1.49598016e8 -- km
@@ -83,6 +88,7 @@ luna :: Body
 luna = Body
   { name   = "Luna"
   , radius = 1737.5 -- km
+  , mass   = 7.342e22 -- kg
   , colour = Nothing
   , orbit  = Just Orbit
     { semimajor                = 384400 -- km
@@ -97,6 +103,7 @@ mars :: Body
 mars = Body
   { name   = "Mars"
   , radius = 3397 -- km
+  , mass   = 6.4171e23 -- kg
   , colour = Nothing
   , orbit  = Just Orbit
     { semimajor                = 2.27936834e8 -- km
@@ -111,6 +118,7 @@ jupiter :: Body
 jupiter = Body
   { name   = "Jupiter"
   , radius = 69911 -- km
+  , mass   = 1898.13e24 -- kg
   , colour = Nothing
   , orbit  = Just Orbit
     { semimajor                = 778412026.7751428 -- km
