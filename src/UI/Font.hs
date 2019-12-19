@@ -25,7 +25,11 @@ import Linear.V2
 import UI.Glyph
 import UI.Path
 
-data Typeface = Typeface { name :: Maybe String, allGlyphs :: Map.Map Char (Maybe Glyph), _font :: O.OpentypeFont }
+data Typeface = Typeface
+  { name      :: Maybe String
+  , allGlyphs :: Map.Map Char (Maybe Glyph)
+  , _font     :: O.OpentypeFont
+  }
 
 data Font = Font { face :: Typeface, size :: Float }
 
