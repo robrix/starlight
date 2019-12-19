@@ -82,8 +82,8 @@ main = do
           , "origin"     '::: Point V2 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
       ship <- build
-        @'[ "colour"      '::: V4 Float
-          , "matrix3"     '::: M33 Float ]
+        @'[ "colour"  '::: V4 Float
+          , "matrix3" '::: M33 Float ]
         [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
 
       label <- label
