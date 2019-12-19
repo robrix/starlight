@@ -1,0 +1,20 @@
+ Revised: July 31, 2013                  Sun                                 10
+
+ PHYSICAL PROPERTIES (updated 2018-Aug-15):
+  GM, km^3/s^2          = 132712440041.93938  Mass, 10^24 kg        = ~1988500
+  Vol. mean radius, km  = 695700              Volume, 10^12 km^3    = 1412000
+  Solar radius (IAU)    = 696000 km           Mean density, g/cm^3  = 1.408
+  Radius (photosphere)  = 696500 km           Angular diam at 1 AU  = 1919.3"
+  Photosphere temp., K  = 6600 (bottom)       Photosphere temp., K  = 4400(top)
+  Photospheric depth    = ~500 km             Chromospheric depth   = ~2500 km
+  Flatness, f           = 0.00005             Adopted sid. rot. per.= 25.38 d
+  Surface gravity       =  274.0 m/s^2        Escape speed, km/s    =  617.7
+  Pole (RA,DEC), deg.   = (286.13, 63.87)     Obliquity to ecliptic = 7.25 deg.
+  Solar constant (1 AU) = 1367.6 W/m^2        Luminosity, 10^24 J/s = 382.8
+  Mass-energy conv rate = 4.260 x 10^9 kg/s   Effective temp, K     = 5772
+  Sunspot cycle         = 11.4 yr             Cycle 24 sunspot min. = 2008 A.D.
+
+  Motion relative to nearby stars = apex : R.A.= 271 deg.; DEC.= +30 deg.
+                                    speed: 19.4 km/s (0.0112 au/day)
+  Motion relative to 2.73K BB/CBR = apex : l= 264.7 +- 0.8; b= 48.2 +- 0.5 deg.
+                                    speed: 369 +-11 km/s
