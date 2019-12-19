@@ -1,0 +1,17 @@
+Revised: November 5, 2015          134340 Pluto                            999
+
+ NOTE: Pre-computed solution PLU055/DE433; a fit to all available observations
+ including New Horizons spacecraft encounter tracking.
+
+ PHYSICAL DATA (updated 2018-Aug-15; Mc= Charon mass, radius is IAU 2009):
+  Mass x10^22 (kg)      = 1.307+-0.018    Volume, 10^10 km^3    = 0.697
+  GM (planet) km^3/s^2  = 869.33907803    Density (R=1195 km)   = 1.86 g/cm^3
+  GM 1-sigma, km^3/s^2  =   1.5           Surface gravity       = 0.611 m/s^2
+  Vol. mean radius (km) = 1188.3+-1.6     Mass ratio (Mc/Mp)    = 0.117
+  Sidereal rot. period  = 153.29335198 h  Sid. rot. rat, rad/s  = 0.0000113856
+  Mean solar day, h     = 153.2820        Mean orbit velocity   = 4.67 km/s
+  Sidereal orbit period = 249.58932 yr    Escape speed, km/s    = 1.21
+                                 Perihelion  Aphelion    Mean
+  Solar Constant (W/m^2)         1.56        0.56        0.88
+  Maximum Planetary IR (W/m^2)   0.8         0.3         0.5
+  Minimum Planetary IR (W/m^2)   0.8         0.3         0.5

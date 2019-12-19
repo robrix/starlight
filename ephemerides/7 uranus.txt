@@ -1,0 +1,21 @@
+Revised: September 10, 2019           Uranus                               799
+
+ PHYSICAL DATA (updated 2018-Aug-15):
+  Mass x10^24 (kg)      = 86.813          Density (g/cm^3)       =  1.271
+  Equat. radius (1 bar) = 25559+-4 km     Polar radius (km)      = 24973+-20
+  Vol. Mean Radius (km) = 25362+-12       Flattening             =  0.02293
+  Geometric Albedo      = 0.51
+  Sid. rot. period (III)= 17.24+-0.01 h   Sid. rot. rate (rad/s) = -0.000101237
+  Mean solar day, h     =~17.24           Rocky core mass (Mc/M) =  0.0012
+  GM (km^3/s^2)         = 5793951.322     GM 1-sigma (km^3/s^2)  = +-4.3
+  Equ. grav, ge (m/s^2) =  8.87           Pol. grav, gp (m/s^2)  =   9.19+-0.02
+  Visual magnitude V(1,0)= -7.11
+  Vis. mag. (opposition)=  +5.52          Obliquity to orbit     = 97.77 deg
+  Sidereal orbit period = 84.0120465 y    Sidereal orbit period  = 30685.4 d
+  Mean daily motion     = 0.01176904 dg/d Mean orbit velocity    =  6.8 km/s
+  Atmos. temp. (1 bar)  =  76+-2 K        Escape speed, km/s     =  21.3
+  Aroche(ice)/Rp        =  2.20           Hill's sphere rad., Rp = 2700
+                                 Perihelion   Aphelion    Mean
+  Solar Constant (W/m^2)         4.09         3.39        3.71
+  Maximum Planetary IR (W/m^2)   0.72         0.55        0.63
+  Minimum Planetary IR (W/m^2)   0.72         0.55        0.63

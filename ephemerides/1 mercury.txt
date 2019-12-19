@@ -1,0 +1,20 @@
+Revised: July 31, 2013              Mercury                            199 / 1
+
+ PHYSICAL DATA (updated 2018-Aug-15):
+  Vol. Mean Radius (km) =  2440+-1        Density (g cm^-3)     = 5.427
+  Mass x10^23 (kg)      =     3.302       Volume (x10^10 km^3)  = 6.085
+  Sidereal rot. period  =    58.6463 d    Sid. rot. rate (rad/s)= 0.00000124001
+  Mean solar day        =   175.9421 d    Core radius (km)      = ~1600
+  Geometric Albedo      =     0.106       Surface emissivity    = 0.77+-0.06
+  GM (km^3/s^2)         = 22031.78        Equatorial radius, Re = 2440 km
+  GM 1-sigma (km^3/s^2) =   +-0.91        Mass ratio (Sun/plnt) = 6023682
+  Mom. of Inertia       =     0.33        Equ. gravity  m/s^2   = 3.701
+  Atmos. pressure (bar) = < 5x10^-15      Max. angular diam.    = 11.0"
+  Mean Temperature (K)  = 440             Visual mag. V(1,0)    = -0.42
+  Obliquity to orbit[1] =  2.11' +/- 0.1' Hill's sphere rad. Rp = 94.4
+  Sidereal orb. per.    =  0.2408467 y    Mean Orbit vel.  km/s = 47.362
+  Sidereal orb. per.    = 87.969257  d    Escape vel. km/s      =  4.435
+                                 Perihelion  Aphelion    Mean
+  Solar Constant (W/m^2)         14462       6278        9126
+  Maximum Planetary IR (W/m^2)   12700       5500        8000
+  Minimum Planetary IR (W/m^2)   6           6           6
