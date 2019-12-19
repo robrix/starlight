@@ -149,6 +149,7 @@ main = do
         when continue $
           Window.swap >> loop
 
+
 data PlayerState = PlayerState
   { position :: !(Point V2 Float)
   , velocity :: !(Delta (Point V2) Float)
@@ -196,7 +197,6 @@ release = modify . inInput . IntSet.delete . fromIntegral . SDL.unwrapKeycode
 
 pressed :: SDL.Keycode -> Input -> Bool
 pressed code = IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput
-
 
 
 loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Buffer 'GL.Buffer.Array (v n), Array (v n))
