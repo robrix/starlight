@@ -4,8 +4,7 @@ module GL.Uniform
 ) where
 
 import Control.Monad.IO.Class.Lift
-import Data.Foldable (toList)
-import qualified Foreign.Marshal.Array.Lift as A
+import qualified Foreign.Marshal.Utils.Lift as A
 import Foreign.Ptr
 import GHC.Stack
 import Graphics.GL.Core41
@@ -35,9 +34,9 @@ instance Uniform (Linear.V4 Double) where
   uniform location (Linear.V4 x y z w) = runLiftIO $ glUniform4d location x y z w
 
 instance Uniform (Linear.M44 Float) where
-  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
+  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M33 Float) where
-  uniform location matrix = A.withArray (toList (Linear.transpose matrix) >>= toList) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
+  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Linear.Point f a)
