@@ -39,11 +39,11 @@ import Physics.Delta
 import Physics.Radians
 import Physics.Seconds
 import qualified SDL
+import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
 import UI.Label
 import UI.Layer
-import qualified UI.Carrier.Window as Window
 
 main :: HasCallStack => IO ()
 main = do
