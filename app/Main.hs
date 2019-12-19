@@ -76,7 +76,7 @@ main = do
     $ (\ m -> now >>= \ now -> evalState now m)
     $ do
       stars <- build
-        @'[ "resolution" '::: V3 Float
+        @'[ "resolution" '::: V2 Float
           , "origin"     '::: Point V2 Float ]
         [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
       ship <- build
@@ -128,7 +128,6 @@ main = do
               _rotation -= angular
 
             windowSize <- Window.size
-            let V2 width height = windowSize
 
             PlayerState
               { position
@@ -138,7 +137,7 @@ main = do
             bind (Just screenQuadArray)
 
             use stars $ do
-              set @"resolution" (V3 width height 8)
+              set @"resolution" windowSize
               set @"origin" position
 
               drawArrays TriangleStrip (Range 0 4)

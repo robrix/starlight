@@ -2,7 +2,7 @@
 
 // from https://www.shadertoy.com/view/XlfGRj
 
-uniform vec3 resolution; // viewport resolution (in pixels)
+uniform vec2 resolution; // viewport resolution (in pixels)
 uniform vec2 origin;
 
 
@@ -31,7 +31,7 @@ void main() {
 	uv.y *= resolution.y / resolution.x;
 	vec3 dir = vec3(uv * zoom, 1.);
 
-	vec3 origin = vec3(origin, 0);
+	vec3 origin = vec3(origin, 1);
 
 	//volumetric rendering
 	float s = 0.1, fade = 1.;
