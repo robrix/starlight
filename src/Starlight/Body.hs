@@ -32,7 +32,7 @@ data Orbit = Orbit
 sol :: Body
 sol = Body
   { name   = "Sol"
-  , radius = 695500.0
+  , radius = 695500.0 -- km
   , colour = Just (V4 1 1 0 1)
   , orbit  = Nothing
   }
