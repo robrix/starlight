@@ -43,7 +43,6 @@ import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
 import UI.Label
-import UI.Layer
 
 main :: HasCallStack => IO ()
 main = do
@@ -92,6 +91,16 @@ main = do
       label <- setLabel label { colour = white } tahoma "hello"
 
       let drawCanvas = do
+            bind @Framebuffer Nothing
+
+            scale <- Window.scale
+            rect <- Rect 0 <$> Window.size
+            viewport $ scale *^ rect
+            scissor  $ scale *^ rect
+
+            setClearColour black
+            glClear GL_COLOR_BUFFER_BIT
+
             input <- input
             t <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
 
@@ -142,8 +151,7 @@ main = do
             _position += getDelta velocity
 
       fix $ \ loop -> do
-        rect <- Rect 0 <$> Window.size
-        continue <- fmap isJust . runEmpty $ drawLayer Nothing (Just black) rect drawCanvas
+        continue <- isJust <$> runEmpty drawCanvas
         drawLabel label
         put =<< now
         when continue $
