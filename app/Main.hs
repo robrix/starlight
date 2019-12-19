@@ -66,7 +66,11 @@ main = do
     . runTime
     . runProgram
     . evalState @Input mempty
-    . evalState PlayerState { position = 0, velocity = 0, rotation = 0 }
+    . evalState PlayerState
+      { position = 0
+      , velocity = 0
+      , rotation = 0
+      }
     $ (\ m -> now >>= \ now -> evalState now m)
     $ do
       stars <- build
