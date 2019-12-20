@@ -18,7 +18,7 @@ data Body = Body
   { name       :: String
   , radius     :: Float
   , mass       :: Float
-  , colour     :: Maybe (Colour Float)
+  , colour     :: Colour Float
   , orbit      :: Maybe Orbit
   , satellites :: [Body]
   }
@@ -36,7 +36,7 @@ sol = Body
   { name       = "Sol"
   , radius     = 695500.0  -- km
   , mass       = 1.9885e30 -- kg
-  , colour     = Just (V4 1 1 0 1)
+  , colour     = V4 1 1 0 1
   , orbit      = Nothing
   , satellites =
     [ mercury
@@ -52,7 +52,7 @@ mercury = Body
   { name       = "Mercury"
   , radius     = 2439.7 -- km
   , mass       = 3.302e23 -- kg
-  , colour     = Nothing
+  , colour     = white
   , orbit      = Just Orbit
     { semimajor                = 5.79092257e7 -- km
     , eccentricity             = 0.20563069
@@ -68,7 +68,7 @@ venus = Body
   { name       = "Venus"
   , radius     = 6051.9    -- km
   , mass       = 48.685e23 -- kg
-  , colour     = Nothing
+  , colour     = white
   , orbit      = Just Orbit
     { semimajor                = 1.08209019e8 -- km
     , eccentricity             = 0.00677323
@@ -84,7 +84,7 @@ earth = Body
   { name       = "Earth"
   , radius     = 6378.14    -- km
   , mass       = 5.97219e24 -- kg
-  , colour     = Nothing
+  , colour     = white
   , orbit      = Just Orbit
     { semimajor                = 1.49598016e8 -- km
     , eccentricity             = 0.01671022
@@ -100,7 +100,7 @@ luna = Body
   { name       = "Luna"
   , radius     = 1737.5   -- km
   , mass       = 7.342e22 -- kg
-  , colour     = Nothing
+  , colour     = white
   , orbit      = Just Orbit
     { semimajor                = 384400 -- km
     , eccentricity             = 0.0554
@@ -116,7 +116,7 @@ mars = Body
   { name       = "Mars"
   , radius     = 3397      -- km
   , mass       = 6.4171e23 -- kg
-  , colour     = Nothing
+  , colour     = white
   , orbit      = Just Orbit
     { semimajor                = 2.27936834e8 -- km
     , eccentricity             = 0.09341233
@@ -132,7 +132,7 @@ jupiter = Body
   { name       = "Jupiter"
   , radius     = 69911      -- km
   , mass       = 1898.13e24 -- kg
-  , colour     = Nothing
+  , colour     = white
   , orbit      = Just Orbit
     { semimajor                = 778412026.7751428 -- km
     , eccentricity             = 0.04839266
