@@ -31,8 +31,7 @@ void main() {
 	uv.y *= resolution.y / resolution.x;
 	vec3 dir = vec3(uv * zoom, 1.0);
 
-	// vec3 origin = vec3(origin, 1);
-	vec3 origin = vec3(2 * origin / resolution, 1);
+	vec3 origin = vec3(origin / resolution, 1);
 
 	// volumetric rendering
 	float s = 0.1, fade = 1.0;
