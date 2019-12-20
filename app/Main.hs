@@ -147,13 +147,15 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
 
             bind (Just shipArray)
 
+            scale <- Window.scale
+            size <- Window.size
+            let V2 sx sy = scale / size
+                window = scaled (V3 sx sy 1)
+
             use ship $ do
-              scale <- Window.scale
-              size <- Window.size
-              let V2 sx sy = scale / size
               set @"colour" $ V4 1 1 1 1
               set @"matrix3"
-                $   scaled     (V3 sx sy 1)
+                $   window
                 !*! translated 0
                 !*! scaled     (V3 50 50 1)
                 !*! rotated    (getRadians rotation)
@@ -162,7 +164,7 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
 
               bind (Just starArray)
               set @"matrix3"
-                $   scaled     (V3 sx sy 1)
+                $   window
                 !*! translated (negated (unP position))
                 !*! scaled     (V3 50 50 1)
                 !*! rotated    0
