@@ -14,8 +14,8 @@ module Starlight.Body
 ) where
 
 import Linear.V4
-import Unit.Angle
 import UI.Colour
+import Unit.Angle
 
 data Body = Body
   { name       :: String
