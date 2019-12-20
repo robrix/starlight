@@ -1,2 +1,5 @@
 module Unit.Length
-() where
+( Kilometres(..)
+) where
+
+newtype Kilometres a = Kilometres { getKilometres :: a }
