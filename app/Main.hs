@@ -41,7 +41,7 @@ import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
 import Physics.Delta
-import Unit.Radians
+import Unit.Angle
 import Unit.Seconds
 import qualified SDL
 import qualified Starlight.Body as S

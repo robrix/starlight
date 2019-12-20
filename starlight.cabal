@@ -79,7 +79,7 @@ library
     UI.Label
     UI.Path
     UI.Window
-    Unit.Radians
+    Unit.Angle
     Unit.Seconds
   build-depends:
       base

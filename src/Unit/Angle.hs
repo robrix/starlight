@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveTraversable, GeneralizedNewtypeDeriving #-}
-module Unit.Radians
+module Unit.Angle
 ( Radians(..)
 , fromDegrees
 , cartesian2
