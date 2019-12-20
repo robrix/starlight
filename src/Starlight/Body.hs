@@ -58,7 +58,7 @@ sol = Body
 mercury :: Body
 mercury = Body
   { name       = "Mercury"
-  , radius     = 2439.7 -- km
+  , radius     = 2439.7   -- km
   , mass       = 3.302e23 -- kg
   , colour     = white
   , orbit      = Orbit
