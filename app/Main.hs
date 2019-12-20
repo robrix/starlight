@@ -108,10 +108,10 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
             glClear GL_COLOR_BUFFER_BIT
 
             input <- input
-            t <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
+            dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
 
-            let thrust  = t *  1
-                angular = t *^ pi
+            let thrust  = dt *  1
+                angular = dt *^ pi
 
             when (pressed SDL.KeycodeUp   input) $ do
               rotation <- Lens.use _rotation
