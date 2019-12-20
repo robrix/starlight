@@ -34,7 +34,7 @@ void main() {
 	vec3 origin = vec3(origin / 100 / resolution, 1);
 
 	// volumetric rendering
-	float s = 0.1, fade = 1.0;
+	float s = 0.1, fade = 0.5;
 	vec3 v = vec3(0.0);
 	for (int r = 0; r < volsteps; r++) {
 		vec3 p = origin + dir * s * 0.5;
