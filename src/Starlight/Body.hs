@@ -16,6 +16,7 @@ module Starlight.Body
 import Linear.V4
 import UI.Colour
 import Unit.Angle
+import Unit.Length
 import Unit.Time
 
 data Body = Body
@@ -31,7 +32,7 @@ data Body = Body
 -- FIXME: true anomaly
 data Orbit = Orbit
   { eccentricity             :: Float
-  , semimajor                :: Float
+  , semimajor                :: Kilometres Float
   , inclination              :: Radians Float
   , longitudeOfAscendingNode :: Radians Float
   , period                   :: Seconds Float
@@ -47,7 +48,7 @@ position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) 
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly = atan2 (sqrt (1 - eccentricity * eccentricity) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = semimajor * (1 - eccentricity * cos eccentricAnomaly)
+  r = getKilometres semimajor * (1 - eccentricity * cos eccentricAnomaly)
 
 
 sol :: Body
@@ -79,7 +80,7 @@ mercury = Body
   , mass       = 3.302e23 -- kg
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 5.79092257e7 -- km
+    { semimajor                = 5.79092257e7
     , eccentricity             = 0.20563069
     , inclination              = fromDegrees 7.00487
     , longitudeOfAscendingNode = fromDegrees 48.33167
@@ -95,7 +96,7 @@ venus = Body
   , mass       = 48.685e23 -- kg
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 1.08209019e8 -- km
+    { semimajor                = 1.08209019e8
     , eccentricity             = 0.00677323
     , inclination              = fromDegrees 3.39471
     , longitudeOfAscendingNode = fromDegrees 181.97973
@@ -111,7 +112,7 @@ earth = Body
   , mass       = 5.97219e24 -- kg
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 1.49598016e8 -- km
+    { semimajor                = 1.49598016e8
     , eccentricity             = 0.01671022
     , inclination              = fromDegrees 5.0e-5
     , longitudeOfAscendingNode = fromDegrees (-11.26064)
@@ -127,7 +128,7 @@ luna = Body
   , mass       = 7.342e22 -- kg
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 384400 -- km
+    { semimajor                = 384400
     , eccentricity             = 0.0554
     , inclination              = fromDegrees 5.16
     , longitudeOfAscendingNode = fromDegrees 125.08
@@ -143,7 +144,7 @@ mars = Body
   , mass       = 6.4171e23 -- kg
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 2.27936834e8 -- km
+    { semimajor                = 2.27936834e8
     , eccentricity             = 0.09341233
     , inclination              = fromDegrees 1.85061
     , longitudeOfAscendingNode = fromDegrees 49.57854
@@ -159,7 +160,7 @@ jupiter = Body
   , mass       = 1898.13e24 -- kg
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 778412026.7751428 -- km
+    { semimajor                = 778412026.7751428
     , eccentricity             = 0.04839266
     , inclination              = fromDegrees 1.30530
     , longitudeOfAscendingNode = fromDegrees 100.55615
