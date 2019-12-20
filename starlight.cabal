@@ -81,6 +81,7 @@ library
     UI.Window
     Unit.Angle
     Unit.Length
+    Unit.Mass
     Unit.Time
   build-depends:
       base
