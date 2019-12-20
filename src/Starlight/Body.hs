@@ -21,7 +21,7 @@ import Unit.Time
 
 data Body = Body
   { name       :: String
-  , radius     :: Float
+  , radius     :: Kilometres Float
   , mass       :: Float
   , colour     :: Colour Float
   , orbit      :: Orbit
@@ -54,7 +54,7 @@ position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) 
 sol :: Body
 sol = Body
   { name       = "Sol"
-  , radius     = 695500.0  -- km
+  , radius     = 695500.0
   , mass       = 1.9885e30 -- kg
   , colour     = V4 1 1 0 1
   , orbit      = Orbit
@@ -76,7 +76,7 @@ sol = Body
 mercury :: Body
 mercury = Body
   { name       = "Mercury"
-  , radius     = 2439.7   -- km
+  , radius     = 2439.7
   , mass       = 3.302e23 -- kg
   , colour     = white
   , orbit      = Orbit
@@ -92,7 +92,7 @@ mercury = Body
 venus :: Body
 venus = Body
   { name       = "Venus"
-  , radius     = 6051.9    -- km
+  , radius     = 6051.9
   , mass       = 48.685e23 -- kg
   , colour     = white
   , orbit      = Orbit
@@ -108,7 +108,7 @@ venus = Body
 earth :: Body
 earth = Body
   { name       = "Earth"
-  , radius     = 6378.14    -- km
+  , radius     = 6378.14
   , mass       = 5.97219e24 -- kg
   , colour     = white
   , orbit      = Orbit
@@ -124,7 +124,7 @@ earth = Body
 luna :: Body
 luna = Body
   { name       = "Luna"
-  , radius     = 1737.5   -- km
+  , radius     = 1737.5
   , mass       = 7.342e22 -- kg
   , colour     = white
   , orbit      = Orbit
@@ -140,7 +140,7 @@ luna = Body
 mars :: Body
 mars = Body
   { name       = "Mars"
-  , radius     = 3397      -- km
+  , radius     = 3397
   , mass       = 6.4171e23 -- kg
   , colour     = white
   , orbit      = Orbit
@@ -156,7 +156,7 @@ mars = Body
 jupiter :: Body
 jupiter = Body
   { name       = "Jupiter"
-  , radius     = 69911      -- km
+  , radius     = 69911
   , mass       = 1898.13e24 -- kg
   , colour     = white
   , orbit      = Orbit
