@@ -3,7 +3,7 @@ module Geometry.Circle
 ) where
 
 import Linear.V2
-import Physics.Radians
+import Unit.Radians
 
 circle
   -- ^ The radius.

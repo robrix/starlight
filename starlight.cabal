@@ -69,8 +69,6 @@ library
     GL.Uniform
     Linear.Exts
     Physics.Delta
-    Physics.Radians
-    Physics.Seconds
     S
     Starlight.Body
     UI.Carrier.Window
@@ -81,6 +79,8 @@ library
     UI.Label
     UI.Path
     UI.Window
+    Unit.Radians
+    Unit.Seconds
   build-depends:
       base
     , containers

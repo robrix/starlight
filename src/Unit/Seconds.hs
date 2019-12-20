@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveTraversable, GeneralizedNewtypeDeriving #-}
-module Physics.Seconds
+module Unit.Seconds
 ( Seconds(..)
 ) where
 

@@ -14,7 +14,7 @@ module Starlight.Body
 ) where
 
 import Linear.V4
-import Physics.Radians
+import Unit.Radians
 import UI.Colour
 
 data Body = Body
