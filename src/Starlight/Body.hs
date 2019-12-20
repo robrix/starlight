@@ -22,7 +22,7 @@ import Unit.Time
 
 data Body = Body
   { name       :: String
-  , radius     :: Kilometres Float
+  , radius     :: Metres Float
   , mass       :: Kilograms Float
   , colour     :: Colour Float
   , orbit      :: Orbit
@@ -33,7 +33,7 @@ data Body = Body
 -- FIXME: true anomaly
 data Orbit = Orbit
   { eccentricity             :: Float
-  , semimajor                :: Kilometres Float
+  , semimajor                :: Metres Float
   , inclination              :: Radians Float
   , longitudeOfAscendingNode :: Radians Float
   , period                   :: Seconds Float
@@ -49,13 +49,13 @@ position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) 
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly = atan2 (sqrt (1 - eccentricity * eccentricity) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = getKilometres semimajor * (1 - eccentricity * cos eccentricAnomaly)
+  r = getMetres semimajor * (1 - eccentricity * cos eccentricAnomaly)
 
 
 sol :: Body
 sol = Body
   { name       = "Sol"
-  , radius     = 695500.0
+  , radius     = fromKilometres 695500.0
   , mass       = 1.9885e30
   , colour     = V4 1 1 0 1
   , orbit      = Orbit
@@ -77,11 +77,11 @@ sol = Body
 mercury :: Body
 mercury = Body
   { name       = "Mercury"
-  , radius     = 2439.7
+  , radius     = fromKilometres 2439.7
   , mass       = 3.302e23
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 5.79092257e7
+    { semimajor                = fromKilometres 5.79092257e7
     , eccentricity             = 0.20563069
     , inclination              = fromDegrees 7.00487
     , longitudeOfAscendingNode = fromDegrees 48.33167
@@ -93,11 +93,11 @@ mercury = Body
 venus :: Body
 venus = Body
   { name       = "Venus"
-  , radius     = 6051.9
+  , radius     = fromKilometres 6051.9
   , mass       = 48.685e23
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 1.08209019e8
+    { semimajor                = fromKilometres 1.08209019e8
     , eccentricity             = 0.00677323
     , inclination              = fromDegrees 3.39471
     , longitudeOfAscendingNode = fromDegrees 181.97973
@@ -109,11 +109,11 @@ venus = Body
 earth :: Body
 earth = Body
   { name       = "Earth"
-  , radius     = 6378.14
+  , radius     = fromKilometres 6378.14
   , mass       = 5.97219e24
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 1.49598016e8
+    { semimajor                = fromKilometres 1.49598016e8
     , eccentricity             = 0.01671022
     , inclination              = fromDegrees 5.0e-5
     , longitudeOfAscendingNode = fromDegrees (-11.26064)
@@ -125,11 +125,11 @@ earth = Body
 luna :: Body
 luna = Body
   { name       = "Luna"
-  , radius     = 1737.5
+  , radius     = fromKilometres 1737.5
   , mass       = 7.342e22
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 384400
+    { semimajor                = fromKilometres 384400
     , eccentricity             = 0.0554
     , inclination              = fromDegrees 5.16
     , longitudeOfAscendingNode = fromDegrees 125.08
@@ -141,11 +141,11 @@ luna = Body
 mars :: Body
 mars = Body
   { name       = "Mars"
-  , radius     = 3397
+  , radius     = fromKilometres 3397
   , mass       = 6.4171e23
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 2.27936834e8
+    { semimajor                = fromKilometres 2.27936834e8
     , eccentricity             = 0.09341233
     , inclination              = fromDegrees 1.85061
     , longitudeOfAscendingNode = fromDegrees 49.57854
@@ -157,11 +157,11 @@ mars = Body
 jupiter :: Body
 jupiter = Body
   { name       = "Jupiter"
-  , radius     = 69911
+  , radius     = fromKilometres 69911
   , mass       = 1898.13e24
   , colour     = white
   , orbit      = Orbit
-    { semimajor                = 778412026.7751428
+    { semimajor                = fromKilometres 778412026.7751428
     , eccentricity             = 0.04839266
     , inclination              = fromDegrees 1.30530
     , longitudeOfAscendingNode = fromDegrees 100.55615
