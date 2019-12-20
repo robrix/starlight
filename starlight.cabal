@@ -80,7 +80,7 @@ library
     UI.Path
     UI.Window
     Unit.Angle
-    Unit.Seconds
+    Unit.Time
   build-depends:
       base
     , containers

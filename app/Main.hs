@@ -42,7 +42,7 @@ import Linear.V4 as Linear
 import Linear.Vector as Linear
 import Physics.Delta
 import Unit.Angle
-import Unit.Seconds
+import Unit.Time
 import qualified SDL
 import qualified Starlight.Body as S
 import qualified UI.Carrier.Window as Window
