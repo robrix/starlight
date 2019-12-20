@@ -56,7 +56,6 @@ main = do
         , V3 (-0.5) 0      0
         , V3 0      0.5    0 :: V3 Float
         ]
-      shipRange = Range 0 4
       quadVertices =
         [ V2 (-1) (-1)
         , V2   1  (-1)
@@ -158,7 +157,7 @@ main = do
                 !*! scaled     (V3 50 50 1)
                 !*! rotated    (getRadians rotation)
 
-              drawArrays LineLoop shipRange
+              drawArrays LineLoop (Range 0 4)
 
               bind (Just starArray)
               set @"matrix3"
