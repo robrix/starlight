@@ -10,6 +10,7 @@ import Control.Carrier.Time
 import Control.Effect.Lens ((+=), (-=))
 import qualified Control.Effect.Lens as Lens
 import Control.Effect.Lift
+import qualified Control.Exception.Lift as E
 import Control.Monad (when)
 import Data.Coerce (coerce)
 import Data.Function (fix)
@@ -48,7 +49,7 @@ import UI.Font as Font
 import UI.Label
 
 main :: HasCallStack => IO ()
-main = do
+main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
   tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 288
   let shipVertices =
         [ V3 1      0      0
