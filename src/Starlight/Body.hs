@@ -31,8 +31,8 @@ data Body = Body
 data Orbit = Orbit
   { eccentricity             :: Float
   , semimajor                :: Float
-  , inclination              :: Float
-  , longitudeOfAscendingNode :: Float
+  , inclination              :: Radians Float
+  , longitudeOfAscendingNode :: Radians Float
   , period                   :: Float
   }
 
@@ -80,8 +80,8 @@ mercury = Body
   , orbit      = Orbit
     { semimajor                = 5.79092257e7 -- km
     , eccentricity             = 0.20563069
-    , inclination              = 7.00487      -- deg
-    , longitudeOfAscendingNode = 48.33167     -- deg
+    , inclination              = fromDegrees 7.00487
+    , longitudeOfAscendingNode = fromDegrees 48.33167
     , period                   = 87.96926     -- d
     }
   , satellites = []
@@ -96,8 +96,8 @@ venus = Body
   , orbit      = Orbit
     { semimajor                = 1.08209019e8 -- km
     , eccentricity             = 0.00677323
-    , inclination              = 3.39471      -- deg
-    , longitudeOfAscendingNode = 181.97973    -- deg
+    , inclination              = fromDegrees 3.39471
+    , longitudeOfAscendingNode = fromDegrees 181.97973
     , period                   = 224.7008     -- d
     }
   , satellites = []
@@ -112,8 +112,8 @@ earth = Body
   , orbit      = Orbit
     { semimajor                = 1.49598016e8 -- km
     , eccentricity             = 0.01671022
-    , inclination              = 5.0e-5       -- deg
-    , longitudeOfAscendingNode = -11.26064    -- deg
+    , inclination              = fromDegrees 5.0e-5
+    , longitudeOfAscendingNode = fromDegrees (-11.26064)
     , period                   = 365.25636    -- d
     }
   , satellites = [ luna ]
@@ -128,8 +128,8 @@ luna = Body
   , orbit      = Orbit
     { semimajor                = 384400 -- km
     , eccentricity             = 0.0554
-    , inclination              = 5.16   -- deg
-    , longitudeOfAscendingNode = 125.08 -- deg
+    , inclination              = fromDegrees 5.16
+    , longitudeOfAscendingNode = fromDegrees 125.08
     , period                   = 27.322 -- d
     }
   , satellites = []
@@ -144,8 +144,8 @@ mars = Body
   , orbit      = Orbit
     { semimajor                = 2.27936834e8 -- km
     , eccentricity             = 0.09341233
-    , inclination              = 1.85061      -- deg
-    , longitudeOfAscendingNode = 49.57854     -- deg
+    , inclination              = fromDegrees 1.85061
+    , longitudeOfAscendingNode = fromDegrees 49.57854
     , period                   = 686.9796     -- d
     }
   , satellites = []
@@ -160,8 +160,8 @@ jupiter = Body
   , orbit      = Orbit
     { semimajor                = 778412026.7751428 -- km
     , eccentricity             = 0.04839266
-    , inclination              = 1.30530           -- deg
-    , longitudeOfAscendingNode = 100.55615         -- deg
+    , inclination              = fromDegrees 1.30530
+    , longitudeOfAscendingNode = fromDegrees 100.55615
     , period                   = 4332.589          -- d
     }
   , satellites = []
