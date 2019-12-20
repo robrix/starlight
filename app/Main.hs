@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, GeneralizedNewtypeDeriving, NamedFieldPuns, OverloadedStrings, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds, DisambiguateRecordFields, FlexibleContexts, GeneralizedNewtypeDeriving, NamedFieldPuns, OverloadedStrings, TypeApplications, TypeOperators #-}
 module Main
 ( main
 ) where
@@ -44,6 +44,7 @@ import Physics.Delta
 import Physics.Radians
 import Physics.Seconds
 import qualified SDL
+import qualified Starlight.Body as S
 import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
@@ -170,6 +171,21 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
                   !*! scaled     (V3 r r 1)
 
                 drawArrays LineLoop (Range 0 (length starVertices))
+
+              let orbit = S.Orbit
+                    { eccentricity = 0.75
+                    , semimajor = 200
+                    , inclination = 0
+                    , longitudeOfAscendingNode = 0
+                    , period = 10
+                    }
+              t <- getSeconds . getDelta . realToFrac <$> since start
+              set @"matrix3"
+                $   window
+                !*! translated (uncurry cartesian2 (S.position orbit t))
+                !*! scaled     (V3 10 10 1)
+
+              drawArrays LineLoop (Range 0 (length starVertices))
 
             _position += getDelta velocity
 
