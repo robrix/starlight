@@ -17,12 +17,13 @@ import Linear.V4
 import UI.Colour
 import Unit.Angle
 import Unit.Length
+import Unit.Mass
 import Unit.Time
 
 data Body = Body
   { name       :: String
   , radius     :: Kilometres Float
-  , mass       :: Float
+  , mass       :: Kilograms Float
   , colour     :: Colour Float
   , orbit      :: Orbit
   , satellites :: [Body]
@@ -55,7 +56,7 @@ sol :: Body
 sol = Body
   { name       = "Sol"
   , radius     = 695500.0
-  , mass       = 1.9885e30 -- kg
+  , mass       = 1.9885e30
   , colour     = V4 1 1 0 1
   , orbit      = Orbit
     { semimajor                = 0
@@ -77,7 +78,7 @@ mercury :: Body
 mercury = Body
   { name       = "Mercury"
   , radius     = 2439.7
-  , mass       = 3.302e23 -- kg
+  , mass       = 3.302e23
   , colour     = white
   , orbit      = Orbit
     { semimajor                = 5.79092257e7
@@ -93,7 +94,7 @@ venus :: Body
 venus = Body
   { name       = "Venus"
   , radius     = 6051.9
-  , mass       = 48.685e23 -- kg
+  , mass       = 48.685e23
   , colour     = white
   , orbit      = Orbit
     { semimajor                = 1.08209019e8
@@ -109,7 +110,7 @@ earth :: Body
 earth = Body
   { name       = "Earth"
   , radius     = 6378.14
-  , mass       = 5.97219e24 -- kg
+  , mass       = 5.97219e24
   , colour     = white
   , orbit      = Orbit
     { semimajor                = 1.49598016e8
@@ -125,7 +126,7 @@ luna :: Body
 luna = Body
   { name       = "Luna"
   , radius     = 1737.5
-  , mass       = 7.342e22 -- kg
+  , mass       = 7.342e22
   , colour     = white
   , orbit      = Orbit
     { semimajor                = 384400
@@ -141,7 +142,7 @@ mars :: Body
 mars = Body
   { name       = "Mars"
   , radius     = 3397
-  , mass       = 6.4171e23 -- kg
+  , mass       = 6.4171e23
   , colour     = white
   , orbit      = Orbit
     { semimajor                = 2.27936834e8
@@ -157,7 +158,7 @@ jupiter :: Body
 jupiter = Body
   { name       = "Jupiter"
   , radius     = 69911
-  , mass       = 1898.13e24 -- kg
+  , mass       = 1898.13e24
   , colour     = white
   , orbit      = Orbit
     { semimajor                = 778412026.7751428
