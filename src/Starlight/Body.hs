@@ -40,10 +40,11 @@ position :: Orbit -> Float -> (Radians Float, Float)
 position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) where
   meanAnomaly = meanMotion * t
   meanMotion = (2 * pi) / period
-  eccentricAnomaly = converge (\ ea -> ea - eccentricity * sin ea - meanAnomaly) meanAnomaly where
-    converge f = go where
-      go a | a' <- f a = if abs (a' - a) < epsilon then a' else go a'
-      epsilon = 0.01
+  eccentricAnomaly = iter 10 (\ ea -> ea - eccentricity * sin ea - meanAnomaly) meanAnomaly where
+    iter n f = go n where
+      go n a
+        | n <= 0    = a
+        | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly = 2 * atan (sqrt (1 + eccentricity / 1 - eccentricity) * tan (eccentricAnomaly * 0.5))
   r = semimajor * (1 - eccentricity * cos eccentricAnomaly)
 
