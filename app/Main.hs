@@ -205,23 +205,18 @@ input
 input = Window.input go >> get where
   go (SDL.Event _ p) = case p of
     SDL.QuitEvent -> empty
-    SDL.KeyboardEvent (SDL.KeyboardEventData _ pressed _ (SDL.Keysym _ kc _)) -> case pressed of
-      SDL.Pressed  -> press   kc
-      SDL.Released -> release kc
+    SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ (SDL.Keysym _ kc _)) -> key p kc
     _ -> pure ()
 
 
-newtype Input = Input
-  { unInput :: IntSet.IntSet
-  }
+newtype Input = Input { unInput :: IntSet.IntSet }
   deriving (Monoid, Semigroup)
 
-inInput :: (IntSet.IntSet -> IntSet.IntSet) -> Input -> Input
-inInput = coerce
-
-press, release :: Has (State Input) sig m => SDL.Keycode -> m ()
-press   = modify . inInput . IntSet.insert . fromIntegral . SDL.unwrapKeycode
-release = modify . inInput . IntSet.delete . fromIntegral . SDL.unwrapKeycode
+key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keycode -> m ()
+key m = modify @Input . coerce . case m of
+  { SDL.Pressed  -> IntSet.insert
+  ; SDL.Released -> IntSet.delete }
+  . fromIntegral . SDL.unwrapKeycode
 
 pressed :: SDL.Keycode -> Input -> Bool
 pressed code = IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput
