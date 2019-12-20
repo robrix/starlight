@@ -51,7 +51,7 @@ import UI.Label
 
 main :: HasCallStack => IO ()
 main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
-  tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 288
+  tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 36
   let shipVertices =
         [ V3 1      0      0
         , V3 0      (-0.5) 0
