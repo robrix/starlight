@@ -13,6 +13,7 @@ import Control.Effect.Lift
 import qualified Control.Exception.Lift as E
 import Control.Monad (when)
 import Data.Coerce (coerce)
+import Data.Foldable (for_)
 import Data.Function (fix)
 import Data.Maybe (isJust)
 import qualified Data.IntSet as IntSet
@@ -163,13 +164,14 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
               drawArrays LineLoop (Range 0 4)
 
               bind (Just starArray)
-              set @"matrix3"
-                $   window
-                !*! translated (negated (unP position))
-                !*! scaled     (V3 50 50 1)
-                !*! rotated    0
+              for_ [10, 50] $ \ r -> do
+                set @"matrix3"
+                  $   window
+                  !*! translated (negated (unP position))
+                  !*! scaled     (V3 r r 1)
+                  !*! rotated    0
 
-              drawArrays LineLoop (Range 0 (length starVertices))
+                drawArrays LineLoop (Range 0 (length starVertices))
 
             _position += getDelta velocity
 
