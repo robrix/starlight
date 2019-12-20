@@ -1,2 +1,5 @@
 module Unit.Mass
-() where
+( Kilograms(..)
+) where
+
+newtype Kilograms a = Kilograms { getKilograms :: a }
