@@ -1,6 +1,8 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Starlight.Body
 ( Body(..)
 , Orbit(..)
+, position
   -- * Solar bodies
 , sol
 , mercury
@@ -12,6 +14,7 @@ module Starlight.Body
 ) where
 
 import Linear.V4
+import Physics.Radians
 import UI.Colour
 
 data Body = Body
@@ -32,6 +35,18 @@ data Orbit = Orbit
   , longitudeOfAscendingNode :: Float
   , period                   :: Float
   }
+
+position :: Orbit -> Float -> (Radians Float, Float)
+position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) where
+  meanAnomaly = meanMotion * t
+  meanMotion = (2 * pi) / period
+  eccentricAnomaly = converge (\ ea -> ea - eccentricity * sin ea - meanAnomaly) meanAnomaly where
+    converge f = go where
+      go a | a' <- f a = if abs (a' - a) < epsilon then a' else go a'
+      epsilon = 0.01
+  trueAnomaly = 2 * atan (sqrt (1 + eccentricity / 1 - eccentricity) * tan (eccentricAnomaly * 0.5))
+  r = semimajor * (1 - eccentricity * cos eccentricAnomaly)
+
 
 sol :: Body
 sol = Body
