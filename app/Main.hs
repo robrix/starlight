@@ -111,7 +111,7 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
             input <- input
             t <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
 
-            let thrust  = t *  0.01
+            let thrust  = t *  1
                 angular = t *^ pi
 
             when (pressed SDL.KeycodeUp   input) $ do
@@ -162,8 +162,8 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
 
               bind (Just starArray)
               set @"matrix3"
-                $   translated (negated (unP position))
-                !*! scaled     (V3 sx sy 1)
+                $   scaled     (V3 sx sy 1)
+                !*! translated (negated (unP position))
                 !*! scaled     (V3 50 50 1)
                 !*! rotated    0
 
