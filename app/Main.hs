@@ -66,18 +66,15 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
         ]
       starVertices = circle 1 32
 
-  Window.runWindow "Starlight" (V2 1024 768)
-    . runFinally
-    . runTime
-    . runProgram
+  Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
+    runProgram
     . evalState @Input mempty
     . evalState PlayerState
       { position = 0
       , velocity = 0
       , rotation = 0
       }
-    $ (\ m -> now >>= \ now -> evalState now m)
-    $ do
+    . evalState start $ do
       stars <- build
         @'[ "resolution" '::: V2 Float
           , "origin"     '::: Point V2 Float ]
