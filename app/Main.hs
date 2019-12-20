@@ -166,9 +166,10 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
               drawArrays LineLoop (Range 0 4)
 
               bind (Just starArray)
-              for_ [10, 50] $ \ r -> do
+              for_ [(10, 100), (50, 0)] $ \ (r, pos) -> do
                 set @"matrix3"
                   $   window
+                  !*! translated pos
                   !*! scaled     (V3 r r 1)
                   !*! rotated    0
 
