@@ -16,6 +16,7 @@ module Starlight.Body
 import Linear.V4
 import UI.Colour
 import Unit.Angle
+import Unit.Time
 
 data Body = Body
   { name       :: String
@@ -33,12 +34,12 @@ data Orbit = Orbit
   , semimajor                :: Float
   , inclination              :: Radians Float
   , longitudeOfAscendingNode :: Radians Float
-  , period                   :: Float
+  , period                   :: Seconds Float
   }
 
-position :: Orbit -> Float -> (Radians Float, Float)
+position :: Orbit -> Seconds Float -> (Radians Float, Float)
 position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) where
-  meanAnomaly = meanMotion * t
+  meanAnomaly = getSeconds (meanMotion * t)
   meanMotion = (2 * pi) / period
   eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity * sin ea) meanAnomaly where
     iter n f = go n where
@@ -82,7 +83,7 @@ mercury = Body
     , eccentricity             = 0.20563069
     , inclination              = fromDegrees 7.00487
     , longitudeOfAscendingNode = fromDegrees 48.33167
-    , period                   = 87.96926     -- d
+    , period                   = fromDays 87.96926
     }
   , satellites = []
   }
@@ -98,7 +99,7 @@ venus = Body
     , eccentricity             = 0.00677323
     , inclination              = fromDegrees 3.39471
     , longitudeOfAscendingNode = fromDegrees 181.97973
-    , period                   = 224.7008     -- d
+    , period                   = fromDays 224.7008
     }
   , satellites = []
   }
@@ -114,7 +115,7 @@ earth = Body
     , eccentricity             = 0.01671022
     , inclination              = fromDegrees 5.0e-5
     , longitudeOfAscendingNode = fromDegrees (-11.26064)
-    , period                   = 365.25636    -- d
+    , period                   = fromDays 365.25636
     }
   , satellites = [ luna ]
   }
@@ -130,7 +131,7 @@ luna = Body
     , eccentricity             = 0.0554
     , inclination              = fromDegrees 5.16
     , longitudeOfAscendingNode = fromDegrees 125.08
-    , period                   = 27.322 -- d
+    , period                   = fromDays 27.322
     }
   , satellites = []
   }
@@ -146,7 +147,7 @@ mars = Body
     , eccentricity             = 0.09341233
     , inclination              = fromDegrees 1.85061
     , longitudeOfAscendingNode = fromDegrees 49.57854
-    , period                   = 686.9796     -- d
+    , period                   = fromDays 686.9796
     }
   , satellites = []
   }
@@ -162,7 +163,7 @@ jupiter = Body
     , eccentricity             = 0.04839266
     , inclination              = fromDegrees 1.30530
     , longitudeOfAscendingNode = fromDegrees 100.55615
-    , period                   = 4332.589          -- d
+    , period                   = fromDays 4332.589
     }
   , satellites = []
   }
