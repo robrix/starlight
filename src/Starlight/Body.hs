@@ -19,7 +19,7 @@ data Body = Body
   , radius     :: Float
   , mass       :: Float
   , colour     :: Colour Float
-  , orbit      :: Maybe Orbit
+  , orbit      :: Orbit
   , satellites :: [Body]
   }
 
@@ -37,7 +37,13 @@ sol = Body
   , radius     = 695500.0  -- km
   , mass       = 1.9885e30 -- kg
   , colour     = V4 1 1 0 1
-  , orbit      = Nothing
+  , orbit      = Orbit
+    { semimajor                = 0
+    , eccentricity             = 0
+    , inclination              = 0
+    , longitudeOfAscendingNode = 0
+    , period                   = 0
+    }
   , satellites =
     [ mercury
     , venus
@@ -53,7 +59,7 @@ mercury = Body
   , radius     = 2439.7 -- km
   , mass       = 3.302e23 -- kg
   , colour     = white
-  , orbit      = Just Orbit
+  , orbit      = Orbit
     { semimajor                = 5.79092257e7 -- km
     , eccentricity             = 0.20563069
     , inclination              = 7.00487      -- deg
@@ -69,7 +75,7 @@ venus = Body
   , radius     = 6051.9    -- km
   , mass       = 48.685e23 -- kg
   , colour     = white
-  , orbit      = Just Orbit
+  , orbit      = Orbit
     { semimajor                = 1.08209019e8 -- km
     , eccentricity             = 0.00677323
     , inclination              = 3.39471      -- deg
@@ -85,7 +91,7 @@ earth = Body
   , radius     = 6378.14    -- km
   , mass       = 5.97219e24 -- kg
   , colour     = white
-  , orbit      = Just Orbit
+  , orbit      = Orbit
     { semimajor                = 1.49598016e8 -- km
     , eccentricity             = 0.01671022
     , inclination              = 5.0e-5       -- deg
@@ -101,7 +107,7 @@ luna = Body
   , radius     = 1737.5   -- km
   , mass       = 7.342e22 -- kg
   , colour     = white
-  , orbit      = Just Orbit
+  , orbit      = Orbit
     { semimajor                = 384400 -- km
     , eccentricity             = 0.0554
     , inclination              = 5.16   -- deg
@@ -117,7 +123,7 @@ mars = Body
   , radius     = 3397      -- km
   , mass       = 6.4171e23 -- kg
   , colour     = white
-  , orbit      = Just Orbit
+  , orbit      = Orbit
     { semimajor                = 2.27936834e8 -- km
     , eccentricity             = 0.09341233
     , inclination              = 1.85061      -- deg
@@ -133,7 +139,7 @@ jupiter = Body
   , radius     = 69911      -- km
   , mass       = 1898.13e24 -- kg
   , colour     = white
-  , orbit      = Just Orbit
+  , orbit      = Orbit
     { semimajor                = 778412026.7751428 -- km
     , eccentricity             = 0.04839266
     , inclination              = 1.30530           -- deg
