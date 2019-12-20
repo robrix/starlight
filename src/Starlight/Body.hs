@@ -23,6 +23,8 @@ data Body = Body
   , satellites :: [Body]
   }
 
+-- FIXME: argument of periapsis
+-- FIXME: true anomaly
 data Orbit = Orbit
   { eccentricity             :: Float
   , semimajor                :: Float
