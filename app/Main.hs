@@ -168,7 +168,6 @@ main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
                   $   window
                   !*! translated pos
                   !*! scaled     (V3 r r 1)
-                  !*! rotated    0
 
                 drawArrays LineLoop (Range 0 (length starVertices))
 
