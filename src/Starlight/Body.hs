@@ -45,7 +45,7 @@ position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) 
       go n a
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
-  trueAnomaly = 2 * atan (sqrt (1 + eccentricity / 1 - eccentricity) * tan (eccentricAnomaly * 0.5))
+  trueAnomaly = atan2 (sqrt (1 - eccentricity * eccentricity) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
   r = semimajor * (1 - eccentricity * cos eccentricAnomaly)
 
 
