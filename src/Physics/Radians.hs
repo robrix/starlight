@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveTraversable, GeneralizedNewtypeDeriving #-}
 module Physics.Radians
 ( Radians(..)
+, fromDegrees
 , cartesian2
 , polar2
 ) where
@@ -10,6 +11,10 @@ import Linear.V2
 
 newtype Radians a = Radians { getRadians :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Traversable, Uniform)
+
+fromDegrees :: Float -> Radians Float
+fromDegrees d = Radians (d * pi / 180)
+
 
 cartesian2 :: Floating a => Radians a -> a -> V2 a
 cartesian2 (Radians phi) r = V2 (r * cos phi) (r * sin phi)
