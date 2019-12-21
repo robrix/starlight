@@ -211,7 +211,7 @@ _velocity :: Lens' PlayerState (Delta (Point V2) Float)
 _velocity = lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens' PlayerState (Radians Float)
-_rotation = lens rotation (\ s r -> s { rotation = r })
+_rotation = lens rotation (\ s r -> s { rotation = wrap r })
 
 
 input
