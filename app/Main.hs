@@ -211,7 +211,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
       $   window
       !*! translated (unP position)
       !*! scaled     (V3 25 25 1)
-      !*! rotated    (getRadians rotation)
+      !*! rotated    rotation
 
     drawArrays LineLoop (Range 0 4)
 
