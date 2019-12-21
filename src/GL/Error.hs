@@ -28,14 +28,14 @@ data GLError
   | Other String
 
 instance Show GLError where
-  showsPrec _ e = case e of
-    InvalidEnum -> showString "GL_INVALID_ENUM"
-    InvalidValue -> showString "GL_INVALID_VALUE"
-    InvalidOperation -> showString "GL_INVALID_OPERATION"
+  showsPrec _ = \case
+    InvalidEnum                 -> showString "GL_INVALID_ENUM"
+    InvalidValue                -> showString "GL_INVALID_VALUE"
+    InvalidOperation            -> showString "GL_INVALID_OPERATION"
     InvalidFramebufferOperation -> showString "GL_INVALID_FRAMEBUFFER_OPERATION"
-    OutOfMemory -> showString "GL_OUT_OF_MEMORY"
-    Source s t -> showString s . showChar '\n' . showString t
-    Other s -> showString s
+    OutOfMemory                 -> showString "GL_OUT_OF_MEMORY"
+    Source s t                  -> showString s . showChar '\n' . showString t
+    Other s                     -> showString s
 
 
 data GLException = GLException GLError CallStack
