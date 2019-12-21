@@ -167,19 +167,20 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
               t <- getSeconds . getDelta . realToFrac <$> since start
 
               let factor = 0.000000718907261
-                  drawBody S.Body { radius = Metres r, colour, orbit, satellites } = do
+                  drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
+                    let pos = rel + uncurry cartesian2 (S.position orbit (t * 86400))
                     set @"colour" colour
                     set @"matrix3"
                       $   window
-                      !*! translated (factor *^ uncurry cartesian2 (S.position orbit (t * 86400)))
+                      !*! translated (factor *^ pos)
                       !*! scaled     (V3 (r * factor) (r * factor) 1)
 
                     drawArrays LineLoop (Range 0 (length starVertices))
 
-                    for_ satellites drawBody
+                    for_ satellites (drawBody pos)
 
               bind (Just starArray)
-              drawBody S.sol
+              drawBody 0 S.sol
 
             _position += getDelta velocity
 
