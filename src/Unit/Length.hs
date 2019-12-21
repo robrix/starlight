@@ -2,6 +2,7 @@
 module Unit.Length
 ( Metres(..)
 , fromKilometres
+, fromAUs
 , Kilometres(..)
 ) where
 
@@ -12,6 +13,9 @@ newtype Metres a = Metres { getMetres :: a }
 
 fromKilometres :: Num a => Kilometres a -> Metres a
 fromKilometres (Kilometres k) = Metres (k * 1000)
+
+fromAUs :: Num a => a -> Metres a
+fromAUs a = Metres (149597870700 * a)
 
 
 newtype Kilometres a = Kilometres { getKilometres :: a }

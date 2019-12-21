@@ -13,6 +13,7 @@ module Starlight.Body
 , mars
 , jupiter
 , saturn
+, uranus
 ) where
 
 import Linear.Exts
@@ -80,6 +81,7 @@ sol = Body
     , mars
     , jupiter
     , saturn
+    , uranus
     ]
   }
 
@@ -191,6 +193,22 @@ saturn = Body
     , inclination              = fromDegrees 2.485
     , longitudeOfAscendingNode = fromDegrees 113.665
     , period                   = fromDays 10759.22
+    }
+  , satellites = []
+  }
+
+uranus :: Body
+uranus = Body
+  { name       = "Uranus"
+  , radius     = fromKilometres 25362
+  , mass       = 86.813e24
+  , colour     = V4 (196/255) (221/255) (240/255) 1
+  , orbit      = Orbit
+    { semimajor                = fromAUs 19.2184
+    , eccentricity             = 0.046381
+    , inclination              = fromDegrees 0.773
+    , longitudeOfAscendingNode = fromDegrees 74.006
+    , period                   = fromDays 30688.5
     }
   , satellites = []
   }
