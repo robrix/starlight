@@ -63,7 +63,7 @@ sol = Body
     , eccentricity             = 0
     , inclination              = 0
     , longitudeOfAscendingNode = 0
-    , period                   = 0
+    , period                   = 1
     }
   , satellites =
     [ mercury
