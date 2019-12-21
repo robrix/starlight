@@ -45,6 +45,9 @@ instance Uniform (Linear.V4 Double) where
 instance Uniform (Linear.M33 Float) where
   uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
 
+instance Uniform (Linear.M33 Double) where
+  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3dv location 1 GL_FALSE . castPtr)
+
 instance Uniform (Linear.M44 Float) where
   uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
 
