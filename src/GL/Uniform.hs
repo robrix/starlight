@@ -27,6 +27,9 @@ instance Uniform Double where
 instance Uniform (Linear.V2 Float) where
   uniform location (Linear.V2 x y) = runLiftIO $ glUniform2f location x y
 
+instance Uniform (Linear.V2 Double) where
+  uniform location (Linear.V2 x y) = runLiftIO $ glUniform2d location x y
+
 instance Uniform (Linear.V3 Float) where
   uniform location (Linear.V3 x y z) = runLiftIO $ glUniform3f location x y z
 
