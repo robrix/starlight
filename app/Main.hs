@@ -12,6 +12,7 @@ import qualified Control.Effect.Lens as Lens
 import Control.Effect.Lift
 import qualified Control.Exception.Lift as E
 import Control.Monad (when)
+import Control.Monad.IO.Class.Lift (runLiftIO)
 import Data.Coerce (coerce)
 import Data.Foldable (for_)
 import Data.Function (fix)
@@ -28,6 +29,7 @@ import GL.Buffer
 import GL.Carrier.Program.Live
 import GL.Framebuffer as GL
 import GL.Object
+import qualified GL.Program as GL
 import GL.Range
 import GL.Scalar
 import GL.Shader
@@ -57,19 +59,6 @@ import Unit.Time
 main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
   tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 36
-  let shipVertices =
-        [ V3 1      0      0
-        , V3 0      (-0.5) 0
-        , V3 (-0.5) 0      0
-        , V3 0      0.5    0 :: V3 Float
-        ]
-      quadVertices =
-        [ V2 (-1) (-1)
-        , V2   1  (-1)
-        , V2 (-1)   1
-        , V2   1    1  :: V2 Float
-        ]
-      starVertices = circle 1 32
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     runProgram
@@ -99,69 +88,13 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_SCISSOR_TEST
 
       label <- setLabel label { colour = white } tahoma "hello"
-
-      let drawCanvas t PlayerState { position, velocity, rotation } = do
-            bind @Framebuffer Nothing
-
-            scale <- Window.scale
-            rect <- Rect 0 <$> Window.size
-            viewport $ scale *^ rect
-            scissor  $ scale *^ rect
-
-            setClearColour black
-            glClear GL_COLOR_BUFFER_BIT
-
-            bind (Just quadArray)
-
-            use stars $ do
-              scale <- Window.scale
-              size <- Window.size
-              set @"resolution" (size ^* (1 / scale))
-              set @"origin" position
-
-              drawArrays TriangleStrip (Range 0 4)
-
-            bind (Just shipArray)
-
-            scale <- Window.scale
-            size <- Window.size
-            let V2 sx sy = scale / size
-                window
-                  =   scaled (V3 sx sy 1)
-                  !*! translated (negated (unP position))
-
-            use ship $ do
-              set @"colour" $ V4 1 1 1 1
-              set @"matrix3"
-                $   window
-                !*! translated (unP position)
-                !*! scaled     (V3 25 25 1)
-                !*! rotated    (getRadians rotation)
-
-              drawArrays LineLoop (Range 0 4)
-
-              let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
-                    let pos = rel + uncurry cartesian2 (S.position orbit (getDelta t * 86400))
-                    set @"colour" colour
-                    set @"matrix3"
-                      $   window
-                      !*! translated (distanceScale *^ pos)
-                      !*! scaled     (V3 (r * distanceScale) (r * distanceScale) 1)
-
-                    drawArrays LineLoop (Range 0 (length starVertices))
-
-                    for_ satellites (drawBody pos)
-
-              bind (Just starArray)
-              drawBody 0 S.sol
-
-            _position += getDelta velocity
+      let drawState = DrawState { quadArray, shipArray, starArray, stars, ship }
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
         continue <- fmap isJust . runEmpty $ do
           state <- physics t =<< input
-          drawCanvas t state
+          drawCanvas drawState t state
         drawLabel label
         put =<< now
         when continue $
@@ -182,6 +115,25 @@ input = Window.input go >> get where
 
 distanceScale :: Float
 distanceScale = 0.000000718907261
+
+shipVertices :: [V3 Float]
+shipVertices =
+  [ V3 1      0      0
+  , V3 0      (-0.5) 0
+  , V3 (-0.5) 0      0
+  , V3 0      0.5    0 :: V3 Float
+  ]
+
+quadVertices :: [V2 Float]
+quadVertices =
+  [ V2 (-1) (-1)
+  , V2   1  (-1)
+  , V2 (-1)   1
+  , V2   1    1  :: V2 Float
+  ]
+
+starVertices :: [V2 Float]
+starVertices = circle 1 32
 
 physics
   :: ( Has (State UTCTime) sig m
@@ -222,7 +174,86 @@ physics t input = do
 
   applyGravity 0 S.sol
 
-  get
+  s@PlayerState { velocity } <- get
+  _position += getDelta velocity
+  pure s
+
+drawCanvas
+  :: ( Has (Lift IO) sig m
+     , Has Program sig m
+     , Has Window.Window sig m
+     )
+  => DrawState
+  -> Delta Seconds Float
+  -> PlayerState
+  -> m ()
+drawCanvas DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { position, rotation } = runLiftIO $ do
+  bind @Framebuffer Nothing
+
+  scale <- Window.scale
+  rect <- Rect 0 <$> Window.size
+  viewport $ scale *^ rect
+  scissor  $ scale *^ rect
+
+  setClearColour black
+  glClear GL_COLOR_BUFFER_BIT
+
+  bind (Just quadArray)
+
+  use stars $ do
+    scale <- Window.scale
+    size <- Window.size
+    set @"resolution" (size ^* (1 / scale))
+    set @"origin" position
+
+    drawArrays TriangleStrip (Range 0 4)
+
+  bind (Just shipArray)
+
+  scale <- Window.scale
+  size <- Window.size
+  let V2 sx sy = scale / size
+      window
+        =   scaled (V3 sx sy 1)
+        !*! translated (negated (unP position))
+
+  use ship $ do
+    set @"colour" $ V4 1 1 1 1
+    set @"matrix3"
+      $   window
+      !*! translated (unP position)
+      !*! scaled     (V3 25 25 1)
+      !*! rotated    (getRadians rotation)
+
+    drawArrays LineLoop (Range 0 4)
+
+    let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
+          let pos = rel + uncurry cartesian2 (S.position orbit (getDelta t * 86400))
+          set @"colour" colour
+          set @"matrix3"
+            $   window
+            !*! translated (distanceScale *^ pos)
+            !*! scaled     (V3 (r * distanceScale) (r * distanceScale) 1)
+
+          drawArrays LineLoop (Range 0 (length starVertices))
+
+          for_ satellites (drawBody pos)
+
+    bind (Just starArray)
+    drawBody 0 S.sol
+
+
+data DrawState = DrawState
+  { quadArray :: Array (V2 Float)
+  , starArray :: Array (V2 Float)
+  , shipArray :: Array (V3 Float)
+  , stars     :: GL.Program
+    '[ "resolution" '::: V2 Float
+     , "origin"     '::: Point V2 Float ]
+  , ship      :: GL.Program
+    '[ "colour"  '::: V4 Float
+     , "matrix3" '::: M33 Float ]
+  }
 
 
 data PlayerState = PlayerState
