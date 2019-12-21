@@ -77,10 +77,10 @@ checkingGLError action = withFrozenCallStack $ do
 
 throwGLError :: (Has (Lift IO) sig m, HasCallStack) => GLenum -> m ()
 throwGLError = \case
-  GL_NO_ERROR -> pure ()
-  GL_INVALID_ENUM -> E.throwIO $ GLException InvalidEnum callStack
-  GL_INVALID_VALUE -> E.throwIO $ GLException InvalidValue callStack
-  GL_INVALID_OPERATION -> E.throwIO $ GLException InvalidOperation callStack
+  GL_NO_ERROR                      -> pure ()
+  GL_INVALID_ENUM                  -> E.throwIO $ GLException InvalidEnum callStack
+  GL_INVALID_VALUE                 -> E.throwIO $ GLException InvalidValue callStack
+  GL_INVALID_OPERATION             -> E.throwIO $ GLException InvalidOperation callStack
   GL_INVALID_FRAMEBUFFER_OPERATION -> E.throwIO $ GLException InvalidFramebufferOperation callStack
-  GL_OUT_OF_MEMORY -> E.throwIO $ GLException OutOfMemory callStack
-  _ -> E.throwIO $ GLException (Other "Unknown") callStack
+  GL_OUT_OF_MEMORY                 -> E.throwIO $ GLException OutOfMemory callStack
+  _                                -> E.throwIO $ GLException (Other "Unknown") callStack
