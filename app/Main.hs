@@ -80,9 +80,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- label
 
-      (_, quadArray) <- loadVertices quadVertices
-      (_, shipArray) <- loadVertices shipVertices
-      (_, starArray) <- loadVertices starVertices
+      quadArray <- loadVertices quadVertices
+      shipArray <- loadVertices shipVertices
+      starArray <- loadVertices starVertices
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -286,7 +286,7 @@ pressed :: SDL.Keycode -> Input -> Bool
 pressed code = IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput
 
 
-loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Buffer 'GL.Buffer.Array (v n), Array (v n))
+loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Array (v n))
 loadVertices vertices = do
   buffer <- gen1
   array  <- gen1
@@ -296,5 +296,4 @@ loadVertices vertices = do
   copy buffer 0 vertices
 
   bind (Just array)
-  configureArray buffer array
-  pure (buffer, array)
+  array <$ configureArray buffer array
