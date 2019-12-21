@@ -159,41 +159,27 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
               set @"matrix3"
                 $   window
                 !*! translated (unP position)
-                !*! scaled     (V3 50 50 1)
+                !*! scaled     (V3 25 25 1)
                 !*! rotated    (getRadians rotation)
 
               drawArrays LineLoop (Range 0 4)
 
-              bind (Just starArray)
-              for_ [(10, 100), (50, 0)] $ \ (r, pos) -> do
-                set @"matrix3"
-                  $   window
-                  !*! translated pos
-                  !*! scaled     (V3 r r 1)
-
-                drawArrays LineLoop (Range 0 (length starVertices))
-
               t <- getSeconds . getDelta . realToFrac <$> since start
 
-              let orbit = S.Orbit
-                    { eccentricity = 0.75
-                    , semimajor = 200
-                    , inclination = 0
-                    , longitudeOfAscendingNode = 0
-                    , period = 10
-                    }
+              let factor = 0.000000718907261
                   drawBody S.Body { radius = Metres r, colour, orbit, satellites } = do
                     set @"colour" colour
                     set @"matrix3"
                       $   window
-                      !*! translated (uncurry cartesian2 (S.position orbit t))
-                      !*! scaled     (V3 r r 1)
+                      !*! translated (factor *^ uncurry cartesian2 (S.position orbit t))
+                      !*! scaled     (V3 (r * factor) (r * factor) 1)
 
                     drawArrays LineLoop (Range 0 (length starVertices))
 
                     for_ satellites drawBody
 
-              drawBody S.Body { name = "", radius = 10, mass = 0, colour = V4 1 1 0 1, orbit = orbit, satellites = [] }
+              bind (Just starArray)
+              drawBody S.sol
 
             _position += getDelta velocity
 
