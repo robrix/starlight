@@ -35,6 +35,7 @@ import Lens.Micro (Lens', lens)
 import Linear.Affine
 import Linear.Exts
 import Linear.Matrix
+import Linear.Metric
 import Linear.V (Size)
 import Linear.V2 as Linear
 import Linear.V3 as Linear
@@ -49,6 +50,7 @@ import UI.Font as Font
 import UI.Label
 import Unit.Angle
 import Unit.Length
+import Unit.Mass
 import Unit.Time
 
 main :: HasCallStack => IO ()
@@ -73,7 +75,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
     . evalState @Input mempty
     . evalState PlayerState
       { position = P (V2 700 0)
-      , velocity = 0
+      , velocity = Delta (P (V2 0 10))
       , rotation = 0
       }
     . evalState start $ do
@@ -130,6 +132,18 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
             when (pressed SDL.KeycodeRight input) $
               _rotation -= angular
 
+            t <- getSeconds . getDelta . realToFrac <$> since start
+
+            let distanceScale = 0.000000718907261
+                applyGravity rel S.Body { mass, orbit, satellites } = do
+                  P position <- Lens.use _position
+                  let pos = rel + distanceScale *^ uncurry cartesian2 (S.position orbit (t * 86400))
+                      r = qd pos position
+                  _velocity += Delta (P (((0.0000000000000000001 * distanceScale * getKilograms mass) / r) *^ normalize (pos ^-^ position)))
+                  for_ satellites (applyGravity pos)
+
+            applyGravity 0 S.sol
+
             PlayerState
               { position
               , velocity
@@ -164,16 +178,13 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
               drawArrays LineLoop (Range 0 4)
 
-              t <- getSeconds . getDelta . realToFrac <$> since start
-
-              let factor = 0.000000718907261
-                  drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
+              let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
                     let pos = rel + uncurry cartesian2 (S.position orbit (t * 86400))
                     set @"colour" colour
                     set @"matrix3"
                       $   window
-                      !*! translated (factor *^ pos)
-                      !*! scaled     (V3 (r * factor) (r * factor) 1)
+                      !*! translated (distanceScale *^ pos)
+                      !*! scaled     (V3 (r * distanceScale) (r * distanceScale) 1)
 
                     drawArrays LineLoop (Range 0 (length starVertices))
 
