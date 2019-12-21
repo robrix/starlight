@@ -182,7 +182,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
                     , longitudeOfAscendingNode = 0
                     , period = 10
                     }
-                  drawBody S.Body { radius = Metres r, orbit, satellites } = do
+                  drawBody S.Body { radius = Metres r, colour, orbit, satellites } = do
+                    set @"colour" colour
                     set @"matrix3"
                       $   window
                       !*! translated (uncurry cartesian2 (S.position orbit t))
