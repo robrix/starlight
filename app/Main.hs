@@ -171,7 +171,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
                     set @"colour" colour
                     set @"matrix3"
                       $   window
-                      !*! translated (factor *^ uncurry cartesian2 (S.position orbit t))
+                      !*! translated (factor *^ uncurry cartesian2 (S.position orbit { S.period = S.period orbit * (1/86400) } t))
                       !*! scaled     (V3 (r * factor) (r * factor) 1)
 
                     drawArrays LineLoop (Range 0 (length starVertices))
