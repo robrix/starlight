@@ -75,8 +75,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
     . evalState @Input mempty
     . evalState PlayerState
       { position = P (V2 700 0)
-      , velocity = Delta (P (V2 0 10))
-      , rotation = 0
+      , velocity = Delta (P (V2 0 14))
+      , rotation = pi/2
       }
     . evalState start $ do
       stars <- build
