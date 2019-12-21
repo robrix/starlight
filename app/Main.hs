@@ -139,7 +139,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
                   P position <- Lens.use _position
                   let pos = rel + distanceScale *^ uncurry cartesian2 (S.position orbit (t * 86400))
                       r = qd pos position
-                  _velocity += Delta (P (((0.0000000000000000001 * distanceScale * getKilograms mass) / r) *^ normalize (pos ^-^ position)))
+                  _velocity += Delta (P (0.0000000000000000001 * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
                   for_ satellites (applyGravity pos)
 
             applyGravity 0 S.sol
