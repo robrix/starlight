@@ -32,7 +32,7 @@ import GL.Range
 import GL.Scalar
 import GL.Shader
 import Graphics.GL.Core41
-import Lens.Micro (Lens', lens)
+import Lens.Micro (Lens', (^.), lens)
 import Linear.Affine
 import Linear.Exts
 import Linear.Matrix
@@ -154,13 +154,14 @@ physics t input = do
 
   let applyGravity rel S.Body { mass, orbit, satellites } = do
         P position <- Lens.use _position
-        let pos = rel + distanceScale *^ uncurry cartesian2 (S.position orbit (getDelta t * 86400))
+        let trans = rel + S.transform orbit (getDelta t * 86400)
+            pos = (trans !* V3 0 0 1) ^. _xy
             r = qd pos position
             bigG = 6.67430e-11
         _velocity += Delta (P (dt * bigG * distanceScale * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
-        for_ satellites (applyGravity pos)
+        for_ satellites (applyGravity trans)
 
-  applyGravity 0 S.sol
+  applyGravity (scaled (V3 distanceScale distanceScale 1)) S.sol
 
   s@PlayerState { velocity } <- get
   _position += getDelta velocity
