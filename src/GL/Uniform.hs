@@ -21,6 +21,9 @@ class Uniform t where
 instance Uniform Float where
   uniform = fmap runLiftIO . glUniform1f
 
+instance Uniform Double where
+  uniform = fmap runLiftIO . glUniform1d
+
 instance Uniform (Linear.V2 Float) where
   uniform location (Linear.V2 x y) = runLiftIO $ glUniform2f location x y
 
