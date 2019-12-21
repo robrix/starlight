@@ -30,7 +30,6 @@ data Body = Body
   }
 
 -- FIXME: argument of periapsis
--- FIXME: true anomaly
 data Orbit = Orbit
   { eccentricity             :: Float
   , semimajor                :: Metres Float
