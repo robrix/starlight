@@ -41,14 +41,14 @@ import Linear.V3 as Linear
 import Linear.V4 as Linear
 import Linear.Vector as Linear
 import Physics.Delta
-import Unit.Angle
-import Unit.Time
 import qualified SDL
 import qualified Starlight.Body as S
 import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
 import UI.Label
+import Unit.Angle
+import Unit.Time
 
 main :: HasCallStack => IO ()
 main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
