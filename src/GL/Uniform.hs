@@ -42,10 +42,10 @@ instance Uniform (Linear.V4 Float) where
 instance Uniform (Linear.V4 Double) where
   uniform location (Linear.V4 x y z w) = runLiftIO $ glUniform4d location x y z w
 
-instance Uniform (Linear.M44 Float) where
-  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
-
 instance Uniform (Linear.M33 Float) where
   uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
+
+instance Uniform (Linear.M44 Float) where
+  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Linear.Point f a)
