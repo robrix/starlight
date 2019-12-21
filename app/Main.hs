@@ -120,7 +120,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
               rotation <- Lens.use _rotation
               velocity <- Lens.use _velocity
               let angle = fst (polar2 (negated (unP (getDelta velocity))))
-                  delta = rotation - angle
+                  delta = wrap $ rotation - angle
                   (+-=) = if delta < 0 then (+=) else (-=)
               _rotation +-= min angular (abs delta)
 
