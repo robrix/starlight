@@ -11,6 +11,7 @@ module Starlight.Body
 , luna
 , mars
 , jupiter
+, saturn
 ) where
 
 import Linear.V4
@@ -70,6 +71,7 @@ sol = Body
     , earth
     , mars
     , jupiter
+    , saturn
     ]
   }
 
@@ -165,6 +167,22 @@ jupiter = Body
     , inclination              = fromDegrees 1.30530
     , longitudeOfAscendingNode = fromDegrees 100.55615
     , period                   = fromDays 4332.589
+    }
+  , satellites = []
+  }
+
+saturn :: Body
+saturn = Body
+  { name       = "Saturn"
+  , radius     = fromKilometres 58232
+  , mass       = 5.6834e26
+  , colour     = V4 (229/255) (216/255) (167/255) 1
+  , orbit      = Orbit
+    { semimajor                = fromKilometres 1433.53e6
+    , eccentricity             = 0.0565
+    , inclination              = fromDegrees 2.485
+    , longitudeOfAscendingNode = fromDegrees 113.665
+    , period                   = fromDays 10759.22
     }
   , satellites = []
   }
