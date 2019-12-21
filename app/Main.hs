@@ -13,11 +13,9 @@ import Control.Effect.Lift
 import qualified Control.Exception.Lift as E
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift (runLiftIO)
-import Data.Coerce (coerce)
 import Data.Foldable (for_)
 import Data.Function (fix)
 import Data.Maybe (isJust)
-import qualified Data.IntSet as IntSet
 import Data.Time.Clock (UTCTime)
 import Foreign.Storable (Storable)
 import Geometry.Circle
@@ -47,6 +45,7 @@ import Linear.Vector as Linear
 import Physics.Delta
 import qualified SDL
 import qualified Starlight.Body as S
+import Starlight.Input
 import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
@@ -271,19 +270,6 @@ _velocity = lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens' PlayerState (Radians Float)
 _rotation = lens rotation (\ s r -> s { rotation = wrap r })
-
-
-newtype Input = Input { unInput :: IntSet.IntSet }
-  deriving (Monoid, Semigroup)
-
-key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keycode -> m ()
-key m = modify @Input . coerce . case m of
-  { SDL.Pressed  -> IntSet.insert
-  ; SDL.Released -> IntSet.delete }
-  . fromIntegral . SDL.unwrapKeycode
-
-pressed :: SDL.Keycode -> Input -> Bool
-pressed code = IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput
 
 
 loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Array (v n))
