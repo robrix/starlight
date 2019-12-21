@@ -216,19 +216,19 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
     drawArrays LineLoop (Range 0 4)
 
     let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
-          let pos = rel + distanceScale *^ uncurry cartesian2 (S.position orbit (getDelta t * 86400))
+          let trans = rel !*! S.transform orbit (getDelta t * 86400)
           set @"colour" colour
           set @"matrix3"
             $   window
-            !*! translated pos
-            !*! scaled     (V3 (r * distanceScale) (r * distanceScale) 1)
+            !*! trans
+            !*! scaled (V3 r r 1)
 
           drawArrays LineLoop (Range 0 (length starVertices))
 
-          for_ satellites (drawBody pos)
+          for_ satellites (drawBody trans)
 
     bind (Just starArray)
-    drawBody 0 S.sol
+    drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
 
 
 data DrawState = DrawState
