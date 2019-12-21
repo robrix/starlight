@@ -2,6 +2,7 @@
 module Starlight.Body
 ( Body(..)
 , Orbit(..)
+, transform
 , position
   -- * Solar bodies
 , sol
@@ -14,6 +15,8 @@ module Starlight.Body
 , saturn
 ) where
 
+import Linear.Exts
+import Linear.Matrix
 import Linear.V4
 import UI.Colour
 import Unit.Angle
@@ -38,6 +41,11 @@ data Orbit = Orbit
   , longitudeOfAscendingNode :: Radians Float
   , period                   :: Seconds Float
   }
+
+transform :: Orbit -> Seconds Float -> M33 Float
+transform orbit t
+  =   rotated    (longitudeOfAscendingNode orbit)
+  !*! translated (uncurry cartesian2 (position orbit t))
 
 position :: Orbit -> Seconds Float -> (Radians Float, Float)
 position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) where
