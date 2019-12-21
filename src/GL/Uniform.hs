@@ -33,6 +33,9 @@ instance Uniform (Linear.V2 Double) where
 instance Uniform (Linear.V3 Float) where
   uniform location (Linear.V3 x y z) = runLiftIO $ glUniform3f location x y z
 
+instance Uniform (Linear.V3 Double) where
+  uniform location (Linear.V3 x y z) = runLiftIO $ glUniform3d location x y z
+
 instance Uniform (Linear.V4 Float) where
   uniform location (Linear.V4 x y z w) = runLiftIO $ glUniform4f location x y z w
 
