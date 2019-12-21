@@ -63,8 +63,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
     runProgram
     . evalState @Input mempty
     . evalState PlayerState
-      { position = P (V2 700 0)
-      , velocity = Delta (P (V2 0 14))
+      { position = P (V2 1200 0)
+      , velocity = Delta (P (V2 0 30))
       , rotation = pi/2
       }
     . evalState start $ do
@@ -156,7 +156,8 @@ physics t input = do
         P position <- Lens.use _position
         let pos = rel + distanceScale *^ uncurry cartesian2 (S.position orbit (getDelta t * 86400))
             r = qd pos position
-        _velocity += Delta (P (0.0000000000000000001 * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
+            bigG = 6.67430e-11
+        _velocity += Delta (P (dt * bigG * distanceScale * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
         for_ satellites (applyGravity pos)
 
   applyGravity 0 S.sol
