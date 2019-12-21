@@ -71,6 +71,7 @@ library
     Physics.Delta
     S
     Starlight.Body
+    Starlight.Input
     UI.Carrier.Window
     UI.Colour
     UI.Effect.Window
