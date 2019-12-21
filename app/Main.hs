@@ -203,6 +203,19 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
           Window.swap >> loop
 
 
+input
+  :: ( Has Empty sig m
+     , Has (State Input) sig m
+     , Has Window.Window sig m
+     )
+  => m Input
+input = Window.input go >> get where
+  go (SDL.Event _ p) = case p of
+    SDL.QuitEvent -> empty
+    SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ (SDL.Keysym _ kc _)) -> key p kc
+    _ -> pure ()
+
+
 data PlayerState = PlayerState
   { position :: !(Point V2 Float)
   , velocity :: !(Delta (Point V2) Float)
@@ -218,19 +231,6 @@ _velocity = lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens' PlayerState (Radians Float)
 _rotation = lens rotation (\ s r -> s { rotation = wrap r })
-
-
-input
-  :: ( Has Empty sig m
-     , Has (State Input) sig m
-     , Has Window.Window sig m
-     )
-  => m Input
-input = Window.input go >> get where
-  go (SDL.Event _ p) = case p of
-    SDL.QuitEvent -> empty
-    SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ (SDL.Keysym _ kc _)) -> key p kc
-    _ -> pure ()
 
 
 newtype Input = Input { unInput :: IntSet.IntSet }
