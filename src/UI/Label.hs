@@ -156,7 +156,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
           !*! translated (negated (rectMin b))
         drawArrays Triangles range
 
-  pure l { bounds = bounds } where
+  pure l { bounds } where
   jitterPattern
     = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
       , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
