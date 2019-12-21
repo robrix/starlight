@@ -48,6 +48,7 @@ import UI.Colour
 import UI.Font as Font
 import UI.Label
 import Unit.Angle
+import Unit.Length
 import Unit.Time
 
 main :: HasCallStack => IO ()
@@ -172,6 +173,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
                 drawArrays LineLoop (Range 0 (length starVertices))
 
+              t <- getSeconds . getDelta . realToFrac <$> since start
+
               let orbit = S.Orbit
                     { eccentricity = 0.75
                     , semimajor = 200
@@ -179,13 +182,17 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
                     , longitudeOfAscendingNode = 0
                     , period = 10
                     }
-              t <- getSeconds . getDelta . realToFrac <$> since start
-              set @"matrix3"
-                $   window
-                !*! translated (uncurry cartesian2 (S.position orbit t))
-                !*! scaled     (V3 10 10 1)
+                  drawBody S.Body { radius = Metres r, orbit, satellites } = do
+                    set @"matrix3"
+                      $   window
+                      !*! translated (uncurry cartesian2 (S.position orbit t))
+                      !*! scaled     (V3 r r 1)
 
-              drawArrays LineLoop (Range 0 (length starVertices))
+                    drawArrays LineLoop (Range 0 (length starVertices))
+
+                    for_ satellites drawBody
+
+              drawBody S.Body { name = "", radius = 10, mass = 0, colour = V4 1 1 0 1, orbit = orbit, satellites = [] }
 
             _position += getDelta velocity
 
