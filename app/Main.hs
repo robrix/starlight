@@ -72,7 +72,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
     runProgram
     . evalState @Input mempty
     . evalState PlayerState
-      { position = 0
+      { position = P (V2 700 0)
       , velocity = 0
       , rotation = 0
       }
