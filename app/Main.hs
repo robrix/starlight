@@ -100,7 +100,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- setLabel label { colour = white } tahoma "hello"
 
-      let drawCanvas = do
+      let drawCanvas t PlayerState { position, velocity, rotation } = do
             bind @Framebuffer Nothing
 
             scale <- Window.scale
@@ -110,12 +110,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
             setClearColour black
             glClear GL_COLOR_BUFFER_BIT
-
-            t <- realToFrac <$> since start
-            PlayerState
-              { position
-              , velocity
-              , rotation } <- physics t =<< input
 
             bind (Just quadArray)
 
@@ -164,7 +158,10 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
             _position += getDelta velocity
 
       fix $ \ loop -> do
-        continue <- isJust <$> runEmpty drawCanvas
+        t <- realToFrac <$> since start
+        continue <- fmap isJust . runEmpty $ do
+          state <- physics t =<< input
+          drawCanvas t state
         drawLabel label
         put =<< now
         when continue $
