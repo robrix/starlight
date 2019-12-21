@@ -51,7 +51,7 @@ import Unit.Angle
 import Unit.Time
 
 main :: HasCallStack => IO ()
-main = E.handle (\ e -> putStrLn $ E.displayException @E.SomeException e) $ do
+main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
   tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 36
   let shipVertices =
         [ V3 1      0      0
