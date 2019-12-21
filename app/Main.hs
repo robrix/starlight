@@ -94,7 +94,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         t <- realToFrac <$> since start
         continue <- fmap isJust . runEmpty $ do
           state <- physics t =<< input
-          drawCanvas drawState t state
+          draw drawState t state
         drawLabel label
         put =<< now
         when continue $
@@ -178,7 +178,7 @@ physics t input = do
   _position += getDelta velocity
   pure s
 
-drawCanvas
+draw
   :: ( Has (Lift IO) sig m
      , Has Program sig m
      , Has Window.Window sig m
@@ -187,7 +187,7 @@ drawCanvas
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-drawCanvas DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { position, rotation } = runLiftIO $ do
+draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { position, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
