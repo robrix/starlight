@@ -17,6 +17,7 @@ import Data.Foldable (for_)
 import Data.Function (fix)
 import Data.Maybe (isJust)
 import qualified Data.IntSet as IntSet
+import Data.Time.Clock (UTCTime)
 import Foreign.Storable (Storable)
 import Geometry.Circle
 import Geometry.Rect
@@ -110,44 +111,11 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
             setClearColour black
             glClear GL_COLOR_BUFFER_BIT
 
-            input <- input
-            dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
-
-            let thrust  = dt *  1
-                angular = dt *^ pi
-
-            when (pressed SDL.KeycodeUp   input) $ do
-              rotation <- Lens.use _rotation
-              _velocity += Delta (P (cartesian2 rotation thrust))
-            when (pressed SDL.KeycodeDown input) $ do
-              rotation <- Lens.use _rotation
-              velocity <- Lens.use _velocity
-              let angle = fst (polar2 (negated (unP (getDelta velocity))))
-                  delta = wrap $ rotation - angle
-                  (+-=) = if delta < 0 then (+=) else (-=)
-              _rotation +-= min angular (abs delta)
-
-            when (pressed SDL.KeycodeLeft  input) $
-              _rotation += angular
-            when (pressed SDL.KeycodeRight input) $
-              _rotation -= angular
-
-            t <- getSeconds . getDelta . realToFrac <$> since start
-
-            let distanceScale = 0.000000718907261
-                applyGravity rel S.Body { mass, orbit, satellites } = do
-                  P position <- Lens.use _position
-                  let pos = rel + distanceScale *^ uncurry cartesian2 (S.position orbit (t * 86400))
-                      r = qd pos position
-                  _velocity += Delta (P (0.0000000000000000001 * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
-                  for_ satellites (applyGravity pos)
-
-            applyGravity 0 S.sol
-
+            t <- realToFrac <$> since start
             PlayerState
               { position
               , velocity
-              , rotation } <- get
+              , rotation } <- physics t =<< input
 
             bind (Just quadArray)
 
@@ -179,7 +147,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
               drawArrays LineLoop (Range 0 4)
 
               let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
-                    let pos = rel + uncurry cartesian2 (S.position orbit (t * 86400))
+                    let pos = rel + uncurry cartesian2 (S.position orbit (getDelta t * 86400))
                     set @"colour" colour
                     set @"matrix3"
                       $   window
@@ -214,6 +182,50 @@ input = Window.input go >> get where
     SDL.QuitEvent -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ (SDL.Keysym _ kc _)) -> key p kc
     _ -> pure ()
+
+distanceScale :: Float
+distanceScale = 0.000000718907261
+
+physics
+  :: ( Has (State UTCTime) sig m
+     , Has (State PlayerState) sig m
+     , Has Time sig m
+     )
+  => Delta Seconds Float
+  -> Input
+  -> m PlayerState
+physics t input = do
+  dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
+
+  let thrust  = dt *  1
+      angular = dt *^ pi
+
+  when (pressed SDL.KeycodeUp   input) $ do
+    rotation <- Lens.use _rotation
+    _velocity += Delta (P (cartesian2 rotation thrust))
+  when (pressed SDL.KeycodeDown input) $ do
+    rotation <- Lens.use _rotation
+    velocity <- Lens.use _velocity
+    let angle = fst (polar2 (negated (unP (getDelta velocity))))
+        delta = wrap $ rotation - angle
+        (+-=) = if delta < 0 then (+=) else (-=)
+    _rotation +-= min angular (abs delta)
+
+  when (pressed SDL.KeycodeLeft  input) $
+    _rotation += angular
+  when (pressed SDL.KeycodeRight input) $
+    _rotation -= angular
+
+  let applyGravity rel S.Body { mass, orbit, satellites } = do
+        P position <- Lens.use _position
+        let pos = rel + distanceScale *^ uncurry cartesian2 (S.position orbit (getDelta t * 86400))
+            r = qd pos position
+        _velocity += Delta (P (0.0000000000000000001 * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
+        for_ satellites (applyGravity pos)
+
+  applyGravity 0 S.sol
+
+  get
 
 
 data PlayerState = PlayerState
