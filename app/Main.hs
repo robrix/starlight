@@ -100,18 +100,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
           Window.swap >> loop
 
 
-input
-  :: ( Has Empty sig m
-     , Has (State Input) sig m
-     , Has Window.Window sig m
-     )
-  => m Input
-input = Window.input go >> get where
-  go (SDL.Event _ p) = case p of
-    SDL.QuitEvent -> empty
-    SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ (SDL.Keysym _ kc _)) -> key p kc
-    _ -> pure ()
-
 distanceScale :: Float
 distanceScale = 0.000000718907261
 
