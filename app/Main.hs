@@ -176,8 +176,8 @@ physics t input = do
 -- | Compute the zoom factor for the given velocity.
 --
 -- Higher values correlate to more of the scene being visible.
-zoomForVelocity :: Metric v => V2 Int -> Delta v Float -> Float
-zoomForVelocity size velocity = max minZoom (min maxZoom (norm velocity / bound * 100)) where
+zoomForSpeed :: V2 Int -> Float -> Float
+zoomForSpeed size speed = max minZoom (min maxZoom (speed / bound * 100)) where
   minZoom = 0.75
   maxZoom = 4
   bound = fromIntegral (min (size ^. _x) (size ^. _y))
@@ -204,7 +204,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
 
   bind (Just quadArray)
 
-  let zoomOut = zoomForVelocity size velocity
+  let zoomOut = zoomForSpeed size (norm velocity)
 
   use stars $ do
     scale <- Window.scale
