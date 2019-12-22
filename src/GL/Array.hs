@@ -40,7 +40,8 @@ configureArray _ _ = runLiftIO $ do
 
 
 data Mode
-  = Lines
+  = Points
+  | Lines
   | LineStrip
   | LineLoop
   | TriangleStrip
@@ -49,6 +50,7 @@ data Mode
 
 modeToGLEnum :: Mode -> GLenum
 modeToGLEnum = \case
+  Points        -> GL_POINTS
   Lines         -> GL_LINES
   LineStrip     -> GL_LINE_STRIP
   LineLoop      -> GL_LINE_LOOP
