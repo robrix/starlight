@@ -6,4 +6,4 @@ package starlight
 source-repository-package
   type: git
   location: https://github.com/robrix/haskell-opentype.git
-  tag: c69d475309eecf9b4f132df9eadf818eaadd2986
+  tag: a1b6967d895530ea691bd83084a2d85c588a6213
