@@ -74,11 +74,11 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       stars <- build
         @'[ "resolution" '::: V2 Float
           , "origin"     '::: Point V2 Float ]
-        [(Vertex, "stars-vertex.glsl"), (Fragment, "stars-fragment.glsl")]
+        [(Vertex, "src/stars-vertex.glsl"), (Fragment, "src/stars-fragment.glsl")]
       ship <- build
         @'[ "colour"  '::: V4 Float
           , "matrix3" '::: M33 Float ]
-        [(Vertex, "ship-vertex.glsl"), (Fragment, "ship-fragment.glsl")]
+        [(Vertex, "src/ship-vertex.glsl"), (Fragment, "src/ship-fragment.glsl")]
 
       label <- label
 

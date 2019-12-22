@@ -71,12 +71,12 @@ label = do
   glyphP <- build
     @'[ "matrix3" '::: M33 Float
       , "colour"  '::: V4 Float ]
-    [(Vertex, "glyph-vertex.glsl"), (Fragment, "glyph-fragment.glsl")]
+    [(Vertex, "src/glyph-vertex.glsl"), (Fragment, "src/glyph-fragment.glsl")]
   textP  <- build
     @'[ "rect"    '::: V4 Float
       , "sampler" '::: TextureUnit
       , "colour"  '::: V4 Float ]
-    [(Vertex, "text-vertex.glsl"),  (Fragment, "text-fragment.glsl")]
+    [(Vertex, "src/text-vertex.glsl"),  (Fragment, "src/text-fragment.glsl")]
 
   glyphA <- gen1
   glyphB <- gen1
