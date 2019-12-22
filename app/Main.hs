@@ -178,10 +178,19 @@ physics t input = do
 --
 -- Higher values correlate to more of the scene being visible.
 zoomForSpeed :: V2 Int -> Float -> Float
-zoomForSpeed size speed = max minZoom (min maxZoom (speed / bound * 100)) where
+zoomForSpeed size speed
+  | speed < minSpeed = minZoom
+  | speed > maxSpeed = maxZoom
+  | otherwise        = fromUnit (minZoom, maxZoom) (ease speed) where
   minZoom = 0.75
   maxZoom = 4
   bound = fromIntegral (min (size ^. _x) (size ^. _y))
+  speedAt x = x / 100 * bound
+  minSpeed = speedAt minZoom
+  maxSpeed = speedAt maxZoom
+  ease x = toUnit (-1, 1) (cos (fromUnit (pi, 2 * pi) (toUnit (minSpeed, maxSpeed) x)))
+  toUnit   (smin, smax) x = (x - smin) / (smax - smin)
+  fromUnit (tmin, tmax) x = x * (tmax - tmin) + tmin
 
 draw
   :: ( Has (Lift IO) sig m
