@@ -88,7 +88,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
-      graph <- mkGraph id 15 0 1
+      size <- Window.size
+      graph <- mkGraph (zoomForSpeed size) 127 0 100
 
       label <- setLabel label { Label.colour = white } font "hello"
       let drawState = DrawState { quadArray, shipArray, starArray, stars, ship }
