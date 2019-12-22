@@ -50,7 +50,7 @@ import System.FilePath
 import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
-import UI.Label
+import UI.Label as Label
 import Unit.Angle
 import Unit.Length
 import Unit.Mass
@@ -86,8 +86,11 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
+      glEnable GL_PROGRAM_POINT_SIZE
 
-      label <- setLabel label { colour = white } font "hello"
+      graph <- mkGraph id 15 0 1
+
+      label <- setLabel label { Label.colour = white } font "hello"
       let drawState = DrawState { quadArray, shipArray, starArray, stars, ship }
 
       fix $ \ loop -> do
@@ -95,6 +98,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         continue <- fmap isJust . runEmpty $ do
           state <- physics t =<< input
           draw drawState t state
+        drawGraph graph
         drawLabel label
         put =<< now
         when continue $
@@ -280,3 +284,46 @@ loadVertices vertices = do
 
   bind (Just array)
   array <$ configureArray buffer array
+
+
+data Graph = Graph
+  { matrix    :: !(M33 Float)
+  , colour    :: !(V4 Float)
+  , array     :: !(Array (V2 Float))
+  , points    :: !(GL.Program
+    '[ "matrix"    '::: M33 Float
+     , "pointSize" '::: Float
+     , "colour"    '::: V4 Float
+     ])
+  , pointSize :: !Float
+  , count     :: !Int
+  }
+
+mkGraph :: (Has Finally sig m, Has (Lift IO) sig m, Has Program sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
+mkGraph f n from to = do
+  let vertex = V2 <*> f
+      count = max n 0 + 2
+      vertices = map (\ i -> vertex (from + (to - from) * fromIntegral i / fromIntegral (count - 1))) [0..n+1]
+      minXY = V2 from (minimum (map (^. _y) vertices))
+      maxXY = V2 to   (maximum (map (^. _y) vertices))
+      ext (V2 x y) = V3 x y
+      matrix
+        =   translated (-1)
+        !*! translated minXY
+        !*! scaled (ext ((maxXY - minXY) * 2) 1)
+      colour = white
+  array <- loadVertices vertices
+  points <- build
+    [(Vertex, "src" </> "points-vertex.glsl"), (Fragment, "src" </> "points-fragment.glsl")]
+
+  pure $! Graph { matrix, colour, array, points, pointSize = 9, count }
+
+drawGraph :: (Has (Lift IO) sig m, Has Program sig m) => Graph -> m ()
+drawGraph Graph { matrix, colour, array, points, pointSize, count } = do
+  bind (Just array)
+  runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
+  use points $ do
+    set @"colour" colour
+    set @"matrix" matrix
+    set @"pointSize" pointSize
+    drawArrays Points    (Range 0 count)
