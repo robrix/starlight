@@ -197,8 +197,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
   let minZoom = 0.75
       maxZoom = 4
       bound = fromIntegral (min (size ^. _x) (size ^. _y))
-      speed = max 1 (norm velocity)
-      zoomOut = max minZoom (min maxZoom ((speed / bound) * 100)) -- higher = show more around the ship
+      zoomOut = max minZoom (min maxZoom (norm velocity / bound * 100)) -- higher = show more around the ship
 
   use stars $ do
     scale <- Window.scale
