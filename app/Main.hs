@@ -176,27 +176,29 @@ draw
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { position, rotation } = runLiftIO $ do
+draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
-  rect <- Rect 0 <$> Window.size
-  viewport $ scale *^ rect
-  scissor  $ scale *^ rect
+  size <- Window.size
+  viewport $ scale *^ Rect 0 size
+  scissor  $ scale *^ Rect 0 size
 
   setClearColour black
   glClear GL_COLOR_BUFFER_BIT
 
   bind (Just quadArray)
 
-  let minZoom = 0.25
-      maxZoom = 10
-      zoom = max minZoom (min maxZoom 2)
+  let minZoom = 0.75
+      maxZoom = 4
+      bound = fromIntegral (min (size ^. _x) (size ^. _y))
+      speed = max 1 (norm velocity)
+      zoomOut = max minZoom (min maxZoom ((speed / bound) * 100)) -- higher = show more around the ship
 
   use stars $ do
     scale <- Window.scale
     size <- Window.size
-    set @"resolution" (size ^* (1 / scale) ^* (1 / zoom))
+    set @"resolution" (size ^* (1 / scale) ^* (1 / zoomOut))
     set @"origin" position
 
     drawArrays TriangleStrip (Range 0 4)
@@ -205,7 +207,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
 
   scale <- Window.scale
   size <- Window.size
-  let V2 sx sy = scale / size ^* (1 / zoom)
+  let V2 sx sy = scale / size ^* (1 / zoomOut)
       window
         =   scaled (V3 sx sy 1)
         !*! translated (negated (unP position))
