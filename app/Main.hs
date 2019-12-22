@@ -313,7 +313,7 @@ mkGraph f n from to = do
       matrix
         =   translated (-1)
         !*! translated minXY
-        !*! scaled (ext ((maxXY - minXY) * 2) 1)
+        !*! scaled     (ext (2 / (maxXY - minXY)) 1)
       colour = white
   array <- loadVertices vertices
   points <- build
