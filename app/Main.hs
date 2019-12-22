@@ -108,7 +108,7 @@ shipVertices =
   [ V3 1      0      0
   , V3 0      (-0.5) 0
   , V3 (-0.5) 0      0
-  , V3 0      0.5    0 :: V3 Float
+  , V3 0      0.5    0
   ]
 
 quadVertices :: [V2 Float]
@@ -116,7 +116,7 @@ quadVertices =
   [ V2 (-1) (-1)
   , V2   1  (-1)
   , V2 (-1)   1
-  , V2   1    1  :: V2 Float
+  , V2   1    1
   ]
 
 starVertices :: [V2 Float]
