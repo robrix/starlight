@@ -4,6 +4,8 @@ module Physics.Delta
 ) where
 
 import GL.Uniform
+import Linear.Metric
+import Linear.Vector
 
 newtype Delta f a = Delta { getDelta :: f a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Traversable, Uniform)
+  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Traversable, Uniform)
