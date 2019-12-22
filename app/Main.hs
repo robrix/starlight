@@ -189,11 +189,14 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
 
   bind (Just quadArray)
 
-  let zoom = 0.5
+  let minZoom = 0.25
+      maxZoom = 10
+      zoom = max minZoom (min maxZoom 2)
+
   use stars $ do
     scale <- Window.scale
     size <- Window.size
-    set @"resolution" (size ^* (1 / scale) ^* zoom)
+    set @"resolution" (size ^* (1 / scale) ^* (1 / zoom))
     set @"origin" position
 
     drawArrays TriangleStrip (Range 0 4)
@@ -202,7 +205,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
 
   scale <- Window.scale
   size <- Window.size
-  let V2 sx sy = scale / size ^* zoom
+  let V2 sx sy = scale / size ^* (1 / zoom)
       window
         =   scaled (V3 sx sy 1)
         !*! translated (negated (unP position))
