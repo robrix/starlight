@@ -295,6 +295,10 @@ data Graph = Graph
      , "pointSize" '::: Float
      , "colour"    '::: V4 Float
      ])
+  , lines     :: !(GL.Program
+    '[ "matrix"    '::: M33 Float
+     , "colour"    '::: V4 Float
+     ])
   , pointSize :: !Float
   , count     :: !Int
   }
@@ -315,11 +319,13 @@ mkGraph f n from to = do
   array <- loadVertices vertices
   points <- build
     [(Vertex, "src" </> "points-vertex.glsl"), (Fragment, "src" </> "points-fragment.glsl")]
+  lines <- build
+    [(Vertex, "src" </> "lines-vertex.glsl"), (Fragment, "src" </> "lines-fragment.glsl")]
 
-  pure $! Graph { matrix, colour, array, points, pointSize = 9, count }
+  pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 
 drawGraph :: (Has (Lift IO) sig m, Has Program sig m) => Graph -> m ()
-drawGraph Graph { matrix, colour, array, points, pointSize, count } = do
+drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = do
   bind (Just array)
   runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
   use points $ do
@@ -327,3 +333,7 @@ drawGraph Graph { matrix, colour, array, points, pointSize, count } = do
     set @"matrix" matrix
     set @"pointSize" pointSize
     drawArrays Points    (Range 0 count)
+  use lines $ do
+    set @"colour" colour
+    set @"matrix" matrix
+    drawArrays LineStrip (Range 0 count)
