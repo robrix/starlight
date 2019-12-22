@@ -46,7 +46,6 @@ import Physics.Delta
 import qualified SDL
 import qualified Starlight.Body as S
 import Starlight.Input
-import System.Environment
 import System.FilePath
 import qualified UI.Carrier.Window as Window
 import UI.Colour
@@ -59,8 +58,7 @@ import Unit.Time
 
 main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
-  dir <- lookupEnv "PWD" >>= maybe (takeDirectory <$> getExecutablePath) pure
-  font <- readFontOfSize (dir </> "fonts" </> "DejaVuSans.ttf") 36
+  font <- readFontOfSize ("fonts" </> "DejaVuSans.ttf") 36
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     runProgram
