@@ -172,6 +172,16 @@ physics t input = do
   _position += getDelta velocity
   pure s
 
+
+-- | Compute the zoom factor for the given velocity.
+--
+-- Higher values correlate to more of the scene being visible.
+zoomForVelocity :: Metric v => V2 Int -> Delta v Float -> Float
+zoomForVelocity size velocity = max minZoom (min maxZoom (norm velocity / bound * 100)) where
+  minZoom = 0.75
+  maxZoom = 4
+  bound = fromIntegral (min (size ^. _x) (size ^. _y))
+
 draw
   :: ( Has (Lift IO) sig m
      , Has Program sig m
@@ -194,10 +204,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
 
   bind (Just quadArray)
 
-  let minZoom = 0.75
-      maxZoom = 4
-      bound = fromIntegral (min (size ^. _x) (size ^. _y))
-      zoomOut = max minZoom (min maxZoom (norm velocity / bound * 100)) -- higher = show more around the ship
+  let zoomOut = zoomForVelocity size velocity
 
   use stars $ do
     scale <- Window.scale
