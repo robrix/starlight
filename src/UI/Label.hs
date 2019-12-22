@@ -31,6 +31,7 @@ import Linear.V2
 import Linear.V3
 import Linear.V4
 import Linear.Vector
+import System.FilePath
 import UI.Colour
 import qualified UI.Effect.Window as Window
 import UI.Font
@@ -71,12 +72,12 @@ label = do
   glyphP <- build
     @'[ "matrix3" '::: M33 Float
       , "colour"  '::: V4 Float ]
-    [(Vertex, "src/glyph-vertex.glsl"), (Fragment, "src/glyph-fragment.glsl")]
+    [(Vertex, "src" </> "glyph-vertex.glsl"), (Fragment, "src" </> "glyph-fragment.glsl")]
   textP  <- build
     @'[ "rect"    '::: V4 Float
       , "sampler" '::: TextureUnit
       , "colour"  '::: V4 Float ]
-    [(Vertex, "src/text-vertex.glsl"),  (Fragment, "src/text-fragment.glsl")]
+    [(Vertex, "src" </> "text-vertex.glsl"),  (Fragment, "src" </> "text-fragment.glsl")]
 
   glyphA <- gen1
   glyphB <- gen1
