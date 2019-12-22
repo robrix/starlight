@@ -46,6 +46,8 @@ import Physics.Delta
 import qualified SDL
 import qualified Starlight.Body as S
 import Starlight.Input
+import System.Environment
+import System.FilePath
 import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
@@ -57,7 +59,8 @@ import Unit.Time
 
 main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
-  tahoma <- readFontOfSize "/System/Library/Fonts/Supplemental/Tahoma.ttf" 36
+  dir <- lookupEnv "PWD" >>= maybe (takeDirectory <$> getExecutablePath) pure
+  font <- readFontOfSize (dir </> "fonts" </> "DejaVuSans.ttf") 36
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     runProgram
@@ -86,7 +89,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
 
-      label <- setLabel label { colour = white } tahoma "hello"
+      label <- setLabel label { colour = white } font "hello"
       let drawState = DrawState { quadArray, shipArray, starArray, stars, ship }
 
       fix $ \ loop -> do

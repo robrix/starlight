@@ -108,6 +108,7 @@ executable starlight
   build-depends:
       base
     , containers
+    , filepath
     , fused-effects
     , fused-effects-lens
     , gl
