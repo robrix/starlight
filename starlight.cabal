@@ -64,6 +64,7 @@ library
     GL.Program
     GL.Scalar
     GL.Shader
+    GL.Shader.Expr
     GL.Texture
     GL.TextureUnit
     GL.Uniform
