@@ -66,7 +66,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       starsP <- build
         [(Vertex, "src" </> "stars-vertex.glsl"), (Fragment, "src" </> "stars-fragment.glsl")]
       shipP <- build
-        [(Vertex, "src" </> "ship-vertex.glsl"), (Fragment, "src" </> "ship-fragment.glsl")]
+        [(Vertex, "src" </> "ship-vertex.glsl"),  (Fragment, "src" </> "ship-fragment.glsl")]
       radarP <- build
         [(Vertex, "src" </> "ship-vertex.glsl"), (Fragment, "src" </> "ship-fragment.glsl")]
 
