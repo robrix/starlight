@@ -133,7 +133,7 @@ data Prj s t
 uniform :: Decl k s (Expr k a)
 uniform = undefined
 
-input :: (Expr k t -> Decl k s ()) -> Decl k s ()
+input :: Decl k s (Expr k t)
 input = undefined
 
 output :: (Expr k (Ref t) -> Decl k s ()) -> Decl k s ()
@@ -238,11 +238,11 @@ _radarVertex = version 410 $ do
   matrix <- uniform
   angle <- uniform
   sweep <- uniform
-  input $ \ n ->
-    main $ do
-      angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
-      pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
-      gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
+  n <- input
+  main $ do
+    angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
+    pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
+    gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
 
 _pointsVertex
   :: Shader
@@ -255,10 +255,10 @@ _pointsVertex
 _pointsVertex = version 410 $ do
   matrix <- uniform
   pointSize <- uniform
-  input $ \ pos ->
-    main $ do
-      gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
-      gl_PointSize .= pointSize
+  pos <- input
+  main $ do
+    gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
+    gl_PointSize .= pointSize
 
 _shipVertex
   :: Shader
@@ -268,8 +268,8 @@ _shipVertex
     '[]
 _shipVertex = version 410 $ do
   matrix <- uniform
-  input $ \ pos ->
-    main $ gl_Position .= vec4 (matrix |* vec3 pos 1) 1
+  pos <- input
+  main $ gl_Position .= vec4 (matrix |* vec3 pos 1) 1
 
 _shipFragment
   :: Shader
