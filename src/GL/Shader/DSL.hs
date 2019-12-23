@@ -315,6 +315,9 @@ class GLSLType a where
 instance GLSLType Float where
   renderTypeOf _ = pretty "float"
 
+instance GLSLType (V2 Float) where
+  renderTypeOf _ = pretty "vec2"
+
 
 _radarVertex
   :: Shader
