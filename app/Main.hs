@@ -260,7 +260,8 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
               d = distance here there
               direction = normalize (there ^-^ here)
               edge = distanceScale * r * (min d 150/d) *^ perp direction + direction ^* 150 + here
-              sweep = wrap (Interval (-pi) pi) (abs (angleTo here edge - angle))
+              minSweep = 0.0133 -- at d=150, makes approx. 4px blips
+              sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
           set @"colour" $ colour & _a .~ 0.5
           set @"matrix" $ window !*! translated (unP position)
