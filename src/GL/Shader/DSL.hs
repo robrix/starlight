@@ -24,6 +24,7 @@ module GL.Shader.DSL
 , (|*)
 ) where
 
+import Control.Monad (ap)
 import Data.DSL
 import GL.Shader (Type(..))
 import Linear.Matrix
@@ -41,7 +42,7 @@ instance Functor (Expr k) where
 
 instance Applicative (Expr k) where
   pure _ = undefined
-  _ <*> _ = undefined
+  (<*>) = ap
 
 instance Monad (Expr k) where
   _ >>= _ = undefined
