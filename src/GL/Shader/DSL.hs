@@ -67,7 +67,8 @@ instance Applicative (Decl k s) where
   (<*>) = ap
 
 instance Monad (Decl k s) where
-  _ >>= _ = undefined
+  Pure a   >>= f = f a
+  Decl a k >>= f = Decl a (f <=< k)
 
 
 data Stmt (k :: Type) a
