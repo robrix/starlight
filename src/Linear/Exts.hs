@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Linear.Exts
 ( translated
 , rotated
@@ -7,6 +8,7 @@ module Linear.Exts
 , angleTo
 , cartesian2
 , polar2
+, Ext(..)
 ) where
 
 import Linear.Matrix
@@ -49,3 +51,8 @@ cartesian2 (Radians phi) r = V2 (r * cos phi) (r * sin phi)
 
 polar2 :: RealFloat a => V2 a -> (Radians a, a)
 polar2 v = (angleOf v, norm v) where
+
+
+-- | Extensions of a vector with an extra dimension.
+class Ext v v' | v -> v', v' -> v where
+  ext :: v a -> a -> v' a
