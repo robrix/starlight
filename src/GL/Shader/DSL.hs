@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Shader.DSL
-( Shader
+( Prog(..)
+, Shader
 , Stmt
 , Expr
 , Ref
@@ -51,6 +52,13 @@ import Linear.V3 (V3(..))
 import Linear.V4 (V4(..))
 import UI.Colour (Colour)
 import Unit.Angle
+
+data Prog (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
+  Stage :: Shader k u i o -> Prog k u i o
+  (:>>>) :: Prog k u1 i1 o1 -> Prog k u2 o1 o2 -> Prog k u3 i1 o2
+
+infixr 1 :>>>
+
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
   Uniform :: (KnownSymbol n, GLSLType t) => Shader k u i o -> Shader k (n '::: t ': u) i o
