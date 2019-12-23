@@ -14,6 +14,7 @@ module GL.Program
 
 import Control.Effect.Finally
 import Control.Monad.IO.Class.Lift
+import Data.DSL
 import Data.Foldable (for_)
 import Data.Proxy
 import qualified Foreign.C.String.Lift as C
@@ -27,11 +28,6 @@ import Graphics.GL.Types
 
 newtype Program (ty :: [Symbol ::: *]) = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)
-
-data a ::: b = a ::: b
-  deriving (Eq, Ord, Show)
-
-infix 9 :::
 
 createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m (Program ty)
 createProgram = do
