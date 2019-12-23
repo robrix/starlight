@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 module Data.Interval
 ( Interval(..)
+, size
 ) where
 
 import Control.Applicative (liftA2)
@@ -23,3 +24,7 @@ instance Num a => Num (Interval a) where
   signum = fmap signum
   negate = fmap negate
   fromInteger = pure . fromInteger
+
+
+size :: Num a => Interval a -> a
+size (Interval from to) = to - from
