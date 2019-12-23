@@ -2,7 +2,6 @@
 module GL.Shader.DSL
 ( Shader
 , Expr
-, Vec(..)
 , Ref
 , Prj
 , uniform
@@ -11,6 +10,8 @@ module GL.Shader.DSL
 , output
 , main
 , let'
+, vec3
+, vec4
 , gl_Position
 , gl_PointSize
 , (.=)
@@ -27,9 +28,9 @@ import Data.DSL
 import GL.Shader (Type(..))
 import Linear.Matrix
 import Linear.V1 (R1)
-import Linear.V2 (V2, R2)
-import Linear.V3 (V3, R3)
-import Linear.V4 (V4, R4)
+import Linear.V2 (V2(..), R2)
+import Linear.V3 (V3(..), R3)
+import Linear.V4 (V4(..), R4)
 import UI.Colour
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
@@ -69,17 +70,6 @@ instance Floating (Expr k a) where
   acosh _ = undefined
   atanh _ = undefined
 
-class Vec v1 v2 v3 | v1 v2 -> v3, v2 v3 -> v1, v1 v3 -> v2 where
-  vec :: v1 -> v2 -> v3
-
-instance Vec (Expr k (V2 a)) (Expr k a) (Expr k (V3 a)) where
-  vec _ = undefined
-
-instance Vec (Expr k (V2 a)) (Expr k (V2 a)) (Expr k (V4 a)) where
-  vec _ = undefined
-
-instance Vec (Expr k (V3 a)) (Expr k a) (Expr k (V4 a)) where
-  vec _ = undefined
 
 data Ref t
 
@@ -109,6 +99,13 @@ main _ = undefined
 
 let' :: Expr k a -> (Expr k a -> Expr k b) -> Expr k b
 let' _ _ = undefined
+
+
+vec3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
+vec3 _ _ = undefined
+
+vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
+vec4 _ _ = undefined
 
 
 gl_Position :: Expr 'Vertex (Ref (V4 Float))
@@ -161,7 +158,7 @@ _shipVertex
   $ \ matrix ->
     input
   $ \ pos ->
-    main $ gl_Position .= vec (matrix |* vec pos 1) 1
+    main $ gl_Position .= vec4 (matrix |* vec3 pos 1) 1
 
 _shipFragment
   :: Shader
