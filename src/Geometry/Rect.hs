@@ -3,7 +3,7 @@ module Geometry.Rect
 ( Rect(..)
 , _min
 , _max
-, clamp
+, outsetToIntegralCoords
 , transformRect
 , viewport
 , scissor
@@ -30,8 +30,8 @@ _max :: Lens' (Rect a) (V2 a)
 _max = lens rectMax (\ r v -> r { rectMax = v })
 
 
-clamp :: RealFrac a => Rect a -> Rect Int
-clamp (Rect min max) = Rect (floor <$> min) (ceiling <$> max)
+outsetToIntegralCoords :: RealFrac a => Rect a -> Rect Int
+outsetToIntegralCoords (Rect min max) = Rect (floor <$> min) (ceiling <$> max)
 
 
 transformRect :: Num a => M33 a -> Rect a -> Rect a

@@ -118,7 +118,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
 
   let Run instances b = layoutString font string
       vertices = geometry . UI.Glyph.glyph =<< instances
-      bounds = let b' = clamp (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
+      bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest
