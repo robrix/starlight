@@ -263,6 +263,18 @@ _pointsVertex = version 410 $ do
     gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
     gl_PointSize .= pointSize
 
+_pointsFragment = do
+  colour <- uniform
+  fragColour <- output
+  main $ do
+    p <- let' (gl_PointCoord - vec2 0.5 0.5)
+    iff (len p `gt` 1)
+      discard
+      (do
+        fragColour .= colour
+        mag <- let' (len p * 2)
+        fragColour ^. _a .= 1 - mag * mag * mag / 2)
+
 _shipVertex
   :: Shader
     'Vertex
