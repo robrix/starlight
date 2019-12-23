@@ -157,7 +157,7 @@ instance Floating (Expr k a) where
   atanh = ATanH
 
 
-newtype Ref t = Ref { getRef :: String }
+newtype Ref (k :: Type) t = Ref { getRef :: String }
 
 data Prj s t
 
@@ -172,7 +172,7 @@ uniform = pure (Var (symbolVal (Proxy @n)))
 input :: Decl k s (Expr k t)
 input = undefined
 
-output :: Decl k s (Ref t)
+output :: Decl k s (Ref k t)
 output = undefined
 
 main :: Stmt k () -> Decl k s ()
@@ -200,10 +200,10 @@ coerce :: C.Coercible a b => (a -> b) -> Expr k a -> Expr k b
 coerce _ _ = undefined
 
 
-gl_Position :: Ref (V4 Float)
+gl_Position :: Ref 'Vertex (V4 Float)
 gl_Position = undefined
 
-gl_PointSize :: Ref Float
+gl_PointSize :: Ref 'Vertex Float
 gl_PointSize = undefined
 
 
@@ -223,7 +223,7 @@ gt _ _ = undefined
 infix 4 `gt`
 
 
-(.=) :: Ref a -> Expr k a -> Stmt k ()
+(.=) :: Ref k a -> Expr k a -> Stmt k ()
 _ .= _ = undefined
 
 infixr 4 .=
