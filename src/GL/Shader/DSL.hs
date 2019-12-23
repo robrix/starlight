@@ -2,6 +2,7 @@
 module GL.Shader.DSL
 ( Shader
 , Expr
+, Vec(..)
 , Ref
 , Prj
 , uniform
@@ -24,7 +25,6 @@ module GL.Shader.DSL
 
 import Data.DSL
 import GL.Shader (Type(..))
-import Linear.Exts
 import Linear.Matrix
 import Linear.V1 (R1)
 import Linear.V2 (V2, R2)
@@ -69,14 +69,17 @@ instance Floating (Expr k a) where
   acosh _ = undefined
   atanh _ = undefined
 
-instance Ext (Expr k (V2 a)) (Expr k a) (Expr k (V3 a)) where
-  ext _ = undefined
+class Vec v1 v2 v3 | v1 v2 -> v3, v2 v3 -> v1, v1 v3 -> v2 where
+  vec :: v1 -> v2 -> v3
 
-instance Ext (Expr k (V2 a)) (Expr k (V2 a)) (Expr k (V4 a)) where
-  ext _ = undefined
+instance Vec (Expr k (V2 a)) (Expr k a) (Expr k (V3 a)) where
+  vec _ = undefined
 
-instance Ext (Expr k (V3 a)) (Expr k a) (Expr k (V4 a)) where
-  ext _ = undefined
+instance Vec (Expr k (V2 a)) (Expr k (V2 a)) (Expr k (V4 a)) where
+  vec _ = undefined
+
+instance Vec (Expr k (V3 a)) (Expr k a) (Expr k (V4 a)) where
+  vec _ = undefined
 
 data Ref t
 
@@ -158,7 +161,7 @@ _shipVertex
   $ \ matrix ->
     input
   $ \ pos ->
-    main $ gl_Position .= ext (matrix |* ext pos 1) 1
+    main $ gl_Position .= vec (matrix |* vec pos 1) 1
 
 _shipFragment
   :: Shader
