@@ -191,7 +191,7 @@ gl_Position :: Ref 'Vertex (V4 Float)
 gl_Position = Ref "gl_Position"
 
 gl_PointSize :: Ref 'Vertex Float
-gl_PointSize = undefined
+gl_PointSize = Ref "gl_PointSize"
 
 
 gl_PointCoord :: Expr 'Fragment (V2 Float)
