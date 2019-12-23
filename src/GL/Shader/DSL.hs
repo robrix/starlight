@@ -240,35 +240,34 @@ renderShader :: Shader k u i o -> Doc ()
 renderShader _ = undefined
 
 renderExpr :: Expr k a -> Doc ()
-renderExpr = go where
-  go :: Expr k a -> Doc ()
-  go = parens . \case
-    Var n -> pretty n
-    Lit d -> pretty d
-    a :+ b -> go a <+> pretty '+' <+> go b
-    a :* b -> go a <+> pretty '*' <+> go b
-    a :- b -> go a <+> pretty '-' <+> go b
-    a :/ b -> go a <+> pretty '/' <+> go b
-    Signum a -> fn "signum" [go a] -- log
-    Negate a -> pretty "-" <> go a
-    Abs a -> fn "abs" [go a]
-    Exp a -> fn "exp" [go a]
-    Log a -> fn "log" [go a]
-    Sqrt a -> fn "sqrt" [go a]
-    a :** b -> fn "pow" [go a, go b]
-    Sin a -> fn "sin" [go a]
-    Cos a -> fn "cos" [go a]
-    Tan a -> fn "tan" [go a]
-    ASin a -> fn "asin" [go a]
-    ACos a -> fn "acos" [go a]
-    ATan a -> fn "atan" [go a]
-    SinH a -> fn "sinh" [go a]
-    CosH a -> fn "cosh" [go a]
-    TanH a -> fn "tanh" [go a]
-    ASinH a -> fn "asinh" [go a]
-    ACosH a -> fn "acosh" [go a]
-    ATanH a -> fn "atanh" [go a]
-    a :^. Prj s -> go a <> pretty '.' <> pretty s
+renderExpr = parens . \case
+  Var n -> pretty n
+  Lit d -> pretty d
+  a :+ b -> renderExpr a <+> pretty '+' <+> renderExpr b
+  a :* b -> renderExpr a <+> pretty '*' <+> renderExpr b
+  a :- b -> renderExpr a <+> pretty '-' <+> renderExpr b
+  a :/ b -> renderExpr a <+> pretty '/' <+> renderExpr b
+  Signum a -> fn "signum" [renderExpr a] -- log
+  Negate a -> pretty "-" <> renderExpr a
+  Abs a -> fn "abs" [renderExpr a]
+  Exp a -> fn "exp" [renderExpr a]
+  Log a -> fn "log" [renderExpr a]
+  Sqrt a -> fn "sqrt" [renderExpr a]
+  a :** b -> fn "pow" [renderExpr a, renderExpr b]
+  Sin a -> fn "sin" [renderExpr a]
+  Cos a -> fn "cos" [renderExpr a]
+  Tan a -> fn "tan" [renderExpr a]
+  ASin a -> fn "asin" [renderExpr a]
+  ACos a -> fn "acos" [renderExpr a]
+  ATan a -> fn "atan" [renderExpr a]
+  SinH a -> fn "sinh" [renderExpr a]
+  CosH a -> fn "cosh" [renderExpr a]
+  TanH a -> fn "tanh" [renderExpr a]
+  ASinH a -> fn "asinh" [renderExpr a]
+  ACosH a -> fn "acosh" [renderExpr a]
+  ATanH a -> fn "atanh" [renderExpr a]
+  a :^. Prj s -> renderExpr a <> pretty '.' <> pretty s
+  where
   fn n as = pretty n <> tupled as
 
 
