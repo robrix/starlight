@@ -95,7 +95,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
 
 distanceScale :: Float
-distanceScale = 0.000000718907261
+distanceScale = 500 / getMetres (S.radius S.sol)
 
 shipV :: [V3 Float]
 shipV =
