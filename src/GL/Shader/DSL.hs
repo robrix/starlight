@@ -108,6 +108,9 @@ data Expr (k :: Type) a where
 
   Gt :: Expr k a -> Expr k a -> Expr k Bool
 
+  Vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
+  Vec3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
+  Vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
   Len :: Expr k (v Float) -> Expr k Float
 
 infixl 6 :+
@@ -166,13 +169,13 @@ let' _ = undefined
 
 
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
-vec2 _ _ = undefined
+vec2 = Vec2
 
 vec3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
-vec3 _ _ = undefined
+vec3 = Vec3
 
 vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
-vec4 _ _ = undefined
+vec4 = Vec4
 
 len :: Expr k (v Float) -> Expr k Float
 len = Len
@@ -290,6 +293,9 @@ renderExpr = parens . \case
   a :^* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   a :!* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
+  Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
+  Vec3 a b -> fn "vec3" [renderExpr a, renderExpr b]
+  Vec4 a b -> fn "vec4" [renderExpr a, renderExpr b]
   Len a -> fn "length" [renderExpr a]
   where
   fn n as = pretty n <> tupled as
