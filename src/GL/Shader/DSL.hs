@@ -169,6 +169,25 @@ _ |* _ = undefined
 infixl 7 |*
 
 
+_pointsVertex
+  :: Shader
+    'Vertex
+    '[ "matrix" '::: M33 Float
+     , "pointSize" '::: Float
+     ]
+    '[ "pos" '::: V2 Float ]
+    '[]
+_pointsVertex
+  = uniform
+  $ \ matrix ->
+    uniform
+  $ \ pointSize ->
+    input
+  $ \ pos ->
+    main $ do
+      gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
+      gl_PointSize .= pointSize
+
 _shipVertex
   :: Shader
     'Vertex
