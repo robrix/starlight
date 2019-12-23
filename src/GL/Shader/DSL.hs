@@ -18,6 +18,7 @@ module GL.Shader.DSL
 , _y
 , _z
 , _w
+, _xy
 , (|*)
 ) where
 
@@ -135,6 +136,9 @@ _z = undefined
 
 _w :: R4 v => Prj (v a) a
 _w = undefined
+
+_xy :: R2 v => Prj (v a) (V2 a)
+_xy = undefined
 
 
 (|*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
