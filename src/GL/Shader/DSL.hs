@@ -35,8 +35,8 @@ _shipFragment
     '[]
     '[ "fragColour" '::: Colour Float ]
 _shipFragment
-  = uniform @"colour"
+  = uniform
   $ \ colour ->
-    output @"fragColour"
+    output
   $ \ fragColour ->
     main $ fragColour colour
