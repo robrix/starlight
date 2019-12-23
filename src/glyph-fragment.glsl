@@ -1,8 +1,11 @@
 #version 410
-precision highp float;
+
 uniform vec4 colour;
+
 in vec2 _coord2;
+
 out vec4 fragColor;
+
 void main() {
   if (_coord2.x * _coord2.x - _coord2.y > 0.0) {
     discard;
