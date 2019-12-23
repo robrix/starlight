@@ -42,6 +42,44 @@ instance Fractional a => Fractional (Interval a) where
   fromRational = pure . fromRational
   {-# INLINE fromRational #-}
 
+instance Floating a => Floating (Interval a) where
+  pi = pure pi
+  {-# INLINE pi #-}
+  exp = fmap exp
+  {-# INLINE exp #-}
+  sqrt = fmap sqrt
+  {-# INLINE sqrt #-}
+  log = fmap log
+  {-# INLINE log #-}
+  (**) = liftA2 (**)
+  {-# INLINE (**) #-}
+  logBase = liftA2 logBase
+  {-# INLINE logBase #-}
+  sin = fmap sin
+  {-# INLINE sin #-}
+  tan = fmap tan
+  {-# INLINE tan #-}
+  cos = fmap cos
+  {-# INLINE cos #-}
+  asin = fmap asin
+  {-# INLINE asin #-}
+  atan = fmap atan
+  {-# INLINE atan #-}
+  acos = fmap acos
+  {-# INLINE acos #-}
+  sinh = fmap sinh
+  {-# INLINE sinh #-}
+  tanh = fmap tanh
+  {-# INLINE tanh #-}
+  cosh = fmap cosh
+  {-# INLINE cosh #-}
+  asinh = fmap asinh
+  {-# INLINE asinh #-}
+  atanh = fmap atanh
+  {-# INLINE atanh #-}
+  acosh = fmap acosh
+  {-# INLINE acosh #-}
+
 
 size :: Num a => Interval a -> a
 size (Interval min max) = max - min
