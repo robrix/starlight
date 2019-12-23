@@ -32,6 +32,7 @@ module GL.Shader.DSL
 , renderShader
 , renderStmt
 , renderExpr
+, GLSLType(..)
 , Mk(..)
 ) where
 
@@ -307,6 +308,9 @@ renderExpr = parens . \case
   Coerce a -> renderExpr a
   where
   fn n as = pretty n <> tupled as
+
+class GLSLType a where
+  renderTypeOf :: expr a -> Doc ()
 
 
 _radarVertex
