@@ -73,6 +73,19 @@ _ |* _ = undefined
 infixl 7 |*
 
 
+_shipVertex
+  :: Shader
+    'Vertex
+    '[ "matrix" '::: M33 Float ]
+    '[ "position2" '::: V2 Float ]
+    '[]
+_shipVertex
+  = uniform
+  $ \ matrix ->
+    input
+  $ \ pos ->
+    main $ gl_Position .= ext (matrix |* ext pos 1) 1
+
 _shipFragment
   :: Shader
     'Fragment
