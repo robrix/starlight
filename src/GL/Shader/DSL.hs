@@ -96,10 +96,30 @@ data Expr (k :: Type) a where
   (:/) :: Expr k a -> Expr k a -> Expr k a
   FromRational :: Rational -> Expr k a
 
+  Pi :: Expr k a
+  Exp :: Expr k a -> Expr k a
+  Log :: Expr k a -> Expr k a
+  Sqrt :: Expr k a -> Expr k a
+  (:**) :: Expr k a -> Expr k a -> Expr k a
+  LogBase :: Expr k a -> Expr k a -> Expr k a
+  Sin :: Expr k a -> Expr k a
+  Cos :: Expr k a -> Expr k a
+  Tan :: Expr k a -> Expr k a
+  ASin :: Expr k a -> Expr k a
+  ACos :: Expr k a -> Expr k a
+  ATan :: Expr k a -> Expr k a
+  SinH :: Expr k a -> Expr k a
+  CosH :: Expr k a -> Expr k a
+  TanH :: Expr k a -> Expr k a
+  ASinH :: Expr k a -> Expr k a
+  ACosH :: Expr k a -> Expr k a
+  ATanH :: Expr k a -> Expr k a
+
 infixl 6 :+
 infixl 7 :*
 infixl 6 :-
 infixl 7 :/
+infixr 8 :**
 
 instance Num (Expr k a) where
   (+) = (:+)
@@ -115,24 +135,24 @@ instance Fractional (Expr k a) where
   fromRational = FromRational
 
 instance Floating (Expr k a) where
-  pi = undefined
-  exp _ = undefined
-  log _ = undefined
-  sqrt _ = undefined
-  _ ** _ = undefined
-  logBase _ _ = undefined
-  sin _ = undefined
-  cos _ = undefined
-  tan _ = undefined
-  asin _ = undefined
-  acos _ = undefined
-  atan _ = undefined
-  sinh _ = undefined
-  cosh _ = undefined
-  tanh _ = undefined
-  asinh _ = undefined
-  acosh _ = undefined
-  atanh _ = undefined
+  pi = Pi
+  exp = Exp
+  log = Log
+  sqrt = Sqrt
+  (**) = (:**)
+  logBase = LogBase
+  sin = Sin
+  cos = Cos
+  tan = Tan
+  asin = ASin
+  acos = ACos
+  atan = ATan
+  sinh = SinH
+  cosh = CosH
+  tanh = TanH
+  asinh = ASinH
+  acosh = ACosH
+  atanh = ATanH
 
 
 data Ref t
