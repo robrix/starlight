@@ -45,7 +45,7 @@ import Data.DSL
 import Data.Proxy
 import Data.Text.Prettyprint.Doc
 import GHC.TypeLits
-import GL.Shader (Type(..))
+import GL.Shader (Type(..), KnownType(..))
 import Linear.Matrix (M33)
 import Linear.V2 (V2(..))
 import Linear.V3 (V3(..))
@@ -54,7 +54,7 @@ import UI.Colour (Colour)
 import Unit.Angle
 
 data Prog (u :: Context) (i :: Context) (o :: Context) where
-  Stage :: Shader k u i o -> Prog u i o
+  Stage :: KnownType k => Shader k u i o -> Prog u i o
   (:>>>) :: Prog u1 i1 o1 -> Prog u2 o1 o2 -> Prog u3 i1 o2
 
 infixr 1 :>>>
