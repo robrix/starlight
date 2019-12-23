@@ -32,6 +32,7 @@ import Linear.Affine
 import Linear.Exts
 import Linear.Matrix
 import Linear.Metric
+import Linear.V1 as Linear
 import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
@@ -68,20 +69,21 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       shipP <- build
         [(Vertex, "src" </> "ship-vertex.glsl"),  (Fragment, "src" </> "ship-fragment.glsl")]
       radarP <- build
-        [(Vertex, "src" </> "ship-vertex.glsl"), (Fragment, "src" </> "ship-fragment.glsl")]
+        [(Vertex, "src" </> "radar-vertex.glsl"), (Fragment, "src" </> "ship-fragment.glsl")]
 
       label <- label
 
       quadA   <- loadVertices quadV
       shipA   <- loadVertices shipV
       circleA <- loadVertices circleV
+      radarA  <- loadVertices (let n = (16 :: Int) in [ V1 (fromIntegral t / fromIntegral n) | t <- [-n..n] ])
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
       label <- setLabel label { Label.colour = white } font "hello"
-      let drawState = DrawState { quadA, shipA, circleA, starsP, shipP, radarP }
+      let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP }
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
@@ -252,18 +254,18 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
   use radarP $ do
     let drawBlip rel S.Body { radius = Metres r, colour, orbit, satellites } = do
           let trans = rel !*! S.transform orbit (getDelta t * 86400)
-              v2 = unP position
-              v1 = (trans !* V3 0 0 1) ^. _xy
-              angle = Radians (atan2 (v2 ^. _y) (v2 ^. _x) - atan2 (v1 ^. _y) (v1 ^. _x))
-              d = distance v2 v1
+              here = unP position
+              there = (trans !* V3 0 0 1) ^. _xy
+              angle = angleTo here there
+              d = distance here there
+              direction = normalize (there ^-^ here)
+              edge = distanceScale * r * (min d 150/d) *^ perp direction + direction ^* 150 + here
+              sweep = abs (angleTo here edge - angle)
+
           set @"colour" $ colour & _a .~ 0.5
-          set @"matrix"
-            $   window
-            !*! translated (unP position)
-            !*! translated (cartesian2 (angle - pi) (min d 150))
-            !*! scaled     (V3 distanceScale distanceScale 1)
-            !*! scaled     (V3 (min d 150/d) (min d 150/d) 1)
-            !*! scaled     (V3 r r 1)
+          set @"matrix" $ window !*! translated (unP position)
+          set @"angle"  angle
+          set @"sweep"  sweep
 
           drawArrays LineLoop (Interval 0 (length circleV))
 
@@ -276,6 +278,7 @@ data DrawState = DrawState
   { quadA   :: Array (V2 Float)
   , circleA :: Array (V2 Float)
   , shipA   :: Array (V3 Float)
+  , radarA  :: Array (V1 Float)
   , starsP  :: GL.Program
     '[ "resolution" '::: V2 Float
      , "origin"     '::: Point V2 Float
@@ -285,7 +288,9 @@ data DrawState = DrawState
      , "matrix"     '::: M33 Float ]
   , radarP  :: GL.Program
     '[ "colour"     '::: V4 Float
-     , "matrix"     '::: M33 Float ]
+     , "matrix"     '::: M33 Float
+     , "angle"      '::: Radians Float
+     , "sweep"      '::: Radians Float ]
   }
 
 
