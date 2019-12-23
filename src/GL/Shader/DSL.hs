@@ -280,7 +280,7 @@ renderShader s = pretty "#version 410" <> hardline <> go s where
     s@(Output k)
       -> pretty "out" <+> renderTypeOf (typeOf (outputsOf s)) <+> pretty (symbolVal (nameOf (outputsOf s))) <> pretty ';' <> hardline
       <> go k
-    Main s -> renderStmt s
+    Main s -> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt s <> line))
   uniformsOf :: Shader k u i o -> Proxy u
   uniformsOf _ = Proxy
   inputsOf :: Shader k u i o -> Proxy i
