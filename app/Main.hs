@@ -245,14 +245,26 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position
     bind (Just circleA)
     drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
 
-  use shipP $ do
-    set @"colour" $ V4 1 1 1 1
-    set @"matrix"
-      $   window
-      !*! translated (unP position)
-      !*! scaled (V3 150 150 1)
+    let drawBlip rel S.Body { radius = Metres r, colour, orbit, satellites } = do
+          let trans = rel !*! S.transform orbit (getDelta t * 86400)
+              v2 = unP position
+              v1 = (trans !* V3 0 0 1) ^. _xy
+              angle = Radians (atan2 (v2 ^. _y) (v2 ^. _x) - atan2 (v1 ^. _y) (v1 ^. _x))
+              d = distance v2 v1
+          set @"colour" $ colour
+          set @"matrix"
+            $   window
+            !*! translated (unP position)
+            !*! translated (cartesian2 (angle - pi) (min d 150))
+            !*! scaled     (V3 distanceScale distanceScale 1)
+            !*! scaled     (V3 (min d 150/d) (min d 150/d) 1)
+            !*! scaled     (V3 r r 1)
 
-    drawArrays LineLoop (Interval 0 (length circleV))
+          drawArrays LineLoop (Interval 0 (length circleV))
+
+          for_ satellites (drawBlip trans)
+
+    drawBlip (scaled (V3 distanceScale distanceScale 1)) S.sol
 
 
 data DrawState = DrawState
