@@ -63,9 +63,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       , rotation = pi/2
       }
     . evalState start $ do
-      stars <- build
+      starsP <- build
         [(Vertex, "src" </> "stars-vertex.glsl"), (Fragment, "src" </> "stars-fragment.glsl")]
-      ship <- build
+      shipP <- build
         [(Vertex, "src" </> "ship-vertex.glsl"), (Fragment, "src" </> "ship-fragment.glsl")]
 
       label <- label
@@ -79,7 +79,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_PROGRAM_POINT_SIZE
 
       label <- setLabel label { Label.colour = white } font "hello"
-      let drawState = DrawState { quadA, shipA, circleA, stars, ship }
+      let drawState = DrawState { quadA, shipA, circleA, starsP, shipP }
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
@@ -187,7 +187,7 @@ draw
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState { quadA, circleA, shipA, ship, stars } t PlayerState { position, velocity, rotation } = runLiftIO $ do
+draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -202,7 +202,7 @@ draw DrawState { quadA, circleA, shipA, ship, stars } t PlayerState { position, 
 
   let zoomOut = zoomForSpeed size (norm velocity)
 
-  use stars $ do
+  use starsP $ do
     scale <- Window.scale
     size <- Window.size
     set @"resolution" (size ^* scale)
@@ -220,7 +220,7 @@ draw DrawState { quadA, circleA, shipA, ship, stars } t PlayerState { position, 
         =   scaled (V3 sx sy 1)
         !*! translated (negated (unP position))
 
-  use ship $ do
+  use shipP $ do
     set @"colour" $ V4 1 1 1 1
     set @"matrix3"
       $   window
@@ -250,11 +250,11 @@ data DrawState = DrawState
   { quadA   :: Array (V2 Float)
   , circleA :: Array (V2 Float)
   , shipA   :: Array (V3 Float)
-  , stars   :: GL.Program
+  , starsP  :: GL.Program
     '[ "resolution" '::: V2 Float
      , "origin"     '::: Point V2 Float
      , "zoom"       '::: Float ]
-  , ship    :: GL.Program
+  , shipP    :: GL.Program
     '[ "colour"  '::: V4 Float
      , "matrix3" '::: M33 Float ]
   }
