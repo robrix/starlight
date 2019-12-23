@@ -36,6 +36,9 @@ import UI.Colour
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
 data Expr (k :: Type) a
 
+instance Functor (Expr k) where
+  fmap _ _ = undefined
+
 instance Num (Expr k a) where
   _ + _ = undefined
   _ * _ = undefined
