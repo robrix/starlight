@@ -83,16 +83,6 @@ instance Monad (Stmt k) where
 
 data Expr (k :: Type) a
 
-instance Functor (Expr k) where
-  fmap _ _ = undefined
-
-instance Applicative (Expr k) where
-  pure _ = undefined
-  (<*>) = ap
-
-instance Monad (Expr k) where
-  _ >>= _ = undefined
-
 instance Num (Expr k a) where
   _ + _ = undefined
   _ * _ = undefined
