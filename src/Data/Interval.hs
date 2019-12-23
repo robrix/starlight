@@ -20,12 +20,19 @@ instance Applicative Interval where
 
 instance Num a => Num (Interval a) where
   (+) = liftA2 (+)
+  {-# INLINE (+) #-}
   (*) = liftA2 (*)
+  {-# INLINE (*) #-}
   (-) = liftA2 (-)
+  {-# INLINE (-) #-}
   abs = fmap abs
+  {-# INLINE abs #-}
   signum = fmap signum
+  {-# INLINE signum #-}
   negate = fmap negate
+  {-# INLINE negate #-}
   fromInteger = pure . fromInteger
+  {-# INLINE fromInteger #-}
 
 
 size :: Num a => Interval a -> a
