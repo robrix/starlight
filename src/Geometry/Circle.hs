@@ -2,8 +2,8 @@ module Geometry.Circle
 ( circle
 ) where
 
+import Linear.Exts
 import Linear.V2
-import Unit.Angle
 
 circle
   -- ^ The radius.
