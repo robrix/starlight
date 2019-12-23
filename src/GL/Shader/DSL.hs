@@ -62,7 +62,10 @@ data Stmt (k :: Type) a where
   Let :: GLSLType b => String -> Expr k b -> (Expr k b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
+  (:.=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
+
+infixr 4 :.=
 
 instance Functor (Stmt k) where
   fmap = liftM
@@ -72,11 +75,12 @@ instance Applicative (Stmt k) where
   (<*>) = ap
 
 instance Monad (Stmt k) where
-  Pure a     >>= f = f a
-  Let n v  k >>= f = Let n v (f <=< k)
-  Discard  k >>= f = Discard (k >>= f)
-  If c t e k >>= f = If c t e (k >>= f)
-  Stmt a   k >>= f = Stmt a (f <=< k)
+  Pure a      >>= f = f a
+  Let n v   k >>= f = Let n v (f <=< k)
+  Discard   k >>= f = Discard (k >>= f)
+  If c t e  k >>= f = If c t e (k >>= f)
+  (:.=) r v k >>= f = (r :.= v) (k >>= f)
+  Stmt a    k >>= f = Stmt a (f <=< k)
 
 
 data Expr (k :: Type) a where
@@ -218,7 +222,7 @@ infix 4 `gt`
 
 
 (.=) :: Ref k a -> Expr k a -> Stmt k ()
-_ .= _ = undefined
+r .= v = (r :.= v) (pure ())
 
 infixr 4 .=
 
@@ -275,6 +279,9 @@ renderStmt = \case
     <> renderStmt k
   If c t e k
     -> pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
+    <> renderStmt k
+  (:.=) (Ref r) v k
+    -> pretty r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt k
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
