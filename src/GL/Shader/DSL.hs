@@ -93,9 +93,13 @@ data Expr (k :: Type) a where
   Abs :: Expr k a -> Expr k a
   FromInteger :: Integer -> Expr k a
 
+  (:/) :: Expr k a -> Expr k a -> Expr k a
+  FromRational :: Rational -> Expr k a
+
 infixl 6 :+
 infixl 7 :*
 infixl 6 :-
+infixl 7 :/
 
 instance Num (Expr k a) where
   (+) = (:+)
@@ -107,9 +111,8 @@ instance Num (Expr k a) where
   fromInteger = FromInteger
 
 instance Fractional (Expr k a) where
-  _ / _ = undefined
-  recip _ = undefined
-  fromRational _ = undefined
+  (/) = (:/)
+  fromRational = FromRational
 
 instance Floating (Expr k a) where
   pi = undefined
