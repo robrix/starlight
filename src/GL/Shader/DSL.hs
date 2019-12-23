@@ -61,7 +61,7 @@ instance Functor (Decl k s) where
   fmap _ = C.coerce
 
 instance Applicative (Decl k s) where
-  pure _ = undefined
+  pure _ = Decl mempty
   (<*>) = ap
 
 instance Monad (Decl k s) where
