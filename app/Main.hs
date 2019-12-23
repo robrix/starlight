@@ -14,7 +14,7 @@ import qualified Control.Exception.Lift as E
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift (runLiftIO)
 import Data.Foldable (for_)
-import Data.Function (fix)
+import Data.Function ((&), fix)
 import Data.Interval
 import Data.Maybe (isJust)
 import Data.Time.Clock (UTCTime)
@@ -27,7 +27,7 @@ import GL.Framebuffer as GL
 import qualified GL.Program as GL
 import GL.Shader
 import Graphics.GL.Core41
-import Lens.Micro (Lens', (^.), lens)
+import Lens.Micro (Lens', (.~), (^.), lens)
 import Linear.Affine
 import Linear.Exts
 import Linear.Matrix
@@ -251,7 +251,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position
               v1 = (trans !* V3 0 0 1) ^. _xy
               angle = Radians (atan2 (v2 ^. _y) (v2 ^. _x) - atan2 (v1 ^. _y) (v1 ^. _x))
               d = distance v2 v1
-          set @"colour" $ colour
+          set @"colour" $ colour & _a .~ 0.75
           set @"matrix"
             $   window
             !*! translated (unP position)
