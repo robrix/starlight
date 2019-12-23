@@ -183,8 +183,8 @@ len :: Expr k (v Float) -> Expr k Float
 len = Len
 
 
-coerce :: C.Coercible a b => (a -> b) -> Expr k a -> Expr k b
-coerce _ = Coerce
+coerce :: C.Coercible a b => Expr k a -> Expr k b
+coerce = Coerce
 
 
 gl_Position :: Ref 'Vertex (V4 Float)
@@ -314,7 +314,7 @@ _radarVertex
     '[ "n" '::: Float ]
     '[]
 _radarVertex = mk $ \ matrix angle sweep n -> do
-  angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
+  angle <- let' (coerce angle + n * coerce sweep)
   pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
   gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
 
