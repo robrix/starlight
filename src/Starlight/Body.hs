@@ -14,6 +14,7 @@ module Starlight.Body
 , jupiter
 , saturn
 , uranus
+, neptune
 ) where
 
 import Linear.Exts
@@ -82,6 +83,7 @@ sol = Body
     , jupiter
     , saturn
     , uranus
+    , neptune
     ]
   }
 
@@ -209,6 +211,22 @@ uranus = Body
     , inclination              = fromDegrees 0.773
     , longitudeOfAscendingNode = fromDegrees 74.006
     , period                   = fromDays 30688.5
+    }
+  , satellites = []
+  }
+
+neptune :: Body
+neptune = Body
+  { name       = "Neptune"
+  , radius     = fromKilometres 24624
+  , mass       = 102.413e24
+  , colour     = V4 (138/255) (163/255) (217/255) 1
+  , orbit      = Orbit
+    { semimajor                = fromAUs 30.11
+    , eccentricity             = 0.009456
+    , inclination              = fromDegrees 1.767975
+    , longitudeOfAscendingNode = 131.784
+    , period                   = fromDays 60182
     }
   , satellites = []
   }
