@@ -6,7 +6,6 @@ module GL.Shader.DSL
 , Ref
 , Prj
 , uniform
-, Uniforms(..)
 , input
 , output
 , main
@@ -114,15 +113,6 @@ data Prj s t
 
 uniform :: forall n t k u i o . (Expr k t -> Decl k u i o) -> Decl k ((n '::: t) ': u) i o
 uniform _ = undefined
-
-class Uniforms k u i o a where
-  uniforms :: a -> Decl k u i o
-
-instance Uniforms k u i o (Decl k u i o) where
-  uniforms = id
-
-instance Uniforms k u i o a => Uniforms k ((n '::: t) ': u) i o (Expr k t -> a) where
-  uniforms with = uniform (uniforms . with)
 
 input :: forall n t k u i o . (Expr k t -> Decl k u i o) -> Decl k u ((n '::: t) ': i) o
 input _ = undefined
