@@ -4,6 +4,7 @@
 
 uniform vec2 resolution; // viewport resolution (in pixels)
 uniform vec2 origin;
+uniform float zoom;
 
 
 // Star Nest by Pablo Roman Andrioli
@@ -16,7 +17,6 @@ uniform vec2 origin;
 #define volsteps 8
 #define stepsize 0.1
 
-#define zoom   0.800
 #define tile   0.850
 
 #define brightness 0.0015

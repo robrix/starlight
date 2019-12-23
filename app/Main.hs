@@ -205,8 +205,9 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
   use stars $ do
     scale <- Window.scale
     size <- Window.size
-    set @"resolution" (size ^* scale ^* (1 / zoomOut))
+    set @"resolution" (size ^* scale)
     set @"origin" position
+    set @"zoom" zoomOut
 
     drawArrays TriangleStrip (Interval 0 4)
 
@@ -251,7 +252,8 @@ data DrawState = DrawState
   , shipArray :: Array (V3 Float)
   , stars     :: GL.Program
     '[ "resolution" '::: V2 Float
-     , "origin"     '::: Point V2 Float ]
+     , "origin"     '::: Point V2 Float
+     , "zoom"       '::: Float ]
   , ship      :: GL.Program
     '[ "colour"  '::: V4 Float
      , "matrix3" '::: M33 Float ]
