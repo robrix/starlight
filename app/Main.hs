@@ -70,16 +70,16 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- label
 
-      quadArray   <- loadVertices quadVertices
-      shipArray   <- loadVertices shipVertices
-      circleArray <- loadVertices starVertices
+      quadA   <- loadVertices quadVertices
+      shipA   <- loadVertices shipVertices
+      circleA <- loadVertices starVertices
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
       label <- setLabel label { Label.colour = white } font "hello"
-      let drawState = DrawState { quadArray, shipArray, circleArray, stars, ship }
+      let drawState = DrawState { quadA, shipA, circleA, stars, ship }
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
@@ -187,7 +187,7 @@ draw
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState { quadArray, circleArray, shipArray, ship, stars } t PlayerState { position, velocity, rotation } = runLiftIO $ do
+draw DrawState { quadA, circleA, shipA, ship, stars } t PlayerState { position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -198,7 +198,7 @@ draw DrawState { quadArray, circleArray, shipArray, ship, stars } t PlayerState 
   setClearColour black
   glClear GL_COLOR_BUFFER_BIT
 
-  bind (Just quadArray)
+  bind (Just quadA)
 
   let zoomOut = zoomForSpeed size (norm velocity)
 
@@ -211,7 +211,7 @@ draw DrawState { quadArray, circleArray, shipArray, ship, stars } t PlayerState 
 
     drawArrays TriangleStrip (Interval 0 4)
 
-  bind (Just shipArray)
+  bind (Just shipA)
 
   scale <- Window.scale
   size <- Window.size
@@ -242,19 +242,19 @@ draw DrawState { quadArray, circleArray, shipArray, ship, stars } t PlayerState 
 
           for_ satellites (drawBody trans)
 
-    bind (Just circleArray)
+    bind (Just circleA)
     drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
 
 
 data DrawState = DrawState
-  { quadArray   :: Array (V2 Float)
-  , circleArray :: Array (V2 Float)
-  , shipArray   :: Array (V3 Float)
-  , stars       :: GL.Program
+  { quadA   :: Array (V2 Float)
+  , circleA :: Array (V2 Float)
+  , shipA   :: Array (V3 Float)
+  , stars   :: GL.Program
     '[ "resolution" '::: V2 Float
      , "origin"     '::: Point V2 Float
      , "zoom"       '::: Float ]
-  , ship        :: GL.Program
+  , ship    :: GL.Program
     '[ "colour"  '::: V4 Float
      , "matrix3" '::: M33 Float ]
   }
