@@ -350,9 +350,8 @@ _pointsFragment = version 410 $ do
     iff (len p `gt` 1)
       discard
       (do
-        fragColour .= colour
         mag <- let' (len p * 2)
-        fragColour ^. _a .= 1 - mag * mag * mag / 2)
+        fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
 
 _shipVertex
   :: Shader
