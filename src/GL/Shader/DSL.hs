@@ -43,6 +43,9 @@ instance Applicative (Expr k) where
   pure _ = undefined
   _ <*> _ = undefined
 
+instance Monad (Expr k) where
+  _ >>= _ = undefined
+
 instance Num (Expr k a) where
   _ + _ = undefined
   _ * _ = undefined
