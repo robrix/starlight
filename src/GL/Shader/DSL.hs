@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
 , version
@@ -34,6 +34,7 @@ module GL.Shader.DSL
 , (^*)
 , (!*)
 , renderShader
+, renderExpr
 ) where
 
 import Control.Monad ((<=<), ap, liftM)
@@ -256,6 +257,35 @@ infixl 7 !*
 
 renderShader :: Shader k u i o -> Doc ()
 renderShader (Shader doc) = doc
+
+renderExpr :: Expr k a -> Doc ()
+renderExpr = go where
+  go = parens . \case
+    Lit d -> pretty d
+    a :+ b -> go a <+> pretty '+' <+> go b
+    a :* b -> go a <+> pretty '*' <+> go b
+    a :- b -> go a <+> pretty '-' <+> go b
+    a :/ b -> go a <+> pretty '/' <+> go b
+    Signum a -> fn "signum" [go a] -- log
+    Negate a -> pretty "-" <> go a
+    Abs a -> fn "abs" [go a]
+    Exp a -> fn "exp" [go a]
+    Log a -> fn "log" [go a]
+    Sqrt a -> fn "sqrt" [go a]
+    a :** b -> fn "pow" [go a, go b]
+    Sin a -> fn "sin" [go a]
+    Cos a -> fn "cos" [go a]
+    Tan a -> fn "tan" [go a]
+    ASin a -> fn "asin" [go a]
+    ACos a -> fn "acos" [go a]
+    ATan a -> fn "atan" [go a]
+    SinH a -> fn "sinh" [go a]
+    CosH a -> fn "cosh" [go a]
+    TanH a -> fn "tanh" [go a]
+    ASinH a -> fn "asinh" [go a]
+    ACosH a -> fn "acosh" [go a]
+    ATanH a -> fn "atanh" [go a]
+  fn n as = pretty n <> tupled as
 
 
 _radarVertex
