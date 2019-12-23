@@ -245,6 +245,15 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position
     bind (Just circleA)
     drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
 
+  use shipP $ do
+    set @"colour" $ V4 1 1 1 1
+    set @"matrix3"
+      $   window
+      !*! translated (unP position)
+      !*! scaled (V3 150 150 1)
+
+    drawArrays LineLoop (Interval 0 (length circleV))
+
 
 data DrawState = DrawState
   { quadA   :: Array (V2 Float)
