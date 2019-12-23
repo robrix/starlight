@@ -17,6 +17,7 @@ module GL.Shader.DSL
 , _x
 , _y
 , _z
+, _w
 , (|*)
 ) where
 
@@ -27,7 +28,7 @@ import Linear.Matrix
 import Linear.V1 (R1)
 import Linear.V2 (V2, R2)
 import Linear.V3 (V3, R3)
-import Linear.V4 (V4)
+import Linear.V4 (V4, R4)
 import UI.Colour
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
@@ -131,6 +132,9 @@ _y = undefined
 
 _z :: R3 v => Prj (v a) a
 _z = undefined
+
+_w :: R4 v => Prj (v a) a
+_w = undefined
 
 
 (|*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
