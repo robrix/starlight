@@ -16,6 +16,7 @@ module GL.Shader.DSL
 , coerce
 , gl_Position
 , gl_PointSize
+, gl_PointCoord
 , (.=)
 , (^.)
 , _x
@@ -136,6 +137,10 @@ gl_Position = undefined
 
 gl_PointSize :: Expr 'Vertex (Ref Float)
 gl_PointSize = undefined
+
+
+gl_PointCoord :: Expr 'Fragment (V2 Float)
+gl_PointCoord = undefined
 
 
 (.=) :: Expr k (Ref a) -> Expr k a -> Expr k ()
