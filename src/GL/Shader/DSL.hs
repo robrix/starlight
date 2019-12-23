@@ -407,7 +407,7 @@ _pointsFragment = mk $ \ colour fragColour -> do
       fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
 
 
-class Mk k u i o a | k u i o -> a where
+class Mk k u i o a | k u i o -> a, a -> o where
   mk :: a -> Shader k u i o
 
 instance Mk k '[] '[] '[] (Stmt k ()) where
