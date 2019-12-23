@@ -16,6 +16,15 @@ import UI.Colour
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
 data Expr (k :: Type) a
 
+instance Num (Expr k a) where
+  _ + _ = undefined
+  _ * _ = undefined
+  _ - _ = undefined
+  signum _ = undefined
+  negate _ = undefined
+  abs _ = undefined
+  fromInteger _ = undefined
+
 data Ref t
 
 uniform :: forall n t k u i o . (Expr k t -> Shader k u i o) -> Shader k ((n '::: t) ': u) i o
