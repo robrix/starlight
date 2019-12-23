@@ -204,25 +204,25 @@ infixr 4 .=
 infixl 8 ^.
 
 _x :: Prj (v a) a
-_x = undefined
+_x = Prj "x"
 
 _y :: Prj (v a) a
-_y = undefined
+_y = Prj "y"
 
 _z :: Prj (v a) a
-_z = undefined
+_z = Prj "z"
 
 _w :: Prj (v a) a
-_w = undefined
+_w = Prj "w"
 
 _xy :: Prj (v a) (V2 a)
-_xy = undefined
+_xy = Prj "xy"
 
 _xyz :: Prj (v a) (V3 a)
-_xyz = undefined
+_xyz = Prj "xyz"
 
 _a :: Prj (v a) a
-_a = undefined
+_a = Prj "a"
 
 
 (^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
