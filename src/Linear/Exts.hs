@@ -3,8 +3,10 @@ module Linear.Exts
 , rotated
 , scaled
 , reject
+, angleTo
 ) where
 
+import Lens.Micro ((^.))
 import Linear.Matrix
 import Linear.Metric
 import Linear.V2
@@ -29,3 +31,8 @@ rotated (Radians theta) = V3
 
 reject :: (Metric v, Fractional a) => v a -> v a -> v a
 reject a b = a ^-^ project a b
+
+
+-- | The angle from the first vector to the second.
+angleTo :: V2 Float -> V2 Float -> Radians Float
+angleTo v1 v2 = Radians (atan2 (v2 ^. _y) (v2 ^. _x) - atan2 (v1 ^. _y) (v1 ^. _x))
