@@ -34,7 +34,7 @@ module GL.Shader.DSL
 , Mk(..)
 ) where
 
-import Control.Monad (ap)
+import Control.Monad (ap, liftM)
 import qualified Data.Coerce as C
 import Data.DSL
 import Data.Proxy
@@ -58,7 +58,7 @@ data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
 data Stmt (k :: Type) a
 
 instance Functor (Stmt k) where
-  fmap _ _ = undefined
+  fmap = liftM
 
 instance Applicative (Stmt k) where
   pure _ = undefined
