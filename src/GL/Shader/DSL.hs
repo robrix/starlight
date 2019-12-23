@@ -130,11 +130,11 @@ input _ = undefined
 output :: forall n t k u i o . (Expr k (Ref t) -> Decl k u i o) -> Decl k u i ((n '::: t) ': o)
 output _ = undefined
 
-main :: Expr k () -> Decl k u i o
+main :: Stmt k () -> Decl k u i o
 main _ = undefined
 
 
-let' :: Expr k a -> (Expr k a -> Expr k b) -> Expr k b
+let' :: Expr k a -> (Expr k a -> Stmt k b) -> Stmt k b
 let' _ _ = undefined
 
 
@@ -165,11 +165,11 @@ gl_PointSize = undefined
 gl_PointCoord :: Expr 'Fragment (V2 Float)
 gl_PointCoord = undefined
 
-discard :: Expr 'Fragment ()
+discard :: Stmt 'Fragment ()
 discard = undefined
 
 
-iff :: Expr k Bool -> Expr k () -> Expr k () -> Expr k ()
+iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
 iff _c _t _e = undefined
 
 gt :: Expr k Float -> Expr k Float -> Expr k Bool
@@ -178,7 +178,7 @@ gt _ _ = undefined
 infix 4 `gt`
 
 
-(.=) :: Expr k (Ref a) -> Expr k a -> Expr k ()
+(.=) :: Expr k (Ref a) -> Expr k a -> Stmt k ()
 _ .= _ = undefined
 
 infixr 4 .=
