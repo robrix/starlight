@@ -12,8 +12,7 @@ vertex
     'Vertex
     '[ "matrix" '::: M33 Float
      , "angle"  '::: Radians Float
-     , "sweep"  '::: Radians Float
-     ]
+     , "sweep"  '::: Radians Float ]
     '[ "n" '::: Float ]
     '[]
 vertex = mk $ \ matrix angle sweep n -> do
