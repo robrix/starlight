@@ -32,6 +32,9 @@ instance GL.Enum Type where
 class KnownType (k :: Type) where
   typeVal :: proxy k -> Type
 
+instance KnownType 'Vertex where
+  typeVal _ = Vertex
+
 
 createShader :: (Has Finally sig m, Has (Lift IO) sig m) => Type -> m Shader
 createShader type' = do
