@@ -97,11 +97,14 @@ data Expr (k :: Type) a where
   ACosH :: Expr k a -> Expr k a
   ATanH :: Expr k a -> Expr k a
 
+  (:^.) :: Expr k a -> Prj a b -> Expr k b
+
 infixl 6 :+
 infixl 7 :*
 infixl 6 :-
 infixl 7 :/
 infixr 8 :**
+infixl 8 :^.
 
 instance Num (Expr k a) where
   (+) = (:+)
@@ -195,7 +198,7 @@ _ .= _ = undefined
 infixr 4 .=
 
 (^.) :: Expr k a -> Prj a b -> Expr k b
-_ ^. _ = undefined
+(^.) = (:^.)
 
 infixl 8 ^.
 
@@ -238,6 +241,7 @@ renderShader _ = undefined
 
 renderExpr :: Expr k a -> Doc ()
 renderExpr = go where
+  go :: Expr k a -> Doc ()
   go = parens . \case
     Var n -> pretty n
     Lit d -> pretty d
@@ -264,6 +268,7 @@ renderExpr = go where
     ASinH a -> fn "asinh" [go a]
     ACosH a -> fn "acosh" [go a]
     ATanH a -> fn "atanh" [go a]
+    a :^. Prj s -> go a <> pretty '.' <> pretty s
   fn n as = pretty n <> tupled as
 
 
