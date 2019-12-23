@@ -11,6 +11,6 @@ void main() {
   } else {
     fragColour = colour;
     float mag = length(p) * 2;
-    fragColour.a = 1 - (mag * mag * mag / 2);
+    fragColour.a = 1 - mag * mag * mag / 2;
   }
 }
