@@ -74,6 +74,7 @@ library
     S
     Starlight.Body
     Starlight.Input
+    Starlight.Shader.Radar
     UI.Carrier.Window
     UI.Colour
     UI.Effect.Window
