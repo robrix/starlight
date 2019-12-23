@@ -33,4 +33,4 @@ size (Interval min max) = max - min
 
 toUnit, fromUnit :: Fractional a => Interval a -> a -> a
 toUnit   i x = (x - min_ i) / size i
-fromUnit i x =  x * size i + min_ i
+fromUnit i x =  x * size i  + min_ i
