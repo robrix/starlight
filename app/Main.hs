@@ -256,7 +256,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
               v1 = (trans !* V3 0 0 1) ^. _xy
               angle = Radians (atan2 (v2 ^. _y) (v2 ^. _x) - atan2 (v1 ^. _y) (v1 ^. _x))
               d = distance v2 v1
-          set @"colour" $ colour & _a .~ 0.75
+          set @"colour" $ colour & _a .~ 0.5
           set @"matrix"
             $   window
             !*! translated (unP position)
