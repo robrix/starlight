@@ -37,7 +37,7 @@ module GL.Shader.DSL
 ) where
 
 import Control.Monad (ap)
-import Data.Coerce (Coercible)
+import qualified Data.Coerce as C
 import Data.DSL
 import Data.Text.Prettyprint.Doc
 import Data.Word
@@ -58,7 +58,7 @@ version v _ = Shader $ pretty "#version" <+> pretty v <> hardline
 newtype Decl (k :: Type) s a = Decl (Doc ())
 
 instance Functor (Decl k s) where
-  fmap _ _ = undefined
+  fmap _ = C.coerce
 
 instance Applicative (Decl k s) where
   pure _ = undefined
@@ -152,7 +152,7 @@ len :: Expr k (v Float) -> Expr k Float
 len _ = undefined
 
 
-coerce :: Coercible a b => (a -> b) -> Expr k a -> Expr k b
+coerce :: C.Coercible a b => (a -> b) -> Expr k a -> Expr k b
 coerce _ _ = undefined
 
 
