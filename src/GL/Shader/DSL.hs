@@ -13,6 +13,7 @@ module GL.Shader.DSL
 , gl_Position
 , gl_PointSize
 , (.=)
+, (^.)
 , (|*)
 ) where
 
@@ -112,6 +113,11 @@ gl_PointSize = undefined
 _ .= _ = undefined
 
 infixr 4 .=
+
+(^.) :: Expr k a -> Prj a b -> Expr k b
+_ ^. _ = undefined
+
+infixl 8 ^.
 
 
 (|*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
