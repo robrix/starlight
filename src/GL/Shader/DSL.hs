@@ -13,6 +13,7 @@ module GL.Shader.DSL
 , vec2
 , vec3
 , vec4
+, coerce
 , gl_Position
 , gl_PointSize
 , (.=)
@@ -27,6 +28,7 @@ module GL.Shader.DSL
 ) where
 
 import Control.Monad (ap)
+import Data.Coerce (Coercible)
 import Data.DSL
 import GL.Shader (Type(..))
 import Linear.Matrix
@@ -122,6 +124,10 @@ vec3 _ _ = undefined
 
 vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
 vec4 _ _ = undefined
+
+
+coerce :: Coercible a b => (a -> b) -> Expr k a -> Expr k b
+coerce _ _ = undefined
 
 
 gl_Position :: Expr 'Vertex (Ref (V4 Float))
