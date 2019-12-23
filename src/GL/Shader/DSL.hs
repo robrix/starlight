@@ -9,11 +9,13 @@ module GL.Shader.DSL
 , main
 , gl_Position
 , (.=)
+, (|*)
 ) where
 
 import Data.DSL
 import GL.Shader (Type(..))
 import Linear.Exts
+import Linear.Matrix
 import Linear.V2
 import Linear.V3
 import Linear.V4
@@ -63,6 +65,12 @@ gl_Position = undefined
 _ .= _ = undefined
 
 infixr 4 .=
+
+
+(|*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
+_ |* _ = undefined
+
+infixl 7 |*
 
 
 _shipFragment
