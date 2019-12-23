@@ -264,7 +264,7 @@ renderStmt :: Pretty a => Stmt k a -> Doc ()
 renderStmt = \case
   Pure a -> pretty a
   Let n v k
-    -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';'
+    -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt (k (Var n))
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
