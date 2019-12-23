@@ -52,8 +52,8 @@ uniform _ = undefined
 class Uniforms k u i o a where
   uniforms :: a -> Shader k u i o
 
-instance {-# OVERLAPPABLE #-} Uniforms k ((n '::: t) ': u) i o (Expr k t -> Shader k u i o) where
-  uniforms with = uniform with
+instance Uniforms k u i o (Shader k u i o) where
+  uniforms = id
 
 instance Uniforms k u i o a => Uniforms k ((n '::: t) ': u) i o (Expr k t -> a) where
   uniforms with = uniform (uniforms . with)
