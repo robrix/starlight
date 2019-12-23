@@ -4,9 +4,11 @@ module Data.Interval
 , size
 , toUnit
 , fromUnit
+, wrap
 ) where
 
 import Control.Applicative (liftA2)
+import Data.Fixed (mod')
 
 data Interval a = Interval
   { min_ :: !a
@@ -87,3 +89,7 @@ size (Interval min max) = max - min
 toUnit, fromUnit :: Fractional a => Interval a -> a -> a
 toUnit   i x = (x - min_ i) / size i
 fromUnit i x =  x * size i  + min_ i
+
+
+wrap :: Real a => Interval a -> a -> a
+wrap i x = ((x + max_ i) `mod'` size i) + min_ i

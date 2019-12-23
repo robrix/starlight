@@ -2,11 +2,9 @@
 module Unit.Angle
 ( Radians(..)
 , fromDegrees
-, wrap
 , Degrees(..)
 ) where
 
-import Data.Fixed (mod')
 import GL.Uniform
 
 newtype Radians a = Radians { getRadians :: a }
@@ -14,9 +12,6 @@ newtype Radians a = Radians { getRadians :: a }
 
 fromDegrees :: Floating a => Degrees a -> Radians a
 fromDegrees (Degrees d) = Radians (d * pi / 180)
-
-wrap :: (Floating a, Real a) => Radians a -> Radians a
-wrap r = ((r + pi) `mod'` (2 * pi)) - pi
 
 
 newtype Degrees a = Degrees { getDegrees :: a }
