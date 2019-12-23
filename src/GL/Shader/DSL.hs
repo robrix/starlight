@@ -20,6 +20,7 @@ module GL.Shader.DSL
 , gl_PointCoord
 , discard
 , iff
+, gt
 , (.=)
 , (^.)
 , _x
@@ -154,6 +155,11 @@ discard = undefined
 
 iff :: Expr k Bool -> Expr k () -> Expr k () -> Expr k ()
 iff _c _t _e = undefined
+
+gt :: Expr k Float -> Expr k Float -> Expr k Bool
+gt _ _ = undefined
+
+infix 4 `gt`
 
 
 (.=) :: Expr k (Ref a) -> Expr k a -> Expr k ()
