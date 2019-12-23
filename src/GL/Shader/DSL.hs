@@ -106,6 +106,8 @@ data Expr (k :: Type) a where
   (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
   (:!*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
 
+  Gt :: Expr k a -> Expr k a -> Expr k Bool
+
 infixl 6 :+
 infixl 7 :*
 infixl 6 :-
@@ -196,7 +198,7 @@ iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
 iff _c _t _e = undefined
 
 gt :: Expr k Float -> Expr k Float -> Expr k Bool
-gt _ _ = undefined
+gt = Gt
 
 infix 4 `gt`
 
@@ -285,6 +287,7 @@ renderExpr = parens . \case
   a :^. Prj s -> renderExpr a <> pretty '.' <> pretty s
   a :^* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   a :!* b -> renderExpr a <+> pretty '*' <+> renderExpr b
+  Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
   where
   fn n as = pretty n <> tupled as
 
