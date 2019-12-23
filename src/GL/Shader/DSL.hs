@@ -44,7 +44,7 @@ import Linear.V1 (R1)
 import Linear.V2 (V2(..), R2)
 import Linear.V3 (V3(..), R3)
 import Linear.V4 (V4(..), R4)
-import UI.Colour
+import UI.Colour (Colour)
 import Unit.Angle
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
