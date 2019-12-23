@@ -195,7 +195,7 @@ gl_PointSize = Ref "gl_PointSize"
 
 
 gl_PointCoord :: Expr 'Fragment (V2 Float)
-gl_PointCoord = undefined
+gl_PointCoord = Var "gl_PointCoord"
 
 discard :: Stmt 'Fragment ()
 discard = undefined
