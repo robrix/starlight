@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, ExplicitForAll, KindSignatures, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds, ExplicitForAll, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
 , Expr
@@ -11,6 +11,10 @@ module GL.Shader.DSL
 
 import Data.DSL
 import GL.Shader (Type(..))
+import Linear.Exts
+import Linear.V2
+import Linear.V3
+import Linear.V4
 import UI.Colour
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
@@ -24,6 +28,15 @@ instance Num (Expr k a) where
   negate _ = undefined
   abs _ = undefined
   fromInteger _ = undefined
+
+instance Ext (Expr k (V2 a)) (Expr k a) (Expr k (V3 a)) where
+  ext _ = undefined
+
+instance Ext (Expr k (V2 a)) (Expr k (V2 a)) (Expr k (V4 a)) where
+  ext _ = undefined
+
+instance Ext (Expr k (V3 a)) (Expr k a) (Expr k (V4 a)) where
+  ext _ = undefined
 
 data Ref t
 
