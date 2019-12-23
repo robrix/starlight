@@ -40,7 +40,7 @@ angleOf :: RealFloat a => V2 a -> Radians a
 angleOf (V2 x y) = Radians (atan2 y x)
 
 -- | The angle from the first vector to the second.
-angleTo :: V2 Float -> V2 Float -> Radians Float
+angleTo :: RealFloat a => V2 a -> V2 a -> Radians a
 angleTo v1 v2 = angleOf (v2 - v1)
 
 
