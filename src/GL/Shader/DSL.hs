@@ -51,9 +51,9 @@ import UI.Colour (Colour)
 import Unit.Angle
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
-  Uniform :: Shader k u i o -> Shader k (n '::: t ': u) i o
-  Input   :: Shader k u i o -> Shader k u (n '::: t ': i) o
-  Output  :: Shader k u i o -> Shader k u i (n '::: t ': o)
+  Uniform :: GLSLType t => Shader k u i o -> Shader k (n '::: t ': u) i o
+  Input   :: GLSLType t => Shader k u i o -> Shader k u (n '::: t ': i) o
+  Output  :: GLSLType t => Shader k u i o -> Shader k u i (n '::: t ': o)
   Main    :: Stmt k () -> Shader k u i o
 
 
@@ -413,11 +413,11 @@ class Mk k u i o a | k u i o -> a where
 instance Mk k '[] '[] '[] (Stmt k ()) where
   mk = Main
 
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, Mk k '[] '[] os a) => Mk k '[] '[] (n '::: t ': os) (Ref k t -> a) where
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Mk k '[] '[] os a) => Mk k '[] '[] (n '::: t ': os) (Ref k t -> a) where
   mk f = Output (mk (f (Ref (symbolVal (Proxy @n)))))
 
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, Mk k '[] is os a) => Mk k '[] (n '::: t ': is) os (Expr k t -> a) where
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Mk k '[] is os a) => Mk k '[] (n '::: t ': is) os (Expr k t -> a) where
   mk f = Input (mk (f (Var (symbolVal (Proxy @n)))))
 
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, Mk k us is os a) => Mk k (n '::: t ': us) is os (Expr k t -> a) where
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Mk k us is os a) => Mk k (n '::: t ': us) is os (Expr k t -> a) where
   mk f = Uniform (mk (f (Var (symbolVal (Proxy @n)))))
