@@ -33,11 +33,13 @@ module GL.Shader.DSL
 , _a
 , (^*)
 , (|*)
+, renderShader
 ) where
 
 import Control.Monad (ap)
 import Data.Coerce (Coercible)
 import Data.DSL
+import Data.Text.Prettyprint.Doc
 import Data.Word
 import GL.Shader (Type(..))
 import Linear.Matrix
@@ -226,6 +228,10 @@ infixl 7 ^*
 _ |* _ = undefined
 
 infixl 7 |*
+
+
+renderShader :: Shader k u i o -> Doc ann
+renderShader _ = undefined
 
 
 _radarVertex
