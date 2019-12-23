@@ -10,6 +10,7 @@ module GL.Shader.DSL
 , output
 , main
 , let'
+, vec2
 , vec3
 , vec4
 , gl_Position
@@ -111,6 +112,9 @@ main _ = undefined
 let' :: Expr k a -> (Expr k a -> Expr k b) -> Expr k b
 let' _ _ = undefined
 
+
+vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
+vec2 _ _ = undefined
 
 vec3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
 vec3 _ _ = undefined
