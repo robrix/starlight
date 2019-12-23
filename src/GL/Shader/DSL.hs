@@ -18,6 +18,7 @@ module GL.Shader.DSL
 , gl_PointSize
 , gl_PointCoord
 , discard
+, iff
 , (.=)
 , (^.)
 , _x
@@ -145,6 +146,10 @@ gl_PointCoord = undefined
 
 discard :: Expr 'Fragment ()
 discard = undefined
+
+
+iff :: Expr k Bool -> Expr k () -> Expr k () -> Expr k ()
+iff _c _t _e = undefined
 
 
 (.=) :: Expr k (Ref a) -> Expr k a -> Expr k ()
