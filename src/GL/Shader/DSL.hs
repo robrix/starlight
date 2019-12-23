@@ -312,6 +312,9 @@ renderExpr = parens . \case
 class GLSLType a where
   renderTypeOf :: expr a -> Doc ()
 
+instance GLSLType Float where
+  renderTypeOf _ = pretty "float"
+
 
 _radarVertex
   :: Shader
