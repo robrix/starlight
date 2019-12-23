@@ -406,24 +406,6 @@ _pointsFragment = mk $ \ colour fragColour -> do
       mag <- let' "mag" (len p * 2)
       fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
 
-_shipVertex
-  :: Shader
-    'Vertex
-    '[ "matrix" '::: M33 Float ]
-    '[ "position2" '::: V2 Float ]
-    '[]
-_shipVertex = mk $ \ matrix pos ->
-  gl_Position .= vec4 (matrix !* vec3 pos 1) 1
-
-_shipFragment
-  :: Shader
-    'Fragment
-    '[ "colour"     '::: Colour Float ]
-    '[]
-    '[ "fragColour" '::: Colour Float ]
-_shipFragment = mk $ \ colour fragColour ->
-  fragColour .= colour
-
 
 class Mk k u i o a | k u i o -> a where
   mk :: a -> Shader k u i o
