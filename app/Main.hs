@@ -70,16 +70,16 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- label
 
-      quadArray <- loadVertices quadVertices
-      shipArray <- loadVertices shipVertices
-      starArray <- loadVertices starVertices
+      quadArray   <- loadVertices quadVertices
+      shipArray   <- loadVertices shipVertices
+      circleArray <- loadVertices starVertices
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
       label <- setLabel label { Label.colour = white } font "hello"
-      let drawState = DrawState { quadArray, shipArray, starArray, stars, ship }
+      let drawState = DrawState { quadArray, shipArray, circleArray, stars, ship }
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
@@ -187,7 +187,7 @@ draw
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { position, velocity, rotation } = runLiftIO $ do
+draw DrawState { quadArray, circleArray, shipArray, ship, stars } t PlayerState { position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -242,19 +242,19 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
 
           for_ satellites (drawBody trans)
 
-    bind (Just starArray)
+    bind (Just circleArray)
     drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
 
 
 data DrawState = DrawState
-  { quadArray :: Array (V2 Float)
-  , starArray :: Array (V2 Float)
-  , shipArray :: Array (V3 Float)
-  , stars     :: GL.Program
+  { quadArray   :: Array (V2 Float)
+  , circleArray :: Array (V2 Float)
+  , shipArray   :: Array (V3 Float)
+  , stars       :: GL.Program
     '[ "resolution" '::: V2 Float
      , "origin"     '::: Point V2 Float
      , "zoom"       '::: Float ]
-  , ship      :: GL.Program
+  , ship        :: GL.Program
     '[ "colour"  '::: V4 Float
      , "matrix3" '::: M33 Float ]
   }
