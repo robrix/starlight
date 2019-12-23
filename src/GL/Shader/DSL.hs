@@ -230,8 +230,8 @@ _ !* _ = undefined
 infixl 7 !*
 
 
-renderShader :: Shader k u i o -> Doc ann
-renderShader _ = undefined
+renderShader :: Shader k u i o -> Doc ()
+renderShader (Shader doc) = doc
 
 
 _radarVertex
