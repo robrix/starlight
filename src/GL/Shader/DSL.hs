@@ -31,6 +31,7 @@ module GL.Shader.DSL
 , (!*)
 , renderShader
 , renderExpr
+, Mk(..)
 ) where
 
 import Control.Monad (ap)
