@@ -86,6 +86,7 @@ instance Monad (Stmt k) where
 
 
 data Expr (k :: Type) a where
+  Var :: String -> Expr k a
   Lit :: Double -> Expr k a
 
   (:+) :: Expr k a -> Expr k a -> Expr k a
@@ -261,6 +262,7 @@ renderShader (Shader doc) = doc
 renderExpr :: Expr k a -> Doc ()
 renderExpr = go where
   go = parens . \case
+    Var n -> pretty n
     Lit d -> pretty d
     a :+ b -> go a <+> pretty '+' <+> go b
     a :* b -> go a <+> pretty '*' <+> go b
