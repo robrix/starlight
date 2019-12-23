@@ -2,9 +2,11 @@ module Linear.Exts
 ( translated
 , rotated
 , scaled
+, reject
 ) where
 
 import Linear.Matrix
+import Linear.Metric
 import Linear.V2
 import Linear.V3
 import Linear.Vector
@@ -23,3 +25,7 @@ rotated (Radians theta) = V3
   (V3 0    0       1) where
   cosT = cos theta
   sinT = sin theta
+
+
+reject :: (Metric v, Fractional a) => v a -> v a -> v a
+reject a b = a ^-^ project a b
