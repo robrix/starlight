@@ -56,14 +56,14 @@ polar2 v = (angleOf v, norm v) where
 
 
 -- | Extensions of a vector with an extra dimension.
-class Ext v v' a | v -> v' a, v' -> v a where
+class Ext v a v' | v -> v' a, v' -> v a where
   ext :: v -> a -> v'
 
-instance Ext (V1 a) (V2 a) a where
+instance Ext (V1 a) a (V2 a) where
   ext (V1 x) = V2 x
 
-instance Ext (V2 a) (V3 a) a where
+instance Ext (V2 a) a (V3 a) where
   ext (V2 x y) = V3 x y
 
-instance Ext (V3 a) (V4 a) a where
+instance Ext (V3 a) a (V4 a) where
   ext (V3 x y z) = V4 x y z
