@@ -157,7 +157,7 @@ instance Floating (Expr k a) where
   atanh = ATanH
 
 
-newtype Ref (k :: Type) t = Ref { getRef :: String }
+newtype Ref (k :: Type) t = Ref String
 
 newtype Prj s t = Prj String
 
