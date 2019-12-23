@@ -16,6 +16,7 @@ import Linear.Metric
 import Linear.V1
 import Linear.V2
 import Linear.V3
+import Linear.V4
 import Linear.Vector
 import Unit.Angle
 
@@ -63,3 +64,6 @@ instance Ext V1 V2 where
 
 instance Ext V2 V3 where
   ext (V2 x y) = V3 x y
+
+instance Ext V3 V4 where
+  ext (V3 x y z) = V4 x y z
