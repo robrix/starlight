@@ -13,6 +13,7 @@ module GL.Shader.DSL
 , vec2
 , vec3
 , vec4
+, len
 , coerce
 , gl_Position
 , gl_PointSize
@@ -128,6 +129,9 @@ vec3 _ _ = undefined
 
 vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
 vec4 _ _ = undefined
+
+len :: Expr k (v Float) -> Expr k Float
+len _ = undefined
 
 
 coerce :: Coercible a b => (a -> b) -> Expr k a -> Expr k b
