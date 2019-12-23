@@ -22,6 +22,7 @@ module GL.Shader.DSL
 , _z
 , _w
 , _xy
+, (^*)
 , (|*)
 ) where
 
@@ -154,6 +155,12 @@ _w = undefined
 
 _xy :: R2 v => Prj (v a) (V2 a)
 _xy = undefined
+
+
+(^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
+_ ^* _ = undefined
+
+infixl 7 ^*
 
 
 (|*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
