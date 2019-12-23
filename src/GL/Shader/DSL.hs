@@ -338,6 +338,9 @@ instance GLSLType (V2 Float) where
 instance GLSLType (V3 Float) where
   renderTypeOf _ = pretty "vec3"
 
+instance GLSLType (V3 (V3 Float)) where
+  renderTypeOf _ = pretty "mat3"
+
 instance GLSLType (V4 Float) where
   renderTypeOf _ = pretty "vec4"
 
