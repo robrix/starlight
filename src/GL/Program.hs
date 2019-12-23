@@ -1,7 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, KindSignatures, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Program
 ( Program(..)
-, (:::)(..)
 , createProgram
 , useProgram
 , link
