@@ -108,6 +108,8 @@ data Expr (k :: Type) a where
 
   Gt :: Expr k a -> Expr k a -> Expr k Bool
 
+  Len :: Expr k (v Float) -> Expr k Float
+
 infixl 6 :+
 infixl 7 :*
 infixl 6 :-
@@ -173,7 +175,7 @@ vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
 vec4 _ _ = undefined
 
 len :: Expr k (v Float) -> Expr k Float
-len _ = undefined
+len = Len
 
 
 coerce :: C.Coercible a b => (a -> b) -> Expr k a -> Expr k b
@@ -288,6 +290,7 @@ renderExpr = parens . \case
   a :^* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   a :!* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
+  Len a -> fn "length" [renderExpr a]
   where
   fn n as = pretty n <> tupled as
 
