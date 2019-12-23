@@ -172,7 +172,7 @@ uniform = pure (Var (symbolVal (Proxy @n)))
 input :: Decl k s (Expr k t)
 input = undefined
 
-output :: Decl k s (Expr k (Ref t))
+output :: Decl k s (Ref t)
 output = undefined
 
 main :: Stmt k () -> Decl k s ()
@@ -200,10 +200,10 @@ coerce :: C.Coercible a b => (a -> b) -> Expr k a -> Expr k b
 coerce _ _ = undefined
 
 
-gl_Position :: Expr 'Vertex (Ref (V4 Float))
+gl_Position :: Ref (V4 Float)
 gl_Position = undefined
 
-gl_PointSize :: Expr 'Vertex (Ref Float)
+gl_PointSize :: Ref Float
 gl_PointSize = undefined
 
 
@@ -223,7 +223,7 @@ gt _ _ = undefined
 infix 4 `gt`
 
 
-(.=) :: Expr k (Ref a) -> Expr k a -> Stmt k ()
+(.=) :: Ref a -> Expr k a -> Stmt k ()
 _ .= _ = undefined
 
 infixr 4 .=
