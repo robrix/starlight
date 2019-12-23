@@ -41,10 +41,9 @@ import Data.DSL
 import Data.Word
 import GL.Shader (Type(..))
 import Linear.Matrix
-import qualified Linear.V1 as L
-import Linear.V2 (V2(..), R2)
-import Linear.V3 (V3(..), R3)
-import Linear.V4 (V4(..), R4)
+import Linear.V2 (V2(..))
+import Linear.V3 (V3(..))
+import Linear.V4 (V4(..))
 import UI.Colour (Colour)
 import Unit.Angle
 
@@ -198,22 +197,22 @@ _ ^. _ = undefined
 
 infixl 8 ^.
 
-_x :: L.R1 v => Prj (v a) a
+_x :: Prj (v a) a
 _x = undefined
 
-_y :: R2 v => Prj (v a) a
+_y :: Prj (v a) a
 _y = undefined
 
-_z :: R3 v => Prj (v a) a
+_z :: Prj (v a) a
 _z = undefined
 
-_w :: R4 v => Prj (v a) a
+_w :: Prj (v a) a
 _w = undefined
 
-_xy :: R2 v => Prj (v a) (V2 a)
+_xy :: Prj (v a) (V2 a)
 _xy = undefined
 
-_a :: L.R1 v => Prj (v a) a
+_a :: Prj (v a) a
 _a = undefined
 
 
