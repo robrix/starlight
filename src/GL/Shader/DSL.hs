@@ -60,6 +60,7 @@ data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
 data Stmt (k :: Type) a where
   Pure :: a -> Stmt k a
   Let :: GLSLType b => String -> Expr k b -> (Expr k b -> Stmt k a) -> Stmt k a
+  Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
 instance Functor (Stmt k) where
@@ -72,6 +73,7 @@ instance Applicative (Stmt k) where
 instance Monad (Stmt k) where
   Pure a    >>= f = f a
   Let n v k >>= f = Let n v (f <=< k)
+  Discard k >>= f = Discard (k >>= f)
   Stmt a  k >>= f = Stmt a (f <=< k)
 
 
@@ -201,7 +203,7 @@ gl_PointCoord :: Expr 'Fragment (V2 Float)
 gl_PointCoord = Var "gl_PointCoord"
 
 discard :: Stmt 'Fragment ()
-discard = undefined
+discard = Discard (pure ())
 
 
 iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
@@ -266,6 +268,9 @@ renderStmt = \case
   Let n v k
     -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt (k (Var n))
+  Discard k
+    -> pretty "discard" <> pretty ';' <> hardline
+    <> renderStmt k
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
     <> renderStmt (k b)
