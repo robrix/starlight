@@ -58,6 +58,7 @@ data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
 
 data Stmt (k :: Type) a where
   Pure :: a -> Stmt k a
+  Let :: String -> Expr k b -> (Expr k b -> Stmt k a) -> Stmt k a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
 instance Functor (Stmt k) where
@@ -68,8 +69,9 @@ instance Applicative (Stmt k) where
   (<*>) = ap
 
 instance Monad (Stmt k) where
-  Pure a   >>= f = f a
-  Stmt a k >>= f = Stmt a (f <=< k)
+  Pure a    >>= f = f a
+  Let n v k >>= f = Let n v (f <=< k)
+  Stmt a  k >>= f = Stmt a (f <=< k)
 
 
 data Expr (k :: Type) a where
@@ -167,7 +169,7 @@ main = Main
 
 
 let' :: String -> Expr k a -> Stmt k (Expr k a)
-let' _ _ = undefined
+let' n v = Let n v pure
 
 
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
@@ -260,6 +262,9 @@ renderShader _ = undefined
 renderStmt :: Pretty a => Stmt k a -> Doc ()
 renderStmt = \case
   Pure a -> pretty a
+  Let n v k
+    -> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';'
+    <> renderStmt (k (Var n))
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
     <> renderStmt (k b)
