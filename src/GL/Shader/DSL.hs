@@ -99,6 +99,7 @@ data Expr (k :: Type) a where
   ATanH :: Expr k a -> Expr k a
 
   (:^.) :: Expr k a -> Prj a b -> Expr k b
+  (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
 
 infixl 6 :+
 infixl 7 :*
@@ -106,6 +107,7 @@ infixl 6 :-
 infixl 7 :/
 infixr 8 :**
 infixl 8 :^.
+infixl 7 :^*
 
 instance Num (Expr k a) where
   (+) = (:+)
@@ -226,7 +228,7 @@ _a = Prj "a"
 
 
 (^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
-_ ^* _ = undefined
+(^*) = (:^*)
 
 infixl 7 ^*
 
@@ -268,6 +270,7 @@ renderExpr = parens . \case
   ACosH a -> fn "acosh" [renderExpr a]
   ATanH a -> fn "atanh" [renderExpr a]
   a :^. Prj s -> renderExpr a <> pretty '.' <> pretty s
+  a :^* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   where
   fn n as = pretty n <> tupled as
 
