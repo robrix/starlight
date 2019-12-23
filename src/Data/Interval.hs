@@ -9,8 +9,8 @@ module Data.Interval
 import Control.Applicative (liftA2)
 
 data Interval a = Interval
-  { from :: !a
-  , to   :: !a
+  { min_ :: !a
+  , max_ :: !a
   }
   deriving (Eq, Foldable, Functor, Show, Traversable)
 
@@ -29,8 +29,8 @@ instance Num a => Num (Interval a) where
 
 
 size :: Num a => Interval a -> a
-size (Interval from to) = to - from
+size (Interval min max) = max - min
 
 toUnit, fromUnit :: Fractional a => Interval a -> a -> a
-toUnit   i x = (x - from i) / size i
-fromUnit i x =  x * size i + from i
+toUnit   i x = (x - min_ i) / size i
+fromUnit i x =  x * size i + min_ i

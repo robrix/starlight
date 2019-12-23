@@ -59,4 +59,4 @@ modeToGLEnum = \case
 
 
 drawArrays :: (Has (Lift IO) sig m, HasCallStack) => Mode -> Interval Int -> m ()
-drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (modeToGLEnum mode) (fromIntegral (from i)) (fromIntegral (size i))
+drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (modeToGLEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))
