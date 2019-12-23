@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, ExplicitForAll, FlexibleInstances, FunctionalDependencies, KindSignatures, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
 ( Decl
+, Stmt
 , Expr
 , Ref
 , Prj
@@ -45,6 +46,7 @@ import UI.Colour
 import Unit.Angle
 
 data Decl (k :: Type) (u :: Context) (i :: Context) (o :: Context)
+data Stmt (k :: Type) a
 data Expr (k :: Type) a
 
 instance Functor (Expr k) where
