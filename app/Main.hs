@@ -181,7 +181,7 @@ zoomForSpeed :: V2 Int -> Float -> Float
 zoomForSpeed size speed
   | speed < minSpeed = minZoom
   | speed > maxSpeed = maxZoom
-  | otherwise        = fromUnit (minZoom, maxZoom) (easeInOutCubic (toUnit (minSpeed, maxSpeed) speed)) where
+  | otherwise        = fromUnit (Interval minZoom maxZoom) (easeInOutCubic (toUnit (Interval minSpeed maxSpeed) speed)) where
   minZoom = 0.75
   maxZoom = 4
   bound = fromIntegral (min (size ^. _x) (size ^. _y))
@@ -189,12 +189,8 @@ zoomForSpeed size speed
   minSpeed = speedAt minZoom
   maxSpeed = speedAt maxZoom
 
-toUnit, fromUnit :: (Float, Float) -> Float -> Float
-toUnit   (smin, smax) x = (x - smin) / (smax - smin)
-fromUnit (tmin, tmax) x = x * (tmax - tmin) + tmin
-
 easeInOutCosine :: Float -> Float
-easeInOutCosine = toUnit (-1, 1) . cos . fromUnit (pi, 2 * pi)
+easeInOutCosine = toUnit (Interval (-1) 1) . cos . fromUnit (Interval pi (2 * pi))
 
 easeInOutCubic :: Float -> Float
 easeInOutCubic t

@@ -2,6 +2,8 @@
 module Data.Interval
 ( Interval(..)
 , size
+, toUnit
+, fromUnit
 ) where
 
 import Control.Applicative (liftA2)
@@ -28,3 +30,7 @@ instance Num a => Num (Interval a) where
 
 size :: Num a => Interval a -> a
 size (Interval from to) = to - from
+
+toUnit, fromUnit :: Fractional a => Interval a -> a -> a
+toUnit   i x = (x - from i) / size i
+fromUnit i x =  x * size i + from i
