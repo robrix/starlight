@@ -25,7 +25,7 @@ import GL.Uniform
 import Graphics.GL.Core41
 import Graphics.GL.Types
 
-newtype Program (ty :: [Symbol ::: *]) = Program { unProgram :: GLuint }
+newtype Program (ty :: Context) = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)
 
 createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m (Program ty)
@@ -56,7 +56,7 @@ setUniformValue program (Var v) = do
   checkingGLError $ uniform location v
 
 
-class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (tys :: [Symbol ::: *]) | sym tys -> t where
+class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (tys :: Context) | sym tys -> t where
   uniformLocation :: GLint
 
 instance {-# OVERLAPPABLE #-} (KnownSymbol sym, Uniform t) => HasUniform sym t (sym '::: t ': tys) where

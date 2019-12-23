@@ -20,7 +20,6 @@ import Control.Carrier.Reader
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.DSL
-import GHC.TypeLits
 import qualified GL.Program as GL
 import GL.Shader as Shader
 
@@ -54,11 +53,11 @@ set :: forall name a ty m sig . (GL.HasUniform name a ty, HasProgram ty m, Has P
 set v = askProgram >>= \ p -> send (Set p (GL.Var @name v) (pure ()))
 
 
-class HasProgram (ty :: [Symbol ::: *]) (m :: * -> *) | m -> ty where
+class HasProgram (ty :: Context) (m :: * -> *) | m -> ty where
   askProgram :: m (GL.Program ty)
 
 
-newtype ProgramT (ty :: [Symbol ::: *]) m a = ProgramT { runProgramT :: ReaderC (GL.Program ty) m a }
+newtype ProgramT (ty :: Context) m a = ProgramT { runProgramT :: ReaderC (GL.Program ty) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 instance Algebra sig m => Algebra sig (ProgramT ty m) where
