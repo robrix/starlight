@@ -113,6 +113,8 @@ data Expr (k :: Type) a where
   Vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
   Len :: Expr k (v Float) -> Expr k Float
 
+  Coerce :: C.Coercible a b => Expr k a -> Expr k b
+
 infixl 6 :+
 infixl 7 :*
 infixl 6 :-
@@ -182,7 +184,7 @@ len = Len
 
 
 coerce :: C.Coercible a b => (a -> b) -> Expr k a -> Expr k b
-coerce _ _ = undefined
+coerce _ = Coerce
 
 
 gl_Position :: Ref 'Vertex (V4 Float)
@@ -297,6 +299,7 @@ renderExpr = parens . \case
   Vec3 a b -> fn "vec3" [renderExpr a, renderExpr b]
   Vec4 a b -> fn "vec4" [renderExpr a, renderExpr b]
   Len a -> fn "length" [renderExpr a]
+  Coerce a -> renderExpr a
   where
   fn n as = pretty n <> tupled as
 
