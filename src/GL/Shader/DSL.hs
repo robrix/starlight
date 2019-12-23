@@ -40,6 +40,26 @@ instance Fractional (Expr k a) where
   recip _ = undefined
   fromRational _ = undefined
 
+instance Floating (Expr k a) where
+  pi = undefined
+  exp _ = undefined
+  log _ = undefined
+  sqrt _ = undefined
+  _ ** _ = undefined
+  logBase _ _ = undefined
+  sin _ = undefined
+  cos _ = undefined
+  tan _ = undefined
+  asin _ = undefined
+  acos _ = undefined
+  atan _ = undefined
+  sinh _ = undefined
+  cosh _ = undefined
+  tanh _ = undefined
+  asinh _ = undefined
+  acosh _ = undefined
+  atanh _ = undefined
+
 instance Ext (Expr k (V2 a)) (Expr k a) (Expr k (V3 a)) where
   ext _ = undefined
 
