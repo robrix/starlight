@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, ExplicitForAll, FlexibleInstances, FunctionalDependencies, KindSignatures, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
-( Decl
+( Shader
+, Decl
 , Stmt
 , Expr
 , Ref
@@ -43,6 +44,8 @@ import Linear.V3 (V3(..), R3)
 import Linear.V4 (V4(..), R4)
 import UI.Colour
 import Unit.Angle
+
+data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
 
 data Decl (k :: Type) (u :: Context) (i :: Context) (o :: Context) a
 
