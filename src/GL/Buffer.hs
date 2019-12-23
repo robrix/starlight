@@ -13,6 +13,7 @@ module GL.Buffer
 
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
+import Data.Interval
 import Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
 import Foreign.Ptr (Ptr, castPtr, nullPtr)
@@ -20,9 +21,9 @@ import Foreign.Storable as S
 import GL.Enum as GL
 import GL.Error
 import GL.Object
-import GL.Range
 import Graphics.GL.Core41
 import Graphics.GL.Types
+import Linear.Vector
 
 newtype Buffer (ty :: Type) v = Buffer { unBuffer :: GLuint }
   deriving (Storable)
@@ -37,12 +38,11 @@ instance KnownType ty => Bind (Buffer ty v) where
 realloc :: forall ty v m buffer sig . (KnownType ty, S.Storable v, Has (Lift IO) sig m) => buffer ty v -> Int -> Update -> Usage -> m ()
 realloc _ n update usage = runLiftIO (glBufferData (glEnum (typeVal (Proxy @ty))) (fromIntegral (n * S.sizeOf @v undefined)) nullPtr (hintToGLEnum update usage))
 
-copyPtr :: forall ty a m buffer sig . (KnownType ty, Has (Lift IO) sig m) => buffer ty a -> Range -> Ptr a -> m ()
-copyPtr _ (Range offset size) = checkingGLError . runLiftIO . glBufferSubData (glEnum (typeVal (Proxy @ty))) (fromIntegral offset) (fromIntegral size) . castPtr
+copyPtr :: forall ty a m buffer sig . (KnownType ty, Has (Lift IO) sig m) => buffer ty a -> Interval Int -> Ptr a -> m ()
+copyPtr _ i = checkingGLError . runLiftIO . glBufferSubData (glEnum (typeVal (Proxy @ty))) (fromIntegral (from i)) (fromIntegral (size i)) . castPtr
 
 copy :: forall ty v m buffer sig . (KnownType ty, S.Storable v, Has (Lift IO) sig m) => buffer ty v -> Int -> [v] -> m ()
-copy buffer offset vertices = A.withArray vertices $ copyPtr buffer (Range (offset * vsize) size) where
-  size = length vertices * vsize
+copy buffer offset vertices = A.withArray vertices $ copyPtr buffer ((Interval 0 (length vertices) + pure offset) ^* vsize) where
   vsize = S.sizeOf @v undefined
 
 

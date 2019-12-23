@@ -8,6 +8,7 @@ module GL.Array
 
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
+import Data.Interval
 import Data.Proxy
 import Foreign.Ptr
 import qualified Foreign.Storable as S
@@ -16,7 +17,6 @@ import GHC.TypeLits
 import qualified GL.Buffer as GL
 import GL.Error
 import GL.Object
-import GL.Range
 import GL.Scalar
 import Graphics.GL.Core41
 import Graphics.GL.Types
@@ -58,5 +58,5 @@ modeToGLEnum = \case
   Triangles     -> GL_TRIANGLES
 
 
-drawArrays :: (Has (Lift IO) sig m, HasCallStack) => Mode -> Range -> m ()
-drawArrays mode (Range from count) = checkingGLError . runLiftIO $ glDrawArrays (modeToGLEnum mode) (fromIntegral from) (fromIntegral count)
+drawArrays :: (Has (Lift IO) sig m, HasCallStack) => Mode -> Interval Int -> m ()
+drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (modeToGLEnum mode) (fromIntegral (from i)) (fromIntegral (size i))

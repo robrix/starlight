@@ -8,8 +8,8 @@ module UI.Glyph
 ) where
 
 import Data.Foldable (foldl')
+import Data.Interval
 import Geometry.Rect
-import GL.Range
 import Linear.Exts
 import Linear.V2
 import Linear.V4
@@ -24,16 +24,16 @@ data Glyph = Glyph
 data Instance = Instance
   { glyph  :: {-# UNPACK #-} !Glyph
   , offset :: {-# UNPACK #-} !Float
-  , range  :: {-# UNPACK #-} !Range
+  , range  :: {-# UNPACK #-} !(Interval Int)
   }
 
 
 layoutGlyphs :: [Glyph] -> Run
 layoutGlyphs = (Run <*> bounds) . ($ []) . result . foldl' go (LayoutState 0 0 id) where
-  go (LayoutState offset i is) g = let di = length (geometry g) in LayoutState
+  go (LayoutState offset i is) g = let i' = i + length (geometry g) in LayoutState
     { offset = offset + advanceWidth g
-    , index  = i + di
-    , result = is . (Instance g offset (Range i di) :)
+    , index  = i'
+    , result = is . (Instance g offset (Interval i i') :)
     }
 
 data LayoutState = LayoutState

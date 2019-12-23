@@ -15,6 +15,7 @@ import Control.Monad (when)
 import Control.Monad.IO.Class.Lift (runLiftIO)
 import Data.Foldable (for_)
 import Data.Function (fix)
+import Data.Interval
 import Data.Maybe (isJust)
 import Data.Time.Clock (UTCTime)
 import Foreign.Storable (Storable)
@@ -28,7 +29,6 @@ import GL.Carrier.Program.Live
 import GL.Framebuffer as GL
 import GL.Object
 import qualified GL.Program as GL
-import GL.Range
 import GL.Scalar
 import GL.Shader
 import Graphics.GL.Core41
@@ -231,7 +231,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
     set @"resolution" (size ^* (1 / scale) ^* (1 / zoomOut))
     set @"origin" position
 
-    drawArrays TriangleStrip (Range 0 4)
+    drawArrays TriangleStrip (Interval 0 4)
 
   bind (Just shipArray)
 
@@ -250,7 +250,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
       !*! scaled     (V3 25 25 1)
       !*! rotated    rotation
 
-    drawArrays LineLoop (Range 0 4)
+    drawArrays LineLoop (Interval 0 4)
 
     let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
           let trans = rel !*! S.transform orbit (getDelta t * 86400)
@@ -260,7 +260,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
             !*! trans
             !*! scaled (V3 r r 1)
 
-          drawArrays LineLoop (Range 0 (length starVertices))
+          drawArrays LineLoop (Interval 0 (length starVertices))
 
           for_ satellites (drawBody trans)
 
@@ -357,8 +357,8 @@ drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = do
     set @"colour" colour
     set @"matrix" matrix
     set @"pointSize" pointSize
-    drawArrays Points    (Range 0 count)
+    drawArrays Points    (Interval 0 count)
   use lines $ do
     set @"colour" colour
     set @"matrix" matrix
-    drawArrays LineStrip (Range 0 count)
+    drawArrays LineStrip (Interval 0 count)

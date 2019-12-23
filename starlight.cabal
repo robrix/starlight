@@ -62,7 +62,6 @@ library
     GL.Framebuffer
     GL.Object
     GL.Program
-    GL.Range
     GL.Scalar
     GL.Shader
     GL.Texture

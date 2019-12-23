@@ -11,6 +11,7 @@ import Control.Effect.Lift
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
+import Data.Interval
 import GHC.Stack
 import Geometry.Rect
 import GL.Array
@@ -19,7 +20,6 @@ import GL.Effect.Program
 import GL.Framebuffer as GL
 import GL.Object
 import qualified GL.Program as GL
-import GL.Range (Range(Range))
 import GL.Shader
 import GL.Texture
 import GL.TextureUnit
@@ -207,7 +207,7 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
     set @"sampler" textureUnit
 
     bind (Just quadA)
-    let range = Range 0 4
+    let range = Interval 0 4
     drawArrays TriangleStrip range
 
     when (opaque colour /= black) $ do
