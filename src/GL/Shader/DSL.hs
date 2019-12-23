@@ -138,7 +138,7 @@ instance Floating (Expr k a) where
 
 newtype Ref (k :: Type) t = Ref { getRef :: String }
 
-data Prj s t
+newtype Prj s t = Prj String
 
 
 main :: Stmt k () -> Shader k u i o
