@@ -30,6 +30,7 @@ void main() {
 	vec2 uv = gl_FragCoord.xy / resolution.xy - 0.5;
 	uv.y *= resolution.y / resolution.x;
 	vec3 dir = vec3(uv * zoom, 1.0);
+	dir *= 0.5;
 
 	vec3 origin = vec3(origin * 0.01 / resolution, 1);
 
@@ -37,7 +38,7 @@ void main() {
 	float s = 0.1, fade = 0.5;
 	vec3 v = vec3(0.0);
 	for (int r = 0; r < volsteps; r++) {
-		vec3 p = origin + dir * s * 0.5;
+		vec3 p = origin + dir * s;
 		p = abs(vec3(tile) - mod(p, vec3(tile * 2.0))); // tiling fold
 		float pa, a = pa = 0.0;
 		for (int i = 0; i < iterations; i++) {
