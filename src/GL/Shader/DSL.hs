@@ -30,6 +30,7 @@ module GL.Shader.DSL
 , (^*)
 , (!*)
 , renderShader
+, renderStmt
 , renderExpr
 , Mk(..)
 ) where
@@ -246,6 +247,13 @@ infixl 7 !*
 
 renderShader :: Shader k u i o -> Doc ()
 renderShader _ = undefined
+
+renderStmt :: Pretty a => Stmt k a -> Doc ()
+renderStmt = \case
+  Pure a -> pretty a
+  Stmt b k
+    -> pretty b <> pretty ';' <> hardline
+    <> renderStmt (k b)
 
 renderExpr :: Expr k a -> Doc ()
 renderExpr = parens . \case
