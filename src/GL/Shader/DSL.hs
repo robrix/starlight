@@ -30,6 +30,7 @@ module GL.Shader.DSL
 , _z
 , _w
 , _xy
+, _a
 , (^*)
 , (|*)
 ) where
@@ -211,6 +212,9 @@ _w = undefined
 
 _xy :: R2 v => Prj (v a) (V2 a)
 _xy = undefined
+
+_a :: L.R1 v => Prj (v a) a
+_a = undefined
 
 
 (^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
