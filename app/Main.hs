@@ -70,9 +70,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- label
 
-      quadA   <- loadVertices quadVertices
-      shipA   <- loadVertices shipVertices
-      circleA <- loadVertices circleVertices
+      quadA   <- loadVertices quadV
+      shipA   <- loadVertices shipV
+      circleA <- loadVertices circleV
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -95,24 +95,24 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 distanceScale :: Float
 distanceScale = 0.000000718907261
 
-shipVertices :: [V3 Float]
-shipVertices =
+shipV :: [V3 Float]
+shipV =
   [ V3 1      0      0
   , V3 0      (-0.5) 0
   , V3 (-0.5) 0      0
   , V3 0      0.5    0
   ]
 
-quadVertices :: [V2 Float]
-quadVertices =
+quadV :: [V2 Float]
+quadV =
   [ V2 (-1) (-1)
   , V2   1  (-1)
   , V2 (-1)   1
   , V2   1    1
   ]
 
-circleVertices :: [V2 Float]
-circleVertices = circle 1 32
+circleV :: [V2 Float]
+circleV = circle 1 32
 
 physics
   :: ( Has (State UTCTime) sig m
@@ -238,7 +238,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position
             !*! trans
             !*! scaled (V3 r r 1)
 
-          drawArrays LineLoop (Interval 0 (length circleVertices))
+          drawArrays LineLoop (Interval 0 (length circleV))
 
           for_ satellites (drawBody trans)
 
