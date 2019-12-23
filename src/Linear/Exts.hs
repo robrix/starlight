@@ -3,6 +3,7 @@ module Linear.Exts
 , rotated
 , scaled
 , reject
+, angleOf
 , angleTo
 ) where
 
@@ -32,6 +33,10 @@ rotated (Radians theta) = V3
 reject :: (Metric v, Fractional a) => v a -> v a -> v a
 reject a b = a ^-^ project a b
 
+
+-- | The angle of a vector.
+angleOf :: V2 Float -> Radians Float
+angleOf (V2 x y) = Radians (atan2 y x)
 
 -- | The angle from the first vector to the second.
 angleTo :: V2 Float -> V2 Float -> Radians Float
