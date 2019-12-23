@@ -264,8 +264,8 @@ data DrawState = DrawState
      , "origin"     '::: Point V2 Float
      , "zoom"       '::: Float ]
   , shipP    :: GL.Program
-    '[ "colour" '::: V4 Float
-     , "matrix" '::: M33 Float ]
+    '[ "colour"     '::: V4 Float
+     , "matrix"     '::: M33 Float ]
   }
 
 
