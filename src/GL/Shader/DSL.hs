@@ -30,6 +30,7 @@ module GL.Shader.DSL
 , _z
 , _w
 , _xy
+, _xyz
 , _a
 , (^*)
 , (!*)
@@ -246,6 +247,9 @@ _w = undefined
 
 _xy :: Prj (v a) (V2 a)
 _xy = undefined
+
+_xyz :: Prj (v a) (V3 a)
+_xyz = undefined
 
 _a :: Prj (v a) a
 _a = undefined
