@@ -111,7 +111,7 @@ instance Uniforms k u i o a => Uniforms k ((n '::: t) ': u) i o (Expr k t -> a) 
 input :: forall n t k u i o . (Expr k t -> Shader k u i o) -> Shader k u ((n '::: t) ': i) o
 input _ = undefined
 
-output :: forall n t k u i o . ((Expr k t -> Expr k ()) -> Shader k u i o) -> Shader k u i ((n '::: t) ': o)
+output :: forall n t k u i o . (Expr k (Ref t) -> Shader k u i o) -> Shader k u i ((n '::: t) ': o)
 output _ = undefined
 
 main :: Expr k () -> Shader k u i o
@@ -268,4 +268,4 @@ _shipFragment
   $ \ colour ->
     output
   $ \ fragColour ->
-    main $ fragColour colour
+    main $ fragColour .= colour
