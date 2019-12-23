@@ -55,7 +55,7 @@ version :: Word16 -> Decl k s () -> Shader k u i o
 version v _ = Shader $ pretty "#version" <+> pretty v <> hardline
 
 
-data Decl (k :: Type) s a
+newtype Decl (k :: Type) s a = Decl (Doc ())
 
 instance Functor (Decl k s) where
   fmap _ _ = undefined
