@@ -40,7 +40,7 @@ import Data.DSL
 import Data.Word
 import GL.Shader (Type(..))
 import Linear.Matrix
-import Linear.V1 (R1)
+import qualified Linear.V1 as L
 import Linear.V2 (V2(..), R2)
 import Linear.V3 (V3(..), R3)
 import Linear.V4 (V4(..), R4)
@@ -197,7 +197,7 @@ _ ^. _ = undefined
 
 infixl 8 ^.
 
-_x :: R1 v => Prj (v a) a
+_x :: L.R1 v => Prj (v a) a
 _x = undefined
 
 _y :: R2 v => Prj (v a) a
