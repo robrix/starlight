@@ -34,6 +34,8 @@ module GL.Shader.DSL
 , renderExpr
 , GLSLType(..)
 , Mk(..)
+, (:::)(..)
+, Type(..)
 ) where
 
 import Control.Monad ((<=<), ap, liftM)
