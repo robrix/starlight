@@ -4,8 +4,10 @@ module GL.Array
 , configureArray
 , Mode(..)
 , drawArrays
+, loadVertices
 ) where
 
+import Control.Effect.Finally
 import Control.Monad.IO.Class.Lift
 import Data.Coerce
 import Data.Interval
@@ -60,3 +62,16 @@ modeToGLEnum = \case
 
 drawArrays :: (Has (Lift IO) sig m, HasCallStack) => Mode -> Interval Int -> m ()
 drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (modeToGLEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))
+
+
+loadVertices :: (KnownNat (Size v), S.Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Array (v n))
+loadVertices vertices = do
+  buffer <- gen1
+  array  <- gen1
+
+  bind (Just buffer)
+  GL.realloc buffer (length vertices) GL.Static GL.Draw
+  GL.copy buffer 0 vertices
+
+  bind (Just array)
+  array <$ configureArray buffer array

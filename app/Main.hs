@@ -18,18 +18,13 @@ import Data.Function (fix)
 import Data.Interval
 import Data.Maybe (isJust)
 import Data.Time.Clock (UTCTime)
-import Foreign.Storable (Storable)
 import Geometry.Circle
 import Geometry.Rect
 import GHC.Stack
-import GHC.TypeLits
 import GL.Array
-import GL.Buffer
 import GL.Carrier.Program.Live
 import GL.Framebuffer as GL
-import GL.Object
 import qualified GL.Program as GL
-import GL.Scalar
 import GL.Shader
 import Graphics.GL.Core41
 import Lens.Micro (Lens', (^.), lens)
@@ -37,7 +32,6 @@ import Linear.Affine
 import Linear.Exts
 import Linear.Matrix
 import Linear.Metric
-import Linear.V (Size)
 import Linear.V2 as Linear
 import Linear.V3 as Linear
 import Linear.V4 as Linear
@@ -290,19 +284,6 @@ _velocity = lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens' PlayerState (Radians Float)
 _rotation = lens rotation (\ s r -> s { rotation = wrap r })
-
-
-loadVertices :: (KnownNat (Size v), Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Array (v n))
-loadVertices vertices = do
-  buffer <- gen1
-  array  <- gen1
-
-  bind (Just buffer)
-  realloc buffer (length vertices) Static Draw
-  copy buffer 0 vertices
-
-  bind (Just array)
-  array <$ configureArray buffer array
 
 
 data Graph = Graph
