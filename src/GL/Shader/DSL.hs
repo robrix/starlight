@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, ExplicitForAll, FlexibleInstances, FunctionalDependencies, KindSignatures, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
+, version
 , Decl
 , Stmt
 , Expr
@@ -36,6 +37,7 @@ module GL.Shader.DSL
 import Control.Monad (ap)
 import Data.Coerce (Coercible)
 import Data.DSL
+import Data.Word
 import GL.Shader (Type(..))
 import Linear.Matrix
 import Linear.V1 (R1)
@@ -46,6 +48,10 @@ import UI.Colour
 import Unit.Angle
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
+
+version :: Word16 -> Decl k u i o () -> Shader k u i o
+version _ _ = undefined
+
 
 data Decl (k :: Type) (u :: Context) (i :: Context) (o :: Context) a
 
