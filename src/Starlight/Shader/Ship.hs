@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, TypeOperators #-}
 module Starlight.Shader.Ship
-( vertex
+( program
+, vertex
 , fragment
 ) where
 
@@ -8,6 +9,13 @@ import GL.Shader.DSL
 import Linear.Matrix (M33)
 import Linear.V2 (V2)
 import UI.Colour (Colour)
+
+program :: Prog
+  '[ "matrix" '::: M33 Float
+   , "colour" '::: Colour Float ]
+  '[ "position2" '::: V2 Float ]
+  '[ "fragColour" '::: Colour Float ]
+program = Stage vertex :>>> Stage fragment
 
 vertex
   :: Shader
