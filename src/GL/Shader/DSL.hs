@@ -85,18 +85,17 @@ instance Monad (Stmt k) where
 
 
 data Expr (k :: Type) a where
+  Lit :: Double -> Expr k a
+
   (:+) :: Expr k a -> Expr k a -> Expr k a
   (:*) :: Expr k a -> Expr k a -> Expr k a
   (:-) :: Expr k a -> Expr k a -> Expr k a
   Signum :: Expr k a -> Expr k a
   Negate :: Expr k a -> Expr k a
   Abs :: Expr k a -> Expr k a
-  FromInteger :: Integer -> Expr k a
 
   (:/) :: Expr k a -> Expr k a -> Expr k a
-  FromRational :: Rational -> Expr k a
 
-  Pi :: Expr k a
   Exp :: Expr k a -> Expr k a
   Log :: Expr k a -> Expr k a
   Sqrt :: Expr k a -> Expr k a
@@ -128,14 +127,14 @@ instance Num (Expr k a) where
   signum = Signum
   negate = Negate
   abs = Abs
-  fromInteger = FromInteger
+  fromInteger = Lit . fromInteger
 
 instance Fractional (Expr k a) where
   (/) = (:/)
-  fromRational = FromRational
+  fromRational = Lit . fromRational
 
 instance Floating (Expr k a) where
-  pi = Pi
+  pi = Lit pi
   exp = Exp
   log = Log
   sqrt = Sqrt
