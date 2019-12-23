@@ -266,7 +266,13 @@ infixl 7 !*
 
 
 renderShader :: Shader k u i o -> Doc ()
-renderShader _ = undefined
+renderShader s = pretty "#version 410" <> hardline <> go s where
+  go :: Shader k u i o -> Doc ()
+  go = \case
+    Uniform b -> go b
+    Input b -> go b
+    Output b -> go b
+    Main s -> renderStmt s
 
 renderStmt :: Pretty a => Stmt k a -> Doc ()
 renderStmt = \case
