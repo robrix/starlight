@@ -12,7 +12,7 @@ import Data.DSL
 import GL.Shader (Type(..))
 import UI.Colour
 
-data Shader (t :: Type) (u :: Context) (i :: Context) (o :: Context)
+data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
 data Expr a
 
 uniform :: forall n t k u i o . (Expr t -> Shader k u i o) -> Shader k ((n '::: t) ': u) i o
