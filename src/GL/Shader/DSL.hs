@@ -56,7 +56,7 @@ version :: Word16 -> Decl k s () -> Shader k u i o
 version v _ = Shader $ pretty "#version" <+> pretty v <> hardline
 
 
-data Decl (k :: Type) s a where
+data Decl (k :: Type) (s :: Context) a where
   Pure :: a -> Decl k s a
   Decl :: Pretty a => a -> (a -> Decl k s b) -> Decl k s b
 
