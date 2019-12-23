@@ -67,6 +67,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         [(Vertex, "src" </> "stars-vertex.glsl"), (Fragment, "src" </> "stars-fragment.glsl")]
       shipP <- build
         [(Vertex, "src" </> "ship-vertex.glsl"), (Fragment, "src" </> "ship-fragment.glsl")]
+      radarP <- build
+        [(Vertex, "src" </> "ship-vertex.glsl"), (Fragment, "src" </> "ship-fragment.glsl")]
 
       label <- label
 
@@ -79,7 +81,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_PROGRAM_POINT_SIZE
 
       label <- setLabel label { Label.colour = white } font "hello"
-      let drawState = DrawState { quadA, shipA, circleA, starsP, shipP }
+      let drawState = DrawState { quadA, shipA, circleA, starsP, shipP, radarP }
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
@@ -187,7 +189,7 @@ draw
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position, velocity, rotation } = runLiftIO $ do
+draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -245,6 +247,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position
     bind (Just circleA)
     drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
 
+  use radarP $ do
     let drawBlip rel S.Body { radius = Metres r, colour, orbit, satellites } = do
           let trans = rel !*! S.transform orbit (getDelta t * 86400)
               v2 = unP position
@@ -276,6 +279,9 @@ data DrawState = DrawState
      , "origin"     '::: Point V2 Float
      , "zoom"       '::: Float ]
   , shipP   :: GL.Program
+    '[ "colour"     '::: V4 Float
+     , "matrix"     '::: M33 Float ]
+  , radarP  :: GL.Program
     '[ "colour"     '::: V4 Float
      , "matrix"     '::: M33 Float ]
   }
