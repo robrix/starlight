@@ -36,7 +36,7 @@ module GL.Shader.DSL
 , renderShader
 ) where
 
-import Control.Monad (ap)
+import Control.Monad (ap, liftM)
 import qualified Data.Coerce as C
 import Data.DSL
 import Data.Text.Prettyprint.Doc
@@ -58,7 +58,7 @@ version v _ = Shader $ pretty "#version" <+> pretty v <> hardline
 newtype Decl (k :: Type) s a = Decl (Doc ())
 
 instance Functor (Decl k s) where
-  fmap _ = C.coerce
+  fmap = liftM
 
 instance Applicative (Decl k s) where
   pure _ = Decl mempty
