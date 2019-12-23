@@ -1,2 +1,8 @@
 module Data.Interval
-() where
+( Interval(..)
+) where
+
+data Interval a = Interval
+  { from :: !a
+  , to   :: !a
+  }
