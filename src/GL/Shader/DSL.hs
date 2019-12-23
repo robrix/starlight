@@ -35,6 +35,11 @@ instance Num (Expr k a) where
   abs _ = undefined
   fromInteger _ = undefined
 
+instance Fractional (Expr k a) where
+  _ / _ = undefined
+  recip _ = undefined
+  fromRational _ = undefined
+
 instance Ext (Expr k (V2 a)) (Expr k a) (Expr k (V3 a)) where
   ext _ = undefined
 
