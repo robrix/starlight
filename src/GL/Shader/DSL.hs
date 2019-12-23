@@ -5,6 +5,7 @@ module GL.Shader.DSL
 ) where
 
 import Data.DSL
+import GL.Shader (Type(..))
 
-data Shader (u :: Context) (i :: Context) (o :: Context)
+data Shader (t :: Type) (u :: Context) (i :: Context) (o :: Context)
 data Expr a
