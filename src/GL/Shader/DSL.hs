@@ -169,6 +169,31 @@ _ |* _ = undefined
 infixl 7 |*
 
 
+_radarVertex
+  :: Shader
+    'Vertex
+    '[ "matrix" '::: M33 Float
+     , "angle"  '::: Float
+     , "sweep"  '::: Float
+     ]
+    '[ "n" '::: Float ]
+    '[]
+_radarVertex
+  = uniform
+  $ \ matrix ->
+    uniform
+  $ \ angle ->
+    uniform
+  $ \ sweep ->
+    input
+  $ \ n ->
+    main $
+      let' (angle + n * sweep)
+      $ \ angle ->
+      let' (vec2 (cos angle) (sin angle) ^* 150)
+      $ \ pos ->
+        gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
+
 _pointsVertex
   :: Shader
     'Vertex
