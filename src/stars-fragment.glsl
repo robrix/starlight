@@ -32,7 +32,7 @@ void main() {
 	vec3 dir = vec3(uv * zoom, 1.0);
 	dir *= 0.5;
 
-	vec3 origin = vec3(origin * 0.01 / resolution, 1);
+	vec3 origin = vec3(origin * 0.05, 1);
 
 	// volumetric rendering
 	float s = 0.1, fade = 0.5;

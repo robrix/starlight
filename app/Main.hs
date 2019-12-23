@@ -206,7 +206,7 @@ draw DrawState { quadArray, starArray, shipArray, ship, stars } t PlayerState { 
     scale <- Window.scale
     size <- Window.size
     set @"resolution" (size ^* scale)
-    set @"origin" position
+    set @"origin" (position / P size)
     set @"zoom" zoomOut
 
     drawArrays TriangleStrip (Interval 0 4)
