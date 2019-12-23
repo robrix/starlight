@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, FlexibleInstances, FunctionalDependencies, KindSignatures, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
 , version
@@ -36,7 +36,7 @@ module GL.Shader.DSL
 , renderShader
 ) where
 
-import Control.Monad (ap, liftM)
+import Control.Monad ((<=<), ap, liftM)
 import qualified Data.Coerce as C
 import Data.DSL
 import Data.Text.Prettyprint.Doc
@@ -55,13 +55,15 @@ version :: Word16 -> Decl k s () -> Shader k u i o
 version v _ = Shader $ pretty "#version" <+> pretty v <> hardline
 
 
-newtype Decl (k :: Type) s a = Decl (Doc ())
+data Decl (k :: Type) s a where
+  Pure :: a -> Decl k s a
+  Decl :: Pretty a => a -> (a -> Decl k s b) -> Decl k s b
 
 instance Functor (Decl k s) where
   fmap = liftM
 
 instance Applicative (Decl k s) where
-  pure _ = Decl mempty
+  pure = Pure
   (<*>) = ap
 
 instance Monad (Decl k s) where
