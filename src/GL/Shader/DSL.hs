@@ -49,10 +49,10 @@ import Linear.V4 (V4(..))
 import UI.Colour (Colour)
 import Unit.Angle
 
-data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
+newtype Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) = Shader (Doc ())
 
 version :: Word16 -> Decl k s () -> Shader k u i o
-version _ _ = undefined
+version v _ = Shader $ pretty "#version" <+> pretty v <> hardline
 
 
 data Decl (k :: Type) s a
