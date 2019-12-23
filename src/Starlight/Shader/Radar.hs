@@ -18,5 +18,5 @@ vertex
     '[]
 vertex = mk $ \ matrix angle sweep n -> do
   angle <- let' "angle" (coerce angle + n * coerce sweep)
-  pos <- let' "pos" (vec2 (cos angle) (sin angle) ^* 150)
+  pos   <- let' "pos"   (vec2 (cos angle) (sin angle) ^* 150)
   gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
