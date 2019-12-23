@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, ExplicitForAll, KindSignatures, TypeOperators #-}
+{-# LANGUAGE DataKinds, ExplicitForAll, KindSignatures, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
 , Expr
@@ -10,6 +10,7 @@ module GL.Shader.DSL
 
 import Data.DSL
 import GL.Shader (Type(..))
+import UI.Colour
 
 data Shader (t :: Type) (u :: Context) (i :: Context) (o :: Context)
 data Expr a
@@ -25,3 +26,17 @@ output _ = undefined
 
 main :: Expr () -> Shader k u i o
 main _ = undefined
+
+
+_shipFragment
+  :: Shader
+    'Fragment
+    '[ "colour"     '::: Colour Float ]
+    '[]
+    '[ "fragColour" '::: Colour Float ]
+_shipFragment
+  = uniform @"colour"
+  $ \ colour ->
+    output @"fragColour"
+  $ \ fragColour ->
+    main $ fragColour colour
