@@ -14,6 +14,7 @@ module GL.Shader.DSL
 , gl_PointSize
 , (.=)
 , (^.)
+, _x
 , (|*)
 ) where
 
@@ -21,9 +22,10 @@ import Data.DSL
 import GL.Shader (Type(..))
 import Linear.Exts
 import Linear.Matrix
-import Linear.V2
-import Linear.V3
-import Linear.V4
+import Linear.V1 (R1)
+import Linear.V2 (V2)
+import Linear.V3 (V3)
+import Linear.V4 (V4)
 import UI.Colour
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
@@ -118,6 +120,9 @@ infixr 4 .=
 _ ^. _ = undefined
 
 infixl 8 ^.
+
+_x :: R1 v => Prj (v a) a
+_x = undefined
 
 
 (|*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
