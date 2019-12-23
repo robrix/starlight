@@ -46,7 +46,21 @@ import UI.Colour
 import Unit.Angle
 
 data Decl (k :: Type) (u :: Context) (i :: Context) (o :: Context)
+
+
 data Stmt (k :: Type) a
+
+instance Functor (Stmt k) where
+  fmap _ _ = undefined
+
+instance Applicative (Stmt k) where
+  pure _ = undefined
+  (<*>) = ap
+
+instance Monad (Stmt k) where
+  _ >>= _ = undefined
+
+
 data Expr (k :: Type) a
 
 instance Functor (Expr k) where
