@@ -36,7 +36,7 @@ reject a b = a ^-^ project a b
 
 
 -- | The angle of a vector.
-angleOf :: V2 Float -> Radians Float
+angleOf :: RealFloat a => V2 a -> Radians a
 angleOf (V2 x y) = Radians (atan2 y x)
 
 -- | The angle from the first vector to the second.
