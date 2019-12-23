@@ -1,15 +1,10 @@
 {-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Shader.DSL
 ( Shader
-, version
-, Decl
 , Stmt
 , Expr
 , Ref
 , Prj
-, uniform
-, input
-, output
 , main
 , let'
 , vec2
@@ -38,12 +33,11 @@ module GL.Shader.DSL
 , renderExpr
 ) where
 
-import Control.Monad ((<=<), ap, liftM)
+import Control.Monad (ap)
 import qualified Data.Coerce as C
 import Data.DSL
 import Data.Proxy
 import Data.Text.Prettyprint.Doc
-import Data.Word
 import GHC.TypeLits
 import GL.Shader (Type(..))
 import Linear.Matrix (M33)
@@ -57,25 +51,7 @@ data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
   Uniform :: Shader k u i o -> Shader k (n '::: t ': u) i o
   Input   :: Shader k u i o -> Shader k u (n '::: t ': i) o
   Output  :: Shader k u i o -> Shader k u i (n '::: t ': o)
-
-version :: Word16 -> Decl k u () -> Shader k u i o
-version v _ = undefined
-
-
-data Decl (k :: Type) (s :: Context) a where
-  Pure :: a -> Decl k s a
-  Decl :: Pretty a => a -> (a -> Decl k s b) -> Decl k s b
-
-instance Functor (Decl k s) where
-  fmap = liftM
-
-instance Applicative (Decl k s) where
-  pure = Pure
-  (<*>) = ap
-
-instance Monad (Decl k s) where
-  Pure a   >>= f = f a
-  Decl a k >>= f = Decl a (f <=< k)
+  Main    :: Stmt k () -> Shader k u i o
 
 
 data Stmt (k :: Type) a
@@ -165,21 +141,8 @@ newtype Ref (k :: Type) t = Ref { getRef :: String }
 data Prj s t
 
 
-class KnownSymbol n => HasUniform (n :: Symbol) t (s :: Context) | s n -> t
-instance {-# OVERLAPPABLE #-} KnownSymbol n => HasUniform n t (n '::: t ': s)
-instance {-# OVERLAPPABLE #-} HasUniform n t s => HasUniform n t (n' '::: t' ': s)
-
-uniform :: forall n t k a s . HasUniform n t s => Decl k s (Expr k a)
-uniform = pure (Var (symbolVal (Proxy @n)))
-
-input :: Decl k s (Expr k t)
-input = undefined
-
-output :: Decl k s (Ref k t)
-output = undefined
-
-main :: Stmt k () -> Decl k s ()
-main _ = undefined
+main :: Stmt k () -> Shader k u i o
+main = Main
 
 
 let' :: Expr k a -> Stmt k (Expr k a)
@@ -313,11 +276,10 @@ _radarVertex
      ]
     '[ "n" '::: Float ]
     '[]
-_radarVertex = mk $ \ matrix angle sweep n ->
-  main $ do
-    angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
-    pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
-    gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
+_radarVertex = mk $ \ matrix angle sweep n -> do
+  angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
+  pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
+  gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
 
 _pointsVertex
   :: Shader
@@ -327,10 +289,9 @@ _pointsVertex
      ]
     '[ "pos" '::: V2 Float ]
     '[]
-_pointsVertex = mk $ \ matrix pointSize pos ->
-  main $ do
-    gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
-    gl_PointSize .= pointSize
+_pointsVertex = mk $ \ matrix pointSize pos -> do
+  gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
+  gl_PointSize .= pointSize
 
 _pointsFragment
   :: Shader
@@ -338,14 +299,13 @@ _pointsFragment
     '[ "colour"     '::: Colour Float ]
     '[]
     '[ "fragColour" '::: Colour Float ]
-_pointsFragment = mk $ \ colour fragColour ->
-  main $ do
-    p <- let' (gl_PointCoord - vec2 0.5 0.5)
-    iff (len p `gt` 1)
-      discard
-      (do
-        mag <- let' (len p * 2)
-        fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
+_pointsFragment = mk $ \ colour fragColour -> do
+  p <- let' (gl_PointCoord - vec2 0.5 0.5)
+  iff (len p `gt` 1)
+    discard
+    (do
+      mag <- let' (len p * 2)
+      fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
 
 _shipVertex
   :: Shader
@@ -354,7 +314,7 @@ _shipVertex
     '[ "position2" '::: V2 Float ]
     '[]
 _shipVertex = mk $ \ matrix pos ->
-  main $ gl_Position .= vec4 (matrix !* vec3 pos 1) 1
+  gl_Position .= vec4 (matrix !* vec3 pos 1) 1
 
 _shipFragment
   :: Shader
@@ -363,14 +323,14 @@ _shipFragment
     '[]
     '[ "fragColour" '::: Colour Float ]
 _shipFragment = mk $ \ colour fragColour ->
-  main $ fragColour .= colour
+  fragColour .= colour
 
 
 class Mk k u i o a | k u i o -> a where
   mk :: a -> Shader k u i o
 
-instance Mk k '[] '[] '[] (Decl k '[] ()) where
-  mk = version 410
+instance Mk k '[] '[] '[] (Stmt k ()) where
+  mk = Main
 
 instance {-# OVERLAPPABLE #-} (KnownSymbol n, Mk k '[] '[] os a) => Mk k '[] '[] (n '::: t ': os) (Ref k t -> a) where
   mk f = Output (mk (f (Ref (symbolVal (Proxy @n)))))
