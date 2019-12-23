@@ -44,7 +44,6 @@ import System.FilePath
 import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
-import UI.Graph
 import UI.Label as Label
 import Unit.Angle
 import Unit.Length
@@ -83,9 +82,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
-      size <- Window.size
-      graph <- mkGraph (zoomForSpeed size) 127 0 100
-
       label <- setLabel label { Label.colour = white } font "hello"
       let drawState = DrawState { quadArray, shipArray, starArray, stars, ship }
 
@@ -94,7 +90,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         continue <- fmap isJust . runEmpty $ do
           state <- physics t =<< input
           draw drawState t state
-        drawGraph graph
         drawLabel label
         put =<< now
         when continue $
