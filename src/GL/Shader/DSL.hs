@@ -3,6 +3,7 @@ module GL.Shader.DSL
 ( Shader
 , Expr
 , uniform
+, input
 , main
 ) where
 
@@ -14,6 +15,9 @@ data Expr a
 
 uniform :: forall n t k u i o . (Expr t -> Shader k u i o) -> Shader k ((n '::: t) ': u) i o
 uniform _ = undefined
+
+input :: forall n t k u i o . (Expr t -> Shader k u i o) -> Shader k u ((n '::: t) ': i) o
+input _ = undefined
 
 main :: Expr () -> Shader k u i o
 main _ = undefined
