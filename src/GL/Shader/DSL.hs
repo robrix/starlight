@@ -13,18 +13,18 @@ import GL.Shader (Type(..))
 import UI.Colour
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
-data Expr a
+data Expr (k :: Type) a
 
-uniform :: forall n t k u i o . (Expr t -> Shader k u i o) -> Shader k ((n '::: t) ': u) i o
+uniform :: forall n t k u i o . (Expr k t -> Shader k u i o) -> Shader k ((n '::: t) ': u) i o
 uniform _ = undefined
 
-input :: forall n t k u i o . (Expr t -> Shader k u i o) -> Shader k u ((n '::: t) ': i) o
+input :: forall n t k u i o . (Expr k t -> Shader k u i o) -> Shader k u ((n '::: t) ': i) o
 input _ = undefined
 
-output :: forall n t k u i o . ((Expr t -> Expr ()) -> Shader k u i o) -> Shader k u i ((n '::: t) ': o)
+output :: forall n t k u i o . ((Expr k t -> Expr k ()) -> Shader k u i o) -> Shader k u i ((n '::: t) ': o)
 output _ = undefined
 
-main :: Expr () -> Shader k u i o
+main :: Expr k () -> Shader k u i o
 main _ = undefined
 
 
