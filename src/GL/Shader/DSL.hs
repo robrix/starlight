@@ -37,6 +37,7 @@ import Linear.V2 (V2(..), R2)
 import Linear.V3 (V3(..), R3)
 import Linear.V4 (V4(..), R4)
 import UI.Colour
+import Unit.Angle
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
 data Expr (k :: Type) a
@@ -179,8 +180,8 @@ _radarVertex
   :: Shader
     'Vertex
     '[ "matrix" '::: M33 Float
-     , "angle"  '::: Float
-     , "sweep"  '::: Float
+     , "angle"  '::: Radians Float
+     , "sweep"  '::: Radians Float
      ]
     '[ "n" '::: Float ]
     '[]
@@ -194,7 +195,7 @@ _radarVertex
     input
   $ \ n ->
     main $
-      let' (angle + n * sweep)
+      let' (coerce getRadians angle + n * coerce getRadians sweep)
       $ \ angle ->
       let' (vec2 (cos angle) (sin angle) ^* 150)
       $ \ pos ->
