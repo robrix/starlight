@@ -44,6 +44,7 @@ import System.FilePath
 import qualified UI.Carrier.Window as Window
 import UI.Colour
 import UI.Font as Font
+import UI.Graph
 import UI.Label as Label
 import Unit.Angle
 import Unit.Length
@@ -284,56 +285,3 @@ _velocity = lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens' PlayerState (Radians Float)
 _rotation = lens rotation (\ s r -> s { rotation = wrap r })
-
-
-data Graph = Graph
-  { matrix    :: !(M33 Float)
-  , colour    :: !(V4 Float)
-  , array     :: !(Array (V2 Float))
-  , points    :: !(GL.Program
-    '[ "matrix"    '::: M33 Float
-     , "pointSize" '::: Float
-     , "colour"    '::: V4 Float
-     ])
-  , lines     :: !(GL.Program
-    '[ "matrix"    '::: M33 Float
-     , "colour"    '::: V4 Float
-     ])
-  , pointSize :: !Float
-  , count     :: !Int
-  }
-
-mkGraph :: (Has Finally sig m, Has (Lift IO) sig m, Has Program sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
-mkGraph f n from to = do
-  let vertex = V2 <*> f
-      count = max n 0 + 2
-      vertices = map (\ i -> vertex (from + (to - from) * fromIntegral i / fromIntegral (count - 1))) [0..n+1]
-      minXY = V2 from (minimum (map (^. _y) vertices))
-      maxXY = V2 to   (maximum (map (^. _y) vertices))
-      ext (V2 x y) = V3 x y
-      matrix
-        =   translated (-1)
-        !*! scaled     (ext (2 / (maxXY - minXY)) 1)
-        !*! translated (negated minXY)
-      colour = white
-  array <- loadVertices vertices
-  points <- build
-    [(Vertex, "src" </> "points-vertex.glsl"), (Fragment, "src" </> "points-fragment.glsl")]
-  lines <- build
-    [(Vertex, "src" </> "lines-vertex.glsl"), (Fragment, "src" </> "lines-fragment.glsl")]
-
-  pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
-
-drawGraph :: (Has (Lift IO) sig m, Has Program sig m) => Graph -> m ()
-drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = do
-  bind (Just array)
-  runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
-  use points $ do
-    set @"colour" colour
-    set @"matrix" matrix
-    set @"pointSize" pointSize
-    drawArrays Points    (Interval 0 count)
-  use lines $ do
-    set @"colour" colour
-    set @"matrix" matrix
-    drawArrays LineStrip (Interval 0 count)
