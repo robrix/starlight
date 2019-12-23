@@ -1,9 +1,10 @@
-{-# LANGUAGE DataKinds, ExplicitForAll, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds, ExplicitForAll, FlexibleInstances, FunctionalDependencies, KindSignatures, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
 , Expr
 , Ref
 , uniform
+, Uniforms(..)
 , input
 , output
 , main
@@ -47,6 +48,15 @@ data Ref t
 
 uniform :: forall n t k u i o . (Expr k t -> Shader k u i o) -> Shader k ((n '::: t) ': u) i o
 uniform _ = undefined
+
+class Uniforms k u i o a where
+  uniforms :: a -> Shader k u i o
+
+instance {-# OVERLAPPABLE #-} Uniforms k ((n '::: t) ': u) i o (Expr k t -> Shader k u i o) where
+  uniforms with = uniform with
+
+instance Uniforms k u i o a => Uniforms k ((n '::: t) ': u) i o (Expr k t -> a) where
+  uniforms with = uniform (uniforms . with)
 
 input :: forall n t k u i o . (Expr k t -> Shader k u i o) -> Shader k u ((n '::: t) ': i) o
 input _ = undefined
