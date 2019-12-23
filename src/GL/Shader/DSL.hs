@@ -134,8 +134,8 @@ main :: Stmt k () -> Decl k u i o
 main _ = undefined
 
 
-let' :: Expr k a -> (Expr k a -> Stmt k b) -> Stmt k b
-let' _ _ = undefined
+let' :: Expr k a -> Stmt k (Expr k a)
+let' _ = undefined
 
 
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
@@ -234,12 +234,10 @@ _radarVertex
   $ \ sweep ->
     input
   $ \ n ->
-    main $
-      let' (coerce getRadians angle + n * coerce getRadians sweep)
-      $ \ angle ->
-      let' (vec2 (cos angle) (sin angle) ^* 150)
-      $ \ pos ->
-        gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
+    main $ do
+      angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
+      pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
+      gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
 
 _pointsVertex
   :: Decl
