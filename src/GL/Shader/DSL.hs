@@ -7,6 +7,7 @@ module GL.Shader.DSL
 , input
 , output
 , main
+, gl_Position
 ) where
 
 import Data.DSL
@@ -51,6 +52,10 @@ output _ = undefined
 
 main :: Expr k () -> Shader k u i o
 main _ = undefined
+
+
+gl_Position :: Expr 'Vertex (Ref (V4 Float))
+gl_Position = undefined
 
 
 _shipFragment
