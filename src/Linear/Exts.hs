@@ -60,3 +60,6 @@ class Ext v v' | v -> v', v' -> v where
 
 instance Ext V1 V2 where
   ext (V1 x) = V2 x
+
+instance Ext V2 V3 where
+  ext (V2 x y) = V3 x y
