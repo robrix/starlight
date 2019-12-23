@@ -84,16 +84,27 @@ instance Monad (Stmt k) where
   _ >>= _ = undefined
 
 
-data Expr (k :: Type) a
+data Expr (k :: Type) a where
+  (:+) :: Expr k a -> Expr k a -> Expr k a
+  (:*) :: Expr k a -> Expr k a -> Expr k a
+  (:-) :: Expr k a -> Expr k a -> Expr k a
+  Signum :: Expr k a -> Expr k a
+  Negate :: Expr k a -> Expr k a
+  Abs :: Expr k a -> Expr k a
+  FromInteger :: Integer -> Expr k a
+
+infixl 6 :+
+infixl 7 :*
+infixl 6 :-
 
 instance Num (Expr k a) where
-  _ + _ = undefined
-  _ * _ = undefined
-  _ - _ = undefined
-  signum _ = undefined
-  negate _ = undefined
-  abs _ = undefined
-  fromInteger _ = undefined
+  (+) = (:+)
+  (*) = (:*)
+  (-) = (:-)
+  signum = Signum
+  negate = Negate
+  abs = Abs
+  fromInteger = FromInteger
 
 instance Fractional (Expr k a) where
   _ / _ = undefined
