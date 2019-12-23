@@ -269,10 +269,26 @@ renderShader :: Shader k u i o -> Doc ()
 renderShader s = pretty "#version 410" <> hardline <> go s where
   go :: Shader k u i o -> Doc ()
   go = \case
-    Uniform b -> go b
-    Input b -> go b
-    Output b -> go b
+    s@(Uniform k)
+      -> pretty "uniform" <+> renderTypeOf (typeOf (uniformsOf s)) <+> pretty (symbolVal (nameOf (uniformsOf s))) <> pretty ';' <> hardline
+      <> go k
+    s@(Input k)
+      -> pretty "in" <+> renderTypeOf (typeOf (inputsOf s)) <+> pretty (symbolVal (nameOf (inputsOf s))) <> pretty ';' <> hardline
+      <> go k
+    s@(Output k)
+      -> pretty "out" <+> renderTypeOf (typeOf (outputsOf s)) <+> pretty (symbolVal (nameOf (outputsOf s))) <> pretty ';' <> hardline
+      <> go k
     Main s -> renderStmt s
+  uniformsOf :: Shader k u i o -> Proxy u
+  uniformsOf _ = Proxy
+  inputsOf :: Shader k u i o -> Proxy i
+  inputsOf _ = Proxy
+  outputsOf :: Shader k u i o -> Proxy o
+  outputsOf _ = Proxy
+  typeOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy t
+  typeOf _ = Proxy
+  nameOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy n
+  nameOf _ = Proxy
 
 renderStmt :: Pretty a => Stmt k a -> Doc ()
 renderStmt = \case
