@@ -129,7 +129,7 @@ physics
 physics t input = do
   dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
 
-  let thrust  = dt *  1
+  let thrust  = dt *  2
       angular = dt *^ pi
 
   when (pressed SDL.KeycodeUp   input) $ do
