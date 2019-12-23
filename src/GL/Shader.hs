@@ -35,6 +35,9 @@ class KnownType (k :: Type) where
 instance KnownType 'Vertex where
   typeVal _ = Vertex
 
+instance KnownType 'Fragment where
+  typeVal _ = Fragment
+
 
 createShader :: (Has Finally sig m, Has (Lift IO) sig m) => Type -> m Shader
 createShader type' = do
