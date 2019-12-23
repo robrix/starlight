@@ -51,9 +51,9 @@ import UI.Colour (Colour)
 import Unit.Angle
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
-  Uniform :: GLSLType t => Shader k u i o -> Shader k (n '::: t ': u) i o
-  Input   :: GLSLType t => Shader k u i o -> Shader k u (n '::: t ': i) o
-  Output  :: GLSLType t => Shader k u i o -> Shader k u i (n '::: t ': o)
+  Uniform :: (KnownSymbol n, GLSLType t) => Shader k u i o -> Shader k (n '::: t ': u) i o
+  Input   :: (KnownSymbol n, GLSLType t) => Shader k u i o -> Shader k u (n '::: t ': i) o
+  Output  :: (KnownSymbol n, GLSLType t) => Shader k u i o -> Shader k u i (n '::: t ': o)
   Main    :: Stmt k () -> Shader k u i o
 
 
