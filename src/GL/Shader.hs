@@ -1,7 +1,8 @@
-{-# LANGUAGE FlexibleContexts, LambdaCase #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, KindSignatures, LambdaCase #-}
 module GL.Shader
 ( Shader(..)
 , Type(..)
+, KnownType(..)
 , createShader
 , compile
 , checkShader
@@ -26,6 +27,10 @@ instance GL.Enum Type where
   glEnum = \case
     Vertex   -> GL_VERTEX_SHADER
     Fragment -> GL_FRAGMENT_SHADER
+
+
+class KnownType (k :: Type) where
+  typeVal :: proxy k -> Type
 
 
 createShader :: (Has Finally sig m, Has (Lift IO) sig m) => Type -> m Shader
