@@ -166,8 +166,8 @@ main :: Stmt k () -> Shader k u i o
 main = Main
 
 
-let' :: Expr k a -> Stmt k (Expr k a)
-let' _ = undefined
+let' :: String -> Expr k a -> Stmt k (Expr k a)
+let' _ _ = undefined
 
 
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
@@ -314,8 +314,8 @@ _radarVertex
     '[ "n" '::: Float ]
     '[]
 _radarVertex = mk $ \ matrix angle sweep n -> do
-  angle <- let' (coerce angle + n * coerce sweep)
-  pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
+  angle <- let' "angle" (coerce angle + n * coerce sweep)
+  pos <- let' "pos" (vec2 (cos angle) (sin angle) ^* 150)
   gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
 
 _pointsVertex
@@ -337,11 +337,11 @@ _pointsFragment
     '[]
     '[ "fragColour" '::: Colour Float ]
 _pointsFragment = mk $ \ colour fragColour -> do
-  p <- let' (gl_PointCoord - vec2 0.5 0.5)
+  p <- let' "p" (gl_PointCoord - vec2 0.5 0.5)
   iff (len p `gt` 1)
     discard
     (do
-      mag <- let' (len p * 2)
+      mag <- let' "mag" (len p * 2)
       fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
 
 _shipVertex
