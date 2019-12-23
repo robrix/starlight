@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, TypeApplications, TypeOperators #-}
+{-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Shader.DSL
 ( Shader
 , version
@@ -40,8 +40,10 @@ module GL.Shader.DSL
 import Control.Monad ((<=<), ap, liftM)
 import qualified Data.Coerce as C
 import Data.DSL
+import Data.Proxy
 import Data.Text.Prettyprint.Doc
 import Data.Word
+import GHC.TypeLits
 import GL.Shader (Type(..))
 import Linear.Matrix (M33)
 import Linear.V2 (V2(..))
@@ -52,7 +54,7 @@ import Unit.Angle
 
 newtype Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) = Shader (Doc ())
 
-version :: Word16 -> Decl k s () -> Shader k u i o
+version :: Word16 -> Decl k u () -> Shader k u i o
 version v _ = Shader $ pretty "#version" <+> pretty v <> hardline
 
 
@@ -158,8 +160,13 @@ data Ref t
 
 data Prj s t
 
-uniform :: Decl k s (Expr k a)
-uniform = undefined
+
+class KnownSymbol n => HasUniform (n :: Symbol) t (s :: Context) | s n -> t
+instance {-# OVERLAPPABLE #-} KnownSymbol n => HasUniform n t (n '::: t ': s)
+instance {-# OVERLAPPABLE #-} HasUniform n t s => HasUniform n t (n' '::: t' ': s)
+
+uniform :: forall n t k a s . HasUniform n t s => Decl k s (Expr k a)
+uniform = pure (Var (symbolVal (Proxy @n)))
 
 input :: Decl k s (Expr k t)
 input = undefined
@@ -300,9 +307,9 @@ _radarVertex
     '[ "n" '::: Float ]
     '[]
 _radarVertex = version 410 $ do
-  matrix <- uniform
-  angle <- uniform
-  sweep <- uniform
+  matrix <- uniform @"matrix"
+  angle <- uniform @"angle"
+  sweep <- uniform @"sweep"
   n <- input
   main $ do
     angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
@@ -318,15 +325,21 @@ _pointsVertex
     '[ "pos" '::: V2 Float ]
     '[]
 _pointsVertex = version 410 $ do
-  matrix <- uniform
-  pointSize <- uniform
+  matrix <- uniform @"matrix"
+  pointSize <- uniform @"pointSize"
   pos <- input
   main $ do
     gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
     gl_PointSize .= pointSize
 
-_pointsFragment = do
-  colour <- uniform
+_pointsFragment
+  :: Shader
+    'Fragment
+    '[ "colour"     '::: Colour Float ]
+    '[]
+    '[ "fragColour" '::: Colour Float ]
+_pointsFragment = version 410 $ do
+  colour <- uniform @"colour"
   fragColour <- output
   main $ do
     p <- let' (gl_PointCoord - vec2 0.5 0.5)
@@ -344,7 +357,7 @@ _shipVertex
     '[ "position2" '::: V2 Float ]
     '[]
 _shipVertex = version 410 $ do
-  matrix <- uniform
+  matrix <- uniform @"matrix"
   pos <- input
   main $ gl_Position .= vec4 (matrix !* vec3 pos 1) 1
 
@@ -355,6 +368,6 @@ _shipFragment
     '[]
     '[ "fragColour" '::: Colour Float ]
 _shipFragment = version 410 $ do
-  colour <- uniform
+  colour <- uniform @"colour"
   fragColour <- output
   main $ fragColour .= colour
