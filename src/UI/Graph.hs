@@ -18,7 +18,6 @@ import Lens.Micro ((^.))
 import Linear.Exts
 import Linear.Matrix
 import Linear.V2
-import Linear.V3
 import Linear.V4
 import Linear.Vector
 import System.FilePath
@@ -48,7 +47,6 @@ mkGraph f n from to = do
       vertices = map (\ i -> vertex (from + (to - from) * fromIntegral i / fromIntegral (count - 1))) [0..n+1]
       minXY = V2 from (minimum (map (^. _y) vertices))
       maxXY = V2 to   (maximum (map (^. _y) vertices))
-      ext (V2 x y) = V3 x y
       matrix
         =   translated (-1)
         !*! scaled     (ext (2 / (maxXY - minXY)) 1)
