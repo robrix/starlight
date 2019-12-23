@@ -73,7 +73,7 @@ instance Ext (Expr k (V3 a)) (Expr k a) (Expr k (V4 a)) where
 
 data Ref t
 
-data Prj t
+data Prj s t
 
 uniform :: forall n t k u i o . (Expr k t -> Shader k u i o) -> Shader k ((n '::: t) ': u) i o
 uniform _ = undefined
