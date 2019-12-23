@@ -2,6 +2,7 @@
 module GL.Shader.DSL
 ( Shader
 , Expr
+, Ref
 , uniform
 , input
 , output
@@ -14,6 +15,8 @@ import UI.Colour
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
 data Expr (k :: Type) a
+
+data Ref t
 
 uniform :: forall n t k u i o . (Expr k t -> Shader k u i o) -> Shader k ((n '::: t) ': u) i o
 uniform _ = undefined
