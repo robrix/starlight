@@ -59,7 +59,7 @@ data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
 
 data Stmt (k :: Type) a where
   Pure :: a -> Stmt k a
-  Let :: String -> Expr k b -> (Expr k b -> Stmt k a) -> Stmt k a
+  Let :: GLSLType b => String -> Expr k b -> (Expr k b -> Stmt k a) -> Stmt k a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
 instance Functor (Stmt k) where
@@ -169,7 +169,7 @@ main :: Stmt k () -> Shader k u i o
 main = Main
 
 
-let' :: String -> Expr k a -> Stmt k (Expr k a)
+let' :: GLSLType a => String -> Expr k a -> Stmt k (Expr k a)
 let' n v = Let n v pure
 
 
@@ -264,7 +264,7 @@ renderStmt :: Pretty a => Stmt k a -> Doc ()
 renderStmt = \case
   Pure a -> pretty a
   Let n v k
-    -> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';'
+    -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';'
     <> renderStmt (k (Var n))
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
