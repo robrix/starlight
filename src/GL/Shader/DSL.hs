@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, ExplicitForAll, FlexibleInstances, FunctionalDependencies, KindSignatures, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds, FlexibleInstances, FunctionalDependencies, KindSignatures, TypeApplications, TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
 , version
@@ -49,20 +49,20 @@ import Unit.Angle
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context)
 
-version :: Word16 -> Decl k u i o () -> Shader k u i o
+version :: Word16 -> Decl k s () -> Shader k u i o
 version _ _ = undefined
 
 
-data Decl (k :: Type) (u :: Context) (i :: Context) (o :: Context) a
+data Decl (k :: Type) s a
 
-instance Functor (Decl k u i o) where
+instance Functor (Decl k s) where
   fmap _ _ = undefined
 
-instance Applicative (Decl k u i o) where
+instance Applicative (Decl k s) where
   pure _ = undefined
   (<*>) = ap
 
-instance Monad (Decl k u i o) where
+instance Monad (Decl k s) where
   _ >>= _ = undefined
 
 
@@ -130,16 +130,16 @@ data Ref t
 
 data Prj s t
 
-uniform :: forall n t k u i o . (Expr k t -> Decl k u i o ()) -> Decl k ((n '::: t) ': u) i o ()
-uniform _ = undefined
+uniform :: Decl k s (Expr k a)
+uniform = undefined
 
-input :: forall n t k u i o . (Expr k t -> Decl k u i o ()) -> Decl k u ((n '::: t) ': i) o ()
-input _ = undefined
+input :: (Expr k t -> Decl k s ()) -> Decl k s ()
+input = undefined
 
-output :: forall n t k u i o . (Expr k (Ref t) -> Decl k u i o ()) -> Decl k u i ((n '::: t) ': o) ()
-output _ = undefined
+output :: (Expr k (Ref t) -> Decl k s ()) -> Decl k s ()
+output = undefined
 
-main :: Stmt k () -> Decl k u i o ()
+main :: Stmt k () -> Decl k s ()
 main _ = undefined
 
 
@@ -226,7 +226,7 @@ infixl 7 |*
 
 
 _radarVertex
-  :: Decl
+  :: Shader
     'Vertex
     '[ "matrix" '::: M33 Float
      , "angle"  '::: Radians Float
@@ -234,65 +234,50 @@ _radarVertex
      ]
     '[ "n" '::: Float ]
     '[]
-    ()
-_radarVertex
-  = uniform
-  $ \ matrix ->
-    uniform
-  $ \ angle ->
-    uniform
-  $ \ sweep ->
-    input
-  $ \ n ->
+_radarVertex = version 410 $ do
+  matrix <- uniform
+  angle <- uniform
+  sweep <- uniform
+  input $ \ n ->
     main $ do
       angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
       pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
       gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
 
 _pointsVertex
-  :: Decl
+  :: Shader
     'Vertex
     '[ "matrix" '::: M33 Float
      , "pointSize" '::: Float
      ]
     '[ "pos" '::: V2 Float ]
     '[]
-    ()
-_pointsVertex
-  = uniform
-  $ \ matrix ->
-    uniform
-  $ \ pointSize ->
-    input
-  $ \ pos ->
+_pointsVertex = version 410 $ do
+  matrix <- uniform
+  pointSize <- uniform
+  input $ \ pos ->
     main $ do
       gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
       gl_PointSize .= pointSize
 
 _shipVertex
-  :: Decl
+  :: Shader
     'Vertex
     '[ "matrix" '::: M33 Float ]
     '[ "position2" '::: V2 Float ]
     '[]
-    ()
-_shipVertex
-  = uniform
-  $ \ matrix ->
-    input
-  $ \ pos ->
+_shipVertex = version 410 $ do
+  matrix <- uniform
+  input $ \ pos ->
     main $ gl_Position .= vec4 (matrix |* vec3 pos 1) 1
 
 _shipFragment
-  :: Decl
+  :: Shader
     'Fragment
     '[ "colour"     '::: Colour Float ]
     '[]
     '[ "fragColour" '::: Colour Float ]
-    ()
-_shipFragment
-  = uniform
-  $ \ colour ->
-    output
-  $ \ fragColour ->
+_shipFragment = version 410 $ do
+  colour <- uniform
+  output $ \ fragColour ->
     main $ fragColour .= colour
