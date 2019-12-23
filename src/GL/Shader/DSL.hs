@@ -53,9 +53,9 @@ import Linear.V4 (V4(..))
 import UI.Colour (Colour)
 import Unit.Angle
 
-data Prog (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
-  Stage :: Shader k u i o -> Prog k u i o
-  (:>>>) :: Prog k u1 i1 o1 -> Prog k u2 o1 o2 -> Prog k u3 i1 o2
+data Prog (u :: Context) (i :: Context) (o :: Context) where
+  Stage :: Shader k u i o -> Prog u i o
+  (:>>>) :: Prog u1 i1 o1 -> Prog u2 o1 o2 -> Prog u3 i1 o2
 
 infixr 1 :>>>
 
