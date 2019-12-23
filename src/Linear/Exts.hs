@@ -71,5 +71,8 @@ instance Ext a (V2 a) (V3 a) where
 instance Ext (V2 a) (V2 a) (V4 a) where
   ext (V2 x y) (V2 z w) = V4 x y z w
 
+instance Ext a (V3 a) (V4 a) where
+  ext x (V3 y z w) = V4 x y z w
+
 instance Ext (V3 a) a (V4 a) where
   ext (V3 x y z) = V4 x y z
