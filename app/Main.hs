@@ -177,9 +177,6 @@ zoomForSpeed size x
   bound = fromIntegral (min (size ^. _x) (size ^. _y))
   speedAt x = x / 100 * bound
 
-easeInOutCosine :: Float -> Float
-easeInOutCosine = toUnit (Interval (-1) 1) . cos . fromUnit (Interval pi (2 * pi))
-
 easeInOutCubic :: Float -> Float
 easeInOutCubic t
   | t < 0.5   = 4 * t ** 3
