@@ -53,10 +53,13 @@ import Linear.V4 (V4(..))
 import UI.Colour (Colour)
 import Unit.Angle
 
-newtype Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) = Shader (Doc ())
+data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
+  Uniform :: Shader k u i o -> Shader k (n '::: t ': u) i o
+  Input   :: Shader k u i o -> Shader k u (n '::: t ': i) o
+  Output  :: Shader k u i o -> Shader k u i (n '::: t ': o)
 
 version :: Word16 -> Decl k u () -> Shader k u i o
-version v _ = Shader $ pretty "#version" <+> pretty v <> hardline
+version v _ = undefined
 
 
 data Decl (k :: Type) (s :: Context) a where
@@ -268,7 +271,7 @@ infixl 7 !*
 
 
 renderShader :: Shader k u i o -> Doc ()
-renderShader (Shader doc) = doc
+renderShader _ = undefined
 
 renderExpr :: Expr k a -> Doc ()
 renderExpr = go where
@@ -310,11 +313,7 @@ _radarVertex
      ]
     '[ "n" '::: Float ]
     '[]
-_radarVertex = version 410 $ do
-  matrix <- uniform @"matrix"
-  angle <- uniform @"angle"
-  sweep <- uniform @"sweep"
-  n <- input
+_radarVertex = mk $ \ matrix angle sweep n ->
   main $ do
     angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
     pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
@@ -328,10 +327,7 @@ _pointsVertex
      ]
     '[ "pos" '::: V2 Float ]
     '[]
-_pointsVertex = version 410 $ do
-  matrix <- uniform @"matrix"
-  pointSize <- uniform @"pointSize"
-  pos <- input
+_pointsVertex = mk $ \ matrix pointSize pos ->
   main $ do
     gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
     gl_PointSize .= pointSize
@@ -342,9 +338,7 @@ _pointsFragment
     '[ "colour"     '::: Colour Float ]
     '[]
     '[ "fragColour" '::: Colour Float ]
-_pointsFragment = version 410 $ do
-  colour <- uniform @"colour"
-  fragColour <- output
+_pointsFragment = mk $ \ colour fragColour ->
   main $ do
     p <- let' (gl_PointCoord - vec2 0.5 0.5)
     iff (len p `gt` 1)
@@ -359,9 +353,7 @@ _shipVertex
     '[ "matrix" '::: M33 Float ]
     '[ "position2" '::: V2 Float ]
     '[]
-_shipVertex = version 410 $ do
-  matrix <- uniform @"matrix"
-  pos <- input
+_shipVertex = mk $ \ matrix pos ->
   main $ gl_Position .= vec4 (matrix !* vec3 pos 1) 1
 
 _shipFragment
@@ -370,7 +362,21 @@ _shipFragment
     '[ "colour"     '::: Colour Float ]
     '[]
     '[ "fragColour" '::: Colour Float ]
-_shipFragment = version 410 $ do
-  colour <- uniform @"colour"
-  fragColour <- output
+_shipFragment = mk $ \ colour fragColour ->
   main $ fragColour .= colour
+
+
+class Mk k u i o a | k u i o -> a where
+  mk :: a -> Shader k u i o
+
+instance Mk k '[] '[] '[] (Decl k '[] ()) where
+  mk = version 410
+
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, Mk k '[] '[] os a) => Mk k '[] '[] (n '::: t ': os) (Ref k t -> a) where
+  mk f = Output (mk (f (Ref (symbolVal (Proxy @n)))))
+
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, Mk k '[] is os a) => Mk k '[] (n '::: t ': is) os (Expr k t -> a) where
+  mk f = Input (mk (f (Var (symbolVal (Proxy @n)))))
+
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, Mk k us is os a) => Mk k (n '::: t ': us) is os (Expr k t -> a) where
+  mk f = Uniform (mk (f (Var (symbolVal (Proxy @n)))))
