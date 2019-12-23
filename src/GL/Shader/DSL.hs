@@ -8,6 +8,7 @@ module GL.Shader.DSL
 , output
 , main
 , gl_Position
+, gl_PointSize
 , (.=)
 , (|*)
 ) where
@@ -59,6 +60,9 @@ main _ = undefined
 
 gl_Position :: Expr 'Vertex (Ref (V4 Float))
 gl_Position = undefined
+
+gl_PointSize :: Expr 'Vertex (Ref Float)
+gl_PointSize = undefined
 
 
 (.=) :: Expr k (Ref a) -> Expr k a -> Expr k ()
