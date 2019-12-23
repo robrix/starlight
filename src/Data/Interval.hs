@@ -34,6 +34,14 @@ instance Num a => Num (Interval a) where
   fromInteger = pure . fromInteger
   {-# INLINE fromInteger #-}
 
+instance Fractional a => Fractional (Interval a) where
+  recip = fmap recip
+  {-# INLINE recip #-}
+  (/) = liftA2 (/)
+  {-# INLINE (/) #-}
+  fromRational = pure . fromRational
+  {-# INLINE fromRational #-}
+
 
 size :: Num a => Interval a -> a
 size (Interval min max) = max - min
