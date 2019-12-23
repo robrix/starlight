@@ -57,7 +57,7 @@ data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
 
 data Stmt (k :: Type) a where
   Pure :: a -> Stmt k a
-  Stmt :: b -> (b -> Stmt k a) -> Stmt k a
+  Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
 instance Functor (Stmt k) where
   fmap = liftM
