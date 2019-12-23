@@ -136,7 +136,7 @@ uniform = undefined
 input :: Decl k s (Expr k t)
 input = undefined
 
-output :: (Expr k (Ref t) -> Decl k s ()) -> Decl k s ()
+output :: Decl k s (Expr k (Ref t))
 output = undefined
 
 main :: Stmt k () -> Decl k s ()
@@ -279,5 +279,5 @@ _shipFragment
     '[ "fragColour" '::: Colour Float ]
 _shipFragment = version 410 $ do
   colour <- uniform
-  output $ \ fragColour ->
-    main $ fragColour .= colour
+  fragColour <- output
+  main $ fragColour .= colour
