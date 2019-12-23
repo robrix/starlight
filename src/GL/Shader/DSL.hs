@@ -44,7 +44,17 @@ import Linear.V4 (V4(..), R4)
 import UI.Colour
 import Unit.Angle
 
-data Decl (k :: Type) (u :: Context) (i :: Context) (o :: Context)
+data Decl (k :: Type) (u :: Context) (i :: Context) (o :: Context) a
+
+instance Functor (Decl k u i o) where
+  fmap _ _ = undefined
+
+instance Applicative (Decl k u i o) where
+  pure _ = undefined
+  (<*>) = ap
+
+instance Monad (Decl k u i o) where
+  _ >>= _ = undefined
 
 
 data Stmt (k :: Type) a
@@ -111,16 +121,16 @@ data Ref t
 
 data Prj s t
 
-uniform :: forall n t k u i o . (Expr k t -> Decl k u i o) -> Decl k ((n '::: t) ': u) i o
+uniform :: forall n t k u i o . (Expr k t -> Decl k u i o ()) -> Decl k ((n '::: t) ': u) i o ()
 uniform _ = undefined
 
-input :: forall n t k u i o . (Expr k t -> Decl k u i o) -> Decl k u ((n '::: t) ': i) o
+input :: forall n t k u i o . (Expr k t -> Decl k u i o ()) -> Decl k u ((n '::: t) ': i) o ()
 input _ = undefined
 
-output :: forall n t k u i o . (Expr k (Ref t) -> Decl k u i o) -> Decl k u i ((n '::: t) ': o)
+output :: forall n t k u i o . (Expr k (Ref t) -> Decl k u i o ()) -> Decl k u i ((n '::: t) ': o) ()
 output _ = undefined
 
-main :: Stmt k () -> Decl k u i o
+main :: Stmt k () -> Decl k u i o ()
 main _ = undefined
 
 
@@ -215,6 +225,7 @@ _radarVertex
      ]
     '[ "n" '::: Float ]
     '[]
+    ()
 _radarVertex
   = uniform
   $ \ matrix ->
@@ -237,6 +248,7 @@ _pointsVertex
      ]
     '[ "pos" '::: V2 Float ]
     '[]
+    ()
 _pointsVertex
   = uniform
   $ \ matrix ->
@@ -254,6 +266,7 @@ _shipVertex
     '[ "matrix" '::: M33 Float ]
     '[ "position2" '::: V2 Float ]
     '[]
+    ()
 _shipVertex
   = uniform
   $ \ matrix ->
@@ -267,6 +280,7 @@ _shipFragment
     '[ "colour"     '::: Colour Float ]
     '[]
     '[ "fragColour" '::: Colour Float ]
+    ()
 _shipFragment
   = uniform
   $ \ colour ->
