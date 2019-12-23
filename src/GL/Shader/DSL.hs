@@ -188,7 +188,7 @@ coerce = Coerce
 
 
 gl_Position :: Ref 'Vertex (V4 Float)
-gl_Position = undefined
+gl_Position = Ref "gl_Position"
 
 gl_PointSize :: Ref 'Vertex Float
 gl_PointSize = undefined
