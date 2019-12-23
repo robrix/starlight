@@ -32,7 +32,7 @@ module GL.Shader.DSL
 , _xy
 , _a
 , (^*)
-, (|*)
+, (!*)
 , renderShader
 ) where
 
@@ -42,7 +42,7 @@ import Data.DSL
 import Data.Text.Prettyprint.Doc
 import Data.Word
 import GL.Shader (Type(..))
-import Linear.Matrix
+import Linear.Matrix (M33)
 import Linear.V2 (V2(..))
 import Linear.V3 (V3(..))
 import Linear.V4 (V4(..))
@@ -224,10 +224,10 @@ _ ^* _ = undefined
 infixl 7 ^*
 
 
-(|*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
-_ |* _ = undefined
+(!*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
+_ !* _ = undefined
 
-infixl 7 |*
+infixl 7 !*
 
 
 renderShader :: Shader k u i o -> Doc ann
@@ -251,7 +251,7 @@ _radarVertex = version 410 $ do
   main $ do
     angle <- let' (coerce getRadians angle + n * coerce getRadians sweep)
     pos <- let' (vec2 (cos angle) (sin angle) ^* 150)
-    gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
+    gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
 
 _pointsVertex
   :: Shader
@@ -266,7 +266,7 @@ _pointsVertex = version 410 $ do
   pointSize <- uniform
   pos <- input
   main $ do
-    gl_Position .= vec4 (vec3 ((matrix |* vec3 pos 1) ^. _xy) 0) 1
+    gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
     gl_PointSize .= pointSize
 
 _pointsFragment = do
@@ -290,7 +290,7 @@ _shipVertex
 _shipVertex = version 410 $ do
   matrix <- uniform
   pos <- input
-  main $ gl_Position .= vec4 (matrix |* vec3 pos 1) 1
+  main $ gl_Position .= vec4 (matrix !* vec3 pos 1) 1
 
 _shipFragment
   :: Shader
