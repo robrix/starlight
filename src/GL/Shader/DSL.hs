@@ -100,7 +100,6 @@ data Expr (k :: Type) a where
   Log :: Expr k a -> Expr k a
   Sqrt :: Expr k a -> Expr k a
   (:**) :: Expr k a -> Expr k a -> Expr k a
-  LogBase :: Expr k a -> Expr k a -> Expr k a
   Sin :: Expr k a -> Expr k a
   Cos :: Expr k a -> Expr k a
   Tan :: Expr k a -> Expr k a
@@ -139,7 +138,6 @@ instance Floating (Expr k a) where
   log = Log
   sqrt = Sqrt
   (**) = (:**)
-  logBase = LogBase
   sin = Sin
   cos = Cos
   tan = Tan
