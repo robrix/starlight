@@ -13,6 +13,7 @@ module Linear.Exts
 
 import Linear.Matrix
 import Linear.Metric
+import Linear.V1
 import Linear.V2
 import Linear.V3
 import Linear.Vector
@@ -56,3 +57,6 @@ polar2 v = (angleOf v, norm v) where
 -- | Extensions of a vector with an extra dimension.
 class Ext v v' | v -> v', v' -> v where
   ext :: v a -> a -> v' a
+
+instance Ext V1 V2 where
+  ext (V1 x) = V2 x
