@@ -222,7 +222,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position
 
   use shipP $ do
     set @"colour" $ V4 1 1 1 1
-    set @"matrix3"
+    set @"matrix"
       $   window
       !*! translated (unP position)
       !*! scaled     (V3 25 25 1)
@@ -233,7 +233,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position
     let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
           let trans = rel !*! S.transform orbit (getDelta t * 86400)
           set @"colour" colour
-          set @"matrix3"
+          set @"matrix"
             $   window
             !*! trans
             !*! scaled (V3 r r 1)
@@ -247,7 +247,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP } t PlayerState { position
 
   use shipP $ do
     set @"colour" $ V4 1 1 1 1
-    set @"matrix3"
+    set @"matrix"
       $   window
       !*! translated (unP position)
       !*! scaled (V3 150 150 1)
@@ -264,8 +264,8 @@ data DrawState = DrawState
      , "origin"     '::: Point V2 Float
      , "zoom"       '::: Float ]
   , shipP    :: GL.Program
-    '[ "colour"  '::: V4 Float
-     , "matrix3" '::: M33 Float ]
+    '[ "colour" '::: V4 Float
+     , "matrix" '::: M33 Float ]
   }
 
 
