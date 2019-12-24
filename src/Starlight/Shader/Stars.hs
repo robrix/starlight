@@ -5,6 +5,8 @@ module Starlight.Shader.Stars
 
 import GL.Shader.DSL
 
+-- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
+
 vertex :: Shader 'Vertex
   '[]
   '[ "position2" '::: V2 Float ]
