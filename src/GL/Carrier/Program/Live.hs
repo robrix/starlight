@@ -78,7 +78,7 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
       insert p v = IntMap.insert (fromIntegral (GL.unProgram p)) v
 
 data ShaderState = ShaderState
-  { shader :: !Shader
-  , whence :: !(Maybe FilePath)
-  , time   :: !(Maybe UTCTime)
+  { shader  :: !Shader
+  , _whence :: !(Maybe FilePath)
+  , time    :: !(Maybe UTCTime)
   }
