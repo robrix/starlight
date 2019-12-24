@@ -40,7 +40,6 @@ module GL.Shader.DSL
 , Colour
 , M33
 , Point(..)
-, V1
 , V2
 , V3
 , V4
@@ -54,7 +53,6 @@ import Data.Text.Prettyprint.Doc.Render.String
 import GL.Shader (Type(..))
 import Linear.Affine (Point(..))
 import Linear.Matrix (M33)
-import Linear.V1 (V1(..))
 import Linear.V2 (V2(..))
 import Linear.V3 (V3(..))
 import Linear.V4 (V4(..))
