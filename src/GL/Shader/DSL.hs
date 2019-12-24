@@ -404,15 +404,15 @@ instance GLSLType (V4 Float) where
 
 
 class Vars t where
-  makeVars :: (forall a . String -> v a) -> t v
-  default makeVars :: (Generic (t v), GVars v t (Rep (t v))) => (forall a . String -> v a) -> t v
+  makeVars :: (forall a . GLSLType a => String -> v a) -> t v
+  default makeVars :: (Generic (t v), GVars v t (Rep (t v))) => (forall a . GLSLType a => String -> v a) -> t v
   makeVars f = to (gmakeVars @_ @t f)
 
-  foldVars :: Monoid b => (forall a . v a -> b) -> t v -> b
-  default foldVars :: (Generic (t v), GVars v t (Rep (t v)), Monoid b) => (forall a . v a -> b) -> t v -> b
+  foldVars :: Monoid b => (forall a . GLSLType a => v a -> b) -> t v -> b
+  default foldVars :: (Generic (t v), GVars v t (Rep (t v)), Monoid b) => (forall a . GLSLType a => v a -> b) -> t v -> b
   foldVars f = gfoldVars @_ @t f . from
 
-instance (KnownSymbol n, Vars (GL.Rec ts)) => Vars (GL.Rec (n 'GL.::: t ': ts)) where
+instance (KnownSymbol n, GLSLType t, Vars (GL.Rec ts)) => Vars (GL.Rec (n 'GL.::: t ': ts)) where
   makeVars f = f (symbolVal (Proxy @n)) GL.:. makeVars f
 
   foldVars f (h GL.:. t) = f h <> foldVars f t
@@ -424,9 +424,9 @@ instance Vars (GL.Rec '[]) where
 
 
 class GVars v t f where
-  gmakeVars :: (forall a . String -> v a) -> f (t v)
+  gmakeVars :: (forall a . GLSLType a => String -> v a) -> f (t v)
 
-  gfoldVars :: Monoid b => (forall a . v a -> b) -> f (t v) -> b
+  gfoldVars :: Monoid b => (forall a . GLSLType a => v a -> b) -> f (t v) -> b
 
 instance GVars v t f => GVars v t (M1 D d f) where
   gmakeVars f = M1 $ gmakeVars f
@@ -454,11 +454,11 @@ instance (GVar v t f, Selector s) => GVars v t (M1 S s f) where
   gfoldVars f = gfoldVar f . unM1
 
 class GVar v t f where
-  gmakeVar :: (forall a . String -> v a) -> String -> f (t v)
+  gmakeVar :: (forall a . GLSLType a => String -> v a) -> String -> f (t v)
 
-  gfoldVar :: Monoid b => (forall a . v a -> b) -> f (t v) -> b
+  gfoldVar :: Monoid b => (forall a . GLSLType a => v a -> b) -> f (t v) -> b
 
-instance GVar v t (K1 R (v a)) where
+instance GLSLType a => GVar v t (K1 R (v a)) where
   gmakeVar f s = K1 (f s)
 
   gfoldVar f = f . unK1
