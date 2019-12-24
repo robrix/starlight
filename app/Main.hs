@@ -41,6 +41,7 @@ import Physics.Delta
 import qualified SDL
 import qualified Starlight.Body as S
 import Starlight.Input
+import qualified Starlight.Shader.Ship as Ship
 import System.FilePath
 import qualified UI.Carrier.Window as Window
 import UI.Colour
@@ -66,8 +67,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
     . evalState start $ do
       starsP <- build
         [(Vertex, "src" </> "stars-vertex.glsl"), (Fragment, "src" </> "stars-fragment.glsl")]
-      shipP <- build
-        [(Vertex, "src" </> "ship-vertex.glsl"),  (Fragment, "src" </> "ship-fragment.glsl")]
+      shipP <- build' Ship.program
       radarP <- build
         [(Vertex, "src" </> "radar-vertex.glsl"), (Fragment, "src" </> "ship-fragment.glsl")]
 
@@ -285,8 +285,8 @@ data DrawState = DrawState
      , "origin"     '::: Point V2 Float
      , "zoom"       '::: Float ]
   , shipP   :: GL.Program
-    '[ "colour"     '::: V4 Float
-     , "matrix"     '::: M33 Float ]
+    '[ "matrix"     '::: M33 Float
+     , "colour"     '::: V4 Float ]
   , radarP  :: GL.Program
     '[ "colour"     '::: V4 Float
      , "matrix"     '::: M33 Float
