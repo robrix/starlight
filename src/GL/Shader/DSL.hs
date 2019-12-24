@@ -70,7 +70,7 @@ import UI.Colour (Colour)
 import Unit.Angle
 
 data Prog (u :: Context) (i :: Context) (o :: Context) where
-  V :: Shader 'Vertex u i o -> Prog u' o o' -> Prog u' i o'
+  V :: Shader 'Vertex   u i o -> Prog u' o o' -> Prog u' i o'
   F :: Shader 'Fragment u i o -> Prog u' o o' -> Prog u' i o'
   Nil :: Prog u i o
 
