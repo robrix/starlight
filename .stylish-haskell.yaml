@@ -6,7 +6,7 @@ steps:
 
   - imports:
       align: file
-      list_align: new_line
+      list_align: after_alias
       pad_module_names: false
       long_list_align: new_line_multiline
       empty_list_align: inherit
