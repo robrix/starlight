@@ -20,6 +20,7 @@ module GL.Program
 , build
 , use
 , set
+, HasProgram(..)
 , ProgramT(..)
   -- * Uniforms
 , Var(..)
