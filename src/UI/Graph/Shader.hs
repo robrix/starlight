@@ -8,8 +8,9 @@ module UI.Graph.Shader
 import GL.Shader.DSL
 
 points :: Prog
-  '[ "matrix" '::: M33 Float
+  '[ "matrix"    '::: M33 Float
    , "pointSize" '::: Float
+   , "colour"    '::: Colour Float
    ]
   '[ "pos" '::: V2 Float ]
   '[]
