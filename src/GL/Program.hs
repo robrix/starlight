@@ -6,7 +6,6 @@ module GL.Program
 , link
 , checkProgram
   -- * Uniforms
-, (:::)(..)
 , Var(..)
 , setUniformValue
 , HasUniform
@@ -14,7 +13,6 @@ module GL.Program
 
 import Control.Effect.Finally
 import Control.Monad.IO.Class.Lift
-import Data.DSL
 import Data.Foldable (for_)
 import Data.Functor.Identity
 import qualified Foreign.C.String.Lift as C

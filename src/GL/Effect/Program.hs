@@ -9,7 +9,6 @@ module GL.Effect.Program
 , HasProgram(..)
 , ProgramT(..)
   -- * Re-exports
-, (GL.:::)(..)
 , Algebra
 , Has
 , run
