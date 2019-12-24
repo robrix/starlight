@@ -22,6 +22,7 @@ import Graphics.GL.Types
 newtype Shader = Shader { unShader :: GLuint }
 
 data Type = Vertex | Fragment
+  deriving (Eq, Ord, Show)
 
 instance GL.Enum Type where
   glEnum = \case
