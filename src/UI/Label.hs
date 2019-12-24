@@ -66,8 +66,7 @@ label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
-  glyphP <- build
-    [(Vertex, "src" </> "glyph-vertex.glsl"), (Fragment, "src" </> "glyph-fragment.glsl")]
+  glyphP <- build' Glyph.shader
   textP  <- build
     [(Vertex, "src" </> "text-vertex.glsl"),  (Fragment, "src" </> "text-fragment.glsl")]
 
