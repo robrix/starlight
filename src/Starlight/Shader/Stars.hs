@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
+{-# LANGUAGE DataKinds, DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
 module Starlight.Shader.Stars
 ( shader
 , U(..)
