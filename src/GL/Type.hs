@@ -10,6 +10,7 @@ import           Graphics.GL.Core41
 import           Graphics.GL.Types
 import           Linear.V2
 import           Linear.V3
+import           Linear.V4
 
 class S.Storable n => Type n where
   glType :: proxy n -> GLenum
@@ -27,4 +28,7 @@ instance Type a => Type (V2 a) where
   glType _ = glType (Proxy @a)
 
 instance Type a => Type (V3 a) where
+  glType _ = glType (Proxy @a)
+
+instance Type a => Type (V4 a) where
   glType _ = glType (Proxy @a)
