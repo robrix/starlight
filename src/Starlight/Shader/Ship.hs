@@ -15,7 +15,9 @@ program :: Prog
    , "colour" '::: Colour Float ]
   '[ "position2" '::: V2 Float ]
   '[ "fragColour" '::: Colour Float ]
-program = Stage vertex :>>> Stage fragment
+program
+  =    Stage vertex
+  :>>> Stage fragment
 
 vertex
   :: Shader
@@ -23,7 +25,7 @@ vertex
     '[ "matrix" '::: M33 Float ]
     '[ "position2" '::: V2 Float ]
     '[]
-vertex = mk $ \ matrix pos ->
+vertex = uniforms $ \ matrix -> inputs $ \ pos -> main $
   gl_Position .= vec4 (matrix !* vec3 pos 1) 1
 
 fragment
@@ -32,5 +34,5 @@ fragment
     '[ "colour"     '::: Colour Float ]
     '[]
     '[ "fragColour" '::: Colour Float ]
-fragment = mk $ \ colour fragColour ->
+fragment = uniforms $ \ colour -> outputs $ \ fragColour -> main $
   fragColour .= colour

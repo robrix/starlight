@@ -34,7 +34,9 @@ module GL.Shader.DSL
 , renderStmt
 , renderExpr
 , GLSLType(..)
-, Mk(..)
+, Uniforms(..)
+, Inputs(..)
+, Outputs(..)
 , (:::)(..)
 , Type(..)
 ) where
@@ -388,7 +390,7 @@ _pointsVertex
      ]
     '[ "pos" '::: V2 Float ]
     '[]
-_pointsVertex = mk $ \ matrix pointSize pos -> do
+_pointsVertex = uniforms $ \ matrix pointSize -> inputs $ \ pos -> main $ do
   gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
   gl_PointSize .= pointSize
 
@@ -398,7 +400,7 @@ _pointsFragment
     '[ "colour"     '::: Colour Float ]
     '[]
     '[ "fragColour" '::: Colour Float ]
-_pointsFragment = mk $ \ colour fragColour -> do
+_pointsFragment = uniforms $ \ colour -> outputs $ \ fragColour -> main $ do
   p <- let' "p" (gl_PointCoord - vec2 0.5 0.5)
   iff (len p `gt` 1)
     discard
@@ -407,17 +409,31 @@ _pointsFragment = mk $ \ colour fragColour -> do
       fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
 
 
-class Mk k u i o a | k u i o -> a, a -> o where
-  mk :: a -> Shader k u i o
+class Uniforms k u i o a | k u i o -> a where
+  uniforms :: a -> Shader k u i o
 
-instance Mk k '[] '[] '[] (Stmt k ()) where
-  mk = Main
+instance Uniforms k '[] i o (Shader k '[] i o) where
+  uniforms = id
 
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Mk k '[] '[] os a) => Mk k '[] '[] (n '::: t ': os) (Ref k n t -> a) where
-  mk f = Output (mk (f (Ref (symbolVal (Proxy @n)))))
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Uniforms k us is os a) => Uniforms k (n '::: t ': us) is os (Expr k t -> a) where
+  uniforms f = Uniform (uniforms (f (Var (symbolVal (Proxy @n)))))
 
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Mk k '[] is os a) => Mk k '[] (n '::: t ': is) os (Expr k t -> a) where
-  mk f = Input (mk (f (Var (symbolVal (Proxy @n)))))
 
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Mk k us is os a) => Mk k (n '::: t ': us) is os (Expr k t -> a) where
-  mk f = Uniform (mk (f (Var (symbolVal (Proxy @n)))))
+class Inputs k u i o a | k u i o -> a where
+  inputs :: a -> Shader k u i o
+
+instance Inputs k u '[] o (Shader k u '[] o) where
+  inputs = id
+
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Inputs k '[] is os a) => Inputs k '[] (n '::: t ': is) os (Expr k t -> a) where
+  inputs f = Input (inputs (f (Var (symbolVal (Proxy @n)))))
+
+
+class Outputs k u i o a | k u i o -> a, a -> o where
+  outputs :: a -> Shader k u i o
+
+instance Outputs k u i '[] (Shader k u i '[]) where
+  outputs = id
+
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Outputs k '[] '[] os a) => Outputs k '[] '[] (n '::: t ': os) (Ref k n t -> a) where
+  outputs f = Output (outputs (f (Ref (symbolVal (Proxy @n)))))
