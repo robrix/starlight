@@ -78,7 +78,13 @@ instance GL.Enum Mode where
     Triangles     -> GL_TRIANGLES
 
 
-drawArrays :: (Has (Lift IO) sig m, HasCallStack) => Mode -> Interval Int -> m ()
+drawArrays
+  :: ( Has (Lift IO) sig m
+     , HasCallStack
+     )
+  => Mode
+  -> Interval Int
+  -> m ()
 drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))
 
 
