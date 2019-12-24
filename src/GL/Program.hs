@@ -8,7 +8,7 @@ module GL.Program
   -- * Uniforms
 , Var(..)
 , setUniformValue
-, HasUniform(..)
+, HasUniform
 ) where
 
 import Control.Effect.Finally
@@ -56,11 +56,6 @@ setUniformValue program (Var v) = do
   checkingGLError $ uniform location v
 
 
-class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (tys :: Context) | sym tys -> t where
-  uniformLocation :: GLint
-
-instance {-# OVERLAPPABLE #-} (KnownSymbol sym, Uniform t) => HasUniform sym t (sym '::: t ': tys) where
-  uniformLocation = 0
-
-instance {-# OVERLAPPABLE #-} HasUniform sym t tys => HasUniform sym t (ty ': tys) where
-  uniformLocation = 1 + uniformLocation @sym @t @tys
+class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (tys :: Context) | sym tys -> t
+instance {-# OVERLAPPABLE #-} (KnownSymbol sym, Uniform t) => HasUniform sym t (sym '::: t ': tys)
+instance {-# OVERLAPPABLE #-} HasUniform sym t tys => HasUniform sym t (ty ': tys)
