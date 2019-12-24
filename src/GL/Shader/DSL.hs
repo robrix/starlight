@@ -49,6 +49,7 @@ module GL.Shader.DSL
 import Control.Monad ((<=<), ap, liftM)
 import qualified Data.Coerce as C
 import Data.Function (fix)
+import Data.Functor.Const
 import Data.Proxy
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.String
@@ -80,7 +81,20 @@ shaderSources = \case
   where
   renderShader f
     =  pretty "#version 410" <> hardline
-    <> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt (f (makeVars Var) (makeVars Var) (makeVars Ref)) <> line))
+    <> foldVars getConst (makeVars (var "uniform") `like` u)
+    <> foldVars getConst (makeVars (var "in") `like` i)
+    <> foldVars getConst (makeVars (var "out") `like` o)
+    <> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt (f u i o) <> line)) where
+    u = makeVars Var
+    i = makeVars Var
+    o = makeVars Ref
+
+    like :: t (Const a) -> t b -> t (Const a)
+    like = const
+
+    var :: GLSLType a => String -> String -> Const (Doc ()) a
+    var qual n = fix $ \ c -> Const $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline
+
   -- renderShader :: Shader k u i o -> Doc ()
   -- renderShader s = pretty "#version 410" <> hardline <> go s where
   --   go :: Shader k u i o -> Doc ()
