@@ -104,7 +104,6 @@ set v = askProgram >>= \ p ->
     Nothing -> pure ()) v))
 
 
-
 class HasProgram (u :: (* -> *) -> *) (m :: * -> *) | m -> u where
   askProgram :: m (Program u)
 
