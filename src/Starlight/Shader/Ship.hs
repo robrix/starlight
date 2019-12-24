@@ -1,4 +1,6 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module Starlight.Shader.Ship
 ( shader
 , U(..)
@@ -17,8 +19,8 @@ shader = V vertex $ F fragment Nil where
 
 
 data U v = U
-  { matrix    :: v (M33 Float)
-  , colour    :: v (Colour Float)
+  { matrix :: v (M33 Float)
+  , colour :: v (Colour Float)
   }
   deriving (Generic, Vars)
 

@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveGeneric #-}
 module UI.Effect.Window
 ( -- * Window effect
   Window(..)
@@ -13,10 +14,10 @@ module UI.Effect.Window
 , run
 ) where
 
-import Control.Algebra
-import Control.Monad ((<=<))
-import GHC.Generics (Generic1)
-import Linear.V2
+import           Control.Algebra
+import           Control.Monad ((<=<))
+import           GHC.Generics (Generic1)
+import           Linear.V2
 import qualified SDL
 
 data Window m k

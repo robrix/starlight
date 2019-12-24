@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module GL.Carrier.Program
 ( -- * Program carrier
   runProgram
@@ -7,16 +12,16 @@ module GL.Carrier.Program
 , module GL.Effect.Program
 ) where
 
-import Control.Algebra
-import Control.Effect.Finally
-import Control.Monad.IO.Class.Lift
-import Data.Functor.Const
-import Data.Monoid (Ap(..))
-import Data.Traversable (for)
-import GL.Effect.Program
-import GL.Shader
-import GL.Shader.DSL (foldVars, shaderSources)
+import           Control.Algebra
+import           Control.Effect.Finally
+import           Control.Monad.IO.Class.Lift
+import           Data.Functor.Const
+import           Data.Monoid (Ap(..))
+import           Data.Traversable (for)
+import           GL.Effect.Program
 import qualified GL.Program as GL
+import           GL.Shader
+import           GL.Shader.DSL (foldVars, shaderSources)
 
 runProgram :: ProgramC m a -> m a
 runProgram (ProgramC m) = m

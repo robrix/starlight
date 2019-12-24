@@ -1,4 +1,17 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -13,10 +26,10 @@ module GL.Effect.Program
 , run
 ) where
 
-import Control.Algebra
-import Control.Carrier.Reader
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import           Control.Algebra
+import           Control.Carrier.Reader
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 import qualified GL.Program as GL
 import qualified GL.Shader.DSL as DSL
 

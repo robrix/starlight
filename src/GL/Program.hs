@@ -1,4 +1,14 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module GL.Program
 ( Program(..)
 , createProgram
@@ -11,19 +21,19 @@ module GL.Program
 , HasUniform
 ) where
 
-import Control.Effect.Finally
-import Control.Monad.IO.Class.Lift
-import Data.Foldable (for_)
-import Data.Functor.Identity
+import           Control.Effect.Finally
+import           Control.Monad.IO.Class.Lift
+import           Data.Foldable (for_)
+import           Data.Functor.Identity
 import qualified Foreign.C.String.Lift as C
-import GHC.Records
-import GHC.Stack
-import GHC.TypeLits
-import GL.Error
-import GL.Shader
-import GL.Uniform
-import Graphics.GL.Core41
-import Graphics.GL.Types
+import           GHC.Records
+import           GHC.Stack
+import           GHC.TypeLits
+import           GL.Error
+import           GL.Shader
+import           GL.Uniform
+import           Graphics.GL.Core41
+import           Graphics.GL.Types
 
 newtype Program (ty :: (* -> *) -> *) = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)

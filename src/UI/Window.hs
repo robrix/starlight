@@ -5,16 +5,16 @@ module UI.Window
 , Window
 ) where
 
-import Control.Carrier.Lift
+import           Control.Carrier.Lift
 import qualified Control.Concurrent.Lift as CC
 import qualified Control.Exception.Lift as E
-import Control.Monad.IO.Class.Lift
-import Data.Text (Text)
-import Graphics.GL.Core41
-import Linear.V2 as Linear
-import Linear.V4 as Linear
-import SDL.Init
-import SDL.Video
+import           Control.Monad.IO.Class.Lift
+import           Data.Text (Text)
+import           Graphics.GL.Core41
+import           Linear.V2 as Linear
+import           Linear.V4 as Linear
+import           SDL.Init
+import           SDL.Video
 
 withSDL :: Has (Lift IO) sig m => m a -> m a
 withSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO (glFinish >> quit))

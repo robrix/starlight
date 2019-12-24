@@ -1,4 +1,6 @@
-{-# LANGUAGE DeriveFunctor, LambdaCase, TypeApplications #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TypeApplications #-}
 module UI.Path
 ( Component(..)
 , Path

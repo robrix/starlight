@@ -1,4 +1,6 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module UI.Label.Glyph
 ( shader
 , U(..)

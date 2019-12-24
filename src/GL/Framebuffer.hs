@@ -1,4 +1,6 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, LambdaCase, ScopedTypeVariables #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module GL.Framebuffer
 ( Framebuffer(..)
 , Attachment(..)
@@ -6,17 +8,17 @@ module GL.Framebuffer
 , Bind(..)
 ) where
 
-import Control.Monad (unless)
-import Control.Monad.IO.Class.Lift
-import Data.Coerce
-import Data.Proxy
-import Foreign.Storable
-import GL.Enum as GL
-import GL.Error
-import GL.Object
+import           Control.Monad (unless)
+import           Control.Monad.IO.Class.Lift
+import           Data.Coerce
+import           Data.Proxy
+import           Foreign.Storable
+import           GL.Enum as GL
+import           GL.Error
+import           GL.Object
 import qualified GL.Texture as GL
-import Graphics.GL.Core41
-import Graphics.GL.Types
+import           Graphics.GL.Core41
+import           Graphics.GL.Types
 
 newtype Framebuffer = Framebuffer { unFramebuffer :: GLuint }
   deriving (Storable)

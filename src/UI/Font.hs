@@ -1,4 +1,5 @@
-{-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module UI.Font
 ( Typeface(name)
 , Font(..)
@@ -8,22 +9,22 @@ module UI.Font
 , layoutString
 ) where
 
-import Control.Monad ((<=<), guard, join)
-import Control.Monad.IO.Class.Lift
-import Data.Bifunctor (first)
-import Data.Char (ord)
-import Data.Foldable (find)
+import           Control.Monad (guard, join, (<=<))
+import           Control.Monad.IO.Class.Lift
+import           Data.Bifunctor (first)
+import           Data.Char (ord)
+import           Data.Foldable (find)
 import qualified Data.Map as Map
-import Data.Maybe (catMaybes)
+import           Data.Maybe (catMaybes)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import Data.Vector ((!?))
-import Geometry.Triangle
+import           Data.Vector ((!?))
+import           Geometry.Triangle
+import           Lens.Micro
+import           Linear.V2
 import qualified Opentype.Fileformat as O
-import Lens.Micro
-import Linear.V2
-import UI.Glyph
-import UI.Path
+import           UI.Glyph
+import           UI.Path
 
 data Typeface = Typeface
   { name      :: Maybe String

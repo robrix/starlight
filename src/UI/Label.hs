@@ -1,4 +1,9 @@
-{-# LANGUAGE DataKinds, DisambiguateRecordFields, FlexibleContexts, NamedFieldPuns, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module UI.Label
 ( Label(colour, bcolour)
 , label
@@ -6,34 +11,34 @@ module UI.Label
 , drawLabel
 ) where
 
-import Control.Effect.Finally
-import Control.Effect.Lift
-import Control.Monad (when)
-import Control.Monad.IO.Class.Lift
-import Data.Foldable (for_)
-import Data.Interval
-import GHC.Stack
-import Geometry.Rect
-import GL.Array
-import GL.Buffer
-import GL.Effect.Program
-import GL.Framebuffer as GL
-import GL.Object
+import           Control.Effect.Finally
+import           Control.Effect.Lift
+import           Control.Monad (when)
+import           Control.Monad.IO.Class.Lift
+import           Data.Foldable (for_)
+import           Data.Interval
+import           Geometry.Rect
+import           GHC.Stack
+import           GL.Array
+import           GL.Buffer
+import           GL.Effect.Program
+import           GL.Framebuffer as GL
+import           GL.Object
 import qualified GL.Program as GL
-import GL.Texture
-import GL.TextureUnit
-import Graphics.GL.Core41
-import Lens.Micro ((^.))
-import Linear.Exts
-import Linear.Matrix
-import Linear.V2
-import Linear.V3
-import Linear.V4
-import Linear.Vector
-import UI.Colour
+import           GL.Texture
+import           GL.TextureUnit
+import           Graphics.GL.Core41
+import           Lens.Micro ((^.))
+import           Linear.Exts
+import           Linear.Matrix
+import           Linear.V2
+import           Linear.V3
+import           Linear.V4
+import           Linear.Vector
+import           UI.Colour
 import qualified UI.Effect.Window as Window
-import UI.Font
-import UI.Glyph (Instance(..), Run(..), geometry)
+import           UI.Font
+import           UI.Glyph (Instance(..), Run(..), geometry)
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 

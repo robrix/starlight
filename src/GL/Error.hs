@@ -8,15 +8,15 @@ module GL.Error
 ) where
 
 import qualified Control.Exception.Lift as E
-import Control.Monad
-import Control.Monad.IO.Class.Lift
+import           Control.Monad
+import           Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String as C
 import qualified Foreign.Marshal.Alloc.Lift as A
-import Foreign.Ptr
+import           Foreign.Ptr
 import qualified Foreign.Storable as S
-import GHC.Stack
-import Graphics.GL.Core41
-import Graphics.GL.Types
+import           GHC.Stack
+import           Graphics.GL.Core41
+import           Graphics.GL.Types
 
 data GLError
   = InvalidEnum

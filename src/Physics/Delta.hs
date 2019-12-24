@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveTraversable, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Physics.Delta
 ( Delta(..)
 ) where

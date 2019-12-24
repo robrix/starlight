@@ -1,4 +1,8 @@
-{-# LANGUAGE DisambiguateRecordFields, DuplicateRecordFields, FlexibleInstances, NamedFieldPuns, RecordWildCards #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 module UI.Glyph
 ( Glyph(..)
 , Instance(..)

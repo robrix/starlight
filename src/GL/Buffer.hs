@@ -1,4 +1,10 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module GL.Buffer
 ( Buffer(..)
 , realloc
@@ -11,19 +17,19 @@ module GL.Buffer
 , hintToGLEnum
 ) where
 
-import Control.Monad.IO.Class.Lift
-import Data.Coerce
-import Data.Interval
-import Data.Proxy
+import           Control.Monad.IO.Class.Lift
+import           Data.Coerce
+import           Data.Interval
+import           Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
-import Foreign.Ptr (Ptr, castPtr, nullPtr)
-import Foreign.Storable as S
-import GL.Enum as GL
-import GL.Error
-import GL.Object
-import Graphics.GL.Core41
-import Graphics.GL.Types
-import Linear.Vector
+import           Foreign.Ptr (Ptr, castPtr, nullPtr)
+import           Foreign.Storable as S
+import           GL.Enum as GL
+import           GL.Error
+import           GL.Object
+import           Graphics.GL.Core41
+import           Graphics.GL.Types
+import           Linear.Vector
 
 newtype Buffer (ty :: Type) v = Buffer { unBuffer :: GLuint }
   deriving (Storable)

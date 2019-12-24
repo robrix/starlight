@@ -1,19 +1,21 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, StandaloneDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module GL.Uniform
 ( Uniform(..)
 ) where
 
-import Control.Monad.IO.Class.Lift
+import           Control.Monad.IO.Class.Lift
 import qualified Foreign.Marshal.Utils.Lift as A
-import Foreign.Ptr
-import GHC.Stack
-import Graphics.GL.Core41
-import Graphics.GL.Types
-import Linear.Affine as Linear
-import Linear.Matrix as Linear
-import Linear.V2 as Linear
-import Linear.V3 as Linear
-import Linear.V4 as Linear
+import           Foreign.Ptr
+import           GHC.Stack
+import           Graphics.GL.Core41
+import           Graphics.GL.Types
+import           Linear.Affine as Linear
+import           Linear.Matrix as Linear
+import           Linear.V2 as Linear
+import           Linear.V3 as Linear
+import           Linear.V4 as Linear
 
 class Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()

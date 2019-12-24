@@ -1,4 +1,7 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, KindSignatures, LambdaCase #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
 module GL.Shader
 ( Shader(..)
 , Type(..)
@@ -8,16 +11,16 @@ module GL.Shader
 , checkShader
 ) where
 
-import Control.Effect.Finally
-import Control.Monad.IO.Class.Lift
+import           Control.Effect.Finally
+import           Control.Monad.IO.Class.Lift
 import qualified Foreign.C.String.Lift as C
 import qualified Foreign.Marshal.Utils.Lift as U
-import Foreign.Ptr
-import GHC.Stack
+import           Foreign.Ptr
+import           GHC.Stack
 import qualified GL.Enum as GL
-import GL.Error
-import Graphics.GL.Core41
-import Graphics.GL.Types
+import           GL.Error
+import           Graphics.GL.Core41
+import           Graphics.GL.Types
 
 newtype Shader = Shader { unShader :: GLuint }
 

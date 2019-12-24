@@ -1,4 +1,5 @@
-{-# LANGUAGE FlexibleContexts, ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module GL.Object
 ( Object(..)
 , Bind(..)
@@ -6,13 +7,13 @@ module GL.Object
 , gen1
 ) where
 
-import Control.Carrier.Lift
-import Control.Effect.Finally
-import GHC.Stack
+import           Control.Carrier.Lift
+import           Control.Effect.Finally
 import qualified Foreign.Marshal.Array.Lift as A
-import Foreign.Ptr
-import Foreign.Storable
-import Graphics.GL.Types
+import           Foreign.Ptr
+import           Foreign.Storable
+import           GHC.Stack
+import           Graphics.GL.Types
 
 class Storable t => Object t where
   gen :: (Has (Lift IO) sig m, HasCallStack) => GLsizei -> Ptr t -> m ()

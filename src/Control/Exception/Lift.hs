@@ -12,7 +12,7 @@ module Control.Exception.Lift
 , onException
 ) where
 
-import Control.Effect.Lift
+import           Control.Effect.Lift
 import qualified Control.Exception as E
 
 -- | See @"Control.Exception".'E.throwIO'@.

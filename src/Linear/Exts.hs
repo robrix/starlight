@@ -1,4 +1,5 @@
-{-# LANGUAGE FlexibleInstances, FunctionalDependencies #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 module Linear.Exts
 ( translated
 , rotated

@@ -1,4 +1,9 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, GeneralizedNewtypeDeriving, LambdaCase, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module GL.Array
 ( Array(..)
 , configureArray
@@ -7,22 +12,22 @@ module GL.Array
 , loadVertices
 ) where
 
-import Control.Effect.Finally
-import Control.Monad.IO.Class.Lift
-import Data.Coerce
-import Data.Interval
-import Data.Proxy
-import Foreign.Ptr
+import           Control.Effect.Finally
+import           Control.Monad.IO.Class.Lift
+import           Data.Coerce
+import           Data.Interval
+import           Data.Proxy
+import           Foreign.Ptr
 import qualified Foreign.Storable as S
-import GHC.Stack
-import GHC.TypeLits
+import           GHC.Stack
+import           GHC.TypeLits
 import qualified GL.Buffer as GL
-import GL.Error
-import GL.Object
-import GL.Scalar
-import Graphics.GL.Core41
-import Graphics.GL.Types
-import Linear.V
+import           GL.Error
+import           GL.Object
+import           GL.Scalar
+import           Graphics.GL.Core41
+import           Graphics.GL.Types
+import           Linear.V
 
 newtype Array n = Array { unArray :: GLuint }
   deriving (S.Storable)

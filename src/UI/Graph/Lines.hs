@@ -1,4 +1,6 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module UI.Graph.Lines
 ( shader
 , U(..)

@@ -1,4 +1,7 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, FlexibleContexts, NamedFieldPuns #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module UI.Label.Text
 ( shader
 , U(..)

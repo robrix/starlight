@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveTraversable, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Unit.Angle
 ( Radians(..)
 , fromDegrees

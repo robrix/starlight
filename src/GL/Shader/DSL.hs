@@ -1,4 +1,19 @@
-{-# LANGUAGE AllowAmbiguousTypes, DataKinds, DefaultSignatures, DeriveAnyClass, DeriveGeneric, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module GL.Shader.DSL
 ( Shader(..)
 , None(..)
@@ -65,24 +80,24 @@ module GL.Shader.DSL
 , V4
 ) where
 
-import Control.Monad ((<=<), ap, liftM)
+import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
-import Data.Function (fix)
-import Data.Functor.Const
-import Data.Proxy
-import Data.Text.Prettyprint.Doc hiding (dot)
-import Data.Text.Prettyprint.Doc.Render.String
-import GHC.Generics
-import GL.Shader (Type(..))
-import GL.TextureUnit
+import           Data.Function (fix)
+import           Data.Functor.Const
+import           Data.Proxy
+import           Data.Text.Prettyprint.Doc hiding (dot)
+import           Data.Text.Prettyprint.Doc.Render.String
+import           GHC.Generics
+import           GL.Shader (Type(..))
+import           GL.TextureUnit
 import qualified GL.Uniform as GL
-import Linear.Affine (Point(..))
-import Linear.Matrix (M33)
-import Linear.V2 (V2(..))
-import Linear.V3 (V3(..))
-import Linear.V4 (V4(..))
-import UI.Colour (Colour)
-import Unit.Angle
+import           Linear.Affine (Point(..))
+import           Linear.Matrix (M33)
+import           Linear.V2 (V2(..))
+import           Linear.V3 (V3(..))
+import           Linear.V4 (V4(..))
+import           UI.Colour (Colour)
+import           Unit.Angle
 
 data Shader (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) where
   V :: (Vars u, Vars i, Vars o) => (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'

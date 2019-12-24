@@ -1,4 +1,9 @@
-{-# LANGUAGE DataKinds, DeriveTraversable, EmptyCase, GADTs, LambdaCase, StandaloneDeriving #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE EmptyCase #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module S
 ( S(..)
 , Scope

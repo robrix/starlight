@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module UI.Carrier.Window
 ( -- * Window carrier
   runWindow
@@ -7,14 +12,14 @@ module UI.Carrier.Window
 , module UI.Effect.Window
 ) where
 
-import Control.Algebra
-import Control.Carrier.Lift
-import Control.Carrier.Reader
-import Control.Monad.IO.Class.Lift
-import Data.Text (Text)
-import Linear.V2
+import           Control.Algebra
+import           Control.Carrier.Lift
+import           Control.Carrier.Reader
+import           Control.Monad.IO.Class.Lift
+import           Data.Text (Text)
+import           Linear.V2
 import qualified SDL
-import UI.Effect.Window
+import           UI.Effect.Window
 import qualified UI.Window as UI
 
 runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> WindowC m a -> m a

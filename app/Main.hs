@@ -1,56 +1,63 @@
-{-# LANGUAGE DataKinds, DisambiguateRecordFields, FlexibleContexts, GeneralizedNewtypeDeriving, NamedFieldPuns, OverloadedStrings, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Main
 ( main
 ) where
 
-import Control.Carrier.Empty.Maybe
-import Control.Carrier.Finally
-import Control.Carrier.State.Strict
-import Control.Carrier.Time
-import Control.Effect.Lens ((+=), (-=))
+import           Control.Carrier.Empty.Maybe
+import           Control.Carrier.Finally
+import           Control.Carrier.State.Strict
+import           Control.Carrier.Time
+import           Control.Effect.Lens ((+=), (-=))
 import qualified Control.Effect.Lens as Lens
-import Control.Effect.Lift
+import           Control.Effect.Lift
 import qualified Control.Exception.Lift as E
-import Control.Monad (when)
-import Control.Monad.IO.Class.Lift (runLiftIO)
-import Data.Foldable (for_)
-import Data.Function ((&), fix)
-import Data.Interval
-import Data.Maybe (isJust)
-import Data.Time.Clock (UTCTime)
-import Geometry.Circle
-import Geometry.Rect
-import GHC.Stack
-import GL.Array
-import GL.Carrier.Program
-import GL.Framebuffer as GL
+import           Control.Monad (when)
+import           Control.Monad.IO.Class.Lift (runLiftIO)
+import           Data.Foldable (for_)
+import           Data.Function (fix, (&))
+import           Data.Interval
+import           Data.Maybe (isJust)
+import           Data.Time.Clock (UTCTime)
+import           Geometry.Circle
+import           Geometry.Rect
+import           GHC.Stack
+import           GL.Array
+import           GL.Carrier.Program
+import           GL.Framebuffer as GL
 import qualified GL.Program as GL
-import Graphics.GL.Core41
-import Lens.Micro (Lens', (.~), (^.), lens)
-import Linear.Affine
-import Linear.Exts
-import Linear.Matrix
-import Linear.Metric
-import Linear.V1 as Linear
-import Linear.V2 as Linear
-import Linear.V3 as Linear
-import Linear.Vector as Linear
-import Physics.Delta
+import           Graphics.GL.Core41
+import           Lens.Micro (Lens', lens, (.~), (^.))
+import           Linear.Affine
+import           Linear.Exts
+import           Linear.Matrix
+import           Linear.Metric
+import           Linear.V1 as Linear
+import           Linear.V2 as Linear
+import           Linear.V3 as Linear
+import           Linear.Vector as Linear
+import           Physics.Delta
 import qualified SDL
 import qualified Starlight.Body as S
-import Starlight.Input
+import           Starlight.Input
 import qualified Starlight.Shader.Radar as Radar
 import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
-import System.FilePath
+import           System.FilePath
 import qualified UI.Carrier.Window as Window
-import UI.Colour
-import UI.Font as Font
-import UI.Label as Label
-import Unit.Angle
-import Unit.Length
-import Unit.Mass
-import Unit.Time
+import           UI.Colour
+import           UI.Font as Font
+import           UI.Label as Label
+import           Unit.Angle
+import           Unit.Length
+import           Unit.Mass
+import           Unit.Time
 
 main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ do

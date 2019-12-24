@@ -1,25 +1,29 @@
-{-# LANGUAGE DataKinds, DisambiguateRecordFields, NamedFieldPuns, TypeApplications, TypeOperators #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module UI.Graph
 ( Graph
 , mkGraph
 , drawGraph
 ) where
 
-import Control.Carrier.Finally
-import Control.Monad.IO.Class.Lift
-import Data.Interval
-import GL.Array
-import GL.Effect.Program
-import GL.Object
+import           Control.Carrier.Finally
+import           Control.Monad.IO.Class.Lift
+import           Data.Interval
+import           GL.Array
+import           GL.Effect.Program
+import           GL.Object
 import qualified GL.Program as GL
-import Graphics.GL.Core41
-import Lens.Micro ((^.))
-import Linear.Exts
-import Linear.Matrix
-import Linear.V2
-import Linear.V4
-import Linear.Vector
-import UI.Colour
+import           Graphics.GL.Core41
+import           Lens.Micro ((^.))
+import           Linear.Exts
+import           Linear.Matrix
+import           Linear.V2
+import           Linear.V4
+import           Linear.Vector
+import           UI.Colour
 import qualified UI.Graph.Lines as Lines
 import qualified UI.Graph.Points as Points
 
