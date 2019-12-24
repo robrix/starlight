@@ -18,6 +18,7 @@ module GL.Shader.DSL
 , dFdx
 , mod'
 , min'
+, max'
 , texture
 , coerce
 , gl_Position
@@ -186,6 +187,7 @@ data Expr (k :: Type) a where
   Dfdx :: Expr k Float -> Expr k Float
   Mod :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Min :: Expr k a -> Expr k a -> Expr k a
+  Max :: Expr k a -> Expr k a -> Expr k a
   Texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 
   Coerce :: C.Coercible a b => Expr k a -> Expr k b
@@ -270,6 +272,9 @@ mod' = Mod
 
 min' :: Expr k a -> Expr k a -> Expr k a
 min' = Min
+
+max' :: Expr k a -> Expr k a -> Expr k a
+max' = Max
 
 texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 texture = Texture
@@ -439,6 +444,7 @@ renderExpr = parens . \case
   Dfdx a -> fn "dFdx" [renderExpr a]
   Mod a b -> fn "mod" [renderExpr a, renderExpr b]
   Min a b -> fn "min" [renderExpr a, renderExpr b]
+  Max a b -> fn "max" [renderExpr a, renderExpr b]
   Texture a b -> fn "texture" [renderExpr a, renderExpr b]
   Coerce a -> renderExpr a
   where
