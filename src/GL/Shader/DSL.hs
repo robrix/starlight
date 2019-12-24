@@ -17,6 +17,7 @@ module GL.Shader.DSL
 , gl_Position
 , gl_PointSize
 , gl_FragCoord
+, gl_FrontFacing
 , gl_PointCoord
 , discard
 , iff
@@ -249,6 +250,9 @@ gl_PointSize = Ref "gl_PointSize"
 
 gl_FragCoord :: Expr 'Fragment (V2 Float)
 gl_FragCoord = Var "gl_FragCoord"
+
+gl_FrontFacing :: Expr 'Fragment Bool
+gl_FrontFacing = Var "gl_FrontFacing"
 
 gl_PointCoord :: Expr 'Fragment (V2 Float)
 gl_PointCoord = Var "gl_PointCoord"
