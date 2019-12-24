@@ -21,7 +21,6 @@ shader = V vertex $ F fragment Nil where
       s <- var "s" (0.1 :: Expr 'Fragment Float)
       fade <- var "fade" (0.5 :: Expr 'Fragment Float)
       v <- var "v" $ vec3 (vec2 0 0) 0
-      mag <- let' "mag" (norm (get v))
       r <- var "r" 0
       while (get r `lt` volsteps) $ do
         p <- var "p" $ origin + dir ^* get s
@@ -44,6 +43,7 @@ shader = V vertex $ F fragment Nil where
         fade *= distfading
         s += stepsize
         r += 1
+      mag <- let' "mag" (norm (get v))
       fragColour .= vec4 (lerp saturation (vec3 (vec2 mag mag) mag) (get v) ^* 0.01) 1
       where
       iterations = 17
