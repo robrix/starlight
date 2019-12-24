@@ -113,7 +113,7 @@ shaderSources = \case
 
 data Stmt (k :: Type) a where
   Pure :: a -> Stmt k a
-  Let :: GLSLType b => String -> Expr k b -> (Expr k b -> Stmt k a) -> Stmt k a
+  Let :: GLSLType b => String -> Expr k b -> (Const String b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
   While :: Expr k Bool -> Stmt k () -> Stmt k a -> Stmt k a
@@ -240,7 +240,7 @@ newtype Prj s t = Prj String
 
 
 let' :: GLSLType a => String -> Expr k a -> Stmt k (Expr k a)
-let' n v = Let n v pure
+let' n v = Let n v (pure . Var . getConst)
 
 
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
@@ -384,7 +384,7 @@ renderStmt = \case
   Pure _ -> mempty
   Let n v k
     -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-    <> renderStmt (k (Var n))
+    <> renderStmt (k (Const n))
   Discard k
     -> pretty "discard" <> pretty ';' <> hardline
     <> renderStmt k
