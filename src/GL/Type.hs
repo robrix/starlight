@@ -6,7 +6,7 @@ import qualified Foreign.Storable as S
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
-class (Num n, S.Storable n) => Type n where
+class S.Storable n => Type n where
   glType :: proxy n -> GLenum
 
 instance Type Float where
