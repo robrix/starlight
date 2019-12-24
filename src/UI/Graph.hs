@@ -20,7 +20,8 @@ import Linear.V2
 import Linear.V4
 import Linear.Vector
 import UI.Colour
-import qualified UI.Graph.Shader as Shader
+import qualified UI.Graph.Lines as Lines
+import qualified UI.Graph.Points as Points
 
 data Graph = Graph
   { matrix    :: !(M33 Float)
@@ -52,8 +53,8 @@ mkGraph f n from to = do
         !*! translated (negated minXY)
       colour = white
   array <- loadVertices vertices
-  points <- build' Shader.points
-  lines <- build' Shader.lines
+  points <- build' Points.shader
+  lines <- build' Lines.shader
 
   pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 
