@@ -95,31 +95,6 @@ shaderSources = \case
     var :: GLSLType a => String -> String -> Const (Doc ()) a
     var qual n = fix $ \ c -> Const $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline
 
-  -- renderShader :: Shader k u i o -> Doc ()
-  -- renderShader s = pretty "#version 410" <> hardline <> go s where
-  --   go :: Shader k u i o -> Doc ()
-  --   go = \case
-  --     s@(Uniform k)
-  --       -> pretty "uniform" <+> renderTypeOf (typeOf (uniformsOf s)) <+> pretty (symbolVal (nameOf (uniformsOf s))) <> pretty ';' <> hardline
-  --       <> go k
-  --     s@(Input k)
-  --       -> pretty "in" <+> renderTypeOf (typeOf (inputsOf s)) <+> pretty (symbolVal (nameOf (inputsOf s))) <> pretty ';' <> hardline
-  --       <> go k
-  --     s@(Output k)
-  --       -> pretty "out" <+> renderTypeOf (typeOf (outputsOf s)) <+> pretty (symbolVal (nameOf (outputsOf s))) <> pretty ';' <> hardline
-  --       <> go k
-  --     Main s -> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt s <> line))
-  --   uniformsOf :: Shader k u i o -> Proxy u
-  --   uniformsOf _ = Proxy
-  --   inputsOf :: Shader k u i o -> Proxy i
-  --   inputsOf _ = Proxy
-  --   outputsOf :: Shader k u i o -> Proxy o
-  --   outputsOf _ = Proxy
-  --   typeOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy t
-  --   typeOf _ = Proxy
-  --   nameOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy n
-  --   nameOf _ = Proxy
-
 
 data Stmt (k :: Type) a where
   Pure :: a -> Stmt k a
