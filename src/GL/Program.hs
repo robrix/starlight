@@ -56,7 +56,7 @@ createProgram = do
   program <- runLiftIO glCreateProgram
   Program program <$ onExit (runLiftIO (glDeleteProgram program))
 
-useProgram :: Has (Lift IO) sig m => Program ty -> m ()
+useProgram :: Has (Lift IO) sig m => Program u -> m ()
 useProgram = runLiftIO . glUseProgram . unProgram
 
 link :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> Program u -> m ()
