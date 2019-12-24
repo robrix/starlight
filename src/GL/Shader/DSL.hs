@@ -15,6 +15,7 @@ module GL.Shader.DSL
 , lerp
 , lerp2
 , dFdx
+, texture
 , coerce
 , gl_Position
 , gl_PointSize
@@ -176,6 +177,7 @@ data Expr (k :: Type) a where
   Lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Lerp2 :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Dfdx :: Expr k Float -> Expr k Float
+  Texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 
   Coerce :: C.Coercible a b => Expr k a -> Expr k b
 
@@ -250,6 +252,9 @@ lerp2 = Lerp2
 
 dFdx :: Expr k Float -> Expr k Float
 dFdx = Dfdx
+
+texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
+texture = Texture
 
 
 coerce :: C.Coercible a b => Expr k a -> Expr k b
@@ -407,6 +412,7 @@ renderExpr = parens . \case
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Lerp2 t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Dfdx a -> fn "dFdx" [renderExpr a]
+  Texture a b -> fn "texture" [renderExpr a, renderExpr b]
   Coerce a -> renderExpr a
   where
   fn n as = pretty n <> tupled as
