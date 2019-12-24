@@ -2,7 +2,7 @@
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
-, build'
+, build
 , use
 , set
 , HasProgram(..)
@@ -21,7 +21,7 @@ import qualified GL.Program as GL
 import qualified GL.Shader.DSL as DSL
 
 data Program m k
-  = forall u i o . Build' (DSL.Shader u i o) (GL.Program u -> m k)
+  = forall u i o . Build (DSL.Shader u i o) (GL.Program u -> m k)
   | forall ty a . Use (GL.Program ty) (m a) (a -> m k)
   | forall ty . DSL.Vars ty => Set (GL.Program ty) (ty Maybe) (m k)
 
@@ -29,19 +29,19 @@ deriving instance Functor m => Functor (Program m)
 
 instance HFunctor Program where
   hmap f = \case
-    Build' s k -> Build' s     (f . k)
+    Build s k -> Build s     (f . k)
     Use p m k -> Use p (f m) (f . k)
     Set p v k -> Set p v     (f k)
 
 instance Effect   Program where
   thread ctx hdl = \case
-    Build' s k -> Build' s                (hdl . (<$ ctx) . k)
+    Build s k -> Build s                (hdl . (<$ ctx) . k)
     Use p m k -> Use p (hdl (m <$ ctx)) (hdl . fmap k)
     Set p v k -> Set p v                (hdl (k <$ ctx))
 
 
-build' :: forall u i o m sig . Has Program sig m => DSL.Shader u i o -> m (GL.Program u)
-build' s = send (Build' s pure)
+build :: forall u i o m sig . Has Program sig m => DSL.Shader u i o -> m (GL.Program u)
+build s = send (Build s pure)
 
 use :: Has Program sig m => GL.Program ty -> ProgramT ty m a -> m a
 use p (ProgramT m) = send (Use p (runReader p m) pure)

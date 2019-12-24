@@ -65,9 +65,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       , rotation = pi/2
       }
     . evalState start $ do
-      starsP <- build' Stars.shader
-      shipP <- build' Ship.shader
-      radarP <- build' Radar.shader
+      starsP <- build Stars.shader
+      shipP <- build Ship.shader
+      radarP <- build Radar.shader
 
       label <- label
 

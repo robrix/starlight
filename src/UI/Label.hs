@@ -64,8 +64,8 @@ label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
-  glyphP <- build' Glyph.shader
-  textP  <- build' Text.shader
+  glyphP <- build Glyph.shader
+  textP  <- build Text.shader
 
   glyphA <- gen1
   glyphB <- gen1

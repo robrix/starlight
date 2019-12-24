@@ -26,7 +26,7 @@ newtype ProgramC m a = ProgramC (m a)
 
 instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (ProgramC m) where
   alg = \case
-    L (Build' p k) -> do
+    L (Build p k) -> do
       program <- GL.createProgram
       let s = shaderSources p
       shaders <- for s $ \ (type', source) -> do

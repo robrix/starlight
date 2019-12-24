@@ -46,8 +46,8 @@ mkGraph f n from to = do
         !*! translated (negated minXY)
       colour = white
   array <- loadVertices vertices
-  points <- build' Points.shader
-  lines <- build' Lines.shader
+  points <- build Points.shader
+  lines <- build Lines.shader
 
   pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 
