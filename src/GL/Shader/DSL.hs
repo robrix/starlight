@@ -320,9 +320,9 @@ renderShader s = pretty "#version 410" <> hardline <> go s where
   nameOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy n
   nameOf _ = Proxy
 
-renderStmt :: Pretty a => Stmt k a -> Doc ()
+renderStmt :: Stmt k a -> Doc ()
 renderStmt = \case
-  Pure a -> pretty a
+  Pure _ -> mempty
   Let n v k
     -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt (k (Var n))
