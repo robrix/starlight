@@ -57,6 +57,7 @@ import GHC.Generics
 import GHC.TypeLits
 import qualified GL.Program as GL
 import GL.Shader (Type(..))
+import qualified GL.Uniform as GL
 import Linear.Affine (Point(..))
 import Linear.Matrix (M33)
 import Linear.V2 (V2(..))
@@ -367,7 +368,7 @@ renderExpr = parens . \case
   fn n as = pretty n <> tupled as
 
 
-class GLSLType a where
+class GL.Uniform a => GLSLType a where
   renderTypeOf :: expr a -> Doc ()
 
 instance GLSLType a => GLSLType (Radians a) where
