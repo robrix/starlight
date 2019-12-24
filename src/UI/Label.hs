@@ -20,7 +20,6 @@ import GL.Effect.Program
 import GL.Framebuffer as GL
 import GL.Object
 import qualified GL.Program as GL
-import GL.Shader
 import GL.Texture
 import GL.TextureUnit
 import Graphics.GL.Core41
@@ -31,7 +30,6 @@ import Linear.V2
 import Linear.V3
 import Linear.V4
 import Linear.Vector
-import System.FilePath
 import UI.Colour
 import qualified UI.Effect.Window as Window
 import UI.Font
@@ -67,8 +65,7 @@ label = do
   fbuffer <- gen1
 
   glyphP <- build' Glyph.shader
-  textP  <- build
-    [(Vertex, "src" </> "text-vertex.glsl"),  (Fragment, "src" </> "text-fragment.glsl")]
+  textP  <- build' Text.shader
 
   glyphA <- gen1
   glyphB <- gen1
