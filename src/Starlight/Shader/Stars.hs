@@ -44,7 +44,8 @@ shader = V vertex $ F fragment Nil where
         s += stepsize
         r += 1
       mag <- let' "mag" (norm (get v))
-      fragColour .= vec4 (lerp saturation (vec3 (vec2 mag mag) mag) (get v) ^* 0.01) 1
+      v .= lerp saturation (vec3 (vec2 mag mag) mag) (get v)
+      fragColour .= vec4 (get v ^* 0.01) 1
       where
       iterations = 17
       formuparam = 0.53
