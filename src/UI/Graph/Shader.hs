@@ -13,7 +13,7 @@ points :: Prog
    , "colour"    '::: Colour Float
    ]
   '[ "pos" '::: V2 Float ]
-  '[]
+  '[ "fragColour" '::: Colour Float ]
 points = V pointsVertex $ F pointsFragment Nil
 
 pointsVertex :: Shader 'Vertex
