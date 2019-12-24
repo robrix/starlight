@@ -12,7 +12,6 @@ import GL.Array
 import GL.Effect.Program
 import GL.Object
 import qualified GL.Program as GL
-import GL.Shader
 import Graphics.GL.Core41
 import Lens.Micro ((^.))
 import Linear.Exts
@@ -20,7 +19,6 @@ import Linear.Matrix
 import Linear.V2
 import Linear.V4
 import Linear.Vector
-import System.FilePath
 import UI.Colour
 import qualified UI.Graph.Shader as Shader
 
@@ -55,8 +53,7 @@ mkGraph f n from to = do
       colour = white
   array <- loadVertices vertices
   points <- build' Shader.points
-  lines <- build
-    [(Vertex, "src" </> "lines-vertex.glsl"), (Fragment, "src" </> "lines-fragment.glsl")]
+  lines <- build' Shader.lines
 
   pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 
