@@ -18,6 +18,7 @@ import Data.Time.Clock (UTCTime)
 import Data.Traversable (for)
 import GL.Effect.Program
 import GL.Shader
+import GL.Shader.DSL (progShaders)
 import qualified GL.Program as GL
 import System.Directory
 
@@ -29,25 +30,37 @@ newtype ProgramC m a = ProgramC (StateC (IntMap.IntMap [ShaderState]) m a)
 
 instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Program :+: sig) (ProgramC m) where
   alg = \case
+    L (Build' p k) -> do
+      program <- GL.createProgram
+      let s = progShaders p
+      shaders <- for s $ \ (type', source) -> do
+        shader <- createShader type'
+        compile source shader
+        pure $! ShaderState shader Nothing Nothing
+      ProgramC $ modify (insert program shaders)
+      GL.link (map shader shaders) program
+      k program
     L (Build s k) -> do
       program <- GL.createProgram
       shaders <- for s $ \ (type', path) -> do
         shader <- createShader type'
-        pure $! ShaderState shader path Nothing
+        pure $! ShaderState shader (Just path) Nothing
       ProgramC $ modify (insert program shaders)
       k program
     L (Use p m k) -> do
       shaders <- maybe (error "no state found for program") id <$> ProgramC (gets (lookup p))
-      let prevTimes = map time shaders
-      times <- traverse (fmap Just . sendM . getModificationTime . path) shaders
-      when (times /= prevTimes) $ do
-        shaders <- for (zip times shaders) $ \ (newTime, ShaderState shader path oldTime) -> do
-          when (newTime /= oldTime) $ do
-            source <- sendM $ readFile path
-            compile source shader
-          pure (ShaderState shader path newTime)
-        ProgramC (modify (insert p shaders))
-        GL.link (map shader shaders) p
+      shaders' <- for shaders $ \ s@(ShaderState shader whence oldTime) ->
+        case whence of
+          Just path -> do
+            newTime <- Just <$> sendM (getModificationTime path)
+            when (oldTime /= newTime) $ do
+              source <- sendM (readFile path)
+              compile source shader
+            pure s { time = newTime }
+          _ -> pure s
+      when (map time shaders /= map time shaders') $ do
+        ProgramC (modify (insert p shaders'))
+        GL.link (map shader shaders') p
       GL.useProgram p
       a <- m
       GL.useProgram (GL.Program 0)
@@ -60,6 +73,6 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
 
 data ShaderState = ShaderState
   { shader :: !Shader
-  , path   :: !FilePath
+  , whence :: !(Maybe FilePath)
   , time   :: !(Maybe UTCTime)
   }

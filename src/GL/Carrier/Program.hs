@@ -13,6 +13,7 @@ import Control.Monad.IO.Class.Lift
 import Data.Traversable (for)
 import GL.Effect.Program
 import GL.Shader
+import GL.Shader.DSL (progShaders)
 import qualified GL.Program as GL
 
 runProgram :: ProgramC m a -> m a
@@ -23,6 +24,14 @@ newtype ProgramC m a = ProgramC (m a)
 
 instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (ProgramC m) where
   alg = \case
+    L (Build' p k) -> do
+      program <- GL.createProgram
+      let s = progShaders p
+      shaders <- for s $ \ (type', source) -> do
+        shader <- createShader type'
+        shader <$ compile source shader
+      GL.link shaders program
+      k program
     L (Build s k) -> do
       program <- GL.createProgram
       shaders <- for s $ \ (type', path) -> do
