@@ -4,6 +4,8 @@
 module UI.Graph.Points
 ( shader
 , U(..)
+, I(..)
+, O(..)
 ) where
 
 import GHC.Generics (Generic)

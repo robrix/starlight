@@ -5,6 +5,8 @@
 module Starlight.Shader.Stars
 ( shader
 , U(..)
+, I(..)
+, O(..)
 ) where
 
 import GHC.Generics (Generic)

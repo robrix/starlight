@@ -4,6 +4,8 @@
 module Starlight.Shader.Ship
 ( shader
 , U(..)
+, I(..)
+, O(..)
 ) where
 
 import GHC.Generics (Generic)
