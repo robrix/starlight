@@ -175,7 +175,7 @@ data Expr (k :: Type) a where
   Norm :: Expr k (v Float) -> Expr k Float
   Lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Lerp2 :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
-  Dfdx :: Expr k Float -> Expr k Float -> Expr k Float
+  Dfdx :: Expr k Float -> Expr k Float
 
   Coerce :: C.Coercible a b => Expr k a -> Expr k b
 
@@ -248,7 +248,7 @@ lerp = Lerp
 lerp2 :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
 lerp2 = Lerp2
 
-dFdx :: Expr k Float -> Expr k Float -> Expr k Float
+dFdx :: Expr k Float -> Expr k Float
 dFdx = Dfdx
 
 
@@ -406,7 +406,7 @@ renderExpr = parens . \case
   Norm a -> fn "length" [renderExpr a]
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Lerp2 t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
-  Dfdx a b -> fn "dFdx" [renderExpr a, renderExpr b]
+  Dfdx a -> fn "dFdx" [renderExpr a]
   Coerce a -> renderExpr a
   where
   fn n as = pretty n <> tupled as
