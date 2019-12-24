@@ -139,14 +139,15 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
     let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
     for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
-        let matrix
-              =   translated (-1)
+        set Glyph.U
+          { matrix3 = Just
+              $   translated (-1)
               !*! scaled     (V3 sx sy 1)
               !*! translated (V2 tx ty * (1 / fromIntegral scale))
               !*! scaled     (V3 (fontScale font) (fontScale font) 1)
               !*! translated (V2 offset 0)
               !*! translated (negated (rectMin b))
-        set Glyph.U { matrix3 = Just matrix, colour = Just colour }
+          , colour = Just colour }
         drawArrays Triangles range
 
   pure l { bounds } where
