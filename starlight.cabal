@@ -82,6 +82,7 @@ library
     UI.Font
     UI.Glyph
     UI.Graph
+    UI.Graph.Shader
     UI.Label
     UI.Path
     UI.Window
