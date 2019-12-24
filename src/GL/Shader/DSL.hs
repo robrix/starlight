@@ -40,6 +40,12 @@ module GL.Shader.DSL
   -- * Re-exports
 , (:::)(..)
 , Type(..)
+, Colour
+, M33
+, V1
+, V2
+, V3
+, V4
 ) where
 
 import Control.Monad ((<=<), ap, liftM)
@@ -50,9 +56,11 @@ import Data.Text.Prettyprint.Doc
 import GHC.TypeLits
 import GL.Shader (Type(..), KnownType(..))
 import Linear.Matrix (M33)
+import Linear.V1 (V1(..))
 import Linear.V2 (V2(..))
 import Linear.V3 (V3(..))
 import Linear.V4 (V4(..))
+import UI.Colour (Colour)
 import Unit.Angle
 
 data Prog (u :: Context) (i :: Context) (o :: Context) where

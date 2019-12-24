@@ -5,9 +5,6 @@ module UI.Graph.Shader
 ) where
 
 import GL.Shader.DSL
-import Linear.Matrix (M33)
-import Linear.V2 (V2)
-import UI.Colour (Colour)
 
 pointsVertex
   :: Shader
