@@ -42,8 +42,8 @@ import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 
 data Label = Label
-  { textP   :: !(Program Text.U)
-  , glyphP  :: !(Program Glyph.U)
+  { textP   :: !(Program Text.U Text.I)
+  , glyphP  :: !(Program Glyph.U Glyph.I)
   , colour  :: !(Colour Float)
   , bcolour :: !(Maybe (Colour Float))
   , texture :: !(Texture 'Texture2D)

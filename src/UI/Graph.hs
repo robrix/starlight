@@ -30,8 +30,8 @@ data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
   , array     :: !(Array (V2 Float))
-  , points    :: !(Program Points.U)
-  , lines     :: !(Program Lines.U)
+  , points    :: !(Program Points.U Points.I)
+  , lines     :: !(Program Lines.U Lines.I)
   , pointSize :: !Float
   , count     :: !Int
   }

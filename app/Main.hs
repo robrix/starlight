@@ -291,9 +291,9 @@ data DrawState = DrawState
   , circleA :: Array (V2 Float)
   , shipA   :: Array (V3 Float)
   , radarA  :: Array (V1 Float)
-  , starsP  :: Program Stars.U
-  , shipP   :: Program Ship.U
-  , radarP  :: Program Radar.U
+  , starsP  :: Program Stars.U Stars.I
+  , shipP   :: Program Ship.U Ship.I
+  , radarP  :: Program Radar.U Radar.I
   }
 
 
