@@ -16,6 +16,9 @@ import           Linear.V4
 class S.Storable n => Type n where
   glType :: proxy n -> GLenum
 
+  glDims :: proxy n -> GLint
+  glDims _ = 1
+
 instance Type Float where
   glType _ = GL_FLOAT
 
@@ -28,11 +31,19 @@ instance Type Int where
 instance Type a => Type (V2 a) where
   glType _ = glType (Proxy @a)
 
+  glDims _ = 2 * glDims (Proxy @a)
+
 instance Type a => Type (V3 a) where
   glType _ = glType (Proxy @a)
+
+  glDims _ = 3 * glDims (Proxy @a)
 
 instance Type a => Type (V4 a) where
   glType _ = glType (Proxy @a)
 
+  glDims _ = 4 * glDims (Proxy @a)
+
 instance Type (f a) => Type (Point f a) where
   glType _ = glType (Proxy @(f a))
+
+  glDims _ = glDims (Proxy @(f a))
