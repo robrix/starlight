@@ -105,7 +105,7 @@ set v = askProgram >>= \ p ->
     Nothing -> pure ()) v))
 
 
-class HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u i o where
+class Monad m => HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u i o where
   askProgram :: m (Program u i o)
 
 
