@@ -48,18 +48,18 @@ import           GL.Uniform
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
-newtype Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) = Program { unProgram :: GLuint }
+newtype Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)
 
-createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m (Program u i)
+createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m (Program u i o)
 createProgram = do
   program <- runLiftIO glCreateProgram
   Program program <$ onExit (runLiftIO (glDeleteProgram program))
 
-useProgram :: Has (Lift IO) sig m => Program u i -> m ()
+useProgram :: Has (Lift IO) sig m => Program u i o -> m ()
 useProgram = runLiftIO . glUseProgram . unProgram
 
-link :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> Program u i -> m ()
+link :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> Program u i o -> m ()
 link shaders (Program program) = runLiftIO $ do
   for_ shaders (glAttachShader program . unShader)
   glLinkProgram program
@@ -67,13 +67,13 @@ link shaders (Program program) = runLiftIO $ do
   checkProgram (Program program)
 
 
-checkProgram :: (Has (Lift IO) sig m, HasCallStack) => Program u i -> m ()
+checkProgram :: (Has (Lift IO) sig m, HasCallStack) => Program u i o -> m ()
 checkProgram = runLiftIO . checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS . unProgram
 
 
 newtype Var (name :: Symbol) t = Var t
 
-setUniformValue :: (Uniform t, Has (Lift IO) sig m, HasCallStack) => Program u i -> String -> t -> m ()
+setUniformValue :: (Uniform t, Has (Lift IO) sig m, HasCallStack) => Program u i o -> String -> t -> m ()
 setUniformValue program name v = do
   location <- checkingGLError . runLiftIO $ C.withCString name (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v
@@ -82,7 +82,7 @@ setUniformValue program name v = do
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
 
 
-build :: (Has Finally sig m, Has (Lift IO) sig m) => DSL.Shader u i o -> m (Program u i)
+build :: (Has Finally sig m, Has (Lift IO) sig m) => DSL.Shader u i o -> m (Program u i o)
 build p = do
   program <- createProgram
   let s = DSL.shaderSources p
@@ -91,28 +91,28 @@ build p = do
     shader <$ compile source shader
   program <$ link shaders program
 
-use :: (Has Finally sig m, Has (Lift IO) sig m) => Program u i -> ProgramT u i m a -> m a
+use :: (Has Finally sig m, Has (Lift IO) sig m) => Program u i o -> ProgramT u i o m a -> m a
 use p (ProgramT m) = do
   useProgram p
   a <- runReader p m
   a <$ useProgram (Program 0)
 
-set :: (DSL.Vars u, HasProgram u i m, Has Finally sig m, Has (Lift IO) sig m) => u Maybe -> m ()
+set :: (DSL.Vars u, HasProgram u i o m, Has Finally sig m, Has (Lift IO) sig m) => u Maybe -> m ()
 set v = askProgram >>= \ p ->
   getAp (getConst (DSL.foldVars (\ s -> Const . \case
     Just v  -> Ap (setUniformValue p s v)
     Nothing -> pure ()) v))
 
 
-class HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (m :: * -> *) | m -> u i where
-  askProgram :: m (Program u i)
+class HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u i o where
+  askProgram :: m (Program u i o)
 
 
-newtype ProgramT (u :: (* -> *) -> *) (i :: (* -> *) -> *) m a = ProgramT { runProgramT :: ReaderC (Program u i) m a }
+newtype ProgramT (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramT { runProgramT :: ReaderC (Program u i o) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-instance Algebra sig m => Algebra sig (ProgramT u i m) where
+instance Algebra sig m => Algebra sig (ProgramT u i o m) where
   alg = ProgramT . send . handleCoercible
 
-instance Algebra sig m => HasProgram u i (ProgramT u i m) where
+instance Algebra sig m => HasProgram u i o (ProgramT u i o m) where
   askProgram = ProgramT ask
