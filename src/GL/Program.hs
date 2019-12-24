@@ -18,7 +18,6 @@ import Control.Monad.IO.Class.Lift
 import Data.DSL
 import Data.Foldable (for_)
 import Data.Functor.Identity
-import Data.Proxy
 import qualified Foreign.C.String.Lift as C
 import GHC.Records
 import GHC.Stack
@@ -54,9 +53,9 @@ checkProgram = runLiftIO . checkStatus glGetProgramiv glGetProgramInfoLog Other 
 
 newtype Var (name :: Symbol) t = Var t
 
-setUniformValue :: forall name t ty m sig . (HasUniform name t ty, Has (Lift IO) sig m, HasCallStack) => Program ty -> Var name t -> m ()
-setUniformValue program (Var v) = do
-  location <- checkingGLError . runLiftIO $ C.withCString (symbolVal (Proxy @name)) (glGetUniformLocation (unProgram program))
+setUniformValue :: (Uniform t, Has (Lift IO) sig m, HasCallStack) => Program ty -> String -> t -> m ()
+setUniformValue program name v = do
+  location <- checkingGLError . runLiftIO $ C.withCString name (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v
 
 

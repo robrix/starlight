@@ -1,4 +1,4 @@
-{-# LANGUAGE AllowAmbiguousTypes, DataKinds, DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Effect.Program
 ( -- * Program effect
   Program(..)
@@ -28,7 +28,7 @@ data Program m k
   = forall ty . Build [(Shader.Type, FilePath)] (GL.Program ty -> m k)
   | forall u i o . Build' (DSL.Shader u i o) (GL.Program u -> m k)
   | forall ty a . Use (GL.Program ty) (m a) (a -> m k)
-  | forall name a ty . GL.HasUniform name a ty => Set (GL.Program ty) (GL.Var name a) (m k)
+  | forall ty . DSL.Vars ty => Set (GL.Program ty) (ty Maybe) (m k)
 
 deriving instance Functor m => Functor (Program m)
 
@@ -56,8 +56,8 @@ build' s = send (Build' s pure)
 use :: Has Program sig m => GL.Program ty -> ProgramT ty m a -> m a
 use p (ProgramT m) = send (Use p (runReader p m) pure)
 
-set :: forall name a ty m sig . (GL.HasUniform name a ty, HasProgram ty m, Has Program sig m) => a -> m ()
-set v = askProgram >>= \ p -> send (Set p (GL.Var @name v) (pure ()))
+set :: (DSL.Vars ty, HasProgram ty m, Has Program sig m) => ty Maybe -> m ()
+set v = askProgram >>= \ p -> send (Set p v (pure ()))
 
 
 class HasProgram (ty :: (* -> *) -> *) (m :: * -> *) | m -> ty where

@@ -10,10 +10,12 @@ module GL.Carrier.Program
 import Control.Algebra
 import Control.Effect.Finally
 import Control.Monad.IO.Class.Lift
+import Data.Functor.Const
+import Data.Monoid (Ap(..))
 import Data.Traversable (for)
 import GL.Effect.Program
 import GL.Shader
-import GL.Shader.DSL (shaderSources)
+import GL.Shader.DSL (foldVars, shaderSources)
 import qualified GL.Program as GL
 
 runProgram :: ProgramC m a -> m a
@@ -45,5 +47,9 @@ instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (
       a <- m
       GL.useProgram (GL.Program 0)
       k a
-    L (Set p v k) -> GL.setUniformValue p v >> k
+    L (Set p v k) -> do
+      getAp (getConst (foldVars (\ s -> Const . \case
+        Just v  -> Ap (GL.setUniformValue p s v)
+        Nothing -> pure ()) v))
+      k
     R other       -> ProgramC (send (handleCoercible other))

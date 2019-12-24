@@ -56,11 +56,8 @@ drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = do
   bind (Just array)
   runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
   use points $ do
-    set @"colour" colour
-    set @"matrix" matrix
-    set @"pointSize" pointSize
+    set Points.U { matrix = Just matrix, pointSize = Just pointSize, colour = Just colour }
     drawArrays Points    (Interval 0 count)
   use lines $ do
-    set @"colour" colour
-    set @"matrix" matrix
+    set Lines.U { matrix = Just matrix, colour = Just colour }
     drawArrays LineStrip (Interval 0 count)

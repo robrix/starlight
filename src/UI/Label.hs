@@ -142,14 +142,14 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
     let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
     for_ instances $ \ Instance{ offset, range } ->
       for_ jitterPattern $ \ (colour, V2 tx ty) -> do
-        set @"colour" colour
-        set @"matrix3"
-          $   translated (-1)
-          !*! scaled     (V3 sx sy 1)
-          !*! translated (V2 tx ty * (1 / fromIntegral scale))
-          !*! scaled     (V3 (fontScale font) (fontScale font) 1)
-          !*! translated (V2 offset 0)
-          !*! translated (negated (rectMin b))
+        let matrix
+              =   translated (-1)
+              !*! scaled     (V3 sx sy 1)
+              !*! translated (V2 tx ty * (1 / fromIntegral scale))
+              !*! scaled     (V3 (fontScale font) (fontScale font) 1)
+              !*! translated (V2 offset 0)
+              !*! translated (negated (rectMin b))
+        set $ Just matrix :. Just colour :. Nil
         drawArrays Triangles range
 
   pure l { bounds } where
@@ -187,19 +187,19 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
   use textP $ do
     let b = fromIntegral <$> bounds
         V2 w h = rectMax b - rectMin b
-    set @"rect" $ V4
-      (b ^. _min . _x / w)
-      (b ^. _max . _y / h)
-      (b ^. _max . _x / w)
-      (b ^. _min . _y / h)
-
-    set @"colour" transparent
+        rect = V4
+          (b ^. _min . _x / w)
+          (b ^. _max . _y / h)
+          (b ^. _max . _x / w)
+          (b ^. _min . _y / h)
 
     let textureUnit = TextureUnit 0
     setActiveTexture textureUnit
     bind (Just texture)
 
-    set @"sampler" textureUnit
+    let u t = Just rect :. Just textureUnit :. t
+
+    set . u $ Just transparent :. Nil
 
     bind (Just quadA)
     let range = Interval 0 4
@@ -207,5 +207,5 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
 
     when (opaque colour /= black) $ do
       glBlendFunc GL_ONE GL_ONE
-      set @"colour" colour
+      set . u $ Just colour :. Nil
       drawArrays TriangleStrip range

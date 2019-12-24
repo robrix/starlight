@@ -13,12 +13,14 @@ import Control.Carrier.State.Strict
 import Control.Effect.Finally
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
+import Data.Functor.Const
 import qualified Data.IntMap as IntMap
+import Data.Monoid (Ap(..))
 import Data.Time.Clock (UTCTime)
 import Data.Traversable (for)
 import GL.Effect.Program
 import GL.Shader
-import GL.Shader.DSL (shaderSources)
+import GL.Shader.DSL (foldVars, shaderSources)
 import qualified GL.Program as GL
 import System.Directory
 
@@ -65,7 +67,11 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
       a <- m
       GL.useProgram (GL.Program 0)
       k a
-    L (Set p v k) -> GL.setUniformValue p v >> k
+    L (Set p v k) -> do
+      getAp (getConst (foldVars (\ s -> Const . \case
+        Just v  -> Ap (GL.setUniformValue p s v)
+        Nothing -> pure ()) v))
+      k
     R other       -> ProgramC (send (handleCoercible other))
     where
       lookup = IntMap.lookup . fromIntegral . GL.unProgram

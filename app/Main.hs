@@ -35,7 +35,6 @@ import Linear.Metric
 import Linear.V1 as Linear
 import Linear.V2 as Linear
 import Linear.V3 as Linear
-import Linear.V4 as Linear
 import Linear.Vector as Linear
 import Physics.Delta
 import qualified SDL
@@ -211,9 +210,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
   use starsP $ do
     scale <- Window.scale
     size <- Window.size
-    set @"resolution" (size ^* scale)
-    set @"origin" (position / P size)
-    set @"zoom" zoomOut
+    set $ Just (size ^* scale) :. Just (position / P size) :. Just zoomOut :. Nil
 
     drawArrays TriangleStrip (Interval 0 4)
 
@@ -227,22 +224,26 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
         !*! translated (negated (unP position))
 
   use shipP $ do
-    set @"colour" $ V4 1 1 1 1
-    set @"matrix"
-      $   window
-      !*! translated (unP position)
-      !*! scaled     (V3 25 25 1)
-      !*! rotated    rotation
+    set Ship.U
+      { matrix = Just
+          $   window
+          !*! translated (unP position)
+          !*! scaled     (V3 25 25 1)
+          !*! rotated    rotation
+      , colour = Just white
+      }
 
     drawArrays LineLoop (Interval 0 4)
 
     let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
           let trans = rel !*! S.transform orbit (getDelta t * 86400)
-          set @"colour" colour
-          set @"matrix"
-            $   window
-            !*! trans
-            !*! scaled (V3 r r 1)
+          set Ship.U
+            { matrix = Just
+                $   window
+                !*! trans
+                !*! scaled (V3 r r 1)
+            , colour = Just colour
+            }
 
           drawArrays LineLoop (Interval 0 (length circleV))
 
@@ -263,10 +264,12 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
               minSweep = 0.0133 -- at d=150, makes approx. 4px blips
               sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
-          set @"colour" $ colour & _a .~ 0.5
-          set @"matrix" $ window !*! translated (unP position)
-          set @"angle"  angle
-          set @"sweep"  sweep
+          set Radar.U
+            { colour = Just (colour & _a .~ 0.5)
+            , matrix = Just (window !*! translated (unP position))
+            , angle  = Just angle
+            , sweep  = Just sweep
+            }
 
           drawArrays LineLoop (Interval 0 (length circleV))
 
