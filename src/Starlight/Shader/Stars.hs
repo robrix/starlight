@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
+{-# LANGUAGE DataKinds, DeriveAnyClass, DeriveGeneric, NamedFieldPuns, TypeApplications #-}
 module Starlight.Shader.Stars
 ( shader
 , U(..)
@@ -21,13 +21,13 @@ shader = V vertex $ F fragment Nil where
       s <- var "s" (0.1 :: Expr 'Fragment Float)
       fade <- var "fade" (0.5 :: Expr 'Fragment Float)
       v <- var "v" $ vec3 (vec2 0 0) 0
-      r <- var "r" 0
+      r <- var @Int "r" 0
       while (get r `lt` volsteps) $ do
         p <- var "p" $ origin + dir ^* get s
         p .= abs (tile - mod' (get p) (tile ^* 2))
         pa <- var "pa" 0
         a <- var "a" 0
-        i <- var "i" 0
+        i <- var @Int "i" 0
         while (get i `lt` iterations) $ do
           p .= abs (get p) / dot (get p) (get p) - formuparam
           a += abs (norm (get p) - get pa)
