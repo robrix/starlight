@@ -1,10 +1,19 @@
 {-# LANGUAGE DataKinds, TypeOperators #-}
 module UI.Graph.Shader
-( pointsVertex
+( pointsProgram
+, pointsVertex
 , pointsFragment
 ) where
 
 import GL.Shader.DSL
+
+pointsProgram :: Prog
+  '[ "matrix" '::: M33 Float
+   , "pointSize" '::: Float
+   ]
+  '[ "pos" '::: V2 Float ]
+  '[]
+pointsProgram = V pointsVertex $ F pointsFragment Nil
 
 pointsVertex :: Shader 'Vertex
   '[ "matrix" '::: M33 Float
