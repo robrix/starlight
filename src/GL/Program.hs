@@ -82,7 +82,7 @@ setUniformValue program name v = do
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
 
 
-build :: forall u i o m sig . (Has Finally sig m, Has (Lift IO) sig m) => DSL.Shader u i o -> m (Program u)
+build :: (Has Finally sig m, Has (Lift IO) sig m) => DSL.Shader u i o -> m (Program u)
 build p = do
   program <- createProgram
   let s = DSL.shaderSources p
