@@ -348,6 +348,7 @@ renderExpr = parens . \case
   where
   fn n as = pretty n <> tupled as
 
+
 class GLSLType a where
   renderTypeOf :: expr a -> Doc ()
 
