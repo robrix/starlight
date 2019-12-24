@@ -41,6 +41,7 @@ module GL.Shader.DSL
 , Colour
 , M33
 , Point(..)
+, TextureUnit
 , V2
 , V3
 , V4
