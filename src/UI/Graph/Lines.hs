@@ -1,27 +1,29 @@
-{-# LANGUAGE DataKinds, TypeOperators #-}
+{-# LANGUAGE DeriveGeneric, NamedFieldPuns #-}
 module UI.Graph.Lines
 ( shader
+, U(..)
 ) where
 
+import GHC.Generics (Generic)
 import GL.Shader.DSL
 
-shader :: Prog
-  '[ "matrix"     '::: M33 Float
-   , "colour"     '::: V4 Float ]
-  '[ "pos"        '::: V2 Float ]
-  '[ "fragColour" '::: Colour Float ]
-shader = V vertex $ F fragment Nil
+shader :: Shader U I O
+shader = V vertex $ F fragment Nil where
+  vertex U { matrix } I { pos } None =
+    gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
 
-vertex :: Shader 'Vertex
-  '[ "matrix" '::: M33 Float ]
-  '[ "pos"    '::: V2 Float ]
-  '[]
-vertex = uniforms $ \ matrix -> inputs $ \ pos -> main $ do
-  gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
+  fragment U { colour } None O { fragColour } =
+    fragColour .= colour
 
-fragment :: Shader 'Fragment
-  '[ "colour"     '::: Colour Float ]
-  '[]
-  '[ "fragColour" '::: Colour Float ]
-fragment = uniforms $ \ colour -> outputs $ \ fragColour -> main $ do
-  fragColour .= colour
+
+data U v = U
+  { matrix :: v (M33 Float)
+  , colour :: v (Colour Float)
+  }
+  deriving (Generic)
+
+newtype I v = I { pos :: v (V2 Float) }
+  deriving (Generic)
+
+newtype O v = O { fragColour :: v (Colour Float) }
+  deriving (Generic)

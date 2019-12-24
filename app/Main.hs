@@ -68,8 +68,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
     . evalState start $ do
       starsP <- build
         [(Vertex, "src" </> "stars-vertex.glsl"), (Fragment, "src" </> "stars-fragment.glsl")]
-      shipP <- build' Ship.program
-      radarP <- build' Radar.program
+      shipP <- build' Ship.shader
+      radarP <- build' Radar.shader
 
       label <- label
 
@@ -280,18 +280,12 @@ data DrawState = DrawState
   , circleA :: Array (V2 Float)
   , shipA   :: Array (V3 Float)
   , radarA  :: Array (V1 Float)
-  , starsP  :: GL.Program
-    '[ "resolution" '::: V2 Float
-     , "origin"     '::: Point V2 Float
-     , "zoom"       '::: Float ]
-  , shipP   :: GL.Program
-    '[ "matrix"     '::: M33 Float
-     , "colour"     '::: V4 Float ]
-  , radarP  :: GL.Program
-    '[ "matrix"     '::: M33 Float
-     , "angle"      '::: Radians Float
-     , "sweep"      '::: Radians Float
-     , "colour"     '::: V4 Float ]
+  , starsP  :: GL.Program (Rec
+    [ "resolution" '::: V2 Float
+    , "origin"     '::: Point V2 Float
+    , "zoom"       '::: Float ])
+  , shipP   :: GL.Program Ship.U
+  , radarP  :: GL.Program Radar.U
   }
 
 

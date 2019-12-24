@@ -1,4 +1,4 @@
-{-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, KindSignatures, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Program
 ( Program(..)
 , createProgram
@@ -6,17 +6,21 @@ module GL.Program
 , link
 , checkProgram
   -- * Uniforms
+, (:::)(..)
 , Var(..)
 , setUniformValue
 , HasUniform
+, Rec(..)
 ) where
 
 import Control.Effect.Finally
 import Control.Monad.IO.Class.Lift
 import Data.DSL
 import Data.Foldable (for_)
+import Data.Functor.Identity
 import Data.Proxy
 import qualified Foreign.C.String.Lift as C
+import GHC.Records
 import GHC.Stack
 import GHC.TypeLits
 import GL.Error
@@ -25,7 +29,7 @@ import GL.Uniform
 import Graphics.GL.Core41
 import Graphics.GL.Types
 
-newtype Program (ty :: Context) = Program { unProgram :: GLuint }
+newtype Program (ty :: (* -> *) -> *) = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)
 
 createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m (Program ty)
@@ -52,10 +56,25 @@ newtype Var (name :: Symbol) t = Var t
 
 setUniformValue :: forall name t ty m sig . (HasUniform name t ty, Has (Lift IO) sig m, HasCallStack) => Program ty -> Var name t -> m ()
 setUniformValue program (Var v) = do
-  location <- checkingGLError . runLiftIO $ C.withCString (symbolVal (Proxy :: Proxy name)) (glGetUniformLocation (unProgram program))
+  location <- checkingGLError . runLiftIO $ C.withCString (symbolVal (Proxy @name)) (glGetUniformLocation (unProgram program))
   checkingGLError $ uniform location v
 
 
-class (KnownSymbol sym, Uniform t) => HasUniform (sym :: Symbol) t (tys :: Context) | sym tys -> t
-instance {-# OVERLAPPABLE #-} (KnownSymbol sym, Uniform t) => HasUniform sym t (sym '::: t ': tys)
-instance {-# OVERLAPPABLE #-} HasUniform sym t tys => HasUniform sym t (ty ': tys)
+type HasUniform sym t ty = (KnownSymbol sym, Uniform t, HasField sym (ty Identity) (Identity t))
+
+
+data Rec (ts :: Context) (v :: * -> *) where
+  (:.) :: v t -> Rec ts v -> Rec (n '::: t ': ts) v
+  Nil :: Rec '[] v
+
+infixr 4 :.
+
+
+instance {-# OVERLAPPABLE #-}
+         HasField (sym :: Symbol) (Rec (sym '::: t ': tys) f) (f t) where
+  getField (h :. _) = h
+
+instance {-# OVERLAPPABLE #-}
+         HasField sym (Rec tys f) (f t)
+      => HasField (sym :: Symbol) (Rec (other ': tys) f) (f t) where
+  getField (_ :. t) = getField @sym t

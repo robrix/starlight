@@ -1,13 +1,12 @@
 {-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Shader.DSL
-( Prog(..)
-, progShaders
-, Shader
+( Shader(..)
+, None(..)
+, shaderSources
 , Stmt
 , Expr
 , Ref
 , Prj
-, main
 , let'
 , vec2
 , vec3
@@ -33,15 +32,10 @@ module GL.Shader.DSL
 , _a
 , (^*)
 , (!*)
-, renderShader
 , renderStmt
 , renderExpr
 , GLSLType(..)
-, Uniforms(..)
-, Inputs(..)
-, Outputs(..)
   -- * Re-exports
-, (:::)(..)
 , Type(..)
 , Colour
 , M33
@@ -54,11 +48,9 @@ module GL.Shader.DSL
 
 import Control.Monad ((<=<), ap, liftM)
 import qualified Data.Coerce as C
-import Data.DSL
 import Data.Proxy
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.String
-import GHC.TypeLits
 import GL.Shader (Type(..))
 import Linear.Affine (Point(..))
 import Linear.Matrix (M33)
@@ -69,23 +61,21 @@ import Linear.V4 (V4(..))
 import UI.Colour (Colour)
 import Unit.Angle
 
-data Prog (u :: Context) (i :: Context) (o :: Context) where
-  V :: Shader 'Vertex   u i o -> Prog u' o o' -> Prog u' i o'
-  F :: Shader 'Fragment u i o -> Prog u' o o' -> Prog u' i o'
-  Nil :: Prog u i o
+data Shader (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) where
+  V :: (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'
+  F :: (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'
+  Nil :: Shader u i o
 
-progShaders :: Prog u i o -> [(Type, String)]
-progShaders = \case
-  V s k -> (Vertex,   renderString (layoutPretty defaultLayoutOptions (renderShader s))) : progShaders k
-  F s k -> (Fragment, renderString (layoutPretty defaultLayoutOptions (renderShader s))) : progShaders k
+data None (v :: * -> *) = None
+
+shaderSources :: Shader u i o -> [(Type, String)]
+shaderSources = \case
+  V s k -> (Vertex,   renderString (layoutPretty defaultLayoutOptions (renderShader s))) : shaderSources k
+  F s k -> (Fragment, renderString (layoutPretty defaultLayoutOptions (renderShader s))) : shaderSources k
   Nil -> []
-
-
-data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
-  Uniform :: (KnownSymbol n, GLSLType t) => Shader k u i o -> Shader k (n '::: t ': u) i o
-  Input   :: (KnownSymbol n, GLSLType t) => Shader k u i o -> Shader k u (n '::: t ': i) o
-  Output  :: (KnownSymbol n, GLSLType t) => Shader k u i o -> Shader k u i (n '::: t ': o)
-  Main    :: Stmt k () -> Shader k u i o
+  where
+  renderShader f
+    =  pretty "#version 410" <> hardline
 
 
 data Stmt (k :: Type) a where
@@ -205,10 +195,6 @@ newtype Ref (k :: Type) t = Ref String
 newtype Prj s t = Prj String
 
 
-main :: Stmt k () -> Shader k u i o
-main = Main
-
-
 let' :: GLSLType a => String -> Expr k a -> Stmt k (Expr k a)
 let' n v = Let n v pure
 
@@ -303,31 +289,6 @@ infixl 7 ^*
 infixl 7 !*
 
 
-renderShader :: Shader k u i o -> Doc ()
-renderShader s = pretty "#version 410" <> hardline <> go s where
-  go :: Shader k u i o -> Doc ()
-  go = \case
-    s@(Uniform k)
-      -> pretty "uniform" <+> renderTypeOf (typeOf (uniformsOf s)) <+> pretty (symbolVal (nameOf (uniformsOf s))) <> pretty ';' <> hardline
-      <> go k
-    s@(Input k)
-      -> pretty "in" <+> renderTypeOf (typeOf (inputsOf s)) <+> pretty (symbolVal (nameOf (inputsOf s))) <> pretty ';' <> hardline
-      <> go k
-    s@(Output k)
-      -> pretty "out" <+> renderTypeOf (typeOf (outputsOf s)) <+> pretty (symbolVal (nameOf (outputsOf s))) <> pretty ';' <> hardline
-      <> go k
-    Main s -> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt s <> line))
-  uniformsOf :: Shader k u i o -> Proxy u
-  uniformsOf _ = Proxy
-  inputsOf :: Shader k u i o -> Proxy i
-  inputsOf _ = Proxy
-  outputsOf :: Shader k u i o -> Proxy o
-  outputsOf _ = Proxy
-  typeOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy t
-  typeOf _ = Proxy
-  nameOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy n
-  nameOf _ = Proxy
-
 renderStmt :: Stmt k a -> Doc ()
 renderStmt = \case
   Pure _ -> mempty
@@ -410,33 +371,3 @@ instance GLSLType (V3 (V3 Float)) where
 
 instance GLSLType (V4 Float) where
   renderTypeOf _ = pretty "vec4"
-
-
-class Uniforms k u i o a | k u i o -> a where
-  uniforms :: a -> Shader k u i o
-
-instance Uniforms k '[] i o (Shader k '[] i o) where
-  uniforms = id
-
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Uniforms k us is os a) => Uniforms k (n '::: t ': us) is os (Expr k t -> a) where
-  uniforms f = Uniform (uniforms (f (Var (symbolVal (Proxy @n)))))
-
-
-class Inputs k u i o a | k u i o -> a where
-  inputs :: a -> Shader k u i o
-
-instance Inputs k u '[] o (Shader k u '[] o) where
-  inputs = id
-
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Inputs k '[] is os a) => Inputs k '[] (n '::: t ': is) os (Expr k t -> a) where
-  inputs f = Input (inputs (f (Var (symbolVal (Proxy @n)))))
-
-
-class Outputs k u i o a | k u i o -> a where
-  outputs :: a -> Shader k u i o
-
-instance Outputs k u i '[] (Shader k u i '[]) where
-  outputs = id
-
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Outputs k '[] '[] os a) => Outputs k '[] '[] (n '::: t ': os) (Ref k t -> a) where
-  outputs f = Output (outputs (f (Ref (symbolVal (Proxy @n)))))

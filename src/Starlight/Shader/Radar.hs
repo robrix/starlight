@@ -1,36 +1,33 @@
-{-# LANGUAGE DataKinds, TypeOperators #-}
+{-# LANGUAGE DeriveGeneric, NamedFieldPuns #-}
 module Starlight.Shader.Radar
-( program
-, vertex
-, fragment
+( shader
+, U(..)
 ) where
 
+import GHC.Generics (Generic)
 import GL.Shader.DSL
 import Unit.Angle (Radians(..))
 
-program :: Prog
-  '[ "matrix"     '::: M33 Float
-   , "angle"      '::: Radians Float
-   , "sweep"      '::: Radians Float
-   , "colour"     '::: Colour Float ]
-  '[ "n"          '::: Float ]
-  '[ "fragColour" '::: Colour Float ]
-program = V vertex $ F fragment Nil
+shader :: Shader U I O
+shader = V vertex $ F fragment Nil where
+  vertex U { matrix, angle, sweep } I { n } None = do
+    angle <- let' "angle" (coerce angle + n * coerce sweep)
+    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) ^* 150)
+    gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
 
-vertex :: Shader 'Vertex
-  '[ "matrix" '::: M33 Float
-   , "angle"  '::: Radians Float
-   , "sweep"  '::: Radians Float ]
-  '[ "n"      '::: Float ]
-  '[]
-vertex = uniforms $ \ matrix angle sweep -> inputs $ \ n -> main $ do
-  angle <- let' "angle" (coerce angle + n * coerce sweep)
-  pos   <- let' "pos"   (vec2 (cos angle) (sin angle) ^* 150)
-  gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
+  fragment U { colour } None O { fragColour } = fragColour .= colour
 
-fragment :: Shader 'Fragment
-  '[ "colour"     '::: Colour Float ]
-  '[]
-  '[ "fragColour" '::: Colour Float ]
-fragment = uniforms $ \ colour -> outputs $ \ fragColour -> main $
-  fragColour .= colour
+
+data U v = U
+  { matrix :: v (M33 Float)
+  , angle  :: v (Radians Float)
+  , sweep  :: v (Radians Float)
+  , colour :: v (Colour Float)
+  }
+  deriving (Generic)
+
+newtype I v = I { n :: v Float }
+  deriving (Generic)
+
+newtype O v = O { fragColour :: v (Colour Float) }
+  deriving (Generic)

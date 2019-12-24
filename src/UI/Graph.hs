@@ -27,15 +27,8 @@ data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
   , array     :: !(Array (V2 Float))
-  , points    :: !(GL.Program
-    '[ "matrix"    '::: M33 Float
-     , "pointSize" '::: Float
-     , "colour"    '::: V4 Float
-     ])
-  , lines     :: !(GL.Program
-    '[ "matrix"    '::: M33 Float
-     , "colour"    '::: V4 Float
-     ])
+  , points    :: !(GL.Program Points.U)
+  , lines     :: !(GL.Program Lines.U)
   , pointSize :: !Float
   , count     :: !Int
   }

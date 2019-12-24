@@ -1,29 +1,29 @@
-{-# LANGUAGE DataKinds, TypeOperators #-}
+{-# LANGUAGE DeriveGeneric, NamedFieldPuns #-}
 module Starlight.Shader.Ship
-( program
-, vertex
-, fragment
+( shader
+, U(..)
 ) where
 
+import GHC.Generics (Generic)
 import GL.Shader.DSL
 
-program :: Prog
-  '[ "matrix"     '::: M33 Float
-   , "colour"     '::: Colour Float ]
-  '[ "position2"  '::: V2 Float ]
-  '[ "fragColour" '::: Colour Float ]
-program = V vertex $ F fragment Nil
+shader :: Shader U I O
+shader = V vertex $ F fragment Nil where
+  vertex U { matrix } I { pos } None =
+    gl_Position .= vec4 (matrix !* vec3 pos 1) 1
 
-vertex :: Shader 'Vertex
-  '[ "matrix"    '::: M33 Float ]
-  '[ "position2" '::: V2 Float ]
-  '[]
-vertex = uniforms $ \ matrix -> inputs $ \ pos -> main $
-  gl_Position .= vec4 (matrix !* vec3 pos 1) 1
+  fragment U { colour } None O { fragColour } =
+    fragColour .= colour
 
-fragment :: Shader 'Fragment
-  '[ "colour"     '::: Colour Float ]
-  '[]
-  '[ "fragColour" '::: Colour Float ]
-fragment = uniforms $ \ colour -> outputs $ \ fragColour -> main $
-  fragColour .= colour
+
+data U v = U
+  { matrix    :: v (M33 Float)
+  , colour    :: v (Colour Float)
+  }
+  deriving (Generic)
+
+newtype I v = I { pos :: v (V2 Float) }
+  deriving (Generic)
+
+newtype O v = O { fragColour :: v (Colour Float) }
+  deriving (Generic)

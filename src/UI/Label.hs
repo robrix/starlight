@@ -38,13 +38,13 @@ import UI.Font
 import UI.Glyph (Instance(..), Run(..), geometry)
 
 data Label = Label
-  { textP   :: !(GL.Program
-    '[ "rect"    '::: V4 Float
-     , "sampler" '::: TextureUnit
-     , "colour"  '::: V4 Float ])
-  , glyphP  :: !(GL.Program
-    '[ "matrix3" '::: M33 Float
-     , "colour"  '::: V4 Float ])
+  { textP   :: !(GL.Program (Rec
+    [ "rect"    '::: V4 Float
+    , "sampler" '::: TextureUnit
+    , "colour"  '::: V4 Float ]))
+  , glyphP  :: !(GL.Program (Rec
+    [ "matrix3" '::: M33 Float
+    , "colour"  '::: V4 Float ]))
   , colour  :: !(Colour Float)
   , bcolour :: !(Maybe (Colour Float))
   , texture :: !(Texture 'Texture2D)

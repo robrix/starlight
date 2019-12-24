@@ -18,7 +18,7 @@ import Data.Time.Clock (UTCTime)
 import Data.Traversable (for)
 import GL.Effect.Program
 import GL.Shader
-import GL.Shader.DSL (progShaders)
+import GL.Shader.DSL (shaderSources)
 import qualified GL.Program as GL
 import System.Directory
 
@@ -32,7 +32,7 @@ instance (Has Finally sig m, Has (Lift IO) sig m, Effect sig) => Algebra (Progra
   alg = \case
     L (Build' p k) -> do
       program <- GL.createProgram
-      let s = progShaders p
+      let s = shaderSources p
       shaders <- for s $ \ (type', source) -> do
         shader <- createShader type'
         compile source shader
