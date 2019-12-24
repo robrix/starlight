@@ -22,6 +22,7 @@ import Linear.V4
 import Linear.Vector
 import System.FilePath
 import UI.Colour
+import qualified UI.Graph.Shader as Shader
 
 data Graph = Graph
   { matrix    :: !(M33 Float)
@@ -53,8 +54,7 @@ mkGraph f n from to = do
         !*! translated (negated minXY)
       colour = white
   array <- loadVertices vertices
-  points <- build
-    [(Vertex, "src" </> "points-vertex.glsl"), (Fragment, "src" </> "points-fragment.glsl")]
+  points <- build' Shader.points
   lines <- build
     [(Vertex, "src" </> "lines-vertex.glsl"), (Fragment, "src" </> "lines-fragment.glsl")]
 
