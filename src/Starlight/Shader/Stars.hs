@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveAnyClass, DeriveGeneric, NamedFieldPuns, TypeApplications #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, NamedFieldPuns, TypeApplications #-}
 module Starlight.Shader.Stars
 ( shader
 , U(..)
@@ -18,8 +18,8 @@ shader = V vertex $ F fragment Nil where
       uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
       dir <- let' "dir" $ vec3 (uv ^* zoom) 1 ^* 0.5
       origin <- let' "origin" $ vec3 (coerce origin ^* 0.05) 1
-      s <- var "s" (0.1 :: Expr 'Fragment Float)
-      fade <- var "fade" (0.5 :: Expr 'Fragment Float)
+      s <- var "s" 0.1
+      fade <- var "fade" 0.5
       v <- var "v" $ vec3 (vec2 0 0) 0
       r <- var @Int "r" 0
       while (get r `lt` volsteps) $ do
