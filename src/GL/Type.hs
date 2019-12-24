@@ -1,10 +1,14 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module GL.Type
 ( Type(..)
 ) where
 
+import           Data.Proxy
 import qualified Foreign.Storable as S
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
+import           Linear.V2
 
 class S.Storable n => Type n where
   glType :: proxy n -> GLenum
@@ -17,3 +21,6 @@ instance Type Double where
 
 instance Type Int where
   glType _ = GL_INT
+
+instance Type a => Type (V2 a) where
+  glType _ = glType (Proxy @a)
