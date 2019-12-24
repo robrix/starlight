@@ -408,33 +408,57 @@ class Vars t where
   default makeVars :: (Generic (t v), GVars v t (Rep (t v))) => (forall a . String -> v a) -> t v
   makeVars f = to (gmakeVars @_ @t f)
 
+  foldVars :: Monoid b => (forall a . v a -> b) -> t v -> b
+  default foldVars :: (Generic (t v), GVars v t (Rep (t v)), Monoid b) => (forall a . v a -> b) -> t v -> b
+  foldVars f = gfoldVars @_ @t f . from
+
 instance (KnownSymbol n, Vars (GL.Rec ts)) => Vars (GL.Rec (n 'GL.::: t ': ts)) where
   makeVars f = f (symbolVal (Proxy @n)) GL.:. makeVars f
 
+  foldVars f (h GL.:. t) = f h <> foldVars f t
+
 instance Vars (GL.Rec '[]) where
   makeVars _ = GL.Nil
+
+  foldVars _ GL.Nil = mempty
 
 
 class GVars v t f where
   gmakeVars :: (forall a . String -> v a) -> f (t v)
 
+  gfoldVars :: Monoid b => (forall a . v a -> b) -> f (t v) -> b
+
 instance GVars v t f => GVars v t (M1 D d f) where
   gmakeVars f = M1 $ gmakeVars f
+
+  gfoldVars f = gfoldVars f . unM1
 
 instance GVars v t f => GVars v t (M1 C c f) where
   gmakeVars f = M1 $ gmakeVars f
 
+  gfoldVars f = gfoldVars f . unM1
+
 instance GVars v t U1 where
   gmakeVars _ = U1
+
+  gfoldVars _ _ = mempty
 
 instance (GVars v t f, GVars v t g) => GVars v t (f :*: g) where
   gmakeVars f = gmakeVars f :*: gmakeVars f
 
+  gfoldVars f (l :*: r) = gfoldVars f l <> gfoldVars f r
+
 instance (GVar v t f, Selector s) => GVars v t (M1 S s f) where
   gmakeVars f = fix $ \ x -> M1 (gmakeVar f (selName x))
+
+  gfoldVars f = gfoldVar f . unM1
 
 class GVar v t f where
   gmakeVar :: (forall a . String -> v a) -> String -> f (t v)
 
+  gfoldVar :: Monoid b => (forall a . v a -> b) -> f (t v) -> b
+
 instance GVar v t (K1 R (v a)) where
   gmakeVar f s = K1 (f s)
+
+  gfoldVar f = f . unK1
