@@ -329,17 +329,17 @@ iff c t e = If c t e (pure ())
 while :: Expr k Bool -> Stmt k () -> Stmt k ()
 while c t = While c t (pure ())
 
-eq :: Expr k Float -> Expr k Float -> Expr k Bool
+eq :: Expr k a -> Expr k a -> Expr k Bool
 eq = Eq
 
 infix 4 `eq`
 
-lt :: Expr k Float -> Expr k Float -> Expr k Bool
+lt :: Expr k a -> Expr k a -> Expr k Bool
 lt = Lt
 
 infix 4 `lt`
 
-gt :: Expr k Float -> Expr k Float -> Expr k Bool
+gt :: Expr k a -> Expr k a -> Expr k Bool
 gt = Gt
 
 infix 4 `gt`
