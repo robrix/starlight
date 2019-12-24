@@ -52,7 +52,6 @@ import Linear.Matrix (M33)
 import Linear.V2 (V2(..))
 import Linear.V3 (V3(..))
 import Linear.V4 (V4(..))
-import UI.Colour (Colour)
 import Unit.Angle
 
 data Prog (u :: Context) (i :: Context) (o :: Context) where
@@ -380,33 +379,6 @@ instance GLSLType (V3 (V3 Float)) where
 
 instance GLSLType (V4 Float) where
   renderTypeOf _ = pretty "vec4"
-
-
-_pointsVertex
-  :: Shader
-    'Vertex
-    '[ "matrix" '::: M33 Float
-     , "pointSize" '::: Float
-     ]
-    '[ "pos" '::: V2 Float ]
-    '[]
-_pointsVertex = uniforms $ \ matrix pointSize -> inputs $ \ pos -> main $ do
-  gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
-  gl_PointSize .= pointSize
-
-_pointsFragment
-  :: Shader
-    'Fragment
-    '[ "colour"     '::: Colour Float ]
-    '[]
-    '[ "fragColour" '::: Colour Float ]
-_pointsFragment = uniforms $ \ colour -> outputs $ \ fragColour -> main $ do
-  p <- let' "p" (gl_PointCoord - vec2 0.5 0.5)
-  iff (len p `gt` 1)
-    discard
-    (do
-      mag <- let' "mag" (len p * 2)
-      fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
 
 
 class Uniforms k u i o a | k u i o -> a where
