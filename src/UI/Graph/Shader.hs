@@ -22,8 +22,8 @@ pointsFragment :: Shader 'Fragment
   '[ "fragColour" '::: Colour Float ]
 pointsFragment = uniforms $ \ colour -> outputs $ \ fragColour -> main $ do
   p <- let' "p" (gl_PointCoord - vec2 0.5 0.5)
-  iff (len p `gt` 1)
+  iff (norm p `gt` 1)
     discard
     (do
-      mag <- let' "mag" (len p * 2)
+      mag <- let' "mag" (norm p * 2)
       fragColour .= vec4 (colour ^. _xyz) (1 - mag * mag * mag / 2))
