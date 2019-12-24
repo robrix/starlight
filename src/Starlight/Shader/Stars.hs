@@ -27,7 +27,8 @@ fragment = uniforms $ \ resolution origin zoom -> outputs $ \ fragColour -> main
   s <- let' "s" (0.1 :: Expr 'Fragment Float)
   fade <- let' "fade" (0.5 :: Expr 'Fragment Float)
   v <- let' "v" 0
-  fragColour .= vec4 (v ^* 0.01) 1
+  mag <- let' "mag" (norm v)
+  fragColour .= vec4 (lerp saturation (vec3 (vec2 mag mag) mag) v ^* 0.01) 1
   where
   iterations = 17
   formuparam = 0.53
