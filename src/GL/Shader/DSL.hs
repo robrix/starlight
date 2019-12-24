@@ -80,7 +80,7 @@ shaderSources = \case
   where
   renderShader f
     =  pretty "#version 410" <> hardline
-    <> renderStmt (f (makeVars Var) (makeVars Var) (makeVars Ref))
+    <> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt (f (makeVars Var) (makeVars Var) (makeVars Ref)) <> line))
   -- renderShader :: Shader k u i o -> Doc ()
   -- renderShader s = pretty "#version 410" <> hardline <> go s where
   --   go :: Shader k u i o -> Doc ()
