@@ -21,10 +21,9 @@ import           Geometry.Rect
 import           GHC.Stack
 import           GL.Array
 import           GL.Buffer
-import           GL.Effect.Program
 import           GL.Framebuffer as GL
 import           GL.Object
-import qualified GL.Program as GL
+import           GL.Program
 import           GL.Texture
 import           GL.TextureUnit
 import           Graphics.GL.Core41
@@ -43,8 +42,8 @@ import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 
 data Label = Label
-  { textP   :: !(GL.Program Text.U)
-  , glyphP  :: !(GL.Program Glyph.U)
+  { textP   :: !(Program Text.U)
+  , glyphP  :: !(Program Glyph.U)
   , colour  :: !(Colour Float)
   , bcolour :: !(Maybe (Colour Float))
   , texture :: !(Texture 'Texture2D)
@@ -61,7 +60,6 @@ label
   :: ( HasCallStack
      , Has Finally sig m
      , Has (Lift IO) sig m
-     , Has Program sig m
      , Has Window.Window sig m
      )
   => m Label
@@ -99,8 +97,8 @@ label = do
 
 setLabel
   :: ( HasCallStack
+     , Has Finally sig m
      , Has (Lift IO) sig m
-     , Has Program sig m
      )
   => Label
   -> Font
@@ -164,8 +162,8 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
 
 drawLabel
   :: ( HasCallStack
+     , Has Finally sig m
      , Has (Lift IO) sig m
-     , Has Program sig m
      )
   => Label
   -> m ()

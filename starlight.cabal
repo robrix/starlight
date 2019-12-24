@@ -54,8 +54,6 @@ library
     Geometry.Triangle
     GL.Array
     GL.Buffer
-    GL.Carrier.Program
-    GL.Effect.Program
     GL.Enum
     GL.Error
     GL.Framebuffer

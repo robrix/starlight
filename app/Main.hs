@@ -29,9 +29,8 @@ import           Geometry.Circle
 import           Geometry.Rect
 import           GHC.Stack
 import           GL.Array
-import           GL.Carrier.Program
-import           GL.Framebuffer as GL
-import qualified GL.Program as GL
+import           GL.Framebuffer
+import           GL.Program
 import           Graphics.GL.Core41
 import           Lens.Micro (Lens', lens, (.~), (^.))
 import           Linear.Affine
@@ -64,8 +63,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
   font <- readFontOfSize ("fonts" </> "DejaVuSans.ttf") 36
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
-    runProgram
-    . evalState @Input mempty
+    evalState @Input mempty
     . evalState PlayerState
       { position = P (V2 1700 0)
       , velocity = Delta (P (V2 0 20))
@@ -188,8 +186,8 @@ easeInOutCubic t
   | otherwise = (t - 1) * (2 * t - 2) ** 2 + 1
 
 draw
-  :: ( Has (Lift IO) sig m
-     , Has Program sig m
+  :: ( Has Finally sig m
+     , Has (Lift IO) sig m
      , Has Window.Window sig m
      )
   => DrawState
@@ -293,9 +291,9 @@ data DrawState = DrawState
   , circleA :: Array (V2 Float)
   , shipA   :: Array (V3 Float)
   , radarA  :: Array (V1 Float)
-  , starsP  :: GL.Program Stars.U
-  , shipP   :: GL.Program Ship.U
-  , radarP  :: GL.Program Radar.U
+  , starsP  :: Program Stars.U
+  , shipP   :: Program Ship.U
+  , radarP  :: Program Radar.U
   }
 
 
