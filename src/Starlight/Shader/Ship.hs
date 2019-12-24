@@ -12,9 +12,7 @@ program :: Prog
    , "colour" '::: Colour Float ]
   '[ "position2" '::: V2 Float ]
   '[ "fragColour" '::: Colour Float ]
-program
-  =    Stage vertex
-  :>>> Stage fragment
+program = V vertex $ F fragment Nil
 
 vertex :: Shader 'Vertex
   '[ "matrix" '::: M33 Float ]

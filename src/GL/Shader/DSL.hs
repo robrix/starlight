@@ -56,7 +56,7 @@ import Data.Proxy
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.String
 import GHC.TypeLits
-import GL.Shader (Type(..), KnownType(..))
+import GL.Shader (Type(..))
 import Linear.Matrix (M33)
 import Linear.V1 (V1(..))
 import Linear.V2 (V2(..))
@@ -66,18 +66,15 @@ import UI.Colour (Colour)
 import Unit.Angle
 
 data Prog (u :: Context) (i :: Context) (o :: Context) where
-  Stage :: KnownType k => Shader k u i o -> Prog u i o
-  (:>>>) :: Prog u1 i1 o1 -> Prog u2 o1 o2 -> Prog u3 i1 o2
-
-infixr 1 :>>>
+  V :: Shader 'Vertex u i o -> Prog u' o o' -> Prog u' i o'
+  F :: Shader 'Fragment u i o -> Prog u' o o' -> Prog u' i o'
+  Nil :: Prog u i o
 
 progShaders :: Prog u i o -> [(Type, String)]
 progShaders = \case
-  Stage s -> [(ty s, renderString (layoutPretty defaultLayoutOptions (renderShader s)) )]
-  a :>>> b -> progShaders a <> progShaders b
-  where
-  ty :: forall k u i o . KnownType k => Shader k u i o -> Type
-  ty _ = typeVal (Proxy @k)
+  V s k -> (Vertex,   renderString (layoutPretty defaultLayoutOptions (renderShader s))) : progShaders k
+  F s k -> (Fragment, renderString (layoutPretty defaultLayoutOptions (renderShader s))) : progShaders k
+  Nil -> []
 
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
