@@ -27,6 +27,7 @@ module GL.Shader.DSL
 , gl_PointCoord
 , discard
 , iff
+, while
 , eq
 , lt
 , gt
@@ -114,6 +115,7 @@ data Stmt (k :: Type) a where
   Let :: GLSLType b => String -> Expr k b -> (Expr k b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
+  While :: Expr k Bool -> Stmt k () -> Stmt k a -> Stmt k a
   (:.=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
@@ -131,6 +133,7 @@ instance Monad (Stmt k) where
   Let n v   k >>= f = Let n v (f <=< k)
   Discard   k >>= f = Discard (k >>= f)
   If c t e  k >>= f = If c t e (k >>= f)
+  While c t k >>= f = While c t (k >>= f)
   (:.=) r v k >>= f = (r :.= v) (k >>= f)
   Stmt a    k >>= f = Stmt a (f <=< k)
 
@@ -299,6 +302,9 @@ discard = Discard (pure ())
 iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
 iff c t e = If c t e (pure ())
 
+while :: Expr k Bool -> Stmt k () -> Stmt k ()
+while c t = While c t (pure ())
+
 eq :: Expr k Float -> Expr k Float -> Expr k Bool
 eq = Eq
 
@@ -379,6 +385,9 @@ renderStmt = \case
     <> renderStmt k
   If c t e k
     -> pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
+    <> renderStmt k
+  While c t k
+    -> pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
     <> renderStmt k
   (:.=) (Ref r) v k
     -> pretty r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
