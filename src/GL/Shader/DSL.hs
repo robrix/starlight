@@ -8,6 +8,7 @@ module GL.Shader.DSL
 , Ref
 , Prj
 , let'
+, var
 , vec2
 , vec3
 , vec4
@@ -241,6 +242,9 @@ newtype Prj s t = Prj String
 
 let' :: GLSLType a => String -> Expr k a -> Stmt k (Expr k a)
 let' n v = Let n v (pure . Var . getConst)
+
+var :: GLSLType a => String -> Expr k a -> Stmt k (Ref k a)
+var n v = Let n v (pure . Ref . getConst)
 
 
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
