@@ -20,7 +20,7 @@ shader = V vertex $ F fragment Nil where
       origin <- let' "origin" $ vec3 (coerce origin ^* 0.05) 1
       s <- var "s" (0.1 :: Expr 'Fragment Float)
       fade <- var "fade" (0.5 :: Expr 'Fragment Float)
-      v <- var "v" 0
+      v <- var "v" $ vec3 (vec2 0 0) 0
       mag <- let' "mag" (norm (get v))
       r <- var "r" 0
       while (get r `lt` volsteps) $ do
