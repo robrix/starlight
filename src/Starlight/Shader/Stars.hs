@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, TypeOperators #-}
 module Starlight.Shader.Stars
 ( vertex
+, fragment
 ) where
 
 import GL.Shader.DSL
