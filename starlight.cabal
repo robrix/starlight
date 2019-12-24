@@ -87,6 +87,7 @@ library
     UI.Graph.Points
     UI.Label
     UI.Label.Glyph
+    UI.Label.Text
     UI.Path
     UI.Window
     Unit.Angle
