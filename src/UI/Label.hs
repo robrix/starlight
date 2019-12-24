@@ -70,13 +70,8 @@ label = do
   fbuffer <- gen1
 
   glyphP <- build
-    @'[ "matrix3" '::: M33 Float
-      , "colour"  '::: V4 Float ]
     [(Vertex, "src" </> "glyph-vertex.glsl"), (Fragment, "src" </> "glyph-fragment.glsl")]
   textP  <- build
-    @'[ "rect"    '::: V4 Float
-      , "sampler" '::: TextureUnit
-      , "colour"  '::: V4 Float ]
     [(Vertex, "src" </> "text-vertex.glsl"),  (Fragment, "src" </> "text-fragment.glsl")]
 
   glyphA <- gen1
