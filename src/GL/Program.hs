@@ -98,7 +98,7 @@ use p (ProgramT m) = do
   a <- runReader p m
   a <$ useProgram (Program 0)
 
-set :: (DSL.Vars u, HasProgram u i o m, Has Finally sig m, Has (Lift IO) sig m) => u Maybe -> m ()
+set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
 set v = askProgram >>= \ p ->
   getAp (getConst (DSL.foldVars (\ s -> Const . \case
     Just v  -> Ap (setUniformValue p s v)
