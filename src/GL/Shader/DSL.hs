@@ -159,6 +159,7 @@ data Expr (k :: Type) a where
   Signum :: Expr k a -> Expr k a
   Negate :: Expr k a -> Expr k a
   Abs :: Expr k a -> Expr k a
+  FromInteger :: Integer -> Expr k a
 
   (:/) :: Expr k a -> Expr k a -> Expr k a
 
@@ -220,7 +221,7 @@ instance Num (Expr k a) where
   signum = Signum
   negate = Negate
   abs = Abs
-  fromInteger = Lit . fromInteger
+  fromInteger = FromInteger
 
 instance Fractional (Expr k a) where
   (/) = (:/)
@@ -447,6 +448,7 @@ renderExpr = parens . \case
   Signum a -> fn "signum" [renderExpr a] -- log
   Negate a -> pretty "-" <> renderExpr a
   Abs a -> fn "abs" [renderExpr a]
+  FromInteger i -> pretty i
   Exp a -> fn "exp" [renderExpr a]
   Log a -> fn "log" [renderExpr a]
   Sqrt a -> fn "sqrt" [renderExpr a]
