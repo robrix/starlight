@@ -9,6 +9,7 @@ module GL.Shader.DSL
 , Prj
 , let'
 , var
+, get
 , vec2
 , vec3
 , vec4
@@ -186,6 +187,8 @@ data Expr (k :: Type) a where
   Lt :: Expr k a -> Expr k a -> Expr k Bool
   Gt :: Expr k a -> Expr k a -> Expr k Bool
 
+  Get :: Ref k a -> Expr k a
+
   Vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
   Vec3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
   Vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
@@ -253,6 +256,10 @@ let' n v = Let n v (pure . Var . getConst)
 
 var :: GLSLType a => String -> Expr k a -> Stmt k (Ref k a)
 var n v = Let n v (pure . Ref . getConst)
+
+
+get :: Ref k a -> Expr k a
+get = Get
 
 
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
@@ -462,6 +469,7 @@ renderExpr = parens . \case
   Eq a b -> renderExpr a <+> pretty "==" <+> renderExpr b
   Lt a b -> renderExpr a <+> pretty '<' <+> renderExpr b
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
+  Get (Ref n) -> pretty n
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
   Vec3 a b -> fn "vec3" [renderExpr a, renderExpr b]
   Vec4 a b -> fn "vec4" [renderExpr a, renderExpr b]
