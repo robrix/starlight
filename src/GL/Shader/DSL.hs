@@ -431,7 +431,7 @@ renderStmt = \case
     -> pretty r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt k
   (:*=) (Ref r) v k
-    -> pretty r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
+    -> pretty r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt k
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
