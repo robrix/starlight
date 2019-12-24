@@ -21,6 +21,7 @@ module GL.Shader.DSL
 , gl_PointCoord
 , discard
 , iff
+, eq
 , lt
 , gt
 , (.=)
@@ -161,6 +162,7 @@ data Expr (k :: Type) a where
   (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
   (:!*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
 
+  Eq :: Expr k a -> Expr k a -> Expr k Bool
   Lt :: Expr k a -> Expr k a -> Expr k Bool
   Gt :: Expr k a -> Expr k a -> Expr k Bool
 
@@ -265,6 +267,11 @@ discard = Discard (pure ())
 
 iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
 iff c t e = If c t e (pure ())
+
+eq :: Expr k Float -> Expr k Float -> Expr k Bool
+eq = Eq
+
+infix 4 `eq`
 
 lt :: Expr k Float -> Expr k Float -> Expr k Bool
 lt = Lt
@@ -376,6 +383,7 @@ renderExpr = parens . \case
   a :^. Prj s -> renderExpr a <> pretty '.' <> pretty s
   a :^* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   a :!* b -> renderExpr a <+> pretty '*' <+> renderExpr b
+  Eq a b -> renderExpr a <+> pretty "==" <+> renderExpr b
   Lt a b -> renderExpr a <+> pretty '<' <+> renderExpr b
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
