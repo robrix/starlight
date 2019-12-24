@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Shader.DSL
 ( Prog(..)
+, progShaders
 , Shader
 , Stmt
 , Expr
@@ -53,6 +54,7 @@ import qualified Data.Coerce as C
 import Data.DSL
 import Data.Proxy
 import Data.Text.Prettyprint.Doc
+import Data.Text.Prettyprint.Doc.Render.String
 import GHC.TypeLits
 import GL.Shader (Type(..), KnownType(..))
 import Linear.Matrix (M33)
@@ -68,6 +70,14 @@ data Prog (u :: Context) (i :: Context) (o :: Context) where
   (:>>>) :: Prog u1 i1 o1 -> Prog u2 o1 o2 -> Prog u3 i1 o2
 
 infixr 1 :>>>
+
+progShaders :: Prog u i o -> [(Type, String)]
+progShaders = \case
+  Stage s -> [(ty s, renderString (layoutPretty defaultLayoutOptions (renderShader s)) )]
+  a :>>> b -> progShaders a <> progShaders b
+  where
+  ty :: forall k u i o . KnownType k => Shader k u i o -> Type
+  ty _ = typeVal (Proxy @k)
 
 
 data Shader (k :: Type) (u :: Context) (i :: Context) (o :: Context) where
