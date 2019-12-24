@@ -9,11 +9,11 @@ import GL.Shader.DSL
 import Unit.Angle (Radians(..))
 
 program :: Prog
-  '[ "matrix" '::: M33 Float
-   , "angle"  '::: Radians Float
-   , "sweep"  '::: Radians Float
-   , "colour" '::: Colour Float ]
-  '[ "n" '::: Float ]
+  '[ "matrix"     '::: M33 Float
+   , "angle"      '::: Radians Float
+   , "sweep"      '::: Radians Float
+   , "colour"     '::: Colour Float ]
+  '[ "n"          '::: Float ]
   '[ "fragColour" '::: Colour Float ]
 program = V vertex $ F fragment Nil
 
@@ -21,7 +21,7 @@ vertex :: Shader 'Vertex
   '[ "matrix" '::: M33 Float
    , "angle"  '::: Radians Float
    , "sweep"  '::: Radians Float ]
-  '[ "n" '::: Float ]
+  '[ "n"      '::: Float ]
   '[]
 vertex = uniforms $ \ matrix angle sweep -> inputs $ \ n -> main $ do
   angle <- let' "angle" (coerce angle + n * coerce sweep)

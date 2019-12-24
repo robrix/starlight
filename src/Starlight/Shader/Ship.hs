@@ -8,14 +8,14 @@ module Starlight.Shader.Ship
 import GL.Shader.DSL
 
 program :: Prog
-  '[ "matrix" '::: M33 Float
-   , "colour" '::: Colour Float ]
-  '[ "position2" '::: V2 Float ]
+  '[ "matrix"     '::: M33 Float
+   , "colour"     '::: Colour Float ]
+  '[ "position2"  '::: V2 Float ]
   '[ "fragColour" '::: Colour Float ]
 program = V vertex $ F fragment Nil
 
 vertex :: Shader 'Vertex
-  '[ "matrix" '::: M33 Float ]
+  '[ "matrix"    '::: M33 Float ]
   '[ "position2" '::: V2 Float ]
   '[]
 vertex = uniforms $ \ matrix -> inputs $ \ pos -> main $

@@ -8,19 +8,17 @@ module UI.Graph.Shader
 import GL.Shader.DSL
 
 points :: Prog
-  '[ "matrix"    '::: M33 Float
-   , "pointSize" '::: Float
-   , "colour"    '::: Colour Float
-   ]
-  '[ "pos" '::: V2 Float ]
+  '[ "matrix"     '::: M33 Float
+   , "pointSize"  '::: Float
+   , "colour"     '::: Colour Float ]
+  '[ "pos"        '::: V2 Float ]
   '[ "fragColour" '::: Colour Float ]
 points = V pointsVertex $ F pointsFragment Nil
 
 pointsVertex :: Shader 'Vertex
-  '[ "matrix" '::: M33 Float
-   , "pointSize" '::: Float
-   ]
-  '[ "pos" '::: V2 Float ]
+  '[ "matrix"    '::: M33 Float
+   , "pointSize" '::: Float ]
+  '[ "pos"       '::: V2 Float ]
   '[]
 pointsVertex = uniforms $ \ matrix pointSize -> inputs $ \ pos -> main $ do
   gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
