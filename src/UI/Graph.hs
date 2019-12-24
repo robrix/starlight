@@ -13,9 +13,8 @@ import           Control.Carrier.Finally
 import           Control.Monad.IO.Class.Lift
 import           Data.Interval
 import           GL.Array
-import           GL.Effect.Program
 import           GL.Object
-import qualified GL.Program as GL
+import           GL.Program
 import           Graphics.GL.Core41
 import           Lens.Micro ((^.))
 import           Linear.Exts
@@ -31,13 +30,13 @@ data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
   , array     :: !(Array (V2 Float))
-  , points    :: !(GL.Program Points.U)
-  , lines     :: !(GL.Program Lines.U)
+  , points    :: !(Program Points.U)
+  , lines     :: !(Program Lines.U)
   , pointSize :: !Float
   , count     :: !Int
   }
 
-mkGraph :: (Has Finally sig m, Has (Lift IO) sig m, Has Program sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
+mkGraph :: (Has Finally sig m, Has (Lift IO) sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
 mkGraph f n from to = do
   let vertex = V2 <*> f
       count = max n 0 + 2
@@ -55,7 +54,7 @@ mkGraph f n from to = do
 
   pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 
-drawGraph :: (Has (Lift IO) sig m, Has Program sig m) => Graph -> m ()
+drawGraph :: (Has Finally sig m, Has (Lift IO) sig m) => Graph -> m ()
 drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = do
   bind (Just array)
   runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
