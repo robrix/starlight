@@ -16,6 +16,7 @@ module GL.Shader.DSL
 , coerce
 , gl_Position
 , gl_PointSize
+, gl_FragCoord
 , gl_PointCoord
 , discard
 , iff
@@ -233,6 +234,9 @@ gl_Position = Ref "gl_Position"
 gl_PointSize :: Ref 'Vertex "gl_PointSize" Float
 gl_PointSize = Ref "gl_PointSize"
 
+
+gl_FragCoord :: Expr 'Fragment (V2 Float)
+gl_FragCoord = Var "gl_FragCoord"
 
 gl_PointCoord :: Expr 'Fragment (V2 Float)
 gl_PointCoord = Var "gl_PointCoord"
