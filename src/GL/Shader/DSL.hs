@@ -387,6 +387,9 @@ class GLSLType a where
 instance GLSLType a => GLSLType (Radians a) where
   renderTypeOf _ = renderTypeOf (Proxy @a)
 
+instance GLSLType (f a) => GLSLType (Point f a) where
+  renderTypeOf _ = renderTypeOf (Proxy @(f a))
+
 instance GLSLType Float where
   renderTypeOf _ = pretty "float"
 
