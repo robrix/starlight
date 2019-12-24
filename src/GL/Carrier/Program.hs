@@ -34,14 +34,6 @@ instance (Has Finally sig m, Has (Lift IO) sig m) => Algebra (Program :+: sig) (
         shader <$ compile source shader
       GL.link shaders program
       k program
-    L (Build s k) -> do
-      program <- GL.createProgram
-      shaders <- for s $ \ (type', path) -> do
-        shader <- createShader type'
-        source <- sendM (readFile path)
-        shader <$ compile source shader
-      GL.link shaders program
-      k program
     L (Use p m k) -> do
       GL.useProgram p
       a <- m
