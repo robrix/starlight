@@ -1,20 +1,32 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module GL.Array
 ( Array(..)
 , configureArray
 , Mode(..)
 , drawArrays
 , loadVertices
+, useArray
+, HasArray(..)
+, ArrayT(..)
 ) where
 
+import           Control.Algebra
+import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Monad.IO.Class.Lift
+import           Control.Monad.Trans.Class
 import           Data.Coerce
+import           Data.Functor.Identity
 import           Data.Interval
 import           Data.Proxy
 import           Foreign.Ptr
@@ -81,3 +93,24 @@ loadVertices vertices = do
 
   bind (Just array)
   array <$ configureArray buffer array
+
+
+useArray :: forall i m a sig . (Has Finally sig m, Has (Lift IO) sig m) => Array (i Identity) -> ArrayT i m a -> m a
+useArray p (ArrayT m) = do
+  bind (Just p)
+  a <- runReader p m
+  a <$ bind @(Array (i Identity)) Nothing
+
+
+class HasArray (i :: (* -> *) -> *) (m :: * -> *) | m -> i where
+  askArray :: m (Array (i Identity))
+
+
+newtype ArrayT (i :: (* -> *) -> *) m a = ArrayT { runArrayT :: ReaderC (Array (i Identity)) m a }
+  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
+
+instance Algebra sig m => Algebra sig (ArrayT i m) where
+  alg = ArrayT . send . handleCoercible
+
+instance Algebra sig m => HasArray i (ArrayT i m) where
+  askArray = ArrayT ask
