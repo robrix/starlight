@@ -42,6 +42,7 @@ import qualified Starlight.Body as S
 import Starlight.Input
 import qualified Starlight.Shader.Radar as Radar
 import qualified Starlight.Shader.Ship as Ship
+import qualified Starlight.Shader.Stars as Stars
 import System.FilePath
 import qualified UI.Carrier.Window as Window
 import UI.Colour
@@ -210,7 +211,11 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
   use starsP $ do
     scale <- Window.scale
     size <- Window.size
-    set $ Just (size ^* scale) :. Just (position / P size) :. Just zoomOut :. Nil
+    set $ Stars.U
+      { resolution = Just (size ^* scale)
+      , origin     = Just (position / P size)
+      , zoom       = Just zoomOut
+      }
 
     drawArrays TriangleStrip (Interval 0 4)
 
@@ -283,10 +288,7 @@ data DrawState = DrawState
   , circleA :: Array (V2 Float)
   , shipA   :: Array (V3 Float)
   , radarA  :: Array (V1 Float)
-  , starsP  :: GL.Program (Rec
-    [ "resolution" '::: V2 Float
-    , "origin"     '::: Point V2 Float
-    , "zoom"       '::: Float ])
+  , starsP  :: GL.Program Stars.U
   , shipP   :: GL.Program Ship.U
   , radarP  :: GL.Program Radar.U
   }
