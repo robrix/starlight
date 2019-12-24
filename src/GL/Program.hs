@@ -48,7 +48,7 @@ import           GL.Uniform
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
-newtype Program (ty :: (* -> *) -> *) = Program { unProgram :: GLuint }
+newtype Program (u :: (* -> *) -> *) = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)
 
 createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m (Program u)
