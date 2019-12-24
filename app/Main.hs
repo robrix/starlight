@@ -22,7 +22,7 @@ import Geometry.Circle
 import Geometry.Rect
 import GHC.Stack
 import GL.Array
-import GL.Carrier.Program.Live
+import GL.Carrier.Program
 import GL.Framebuffer as GL
 import qualified GL.Program as GL
 import Graphics.GL.Core41

@@ -55,7 +55,6 @@ library
     GL.Array
     GL.Buffer
     GL.Carrier.Program
-    GL.Carrier.Program.Live
     GL.Effect.Program
     GL.Enum
     GL.Error
