@@ -57,6 +57,7 @@ import GHC.Generics
 import GHC.TypeLits
 import qualified GL.Program as GL
 import GL.Shader (Type(..))
+import GL.TextureUnit
 import qualified GL.Uniform as GL
 import Linear.Affine (Point(..))
 import Linear.Matrix (M33)
@@ -391,6 +392,9 @@ instance GLSLType (V3 (V3 Float)) where
 
 instance GLSLType (V4 Float) where
   renderTypeOf _ = pretty "vec4"
+
+instance GLSLType TextureUnit where
+  renderTypeOf _ = pretty "sampler2D"
 
 
 class Vars t where
