@@ -13,6 +13,7 @@ module GL.Shader.DSL
 , vec4
 , norm
 , lerp
+, dFdx
 , coerce
 , gl_Position
 , gl_PointSize
@@ -172,6 +173,7 @@ data Expr (k :: Type) a where
   Vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
   Norm :: Expr k (v Float) -> Expr k Float
   Lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
+  Dfdx :: Expr k Float -> Expr k Float -> Expr k Float
 
   Coerce :: C.Coercible a b => Expr k a -> Expr k b
 
@@ -240,6 +242,9 @@ norm = Norm
 
 lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
 lerp = Lerp
+
+dFdx :: Expr k Float -> Expr k Float -> Expr k Float
+dFdx = Dfdx
 
 
 coerce :: C.Coercible a b => Expr k a -> Expr k b
@@ -395,6 +400,7 @@ renderExpr = parens . \case
   Vec4 a b -> fn "vec4" [renderExpr a, renderExpr b]
   Norm a -> fn "length" [renderExpr a]
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
+  Dfdx a b -> fn "dFdx" [renderExpr a, renderExpr b]
   Coerce a -> renderExpr a
   where
   fn n as = pretty n <> tupled as
