@@ -33,11 +33,11 @@ import           Foreign.Ptr
 import qualified Foreign.Storable as S
 import           GHC.Stack
 import           GHC.TypeLits
-import qualified GL.Buffer as GL
+import qualified GL.Buffer as B
 import           GL.Enum as GL
 import           GL.Error
 import           GL.Object
-import           GL.Scalar
+import qualified GL.Type as GL
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 import           Linear.V
@@ -53,10 +53,10 @@ instance Bind (Array n) where
   bind = checkingGLError . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: forall v n m sig . (KnownNat (Size v), Scalar n, Has (Lift IO) sig m) => GL.Buffer 'GL.Array (v n) -> Array (v n) -> m ()
+configureArray :: forall v n m sig . (KnownNat (Size v), GL.Type n, Has (Lift IO) sig m) => B.Buffer 'B.Array (v n) -> Array (v n) -> m ()
 configureArray _ _ = runLiftIO $ do
   glEnableVertexAttribArray 0
-  glVertexAttribPointer 0 (fromIntegral (natVal (Proxy @(Size v)))) (glType (Proxy @n)) GL_FALSE 0 nullPtr
+  glVertexAttribPointer 0 (fromIntegral (natVal (Proxy @(Size v)))) (GL.glType (Proxy @n)) GL_FALSE 0 nullPtr
 
 
 data Mode
@@ -88,14 +88,14 @@ drawArrays
 drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))
 
 
-loadVertices :: (KnownNat (Size v), S.Storable (v n), Scalar n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Array (v n))
+loadVertices :: (KnownNat (Size v), S.Storable (v n), GL.Type n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Array (v n))
 loadVertices vertices = do
   buffer <- gen1
   array  <- gen1
 
   bind (Just buffer)
-  GL.realloc buffer (length vertices) GL.Static GL.Draw
-  GL.copy buffer 0 vertices
+  B.realloc buffer (length vertices) B.Static B.Draw
+  B.copy buffer 0 vertices
 
   bind (Just array)
   array <$ configureArray buffer array

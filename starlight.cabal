@@ -59,11 +59,11 @@ library
     GL.Framebuffer
     GL.Object
     GL.Program
-    GL.Scalar
     GL.Shader
     GL.Shader.DSL
     GL.Texture
     GL.TextureUnit
+    GL.Type
     GL.Uniform
     Linear.Exts
     Physics.Delta

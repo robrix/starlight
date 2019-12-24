@@ -1,16 +1,16 @@
-module GL.Scalar
-( Scalar(..)
+module GL.Type
+( Type(..)
 ) where
 
 import qualified Foreign.Storable as S
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
-class (Num n, S.Storable n) => Scalar n where
+class (Num n, S.Storable n) => Type n where
   glType :: proxy n -> GLenum
 
-instance Scalar Float where
+instance Type Float where
   glType _ = GL_FLOAT
 
-instance Scalar Double where
+instance Type Double where
   glType _ = GL_DOUBLE
