@@ -36,13 +36,12 @@ import UI.Colour
 import qualified UI.Effect.Window as Window
 import UI.Font
 import UI.Glyph (Instance(..), Run(..), geometry)
+import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 
 data Label = Label
   { textP   :: !(GL.Program Text.U)
-  , glyphP  :: !(GL.Program (Rec
-    [ "matrix3" '::: M33 Float
-    , "colour"  '::: V4 Float ]))
+  , glyphP  :: !(GL.Program Glyph.U)
   , colour  :: !(Colour Float)
   , bcolour :: !(Maybe (Colour Float))
   , texture :: !(Texture 'Texture2D)
@@ -147,7 +146,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
               !*! scaled     (V3 (fontScale font) (fontScale font) 1)
               !*! translated (V2 offset 0)
               !*! translated (negated (rectMin b))
-        set $ Just matrix :. Just colour :. Nil
+        set Glyph.U { matrix3 = Just matrix, colour = Just colour }
         drawArrays Triangles range
 
   pure l { bounds } where
