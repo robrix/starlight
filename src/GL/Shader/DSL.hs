@@ -15,6 +15,7 @@ module GL.Shader.DSL
 , lerp
 , lerp2
 , dFdx
+, mod'
 , texture
 , coerce
 , gl_Position
@@ -177,6 +178,7 @@ data Expr (k :: Type) a where
   Lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Lerp2 :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Dfdx :: Expr k Float -> Expr k Float
+  Mod :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 
   Coerce :: C.Coercible a b => Expr k a -> Expr k b
@@ -252,6 +254,9 @@ lerp2 = Lerp2
 
 dFdx :: Expr k Float -> Expr k Float
 dFdx = Dfdx
+
+mod' :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
+mod' = Mod
 
 texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 texture = Texture
@@ -412,6 +417,7 @@ renderExpr = parens . \case
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Lerp2 t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Dfdx a -> fn "dFdx" [renderExpr a]
+  Mod a b -> fn "mod" [renderExpr a, renderExpr b]
   Texture a b -> fn "texture" [renderExpr a, renderExpr b]
   Coerce a -> renderExpr a
   where
