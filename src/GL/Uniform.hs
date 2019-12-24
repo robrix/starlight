@@ -18,6 +18,9 @@ import Linear.V4 as Linear
 class Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
+instance Uniform Int where
+  uniform loc = runLiftIO . glUniform1i loc . fromIntegral
+
 instance Uniform Float where
   uniform = fmap runLiftIO . glUniform1f
 
