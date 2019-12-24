@@ -97,7 +97,6 @@ library
       base
     , containers
     , directory ^>= 1.3
-    , filepath ^>= 1.4
     , fused-effects      ^>= 1
     , fused-effects-lens ^>= 1.1
     , gl
@@ -119,7 +118,7 @@ executable starlight
   build-depends:
       base
     , containers
-    , filepath
+    , filepath ^>= 1.4
     , fused-effects
     , fused-effects-lens
     , gl
