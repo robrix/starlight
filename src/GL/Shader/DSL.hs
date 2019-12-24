@@ -12,6 +12,7 @@ module GL.Shader.DSL
 , vec3
 , vec4
 , norm
+, dot
 , lerp
 , lerp2
 , dFdx
@@ -63,7 +64,7 @@ import qualified Data.Coerce as C
 import Data.Function (fix)
 import Data.Functor.Const
 import Data.Proxy
-import Data.Text.Prettyprint.Doc
+import Data.Text.Prettyprint.Doc hiding (dot)
 import Data.Text.Prettyprint.Doc.Render.String
 import GHC.Generics
 import GL.Shader (Type(..))
@@ -176,6 +177,7 @@ data Expr (k :: Type) a where
   Vec3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
   Vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
   Norm :: Expr k (v Float) -> Expr k Float
+  Dot :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Lerp2 :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Dfdx :: Expr k Float -> Expr k Float
@@ -247,6 +249,9 @@ vec4 = Vec4
 
 norm :: Expr k (v Float) -> Expr k Float
 norm = Norm
+
+dot :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
+dot = Dot
 
 lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
 lerp = Lerp
@@ -419,6 +424,7 @@ renderExpr = parens . \case
   Vec3 a b -> fn "vec3" [renderExpr a, renderExpr b]
   Vec4 a b -> fn "vec4" [renderExpr a, renderExpr b]
   Norm a -> fn "length" [renderExpr a]
+  Dot a b -> fn "dot" [renderExpr a, renderExpr b]
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Lerp2 t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Dfdx a -> fn "dFdx" [renderExpr a]
