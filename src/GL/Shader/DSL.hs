@@ -93,7 +93,7 @@ data Stmt (k :: Type) a where
   Let :: GLSLType b => String -> Expr k b -> (Expr k b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
-  (:.=) :: Ref k n b -> Expr k b -> Stmt k a -> Stmt k a
+  (:.=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
 infixr 4 :.=
@@ -200,7 +200,7 @@ instance Floating (Expr k a) where
   atanh = ATanH
 
 
-newtype Ref (k :: Type) (n :: Symbol) t = Ref String
+newtype Ref (k :: Type) t = Ref String
 
 newtype Prj s t = Prj String
 
@@ -233,10 +233,10 @@ coerce :: C.Coercible a b => Expr k a -> Expr k b
 coerce = Coerce
 
 
-gl_Position :: Ref 'Vertex "gl_Position" (V4 Float)
+gl_Position :: Ref 'Vertex (V4 Float)
 gl_Position = Ref "gl_Position"
 
-gl_PointSize :: Ref 'Vertex "gl_PointSize" Float
+gl_PointSize :: Ref 'Vertex Float
 gl_PointSize = Ref "gl_PointSize"
 
 
@@ -259,7 +259,7 @@ gt = Gt
 infix 4 `gt`
 
 
-(.=) :: Ref k n a -> Expr k a -> Stmt k ()
+(.=) :: Ref k a -> Expr k a -> Stmt k ()
 r .= v = (r :.= v) (pure ())
 
 infixr 4 .=
@@ -432,11 +432,11 @@ instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Inputs k '[] is os a) 
   inputs f = Input (inputs (f (Var (symbolVal (Proxy @n)))))
 
 
-class Outputs k u i o a | k u i o -> a, a -> o where
+class Outputs k u i o a | k u i o -> a where
   outputs :: a -> Shader k u i o
 
 instance Outputs k u i '[] (Shader k u i '[]) where
   outputs = id
 
-instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Outputs k '[] '[] os a) => Outputs k '[] '[] (n '::: t ': os) (Ref k n t -> a) where
+instance {-# OVERLAPPABLE #-} (KnownSymbol n, GLSLType t, Outputs k '[] '[] os a) => Outputs k '[] '[] (n '::: t ': os) (Ref k t -> a) where
   outputs f = Output (outputs (f (Ref (symbolVal (Proxy @n)))))
