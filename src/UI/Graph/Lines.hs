@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, NamedFieldPuns #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
 module UI.Graph.Lines
 ( shader
 , U(..)
@@ -20,10 +20,10 @@ data U v = U
   { matrix :: v (M33 Float)
   , colour :: v (Colour Float)
   }
-  deriving (Generic)
+  deriving (Generic, Vars)
 
 newtype I v = I { pos :: v (V2 Float) }
-  deriving (Generic)
+  deriving (Generic, Vars)
 
 newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
+  deriving (Generic, Vars)

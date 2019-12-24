@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, NamedFieldPuns #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
 module Starlight.Shader.Stars
 ( shader
 , U(..)
@@ -62,10 +62,10 @@ data U v = U
   , origin     :: v (Point V2 Float)
   , zoom       :: v Float
   }
-  deriving (Generic)
+  deriving (Generic, Vars)
 
 newtype I v = I { pos :: v (V2 Float) }
-  deriving (Generic)
+  deriving (Generic, Vars)
 
 newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
+  deriving (Generic, Vars)

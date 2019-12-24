@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, NamedFieldPuns #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, NamedFieldPuns #-}
 module Starlight.Shader.Radar
 ( shader
 , U(..)
@@ -24,10 +24,10 @@ data U v = U
   , sweep  :: v (Radians Float)
   , colour :: v (Colour Float)
   }
-  deriving (Generic)
+  deriving (Generic, Vars)
 
 newtype I v = I { n :: v Float }
-  deriving (Generic)
+  deriving (Generic, Vars)
 
 newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
+  deriving (Generic, Vars)

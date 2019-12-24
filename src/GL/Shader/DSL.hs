@@ -1,4 +1,4 @@
-{-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes, DataKinds, DefaultSignatures, DeriveAnyClass, DeriveGeneric, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, KindSignatures, LambdaCase, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 module GL.Shader.DSL
 ( Shader(..)
 , None(..)
@@ -35,6 +35,7 @@ module GL.Shader.DSL
 , renderStmt
 , renderExpr
 , GLSLType(..)
+, Vars(..)
   -- * Re-exports
 , Type(..)
 , Colour
@@ -47,9 +48,13 @@ module GL.Shader.DSL
 
 import Control.Monad ((<=<), ap, liftM)
 import qualified Data.Coerce as C
+import Data.Function (fix)
 import Data.Proxy
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.String
+import GHC.Generics
+import GHC.TypeLits
+import qualified GL.Program as GL
 import GL.Shader (Type(..))
 import Linear.Affine (Point(..))
 import Linear.Matrix (M33)
@@ -60,11 +65,12 @@ import UI.Colour (Colour)
 import Unit.Angle
 
 data Shader (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) where
-  V :: (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'
-  F :: (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'
+  V :: (Vars u, Vars i, Vars o) => (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'
+  F :: (Vars u, Vars i, Vars o) => (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'
   Nil :: Shader u i o
 
 data None (v :: * -> *) = None
+  deriving (Generic, Vars)
 
 shaderSources :: Shader u i o -> [(Type, String)]
 shaderSources = \case
@@ -74,6 +80,31 @@ shaderSources = \case
   where
   renderShader f
     =  pretty "#version 410" <> hardline
+    <> renderStmt (f (makeVars Var) (makeVars Var) (makeVars Ref))
+  -- renderShader :: Shader k u i o -> Doc ()
+  -- renderShader s = pretty "#version 410" <> hardline <> go s where
+  --   go :: Shader k u i o -> Doc ()
+  --   go = \case
+  --     s@(Uniform k)
+  --       -> pretty "uniform" <+> renderTypeOf (typeOf (uniformsOf s)) <+> pretty (symbolVal (nameOf (uniformsOf s))) <> pretty ';' <> hardline
+  --       <> go k
+  --     s@(Input k)
+  --       -> pretty "in" <+> renderTypeOf (typeOf (inputsOf s)) <+> pretty (symbolVal (nameOf (inputsOf s))) <> pretty ';' <> hardline
+  --       <> go k
+  --     s@(Output k)
+  --       -> pretty "out" <+> renderTypeOf (typeOf (outputsOf s)) <+> pretty (symbolVal (nameOf (outputsOf s))) <> pretty ';' <> hardline
+  --       <> go k
+  --     Main s -> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt s <> line))
+  --   uniformsOf :: Shader k u i o -> Proxy u
+  --   uniformsOf _ = Proxy
+  --   inputsOf :: Shader k u i o -> Proxy i
+  --   inputsOf _ = Proxy
+  --   outputsOf :: Shader k u i o -> Proxy o
+  --   outputsOf _ = Proxy
+  --   typeOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy t
+  --   typeOf _ = Proxy
+  --   nameOf :: Proxy ((n '::: t ': us) :: Context) -> Proxy n
+  --   nameOf _ = Proxy
 
 
 data Stmt (k :: Type) a where
@@ -370,3 +401,40 @@ instance GLSLType (V3 (V3 Float)) where
 
 instance GLSLType (V4 Float) where
   renderTypeOf _ = pretty "vec4"
+
+
+class Vars t where
+  makeVars :: (forall a . String -> v a) -> t v
+  default makeVars :: (Generic (t v), GVars v t (Rep (t v))) => (forall a . String -> v a) -> t v
+  makeVars f = to (gmakeVars @_ @t f)
+
+instance (KnownSymbol n, Vars (GL.Rec ts)) => Vars (GL.Rec (n 'GL.::: t ': ts)) where
+  makeVars f = f (symbolVal (Proxy @n)) GL.:. makeVars f
+
+instance Vars (GL.Rec '[]) where
+  makeVars _ = GL.Nil
+
+
+class GVars v t f where
+  gmakeVars :: (forall a . String -> v a) -> f (t v)
+
+instance GVars v t f => GVars v t (M1 D d f) where
+  gmakeVars f = M1 $ gmakeVars f
+
+instance GVars v t f => GVars v t (M1 C c f) where
+  gmakeVars f = M1 $ gmakeVars f
+
+instance GVars v t U1 where
+  gmakeVars _ = U1
+
+instance (GVars v t f, GVars v t g) => GVars v t (f :*: g) where
+  gmakeVars f = gmakeVars f :*: gmakeVars f
+
+instance (GVar v t f, Selector s) => GVars v t (M1 S s f) where
+  gmakeVars f = fix $ \ x -> M1 (gmakeVar f (selName x))
+
+class GVar v t f where
+  gmakeVar :: (forall a . String -> v a) -> String -> f (t v)
+
+instance GVar v t (K1 R (v a)) where
+  gmakeVar f s = K1 (f s)
