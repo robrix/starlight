@@ -36,12 +36,10 @@ import UI.Colour
 import qualified UI.Effect.Window as Window
 import UI.Font
 import UI.Glyph (Instance(..), Run(..), geometry)
+import qualified UI.Label.Text as Text
 
 data Label = Label
-  { textP   :: !(GL.Program (Rec
-    [ "rect"    '::: V4 Float
-    , "sampler" '::: TextureUnit
-    , "colour"  '::: V4 Float ]))
+  { textP   :: !(GL.Program Text.U)
   , glyphP  :: !(GL.Program (Rec
     [ "matrix3" '::: M33 Float
     , "colour"  '::: V4 Float ]))
@@ -197,9 +195,11 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
     setActiveTexture textureUnit
     bind (Just texture)
 
-    let u t = Just rect :. Just textureUnit :. t
-
-    set . u $ Just transparent :. Nil
+    set Text.U
+      { rect    = Just rect
+      , sampler = Just textureUnit
+      , colour  = Just transparent
+      }
 
     bind (Just quadA)
     let range = Interval 0 4
@@ -207,5 +207,9 @@ drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runL
 
     when (opaque colour /= black) $ do
       glBlendFunc GL_ONE GL_ONE
-      set . u $ Just colour :. Nil
+      set Text.U
+        { rect    = Just rect
+        , sampler = Just textureUnit
+        , colour  = Just colour
+        }
       drawArrays TriangleStrip range
