@@ -12,7 +12,6 @@ module GL.Effect.Program
 , (GL.:::)(..)
 , Algebra
 , Has
-, GL.Rec(..)
 , run
 ) where
 

@@ -10,7 +10,6 @@ module GL.Program
 , Var(..)
 , setUniformValue
 , HasUniform
-, Rec(..)
 ) where
 
 import Control.Effect.Finally
@@ -60,20 +59,3 @@ setUniformValue program name v = do
 
 
 type HasUniform sym t ty = (KnownSymbol sym, Uniform t, HasField sym (ty Identity) (Identity t))
-
-
-data Rec (ts :: Context) (v :: * -> *) where
-  (:.) :: v t -> Rec ts v -> Rec (n '::: t ': ts) v
-  Nil :: Rec '[] v
-
-infixr 4 :.
-
-
-instance {-# OVERLAPPABLE #-}
-         HasField (sym :: Symbol) (Rec (sym '::: t ': tys) f) (f t) where
-  getField (h :. _) = h
-
-instance {-# OVERLAPPABLE #-}
-         HasField sym (Rec tys f) (f t)
-      => HasField (sym :: Symbol) (Rec (other ': tys) f) (f t) where
-  getField (_ :. t) = getField @sym t

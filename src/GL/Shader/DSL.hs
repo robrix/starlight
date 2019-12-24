@@ -55,8 +55,6 @@ import Data.Proxy
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.String
 import GHC.Generics
-import GHC.TypeLits
-import qualified GL.Program as GL
 import GL.Shader (Type(..))
 import GL.TextureUnit
 import qualified GL.Uniform as GL
@@ -406,16 +404,6 @@ class Vars t where
   foldVars :: Monoid b => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
   default foldVars :: (Generic (t v), GVars v t (Rep (t v)), Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
   foldVars f = gfoldVars @_ @t f . from
-
-instance (KnownSymbol n, GLSLType t, Vars (GL.Rec ts)) => Vars (GL.Rec (n 'GL.::: t ': ts)) where
-  makeVars f = f (symbolVal (Proxy @n)) GL.:. makeVars f
-
-  foldVars f (h GL.:. t) = f (symbolVal (Proxy @n)) h <> foldVars f t
-
-instance Vars (GL.Rec '[]) where
-  makeVars _ = GL.Nil
-
-  foldVars _ GL.Nil = mempty
 
 
 class GVars v t f where
