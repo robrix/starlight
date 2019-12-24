@@ -37,6 +37,7 @@ module GL.Shader.DSL
 , Uniforms(..)
 , Inputs(..)
 , Outputs(..)
+  -- * Re-exports
 , (:::)(..)
 , Type(..)
 ) where
