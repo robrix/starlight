@@ -25,7 +25,6 @@ import GL.Array
 import GL.Carrier.Program.Live
 import GL.Framebuffer as GL
 import qualified GL.Program as GL
-import GL.Shader
 import Graphics.GL.Core41
 import Lens.Micro (Lens', (.~), (^.), lens)
 import Linear.Affine
@@ -66,8 +65,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       , rotation = pi/2
       }
     . evalState start $ do
-      starsP <- build
-        [(Vertex, "src" </> "stars-vertex.glsl"), (Fragment, "src" </> "stars-fragment.glsl")]
+      starsP <- build' Stars.shader
       shipP <- build' Ship.shader
       radarP <- build' Radar.shader
 
