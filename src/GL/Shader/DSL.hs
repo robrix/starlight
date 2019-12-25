@@ -127,9 +127,9 @@ program = Shader
 
 data Stage i o where
   Id :: Stage i i
+  (:>>>) :: Stage i x -> Stage x o -> Stage i o
   V :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
   F :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
-  (:>>>) :: Stage i x -> Stage x o -> Stage i o
 
 vertex   :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
 vertex = V
