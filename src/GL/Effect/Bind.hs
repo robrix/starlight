@@ -3,7 +3,8 @@
 {-# LANGUAGE StandaloneDeriving #-}
 module GL.Effect.Bind
 ( -- * Bind effect
-  Bind(..)
+  bind
+, Bind(..)
   -- * Re-exports
 , Algebra
 , Effect
@@ -12,6 +13,9 @@ module GL.Effect.Bind
 ) where
 
 import Control.Algebra
+
+bind :: Has (Bind t) sig m => t -> m a -> m a
+bind t m = send (Bind t m pure)
 
 data Bind t m k
   = forall a . Bind t (m a) (a -> m k)
