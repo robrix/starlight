@@ -139,8 +139,8 @@ physics
 physics t input = do
   dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
 
-  let thrust  = dt *  2
-      angular = dt *^ pi
+  let thrust  = dt *  3
+      angular = dt *^ 5
 
   when (pressed SDL.KeycodeUp   input) $ do
     rotation <- Lens.use _rotation
