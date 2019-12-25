@@ -54,9 +54,9 @@ instance Bind (Array n) where
 
 
 configureArray :: forall i m sig . (DSL.Vars i, S.Storable (i Identity), Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
-configureArray _ _ = DSL.foldVarsM (\ f@DSL.Field { DSL.location } _ -> runLiftIO $ do
+configureArray _ _ = DSL.foldVarsM (\ f@DSL.Field { DSL.location, DSL.offset } _ -> runLiftIO $ do
   checkingGLError $ glEnableVertexAttribArray (fromIntegral location)
-  checkingGLError $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral (S.sizeOf @(i Identity) undefined)) nullPtr) (DSL.makeVars @i id)
+  checkingGLError $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral (S.sizeOf @(i Identity) undefined)) (nullPtr `plusPtr` DSL.getOffset offset)) (DSL.makeVars @i id)
 
 
 data Mode
