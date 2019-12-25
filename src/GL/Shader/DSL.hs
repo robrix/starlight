@@ -70,6 +70,7 @@ module GL.Shader.DSL
 , GLSLType(..)
 , Vars(..)
 , foldVars
+, mapVars
   -- * Re-exports
 , Type(..)
 , Colour
@@ -85,6 +86,7 @@ import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
 import           Data.Function (fix)
 import           Data.Functor.Const
+import           Data.Functor.Identity
 import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
@@ -547,6 +549,10 @@ class Vars t where
 
 foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
 foldVars f t = getConst $ traverseVars (fmap Const . f) t
+
+mapVars :: Vars t => (forall a . GLSLType a => String -> v a -> v' a) -> t v -> t v'
+mapVars f t = runIdentity $ traverseVars (fmap Identity . f) t
+
 
 class GVars v v' t f f' where
   gmakeVars :: (f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a) -> f (t v)
