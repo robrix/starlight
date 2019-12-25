@@ -31,9 +31,9 @@ import           UI.Graph.Vertex
 data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
-  , array     :: !(Array (I Identity))
-  , points    :: !(Program Points.U Points.I Points.O)
-  , lines     :: !(Program Lines.U Lines.I Lines.O)
+  , array     :: !(Array (V Identity))
+  , points    :: !(Program Points.U V Points.O)
+  , lines     :: !(Program Lines.U  V Lines.O)
   , pointSize :: !Float
   , count     :: !Int
   }

@@ -7,7 +7,7 @@
 module Starlight.Shader.Stars
 ( shader
 , U(..)
-, I(..)
+, V(..)
 , O(..)
 ) where
 
@@ -18,9 +18,9 @@ import GL.Shader.DSL
 
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
 
-shader :: Shader U I O
+shader :: Shader U V O
 shader = program $ \ U{ resolution, origin, zoom }
-  ->  vertex (\ I{ pos } None ->
+  ->  vertex (\ V{ pos } None ->
     gl_Position .= vec4 (vec3 pos 0) 1)
   >>> fragment (\ None O{ fragColour } -> do
     uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
@@ -75,13 +75,13 @@ data U v = U
 
 instance Vars U
 
-newtype I v = I { pos :: v (V2 Float) }
+newtype V v = V { pos :: v (V2 Float) }
   deriving (Generic)
 
-instance Vars I
+instance Vars V
 
-deriving instance Bind     (v (V2 Float)) => Bind     (I v)
-deriving instance Storable (v (V2 Float)) => Storable (I v)
+deriving instance Bind     (v (V2 Float)) => Bind     (V v)
+deriving instance Storable (v (V2 Float)) => Storable (V v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)

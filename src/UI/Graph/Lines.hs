@@ -3,7 +3,7 @@
 module UI.Graph.Lines
 ( shader
 , U(..)
-, I(..)
+, V(..)
 , O(..)
 ) where
 
@@ -11,9 +11,9 @@ import GHC.Generics (Generic)
 import GL.Shader.DSL
 import UI.Graph.Vertex
 
-shader :: Shader U I O
+shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ I{ pos } None ->
+  ->  vertex (\ V{ pos } None ->
     gl_Position .= vec4 (vec3 ((matrix u !* vec3 pos 1) ^. _xy) 0) 1)
 
   >>> fragment (\ None O{ fragColour } ->

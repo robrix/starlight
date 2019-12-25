@@ -103,7 +103,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 distanceScale :: Float
 distanceScale = 500 / getMetres (S.radius S.sol)
 
-shipV :: [Ship.I Identity]
+shipV :: [Ship.V Identity]
 shipV = coerce @[V2 Float]
   [ V2 1      0
   , V2 0      (-0.5)
@@ -111,7 +111,7 @@ shipV = coerce @[V2 Float]
   , V2 0      0.5
   ]
 
-quadV :: [Stars.I Identity]
+quadV :: [Stars.V Identity]
 quadV = coerce @[V2 Float]
   [ V2 (-1) (-1)
   , V2   1  (-1)
@@ -119,10 +119,10 @@ quadV = coerce @[V2 Float]
   , V2   1    1
   ]
 
-circleV :: [Ship.I Identity]
+circleV :: [Ship.V Identity]
 circleV = coerce @[V2 Float] $ circle 1 32
 
-radarV :: [Radar.I Identity]
+radarV :: [Radar.V Identity]
 radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
   n = (16 :: Int)
 
@@ -291,13 +291,13 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
 
 
 data DrawState = DrawState
-  { quadA   :: Array (Stars.I Identity)
-  , circleA :: Array (Ship.I  Identity)
-  , shipA   :: Array (Ship.I  Identity)
-  , radarA  :: Array (Radar.I Identity)
-  , starsP  :: Program Stars.U Stars.I Stars.O
-  , shipP   :: Program Ship.U  Ship.I  Ship.O
-  , radarP  :: Program Radar.U Radar.I Radar.O
+  { quadA   :: Array (Stars.V Identity)
+  , circleA :: Array (Ship.V  Identity)
+  , shipA   :: Array (Ship.V  Identity)
+  , radarA  :: Array (Radar.V Identity)
+  , starsP  :: Program Stars.U Stars.V Stars.O
+  , shipP   :: Program Ship.U  Ship.V  Ship.O
+  , radarP  :: Program Radar.U Radar.V Radar.O
   }
 
 

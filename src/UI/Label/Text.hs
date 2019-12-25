@@ -7,7 +7,7 @@
 module UI.Label.Text
 ( shader
 , U(..)
-, I(..)
+, V(..)
 , O(..)
 ) where
 
@@ -16,9 +16,9 @@ import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
 
-shader :: Shader U I O
-shader = program $ \ u -- U{ rect, sampler, colour }
-  ->  vertex (\ I{ pos} IF{ _coord2 } -> do
+shader :: Shader U V O
+shader = program $ \ u
+  ->  vertex (\ V{ pos} IF{ _coord2 } -> do
     v <- let' "v" $ lerp2 (pos * 0.5 + 0.5) (rect u ^. _xy) (rect u ^. _zw)
     _coord2 .= v
     gl_Position .= vec4 (vec3 (v * 2 - 1) 0) 1)
@@ -57,13 +57,13 @@ data U v = U
 
 instance Vars U
 
-newtype I v = I { pos :: v (V2 Float) }
+newtype V v = V { pos :: v (V2 Float) }
   deriving (Generic)
 
-instance Vars I
+instance Vars V
 
-deriving instance Bind     (v (V2 Float)) => Bind     (I v)
-deriving instance Storable (v (V2 Float)) => Storable (I v)
+deriving instance Bind     (v (V2 Float)) => Bind     (V v)
+deriving instance Storable (v (V2 Float)) => Storable (V v)
 
 newtype IF v = IF { _coord2 :: v (V2 Float) }
   deriving (Generic)

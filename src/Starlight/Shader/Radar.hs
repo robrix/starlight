@@ -6,7 +6,7 @@
 module Starlight.Shader.Radar
 ( shader
 , U(..)
-, I(..)
+, V(..)
 , O(..)
 ) where
 
@@ -16,9 +16,9 @@ import GL.Object
 import GL.Shader.DSL
 import Unit.Angle (Radians(..))
 
-shader :: Shader U I O
+shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ I{ n } None -> do
+  ->  vertex (\ V{ n } None -> do
     angle <- let' "angle" (coerce (angle u) + n * coerce (sweep u))
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle) ^* 150)
     gl_Position .= vec4 (vec3 ((matrix u !* vec3 pos 1) ^. _xy) 0) 1)
@@ -36,13 +36,13 @@ data U v = U
 
 instance Vars U
 
-newtype I v = I { n :: v Float }
+newtype V v = V { n :: v Float }
   deriving (Generic)
 
-instance Vars I
+instance Vars V
 
-deriving instance Bind     (v Float) => Bind     (I v)
-deriving instance Storable (v Float) => Storable (I v)
+deriving instance Bind     (v Float) => Bind     (V v)
+deriving instance Storable (v Float) => Storable (V v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)

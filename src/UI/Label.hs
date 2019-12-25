@@ -44,15 +44,15 @@ import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 
 data LabelState = LabelState
-  { textP   :: !(Program Text.U Text.I Text.O)
-  , glyphP  :: !(Program Glyph.U Glyph.I Glyph.O)
+  { textP   :: !(Program Text.U  Text.V  Text.O)
+  , glyphP  :: !(Program Glyph.U Glyph.V Glyph.O)
   , colour  :: !(Colour Float)
   , bcolour :: !(Maybe (Colour Float))
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
-  , glyphB  :: !(Buffer 'GL.Buffer.Array (Glyph.I Identity))
-  , glyphA  :: !(Array (Glyph.I Identity))
-  , quadA   :: !(Array (Text.I Identity))
+  , glyphB  :: !(Buffer 'GL.Buffer.Array (Glyph.V Identity))
+  , glyphA  :: !(Array (Glyph.V Identity))
+  , quadA   :: !(Array (Text.V  Identity))
   , bounds  :: !(Rect Int)
   , scale   :: !Int
   }
