@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module UI.Graph.Points
@@ -31,10 +30,16 @@ data U v = U
   , pointSize :: v Float
   , colour    :: v (Colour Float)
   }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars U
 
 newtype I v = I { pos :: v (V2 Float) }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars I
 
 newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars O

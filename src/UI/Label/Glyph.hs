@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module UI.Label.Glyph
@@ -31,13 +30,21 @@ data U v = U
   { matrix3 :: v (M33 Float)
   , colour  :: v (Colour Float)
   }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars U
 
 newtype I v = I { pos :: v (V4 Float) }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars I
 
 newtype IF v = IF { _coord2 :: v (V2 Float) }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars IF
 
 newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars O

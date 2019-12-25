@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -50,13 +49,21 @@ data U v = U
   , sampler :: v TextureUnit
   , colour  :: v (Colour Float)
   }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars U
 
 newtype I v = I { pos :: v (V2 Float) }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars I
 
 newtype IF v = IF { _coord2 :: v (V2 Float) }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars IF
 
 newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic, Vars)
+  deriving (Generic)
+
+instance Vars O
