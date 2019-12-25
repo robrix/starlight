@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TypeApplications #-}
 module GL.Array
 ( Array(..)
 , configureArray
@@ -103,14 +104,14 @@ loadVertices vertices = do
   array <$ configureArray buffer array
 
 
-load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => Program u i o -> [i Identity] -> m (i (Product (B.Buffer 'B.Array) Array))
+load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => Program u i o -> [i Identity] -> m (i Array)
 load (Program p) is = do
   let is' = DSL.getApVars (traverse (DSL.ApVars . DSL.mapVars (const ((:[]) . runIdentity))) is)
   DSL.forVars is' (\ s vs -> runLiftIO $ do
-    b <- gen1
+    b <- gen1 @(B.Buffer 'B.Array _)
     a <- gen1
     loc <- C.withCString s (checkingGLError . glGetAttribLocation p)
-    Pair b a <$ unless (loc < 0) (do
+    a <$ unless (loc < 0) (do
       bind (Just b)
       B.realloc b (length vs) B.Static B.Draw
       B.copy b 0 vs
