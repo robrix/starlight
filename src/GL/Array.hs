@@ -12,20 +12,17 @@ module GL.Array
 
 import           Control.Algebra
 import           Control.Effect.Finally
-import           Control.Monad (unless)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Functor.Identity
 import           Data.Interval
 import           Foreign.Ptr
-import qualified Foreign.C.String.Lift as C
 import qualified Foreign.Storable as S
 import           GHC.Stack
 import qualified GL.Buffer as B
 import           GL.Enum as GL
 import           GL.Error
 import           GL.Object
-import           GL.Program
 import qualified GL.Shader.DSL as DSL
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
@@ -77,18 +74,18 @@ drawArrays
 drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))
 
 
-load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => Program u i o -> [i Identity] -> m (i Array)
-load (Program p) is = do
+load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (i Array)
+load is = do
   let is' = DSL.getApVars (traverse (DSL.ApVars . DSL.mapVars (const ((:[]) . runIdentity))) is)
-  DSL.forVars is' (\ (DSL.Field s _) vs -> runLiftIO $ do
+  DSL.forVars is' (\ (DSL.Field _ loc) vs -> runLiftIO $ do
     b <- gen1 @(B.Buffer 'B.Array _)
     a <- gen1
-    loc <- C.withCString s (checkingGLError . glGetAttribLocation p)
-    a <$ unless (loc < 0) (do
-      bind (Just b)
-      B.realloc b (length vs) B.Static B.Draw
-      B.copy b 0 vs
+    bind (Just b)
+    B.realloc b (length vs) B.Static B.Draw
+    B.copy b 0 vs
 
-      bind (Just a)
-      checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
-      checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr))
+    bind (Just a)
+    checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
+    checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr
+
+    pure a)

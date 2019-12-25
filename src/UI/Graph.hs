@@ -51,9 +51,9 @@ mkGraph f n from to = do
         !*! scaled     (ext (2 / (maxXY - minXY)) 1)
         !*! translated (negated minXY)
       colour = white
+  array <- load (coerce @[V2 Float] vertices)
   points <- build Points.shader
   lines <- build Lines.shader
-  array <- load points (coerce @[V2 Float] vertices)
 
   pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 

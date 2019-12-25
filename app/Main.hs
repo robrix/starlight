@@ -77,10 +77,10 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- label
 
-      quadA   <- load starsP quadV
-      shipA   <- load shipP shipV
-      circleA <- load shipP circleV
-      radarA  <- load radarP radarV
+      quadA   <- load quadV
+      shipA   <- load shipV
+      circleA <- load circleV
+      radarA  <- load radarV
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
