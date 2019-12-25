@@ -103,8 +103,8 @@ use p (ProgramT m) = do
 
 set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
 set v = askProgram >>= \ p ->
-  getAp (getConst (DSL.foldVars (\ DSL.Field { DSL.name } -> Const . \case
-    Just v  -> Ap (setUniformValue p name v)
+  getAp (getConst (DSL.foldVars (\ DSL.Field { DSL.name } -> Const . Ap . \case
+    Just v  -> setUniformValue p name v
     Nothing -> pure ()) v))
 
 
