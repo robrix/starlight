@@ -78,7 +78,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       quadA   <- loadVertices quadV
       shipA   <- loadVertices shipV
       circleA <- loadVertices circleV
-      radarA  <- loadVertices (let n = (16 :: Int) in [ fromIntegral t / fromIntegral n | t <- [-n..n] ])
+      radarA  <- loadVertices radarV
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -119,6 +119,9 @@ quadV =
 
 circleV :: [V2 Float]
 circleV = circle 1 32
+
+radarV :: [Float]
+radarV = let n = (16 :: Int) in [ fromIntegral t / fromIntegral n | t <- [-n..n] ]
 
 physics
   :: ( Has (State UTCTime) sig m
