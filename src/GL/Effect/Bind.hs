@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module GL.Effect.Bind
 ( -- * Bind effect
   Bind(..)
@@ -11,6 +13,7 @@ module GL.Effect.Bind
 
 import Control.Algebra
 
-data Bind a m k
-  = Bind a (m k)
-  deriving (Functor)
+data Bind t m k
+  = forall a . Bind t (m a) (a -> m k)
+
+deriving instance Functor m => Functor (Bind t m)
