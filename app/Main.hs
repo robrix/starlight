@@ -72,7 +72,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       }
     . evalState start $ do
       starsP <- build Stars.shader
-      shipP <- build Ship.shader
+      shipP  <- build Ship.shader
       radarP <- build Radar.shader
 
       label <- label
