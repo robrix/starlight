@@ -72,6 +72,8 @@ module GL.Shader.DSL
 , foldVars
 , mapVars
 , forVars
+, sequenceVars
+, ApVars(..)
   -- * Re-exports
 , Type(..)
 , Colour
@@ -83,6 +85,7 @@ module GL.Shader.DSL
 , V4
 ) where
 
+import           Control.Applicative (Alternative(..), liftA)
 import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
 import           Data.Function (fix)
@@ -560,6 +563,19 @@ mapVars f t = runIdentity $ traverseVars (fmap Identity . f) t
 
 forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => String -> v a -> m (v' a)) -> m (t v')
 forVars t f = traverseVars f t
+
+sequenceVars :: (Alternative f, Traversable f, Vars i) => f (i f) -> i f
+sequenceVars = getApVars . traverse (ApVars . mapVars (flip const))
+
+
+newtype ApVars i (f :: * -> *) a = ApVars { getApVars :: i f }
+
+instance (Alternative f, Vars i) => Functor (ApVars i f) where
+  fmap = liftA
+
+instance (Alternative f, Vars i) => Applicative (ApVars i f) where
+  pure _ = ApVars (makeVars (\ _ -> empty))
+  ApVars f <*> ApVars a = ApVars (mapVars2 (const (<|>)) f a)
 
 
 class GMakeVars t v f where
