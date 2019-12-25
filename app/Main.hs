@@ -46,6 +46,7 @@ import           Physics.Delta
 import qualified SDL
 import qualified Starlight.Body as S
 import           Starlight.Input
+import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Shader.Radar as Radar
 import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
@@ -74,7 +75,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       starsP <- build Stars.shader
       shipP  <- build Ship.shader
       radarP <- build Radar.shader
-      bodyP  <- build Ship.shader
+      bodyP  <- build Body.shader
 
       label <- label
 
@@ -122,7 +123,7 @@ quadV = coerce @[V2 Float]
   , V2   1    1
   ]
 
-circleV :: [Ship.V Identity]
+circleV :: [Body.V Identity]
 circleV = coerce @[V2 Float] $ circle 1 128
 
 radarV :: [Radar.V Identity]
@@ -248,7 +249,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
   let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
         let trans = rel !*! S.transform orbit (getDelta t * 86400)
-        set Ship.U
+        set Body.U
           { matrix = Just
               $   window
               !*! trans
@@ -292,12 +293,12 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
 data DrawState = DrawState
   { quadA   :: Array (Stars.V Identity)
-  , circleA :: Array (Ship.V  Identity)
+  , circleA :: Array (Body.V  Identity)
   , shipA   :: Array (Ship.V  Identity)
   , radarA  :: Array (Radar.V Identity)
   , starsP  :: Program Stars.U Stars.V Stars.O
   , shipP   :: Program Ship.U  Ship.V  Ship.O
-  , bodyP   :: Program Ship.U  Ship.V  Ship.O
+  , bodyP   :: Program Body.U  Body.V  Body.O
   , radarP  :: Program Radar.U Radar.V Radar.O
   }
 

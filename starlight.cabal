@@ -72,6 +72,7 @@ library
     S
     Starlight.Body
     Starlight.Input
+    Starlight.Shader.Body
     Starlight.Shader.Radar
     Starlight.Shader.Ship
     Starlight.Shader.Stars
