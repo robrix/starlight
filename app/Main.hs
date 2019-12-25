@@ -214,7 +214,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
   use starsP $ do
     scale <- Window.scale
     size <- Window.size
-    set $ Stars.U
+    set Stars.U
       { resolution = Just (size ^* scale)
       , origin     = Just (position / P size)
       , zoom       = Just zoomOut
