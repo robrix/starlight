@@ -559,7 +559,7 @@ instance Semigroup Offset where
   (<>) = (+)
 
 instance Monoid Offset where
-  mempty = Offset 0
+  mempty = 0
 
 class Vars t where
   makeVars :: (forall a . GLSLType a => Field a -> v a) -> t v
