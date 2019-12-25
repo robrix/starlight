@@ -69,6 +69,7 @@ module GL.Shader.DSL
 , renderExpr
 , GLSLType(..)
 , Vars(..)
+, foldVars
   -- * Re-exports
 , Type(..)
 , Colour
@@ -540,66 +541,49 @@ class Vars t where
   default makeVars :: (Generic (t v), GVars v v t (Rep (t v)) (Rep (t v))) => (forall a . GLSLType a => String -> v a) -> t v
   makeVars f = to (gmakeVars @_ @_ @t f)
 
-  foldVars :: Monoid b => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
-  default foldVars :: forall v b . (Generic (t v), GVars v v t (Rep (t v)) (Rep (t v)), Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
-  foldVars f = gfoldVars @v @v @t @(Rep (t v)) @(Rep (t v)) f . from
-
   traverseVars :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> t v -> m (t v')
   default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GVars v v' t (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => String -> v a -> m (v' a)) -> t v -> m (t v')
   traverseVars f = fmap to . gtraverseVars @v @v' @t @(Rep (t v)) @(Rep (t v')) f . from
 
+foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
+foldVars f t = getConst $ traverseVars (fmap Const . f) t
+
 class GVars v v' t f f' where
   gmakeVars :: (f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a) -> f (t v)
-
-  gfoldVars :: (f ~ f', v ~ v', Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> f (t v) -> b
 
   gtraverseVars :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> f (t v) -> m (f' (t v'))
 
 instance GVars v v' t f f' => GVars v v' t (M1 D d f) (M1 D d f') where
   gmakeVars f = M1 $ gmakeVars f
 
-  gfoldVars f = gfoldVars f . unM1
-
   gtraverseVars f = fmap M1 . gtraverseVars @v @v' @t @f @f' f . unM1
 
 instance GVars v v' t f f' => GVars v v' t (M1 C c f) (M1 C c f') where
   gmakeVars f = M1 $ gmakeVars f
-
-  gfoldVars f = gfoldVars f . unM1
 
   gtraverseVars f = fmap M1 . gtraverseVars @v @v' @t @f @f' f . unM1
 
 instance GVars v v' t U1 U1 where
   gmakeVars _ = U1
 
-  gfoldVars _ _ = mempty
-
   gtraverseVars _ _ = pure U1
 
 instance (GVars v v' t f f', GVars v v' t g g') => GVars v v' t (f :*: g) (f' :*: g') where
   gmakeVars f = gmakeVars f :*: gmakeVars f
-
-  gfoldVars f (l :*: r) = gfoldVars f l <> gfoldVars f r
 
   gtraverseVars f (l :*: r) = (:*:) <$> gtraverseVars @v @v' @t @f @f' f l <*> gtraverseVars @v @v' @t @g @g' f r
 
 instance (GVar v v' t f f', Selector s) => GVars v v' t (M1 S s f) (M1 S s f') where
   gmakeVars f = fix $ \ x -> M1 (gmakeVar f (selName x))
 
-  gfoldVars f m = gfoldVar f (selName m) (unM1 m)
-
   gtraverseVars f m = M1 <$> gtraverseVar f (selName m) (unM1 m)
 
 class GVar v v' t f f' | f -> v, f' -> v' where
   gmakeVar :: (f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a) -> String -> f (t v)
 
-  gfoldVar :: (Monoid b, f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a -> b) -> String -> f (t v) -> b
-
   gtraverseVar :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> String -> f (t v) -> m (f' (t v'))
 
 instance GLSLType a => GVar v v' t (K1 R (v a)) (K1 R (v' a)) where
   gmakeVar f s = K1 (f s)
-
-  gfoldVar f s = f s . unK1
 
   gtraverseVar f s = fmap K1 . f s . unK1
