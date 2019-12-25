@@ -26,6 +26,9 @@ instance Type Float where
 instance Type Double where
   glType _ = GL_DOUBLE
 
+instance Type Int where
+  glType _ = GL_INT
+
 instance Type Int32 where
   glType _ = GL_INT
 
