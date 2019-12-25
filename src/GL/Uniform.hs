@@ -6,6 +6,7 @@ module GL.Uniform
 ) where
 
 import           Control.Monad.IO.Class.Lift
+import           Data.Int
 import qualified Foreign.Marshal.Utils.Lift as A
 import           Foreign.Ptr
 import           GHC.Stack
@@ -22,6 +23,9 @@ class Uniform t where
 
 instance Uniform Int where
   uniform loc = runLiftIO . glUniform1i loc . fromIntegral
+
+instance Uniform Int32 where
+  uniform loc = runLiftIO . glUniform1i loc
 
 instance Uniform Float where
   uniform = fmap runLiftIO . glUniform1f
