@@ -6,6 +6,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module GL.Array
@@ -37,6 +38,7 @@ import qualified GL.Buffer as B
 import           GL.Enum as GL
 import           GL.Error
 import           GL.Object
+import           GL.Program (HasProgram, ProgramT(..))
 import qualified GL.Shader.DSL as DSL
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
@@ -128,6 +130,9 @@ class Monad m => HasArray i m | m -> i where
 
 newtype ArrayT i m a = ArrayT { runArrayT :: ReaderC (Array (i Identity)) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
+
+deriving instance HasArray     i   m => HasArray     i   (ProgramT u i o m)
+deriving instance HasProgram u i o m => HasProgram u i o (ArrayT     i   m)
 
 instance HasArray i m => HasArray i (ReaderC r m) where
   askArray = lift askArray
