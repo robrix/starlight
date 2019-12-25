@@ -556,7 +556,7 @@ newtype Offset = Offset Int
   deriving (Eq, Num, Ord, Show)
 
 instance Semigroup Offset where
-  Offset a <> Offset b = Offset (a + b)
+  (<>) = (+)
 
 instance Monoid Offset where
   mempty = Offset 0
