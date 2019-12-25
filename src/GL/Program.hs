@@ -47,6 +47,7 @@ import           GHC.Stack
 import           GHC.TypeLits
 import           GL.Array
 import           GL.Error
+import           GL.Object
 import           GL.Shader
 import qualified GL.Shader.DSL as DSL
 import           GL.Type
@@ -109,7 +110,9 @@ bindInputs v = askProgram >>= \ (Program p) ->
     loc <- checkingGLError $ C.withCString s (glGetAttribLocation p)
     unless (loc < 0) $ do
       glEnableVertexAttribArray (fromIntegral loc)
-      glVertexAttribPointer 0 (glDims a) (glType a) GL_FALSE 0 nullPtr) v) where
+      glVertexAttribPointer 0 (glDims a) (glType a) GL_FALSE 0 nullPtr
+
+      bind (Just a)) v) where
 
 set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
 set v = askProgram >>= \ p ->
