@@ -196,7 +196,7 @@ draw
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { position, velocity, rotation } = runLiftIO $ do
+draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t PlayerState { position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -220,8 +220,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
       , zoom       = Just zoomOut
       }
 
-    bindInputs Stars.I { pos = quadA }
-
+    bind (Just quadA)
     drawArrays TriangleStrip (Interval 0 4)
 
   bind (Just shipA)
@@ -281,10 +280,11 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
             , sweep  = Just sweep
             }
 
-          drawArrays LineLoop (Interval 0 (length circleV))
+          drawArrays LineStrip (Interval 0 (length radarV))
 
           for_ satellites (drawBlip trans)
 
+    bind (Just radarA)
     drawBlip (scaled (V3 distanceScale distanceScale 1)) S.sol
 
 
