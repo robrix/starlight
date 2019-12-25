@@ -66,8 +66,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     evalState @Input mempty
     . evalState PlayerState
-      { position = P (V2 1700 0)
-      , velocity = Delta (P (V2 0 20))
+      { position = P (V2 25000 0)
+      , velocity = Delta (P (V2 0 75))
       , rotation = pi/2
       }
     . evalState start $ do
@@ -103,7 +103,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
 
 distanceScale :: Float
-distanceScale = 500 / getMetres (S.radius S.sol)
+distanceScale = 10000 / getMetres (S.radius S.sol)
 
 shipV :: [Ship.V Identity]
 shipV = coerce @[V2 Float]
