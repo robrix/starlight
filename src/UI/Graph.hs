@@ -11,6 +11,8 @@ module UI.Graph
 
 import           Control.Carrier.Finally
 import           Control.Monad.IO.Class.Lift
+import           Data.Coerce
+import           Data.Functor.Identity
 import           Data.Interval
 import           GL.Array
 import           GL.Object
@@ -25,11 +27,12 @@ import           Linear.Vector
 import           UI.Colour
 import qualified UI.Graph.Lines as Lines
 import qualified UI.Graph.Points as Points
+import           UI.Graph.Vertex
 
 data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
-  , array     :: !(Array (V2 Float))
+  , array     :: !(I Array)
   , points    :: !(Program Points.U Points.I Points.O)
   , lines     :: !(Program Lines.U Lines.I Lines.O)
   , pointSize :: !Float
@@ -48,9 +51,9 @@ mkGraph f n from to = do
         !*! scaled     (ext (2 / (maxXY - minXY)) 1)
         !*! translated (negated minXY)
       colour = white
-  array <- loadVertices vertices
   points <- build Points.shader
   lines <- build Lines.shader
+  array <- load points (coerce @[V2 Float] vertices)
 
   pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 

@@ -20,8 +20,10 @@ import           Control.Effect.Lift
 import qualified Control.Exception.Lift as E
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift (runLiftIO)
+import           Data.Coerce
 import           Data.Foldable (for_)
 import           Data.Function (fix, (&))
+import           Data.Functor.Identity
 import           Data.Interval
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (UTCTime)
@@ -75,10 +77,10 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- label
 
-      quadA   <- loadVertices quadV
-      shipA   <- loadVertices shipV
-      circleA <- loadVertices circleV
-      radarA  <- loadVertices radarV
+      quadA   <- load starsP quadV
+      shipA   <- load shipP shipV
+      circleA <- load shipP circleV
+      radarA  <- load radarP radarV
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -101,27 +103,28 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 distanceScale :: Float
 distanceScale = 500 / getMetres (S.radius S.sol)
 
-shipV :: [V2 Float]
-shipV =
+shipV :: [Ship.I Identity]
+shipV = coerce @[V2 Float]
   [ V2 1      0
   , V2 0      (-0.5)
   , V2 (-0.5) 0
   , V2 0      0.5
   ]
 
-quadV :: [V2 Float]
-quadV =
+quadV :: [Stars.I Identity]
+quadV = coerce @[V2 Float]
   [ V2 (-1) (-1)
   , V2   1  (-1)
   , V2 (-1)   1
   , V2   1    1
   ]
 
-circleV :: [V2 Float]
-circleV = circle 1 32
+circleV :: [Ship.I Identity]
+circleV = coerce @[V2 Float] $ circle 1 32
 
-radarV :: [Float]
-radarV = let n = (16 :: Int) in [ fromIntegral t / fromIntegral n | t <- [-n..n] ]
+radarV :: [Radar.I Identity]
+radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
+  n = (16 :: Int)
 
 physics
   :: ( Has (State UTCTime) sig m
@@ -289,10 +292,10 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
 
 
 data DrawState = DrawState
-  { quadA   :: Array (V2 Float)
-  , circleA :: Array (V2 Float)
-  , shipA   :: Array (V2 Float)
-  , radarA  :: Array Float
+  { quadA   :: Stars.I Array
+  , circleA :: Ship.I Array
+  , shipA   :: Ship.I Array
+  , radarA  :: Radar.I Array
   , starsP  :: Program Stars.U Stars.I Stars.O
   , shipP   :: Program Ship.U Ship.I Ship.O
   , radarP  :: Program Radar.U Radar.I Radar.O
