@@ -77,10 +77,10 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- label
 
-      quadA   <- load quadV
-      shipA   <- load shipV
-      circleA <- load circleV
-      radarA  <- load radarV
+      quadA   <- loadInterleaved quadV
+      shipA   <- loadInterleaved shipV
+      circleA <- loadInterleaved circleV
+      radarA  <- loadInterleaved radarV
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -292,10 +292,10 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
 
 
 data DrawState = DrawState
-  { quadA   :: Stars.I Array
-  , circleA :: Ship.I Array
-  , shipA   :: Ship.I Array
-  , radarA  :: Radar.I Array
+  { quadA   :: Array (Stars.I Identity)
+  , circleA :: Array (Ship.I Identity)
+  , shipA   :: Array (Ship.I Identity)
+  , radarA  :: Array (Radar.I Identity)
   , starsP  :: Program Stars.U Stars.I Stars.O
   , shipP   :: Program Ship.U Ship.I Ship.O
   , radarP  :: Program Radar.U Radar.I Radar.O

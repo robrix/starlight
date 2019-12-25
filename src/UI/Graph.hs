@@ -32,7 +32,7 @@ import           UI.Graph.Vertex
 data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
-  , array     :: !(I Array)
+  , array     :: !(Array (I Identity))
   , points    :: !(Program Points.U Points.I Points.O)
   , lines     :: !(Program Lines.U Lines.I Lines.O)
   , pointSize :: !Float
@@ -51,7 +51,7 @@ mkGraph f n from to = do
         !*! scaled     (ext (2 / (maxXY - minXY)) 1)
         !*! translated (negated minXY)
       colour = white
-  array <- load (coerce @[V2 Float] vertices)
+  array <- loadInterleaved (coerce @[V2 Float] vertices)
   points <- build Points.shader
   lines <- build Lines.shader
 
