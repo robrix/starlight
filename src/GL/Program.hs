@@ -109,8 +109,8 @@ bindInputs v = askProgram >>= \ (Program p) ->
   getAp (DSL.foldVars (\ s a -> Ap . runLiftIO $ do
     loc <- checkingGLError $ C.withCString s (glGetAttribLocation p)
     unless (loc < 0) $ do
-      glEnableVertexAttribArray (fromIntegral loc)
-      glVertexAttribPointer 0 (glDims a) (glType a) GL_FALSE 0 nullPtr
+      checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
+      checkingGLError $ glVertexAttribPointer (fromIntegral loc) (glDims a) (glType a) GL_FALSE 0 nullPtr
 
       bind (Just a)) v) where
 
