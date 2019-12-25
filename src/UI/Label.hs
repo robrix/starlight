@@ -59,6 +59,7 @@ data LabelState = LabelState
   , quadA   :: !(Array (Text.V  Identity))
   , bounds  :: !(Rect Int)
   , scale   :: !Int
+  , string  :: !String
   }
 
 
@@ -99,7 +100,7 @@ label = do
 
   scale <- Window.scale
 
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale })
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, string = "" })
 
 setLabel
   :: ( HasCallStack
@@ -111,61 +112,62 @@ setLabel
   -> String
   -> m ()
 setLabel Label{ ref } font string = runLiftIO $ do
-  l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale } <- sendIO (readIORef ref)
-  glBlendFunc GL_ONE GL_ONE -- add
+  l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale, bounds, string = oldString } <- sendIO (readIORef ref)
 
-  let Run instances b = layoutString font string
-      vertices = geometry . UI.Glyph.glyph =<< instances
-      bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
+  when (bounds == Rect 0 0 || oldString /= string) $ do
+    glBlendFunc GL_ONE GL_ONE -- add
 
-  bind (Just texture)
-  setParameter Texture2D MagFilter Nearest
-  setParameter Texture2D MinFilter Nearest
-  setParameter Texture2D WrapS ClampToEdge
-  setParameter Texture2D WrapT ClampToEdge
-  setImageFormat Texture2D RGBA8 (scale *^ rectMax bounds) RGBA (Packed8888 True)
+    let Run instances b = layoutString font string
+        vertices = geometry . UI.Glyph.glyph =<< instances
+        bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
 
-  bind (Just fbuffer)
-  attachTexture (GL.Colour 0) texture
+    bind (Just texture)
+    setParameter Texture2D MagFilter Nearest
+    setParameter Texture2D MinFilter Nearest
+    setParameter Texture2D WrapS ClampToEdge
+    setParameter Texture2D WrapT ClampToEdge
+    setImageFormat Texture2D RGBA8 (scale *^ rectMax bounds) RGBA (Packed8888 True)
 
-  viewport $ scale *^ bounds
-  scissor  $ scale *^ bounds
+    bind (Just fbuffer)
+    attachTexture (GL.Colour 0) texture
 
-  setClearColour transparent
-  glClear GL_COLOR_BUFFER_BIT
+    viewport $ scale *^ bounds
+    scissor  $ scale *^ bounds
 
-  bind (Just glyphB)
-  realloc glyphB (length vertices) Static Draw
-  copy glyphB 0 (coerce vertices)
+    setClearColour transparent
+    glClear GL_COLOR_BUFFER_BIT
 
+    bind (Just glyphB)
+    realloc glyphB (length vertices) Static Draw
+    copy glyphB 0 (coerce vertices)
 
-  bindArray glyphA $ do
-    configureArray glyphB glyphA
+    bindArray glyphA $ do
+      configureArray glyphB glyphA
 
-    use glyphP $ do
-      let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
-      for_ instances $ \ Instance{ offset, range } ->
-        for_ jitterPattern $ \ (colour, V2 tx ty) -> do
-          set Glyph.U
-            { matrix3 = Just
-                $   translated (-1)
-                !*! scaled     (V3 sx sy 1)
-                !*! translated (V2 tx ty * (1 / fromIntegral scale))
-                !*! scaled     (V3 (fontScale font) (fontScale font) 1)
-                !*! translated (V2 offset 0)
-                !*! translated (negated (rectMin b))
-            , colour = Just colour }
-          drawArrays Triangles range
+      use glyphP $ do
+        let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
+        for_ instances $ \ Instance{ offset, range } ->
+          for_ jitterPattern $ \ (colour, V2 tx ty) -> do
+            set Glyph.U
+              { matrix3 = Just
+                  $   translated (-1)
+                  !*! scaled     (V3 sx sy 1)
+                  !*! translated (V2 tx ty * (1 / fromIntegral scale))
+                  !*! scaled     (V3 (fontScale font) (fontScale font) 1)
+                  !*! translated (V2 offset 0)
+                  !*! translated (negated (rectMin b))
+              , colour = Just colour }
+            drawArrays Triangles range
 
-  sendIO (writeIORef ref l { bounds }) where
-  jitterPattern
-    = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
-      , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
-      , (green, V2 ( 3 / 12.0) (-1 / 12.0))
-      , (green, V2 ( 5 / 12.0) ( 5 / 12.0))
-      , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
-      , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
-      ]
+    sendIO (writeIORef ref l { bounds, string }) where
+    jitterPattern
+      = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
+        , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
+        , (green, V2 ( 3 / 12.0) (-1 / 12.0))
+        , (green, V2 ( 5 / 12.0) ( 5 / 12.0))
+        , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
+        , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
+        ]
 
 setColour :: Has (Lift IO) sig m => Label -> Colour Float -> m ()
 setColour Label{ ref } colour = sendIO (modifyIORef ref (\ l -> l { colour }))
