@@ -1,2 +1,6 @@
 module GL.Carrier.Bind
-() where
+( -- * Bind effect
+  module GL.Effect.Bind
+) where
+
+import GL.Effect.Bind
