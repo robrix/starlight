@@ -86,7 +86,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
-      label <- setLabel label { Label.colour = white } font "hello"
+      setLabel label font "hello"
+      setColour label white
       let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP }
 
       fix $ \ loop -> do

@@ -5,9 +5,10 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module UI.Label
-( LabelState(colour, bcolour)
+( Label
 , label
 , setLabel
+, setColour
 , drawLabel
 ) where
 
@@ -19,6 +20,7 @@ import           Data.Coerce
 import           Data.Foldable (for_)
 import           Data.Functor.Identity
 import           Data.Interval
+import           Data.IORef
 import           Geometry.Rect
 import           GHC.Stack
 import           GL.Array
@@ -43,6 +45,8 @@ import           UI.Glyph (Instance(..), Run(..), geometry)
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 
+newtype Label = Label { ref :: IORef LabelState }
+
 data LabelState = LabelState
   { textP   :: !(Program Text.U  Text.V  Text.O)
   , glyphP  :: !(Program Glyph.U Glyph.V Glyph.O)
@@ -64,7 +68,7 @@ label
      , Has Window.Window sig m
      , HasCallStack
      )
-  => m LabelState
+  => m Label
 label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
@@ -95,18 +99,19 @@ label = do
 
   scale <- Window.scale
 
-  pure $ LabelState { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale }
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale })
 
 setLabel
   :: ( HasCallStack
      , Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => LabelState
+  => Label
   -> Font
   -> String
-  -> m LabelState
-setLabel l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string = runLiftIO $ do
+  -> m ()
+setLabel Label{ ref } font string = runLiftIO $ do
+  l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale } <- sendIO (readIORef ref)
   glBlendFunc GL_ONE GL_ONE -- add
 
   let Run instances b = layoutString font string
@@ -152,7 +157,7 @@ setLabel l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale } font s
             , colour = Just colour }
           drawArrays Triangles range
 
-    pure l { bounds } where
+  sendIO (writeIORef ref l { bounds }) where
   jitterPattern
     = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
       , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
@@ -162,15 +167,19 @@ setLabel l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale } font s
       , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
       ]
 
+setColour :: Has (Lift IO) sig m => Label -> Colour Float -> m ()
+setColour Label{ ref } colour = sendIO (modifyIORef ref (\ l -> l { colour }))
+
 
 drawLabel
   :: ( HasCallStack
      , Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => LabelState
+  => Label
   -> m ()
-drawLabel LabelState { texture, textP, colour, bcolour, quadA, bounds, scale } = runLiftIO $ do
+drawLabel Label{ ref } = runLiftIO $ do
+  LabelState { texture, textP, colour, bcolour, quadA, bounds, scale } <- sendIO (readIORef ref)
   glBlendFunc GL_ZERO GL_SRC_COLOR
 
   bind @Framebuffer Nothing
