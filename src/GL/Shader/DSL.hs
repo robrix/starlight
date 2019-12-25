@@ -552,6 +552,9 @@ data Field a = Field
   }
   deriving (Eq, Ord, Show)
 
+newtype Offset = Offset Int
+  deriving (Eq, Ord, Show)
+
 class Vars t where
   makeVars :: (forall a . GLSLType a => Field a -> v a) -> t v
   default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GLSLType a => Field a -> v a) -> t v
