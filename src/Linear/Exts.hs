@@ -2,6 +2,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Linear.Exts
 ( translated
+, translated3
 , rotated
 , scaled
 , reject
@@ -26,6 +27,13 @@ translated (V2 tx ty) = V3
   (V3 1 0 tx)
   (V3 0 1 ty)
   (V3 0 0 1)
+
+translated3 :: V3 Float -> M44 Float
+translated3 (V3 tx ty tz) = V4
+  (V4 1 0 0 tx)
+  (V4 0 1 0 ty)
+  (V4 0 0 1 tz)
+  (V4 0 0 0 1)
 
 rotated :: Radians Float -> M33 Float
 rotated (Radians theta) = V3
