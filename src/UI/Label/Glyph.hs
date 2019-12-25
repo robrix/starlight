@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE UndecidableInstances #-}
 module UI.Label.Glyph
 ( shader
 , U(..)
@@ -8,6 +11,7 @@ module UI.Label.Glyph
 ) where
 
 import GHC.Generics (Generic)
+import GL.Object
 import GL.Shader.DSL
 
 shader :: Shader U I O
@@ -38,6 +42,8 @@ newtype I v = I { pos :: v (V4 Float) }
   deriving (Generic)
 
 instance Vars I
+
+deriving instance Bind (v (V4 Float)) => Bind (I v)
 
 newtype IF v = IF { _coord2 :: v (V2 Float) }
   deriving (Generic)

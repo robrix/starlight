@@ -1,6 +1,9 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Starlight.Shader.Stars
 ( shader
 , U(..)
@@ -9,6 +12,7 @@ module Starlight.Shader.Stars
 ) where
 
 import GHC.Generics (Generic)
+import GL.Object
 import GL.Shader.DSL
 
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
@@ -75,6 +79,8 @@ newtype I v = I { pos :: v (V2 Float) }
   deriving (Generic)
 
 instance Vars I
+
+deriving instance Bind (v (V2 Float)) => Bind (I v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)

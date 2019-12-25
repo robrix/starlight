@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE UndecidableInstances #-}
 module UI.Graph.Lines
 ( shader
 , U(..)
@@ -8,6 +11,7 @@ module UI.Graph.Lines
 ) where
 
 import GHC.Generics (Generic)
+import GL.Object
 import GL.Shader.DSL
 
 shader :: Shader U I O
@@ -31,6 +35,8 @@ newtype I v = I { pos :: v (V2 Float) }
   deriving (Generic)
 
 instance Vars I
+
+deriving instance Bind (v (V2 Float)) => Bind (I v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)

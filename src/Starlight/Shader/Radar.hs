@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Starlight.Shader.Radar
 ( shader
 , U(..)
@@ -8,6 +11,7 @@ module Starlight.Shader.Radar
 ) where
 
 import GHC.Generics (Generic)
+import GL.Object
 import GL.Shader.DSL
 import Unit.Angle (Radians(..))
 
@@ -35,6 +39,8 @@ newtype I v = I { n :: v Float }
   deriving (Generic)
 
 instance Vars I
+
+deriving instance Bind (v Float) => Bind (I v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)
