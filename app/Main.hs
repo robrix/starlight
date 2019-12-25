@@ -95,7 +95,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         continue <- fmap isJust . runEmpty $ do
           state <- physics t =<< input
           draw drawState t state
-        setLabel label font $ show (round t)
+        setLabel label font $ show (round t :: Integer)
         drawLabel label
         put =<< now
         when continue $
