@@ -548,6 +548,10 @@ class Vars t where
   default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => String -> v a -> m (v' a)) -> t v -> m (t v')
   traverseVars f = fmap to . gtraverseVars @t f . from
 
+  mapVars2 :: (forall a . GLSLType a => String -> u a -> v a -> w a) -> t u -> t v -> t w
+  default mapVars2 :: (Generic (t u), Generic (t v), Generic (t w), GMapVars2 t u v w (Rep (t u)) (Rep (t v)) (Rep (t w))) => (forall a . GLSLType a => String -> u a -> v a -> w a) -> t u -> t v -> t w
+  mapVars2 f a b = to (gmapVars2 @t f (from a) (from b))
+
 foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
 foldVars f t = getConst $ traverseVars (fmap Const . f) t
 
