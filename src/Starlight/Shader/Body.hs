@@ -18,7 +18,7 @@ import GL.Shader.DSL
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } None ->
-    gl_Position .= vec4 (matrix u !* vec3 pos 1) 1)
+    gl_Position .= vec4 (matrix u !* pos) 1)
 
   >>> fragment (\ None O { fragColour } ->
     fragColour .= colour u)
@@ -32,13 +32,13 @@ data U v = U
 
 instance Vars U
 
-newtype V v = V { pos :: v (V2 Float) }
+newtype V v = V { pos :: v (V3 Float) }
   deriving (Generic)
 
 instance Vars V
 
-deriving instance Bind     (v (V2 Float)) => Bind     (V v)
-deriving instance Storable (v (V2 Float)) => Storable (V v)
+deriving instance Bind     (v (V3 Float)) => Bind     (V v)
+deriving instance Storable (v (V3 Float)) => Storable (V v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)

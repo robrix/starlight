@@ -124,7 +124,7 @@ quadV = coerce @[V2 Float]
   ]
 
 circleV :: [Body.V Identity]
-circleV = coerce @[V2 Float] $ circle 1 128
+circleV = coerce @[V3 Float] . map (`ext` 1) $ circle 1 128
 
 radarV :: [Radar.V Identity]
 radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
