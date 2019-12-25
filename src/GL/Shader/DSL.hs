@@ -20,7 +20,7 @@ module GL.Shader.DSL
 , Stage
 , vertex
 , fragment
-, (>>>)
+, (Cat.>>>)
 , None(..)
 , shaderSources
 , Stmt
@@ -96,6 +96,7 @@ module GL.Shader.DSL
 import           Control.Applicative (Alternative(..), liftA, liftA2)
 import           Control.Carrier.Fresh.Strict
 import qualified Control.Carrier.State.Strict as S
+import qualified Control.Category as Cat
 import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
 import           Data.Function (fix)
@@ -137,8 +138,9 @@ vertex = V
 fragment :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
 fragment = F
 
-(>>>) :: Stage i x -> Stage x o -> Stage i o
-(>>>) = (:>>>)
+instance Cat.Category Stage where
+  id = Id
+  (.) = flip (:>>>)
 
 
 data None (v :: * -> *) = None
