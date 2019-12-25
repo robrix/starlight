@@ -10,6 +10,7 @@ import           Data.Int
 import qualified Foreign.Marshal.Utils.Lift as A
 import           Foreign.Ptr
 import           GHC.Stack
+import qualified GL.Type as GL
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 import           Linear.Affine as Linear
@@ -18,7 +19,7 @@ import           Linear.V2 as Linear
 import           Linear.V3 as Linear
 import           Linear.V4 as Linear
 
-class Uniform t where
+class GL.Type t => Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
 instance Uniform Int where
