@@ -1,14 +1,6 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE UndecidableInstances #-}
 module GL.Array
 ( Array(..)
 , configureArray
@@ -22,11 +14,9 @@ import           Control.Effect.Finally
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Interval
-import           Data.Proxy
 import           Foreign.Ptr
 import qualified Foreign.Storable as S
 import           GHC.Stack
-import           GHC.TypeLits
 import qualified GL.Buffer as B
 import           GL.Enum as GL
 import           GL.Error
@@ -34,7 +24,6 @@ import           GL.Object
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
-import           Linear.V
 
 newtype Array n = Array { unArray :: GLuint }
   deriving (S.Storable)
@@ -47,10 +36,10 @@ instance Bind (Array n) where
   bind = checkingGLError . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: forall v n m sig . (KnownNat (Size v), GL.Type n, Has (Lift IO) sig m) => B.Buffer 'B.Array (v n) -> Array (v n) -> m ()
-configureArray _ _ = runLiftIO $ do
+configureArray :: (GL.Type a, Has (Lift IO) sig m) => B.Buffer 'B.Array a -> Array a -> m ()
+configureArray _ a = runLiftIO $ do
   glEnableVertexAttribArray 0
-  glVertexAttribPointer 0 (fromIntegral (natVal (Proxy @(Size v)))) (GL.glType (Proxy @n)) GL_FALSE 0 nullPtr
+  glVertexAttribPointer 0 (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr
 
 
 data Mode
@@ -82,7 +71,7 @@ drawArrays
 drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))
 
 
-loadVertices :: (KnownNat (Size v), S.Storable (v n), GL.Type n, Has Finally sig m, Has (Lift IO) sig m) => [v n] -> m (Array (v n))
+loadVertices :: (GL.Type a, Has Finally sig m, Has (Lift IO) sig m) => [a] -> m (Array a)
 loadVertices vertices = do
   buffer <- gen1
   array  <- gen1
