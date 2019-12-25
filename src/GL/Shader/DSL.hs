@@ -71,6 +71,7 @@ module GL.Shader.DSL
 , Vars(..)
 , foldVars
 , mapVars
+, forVars
   -- * Re-exports
 , Type(..)
 , Colour
@@ -552,6 +553,9 @@ foldVars f t = getConst $ traverseVars (fmap Const . f) t
 
 mapVars :: Vars t => (forall a . GLSLType a => String -> v a -> v' a) -> t v -> t v'
 mapVars f t = runIdentity $ traverseVars (fmap Identity . f) t
+
+forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => String -> v a -> m (v' a)) -> m (t v')
+forVars t f = traverseVars f t
 
 
 class GVars v v' t f f' where
