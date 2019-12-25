@@ -537,50 +537,69 @@ instance GLSLType TextureUnit where
 
 class Vars t where
   makeVars :: (forall a . GLSLType a => String -> v a) -> t v
-  default makeVars :: (Generic (t v), GVars v t (Rep (t v))) => (forall a . GLSLType a => String -> v a) -> t v
-  makeVars f = to (gmakeVars @_ @t f)
+  default makeVars :: (Generic (t v), GVars v v t (Rep (t v)) (Rep (t v))) => (forall a . GLSLType a => String -> v a) -> t v
+  makeVars f = to (gmakeVars @_ @_ @t f)
 
   foldVars :: Monoid b => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
-  default foldVars :: (Generic (t v), GVars v t (Rep (t v)), Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
-  foldVars f = gfoldVars @_ @t f . from
+  default foldVars :: forall v b . (Generic (t v), GVars v v t (Rep (t v)) (Rep (t v)), Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
+  foldVars f = gfoldVars @v @v @t @(Rep (t v)) @(Rep (t v)) f . from
 
+  traverseVars :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> t v -> m (t v')
+  default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GVars v v' t (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => String -> v a -> m (v' a)) -> t v -> m (t v')
+  traverseVars f = fmap to . gtraverseVars @v @v' @t @(Rep (t v)) @(Rep (t v')) f . from
 
-class GVars v t f where
-  gmakeVars :: (forall a . GLSLType a => String -> v a) -> f (t v)
+class GVars v v' t f f' where
+  gmakeVars :: (f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a) -> f (t v)
 
-  gfoldVars :: Monoid b => (forall a . GLSLType a => String -> v a -> b) -> f (t v) -> b
+  gfoldVars :: (f ~ f', v ~ v', Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> f (t v) -> b
 
-instance GVars v t f => GVars v t (M1 D d f) where
+  gtraverseVars :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> f (t v) -> m (f' (t v'))
+
+instance GVars v v' t f f' => GVars v v' t (M1 D d f) (M1 D d f') where
   gmakeVars f = M1 $ gmakeVars f
 
   gfoldVars f = gfoldVars f . unM1
 
-instance GVars v t f => GVars v t (M1 C c f) where
+  gtraverseVars f = fmap M1 . gtraverseVars @v @v' @t @f @f' f . unM1
+
+instance GVars v v' t f f' => GVars v v' t (M1 C c f) (M1 C c f') where
   gmakeVars f = M1 $ gmakeVars f
 
   gfoldVars f = gfoldVars f . unM1
 
-instance GVars v t U1 where
+  gtraverseVars f = fmap M1 . gtraverseVars @v @v' @t @f @f' f . unM1
+
+instance GVars v v' t U1 U1 where
   gmakeVars _ = U1
 
   gfoldVars _ _ = mempty
 
-instance (GVars v t f, GVars v t g) => GVars v t (f :*: g) where
+  gtraverseVars _ _ = pure U1
+
+instance (GVars v v' t f f', GVars v v' t g g') => GVars v v' t (f :*: g) (f' :*: g') where
   gmakeVars f = gmakeVars f :*: gmakeVars f
 
   gfoldVars f (l :*: r) = gfoldVars f l <> gfoldVars f r
 
-instance (GVar v t f, Selector s) => GVars v t (M1 S s f) where
+  gtraverseVars f (l :*: r) = (:*:) <$> gtraverseVars @v @v' @t @f @f' f l <*> gtraverseVars @v @v' @t @g @g' f r
+
+instance (GVar v v' t f f', Selector s) => GVars v v' t (M1 S s f) (M1 S s f') where
   gmakeVars f = fix $ \ x -> M1 (gmakeVar f (selName x))
 
   gfoldVars f m = gfoldVar f (selName m) (unM1 m)
 
-class GVar v t f where
-  gmakeVar :: (forall a . GLSLType a => String -> v a) -> String -> f (t v)
+  gtraverseVars f m = M1 <$> gtraverseVar f (selName m) (unM1 m)
 
-  gfoldVar :: Monoid b => (forall a . GLSLType a => String -> v a -> b) -> String -> f (t v) -> b
+class GVar v v' t f f' | f -> v, f' -> v' where
+  gmakeVar :: (f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a) -> String -> f (t v)
 
-instance GLSLType a => GVar v t (K1 R (v a)) where
+  gfoldVar :: (Monoid b, f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a -> b) -> String -> f (t v) -> b
+
+  gtraverseVar :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> String -> f (t v) -> m (f' (t v'))
+
+instance GLSLType a => GVar v v' t (K1 R (v a)) (K1 R (v' a)) where
   gmakeVar f s = K1 (f s)
 
   gfoldVar f s = f s . unK1
+
+  gtraverseVar f s = fmap K1 . f s . unK1
