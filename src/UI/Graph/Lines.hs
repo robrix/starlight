@@ -1,8 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE UndecidableInstances #-}
 module UI.Graph.Lines
 ( shader
 , U(..)
@@ -11,8 +8,8 @@ module UI.Graph.Lines
 ) where
 
 import GHC.Generics (Generic)
-import GL.Object
 import GL.Shader.DSL
+import UI.Graph.Vertex
 
 shader :: Shader U I O
 shader = V vertex $ F fragment Nil where
@@ -30,13 +27,6 @@ data U v = U
   deriving (Generic)
 
 instance Vars U
-
-newtype I v = I { pos :: v (V2 Float) }
-  deriving (Generic)
-
-instance Vars I
-
-deriving instance Bind (v (V2 Float)) => Bind (I v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)
