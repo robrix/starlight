@@ -21,3 +21,6 @@ data Bind t m k
   = forall a . Bind t (m a) (a -> m k)
 
 deriving instance Functor m => Functor (Bind t m)
+
+instance HFunctor (Bind t) where
+  hmap f (Bind t m k) = Bind t (f m) (f . k)
