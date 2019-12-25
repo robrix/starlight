@@ -558,6 +558,9 @@ newtype Offset = Offset Int
 instance Semigroup Offset where
   Offset a <> Offset b = Offset (a + b)
 
+instance Monoid Offset where
+  mempty = Offset 0
+
 class Vars t where
   makeVars :: (forall a . GLSLType a => Field a -> v a) -> t v
   default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GLSLType a => Field a -> v a) -> t v
