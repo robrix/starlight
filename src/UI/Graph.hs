@@ -50,7 +50,7 @@ mkGraph f n from to = do
         !*! scaled     (ext (2 / (maxXY - minXY)) 1)
         !*! translated (negated minXY)
       colour = white
-  array <- loadInterleaved (coerce @[V2 Float] vertices)
+  array <- load (coerce @[V2 Float] vertices)
   points <- build Points.shader
   lines <- build Lines.shader
 

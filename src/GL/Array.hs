@@ -13,7 +13,7 @@ module GL.Array
 , configureArray
 , Mode(..)
 , drawArrays
-, loadInterleaved
+, load
 , bindArray
 , ArrayT(..)
 , HasArray(..)
@@ -92,8 +92,8 @@ drawArrays
 drawArrays mode i = askProgram >> askArray >> checkingGLError (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))))
 
 
-loadInterleaved :: (DSL.Vars i, S.Storable (i Identity), Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
-loadInterleaved is = do
+load :: (DSL.Vars i, S.Storable (i Identity), Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
+load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
   bind (Just b)

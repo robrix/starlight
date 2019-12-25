@@ -77,10 +77,10 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       label <- label
 
-      quadA   <- loadInterleaved quadV
-      shipA   <- loadInterleaved shipV
-      circleA <- loadInterleaved circleV
-      radarA  <- loadInterleaved radarV
+      quadA   <- load quadV
+      shipA   <- load shipV
+      circleA <- load circleV
+      radarA  <- load radarV
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
