@@ -223,10 +223,8 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
       , zoom       = Just zoomOut
       }
 
-    bind (Just quadA)
-    drawArrays TriangleStrip (Interval 0 4)
-
-  bind (Just shipA)
+    bindArray quadA $
+      drawArrays TriangleStrip (Interval 0 4)
 
   scale <- Window.scale
   size <- Window.size
@@ -245,7 +243,8 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
       , colour = Just white
       }
 
-    drawArrays LineLoop (Interval 0 4)
+    bindArray shipA $
+      drawArrays LineLoop (Interval 0 4)
 
     let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
           let trans = rel !*! S.transform orbit (getDelta t * 86400)
@@ -261,8 +260,8 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
 
           for_ satellites (drawBody trans)
 
-    bind (Just circleA)
-    drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
+    bindArray circleA $
+      drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
 
   use radarP $ do
     let drawBlip rel S.Body { radius = Metres r, colour, orbit, satellites } = do
@@ -287,8 +286,8 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
 
           for_ satellites (drawBlip trans)
 
-    bind (Just radarA)
-    drawBlip (scaled (V3 distanceScale distanceScale 1)) S.sol
+    bindArray radarA $
+      drawBlip (scaled (V3 distanceScale distanceScale 1)) S.sol
 
 
 data DrawState = DrawState

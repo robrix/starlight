@@ -133,25 +133,26 @@ setLabel l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale } font s
   realloc glyphB (length vertices) Static Draw
   copy glyphB 0 (coerce vertices)
 
-  bind (Just glyphA)
-  configureArray glyphB glyphA
 
-  use glyphP $ do
-    let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
-    for_ instances $ \ Instance{ offset, range } ->
-      for_ jitterPattern $ \ (colour, V2 tx ty) -> do
-        set Glyph.U
-          { matrix3 = Just
-              $   translated (-1)
-              !*! scaled     (V3 sx sy 1)
-              !*! translated (V2 tx ty * (1 / fromIntegral scale))
-              !*! scaled     (V3 (fontScale font) (fontScale font) 1)
-              !*! translated (V2 offset 0)
-              !*! translated (negated (rectMin b))
-          , colour = Just colour }
-        drawArrays Triangles range
+  bindArray glyphA $ do
+    configureArray glyphB glyphA
 
-  pure l { bounds } where
+    use glyphP $ do
+      let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
+      for_ instances $ \ Instance{ offset, range } ->
+        for_ jitterPattern $ \ (colour, V2 tx ty) -> do
+          set Glyph.U
+            { matrix3 = Just
+                $   translated (-1)
+                !*! scaled     (V3 sx sy 1)
+                !*! translated (V2 tx ty * (1 / fromIntegral scale))
+                !*! scaled     (V3 (fontScale font) (fontScale font) 1)
+                !*! translated (V2 offset 0)
+                !*! translated (negated (rectMin b))
+            , colour = Just colour }
+          drawArrays Triangles range
+
+    pure l { bounds } where
   jitterPattern
     = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
       , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
@@ -202,15 +203,15 @@ drawLabel LabelState { texture, textP, colour, bcolour, quadA, bounds, scale } =
       , colour  = Just transparent
       }
 
-    bind (Just quadA)
-    let range = Interval 0 4
-    drawArrays TriangleStrip range
-
-    when (opaque colour /= black) $ do
-      glBlendFunc GL_ONE GL_ONE
-      set Text.U
-        { rect    = Just rect
-        , sampler = Just textureUnit
-        , colour  = Just colour
-        }
+    bindArray quadA $ do
+      let range = Interval 0 4
       drawArrays TriangleStrip range
+
+      when (opaque colour /= black) $ do
+        glBlendFunc GL_ONE GL_ONE
+        set Text.U
+          { rect    = Just rect
+          , sampler = Just textureUnit
+          , colour  = Just colour
+          }
+        drawArrays TriangleStrip range

@@ -15,7 +15,6 @@ import           Data.Coerce
 import           Data.Functor.Identity
 import           Data.Interval
 import           GL.Array
-import           GL.Object
 import           GL.Program
 import           Graphics.GL.Core41
 import           Lens.Micro ((^.))
@@ -58,8 +57,7 @@ mkGraph f n from to = do
   pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 
 drawGraph :: (Has Finally sig m, Has (Lift IO) sig m) => Graph -> m ()
-drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = do
-  bind (Just array)
+drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = bindArray array $ do
   runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
   use points $ do
     set Points.U { matrix = Just matrix, pointSize = Just pointSize, colour = Just colour }

@@ -38,7 +38,7 @@ import qualified GL.Buffer as B
 import           GL.Enum as GL
 import           GL.Error
 import           GL.Object
-import           GL.Program (HasProgram, ProgramT(..))
+import           GL.Program (HasProgram(..), ProgramT(..))
 import qualified GL.Shader.DSL as DSL
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
@@ -83,11 +83,13 @@ instance GL.Enum Mode where
 drawArrays
   :: ( Has (Lift IO) sig m
      , HasCallStack
+     , HasArray i m
+     , HasProgram u i o m
      )
   => Mode
   -> Interval Int
   -> m ()
-drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))
+drawArrays mode i = askProgram >> askArray >> checkingGLError (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))))
 
 
 load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (i Array)
