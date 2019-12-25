@@ -1,9 +1,13 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 module GL.Array
 ( Array(..)
 , configureArray
@@ -11,11 +15,16 @@ module GL.Array
 , drawArrays
 , load
 , loadInterleaved
+, bindArray
+, ArrayT(..)
+, HasArray(..)
 ) where
 
 import           Control.Algebra
+import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Monad.IO.Class.Lift
+import           Control.Monad.Trans.Class
 import           Data.Coerce
 import           Data.Functor.Const
 import           Data.Functor.Identity
@@ -105,3 +114,23 @@ loadInterleaved is = do
   B.copy b 0 is
 
   a <$ configureArray b a
+
+
+bindArray :: Has (Lift IO) sig m => Array (i Identity) -> ArrayT i m a -> m a
+bindArray array (ArrayT m) = do
+  bind (Just array)
+  a <- runReader array m
+  a <$ bind @(Array _) Nothing
+
+class Monad m => HasArray i m | m -> i where
+  askArray :: m (Array (i Identity))
+
+
+newtype ArrayT i m a = ArrayT { runArrayT :: ReaderC (Array (i Identity)) m a }
+  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
+
+instance Algebra sig m => Algebra sig (ArrayT i m) where
+  alg = ArrayT . send . handleCoercible
+
+instance Algebra sig m => HasArray i (ArrayT i m) where
+  askArray = ArrayT ask
