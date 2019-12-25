@@ -13,7 +13,6 @@ module GL.Array
 , configureArray
 , Mode(..)
 , drawArrays
-, load
 , loadInterleaved
 , bindArray
 , ArrayT(..)
@@ -92,22 +91,6 @@ drawArrays
   -> m ()
 drawArrays mode i = askProgram >> askArray >> checkingGLError (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))))
 
-
-load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (i Array)
-load is = do
-  let is' = DSL.getApVars (traverse (DSL.ApVars . DSL.mapVars (const ((:[]) . runIdentity))) is)
-  DSL.forVars is' (\ DSL.Field { DSL.location } vs -> runLiftIO $ do
-    b <- gen1 @(B.Buffer 'B.Array _)
-    a <- gen1
-    bind (Just b)
-    B.realloc b (length vs) B.Static B.Draw
-    B.copy b 0 vs
-
-    bind (Just a)
-    checkingGLError $ glEnableVertexAttribArray (fromIntegral location)
-    checkingGLError $ glVertexAttribPointer     (fromIntegral location) (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr
-
-    pure a)
 
 loadInterleaved :: (DSL.Vars i, S.Storable (i Identity), Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
 loadInterleaved is = do
