@@ -70,6 +70,7 @@ module GL.Shader.DSL
 , GLSLType(..)
 , Vars(..)
 , Field(..)
+, Offset(..)
 , foldVars
 , foldVarsM
 , mapVars
