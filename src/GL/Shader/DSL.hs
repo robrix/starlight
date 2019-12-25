@@ -555,6 +555,9 @@ data Field a = Field
 newtype Offset = Offset Int
   deriving (Eq, Ord, Show)
 
+instance Semigroup Offset where
+  Offset a <> Offset b = Offset (a + b)
+
 class Vars t where
   makeVars :: (forall a . GLSLType a => Field a -> v a) -> t v
   default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GLSLType a => Field a -> v a) -> t v
