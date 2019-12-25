@@ -244,7 +244,7 @@ data Expr (k :: Type) a where
 
   (:^.) :: Expr k a -> Prj a b -> Expr k b
   (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
-  (:!*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
+  (:!*) :: Expr k (v (v Float)) -> Expr k (v Float) -> Expr k (v Float)
 
   Eq :: Expr k a -> Expr k a -> Expr k Bool
   Lt :: Expr k a -> Expr k a -> Expr k Bool
@@ -465,7 +465,7 @@ _a = Prj "a"
 infixl 7 ^*
 
 
-(!*) :: Expr k (M33 Float) -> Expr k (V3 Float) -> Expr k (V3 Float)
+(!*) :: Expr k (v (v Float)) -> Expr k (v Float) -> Expr k (v Float)
 (!*) = (:!*)
 
 infixl 7 !*
