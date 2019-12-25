@@ -292,11 +292,11 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
 
 data DrawState = DrawState
   { quadA   :: Array (Stars.I Identity)
-  , circleA :: Array (Ship.I Identity)
-  , shipA   :: Array (Ship.I Identity)
+  , circleA :: Array (Ship.I  Identity)
+  , shipA   :: Array (Ship.I  Identity)
   , radarA  :: Array (Radar.I Identity)
   , starsP  :: Program Stars.U Stars.I Stars.O
-  , shipP   :: Program Ship.U Ship.I Ship.O
+  , shipP   :: Program Ship.U  Ship.I  Ship.O
   , radarP  :: Program Radar.U Radar.I Radar.O
   }
 
