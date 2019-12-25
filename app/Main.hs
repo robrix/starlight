@@ -74,7 +74,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       starsP <- build Stars.shader
       shipP  <- build Ship.shader
       radarP <- build Radar.shader
-      bodyP  <- build Ship.shader
 
       label <- label
 
@@ -88,7 +87,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_PROGRAM_POINT_SIZE
 
       setColour label white
-      let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP }
+      let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP }
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
@@ -202,7 +201,7 @@ draw
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t PlayerState { position, velocity, rotation } = runLiftIO $ do
+draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t PlayerState { position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -246,22 +245,22 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
     bindArray shipA $
       drawArrays LineLoop (Interval 0 4)
 
-  let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
-        let trans = rel !*! S.transform orbit (getDelta t * 86400)
-        set Ship.U
-          { matrix = Just
-              $   window
-              !*! trans
-              !*! scaled (V3 r r 1)
-          , colour = Just colour
-          }
+    let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
+          let trans = rel !*! S.transform orbit (getDelta t * 86400)
+          set Ship.U
+            { matrix = Just
+                $   window
+                !*! trans
+                !*! scaled (V3 r r 1)
+            , colour = Just colour
+            }
 
-        drawArrays LineLoop (Interval 0 (length circleV))
+          drawArrays LineLoop (Interval 0 (length circleV))
 
-        for_ satellites (drawBody trans)
+          for_ satellites (drawBody trans)
 
-  use bodyP . bindArray circleA $
-    drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
+    bindArray circleA $
+      drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
 
   use radarP $ do
     let drawBlip rel S.Body { radius = Metres r, colour, orbit, satellites } = do
@@ -297,7 +296,6 @@ data DrawState = DrawState
   , radarA  :: Array (Radar.V Identity)
   , starsP  :: Program Stars.U Stars.V Stars.O
   , shipP   :: Program Ship.U  Ship.V  Ship.O
-  , bodyP   :: Program Ship.U  Ship.V  Ship.O
   , radarP  :: Program Radar.U Radar.V Radar.O
   }
 
