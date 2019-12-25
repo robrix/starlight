@@ -52,7 +52,7 @@ configureArray _ a = runLiftIO $ do
 
 configureInputs :: (DSL.Vars i, HasProgram u i o m, Has (Lift IO) sig m) => i (Product (B.Buffer 'B.Array) Array) -> m ()
 configureInputs v = askProgram >>= \ (Program p) ->
-  getAp (DSL.foldVars (\ s (Pair b a) -> Ap . runLiftIO $ do
+  getAp (DSL.foldVars (\ (DSL.Field s _) (Pair b a) -> Ap . runLiftIO $ do
     loc <- C.withCString s (checkingGLError . glGetAttribLocation p)
     unless (loc < 0) $ do
       bind (Just a)
@@ -93,7 +93,7 @@ drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (glEnum mode) (fr
 load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => Program u i o -> [i Identity] -> m (i Array)
 load (Program p) is = do
   let is' = DSL.getApVars (traverse (DSL.ApVars . DSL.mapVars (const ((:[]) . runIdentity))) is)
-  DSL.forVars is' (\ s vs -> runLiftIO $ do
+  DSL.forVars is' (\ (DSL.Field s _) vs -> runLiftIO $ do
     b <- gen1 @(B.Buffer 'B.Array _)
     a <- gen1
     loc <- C.withCString s (checkingGLError . glGetAttribLocation p)

@@ -11,7 +11,6 @@ module UI.Label
 , drawLabel
 ) where
 
-import           Control.Algebra (Effect)
 import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Monad (when)
@@ -58,8 +57,7 @@ data Label = Label
 
 
 label
-  :: ( Effect sig
-     , Has Finally sig m
+  :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Window.Window sig m
      , HasCallStack
