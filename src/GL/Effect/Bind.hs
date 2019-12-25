@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 module GL.Effect.Bind
 ( -- * Bind effect
   Bind(..)
@@ -12,3 +13,4 @@ import Control.Algebra
 
 data Bind a m k
   = Bind a (m k)
+  deriving (Functor)
