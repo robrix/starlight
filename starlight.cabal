@@ -81,6 +81,7 @@ library
     UI.Graph
     UI.Graph.Lines
     UI.Graph.Points
+    UI.Graph.Vertex
     UI.Label
     UI.Label.Glyph
     UI.Label.Text
