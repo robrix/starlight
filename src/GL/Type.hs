@@ -4,6 +4,7 @@ module GL.Type
 ( Type(..)
 ) where
 
+import           Data.Int
 import           Data.Proxy
 import qualified Foreign.Storable as S
 import           Graphics.GL.Core41
@@ -25,7 +26,7 @@ instance Type Float where
 instance Type Double where
   glType _ = GL_DOUBLE
 
-instance Type Int where
+instance Type Int32 where
   glType _ = GL_INT
 
 instance Type a => Type (V2 a) where
