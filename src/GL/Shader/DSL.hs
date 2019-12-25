@@ -553,7 +553,7 @@ data Field a = Field
   deriving (Eq, Ord, Show)
 
 newtype Offset = Offset Int
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Num, Ord, Show)
 
 instance Semigroup Offset where
   Offset a <> Offset b = Offset (a + b)
