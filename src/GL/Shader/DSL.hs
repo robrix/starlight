@@ -126,6 +126,7 @@ program = Shader
 
 
 data Stage i o where
+  Id :: Stage i i
   V :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
   F :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
   (:>>>) :: Stage i x -> Stage x o -> Stage i o
@@ -152,6 +153,7 @@ shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOption
 
 stageSources :: Doc () -> Stage i o -> [(Type, Doc ())]
 stageSources u = \case
+  Id  -> []
   V s -> [(Vertex,   renderStage s)]
   F s -> [(Fragment, renderStage s)]
   l :>>> r -> stageSources u l <> stageSources u r
