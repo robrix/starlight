@@ -9,6 +9,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -114,6 +115,9 @@ class Monad m => HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -
 
 newtype ProgramT (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramT { runProgramT :: ReaderC (Program u i o) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
+
+instance HasProgram u i o m => HasProgram u i o (ReaderC r m) where
+  askProgram = lift askProgram
 
 instance Algebra sig m => Algebra sig (ProgramT u i o m) where
   alg = ProgramT . send . handleCoercible
