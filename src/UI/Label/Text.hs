@@ -11,6 +11,7 @@ module UI.Label.Text
 , O(..)
 ) where
 
+import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
@@ -62,7 +63,8 @@ newtype I v = I { pos :: v (V2 Float) }
 
 instance Vars I
 
-deriving instance Bind (v (V2 Float)) => Bind (I v)
+deriving instance Bind     (v (V2 Float)) => Bind     (I v)
+deriving instance Storable (v (V2 Float)) => Storable (I v)
 
 newtype IF v = IF { _coord2 :: v (V2 Float) }
   deriving (Generic)

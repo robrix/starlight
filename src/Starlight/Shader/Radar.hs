@@ -10,6 +10,7 @@ module Starlight.Shader.Radar
 , O(..)
 ) where
 
+import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
@@ -40,7 +41,8 @@ newtype I v = I { n :: v Float }
 
 instance Vars I
 
-deriving instance Bind (v Float) => Bind (I v)
+deriving instance Bind     (v Float) => Bind     (I v)
+deriving instance Storable (v Float) => Storable (I v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)
