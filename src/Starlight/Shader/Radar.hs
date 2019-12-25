@@ -17,13 +17,13 @@ import GL.Shader.DSL
 import Unit.Angle (Radians(..))
 
 shader :: Shader U I O
-shader = V vertex $ F fragment Nil where
-  vertex U { matrix, angle, sweep } I { n } None = do
-    angle <- let' "angle" (coerce angle + n * coerce sweep)
+shader = program $ \ u
+  ->  vertex (\ I{ n } None -> do
+    angle <- let' "angle" (coerce (angle u) + n * coerce (sweep u))
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle) ^* 150)
-    gl_Position .= vec4 (vec3 ((matrix !* vec3 pos 1) ^. _xy) 0) 1
+    gl_Position .= vec4 (vec3 ((matrix u !* vec3 pos 1) ^. _xy) 0) 1)
 
-  fragment U { colour } None O { fragColour } = fragColour .= colour
+  >>> fragment (\ None O{ fragColour } -> fragColour .= colour u)
 
 
 data U v = U

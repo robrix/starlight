@@ -16,19 +16,19 @@ import GL.Object
 import GL.Shader.DSL
 
 shader :: Shader U I O
-shader = V vertex $ F fragment Nil where
-  vertex U { matrix3 } I { pos } IF { _coord2 } = do
+shader = program $ \ u
+  ->  vertex (\ I { pos } IF { _coord2 } -> do
     _coord2 .= pos ^. _zw
-    gl_Position .= vec4 (matrix3 !* vec3 (pos ^. _xy) 1) 0 ^. _xywz
+    gl_Position .= vec4 (matrix3 u !* vec3 (pos ^. _xy) 1) 0 ^. _xywz)
 
-  fragment U { colour } IF { _coord2 } O { fragColour } = do
+  >>> fragment (\ IF { _coord2 } O { fragColour } -> do
     iff (_coord2 ^. _x * _coord2 ^. _x - _coord2 ^. _y `gt` 0)
       discard
       (iff gl_FrontFacing
         -- Upper 4 bits: front faces
         -- Lower 4 bits: back faces
-        (fragColour .= colour * 16 / 255)
-        (fragColour .= colour * 1 / 255))
+        (fragColour .= colour u * 16 / 255)
+        (fragColour .= colour u * 1 / 255)))
 
 
 data U v = U

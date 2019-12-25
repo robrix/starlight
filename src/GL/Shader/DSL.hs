@@ -15,7 +15,12 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module GL.Shader.DSL
-( Shader(..)
+( Shader
+, program
+, Stage
+, vertex
+, fragment
+, (>>>)
 , None(..)
 , shaderSources
 , Stmt
@@ -114,9 +119,26 @@ import           UI.Colour (Colour)
 import           Unit.Angle
 
 data Shader (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) where
-  V :: (Vars u, Vars i, Vars o) => (u (Expr 'Vertex)   -> i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex ())   -> Shader u o o' -> Shader u i o'
-  F :: (Vars u, Vars i, Vars o) => (u (Expr 'Fragment) -> i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Shader u o o' -> Shader u i o'
-  Nil :: Shader u i o
+  Shader :: Vars u => ((forall k . u (Expr k)) -> Stage i o) -> Shader u i o
+
+program :: Vars u => ((forall k . u (Expr k)) -> Stage i o) -> Shader u i o
+program = Shader
+
+
+data Stage i o where
+  V :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
+  F :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
+  (:>>>) :: Stage i x -> Stage x o -> Stage i o
+
+vertex   :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
+vertex = V
+
+fragment :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
+fragment = F
+
+(>>>) :: Stage i x -> Stage x o -> Stage i o
+(>>>) = (:>>>)
+
 
 data None (v :: * -> *) = None
   deriving (Generic)
@@ -124,26 +146,31 @@ data None (v :: * -> *) = None
 instance Vars None
 
 shaderSources :: Shader u i o -> [(Type, String)]
-shaderSources = \case
-  V s k -> (Vertex,   renderString (layoutPretty defaultLayoutOptions (renderShader s))) : shaderSources k
-  F s k -> (Fragment, renderString (layoutPretty defaultLayoutOptions (renderShader s))) : shaderSources k
-  Nil -> []
+shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> stageSources u' (f u) where
+  u = makeVars (Var . name)
+  u' = foldVars (const getConst) (makeVars (pvar "uniform" . name) `like` u)
+
+stageSources :: Doc () -> Stage i o -> [(Type, Doc ())]
+stageSources u = \case
+  V s -> [(Vertex,   renderStage s)]
+  F s -> [(Fragment, renderStage s)]
+  l :>>> r -> stageSources u l <> stageSources u r
   where
-  renderShader f
+  renderStage :: (Vars i, Vars o) => (i (Expr k) -> o (Ref k) -> Stmt k ()) -> Doc ()
+  renderStage f
     =  pretty "#version 410" <> hardline
-    <> foldVars (const getConst) (makeVars (var "uniform" . name) `like` u)
-    <> foldVars (const getConst) (makeVars (var "in"      . name) `like` i)
-    <> foldVars (const getConst) (makeVars (var "out"     . name) `like` o)
-    <> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt (f u i o) <> line)) where
-    u = makeVars (Var . name)
+    <> u
+    <> foldVars (const getConst) (makeVars (pvar "in"      . name) `like` i)
+    <> foldVars (const getConst) (makeVars (pvar "out"     . name) `like` o)
+    <> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt (f i o) <> line)) where
     i = makeVars (Var . name)
     o = makeVars (Ref . name)
 
-    like :: t (Const a) -> t b -> t (Const a)
-    like = const
+like :: t (Const a) -> t b -> t (Const a)
+like = const
 
-    var :: GLSLType a => String -> String -> Const (Doc ()) a
-    var qual n = fix $ \ c -> Const $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline
+pvar :: GLSLType a => String -> String -> Const (Doc ()) a
+pvar qual n = fix $ \ c -> Const $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline
 
 
 data Stmt (k :: Type) a where

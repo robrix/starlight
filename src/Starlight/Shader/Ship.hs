@@ -16,12 +16,12 @@ import GL.Object
 import GL.Shader.DSL
 
 shader :: Shader U I O
-shader = V vertex $ F fragment Nil where
-  vertex U { matrix } I { pos } None =
-    gl_Position .= vec4 (matrix !* vec3 pos 1) 1
+shader = program $ \ u
+  ->  vertex (\ I{ pos } None ->
+    gl_Position .= vec4 (matrix u !* vec3 pos 1) 1)
 
-  fragment U { colour } None O { fragColour } =
-    fragColour .= colour
+  >>> fragment (\ None O { fragColour } ->
+    fragColour .= colour u)
 
 
 data U v = U
