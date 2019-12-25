@@ -606,3 +606,28 @@ class GTraverseVar t v1 v2 f1 f2 | f1 -> v1, f2 -> v2 where
 
 instance GLSLType a => GTraverseVar t v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
   gtraverseVar f s = fmap K1 . f s . unK1
+
+
+class GMapVars2 t v1 v2 v3 f1 f2 f3 where
+  gmapVars2 :: (forall a . GLSLType a => String -> v1 a -> v2 a -> v3 a) -> f1 (t v1) -> f2 (t v2) -> f3 (t v3)
+
+instance GMapVars2 t v1 v2 v3 f1 f2 f3 => GMapVars2 t v1 v2 v3 (M1 D d f1) (M1 D d f2) (M1 D d f3) where
+  gmapVars2 f (M1 a) (M1 b) = M1 $ gmapVars2 f a b
+
+instance GMapVars2 t v1 v2 v3 f1 f2 f3 => GMapVars2 t v1 v2 v3 (M1 C c f1) (M1 C c f2) (M1 C c f3) where
+  gmapVars2 f (M1 a) (M1 b) = M1 $ gmapVars2 f a b
+
+instance GMapVars2 t v1 v2 v3 U1 U1 U1 where
+  gmapVars2 _ _ _ = U1
+
+instance (GMapVars2 t v1 v2 v3 f1l f2l f3l, GMapVars2 t v1 v2 v3 f1r f2r f3r) => GMapVars2 t v1 v2 v3 (f1l :*: f1r) (f2l :*: f2r) (f3l :*: f3r) where
+  gmapVars2 f (l1 :*: r1) (l2 :*: r2) = gmapVars2 f l1 l2 :*: gmapVars2 f r1 r2
+
+instance (GMapVar2 t v1 v2 v3 f1 f2 f3, Selector s) => GMapVars2 t v1 v2 v3 (M1 S s f1) (M1 S s f2) (M1 S s f3) where
+  gmapVars2 f m@(M1 a) (M1 b) = M1 $ gmapVar2 f (selName m) a b
+
+class GMapVar2 t v1 v2 v3 f1 f2 f3 | f1 -> v1, f2 -> v2, f3 -> v3 where
+  gmapVar2 :: (forall a . GLSLType a => String -> v1 a -> v2 a -> v3 a) -> String -> f1 (t v1) -> f2 (t v2) -> f3 (t v3)
+
+instance GLSLType a => GMapVar2 t v1 v2 v3 (K1 R (v1 a)) (K1 R (v2 a)) (K1 R (v3 a)) where
+  gmapVar2 f s (K1 a) (K1 b) = K1 (f s a b)
