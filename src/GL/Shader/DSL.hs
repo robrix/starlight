@@ -69,6 +69,7 @@ module GL.Shader.DSL
 , renderExpr
 , GLSLType(..)
 , Vars(..)
+, Field(..)
 , foldVars
 , mapVars
 , forVars
@@ -541,6 +542,12 @@ instance GLSLType (V4 Float) where
 instance GLSLType TextureUnit where
   renderTypeOf _ = pretty "sampler2D"
 
+
+data Field a = Field
+  { name     :: String
+  , location :: Int
+  }
+  deriving (Eq, Ord, Show)
 
 class Vars t where
   makeVars :: (forall a . GLSLType a => String -> v a) -> t v
