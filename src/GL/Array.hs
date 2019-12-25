@@ -8,7 +8,6 @@ module GL.Array
 , configureInputs
 , Mode(..)
 , drawArrays
-, loadVertices
 , load
 ) where
 
@@ -89,19 +88,6 @@ drawArrays
   -> Interval Int
   -> m ()
 drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))
-
-
-loadVertices :: (GL.Type a, Has Finally sig m, Has (Lift IO) sig m) => [a] -> m (Array a)
-loadVertices vertices = do
-  buffer <- gen1
-  array  <- gen1
-
-  bind (Just buffer)
-  B.realloc buffer (length vertices) B.Static B.Draw
-  B.copy buffer 0 vertices
-
-  bind (Just array)
-  array <$ configureArray buffer array
 
 
 load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => Program u i o -> [i Identity] -> m (i Array)
