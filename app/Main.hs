@@ -86,7 +86,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
-      setLabel label font "hello"
       setColour label white
       let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP }
 
@@ -95,7 +94,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         continue <- fmap isJust . runEmpty $ do
           state <- physics t =<< input
           draw drawState t state
-        setLabel label font $ show (round t :: Integer)
+        speed <- Lens.uses _velocity norm
+        setLabel label font $ show (round speed :: Integer)
         drawLabel label
         put =<< now
         when continue $
