@@ -71,6 +71,7 @@ module GL.Shader.DSL
 , Vars(..)
 , Field(..)
 , foldVars
+, foldVarsM
 , mapVars
 , forVars
 , sequenceVars
@@ -93,6 +94,7 @@ import qualified Data.Coerce as C
 import           Data.Function (fix)
 import           Data.Functor.Const
 import           Data.Functor.Identity
+import           Data.Monoid (Ap(..))
 import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
@@ -565,6 +567,9 @@ class Vars t where
 
 foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => Field a -> v a -> b) -> t v -> b
 foldVars f t = getConst $ traverseVars (fmap Const . f) t
+
+foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field a -> v a -> m b) -> t v -> m b
+foldVarsM f t = getAp $ foldVars (fmap Ap . f) t
 
 mapVars :: Vars t => (forall a . GLSLType a => Field a -> v a -> v' a) -> t v -> t v'
 mapVars f t = runIdentity $ traverseVars (fmap Identity . f) t
