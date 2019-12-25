@@ -209,9 +209,6 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP } t Player
   viewport $ scale *^ Rect 0 size
   scissor  $ scale *^ Rect 0 size
 
-  setClearColour black
-  glClear GL_COLOR_BUFFER_BIT
-
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
   let zoomOut = zoomForSpeed size (norm velocity)
