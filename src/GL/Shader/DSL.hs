@@ -558,42 +558,42 @@ forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => String ->
 forVars t f = traverseVars f t
 
 
-class GVars v v' t f f' where
-  gmakeVars :: (f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a) -> f (t v)
+class GVars v1 v2 t f1 f2 where
+  gmakeVars :: (f1 ~ f2, v1 ~ v2) => (forall a . GLSLType a => String -> v2 a) -> f1 (t v2)
 
-  gtraverseVars :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> f (t v) -> m (f' (t v'))
+  gtraverseVars :: Applicative m => (forall a . GLSLType a => String -> v1 a -> m (v2 a)) -> f1 (t v1) -> m (f2 (t v2))
 
-instance GVars v v' t f f' => GVars v v' t (M1 D d f) (M1 D d f') where
+instance GVars v1 v2 t f1 f2 => GVars v1 v2 t (M1 D d f1) (M1 D d f2) where
   gmakeVars f = M1 $ gmakeVars f
 
-  gtraverseVars f = fmap M1 . gtraverseVars @v @v' @t @f @f' f . unM1
+  gtraverseVars f = fmap M1 . gtraverseVars @v1 @v2 @t @f1 @f2 f . unM1
 
-instance GVars v v' t f f' => GVars v v' t (M1 C c f) (M1 C c f') where
+instance GVars v1 v2 t f1 f2 => GVars v1 v2 t (M1 C c f1) (M1 C c f2) where
   gmakeVars f = M1 $ gmakeVars f
 
-  gtraverseVars f = fmap M1 . gtraverseVars @v @v' @t @f @f' f . unM1
+  gtraverseVars f = fmap M1 . gtraverseVars @v1 @v2 @t @f1 @f2 f . unM1
 
-instance GVars v v' t U1 U1 where
+instance GVars v1 v2 t U1 U1 where
   gmakeVars _ = U1
 
   gtraverseVars _ _ = pure U1
 
-instance (GVars v v' t f f', GVars v v' t g g') => GVars v v' t (f :*: g) (f' :*: g') where
+instance (GVars v1 v2 t f1l f2l, GVars v1 v2 t f1r f2r) => GVars v1 v2 t (f1l :*: f1r) (f2l :*: f2r) where
   gmakeVars f = gmakeVars f :*: gmakeVars f
 
-  gtraverseVars f (l :*: r) = (:*:) <$> gtraverseVars @v @v' @t @f @f' f l <*> gtraverseVars @v @v' @t @g @g' f r
+  gtraverseVars f (l :*: r) = (:*:) <$> gtraverseVars @v1 @v2 @t @f1l @f2l f l <*> gtraverseVars @v1 @v2 @t @f1r @f2r f r
 
-instance (GVar v v' t f f', Selector s) => GVars v v' t (M1 S s f) (M1 S s f') where
+instance (GVar v1 v2 t f1 f2, Selector s) => GVars v1 v2 t (M1 S s f1) (M1 S s f2) where
   gmakeVars f = fix $ \ x -> M1 (gmakeVar f (selName x))
 
   gtraverseVars f m = M1 <$> gtraverseVar f (selName m) (unM1 m)
 
-class GVar v v' t f f' | f -> v, f' -> v' where
-  gmakeVar :: (f ~ f', v ~ v') => (forall a . GLSLType a => String -> v a) -> String -> f (t v)
+class GVar v1 v2 t f1 f2 | f1 -> v1, f2 -> v2 where
+  gmakeVar :: (f1 ~ f2, v1 ~ v2) => (forall a . GLSLType a => String -> v2 a) -> String -> f1 (t v2)
 
-  gtraverseVar :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> String -> f (t v) -> m (f' (t v'))
+  gtraverseVar :: Applicative m => (forall a . GLSLType a => String -> v1 a -> m (v2 a)) -> String -> f1 (t v1) -> m (f2 (t v2))
 
-instance GLSLType a => GVar v v' t (K1 R (v a)) (K1 R (v' a)) where
+instance GLSLType a => GVar v1 v2 t (K1 R (v1 a)) (K1 R (v2 a)) where
   gmakeVar f s = K1 (f s)
 
   gtraverseVar f s = fmap K1 . f s . unK1
