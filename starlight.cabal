@@ -54,6 +54,7 @@ library
     Geometry.Triangle
     GL.Array
     GL.Buffer
+    GL.Carrier.Bind
     GL.Effect.Bind
     GL.Enum
     GL.Error
