@@ -1,2 +1,9 @@
 module GL.Effect.Bind
-() where
+( -- * Re-exports
+  Algebra
+, Effect
+, Has
+, run
+) where
+
+import Control.Algebra
