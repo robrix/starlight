@@ -541,12 +541,12 @@ instance GLSLType TextureUnit where
 
 class Vars t where
   makeVars :: (forall a . GLSLType a => String -> v a) -> t v
-  default makeVars :: (Generic (t v), GVars t v v (Rep (t v)) (Rep (t v))) => (forall a . GLSLType a => String -> v a) -> t v
+  default makeVars :: (Generic (t v), GVars t v v v (Rep (t v)) (Rep (t v)) (Rep (t v))) => (forall a . GLSLType a => String -> v a) -> t v
   makeVars f = to (gmakeVars @t f)
 
   traverseVars :: Applicative m => (forall a . GLSLType a => String -> v a -> m (v' a)) -> t v -> m (t v')
-  default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => String -> v a -> m (v' a)) -> t v -> m (t v')
-  traverseVars f = fmap to . gtraverseVars @t @v @v' @(Rep (t v)) @(Rep (t v')) f . from
+  default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GVars t v v' v' (Rep (t v)) (Rep (t v')) (Rep (t v')), Applicative m) => (forall a . GLSLType a => String -> v a -> m (v' a)) -> t v -> m (t v')
+  traverseVars f = fmap to . gtraverseVars @t f . from
 
 foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => String -> v a -> b) -> t v -> b
 foldVars f t = getConst $ traverseVars (fmap Const . f) t
@@ -558,42 +558,42 @@ forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => String ->
 forVars t f = traverseVars f t
 
 
-class GVars t v1 v2 f1 f2 where
-  gmakeVars :: (f1 ~ f2, v1 ~ v2) => (forall a . GLSLType a => String -> v1 a) -> f1 (t v1)
+class GVars t v1 v2 v3 f1 f2 f3 where
+  gmakeVars :: (f1 ~ f2, f2 ~ f3, v1 ~ v2, v2 ~ v3) => (forall a . GLSLType a => String -> v1 a) -> f1 (t v1)
 
-  gtraverseVars :: Applicative m => (forall a . GLSLType a => String -> v1 a -> m (v2 a)) -> f1 (t v1) -> m (f2 (t v2))
+  gtraverseVars :: (f2 ~ f3, v2 ~ v3, Applicative m) => (forall a . GLSLType a => String -> v1 a -> m (v2 a)) -> f1 (t v1) -> m (f2 (t v2))
 
-instance GVars t v1 v2 f1 f2 => GVars t v1 v2 (M1 D d f1) (M1 D d f2) where
+instance GVars t v1 v2 v3 f1 f2 f3 => GVars t v1 v2 v3 (M1 D d f1) (M1 D d f2) (M1 D d f3) where
   gmakeVars f = M1 $ gmakeVars f
 
-  gtraverseVars f = fmap M1 . gtraverseVars @t @v1 @v2 @f1 @f2 f . unM1
+  gtraverseVars f = fmap M1 . gtraverseVars @t @v1 @v2 @_ @f1 @f2 f . unM1
 
-instance GVars t v1 v2 f1 f2 => GVars t v1 v2 (M1 C c f1) (M1 C c f2) where
+instance GVars t v1 v2 v3 f1 f2 f3 => GVars t v1 v2 v3 (M1 C c f1) (M1 C c f2) (M1 C c f3) where
   gmakeVars f = M1 $ gmakeVars f
 
-  gtraverseVars f = fmap M1 . gtraverseVars @t @v1 @v2 @f1 @f2 f . unM1
+  gtraverseVars f = fmap M1 . gtraverseVars @t @v1 @v2 @_ @f1 @f2 f . unM1
 
-instance GVars t v1 v2 U1 U1 where
+instance GVars t v1 v2 v3 U1 U1 U1 where
   gmakeVars _ = U1
 
   gtraverseVars _ _ = pure U1
 
-instance (GVars t v1 v2 f1l f2l, GVars t v1 v2 f1r f2r) => GVars t v1 v2 (f1l :*: f1r) (f2l :*: f2r) where
+instance (GVars t v1 v2 v3 f1l f2l f3l, GVars t v1 v2 v3 f1r f2r f3r) => GVars t v1 v2 v3 (f1l :*: f1r) (f2l :*: f2r) (f3l :*: f3r) where
   gmakeVars f = gmakeVars f :*: gmakeVars f
 
-  gtraverseVars f (l :*: r) = (:*:) <$> gtraverseVars @t @v1 @v2 @f1l @f2l f l <*> gtraverseVars @t @v1 @v2 @f1r @f2r f r
+  gtraverseVars f (l :*: r) = (:*:) <$> gtraverseVars @t @v1 @v2 @_ @f1l @f2l f l <*> gtraverseVars @t @v1 @v2 @_ @f1r @f2r f r
 
-instance (GVar t v1 v2 f1 f2, Selector s) => GVars t v1 v2 (M1 S s f1) (M1 S s f2) where
+instance (GVar t v1 v2 v3 f1 f2 f3, Selector s) => GVars t v1 v2 v3 (M1 S s f1) (M1 S s f2) (M1 S s f3) where
   gmakeVars f = fix $ \ x -> M1 (gmakeVar f (selName x))
 
   gtraverseVars f m = M1 <$> gtraverseVar f (selName m) (unM1 m)
 
-class GVar t v1 v2 f1 f2 | f1 -> v1, f2 -> v2 where
-  gmakeVar :: (f1 ~ f2, v1 ~ v2) => (forall a . GLSLType a => String -> v1 a) -> String -> f1 (t v1)
+class GVar t v1 v2 v3 f1 f2 f3 | f1 -> v1, f2 -> v2 where
+  gmakeVar :: (f1 ~ f2, f2 ~ f3, v1 ~ v2, v2 ~ v3) => (forall a . GLSLType a => String -> v1 a) -> String -> f1 (t v1)
 
-  gtraverseVar :: Applicative m => (forall a . GLSLType a => String -> v1 a -> m (v2 a)) -> String -> f1 (t v1) -> m (f2 (t v2))
+  gtraverseVar :: (f2 ~ f3, v2 ~ v3, Applicative m) => (forall a . GLSLType a => String -> v1 a -> m (v2 a)) -> String -> f1 (t v1) -> m (f2 (t v2))
 
-instance GLSLType a => GVar t v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
+instance GLSLType a => GVar t v1 v2 v3 (K1 R (v1 a)) (K1 R (v2 a)) (K1 R (v3 a)) where
   gmakeVar f s = K1 (f s)
 
   gtraverseVar f s = fmap K1 . f s . unK1
