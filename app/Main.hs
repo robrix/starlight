@@ -37,7 +37,6 @@ import           Linear.Affine
 import           Linear.Exts
 import           Linear.Matrix
 import           Linear.Metric
-import           Linear.V1 as Linear
 import           Linear.V2 as Linear
 import           Linear.V3 as Linear
 import           Linear.Vector as Linear
@@ -79,7 +78,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       quadA   <- loadVertices quadV
       shipA   <- loadVertices shipV
       circleA <- loadVertices circleV
-      radarA  <- loadVertices (let n = (16 :: Int) in [ V1 (fromIntegral t / fromIntegral n) | t <- [-n..n] ])
+      radarA  <- loadVertices (let n = (16 :: Int) in [ fromIntegral t / fromIntegral n | t <- [-n..n] ])
 
       glEnable GL_BLEND
       glEnable GL_SCISSOR_TEST
@@ -290,7 +289,7 @@ data DrawState = DrawState
   { quadA   :: Array (V2 Float)
   , circleA :: Array (V2 Float)
   , shipA   :: Array (V2 Float)
-  , radarA  :: Array (V1 Float)
+  , radarA  :: Array Float
   , starsP  :: Program Stars.U Stars.I Stars.O
   , shipP   :: Program Ship.U Ship.I Ship.O
   , radarP  :: Program Radar.U Radar.I Radar.O
