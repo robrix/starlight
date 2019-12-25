@@ -1,5 +1,4 @@
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveGeneric #-}
 module GL.Effect.Bind
 ( -- * Bind effect
   Bind(..)
@@ -11,8 +10,7 @@ module GL.Effect.Bind
 ) where
 
 import Control.Algebra
-import GHC.Generics (Generic)
 
 data Bind a m k
   = Bind a (m k)
-  deriving (Functor, Generic)
+  deriving (Functor)
