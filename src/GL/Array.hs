@@ -106,7 +106,7 @@ load is = do
 
     pure a)
 
-loadInterleaved :: forall i m sig . (DSL.Vars i, S.Storable (i Identity), Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
+loadInterleaved :: (DSL.Vars i, S.Storable (i Identity), Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
 loadInterleaved is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
