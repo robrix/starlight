@@ -559,7 +559,7 @@ forVars t f = traverseVars f t
 
 
 class GVars t v1 v2 f1 f2 where
-  gmakeVars :: (f1 ~ f2, v1 ~ v2) => (forall a . GLSLType a => String -> v2 a) -> f1 (t v2)
+  gmakeVars :: (f1 ~ f2, v1 ~ v2) => (forall a . GLSLType a => String -> v1 a) -> f1 (t v1)
 
   gtraverseVars :: Applicative m => (forall a . GLSLType a => String -> v1 a -> m (v2 a)) -> f1 (t v1) -> m (f2 (t v2))
 
@@ -589,7 +589,7 @@ instance (GVar t v1 v2 f1 f2, Selector s) => GVars t v1 v2 (M1 S s f1) (M1 S s f
   gtraverseVars f m = M1 <$> gtraverseVar f (selName m) (unM1 m)
 
 class GVar t v1 v2 f1 f2 | f1 -> v1, f2 -> v2 where
-  gmakeVar :: (f1 ~ f2, v1 ~ v2) => (forall a . GLSLType a => String -> v2 a) -> String -> f1 (t v2)
+  gmakeVar :: (f1 ~ f2, v1 ~ v2) => (forall a . GLSLType a => String -> v1 a) -> String -> f1 (t v1)
 
   gtraverseVar :: Applicative m => (forall a . GLSLType a => String -> v1 a -> m (v2 a)) -> String -> f1 (t v1) -> m (f2 (t v2))
 
