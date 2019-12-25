@@ -89,6 +89,7 @@ module GL.Shader.DSL
 
 import           Control.Applicative (Alternative(..), liftA, liftA2)
 import           Control.Carrier.Fresh.Strict
+import qualified Control.Carrier.State.Strict as S
 import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
 import           Data.Function (fix)
@@ -98,6 +99,7 @@ import           Data.Monoid (Ap(..))
 import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
+import           Foreign.Storable
 import           GHC.Generics
 import           GL.Shader (Type(..))
 import           GL.TextureUnit
@@ -551,6 +553,7 @@ instance GLSLType TextureUnit where
 data Field a = Field
   { name     :: String
   , location :: Int
+  , offset   :: Offset
   }
   deriving (Eq, Ord, Show)
 
@@ -566,15 +569,15 @@ instance Monoid Offset where
 class Vars t where
   makeVars :: (forall a . GLSLType a => Field a -> v a) -> t v
   default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GLSLType a => Field a -> v a) -> t v
-  makeVars f = to (run (evalFresh 0 (gmakeVars @t f)))
+  makeVars f = to (run (evalFresh 0 (S.evalState (Offset 0) (gmakeVars @t f))))
 
   traverseVars :: Applicative m => (forall a . GLSLType a => Field a -> v a -> m (v' a)) -> t v -> m (t v')
   default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => Field a -> v a -> m (v' a)) -> t v -> m (t v')
-  traverseVars f = fmap to . run . evalFresh 0 . gtraverseVars @t f . from
+  traverseVars f = fmap to . run . evalFresh 0 . S.evalState (Offset 0) . gtraverseVars @t f . from
 
   mapVars2 :: (forall a . GLSLType a => Field a -> u a -> v a -> w a) -> t u -> t v -> t w
   default mapVars2 :: (Generic (t u), Generic (t v), Generic (t w), GMapVars2 t u v w (Rep (t u)) (Rep (t v)) (Rep (t w))) => (forall a . GLSLType a => Field a -> u a -> v a -> w a) -> t u -> t v -> t w
-  mapVars2 f a b = to (run (evalFresh 0 (gmapVars2 @t f (from a) (from b))))
+  mapVars2 f a b = to (run (evalFresh 0 (S.evalState (Offset 0) (gmapVars2 @t f (from a) (from b)))))
 
 foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => Field a -> v a -> b) -> t v -> b
 foldVars f t = getConst $ traverseVars (fmap Const . f) t
@@ -603,7 +606,7 @@ instance (Alternative f, Vars i) => Applicative (ApVars i f) where
 
 
 class GMakeVars t v f where
-  gmakeVars :: Has Fresh sig m => (forall a . GLSLType a => Field a -> v a) -> m (f (t v))
+  gmakeVars :: (Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field a -> v a) -> m (f (t v))
 
 instance GMakeVars t v f => GMakeVars t v (M1 D d f) where
   gmakeVars f = M1 <$> gmakeVars f
@@ -617,20 +620,22 @@ instance GMakeVars t v U1 where
 instance (GMakeVars t v fl, GMakeVars t v fr) => GMakeVars t v (fl :*: fr) where
   gmakeVars f = (:*:) <$> gmakeVars f <*> gmakeVars f
 
-instance (GMakeVar t v f, Selector s) => GMakeVars t v (M1 S s f) where
+instance (Storable a, GMakeVar t a v f, Selector s) => GMakeVars t v (M1 S s f) where
   gmakeVars f = do
     i <- fresh
-    pure (fix $ \ x -> M1 (gmakeVar f (Field (selName x) i)))
+    o <- S.get
+    S.put (o <> Offset (sizeOf @a undefined))
+    pure (fix $ \ x -> M1 (gmakeVar f (Field (selName x) i o)))
 
-class GMakeVar t v f | f -> v where
+class GMakeVar t a v f | f -> a v where
   gmakeVar :: (forall a . GLSLType a => Field a -> v a) -> Field a -> f (t v)
 
-instance GLSLType a => GMakeVar t v (K1 R (v a)) where
+instance GLSLType a => GMakeVar t a v (K1 R (v a)) where
   gmakeVar f s = K1 (f (C.coerce s))
 
 
 class GTraverseVars t v1 v2 f1 f2 where
-  gtraverseVars :: (Applicative f, Has Fresh sig m) => (forall a . GLSLType a => Field a -> v1 a -> f (v2 a)) -> f1 (t v1) -> m (f (f2 (t v2)))
+  gtraverseVars :: (Applicative f, Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field a -> v1 a -> f (v2 a)) -> f1 (t v1) -> m (f (f2 (t v2)))
 
 instance GTraverseVars t v1 v2 f1 f2 => GTraverseVars t v1 v2 (M1 D d f1) (M1 D d f2) where
   gtraverseVars f a = fmap M1 <$> gtraverseVars @t @v1 @v2 @f1 @f2 f (unM1 a)
@@ -644,20 +649,22 @@ instance GTraverseVars t v1 v2 U1 U1 where
 instance (GTraverseVars t v1 v2 f1l f2l, GTraverseVars t v1 v2 f1r f2r) => GTraverseVars t v1 v2 (f1l :*: f1r) (f2l :*: f2r) where
   gtraverseVars f (l :*: r) = liftA2 (:*:) <$> gtraverseVars @t @v1 @v2 @f1l @f2l f l <*> gtraverseVars @t @v1 @v2 @f1r @f2r f r
 
-instance (GTraverseVar t v1 v2 f1 f2, Selector s) => GTraverseVars t v1 v2 (M1 S s f1) (M1 S s f2) where
+instance (Storable a, GTraverseVar t a v1 v2 f1 f2, Selector s) => GTraverseVars t v1 v2 (M1 S s f1) (M1 S s f2) where
   gtraverseVars f m = do
     i <- fresh
-    pure (M1 <$> gtraverseVar f (Field (selName m) i) (unM1 m))
+    o <- S.get
+    S.put (o <> Offset (sizeOf @a undefined))
+    pure (M1 <$> gtraverseVar f (Field (selName m) i o) (unM1 m))
 
-class GTraverseVar t v1 v2 f1 f2 | f1 -> v1, f2 -> v2 where
+class GTraverseVar t a v1 v2 f1 f2 | f1 -> a v1, f2 -> a v2 where
   gtraverseVar :: Applicative f => (forall a . GLSLType a => Field a -> v1 a -> f (v2 a)) -> Field a -> f1 (t v1) -> f (f2 (t v2))
 
-instance GLSLType a => GTraverseVar t v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
+instance GLSLType a => GTraverseVar t a v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
   gtraverseVar f s = fmap K1 . f (C.coerce s) . unK1
 
 
 class GMapVars2 t v1 v2 v3 f1 f2 f3 where
-  gmapVars2 :: Has Fresh sig m => (forall a . GLSLType a => Field a -> v1 a -> v2 a -> v3 a) -> f1 (t v1) -> f2 (t v2) -> m (f3 (t v3))
+  gmapVars2 :: (Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field a -> v1 a -> v2 a -> v3 a) -> f1 (t v1) -> f2 (t v2) -> m (f3 (t v3))
 
 instance GMapVars2 t v1 v2 v3 f1 f2 f3 => GMapVars2 t v1 v2 v3 (M1 D d f1) (M1 D d f2) (M1 D d f3) where
   gmapVars2 f (M1 a) (M1 b) = M1 <$> gmapVars2 f a b
@@ -671,13 +678,15 @@ instance GMapVars2 t v1 v2 v3 U1 U1 U1 where
 instance (GMapVars2 t v1 v2 v3 f1l f2l f3l, GMapVars2 t v1 v2 v3 f1r f2r f3r) => GMapVars2 t v1 v2 v3 (f1l :*: f1r) (f2l :*: f2r) (f3l :*: f3r) where
   gmapVars2 f (l1 :*: r1) (l2 :*: r2) = (:*:) <$> gmapVars2 f l1 l2 <*> gmapVars2 f r1 r2
 
-instance (GMapVar2 t v1 v2 v3 f1 f2 f3, Selector s) => GMapVars2 t v1 v2 v3 (M1 S s f1) (M1 S s f2) (M1 S s f3) where
+instance (Storable a, GMapVar2 t a v1 v2 v3 f1 f2 f3, Selector s) => GMapVars2 t v1 v2 v3 (M1 S s f1) (M1 S s f2) (M1 S s f3) where
   gmapVars2 f m@(M1 a) (M1 b) = do
     i <- fresh
-    pure . M1 $ gmapVar2 f (Field (selName m) i) a b
+    o <- S.get
+    S.put (o <> Offset (sizeOf @a undefined))
+    pure . M1 $ gmapVar2 f (Field (selName m) i o) a b
 
-class GMapVar2 t v1 v2 v3 f1 f2 f3 | f1 -> v1, f2 -> v2, f3 -> v3 where
+class GMapVar2 t a v1 v2 v3 f1 f2 f3 | f1 -> a v1, f2 -> a v2, f3 -> a v3 where
   gmapVar2 :: (forall a . GLSLType a => Field a -> v1 a -> v2 a -> v3 a) -> Field a -> f1 (t v1) -> f2 (t v2) -> f3 (t v3)
 
-instance GLSLType a => GMapVar2 t v1 v2 v3 (K1 R (v1 a)) (K1 R (v2 a)) (K1 R (v3 a)) where
+instance GLSLType a => GMapVar2 t a v1 v2 v3 (K1 R (v1 a)) (K1 R (v2 a)) (K1 R (v3 a)) where
   gmapVar2 f s (K1 a) (K1 b) = K1 (f (C.coerce s) a b)
