@@ -19,6 +19,7 @@ module GL.Program
 , checkProgram
 , build
 , use
+, bindInputs
 , set
 , HasProgram(..)
 , ProgramT(..)
@@ -31,6 +32,7 @@ module GL.Program
 import           Control.Algebra
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
+import           Control.Monad (unless)
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
@@ -39,12 +41,15 @@ import           Data.Functor.Identity
 import           Data.Monoid (Ap(..))
 import           Data.Traversable (for)
 import qualified Foreign.C.String.Lift as C
+import           Foreign.Ptr
 import           GHC.Records
 import           GHC.Stack
 import           GHC.TypeLits
+import           GL.Array
 import           GL.Error
 import           GL.Shader
 import qualified GL.Shader.DSL as DSL
+import           GL.Type
 import           GL.Uniform
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
@@ -97,6 +102,14 @@ use p (ProgramT m) = do
   useProgram p
   a <- runReader p m
   a <$ useProgram (Program 0)
+
+bindInputs :: (DSL.Vars i, HasProgram u i o m, Has (Lift IO) sig m) => i Array -> m ()
+bindInputs v = askProgram >>= \ (Program p) ->
+  getAp (DSL.foldVars (\ s a -> Ap . runLiftIO $ do
+    loc <- checkingGLError $ C.withCString s (glGetAttribLocation p)
+    unless (loc < 0) $ do
+      glEnableVertexAttribArray (fromIntegral loc)
+      glVertexAttribPointer 0 (glDims a) (glType a) GL_FALSE 0 nullPtr) v) where
 
 set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
 set v = askProgram >>= \ p ->
