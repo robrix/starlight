@@ -86,7 +86,7 @@ type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity)
 build :: forall u i o m sig . (Has Finally sig m, Has (Lift IO) sig m, DSL.Vars i) => DSL.Shader u i o -> m (Program u i o)
 build p = do
   program <- createProgram
-  getAp (getConst (DSL.foldVars @i (\ (DSL.Field s i) _ -> Const . Ap . runLiftIO . checkingGLError $ do
+  getAp (getConst (DSL.foldVars @i (\ (DSL.Field s i) _ -> Const . Ap . runLiftIO . checkingGLError $
     C.withCString s (glBindAttribLocation (unProgram program) (fromIntegral i))) (DSL.makeVars id)))
   let s = DSL.shaderSources p
   shaders <- for s $ \ (type', source) -> do
