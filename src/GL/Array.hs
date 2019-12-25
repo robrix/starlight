@@ -43,10 +43,10 @@ instance Bind (Array n) where
   bind = checkingGLError . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (GL.Type a, Has (Lift IO) sig m) => B.Buffer 'B.Array a -> Array a -> m ()
-configureArray _ a = runLiftIO $ do
-  glEnableVertexAttribArray 0
-  glVertexAttribPointer 0 (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr
+configureArray :: forall i m sig . (DSL.Vars i, Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
+configureArray _ _ = getAp (getConst (DSL.foldVars (\ f@(DSL.Field _ loc) _ -> Const . Ap . runLiftIO $ do
+  checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
+  checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims f) (GL.glType f) GL_FALSE 0 nullPtr) (DSL.makeVars @i id)))
 
 
 data Mode

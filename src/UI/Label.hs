@@ -15,7 +15,9 @@ import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
+import           Data.Coerce
 import           Data.Foldable (for_)
+import           Data.Functor.Identity
 import           Data.Interval
 import           Geometry.Rect
 import           GHC.Stack
@@ -48,9 +50,9 @@ data Label = Label
   , bcolour :: !(Maybe (Colour Float))
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
-  , glyphB  :: !(Buffer 'GL.Buffer.Array (V4 Float))
-  , glyphA  :: !(Array (V4 Float))
-  , quadA   :: !(Array (V2 Float))
+  , glyphB  :: !(Buffer 'GL.Buffer.Array (Glyph.I Identity))
+  , glyphA  :: !(Array (Glyph.I Identity))
+  , quadA   :: !(Array (Text.I Identity))
   , bounds  :: !(Rect Int)
   , scale   :: !Int
   }
@@ -86,7 +88,7 @@ label = do
 
     bind (Just buffer)
     realloc buffer (length vertices) Static Draw
-    copy buffer 0 vertices
+    copy buffer 0 (coerce vertices)
 
     bind (Just array)
     array <$ configureArray buffer array
@@ -129,7 +131,7 @@ setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string
 
   bind (Just glyphB)
   realloc glyphB (length vertices) Static Draw
-  copy glyphB 0 vertices
+  copy glyphB 0 (coerce vertices)
 
   bind (Just glyphA)
   configureArray glyphB glyphA
