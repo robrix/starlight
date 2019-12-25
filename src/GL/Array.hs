@@ -8,6 +8,7 @@ module GL.Array
 , Mode(..)
 , drawArrays
 , loadVertices
+, load
 ) where
 
 import           Control.Algebra
@@ -15,6 +16,7 @@ import           Control.Effect.Finally
 import           Control.Monad (unless)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
+import           Data.Functor.Identity
 import           Data.Functor.Product
 import           Data.Interval
 import           Data.Monoid (Ap(..))
@@ -99,3 +101,20 @@ loadVertices vertices = do
 
   bind (Just array)
   array <$ configureArray buffer array
+
+
+load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => Program u i o -> [i Identity] -> m (i (Product (B.Buffer 'B.Array) Array))
+load (Program p) is = do
+  let is' = DSL.getApVars (traverse (DSL.ApVars . DSL.mapVars (const ((:[]) . runIdentity))) is)
+  DSL.forVars is' (\ s vs -> runLiftIO $ do
+    b <- gen1
+    a <- gen1
+    loc <- C.withCString s (checkingGLError . glGetAttribLocation p)
+    Pair b a <$ unless (loc < 0) (do
+      bind (Just b)
+      B.realloc b (length vs) B.Static B.Draw
+      B.copy b 0 vs
+
+      bind (Just a)
+      checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
+      checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr))
