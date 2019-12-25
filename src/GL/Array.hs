@@ -103,8 +103,4 @@ loadInterleaved is = do
   B.realloc b (length is) B.Static B.Draw
   B.copy b 0 is
 
-  getAp (getConst (DSL.foldVars (\ f@(DSL.Field _ loc) _ -> Const . Ap . runLiftIO $ do
-    checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
-    checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims f) (GL.glType f) GL_FALSE 0 nullPtr) (DSL.makeVars @i id)))
-
-  pure a
+  a <$ configureArray b a
