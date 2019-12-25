@@ -102,12 +102,12 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 distanceScale :: Float
 distanceScale = 500 / getMetres (S.radius S.sol)
 
-shipV :: [V3 Float]
+shipV :: [V2 Float]
 shipV =
-  [ V3 1      0      0
-  , V3 0      (-0.5) 0
-  , V3 (-0.5) 0      0
-  , V3 0      0.5    0
+  [ V2 1      0
+  , V2 0      (-0.5)
+  , V2 (-0.5) 0
+  , V2 0      0.5
   ]
 
 quadV :: [V2 Float]
@@ -289,7 +289,7 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
 data DrawState = DrawState
   { quadA   :: Array (V2 Float)
   , circleA :: Array (V2 Float)
-  , shipA   :: Array (V3 Float)
+  , shipA   :: Array (V2 Float)
   , radarA  :: Array (V1 Float)
   , starsP  :: Program Stars.U Stars.I Stars.O
   , shipP   :: Program Ship.U Ship.I Ship.O
