@@ -10,6 +10,7 @@ import qualified Foreign.Storable as S
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 import           Linear.Affine
+import           Linear.V1
 import           Linear.V2
 import           Linear.V3
 import           Linear.V4
@@ -31,6 +32,11 @@ instance Type Int where
 
 instance Type Int32 where
   glType _ = GL_INT
+
+instance Type a => Type (V1 a) where
+  glType _ = glType (Proxy @a)
+
+  glDims _ = glDims (Proxy @a)
 
 instance Type a => Type (V2 a) where
   glType _ = glType (Proxy @a)
