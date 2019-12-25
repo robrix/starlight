@@ -5,7 +5,6 @@
 module GL.Array
 ( Array(..)
 , configureArray
-, configureInputs
 , Mode(..)
 , drawArrays
 , load
@@ -17,9 +16,7 @@ import           Control.Monad (unless)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Functor.Identity
-import           Data.Functor.Product
 import           Data.Interval
-import           Data.Monoid (Ap(..))
 import           Foreign.Ptr
 import qualified Foreign.C.String.Lift as C
 import qualified Foreign.Storable as S
@@ -49,16 +46,6 @@ configureArray :: (GL.Type a, Has (Lift IO) sig m) => B.Buffer 'B.Array a -> Arr
 configureArray _ a = runLiftIO $ do
   glEnableVertexAttribArray 0
   glVertexAttribPointer 0 (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr
-
-configureInputs :: (DSL.Vars i, HasProgram u i o m, Has (Lift IO) sig m) => i (Product (B.Buffer 'B.Array) Array) -> m ()
-configureInputs v = askProgram >>= \ (Program p) ->
-  getAp (DSL.foldVars (\ (DSL.Field s _) (Pair b a) -> Ap . runLiftIO $ do
-    loc <- C.withCString s (checkingGLError . glGetAttribLocation p)
-    unless (loc < 0) $ do
-      bind (Just a)
-      bind (Just b)
-      checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
-      checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr) v)
 
 
 data Mode
