@@ -207,8 +207,6 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
-  bind (Just quadA)
-
   let zoomOut = zoomForSpeed size (norm velocity)
 
   use starsP $ do
@@ -219,6 +217,8 @@ draw DrawState { quadA, circleA, shipA, shipP, starsP, radarP } t PlayerState { 
       , origin     = Just (position / P size)
       , zoom       = Just zoomOut
       }
+
+    bindInputs Stars.I { pos = quadA }
 
     drawArrays TriangleStrip (Interval 0 4)
 
