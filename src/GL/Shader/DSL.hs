@@ -575,6 +575,9 @@ instance GLSLType (V3 Float) where
 instance GLSLType (V3 (V3 Float)) where
   renderTypeOf _ = pretty "mat3"
 
+instance GLSLType (V4 (V4 Float)) where
+  renderTypeOf _ = pretty "mat4"
+
 instance GLSLType (V4 Float) where
   renderTypeOf _ = pretty "vec4"
 
