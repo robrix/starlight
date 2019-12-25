@@ -114,8 +114,8 @@ import           UI.Colour (Colour)
 import           Unit.Angle
 
 data Shader (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) where
-  V :: (Vars u, Vars i, Vars o) => (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'
-  F :: (Vars u, Vars i, Vars o) => (u (Expr k) -> i (Expr k) -> o (Ref k) -> Stmt k ()) -> Shader u o o' -> Shader u i o'
+  V :: (Vars u, Vars i, Vars o) => (u (Expr 'Vertex)   -> i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex ())   -> Shader u o o' -> Shader u i o'
+  F :: (Vars u, Vars i, Vars o) => (u (Expr 'Fragment) -> i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Shader u o o' -> Shader u i o'
   Nil :: Shader u i o
 
 data None (v :: * -> *) = None
