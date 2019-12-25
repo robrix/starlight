@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module UI.Label
-( Label(colour, bcolour)
+( LabelState(colour, bcolour)
 , label
 , setLabel
 , drawLabel
@@ -43,7 +43,7 @@ import           UI.Glyph (Instance(..), Run(..), geometry)
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 
-data Label = Label
+data LabelState = LabelState
   { textP   :: !(Program Text.U Text.I Text.O)
   , glyphP  :: !(Program Glyph.U Glyph.I Glyph.O)
   , colour  :: !(Colour Float)
@@ -64,7 +64,7 @@ label
      , Has Window.Window sig m
      , HasCallStack
      )
-  => m Label
+  => m LabelState
 label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
@@ -95,18 +95,18 @@ label = do
 
   scale <- Window.scale
 
-  pure $ Label { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale }
+  pure $ LabelState { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale }
 
 setLabel
   :: ( HasCallStack
      , Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => Label
+  => LabelState
   -> Font
   -> String
-  -> m Label
-setLabel l@Label { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string = runLiftIO $ do
+  -> m LabelState
+setLabel l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale } font string = runLiftIO $ do
   glBlendFunc GL_ONE GL_ONE -- add
 
   let Run instances b = layoutString font string
@@ -167,9 +167,9 @@ drawLabel
      , Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => Label
+  => LabelState
   -> m ()
-drawLabel Label { texture, textP, colour, bcolour, quadA, bounds, scale } = runLiftIO $ do
+drawLabel LabelState { texture, textP, colour, bcolour, quadA, bounds, scale } = runLiftIO $ do
   glBlendFunc GL_ZERO GL_SRC_COLOR
 
   bind @Framebuffer Nothing
