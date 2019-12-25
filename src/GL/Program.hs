@@ -30,6 +30,7 @@ module GL.Program
 
 import           Control.Algebra
 import           Control.Carrier.Reader
+import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
@@ -83,9 +84,13 @@ setUniformValue program name v = do
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
 
 
-build :: (Has Finally sig m, Has (Lift IO) sig m) => DSL.Shader u i o -> m (Program u i o)
+build :: forall u i o m sig . (Has Finally sig m, Has (Lift IO) sig m, DSL.Vars i, Effect sig) => DSL.Shader u i o -> m (Program u i o)
 build p = do
   program <- createProgram
+  evalState (0 :: GLuint) (getAp (getConst (DSL.foldVars @i (\ s _ -> Const . Ap . runLiftIO . checkingGLError $ do
+    i <- get
+    C.withCString s (glBindAttribLocation (unProgram program) i)
+    put (i + 1)) (DSL.makeVars (\ s -> Const s)))))
   let s = DSL.shaderSources p
   shaders <- for s $ \ (type', source) -> do
     shader <- createShader type'

@@ -9,6 +9,7 @@ module UI.Graph
 , drawGraph
 ) where
 
+import           Control.Algebra (Effect)
 import           Control.Carrier.Finally
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -39,7 +40,7 @@ data Graph = Graph
   , count     :: !Int
   }
 
-mkGraph :: (Has Finally sig m, Has (Lift IO) sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
+mkGraph :: (Effect sig, Has Finally sig m, Has (Lift IO) sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
 mkGraph f n from to = do
   let vertex = V2 <*> f
       count = max n 0 + 2
