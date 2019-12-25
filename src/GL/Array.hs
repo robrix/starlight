@@ -27,10 +27,8 @@ import           Control.Effect.Finally
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Coerce
-import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Interval
-import           Data.Monoid (Ap(..))
 import           Foreign.Ptr
 import qualified Foreign.Storable as S
 import           GHC.Stack
@@ -56,9 +54,9 @@ instance Bind (Array n) where
 
 
 configureArray :: forall i m sig . (DSL.Vars i, S.Storable (i Identity), Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
-configureArray _ _ = getAp (getConst (DSL.foldVars (\ f@DSL.Field { DSL.location } _ -> Const . Ap . runLiftIO $ do
+configureArray _ _ = DSL.foldVarsM (\ f@DSL.Field { DSL.location } _ -> runLiftIO $ do
   checkingGLError $ glEnableVertexAttribArray (fromIntegral location)
-  checkingGLError $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral (S.sizeOf @(i Identity) undefined)) nullPtr) (DSL.makeVars @i id)))
+  checkingGLError $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral (S.sizeOf @(i Identity) undefined)) nullPtr) (DSL.makeVars @i id)
 
 
 data Mode
