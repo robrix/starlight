@@ -14,7 +14,6 @@ module GL.Buffer
 , KnownType(..)
 , Update(..)
 , Usage(..)
-, hintToGLEnum
 ) where
 
 import           Control.Monad.IO.Class.Lift
@@ -42,7 +41,7 @@ instance KnownType ty => Bind (Buffer ty v) where
   bind = checkingGLError . runLiftIO . glBindBuffer (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unBuffer
 
 realloc :: (KnownType ty, S.Storable v, Has (Lift IO) sig m) => Buffer ty v -> Int -> Update -> Usage -> m ()
-realloc b n update usage = runLiftIO (glBufferData (glEnum (typeOf b)) (fromIntegral (n * sizeOfElem b)) nullPtr (hintToGLEnum update usage))
+realloc b n update usage = runLiftIO (glBufferData (glEnum (typeOf b)) (fromIntegral (n * sizeOfElem b)) nullPtr (glEnum (Hint update usage)))
 
 copyPtr :: (KnownType ty, Has (Lift IO) sig m) => Buffer ty a -> Interval Int -> Ptr a -> m ()
 copyPtr b i = checkingGLError . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min_ i)) (fromIntegral (size i)) . castPtr
@@ -88,14 +87,16 @@ data Usage
   | Copy
   deriving (Eq, Ord, Show)
 
-hintToGLEnum :: Update -> Usage -> GLenum
-hintToGLEnum = curry $ \case
-  (Static,  Draw) -> GL_STATIC_DRAW
-  (Static,  Read) -> GL_STATIC_READ
-  (Static,  Copy) -> GL_STATIC_COPY
-  (Dynamic, Draw) -> GL_DYNAMIC_DRAW
-  (Dynamic, Read) -> GL_DYNAMIC_READ
-  (Dynamic, Copy) -> GL_DYNAMIC_COPY
-  (Stream,  Draw) -> GL_STREAM_DRAW
-  (Stream,  Read) -> GL_STREAM_READ
-  (Stream,  Copy) -> GL_STREAM_COPY
+data Hint = Hint Update Usage
+
+instance GL.Enum Hint where
+  glEnum = \case
+    Hint Static  Draw -> GL_STATIC_DRAW
+    Hint Static  Read -> GL_STATIC_READ
+    Hint Static  Copy -> GL_STATIC_COPY
+    Hint Dynamic Draw -> GL_DYNAMIC_DRAW
+    Hint Dynamic Read -> GL_DYNAMIC_READ
+    Hint Dynamic Copy -> GL_DYNAMIC_COPY
+    Hint Stream  Draw -> GL_STREAM_DRAW
+    Hint Stream  Read -> GL_STREAM_READ
+    Hint Stream  Copy -> GL_STREAM_COPY
