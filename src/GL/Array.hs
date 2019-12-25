@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module GL.Array
@@ -44,9 +45,9 @@ instance Bind (Array n) where
 
 
 configureArray :: forall i m sig . (DSL.Vars i, Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
-configureArray _ _ = getAp (getConst (DSL.foldVars (\ f@(DSL.Field _ loc) _ -> Const . Ap . runLiftIO $ do
-  checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
-  checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims f) (GL.glType f) GL_FALSE 0 nullPtr) (DSL.makeVars @i id)))
+configureArray _ _ = getAp (getConst (DSL.foldVars (\ f@DSL.Field { DSL.location } _ -> Const . Ap . runLiftIO $ do
+  checkingGLError $ glEnableVertexAttribArray (fromIntegral location)
+  checkingGLError $ glVertexAttribPointer (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE 0 nullPtr) (DSL.makeVars @i id)))
 
 
 data Mode
@@ -81,7 +82,7 @@ drawArrays mode i = checkingGLError . runLiftIO $ glDrawArrays (glEnum mode) (fr
 load :: (DSL.Vars i, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (i Array)
 load is = do
   let is' = DSL.getApVars (traverse (DSL.ApVars . DSL.mapVars (const ((:[]) . runIdentity))) is)
-  DSL.forVars is' (\ (DSL.Field _ loc) vs -> runLiftIO $ do
+  DSL.forVars is' (\ DSL.Field { DSL.location } vs -> runLiftIO $ do
     b <- gen1 @(B.Buffer 'B.Array _)
     a <- gen1
     bind (Just b)
@@ -89,8 +90,8 @@ load is = do
     B.copy b 0 vs
 
     bind (Just a)
-    checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
-    checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr
+    checkingGLError $ glEnableVertexAttribArray (fromIntegral location)
+    checkingGLError $ glVertexAttribPointer (fromIntegral location) (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr
 
     pure a)
 

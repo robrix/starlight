@@ -7,6 +7,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
@@ -86,8 +87,8 @@ type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity)
 build :: forall u i o m sig . (Has Finally sig m, Has (Lift IO) sig m, DSL.Vars i) => DSL.Shader u i o -> m (Program u i o)
 build p = do
   program <- createProgram
-  getAp (getConst (DSL.foldVars @i (\ (DSL.Field s i) _ -> Const . Ap . runLiftIO . checkingGLError $
-    C.withCString s (glBindAttribLocation (unProgram program) (fromIntegral i))) (DSL.makeVars id)))
+  getAp (getConst (DSL.foldVars @i (\ DSL.Field { DSL.name, DSL.location } _ -> Const . Ap . runLiftIO . checkingGLError $
+    C.withCString name (glBindAttribLocation (unProgram program) (fromIntegral location))) (DSL.makeVars id)))
   let s = DSL.shaderSources p
   shaders <- for s $ \ (type', source) -> do
     shader <- createShader type'
@@ -102,8 +103,8 @@ use p (ProgramT m) = do
 
 set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
 set v = askProgram >>= \ p ->
-  getAp (getConst (DSL.foldVars (\ (DSL.Field s _) -> Const . \case
-    Just v  -> Ap (setUniformValue p s v)
+  getAp (getConst (DSL.foldVars (\ DSL.Field { DSL.name } -> Const . \case
+    Just v  -> Ap (setUniformValue p name v)
     Nothing -> pure ()) v))
 
 
