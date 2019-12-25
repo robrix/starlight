@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module GL.Array
 ( Array(..)
@@ -8,14 +9,17 @@ module GL.Array
 , Mode(..)
 , drawArrays
 , load
+, loadInterleaved
 ) where
 
 import           Control.Algebra
 import           Control.Effect.Finally
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
+import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Interval
+import           Data.Monoid (Ap(..))
 import           Foreign.Ptr
 import qualified Foreign.Storable as S
 import           GHC.Stack
@@ -89,3 +93,18 @@ load is = do
     checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims a) (GL.glType a) GL_FALSE 0 nullPtr
 
     pure a)
+
+loadInterleaved :: forall i m sig . (DSL.Vars i, S.Storable (i Identity), Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
+loadInterleaved is = do
+  b <- gen1 @(B.Buffer 'B.Array _)
+  a <- gen1
+  bind (Just b)
+  bind (Just a)
+  B.realloc b (length is) B.Static B.Draw
+  B.copy b 0 is
+
+  getAp (getConst (DSL.foldVars (\ f@(DSL.Field _ loc) _ -> Const . Ap . runLiftIO $ do
+    checkingGLError $ glEnableVertexAttribArray (fromIntegral loc)
+    checkingGLError $ glVertexAttribPointer (fromIntegral loc) (GL.glDims f) (GL.glType f) GL_FALSE 0 nullPtr) (DSL.makeVars @i id)))
+
+  pure a
