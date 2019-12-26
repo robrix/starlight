@@ -147,10 +147,10 @@ physics t input = do
   dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
   put =<< now
 
-  when (pressed SDL.KeycodePlus  input) $
-    _throttle += 1
+  when (pressed SDL.KeycodePlus  input || pressed SDL.KeycodeEquals input) $
+    _throttle += dt * 3
   when (pressed SDL.KeycodeMinus input) $
-    _throttle -= 1
+    _throttle -= dt * 3
 
   thrust <- (dt *) <$> Lens.use _throttle
 
