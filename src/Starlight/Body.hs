@@ -4,6 +4,7 @@ module Starlight.Body
 , Orbit(..)
 , transform
 , transform3
+, orientation
 , position
   -- * Solar bodies
 , sol
@@ -59,6 +60,11 @@ transform3 :: Orbit -> Seconds Float -> M44 Float
 transform3 orbit t = mkTransformation
   (axisAngle (unit _z) (getRadians (longitudeOfAscendingNode orbit)))
   (ext (uncurry cartesian2 (position orbit t)) 0)
+
+orientation :: Body -> Seconds Float -> Quaternion Float
+orientation Body { tilt, period, orbit = Orbit { inclination } } t
+  = axisAngle (unit _x) (getRadians (inclination + tilt)) -- FIXME: right-ascension & declination
+  + axisAngle (unit _z) (getSeconds (period * t))
 
 
 position :: Orbit -> Seconds Float -> (Radians Float, Float)
