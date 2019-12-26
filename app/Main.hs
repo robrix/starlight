@@ -302,10 +302,9 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
                 drawArrays LineStrip (Interval 0 (length radarV))
 
           drawAtRadius 150 (colour & _a .~ 0.5)
-          when (name == S.name target) $ do
-            drawAtRadius 50  (colour & _a .~ 0.25)
-            drawAtRadius 250 (colour & _a .~ 0.75)
-            drawAtRadius 300 (colour & _a .~ 1.0)
+          let n = 7 :: Int
+          when (name == S.name target) $ for_ [1..n] $ \ i -> do
+            drawAtRadius (50 * fromIntegral i) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
           for_ satellites (drawBlip trans)
 
