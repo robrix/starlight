@@ -207,7 +207,7 @@ zoomForSpeed size x
   zoom = Interval 1 4
   speed = speedAt <$> zoom
   bound = fromIntegral (min (size ^. _x) (size ^. _y))
-  speedAt x = x / 150 * bound
+  speedAt x = x / 50 * bound
 
 easeInOutCubic :: Float -> Float
 easeInOutCubic t
