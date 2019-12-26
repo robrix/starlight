@@ -46,19 +46,18 @@ data Body = Body
 data Orbit = Orbit
   { eccentricity             :: Float
   , semimajor                :: Metres Float
-  , inclination              :: Radians Float
-  , longitudeOfAscendingNode :: Radians Float
+  , orientation              :: Quaternion Float -- relative to ecliptic
   , period                   :: Seconds Float
   }
 
 transform :: Orbit -> Seconds Float -> M44 Float
 transform orbit t = mkTransformation
-  (axisAngle (unit _z) (getRadians (longitudeOfAscendingNode orbit)))
+  (orientation orbit)
   (ext (uncurry cartesian2 (position orbit t)) 0)
 
 orientationAt :: Body -> Seconds Float -> Quaternion Float
-orientationAt Body { tilt, period, orbit = Orbit { inclination } } t
-  = axisAngle (unit _x) (getRadians (inclination + tilt)) -- FIXME: right-ascension & declination
+orientationAt Body { tilt, period } t
+  = axisAngle (unit _x) (getRadians tilt) -- FIXME: orbit orientation, right-ascension & declination
   + axisAngle (unit _z) (getSeconds (t / period))
 
 
@@ -86,8 +85,7 @@ sol = Body
   , orbit      = Orbit
     { semimajor                = 0
     , eccentricity             = 0
-    , inclination              = 0
-    , longitudeOfAscendingNode = 0
+    , orientation              = 0
     , period                   = 1
     }
   , parent     = Nothing
@@ -114,8 +112,10 @@ mercury = Body
   , orbit      = Orbit
     { semimajor                = fromKilometres 5.79092257e7
     , eccentricity             = 0.20563069
-    , inclination              = fromDegrees 7.00487
-    , longitudeOfAscendingNode = fromDegrees 48.33167
+    , orientation              = orient
+      (fromDegrees 48.33167) -- longitude of ascending node
+      (fromDegrees 7.00487)  -- inclination
+      (fromDegrees 29.124)   -- argument of perihelion
     , period                   = fromDays 87.96926
     }
   , parent     = Just sol
@@ -133,8 +133,10 @@ venus = Body
   , orbit      = Orbit
     { semimajor                = fromKilometres 1.08209019e8
     , eccentricity             = 0.00677323
-    , inclination              = fromDegrees 3.39471
-    , longitudeOfAscendingNode = fromDegrees 181.97973
+    , orientation              = orient
+      (fromDegrees 181.97973) -- longitude of ascending node
+      (fromDegrees 3.39471)   -- inclination
+      (fromDegrees 54.884)    -- argument of perihelion
     , period                   = fromDays 224.7008
     }
   , parent     = Just sol
@@ -152,8 +154,10 @@ earth = Body
   , orbit      = Orbit
     { semimajor                = fromKilometres 1.49598016e8
     , eccentricity             = 0.01671022
-    , inclination              = fromDegrees 5.0e-5
-    , longitudeOfAscendingNode = fromDegrees (-11.26064)
+    , orientation              = orient
+      (fromDegrees (-11.26064)) -- longitude of ascending node
+      (fromDegrees 5.0e-5)      -- inclination
+      (fromDegrees 114.20783)   -- argument of perihelion
     , period                   = fromDays 365.25636
     }
   , parent     = Just sol
@@ -171,8 +175,10 @@ luna = Body
   , orbit      = Orbit
     { semimajor                = fromKilometres 384400
     , eccentricity             = 0.0554
-    , inclination              = fromDegrees 5.16
-    , longitudeOfAscendingNode = fromDegrees 125.08
+    , orientation              = orient
+      (fromDegrees 9.813575095580373E+01) -- longitude of ascending node
+      (fromDegrees 5.282953939177387E+00) -- inclination
+      (fromDegrees 9.309343899301913E+01) -- argument of perigee
     , period                   = fromDays 27.322
     }
   , parent     = Just luna
@@ -190,8 +196,10 @@ mars = Body
   , orbit      = Orbit
     { semimajor                = fromKilometres 2.27936834e8
     , eccentricity             = 0.09341233
-    , inclination              = fromDegrees 1.85061
-    , longitudeOfAscendingNode = fromDegrees 49.57854
+    , orientation              = orient
+      (fromDegrees 49.57854) -- longitude of ascending node
+      (fromDegrees 1.85061)  -- inclination
+      (fromDegrees 286.502)  -- argument of perihelion
     , period                   = fromDays 686.9796
     }
   , parent     = Just sol
@@ -209,8 +217,10 @@ jupiter = Body
   , orbit      = Orbit
     { semimajor                = fromKilometres 778412026.7751428
     , eccentricity             = 0.04839266
-    , inclination              = fromDegrees 1.30530
-    , longitudeOfAscendingNode = fromDegrees 100.55615
+    , orientation              = orient
+      (fromDegrees 100.55615) -- longitude of ascending node
+      (fromDegrees 1.30530)   -- inclination
+      (fromDegrees 273.867)   -- argument of perihelion
     , period                   = fromDays 4332.589
     }
   , parent     = Just sol
@@ -228,8 +238,10 @@ saturn = Body
   , orbit      = Orbit
     { semimajor                = fromKilometres 1433.53e6
     , eccentricity             = 0.0565
-    , inclination              = fromDegrees 2.485
-    , longitudeOfAscendingNode = fromDegrees 113.665
+    , orientation              = orient
+      (fromDegrees 113.665) -- longitude of ascending node
+      (fromDegrees 2.485)   -- inclination
+      (fromDegrees 339.392) -- argument of perihelion
     , period                   = fromDays 10759.22
     }
   , parent     = Just sol
@@ -247,8 +259,10 @@ uranus = Body
   , orbit      = Orbit
     { semimajor                = fromAUs 19.2184
     , eccentricity             = 0.046381
-    , inclination              = fromDegrees 0.773
-    , longitudeOfAscendingNode = fromDegrees 74.006
+    , orientation              = orient
+      (fromDegrees 74.006)    -- longitude of ascending node
+      (fromDegrees 0.773)     -- inclination
+      (fromDegrees 96.998857) -- argument of perihelion
     , period                   = fromDays 30688.5
     }
   , parent     = Just sol
@@ -266,8 +280,10 @@ neptune = Body
   , orbit      = Orbit
     { semimajor                = fromAUs 30.11
     , eccentricity             = 0.009456
-    , inclination              = fromDegrees 1.767975
-    , longitudeOfAscendingNode = 131.784
+    , orientation              = orient
+      (fromDegrees 131.784)  -- longitude of ascending node
+      (fromDegrees 1.767975) -- inclination
+      (fromDegrees 276.336)  -- argument of perihelion
     , period                   = fromDays 60182
     }
   , parent     = Just sol
