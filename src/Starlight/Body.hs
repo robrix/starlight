@@ -3,7 +3,6 @@ module Starlight.Body
 ( Body(..)
 , Orbit(..)
 , transform
-, transform3
 , orientation
 , position
   -- * Solar bodies
@@ -54,13 +53,8 @@ data Orbit = Orbit
   , period                   :: Seconds Float
   }
 
-transform :: Orbit -> Seconds Float -> M33 Float
-transform orbit t
-  =   rotated    (longitudeOfAscendingNode orbit)
-  !*! translated (uncurry cartesian2 (position orbit t))
-
-transform3 :: Orbit -> Seconds Float -> M44 Float
-transform3 orbit t = mkTransformation
+transform :: Orbit -> Seconds Float -> M44 Float
+transform orbit t = mkTransformation
   (axisAngle (unit _z) (getRadians (longitudeOfAscendingNode orbit)))
   (ext (uncurry cartesian2 (position orbit t)) 0)
 
