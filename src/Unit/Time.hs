@@ -5,6 +5,7 @@
 module Unit.Time
 ( Seconds(..)
 , fromDays
+, fromHours
 , Days(..)
 ) where
 
@@ -24,6 +25,9 @@ instance GL.Type a => GL.Type (Seconds a) where
 -- | Convert 'Days' to 'Seconds'. Note that this does not take e.g. leap seconds into account.
 fromDays :: Num a => Days a -> Seconds a
 fromDays (Days d) = Seconds (d * 86400)
+
+fromHours :: Num a => a -> Seconds a
+fromHours h = Seconds (h * 3600)
 
 
 newtype Days a = Days { getDays :: a }
