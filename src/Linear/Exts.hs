@@ -5,6 +5,7 @@ module Linear.Exts
 , translated3
 , rotated
 , scaled
+, orient
 , reject
 , angleOf
 , angleTo
@@ -13,8 +14,10 @@ module Linear.Exts
 , Ext(..)
 ) where
 
+import Linear.Epsilon
 import Linear.Matrix
 import Linear.Metric
+import Linear.Quaternion
 import Linear.V1
 import Linear.V2
 import Linear.V3
@@ -42,6 +45,13 @@ rotated (Radians theta) = V3
   (V3 0    0       1) where
   cosT = cos theta
   sinT = sin theta
+
+
+orient :: (Epsilon a, RealFloat a) => Radians a -> Radians a -> Radians a -> Quaternion a
+orient alpha beta gamma
+  = axisAngle (unit _z) (getRadians alpha)
+  * axisAngle (unit _x) (getRadians beta)
+  * axisAngle (unit _z) (getRadians gamma)
 
 
 reject :: (Metric v, Fractional a) => v a -> v a -> v a
