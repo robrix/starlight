@@ -20,7 +20,7 @@ shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ n } None -> do
     angle <- let' "angle" (coerce (angle u) + n * coerce (sweep u))
-    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) ^* 150)
+    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) ^* radius u)
     gl_Position .= vec4 (vec3 ((matrix u !* vec3 pos 1) ^. _xy) 0) 1)
 
   >>> fragment (\ None O{ fragColour } -> fragColour .= colour u)
@@ -28,6 +28,7 @@ shader = program $ \ u
 
 data U v = U
   { matrix :: v (M33 Float)
+  , radius :: v Float
   , angle  :: v (Radians Float)
   , sweep  :: v (Radians Float)
   , colour :: v (Colour Float)

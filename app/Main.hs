@@ -290,10 +290,11 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
               sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
           set Radar.U
-            { colour = Just (colour & _a .~ 0.5)
-            , matrix = Just (window !*! translated (unP position))
+            { matrix = Just (window !*! translated (unP position))
+            , radius = Just 150
             , angle  = Just angle
             , sweep  = Just sweep
+            , colour = Just (colour & _a .~ 0.5)
             }
 
           drawArrays LineStrip (Interval 0 (length radarV))
