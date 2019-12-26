@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE DuplicateRecordFields, NamedFieldPuns #-}
 module Starlight.Body
 ( Body(..)
 , Orbit(..)
@@ -34,6 +34,7 @@ data Body = Body
   , radius     :: Metres Float
   , mass       :: Kilograms Float
   , tilt       :: Radians Float -- relative to orbit
+  , period     :: Seconds Float -- sidereal rotation period
   , colour     :: Colour Float
   , orbit      :: Orbit
   , satellites :: [Body]
@@ -79,6 +80,7 @@ sol = Body
   , radius     = fromKilometres 695500.0
   , mass       = 1.9885e30
   , tilt       = fromDegrees 7.25
+  , period     = fromDays 25.05
   , colour     = V4 1 1 0 1
   , orbit      = Orbit
     { semimajor                = 0
@@ -105,6 +107,7 @@ mercury = Body
   , radius     = fromKilometres 2439.7
   , mass       = 3.302e23
   , tilt       = fromDegrees 2.11
+  , period     = fromDays 58.646
   , colour     = V4 0.5 0.5 0.5 1
   , orbit      = Orbit
     { semimajor                = fromKilometres 5.79092257e7
@@ -122,6 +125,7 @@ venus = Body
   , radius     = fromKilometres 6051.9
   , mass       = 48.685e23
   , tilt       = fromDegrees 177.3
+  , period     = fromDays 243.025
   , colour     = V4 1 1 0.5 1
   , orbit      = Orbit
     { semimajor                = fromKilometres 1.08209019e8
@@ -139,6 +143,7 @@ earth = Body
   , radius     = fromKilometres 6378.14
   , mass       = 5.97219e24
   , tilt       = fromDegrees 23.4392911
+  , period     = fromDays 0.99726968
   , colour     = V4 0 0 1 1
   , orbit      = Orbit
     { semimajor                = fromKilometres 1.49598016e8
@@ -156,6 +161,7 @@ luna = Body
   , radius     = fromKilometres 1737.5
   , mass       = 7.342e22
   , tilt       = fromDegrees 6.687
+  , period     = fromDays 27.321661
   , colour     = V4 0.5 0.5 0.5 1
   , orbit      = Orbit
     { semimajor                = fromKilometres 384400
@@ -173,6 +179,7 @@ mars = Body
   , radius     = fromKilometres 3397
   , mass       = 6.4171e23
   , tilt       = fromDegrees 25.19
+  , period     = fromDays 1.025957
   , colour     = V4 1 0 0 1
   , orbit      = Orbit
     { semimajor                = fromKilometres 2.27936834e8
@@ -190,6 +197,7 @@ jupiter = Body
   , radius     = fromKilometres 69911
   , mass       = 1898.13e24
   , tilt       = fromDegrees 3.13
+  , period     = fromHours 9.925
   , colour     = V4 0.5 0.5 0 1
   , orbit      = Orbit
     { semimajor                = fromKilometres 778412026.7751428
@@ -207,6 +215,7 @@ saturn = Body
   , radius     = fromKilometres 58232
   , mass       = 5.6834e26
   , tilt       = fromDegrees 26.73
+  , period     = fromHours 10 + fromMinutes 33 + Seconds 38
   , colour     = V4 (229/255) (216/255) (167/255) 1
   , orbit      = Orbit
     { semimajor                = fromKilometres 1433.53e6
@@ -224,6 +233,7 @@ uranus = Body
   , radius     = fromKilometres 25362
   , mass       = 86.813e24
   , tilt       = fromDegrees 97.77
+  , period     = fromDays 0.71833
   , colour     = V4 (196/255) (221/255) (240/255) 1
   , orbit      = Orbit
     { semimajor                = fromAUs 19.2184
@@ -241,6 +251,7 @@ neptune = Body
   , radius     = fromKilometres 24624
   , mass       = 102.413e24
   , tilt       = fromDegrees 28.32
+  , period     = fromDays 0.6713
   , colour     = V4 (138/255) (163/255) (217/255) 1
   , orbit      = Orbit
     { semimajor                = fromAUs 30.11
