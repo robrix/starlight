@@ -3,6 +3,7 @@ module Starlight.Body
 ( Body(..)
 , Orbit(..)
 , transform
+, transform3
 , position
   -- * Solar bodies
 , sol
@@ -19,7 +20,9 @@ module Starlight.Body
 
 import Linear.Exts
 import Linear.Matrix
+import Linear.Quaternion
 import Linear.V4
+import Linear.Vector
 import UI.Colour
 import Unit.Angle
 import Unit.Length
@@ -49,6 +52,12 @@ transform :: Orbit -> Seconds Float -> M33 Float
 transform orbit t
   =   rotated    (longitudeOfAscendingNode orbit)
   !*! translated (uncurry cartesian2 (position orbit t))
+
+transform3 :: Orbit -> Seconds Float -> M44 Float
+transform3 orbit t = mkTransformation
+  (axisAngle (unit _z) (getRadians (longitudeOfAscendingNode orbit)))
+  (ext (uncurry cartesian2 (position orbit t)) 0)
+
 
 position :: Orbit -> Seconds Float -> (Radians Float, Float)
 position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) where
