@@ -10,8 +10,8 @@ Development currently assumes a Mac with `ghc` 8.8 & `cabal` 3.0. You can instal
 Initial setup:
 
 ```bash
-brew bundle
-cabal build
+brew bundle # for sdl2
+cabal build # to set up dist-newstyle with the ghc package db
 ```
 
 Run `script/repl` to load the project (both library & executable) into the REPL. In the REPL, `:main` will launch the game.
