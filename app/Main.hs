@@ -86,6 +86,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       radarA  <- load radarV
 
       glEnable GL_BLEND
+      glEnable GL_DEPTH_CLAMP
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
