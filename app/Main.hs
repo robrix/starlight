@@ -302,9 +302,9 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
               angle = angleTo here there
               d = distance here there
               direction = normalize (there ^-^ here)
-              minSweep = 0.0133 -- at d=150, makes approx. 4px blips
               drawAtRadius radius colour = do
                 let edge = distanceScale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
+                    minSweep = 0.0133 / Radians (radius / 150) -- at d=150, makes approx. 4px blips
                     sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
                 set Radar.U
