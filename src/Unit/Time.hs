@@ -6,6 +6,7 @@ module Unit.Time
 ( Seconds(..)
 , fromDays
 , fromHours
+, fromMinutes
 , Days(..)
 ) where
 
@@ -28,6 +29,9 @@ fromDays (Days d) = Seconds (d * 86400)
 
 fromHours :: Num a => a -> Seconds a
 fromHours h = Seconds (h * 3600)
+
+fromMinutes :: Num a => a -> Seconds a
+fromMinutes h = Seconds (h * 60)
 
 
 newtype Days a = Days { getDays :: a }
