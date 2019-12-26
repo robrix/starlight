@@ -156,9 +156,9 @@ physics t input = do
   put =<< now
 
   when (pressed SDL.KeycodePlus  input || pressed SDL.KeycodeEquals input) $
-    _throttle += dt * 3
+    _throttle += dt * 10
   when (pressed SDL.KeycodeMinus input) $
-    _throttle -= dt * 3
+    _throttle -= dt * 10
 
   thrust <- (dt *) <$> Lens.use _throttle
 
