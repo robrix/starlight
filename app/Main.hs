@@ -101,7 +101,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
           state <- physics t =<< input
           draw drawState t state
         speed <- Lens.uses _velocity norm
-        setLabel label font $ show (round speed :: Integer)
+        throttle <- Lens.use _throttle
+        setLabel label font $ show throttle <> ", " <> show (round speed :: Integer)
         drawLabel label
         when continue $ do
           Window.swap
