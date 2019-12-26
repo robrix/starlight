@@ -116,6 +116,9 @@ roundToPlaces n x = fromInteger (round (x * n')) / n' where
 distanceScale :: Float
 distanceScale = 10000 / getMetres (S.radius S.sol)
 
+timeScale :: Seconds Float
+timeScale = 86400
+
 shipV :: [Ship.V Identity]
 shipV = coerce @[V2 Float]
   [ V2 1      0
@@ -178,7 +181,7 @@ physics t input = do
 
   let applyGravity rel S.Body { mass, orbit, satellites } = do
         P position <- Lens.use _position
-        let trans = rel + S.transform orbit (getDelta t * 86400)
+        let trans = rel + S.transform orbit (getDelta t * timeScale)
             pos = (trans !* V3 0 0 1) ^. _xy
             r = qd pos position
             bigG = 6.67430e-11
@@ -265,7 +268,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
       drawArrays LineLoop (Interval 0 4)
 
   let drawBody rel b@S.Body { radius = Metres r, colour, orbit, satellites } = do
-        let trans = rel !*! S.transform3 orbit (getDelta t * 86400)
+        let trans = rel !*! S.transform3 orbit (getDelta t * timeScale)
             rot b r = mkTransformation (axisAngle (unit b) r) 0
             draw rot = do
               set Body.U
@@ -292,7 +295,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
   use radarP $ do
     let drawBlip rel S.Body { name, radius = Metres r, colour, orbit, satellites } = do
-          let trans = rel !*! S.transform orbit (getDelta t * 86400)
+          let trans = rel !*! S.transform orbit (getDelta t * timeScale)
               here = unP position
               there = (trans !* V3 0 0 1) ^. _xy
               angle = angleTo here there
