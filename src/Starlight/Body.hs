@@ -40,6 +40,7 @@ data Body = Body
   }
 
 -- FIXME: argument of periapsis
+-- FIXME: orientation as quat
 data Orbit = Orbit
   { eccentricity             :: Float
   , semimajor                :: Metres Float
