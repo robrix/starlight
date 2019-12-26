@@ -100,7 +100,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         speed <- Lens.uses _velocity norm
         setLabel label font $ show (round speed :: Integer)
         drawLabel label
-        put =<< now
         when continue $ do
           Window.swap
           loop
@@ -142,6 +141,7 @@ physics
   -> m PlayerState
 physics t input = do
   dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
+  put =<< now
 
   let thrust  = dt *  3
       angular = dt *^ 5
