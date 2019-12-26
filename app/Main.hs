@@ -119,6 +119,7 @@ distanceScale = 10000 / getMetres (S.radius S.sol)
 timeScale :: Seconds Float
 timeScale = 86400
 
+
 shipV :: [Ship.V Identity]
 shipV = coerce @[V2 Float]
   [ V2 1      0
