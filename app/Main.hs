@@ -302,9 +302,12 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
               angle = angleTo here there
               d = distance here there
               direction = normalize (there ^-^ here)
+              n = 10 :: Int
+              -- FIXME: apply easing so this works more like a spring
+              step = max 15 (min (50 * zoomOut) (d / fromIntegral n))
               drawAtRadius radius colour = do
                 let edge = distanceScale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
-                    minSweep = 0.0133 / Radians (radius / 450) -- at d=150, makes approx. 4px blips
+                    minSweep = 0.0133 / Radians (radius / (step * 5)) -- at d=150, makes approx. 4px blips
                     sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
                 set Radar.U
@@ -318,9 +321,6 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
                 drawArrays LineStrip (Interval 0 (length radarV))
 
           drawAtRadius 150 (colour & _a .~ 0.5)
-          let n = 10 :: Int
-              -- FIXME: apply easing so this works more like a spring
-              step = max 15 (min 200 (d / fromIntegral n))
           when (name == S.name target) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
