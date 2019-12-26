@@ -205,7 +205,7 @@ zoomForSpeed size x
   | x < min_ speed = min_ zoom
   | x > max_ speed = max_ zoom
   | otherwise      = fromUnit zoom (easeInOutCubic (toUnit speed x)) where
-  zoom = Interval 1 4
+  zoom = Interval 1 6
   speed = speedAt <$> zoom
   bound = fromIntegral (min (size ^. _x) (size ^. _y))
   speedAt x = x / 50 * bound
