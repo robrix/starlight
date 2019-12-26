@@ -297,9 +297,9 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
   use radarP $ do
     let drawBlip rel S.Body { name, radius = Metres r, colour, orbit, satellites } = do
-          let trans = rel !*! S.transform orbit (getDelta t * timeScale)
+          let trans = rel !*! S.transform3 orbit (getDelta t * timeScale) :: M44 Float
               here = unP position
-              there = (trans !* V3 0 0 1) ^. _xy
+              there = (trans !* V4 0 0 0 1) ^. _xy
               angle = angleTo here there
               d = distance here there
               direction = normalize (there ^-^ here)
@@ -312,7 +312,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
                     sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
                 set Radar.U
-                  { matrix = Just (window !*! translated (unP position))
+                  { matrix = Just (scaled (V3 sx sy 1))
                   , radius = Just radius
                   , angle  = Just angle
                   , sweep  = Just sweep
@@ -328,7 +328,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
           for_ satellites (drawBlip trans)
 
     bindArray radarA $
-      drawBlip (scaled (V3 distanceScale distanceScale 1)) S.sol
+      drawBlip (scaled (V4 distanceScale distanceScale distanceScale 1)) S.sol
 
 
 data DrawState = DrawState
