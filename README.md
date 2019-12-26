@@ -5,7 +5,7 @@ A game.
 
 ## Development
 
-Development currently assumes a Mac with `ghc` 8.8 & `cabal` 3.0.
+Development currently assumes a Mac with `ghc` 8.8 & `cabal` 3.0. You can install them directly, or use [`ghcup`](https://www.haskell.org/ghcup/).
 
 Initial setup:
 
