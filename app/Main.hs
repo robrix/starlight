@@ -8,6 +8,7 @@
 {-# LANGUAGE TypeOperators #-}
 module Main
 ( main
+, distanceScale
 ) where
 
 import           Control.Carrier.Empty.Maybe
