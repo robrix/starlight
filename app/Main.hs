@@ -102,11 +102,15 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
           draw drawState t state
         speed <- Lens.uses _velocity norm
         throttle <- Lens.use _throttle
-        setLabel label font $ show (fromIntegral (round (throttle * 10) :: Integer) / 10) <> ", " <> show (round speed :: Integer)
+        setLabel label font $ show (roundToPlaces 1 throttle) <> ", " <> show (roundToPlaces 1 speed)
         drawLabel label
         when continue $ do
           Window.swap
           loop
+
+roundToPlaces :: RealFloat a => Int -> a -> a
+roundToPlaces n x = fromInteger (round (x * n')) / n' where
+  n' = 10 ** fromIntegral n
 
 
 distanceScale :: Float
