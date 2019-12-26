@@ -101,8 +101,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         setLabel label font $ show (round speed :: Integer)
         drawLabel label
         put =<< now
-        when continue $
-          Window.swap >> loop
+        when continue $ do
+          Window.swap
+          loop
 
 
 distanceScale :: Float
