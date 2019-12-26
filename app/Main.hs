@@ -319,7 +319,8 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
           drawAtRadius 150 (colour & _a .~ 0.5)
           let n = 10 :: Int
-              step = max 15 (min 200 (d / fromIntegral (n * 100)))
+              -- FIXME: apply easing so this works more like a spring
+              step = max 15 (min 200 (d / fromIntegral n))
           when (name == S.name target) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
