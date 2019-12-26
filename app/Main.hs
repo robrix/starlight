@@ -39,6 +39,7 @@ import           Linear.Affine
 import           Linear.Exts
 import           Linear.Matrix
 import           Linear.Metric
+import           Linear.Quaternion
 import           Linear.V2 as Linear
 import           Linear.V3 as Linear
 import           Linear.V4
@@ -250,18 +251,26 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
     bindArray shipA $
       drawArrays LineLoop (Interval 0 4)
 
-  let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
+  let drawBody rel b@S.Body { radius = Metres r, colour, orbit, satellites } = do
         let trans = rel !*! S.transform3 orbit (getDelta t * 86400)
-        set Body.U
-          { matrix = Just
-              $   scaled (V4 sx sy 1 1)
-              !*! translated3 (ext (negated (unP position)) 0)
-              !*! trans
-              !*! scaled (V4 r r r 1)
-          , colour = Just colour
-          }
+            rot b r = mkTransformation (axisAngle (unit b) r) 0
+            draw rot = do
+              set Body.U
+                { matrix = Just
+                    $   scaled (V4 sx sy 1 1)
+                    !*! translated3 (ext (negated (unP position)) 0)
+                    !*! trans
+                    !*! scaled (V4 r r r 1)
+                    !*! mkTransformation (S.orientation b (getDelta t)) 0
+                    !*! rot
+                , colour = Just colour
+                }
 
-        drawArrays LineLoop (Interval 0 (length circleV))
+              drawArrays LineLoop (Interval 0 (length circleV))
+
+        draw $ rot _x (pi/2)
+        draw $ rot _y (pi/2)
+        draw $ rot _z (pi/2)
 
         for_ satellites (drawBody trans)
 
