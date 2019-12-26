@@ -40,6 +40,7 @@ data Body = Body
   , period     :: Seconds Float -- sidereal rotation period
   , colour     :: Colour Float
   , orbit      :: Orbit
+  , parent     :: Maybe Body
   , satellites :: [Body]
   }
 
@@ -97,6 +98,7 @@ sol = Body
     , longitudeOfAscendingNode = 0
     , period                   = 1
     }
+  , parent     = Nothing
   , satellites =
     [ mercury
     , venus
@@ -124,6 +126,7 @@ mercury = Body
     , longitudeOfAscendingNode = fromDegrees 48.33167
     , period                   = fromDays 87.96926
     }
+  , parent     = Just sol
   , satellites = []
   }
 
@@ -142,6 +145,7 @@ venus = Body
     , longitudeOfAscendingNode = fromDegrees 181.97973
     , period                   = fromDays 224.7008
     }
+  , parent     = Just sol
   , satellites = []
   }
 
@@ -160,6 +164,7 @@ earth = Body
     , longitudeOfAscendingNode = fromDegrees (-11.26064)
     , period                   = fromDays 365.25636
     }
+  , parent     = Just sol
   , satellites = [ luna ]
   }
 
@@ -178,6 +183,7 @@ luna = Body
     , longitudeOfAscendingNode = fromDegrees 125.08
     , period                   = fromDays 27.322
     }
+  , parent     = Just luna
   , satellites = []
   }
 
@@ -196,6 +202,7 @@ mars = Body
     , longitudeOfAscendingNode = fromDegrees 49.57854
     , period                   = fromDays 686.9796
     }
+  , parent     = Just sol
   , satellites = []
   }
 
@@ -214,6 +221,7 @@ jupiter = Body
     , longitudeOfAscendingNode = fromDegrees 100.55615
     , period                   = fromDays 4332.589
     }
+  , parent     = Just sol
   , satellites = []
   }
 
@@ -232,6 +240,7 @@ saturn = Body
     , longitudeOfAscendingNode = fromDegrees 113.665
     , period                   = fromDays 10759.22
     }
+  , parent     = Just sol
   , satellites = []
   }
 
@@ -250,6 +259,7 @@ uranus = Body
     , longitudeOfAscendingNode = fromDegrees 74.006
     , period                   = fromDays 30688.5
     }
+  , parent     = Just sol
   , satellites = []
   }
 
@@ -268,5 +278,6 @@ neptune = Body
     , longitudeOfAscendingNode = 131.784
     , period                   = fromDays 60182
     }
+  , parent     = Just sol
   , satellites = []
   }
