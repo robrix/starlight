@@ -146,6 +146,11 @@ physics t input = do
   dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
   put =<< now
 
+  when (pressed SDL.KeycodePlus  input) $
+    _throttle += 1
+  when (pressed SDL.KeycodeMinus input) $
+    _throttle -= 1
+
   thrust <- (dt *) <$> Lens.use _throttle
 
   let angular = dt *^ 5
