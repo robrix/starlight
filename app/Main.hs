@@ -230,7 +230,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
   let zoomOut = zoomForSpeed size (norm velocity)
-      target  = S.earth
+      target  = S.mercury
 
   use starsP $ do
     scale <- Window.scale
