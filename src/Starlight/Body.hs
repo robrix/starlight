@@ -30,6 +30,8 @@ import Unit.Length
 import Unit.Mass
 import Unit.Time
 
+-- FIXME: right-ascension
+-- FIXME: declination
 data Body = Body
   { name       :: String
   , radius     :: Metres Float
