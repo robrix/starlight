@@ -183,14 +183,14 @@ physics t input = do
 
   let applyGravity rel S.Body { mass, orbit, satellites } = do
         P position <- Lens.use _position
-        let trans = rel + S.transform orbit (getDelta t * timeScale)
-            pos = (trans !* V3 0 0 1) ^. _xy
+        let trans = rel + S.transform3 orbit (getDelta t * timeScale)
+            pos = (trans !* V4 0 0 0 1) ^. _xy
             r = qd pos position
             bigG = 6.67430e-11
         _velocity += Delta (P (dt * bigG * distanceScale * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
         for_ satellites (applyGravity trans)
 
-  applyGravity (scaled (V3 distanceScale distanceScale 1)) S.sol
+  applyGravity (scaled (V4 distanceScale distanceScale distanceScale 1)) S.sol
 
   s@PlayerState { velocity } <- get
   _position += getDelta velocity
