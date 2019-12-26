@@ -218,6 +218,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
   let zoomOut = zoomForSpeed size (norm velocity)
+      target  = S.earth
 
   use starsP $ do
     scale <- Window.scale
@@ -278,26 +279,33 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
     drawBody (scaled (V4 distanceScale distanceScale distanceScale 1)) S.sol
 
   use radarP $ do
-    let drawBlip rel S.Body { radius = Metres r, colour, orbit, satellites } = do
+    let drawBlip rel S.Body { name, radius = Metres r, colour, orbit, satellites } = do
           let trans = rel !*! S.transform orbit (getDelta t * 86400)
               here = unP position
               there = (trans !* V3 0 0 1) ^. _xy
               angle = angleTo here there
               d = distance here there
               direction = normalize (there ^-^ here)
-              edge = distanceScale * r * (min d 150/d) *^ perp direction + direction ^* 150 + here
               minSweep = 0.0133 -- at d=150, makes approx. 4px blips
-              sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
+              drawAtRadius radius colour = do
+                let edge = distanceScale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
+                    sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
-          set Radar.U
-            { matrix = Just (window !*! translated (unP position))
-            , radius = Just 150
-            , angle  = Just angle
-            , sweep  = Just sweep
-            , colour = Just (colour & _a .~ 0.5)
-            }
+                set Radar.U
+                  { matrix = Just (window !*! translated (unP position))
+                  , radius = Just radius
+                  , angle  = Just angle
+                  , sweep  = Just sweep
+                  , colour = Just colour
+                  }
 
-          drawArrays LineStrip (Interval 0 (length radarV))
+                drawArrays LineStrip (Interval 0 (length radarV))
+
+          drawAtRadius 150 (colour & _a .~ 0.5)
+          when (name == S.name target) $ do
+            drawAtRadius 50  (colour & _a .~ 0.25)
+            drawAtRadius 250 (colour & _a .~ 0.75)
+            drawAtRadius 300 (colour & _a .~ 1.0)
 
           for_ satellites (drawBlip trans)
 
