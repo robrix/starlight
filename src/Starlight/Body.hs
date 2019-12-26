@@ -3,7 +3,7 @@ module Starlight.Body
 ( Body(..)
 , Orbit(..)
 , transform
-, orientation
+, orientationAt
 , position
   -- * Solar bodies
 , sol
@@ -43,8 +43,6 @@ data Body = Body
   , satellites :: [Body]
   }
 
--- FIXME: argument of periapsis
--- FIXME: orientation as quat
 data Orbit = Orbit
   { eccentricity             :: Float
   , semimajor                :: Metres Float
@@ -58,8 +56,8 @@ transform orbit t = mkTransformation
   (axisAngle (unit _z) (getRadians (longitudeOfAscendingNode orbit)))
   (ext (uncurry cartesian2 (position orbit t)) 0)
 
-orientation :: Body -> Seconds Float -> Quaternion Float
-orientation Body { tilt, period, orbit = Orbit { inclination } } t
+orientationAt :: Body -> Seconds Float -> Quaternion Float
+orientationAt Body { tilt, period, orbit = Orbit { inclination } } t
   = axisAngle (unit _x) (getRadians (inclination + tilt)) -- FIXME: right-ascension & declination
   + axisAngle (unit _z) (getSeconds (t / period))
 

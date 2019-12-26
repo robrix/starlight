@@ -279,7 +279,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
                     !*! translated3 (ext (negated (unP position)) 0)
                     !*! trans
                     !*! scaled (V4 r r r 1)
-                    !*! mkTransformation (S.orientation b (getDelta t)) 0
+                    !*! mkTransformation (S.orientationAt b (getDelta t)) 0
                     !*! rot
                 , colour = Just colour
                 }
