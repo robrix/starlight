@@ -69,7 +69,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     evalState @Input mempty
     . evalState PlayerState
-      { position = P (V2 25000 0)
+      { throttle = 3
+      , position = P (V2 25000 0)
       , velocity = Delta (P (V2 0 75))
       , rotation = pi/2
       }
@@ -145,8 +146,9 @@ physics t input = do
   dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
   put =<< now
 
-  let thrust  = dt *  3
-      angular = dt *^ 5
+  thrust <- (dt *) <$> Lens.use _throttle
+
+  let angular = dt *^ 5
 
   when (pressed SDL.KeycodeUp   input) $ do
     rotation <- Lens.use _rotation
@@ -325,11 +327,15 @@ data DrawState = DrawState
 
 
 data PlayerState = PlayerState
-  { position :: !(Point V2 Float)
+  { throttle :: !Float
+  , position :: !(Point V2 Float)
   , velocity :: !(Delta (Point V2) Float)
   , rotation :: !(Radians Float)
   }
   deriving (Eq, Ord, Show)
+
+_throttle :: Lens' PlayerState Float
+_throttle = lens throttle (\ s v -> s { throttle = v })
 
 _position :: Lens' PlayerState (Point V2 Float)
 _position = lens position (\ s v -> s { position = v })
