@@ -118,7 +118,7 @@ distanceScale :: Float
 distanceScale = 10000 / getMetres (S.radius S.sol)
 
 timeScale :: Seconds Float
-timeScale = fromMinutes 30
+timeScale = 1
 
 
 shipV :: [Ship.V Identity]
