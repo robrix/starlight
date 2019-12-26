@@ -305,7 +305,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
               direction = normalize (there ^-^ here)
               n = 10 :: Int
               -- FIXME: apply easing so this works more like a spring
-              step = max 15 (min (50 * zoomOut) (d / fromIntegral n))
+              step = max 1 (min (50 * zoomOut) (d / fromIntegral n))
               drawAtRadius radius colour = do
                 let edge = distanceScale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
                     minSweep = 0.0133 / Radians (radius / (step * 5)) -- at d=150, makes approx. 4px blips
