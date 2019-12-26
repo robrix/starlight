@@ -41,6 +41,7 @@ import           Linear.Matrix
 import           Linear.Metric
 import           Linear.V2 as Linear
 import           Linear.V3 as Linear
+import           Linear.V4
 import           Linear.Vector as Linear
 import           Physics.Delta
 import qualified SDL
@@ -124,7 +125,7 @@ quadV = coerce @[V2 Float]
   ]
 
 circleV :: [Body.V Identity]
-circleV = coerce @[V3 Float] . map (`ext` 1) $ circle 1 128
+circleV = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
 
 radarV :: [Radar.V Identity]
 radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
@@ -248,12 +249,13 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
       drawArrays LineLoop (Interval 0 4)
 
   let drawBody rel S.Body { radius = Metres r, colour, orbit, satellites } = do
-        let trans = rel !*! S.transform orbit (getDelta t * 86400)
+        let trans = rel !*! S.transform3 orbit (getDelta t * 86400)
         set Body.U
           { matrix = Just
-              $   window
+              $   scaled (V4 sx sy 1 1)
+              !*! translated3 (ext (negated (unP position)) 0)
               !*! trans
-              !*! scaled (V3 r r 1)
+              !*! scaled (V4 r r r 1)
           , colour = Just colour
           }
 
@@ -262,7 +264,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
         for_ satellites (drawBody trans)
 
   use bodyP . bindArray circleA $
-    drawBody (scaled (V3 distanceScale distanceScale 1)) S.sol
+    drawBody (scaled (V4 distanceScale distanceScale distanceScale 1)) S.sol
 
   use radarP $ do
     let drawBlip rel S.Body { radius = Metres r, colour, orbit, satellites } = do
