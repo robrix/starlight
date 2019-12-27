@@ -150,7 +150,7 @@ luna = Body
     , period                   = fromDays 27.322
     , timeOfPeriapsis          = Seconds (-1.37156595221758e7)
     }
-  , parent      = Just luna
+  , parent      = Just earth
   , satellites  = []
   }
 
