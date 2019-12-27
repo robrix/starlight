@@ -13,6 +13,7 @@ module Main
 
 import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
+import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Carrier.Time
 import           Control.Effect.Lens ((*=), (+=), (-=), (.=))
@@ -76,7 +77,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       , velocity = Delta (P (V2 0 75))
       , rotation = axisAngle (unit _z) (pi/2)
       }
-    . evalState start $ do
+    . evalState start
+    . runReader S.system $ do
       starsP <- build Stars.shader
       shipP  <- build Ship.shader
       radarP <- build Radar.shader
@@ -99,7 +101,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
-        let bodies = S.bodiesAt S.system systemTrans (getDelta t)
+        system <- ask
+        let bodies = S.bodiesAt system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $ do
           draw drawState bodies =<< physics bodies =<< input
         speed <- Lens.uses _velocity norm
