@@ -15,7 +15,7 @@ import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
 import           Control.Carrier.State.Strict
 import           Control.Carrier.Time
-import           Control.Effect.Lens ((+=), (-=))
+import           Control.Effect.Lens ((*=), (+=), (-=), (.=))
 import qualified Control.Effect.Lens as Lens
 import           Control.Effect.Lift
 import qualified Control.Exception.Lift as E
@@ -74,7 +74,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       { throttle = 20
       , position = P (V2 25000 0)
       , velocity = Delta (P (V2 0 75))
-      , rotation = pi/2
+      , rotation = axisAngle (unit _z) (pi/2)
       }
     . evalState start $ do
       starsP <- build Stars.shader
@@ -165,19 +165,19 @@ physics bodies input = do
 
   when (pressed SDL.KeycodeUp   input) $ do
     rotation <- Lens.use _rotation
-    _velocity += Delta (P (cartesian2 rotation thrust))
+    _velocity += Delta (P (rotate rotation (V3 thrust 0 0) ^. _xy))
   when (pressed SDL.KeycodeDown input) $ do
     rotation <- Lens.use _rotation
     velocity <- Lens.use _velocity
     let angle = fst (polar2 (negated (unP (getDelta velocity))))
-        delta = wrap (Interval (-pi) pi) $ rotation - angle
-        (+-=) = if delta < 0 then (+=) else (-=)
-    _rotation +-= min angular (abs delta)
+        proposed = axisAngle (unit _z) (getRadians angle)
+        delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
+    _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
 
   when (pressed SDL.KeycodeLeft  input) $
-    _rotation += angular
+    _rotation *= axisAngle (unit _z) (getRadians angular)
   when (pressed SDL.KeycodeRight input) $
-    _rotation -= angular
+    _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
   let rel = scaled (V4 distanceScale distanceScale distanceScale 1)
       applyGravity S.Instant { transform, body = S.Body { mass }} = do
@@ -249,17 +249,14 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
   scale <- Window.scale
   size <- Window.size
   let V2 sx sy = scale / size ^* (1 / zoomOut)
-      window
-        =   scaled (V3 sx sy 1)
-        !*! translated (negated (unP position))
+      window = scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
 
   use shipP $ do
     set Ship.U
       { matrix = Just
           $   window
-          !*! translated (unP position)
-          !*! scaled     (V3 15 15 1)
-          !*! rotated    rotation
+          !*! scaled (V4 15 15 15 1)
+          !*! mkTransformation rotation 0
       , colour = Just white
       }
 
@@ -270,7 +267,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
       drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
         let rot b r = mkTransformation (axisAngle (unit b) r) 0
             base
-              =   scaled (V4 sx sy 1 1)
+              =   window
               !*! translated3 (ext (negated (unP position)) 0)
               !*! rel
               !*! transform
@@ -339,7 +336,7 @@ data PlayerState = PlayerState
   { throttle :: !Float
   , position :: !(Point V2 Float)
   , velocity :: !(Delta (Point V2) Float)
-  , rotation :: !(Radians Float)
+  , rotation :: !(Quaternion Float)
   }
   deriving (Eq, Ord, Show)
 
@@ -352,5 +349,5 @@ _position = lens position (\ s v -> s { position = v })
 _velocity :: Lens' PlayerState (Delta (Point V2) Float)
 _velocity = lens velocity (\ s v -> s { velocity = v })
 
-_rotation :: Lens' PlayerState (Radians Float)
-_rotation = lens rotation (\ s r -> s { rotation = wrap (Interval (-pi) pi) r })
+_rotation :: Lens' PlayerState (Quaternion Float)
+_rotation = lens rotation (\ s r -> s { rotation = r })

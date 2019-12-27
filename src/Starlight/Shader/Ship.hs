@@ -18,14 +18,14 @@ import GL.Shader.DSL
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } None ->
-    gl_Position .= vec4 (matrix u !* vec3 pos 1) 1)
+    gl_Position .= (matrix u !* vec4 (vec3 pos 1) 1))
 
   >>> fragment (\ None O { fragColour } ->
     fragColour .= colour u)
 
 
 data U v = U
-  { matrix :: v (M33 Float)
+  { matrix :: v (M44 Float)
   , colour :: v (Colour Float)
   }
   deriving (Generic)
