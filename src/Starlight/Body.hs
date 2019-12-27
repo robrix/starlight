@@ -68,7 +68,7 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
 transformAt :: RealFloat a => Orbit a -> Seconds a -> M44 a
 transformAt orbit@Orbit{ orientation } t = mkTransformation
   orientation
-  (ext (uncurry cartesian2 (position orbit t)) 0)
+  (ext (uncurry cartesian2 (positionAt orbit t)) 0)
 
 orientationAt :: (Epsilon a, RealFloat a) => Body a -> Seconds a -> Quaternion a
 orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } } t
@@ -77,8 +77,8 @@ orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } 
   * axisAngle (unit _z) (getSeconds (t * 3600 / period))
 
 
-position :: RealFloat a => Orbit a -> Seconds a -> (Radians a, a)
-position Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = (Radians trueAnomaly, r) where
+positionAt :: RealFloat a => Orbit a -> Seconds a -> (Radians a, a)
+positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = (Radians trueAnomaly, r) where
   t' = timeOfPeriapsis + t
   meanAnomaly = getSeconds (meanMotion * t')
   meanMotion = (2 * pi) / period
