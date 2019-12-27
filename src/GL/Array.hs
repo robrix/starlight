@@ -13,6 +13,7 @@ module GL.Array
 , configureArray
 , Mode(..)
 , drawArrays
+, drawArraysInstanced
 , load
 , bindArray
 , ArrayT(..)
@@ -90,6 +91,18 @@ drawArrays
   -> Interval Int
   -> m ()
 drawArrays mode i = askProgram >> askArray >> checkingGLError (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))))
+
+drawArraysInstanced
+  :: ( Has (Lift IO) sig m
+     , HasCallStack
+     , HasArray i m
+     , HasProgram u i o m
+     )
+  => Mode
+  -> Interval Int
+  -> Int
+  -> m ()
+drawArraysInstanced mode i n = askProgram >> askArray >> checkingGLError (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i)) (fromIntegral n)))
 
 
 load :: (DSL.Vars i, S.Storable (i Identity), Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
