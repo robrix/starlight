@@ -221,7 +221,7 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ throttle, position, velocity, rotation } = runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ throttle, position, velocity, rotation, target } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -232,7 +232,6 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
   let zoomOut = zoomForSpeed size (norm velocity)
-      target  = S.mercury
 
   use starsP $ do
     scale <- Window.scale
@@ -310,7 +309,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
           drawAtRadius 100 minSweep (colour & _a .~ 0.5)
 
-          when (name == S.name target) $ for_ [1..n] $ \ i ->
+          when (Just name == fmap S.name target) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / 7)) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
     bindArray radarA $ for_ bodies drawBlip
