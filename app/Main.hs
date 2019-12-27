@@ -190,7 +190,7 @@ physics bodies input = do
         let pos = (transform !* V4 0 0 0 1) ^. _xy
             r = qd pos position
             bigG = 6.67430e-11
-        _velocity += Delta (P (dt * bigG * distanceScale * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
+        _velocity += Delta (P (dt * bigG * distanceScale ^ (2 :: Int) * getKilograms mass / r *^ normalize (pos ^-^ position)))
 
   for_ bodies applyGravity
 
