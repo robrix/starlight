@@ -1,7 +1,8 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 -- | A familiar star system.
 module Starlight.Sol
-( sol
+( system
+, sol
 , mercury
 , venus
 , earth
@@ -21,6 +22,21 @@ import Starlight.Body
 import Unit.Angle
 import Unit.Length
 import Unit.Time
+
+system :: System Float
+system = System
+  [ sol
+  , mercury
+  , venus
+  , earth
+  , luna
+  , mars
+  , jupiter
+  , saturn
+  , uranus
+  , neptune
+  ]
+
 
 sol :: Body Float
 sol = Body
