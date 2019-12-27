@@ -39,23 +39,25 @@ data Body = Body
   deriving (Show)
 
 data Orbit = Orbit
-  { eccentricity :: Float
-  , semimajor    :: Metres Float
-  , orientation  :: Quaternion Float -- relative to ecliptic
-  , period       :: Seconds Float
+  { eccentricity    :: Float
+  , semimajor       :: Metres Float
+  , orientation     :: Quaternion Float -- relative to ecliptic
+  , period          :: Seconds Float
+  , timeOfPeriapsis :: Seconds Float    -- relative to epoch
   }
   deriving (Show)
 
 fromEphemeris :: Ephemeris -> Orbit
-fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod }
+fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
   = Orbit
-    { eccentricity = realToFrac eccentricity
-    , semimajor    = realToFrac <$> fromKilometres semimajor
-    , orientation  = orient
+    { eccentricity    = realToFrac eccentricity
+    , semimajor       = realToFrac <$> fromKilometres semimajor
+    , orientation     = orient
       (realToFrac <$> fromDegrees longitudeOfAscendingNode)
       (realToFrac <$> fromDegrees inclination)
       (realToFrac <$> fromDegrees argumentOfPerifocus)
-    , period       = realToFrac <$> siderealOrbitPeriod
+    , period          = realToFrac <$> siderealOrbitPeriod
+    , timeOfPeriapsis = realToFrac <$> timeOfPeriapsisRelativeToEpoch
     }
 
 transform :: Orbit -> Seconds Float -> M44 Float

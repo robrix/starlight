@@ -29,10 +29,11 @@ sol = Body
   , period     = fromDays 25.05
   , colour     = V4 1 1 0 1
   , orbit      = Orbit
-    { semimajor                = 0
-    , eccentricity             = 0
-    , orientation              = 0
-    , period                   = 1
+    { semimajor       = 0
+    , eccentricity    = 0
+    , orientation     = 0
+    , period          = 1
+    , timeOfPeriapsis = 0
     }
   , parent     = Nothing
   , satellites =
@@ -63,6 +64,7 @@ mercury = Body
       (fromDegrees 7.00487)  -- inclination
       (fromDegrees 29.124)   -- argument of perihelion
     , period                   = fromDays 87.96926
+    , timeOfPeriapsis          = Seconds 1573587.126154357
     }
   , parent     = Just sol
   , satellites = []
@@ -84,6 +86,7 @@ venus = Body
       (fromDegrees 3.39471)   -- inclination
       (fromDegrees 54.884)    -- argument of perihelion
     , period                   = fromDays 224.7008
+    , timeOfPeriapsis          = Seconds 4762456.111587039
     }
   , parent     = Just sol
   , satellites = []
@@ -105,6 +108,7 @@ earth = Body
       (fromDegrees 5.0e-5)      -- inclination
       (fromDegrees 114.20783)   -- argument of perihelion
     , period                   = fromDays 365.25636
+    , timeOfPeriapsis          = Seconds (-1713701.526424574)
     }
   , parent     = Just sol
   , satellites = [ luna ]
@@ -126,6 +130,7 @@ luna = Body
       (fromDegrees 5.282953939177387E+00) -- inclination
       (fromDegrees 9.309343899301913E+01) -- argument of perigee
     , period                   = fromDays 27.322
+    , timeOfPeriapsis          = Seconds (-1.37156595221758e7)
     }
   , parent     = Just luna
   , satellites = []
@@ -147,6 +152,7 @@ mars = Body
       (fromDegrees 1.85061)  -- inclination
       (fromDegrees 286.502)  -- argument of perihelion
     , period                   = fromDays 686.9796
+    , timeOfPeriapsis          = Seconds 1.654351298829472e7
     }
   , parent     = Just sol
   , satellites = []
@@ -168,6 +174,7 @@ jupiter = Body
       (fromDegrees 1.30530)   -- inclination
       (fromDegrees 273.867)   -- argument of perihelion
     , period                   = fromDays 4332.589
+    , timeOfPeriapsis          = Seconds 9.42235965064165e7
     }
   , parent     = Just sol
   , satellites = []
@@ -189,6 +196,7 @@ saturn = Body
       (fromDegrees 2.485)   -- inclination
       (fromDegrees 339.392) -- argument of perihelion
     , period                   = fromDays 10759.22
+    , timeOfPeriapsis          = Seconds 4.065001346578497e8
     }
   , parent     = Just sol
   , satellites = []
@@ -210,6 +218,7 @@ uranus = Body
       (fromDegrees 0.773)     -- inclination
       (fromDegrees 96.998857) -- argument of perihelion
     , period                   = fromDays 30688.5
+    , timeOfPeriapsis          = Seconds 9.85355993991342e8
     }
   , parent     = Just sol
   , satellites = []
@@ -231,6 +240,7 @@ neptune = Body
       (fromDegrees 1.767975) -- inclination
       (fromDegrees 276.336)  -- argument of perihelion
     , period                   = fromDays 60182
+    , timeOfPeriapsis          = Seconds 4.50852467415131e8
     }
   , parent     = Just sol
   , satellites = []
