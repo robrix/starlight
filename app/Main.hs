@@ -76,6 +76,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       , position = P (V2 25000 0)
       , velocity = V2 0 75
       , rotation = axisAngle (unit _z) (pi/2)
+      , target   = Nothing
       }
     . evalState start
     . runReader S.system $ do
@@ -336,6 +337,7 @@ data GameState = GameState
   , position :: !(Point V2 Float)
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
+  , target   :: !(Maybe (S.Body Float))
   }
   deriving (Show)
 
