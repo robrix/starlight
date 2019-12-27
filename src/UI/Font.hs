@@ -12,7 +12,7 @@ module UI.Font
 import           Control.Monad (guard, join, (<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Bifunctor (first)
-import           Data.Char (isSpace, ord)
+import           Data.Char (isPrint, isSeparator, ord)
 import           Data.Foldable (find)
 import qualified Data.Map as Map
 import           Data.Maybe (catMaybes)
@@ -51,7 +51,7 @@ readTypeface = fmap toTypeface . sendM . O.readOTFile where
       glyphID <- table Map.!? fromIntegral (ord char)
       glyphTable <- glyphTable
       g <- glyphTable !? fromIntegral glyphID
-      let vertices = if isSpace char then [] else glyphVertices g
+      let vertices = if isPrint char && not (isSeparator char) then glyphVertices g else []
       pure $! Glyph (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
     cmap = find supportedPlatform (O.getCmaps (O.cmapTable o))
     glyphTable = case O.outlineTables o of
