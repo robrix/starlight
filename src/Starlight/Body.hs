@@ -3,7 +3,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
-( Body(..)
+( System(..)
+, Body(..)
 , Orbit(..)
 , fromEphemeris
 , transform
@@ -26,6 +27,9 @@ import Unit.Angle
 import Unit.Length
 import Unit.Mass
 import Unit.Time
+
+newtype System a = System { getSystem :: [Body a] }
+  deriving (Show)
 
 data Body a = Body
   { name        :: String
