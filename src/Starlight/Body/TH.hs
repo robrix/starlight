@@ -6,9 +6,12 @@ module Starlight.Body.TH
 , S.Body(..)
 , Orbit(..)
 , mkOrbit
+, mkOrbitFromFile
 ) where
 
+import Data.List (elemIndex)
 import Language.Haskell.TH
+import Linear.Exts (orient)
 import Starlight.Body as S
 import Unit.Angle
 import Unit.Length
@@ -35,3 +38,9 @@ mkOrbit s = do
       (realToFrac <$> fromDegrees (argumentOfPerifocus      :: Degrees Double)))
     (realToFrac <$> (siderealOrbitPeriod                    :: Seconds Double))
     (realToFrac <$> (timeOfPeriapsisRelativeToEpoch         :: Seconds Double)) |]
+
+mkOrbitFromFile :: FilePath -> Q Exp
+mkOrbitFromFile path = do
+  lines <- lines <$> runIO (readFile path)
+  last <- maybe (fail "no ephemerides found") (pure . pred) (elemIndex "$$EOE" lines)
+  mkOrbit (lines !! last)
