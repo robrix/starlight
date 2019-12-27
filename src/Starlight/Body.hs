@@ -47,6 +47,7 @@ data Body = Body
   , parent     :: Maybe Body
   , satellites :: [Body]
   }
+  deriving (Show)
 
 data Orbit = Orbit
   { eccentricity :: Float
@@ -54,6 +55,7 @@ data Orbit = Orbit
   , orientation  :: Quaternion Float -- relative to ecliptic
   , period       :: Seconds Float
   }
+  deriving (Show)
 
 fromEphemeris :: Ephemeris -> Orbit
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod }
