@@ -287,9 +287,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
               drawArrays LineLoop (Interval 0 (length circleV))
 
-        draw $ rot _x (pi/2)
-        draw $ rot _y (pi/2)
-        draw $ rot _z (pi/2)
+        for_ [_x, _y, _z] (draw . (`rot` (pi/2)))
 
         for_ satellites (drawBody trans)
 
