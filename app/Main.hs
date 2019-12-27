@@ -74,7 +74,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
     . evalState GameState
       { throttle = 20
       , position = P (V2 25000 0)
-      , velocity = Delta (P (V2 0 75))
+      , velocity = V2 0 75
       , rotation = axisAngle (unit _z) (pi/2)
       }
     . evalState start
@@ -166,11 +166,11 @@ physics bodies input = do
 
   when (pressed SDL.KeycodeUp   input) $ do
     rotation <- Lens.use _rotation
-    _velocity += Delta (P (rotate rotation (unit _x ^* thrust) ^. _xy))
+    _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
   when (pressed SDL.KeycodeDown input) $ do
     rotation <- Lens.use _rotation
     velocity <- Lens.use _velocity
-    let angle = fst (polar2 (negated (unP (getDelta velocity))))
+    let angle = fst (polar2 (negated velocity))
         proposed = axisAngle (unit _z) (getRadians angle)
         delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
     _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
@@ -185,12 +185,12 @@ physics bodies input = do
         let pos = (transform !* V4 0 0 0 1) ^. _xy
             r = qd pos position
             bigG = 6.67430e-11
-        _velocity += Delta (P (dt * bigG * distanceScale ^ (2 :: Int) * getKilograms mass / r *^ normalize (pos ^-^ position)))
+        _velocity += dt * bigG * distanceScale ^ (2 :: Int) * getKilograms mass / r *^ normalize (pos ^-^ position)
 
   for_ bodies applyGravity
 
   s@GameState { velocity } <- get
-  _position += getDelta velocity
+  _position += P velocity
   pure s
 
 
@@ -334,7 +334,7 @@ data DrawState = DrawState
 data GameState = GameState
   { throttle :: !Float
   , position :: !(Point V2 Float)
-  , velocity :: !(Delta (Point V2) Float)
+  , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
   }
   deriving (Eq, Ord, Show)
@@ -345,7 +345,7 @@ _throttle = lens throttle (\ s v -> s { throttle = v })
 _position :: Lens' GameState (Point V2 Float)
 _position = lens position (\ s v -> s { position = v })
 
-_velocity :: Lens' GameState (Delta (Point V2) Float)
+_velocity :: Lens' GameState (V2 Float)
 _velocity = lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens' GameState (Quaternion Float)
