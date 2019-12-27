@@ -323,6 +323,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
                 drawArrays LineStrip (Interval 0 (length radarV))
 
           drawAtRadius 150 (colour & _a .~ 0.5)
+
           when (name == S.name target) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
