@@ -67,8 +67,9 @@ transform orbit t = mkTransformation
   (ext (uncurry cartesian2 (position orbit t)) 0)
 
 orientationAt :: (Epsilon a, RealFloat a) => Body a -> Seconds a -> Quaternion a
-orientationAt Body { tilt, period } t
-  = axisAngle (unit _x) (getRadians tilt) -- FIXME: orbit orientation, right-ascension & declination
+orientationAt Body { tilt, period, orbit = Orbit { orientation } } t
+  = orientation
+  + axisAngle (unit _x) (getRadians tilt) -- FIXME: right-ascension & declination
   + axisAngle (unit _z) (getSeconds (t / period))
 
 
