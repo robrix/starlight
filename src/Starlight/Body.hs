@@ -49,10 +49,10 @@ data Body = Body
   }
 
 data Orbit = Orbit
-  { eccentricity             :: Float
-  , semimajor                :: Metres Float
-  , orientation              :: Quaternion Float -- relative to ecliptic
-  , period                   :: Seconds Float
+  { eccentricity :: Float
+  , semimajor    :: Metres Float
+  , orientation  :: Quaternion Float -- relative to ecliptic
+  , period       :: Seconds Float
   }
 
 fromEphemeris :: Ephemeris -> Orbit
