@@ -40,13 +40,13 @@ data Instant a = Instant
   }
   deriving (Show)
 
-bodiesAt :: (Epsilon a, RealFloat a) => Seconds a -> System a -> [(Body a, M44 a, Quaternion a)]
+bodiesAt :: (Epsilon a, RealFloat a) => Seconds a -> System a -> [Instant a]
 bodiesAt t (System bs) = bs' where
   bs' = map go bs
-  go b = (b, rel !*! transformAt (orbit b) t, orientationAt b t) where
-    rel = maybe identity (\ (_, m, _) -> m) $ do
+  go b = Instant b (rel !*! transformAt (orbit b) t) (orientationAt b t) where
+    rel = maybe identity transform $ do
       p <- parent b
-      find (\ (b', _, _) -> name b' == name p) bs'
+      find ((== name p) . name . body) bs'
 
 
 data Body a = Body
