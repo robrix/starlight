@@ -99,8 +99,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
+        let bodies = S.bodiesAt S.system (getDelta t)
         continue <- fmap isJust . runEmpty $ do
-          state <- physics t =<< input
+          state <- physics bodies =<< input
           draw drawState t state
         speed <- Lens.uses _velocity norm
         throttle <- Lens.use _throttle
@@ -150,10 +151,10 @@ physics
      , Has (State PlayerState) sig m
      , Has Time sig m
      )
-  => Delta Seconds Float
+  => [S.Instant Float]
   -> Input
   -> m PlayerState
-physics t input = do
+physics bodies input = do
   dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
   put =<< now
 
@@ -182,16 +183,15 @@ physics t input = do
   when (pressed SDL.KeycodeRight input) $
     _rotation -= angular
 
-  let applyGravity rel S.Body { mass, orbit, satellites } = do
+  let rel = scaled (V4 distanceScale distanceScale distanceScale 1)
+      applyGravity S.Instant { transform, body = S.Body { mass }} = do
         P position <- Lens.use _position
-        let trans = rel + S.transformAt orbit (getDelta t * timeScale)
-            pos = (trans !* V4 0 0 0 1) ^. _xy
+        let pos = ((rel + transform) !* V4 0 0 0 1) ^. _xy
             r = qd pos position
             bigG = 6.67430e-11
         _velocity += Delta (P (dt * bigG * distanceScale * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
-        for_ satellites (applyGravity trans)
 
-  applyGravity (scaled (V4 distanceScale distanceScale distanceScale 1)) S.sol
+  for_ bodies applyGravity
 
   s@PlayerState { velocity } <- get
   _position += getDelta velocity
