@@ -70,7 +70,7 @@ orientationAt :: (Epsilon a, RealFloat a) => Body a -> Seconds a -> Quaternion a
 orientationAt Body { tilt, period, orbit = Orbit { orientation } } t
   = orientation
   * axisAngle (unit _x) (getRadians tilt) -- FIXME: right-ascension & declination
-  * axisAngle (unit _z) (getSeconds (t / period))
+  * axisAngle (unit _z) (getSeconds (t * 3600 / period))
 
 
 position :: RealFloat a => Orbit a -> Seconds a -> (Radians a, a)
