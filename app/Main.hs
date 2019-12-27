@@ -84,7 +84,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       radarP <- build Radar.shader
       bodyP  <- build Body.shader
 
-      label <- Label.label
+      label <- Label.label font white
 
       quadA   <- load quadV
       shipA   <- load shipV
@@ -96,7 +96,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
-      setColour label white
       let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label }
 
       fix $ \ loop -> do
@@ -105,10 +104,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         let bodies = S.bodiesAt system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $ do
           draw drawState bodies =<< physics bodies =<< input
-        speed <- Lens.uses _velocity norm
-        throttle <- Lens.use _throttle
-        setLabel label font $ show (roundToPlaces 1 throttle) <> ", " <> show (roundToPlaces 1 speed)
-        drawLabel label
         when continue $ do
           Window.swap
           loop
@@ -225,7 +220,7 @@ draw
   -> [S.Instant Float]
   -> PlayerState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bodies PlayerState{ position, velocity, rotation } = runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies PlayerState{ throttle, position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -318,6 +313,9 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
             drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / 7)) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
     bindArray radarA $ for_ bodies drawBlip
+
+    setLabel label $ show (roundToPlaces 1 throttle) <> ", " <> show (roundToPlaces 1 (norm velocity))
+    drawLabel label
 
 
 data DrawState = DrawState

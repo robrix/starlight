@@ -8,7 +8,6 @@ module UI.Label
 ( Label
 , label
 , setLabel
-, setColour
 , drawLabel
 ) where
 
@@ -59,6 +58,7 @@ data LabelState = LabelState
   , quadA   :: !(Array (Text.V  Identity))
   , bounds  :: !(Rect Int)
   , scale   :: !Int
+  , font    :: !Font
   , string  :: !String
   }
 
@@ -69,8 +69,10 @@ label
      , Has Window.Window sig m
      , HasCallStack
      )
-  => m Label
-label = do
+  => Font
+  -> Colour Float
+  -> m Label
+label font colour = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
@@ -100,7 +102,7 @@ label = do
 
   scale <- Window.scale
 
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour = black, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, string = "" })
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, string = "" })
 
 setLabel
   :: ( HasCallStack
@@ -108,11 +110,10 @@ setLabel
      , Has (Lift IO) sig m
      )
   => Label
-  -> Font
   -> String
   -> m ()
-setLabel Label{ ref } font string = runLiftIO $ do
-  l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale, bounds, string = oldString } <- sendIO (readIORef ref)
+setLabel Label{ ref } string = runLiftIO $ do
+  l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale, bounds, font, string = oldString } <- sendIO (readIORef ref)
 
   when (bounds == Rect 0 0 || oldString /= string) $ do
     glBlendFunc GL_ONE GL_ONE -- add
@@ -168,9 +169,6 @@ setLabel Label{ ref } font string = runLiftIO $ do
         , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
         , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
         ]
-
-setColour :: Has (Lift IO) sig m => Label -> Colour Float -> m ()
-setColour Label{ ref } colour = sendIO (modifyIORef ref (\ l -> l { colour }))
 
 
 drawLabel
