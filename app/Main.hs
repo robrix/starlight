@@ -104,7 +104,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         system <- ask
         let bodies = S.bodiesAt system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $
-          input >>= physics bodies >>= draw drawState bodies
+          input >>= controls >>= physics bodies >>= draw drawState bodies
         when continue $ do
           Window.swap
           loop
@@ -140,16 +140,15 @@ radarV :: [Radar.V Identity]
 radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
   n = (16 :: Int)
 
-physics
+controls
   :: ( Has (State UTCTime) sig m
      , Has (State GameState) sig m
      , Has Time sig m
      )
-  => [S.Instant Float]
-  -> Input
-  -> m GameState
-physics bodies input = do
-  dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
+  => Input
+  -> m (Delta Seconds Float)
+controls input = do
+  Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
   when (pressed SDL.KeycodePlus  input || pressed SDL.KeycodeEquals input) $
@@ -177,6 +176,14 @@ physics bodies input = do
   when (pressed SDL.KeycodeRight input) $
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
+  pure (Delta (Seconds dt))
+
+physics
+  :: Has (State GameState) sig m
+  => [S.Instant Float]
+  -> Delta Seconds Float
+  -> m GameState
+physics bodies (Delta (Seconds dt)) = do
   let applyGravity S.Instant { transform, body = S.Body { mass }} = do
         P position <- Lens.use _position
         let pos = (transform !* V4 0 0 0 1) ^. _xy
