@@ -21,6 +21,7 @@ module Starlight.Body
 ) where
 
 import Data.Foldable (find)
+import Linear.Affine
 import Linear.Epsilon
 import Linear.Exts
 import Linear.Matrix
@@ -97,7 +98,7 @@ orbitTimeScale = 1
 transformAt :: RealFloat a => Orbit a -> Seconds a -> M44 a
 transformAt orbit@Orbit{ orientation } t = mkTransformation
   orientation
-  (positionAt orbit t)
+  (unP (positionAt orbit t))
 
 orientationAt :: (Epsilon a, RealFloat a) => Body a -> Seconds a -> Quaternion a
 orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } } t
@@ -106,8 +107,8 @@ orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } 
   * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / period))
 
 
-positionAt :: RealFloat a => Orbit a -> Seconds a -> V3 a
-positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = ext (cartesian2 (Radians trueAnomaly) r) 0 where
+positionAt :: RealFloat a => Orbit a -> Seconds a -> Point V3 a
+positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = P (ext (cartesian2 (Radians trueAnomaly) r) 0) where
   t' = timeOfPeriapsis + t * orbitTimeScale
   meanAnomaly = getSeconds (meanMotion * t')
   meanMotion = (2 * pi) / period
@@ -120,7 +121,7 @@ positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = ext (c
   r = getMetres semimajor * (1 - eccentricity * cos eccentricAnomaly)
 
 velocityAt :: RealFloat a => Orbit a -> Seconds a -> V3 a
-velocityAt orbit t = positionAt orbit (t + 1) - positionAt orbit t
+velocityAt orbit t = positionAt orbit (t + 1) .-. positionAt orbit t
 
 
 data Ephemeris = Ephemeris
