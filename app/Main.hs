@@ -71,7 +71,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     evalState @Input mempty
     . evalState PlayerState
-      { throttle = 3
+      { throttle = 20
       , position = P (V2 25000 0)
       , velocity = Delta (P (V2 0 75))
       , rotation = pi/2
