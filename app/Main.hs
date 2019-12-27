@@ -118,9 +118,6 @@ roundToPlaces n x = fromInteger (round (x * n')) / n' where
 distanceScale :: Float
 distanceScale = 10000 / getMetres (S.radius S.sol)
 
-timeScale :: Seconds Float
-timeScale = 1
-
 
 shipV :: [Ship.V Identity]
 shipV = coerce @[V2 Float]
