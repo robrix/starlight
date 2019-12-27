@@ -17,35 +17,21 @@ import Unit.Time
 mkOrbit :: String -> Q Exp
 mkOrbit s = do
   Ephemeris
-    { julianDayNumberBarycentricDynamicalTime
-    , calendarDate
-    , eccentricity
-    , periapsisDistance              = Kilometres periapsisDistance
-    , inclination                    = Degrees inclination
-    , longitudeOfAscendingNode       = Degrees longitudeOfAscendingNode
-    , argumentOfPerifocus            = Degrees argumentOfPerifocus
-    , timeOfPeriapsisRelativeToEpoch = Seconds timeOfPeriapsisRelativeToEpoch
-    , meanMotion                     = Per meanMotion
-    , meanAnomaly                    = Degrees meanAnomaly
-    , trueAnomaly                    = Degrees trueAnomaly
+    { eccentricity
+    , inclination                    = Degrees    inclination
+    , longitudeOfAscendingNode       = Degrees    longitudeOfAscendingNode
+    , argumentOfPerifocus            = Degrees    argumentOfPerifocus
+    , timeOfPeriapsisRelativeToEpoch = Seconds    timeOfPeriapsisRelativeToEpoch
     , semimajor                      = Kilometres semimajor
-    , apoapsisDistance               = Kilometres apoapsisDistance
-    , siderealOrbitPeriod            = Seconds siderealOrbitPeriod
+    , siderealOrbitPeriod            = Seconds    siderealOrbitPeriod
     }
     <- either fail pure (fromCSV s)
-  [e| fromEphemeris Ephemeris
-    { julianDayNumberBarycentricDynamicalTime
-    , calendarDate
-    , eccentricity
-    , periapsisDistance              = Kilometres periapsisDistance
-    , inclination                    = Degrees inclination
-    , longitudeOfAscendingNode       = Degrees longitudeOfAscendingNode
-    , argumentOfPerifocus            = Degrees argumentOfPerifocus
-    , timeOfPeriapsisRelativeToEpoch = Seconds timeOfPeriapsisRelativeToEpoch
-    , meanMotion                     = Per meanMotion
-    , meanAnomaly                    = Degrees meanAnomaly
-    , trueAnomaly                    = Degrees trueAnomaly
-    , semimajor                      = Kilometres semimajor
-    , apoapsisDistance               = Kilometres apoapsisDistance
-    , siderealOrbitPeriod            = Seconds siderealOrbitPeriod
-    } |]
+  [e| Orbit
+    (realToFrac (eccentricity :: Double))
+    (realToFrac <$> fromKilometres (semimajor               :: Kilometres Double))
+    (orient
+      (realToFrac <$> fromDegrees (longitudeOfAscendingNode :: Degrees Double))
+      (realToFrac <$> fromDegrees (inclination              :: Degrees Double))
+      (realToFrac <$> fromDegrees (argumentOfPerifocus      :: Degrees Double)))
+    (realToFrac <$> (siderealOrbitPeriod                    :: Seconds Double))
+    (realToFrac <$> (timeOfPeriapsisRelativeToEpoch         :: Seconds Double)) |]
