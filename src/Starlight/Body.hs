@@ -12,6 +12,7 @@ module Starlight.Body
 , rotationTimeScale
 , transformAt
 , orientationAt
+, velocityAt
   -- * Ephemerides
 , Ephemeris(..)
 , fromCSV
@@ -116,6 +117,9 @@ positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = ext (c
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly = atan2 (sqrt (1 - eccentricity * eccentricity) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
   r = getMetres semimajor * (1 - eccentricity * cos eccentricAnomaly)
+
+velocityAt :: RealFloat a => Orbit a -> Seconds a -> V3 a
+velocityAt orbit t = positionAt orbit (t + 1) - positionAt orbit t
 
 
 data Ephemeris = Ephemeris
