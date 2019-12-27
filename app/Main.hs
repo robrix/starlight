@@ -53,6 +53,7 @@ import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Shader.Radar as Radar
 import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
+import qualified Starlight.Sol as S
 import           System.FilePath
 import qualified UI.Carrier.Window as Window
 import           UI.Colour
