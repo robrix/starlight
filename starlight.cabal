@@ -71,6 +71,7 @@ library
     Physics.Delta
     S
     Starlight.Body
+    Starlight.Body.TH
     Starlight.Input
     Starlight.Shader.Body
     Starlight.Shader.Radar
@@ -128,6 +129,7 @@ executable starlight
     , microlens
     , sdl2
     , starlight
+    , template-haskell
     , time
 
 source-repository head
