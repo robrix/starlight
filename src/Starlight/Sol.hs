@@ -191,13 +191,13 @@ saturn = Body
   , period      = fromHours 10 + fromMinutes 33 + Seconds 38
   , colour      = V4 (229/255) (216/255) (167/255) 1
   , orbit       = Orbit
-    { semimajor                = fromKilometres 1433.53e6
-    , eccentricity             = 0.0565
+    { semimajor                = fromKilometres 1.433018439889365e9
+    , eccentricity             = 5.113892723344726e-2
     , orientation              = orient
-      (fromDegrees 113.665) -- longitude of ascending node
-      (fromDegrees 2.485)   -- inclination
-      (fromDegrees 339.392) -- argument of perihelion
-    , period                   = fromDays 10759.22
+      (fromDegrees 113.5961238206918) -- longitude of ascending node
+      (fromDegrees 2.482467910224053) -- inclination
+      (fromDegrees 338.0091574468112) -- argument of perihelion
+    , period                   = Seconds 9.354911095294629e8
     , timeOfPeriapsis          = Seconds 4.065001346578497e8
     }
   , parent      = Just sol
@@ -212,13 +212,13 @@ uranus = Body
   , period      = fromDays 0.71833
   , colour      = V4 (196/255) (221/255) (240/255) 1
   , orbit       = Orbit
-    { semimajor                = fromAUs 19.2184
-    , eccentricity             = 0.046381
+    { semimajor                = fromKilometres 2.868826375931754e9
+    , eccentricity             = 4.652828268488615e-2
     , orientation              = orient
-      (fromDegrees 74.006)    -- longitude of ascending node
-      (fromDegrees 0.773)     -- inclination
-      (fromDegrees 96.998857) -- argument of perihelion
-    , period                   = fromDays 30688.5
+      (fromDegrees 74.04277909533107)  -- longitude of ascending node
+      (fromDegrees 0.7712301465256223) -- inclination
+      (fromDegrees 98.80551909978557)  -- argument of perihelion
+    , period                   = Seconds 2.650153130646821e9
     , timeOfPeriapsis          = Seconds 9.85355993991342e8
     }
   , parent      = Just sol
@@ -233,13 +233,13 @@ neptune = Body
   , period      = fromDays 0.6713
   , colour      = V4 (138/255) (163/255) (217/255) 1
   , orbit       = Orbit
-    { semimajor                = fromAUs 30.11
-    , eccentricity             = 0.009456
+    { semimajor                = fromKilometres 4.515871632660523e9
+    , eccentricity             = 9.856763754664547e-3
     , orientation              = orient
-      (fromDegrees 131.784)  -- longitude of ascending node
-      (fromDegrees 1.767975) -- inclination
-      (fromDegrees 276.336)  -- argument of perihelion
-    , period                   = fromDays 60182
+      (fromDegrees 131.7987188628215) -- longitude of ascending node
+      (fromDegrees 1.771193284635514) -- inclination
+      (fromDegrees 247.6745929625092) -- argument of perihelion
+    , period                   = Seconds 5.233897945641596e9
     , timeOfPeriapsis          = Seconds 4.50852467415131e8
     }
   , parent      = Just sol
