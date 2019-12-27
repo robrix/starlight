@@ -86,10 +86,10 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
     }
 
 
-rotationTimeScale :: Num a => a
+rotationTimeScale :: Num a => Seconds a
 rotationTimeScale = 3600
 
-orbitTimeScale :: Num a => a
+orbitTimeScale :: Num a => Seconds a
 orbitTimeScale = 1
 
 transformAt :: RealFloat a => Orbit a -> Seconds a -> M44 a
