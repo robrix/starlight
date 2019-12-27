@@ -102,7 +102,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         let bodies = S.bodiesAt S.system (getDelta t)
         continue <- fmap isJust . runEmpty $ do
           state <- physics bodies =<< input
-          draw drawState t state
+          draw drawState bodies t state
         speed <- Lens.uses _velocity norm
         throttle <- Lens.use _throttle
         setLabel label font $ show (roundToPlaces 1 throttle) <> ", " <> show (roundToPlaces 1 speed)
@@ -222,10 +222,11 @@ draw
      , Has Window.Window sig m
      )
   => DrawState
+  -> [S.Instant Float]
   -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t PlayerState { position, velocity, rotation } = runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bodies t PlayerState{ position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -270,15 +271,16 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
     bindArray shipA $
       drawArrays LineLoop (Interval 0 4)
 
-  let drawBody rel b@S.Body { radius = Metres r, colour, orbit, satellites } = do
-        let trans = rel !*! S.transformAt orbit (getDelta t * timeScale)
-            rot b r = mkTransformation (axisAngle (unit b) r) 0
+  let rel = scaled (V4 distanceScale distanceScale distanceScale 1)
+      drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
+        let rot b r = mkTransformation (axisAngle (unit b) r) 0
             base
               =   scaled (V4 sx sy 1 1)
               !*! translated3 (ext (negated (unP position)) 0)
-              !*! trans
+              !*! rel
+              !*! transform
               !*! scaled (V4 r r r 1)
-              !*! mkTransformation (S.orientationAt b (getDelta t)) 0
+              !*! mkTransformation rotation 0
             draw rot = do
               set Body.U
                 { matrix = Just (base !*! rot)
@@ -289,10 +291,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
         for_ [_x, _y, _z] (draw . (`rot` (pi/2)))
 
-        for_ satellites (drawBody trans)
-
-  use bodyP . bindArray circleA $
-    drawBody (scaled (V4 distanceScale distanceScale distanceScale 1)) S.sol
+  use bodyP . bindArray circleA $ for_ bodies drawBody
 
   use radarP $ do
     let drawBlip rel S.Body { name, radius = Metres r, colour, orbit, satellites } = do
