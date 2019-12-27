@@ -4,6 +4,7 @@
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( System(..)
+, Instant(..)
 , bodiesAt
 , Body(..)
 , Orbit(..)
@@ -30,6 +31,13 @@ import Unit.Mass
 import Unit.Time
 
 newtype System a = System { getSystem :: [Body a] }
+  deriving (Show)
+
+data Instant a = Instant
+  { body      :: Body a
+  , transform :: M44 a
+  , rotation  :: Quaternion a
+  }
   deriving (Show)
 
 bodiesAt :: (Epsilon a, RealFloat a) => Seconds a -> System a -> [(Body a, M44 a, Quaternion a)]
