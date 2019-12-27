@@ -27,15 +27,15 @@ import Unit.Time
 -- FIXME: right-ascension
 -- FIXME: declination
 data Body a = Body
-  { name       :: String
-  , radius     :: Metres a
-  , mass       :: Kilograms a
-  , tilt       :: Radians a -- relative to orbit
-  , period     :: Seconds a -- sidereal rotation period
-  , colour     :: Colour a
-  , orbit      :: Orbit a
-  , parent     :: Maybe (Body a)
-  , satellites :: [Body a]
+  { name        :: String
+  , radius      :: Metres a
+  , mass        :: Kilograms a
+  , orientation :: Quaternion a -- relative to orbit
+  , period      :: Seconds a    -- sidereal rotation period
+  , colour      :: Colour a
+  , orbit       :: Orbit a
+  , parent      :: Maybe (Body a)
+  , satellites  :: [Body a]
   }
   deriving (Show)
 
@@ -62,14 +62,14 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
     }
 
 transform :: RealFloat a => Orbit a -> Seconds a -> M44 a
-transform orbit t = mkTransformation
-  (orientation orbit)
+transform orbit@Orbit{ orientation } t = mkTransformation
+  orientation
   (ext (uncurry cartesian2 (position orbit t)) 0)
 
 orientationAt :: (Epsilon a, RealFloat a) => Body a -> Seconds a -> Quaternion a
-orientationAt Body { tilt, period, orbit = Orbit { orientation } } t
-  = orientation
-  * axisAngle (unit _x) (getRadians tilt) -- FIXME: right-ascension & declination
+orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } } t
+  = orbit
+  * orientation
   * axisAngle (unit _z) (getSeconds (t * 3600 / period))
 
 
