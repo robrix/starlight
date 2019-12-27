@@ -72,8 +72,9 @@ orientationAt Body { tilt, period } t
 
 
 position :: Orbit -> Seconds Float -> (Radians Float, Float)
-position Orbit { eccentricity, semimajor, period } t = (Radians trueAnomaly, r) where
-  meanAnomaly = getSeconds (meanMotion * t)
+position Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = (Radians trueAnomaly, r) where
+  t' = timeOfPeriapsis + t
+  meanAnomaly = getSeconds (meanMotion * t')
   meanMotion = (2 * pi) / period
   eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity * sin ea) meanAnomaly where
     iter n f = go n where
