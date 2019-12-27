@@ -11,6 +11,7 @@ module Starlight.Body
 , fromCSV
 ) where
 
+import Linear.Epsilon
 import Linear.Exts
 import Linear.Matrix
 import Linear.Quaternion
@@ -25,29 +26,29 @@ import Unit.Time
 
 -- FIXME: right-ascension
 -- FIXME: declination
-data Body = Body
+data Body a = Body
   { name       :: String
-  , radius     :: Metres Float
-  , mass       :: Kilograms Float
-  , tilt       :: Radians Float -- relative to orbit
-  , period     :: Seconds Float -- sidereal rotation period
-  , colour     :: Colour Float
-  , orbit      :: Orbit
-  , parent     :: Maybe Body
-  , satellites :: [Body]
+  , radius     :: Metres a
+  , mass       :: Kilograms a
+  , tilt       :: Radians a -- relative to orbit
+  , period     :: Seconds a -- sidereal rotation period
+  , colour     :: Colour a
+  , orbit      :: Orbit a
+  , parent     :: Maybe (Body a)
+  , satellites :: [Body a]
   }
   deriving (Show)
 
-data Orbit = Orbit
-  { eccentricity    :: Float
-  , semimajor       :: Metres Float
-  , orientation     :: Quaternion Float -- relative to ecliptic
-  , period          :: Seconds Float
-  , timeOfPeriapsis :: Seconds Float    -- relative to epoch
+data Orbit a = Orbit
+  { eccentricity    :: a
+  , semimajor       :: Metres a
+  , orientation     :: Quaternion a -- relative to ecliptic
+  , period          :: Seconds a
+  , timeOfPeriapsis :: Seconds a    -- relative to epoch
   }
   deriving (Show)
 
-fromEphemeris :: Ephemeris -> Orbit
+fromEphemeris :: (Epsilon a, RealFloat a) => Ephemeris -> Orbit a
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
   = Orbit
     { eccentricity    = realToFrac eccentricity
@@ -60,18 +61,18 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
     , timeOfPeriapsis = realToFrac <$> timeOfPeriapsisRelativeToEpoch
     }
 
-transform :: Orbit -> Seconds Float -> M44 Float
+transform :: Orbit Float -> Seconds Float -> M44 Float
 transform orbit t = mkTransformation
   (orientation orbit)
   (ext (uncurry cartesian2 (position orbit t)) 0)
 
-orientationAt :: Body -> Seconds Float -> Quaternion Float
+orientationAt :: Body Float -> Seconds Float -> Quaternion Float
 orientationAt Body { tilt, period } t
   = axisAngle (unit _x) (getRadians tilt) -- FIXME: orbit orientation, right-ascension & declination
   + axisAngle (unit _z) (getSeconds (t / period))
 
 
-position :: Orbit -> Seconds Float -> (Radians Float, Float)
+position :: Orbit Float -> Seconds Float -> (Radians Float, Float)
 position Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = (Radians trueAnomaly, r) where
   t' = timeOfPeriapsis + t
   meanAnomaly = getSeconds (meanMotion * t')

@@ -20,7 +20,7 @@ import Unit.Angle
 import Unit.Length
 import Unit.Time
 
-sol :: Body
+sol :: Body Float
 sol = Body
   { name       = "Sol"
   , radius     = fromKilometres 695500.0
@@ -48,7 +48,7 @@ sol = Body
     ]
   }
 
-mercury :: Body
+mercury :: Body Float
 mercury = Body
   { name       = "Mercury"
   , radius     = fromKilometres 2439.7
@@ -70,7 +70,7 @@ mercury = Body
   , satellites = []
   }
 
-venus :: Body
+venus :: Body Float
 venus = Body
   { name       = "Venus"
   , radius     = fromKilometres 6051.9
@@ -92,7 +92,7 @@ venus = Body
   , satellites = []
   }
 
-earth :: Body
+earth :: Body Float
 earth = Body
   { name       = "Earth"
   , radius     = fromKilometres 6378.14
@@ -114,7 +114,7 @@ earth = Body
   , satellites = [ luna ]
   }
 
-luna :: Body
+luna :: Body Float
 luna = Body
   { name       = "Luna"
   , radius     = fromKilometres 1737.5
@@ -136,7 +136,7 @@ luna = Body
   , satellites = []
   }
 
-mars :: Body
+mars :: Body Float
 mars = Body
   { name       = "Mars"
   , radius     = fromKilometres 3397
@@ -158,7 +158,7 @@ mars = Body
   , satellites = []
   }
 
-jupiter :: Body
+jupiter :: Body Float
 jupiter = Body
   { name       = "Jupiter"
   , radius     = fromKilometres 69911
@@ -180,7 +180,7 @@ jupiter = Body
   , satellites = []
   }
 
-saturn :: Body
+saturn :: Body Float
 saturn = Body
   { name       = "Saturn"
   , radius     = fromKilometres 58232
@@ -202,7 +202,7 @@ saturn = Body
   , satellites = []
   }
 
-uranus :: Body
+uranus :: Body Float
 uranus = Body
   { name       = "Uranus"
   , radius     = fromKilometres 25362
@@ -224,7 +224,7 @@ uranus = Body
   , satellites = []
   }
 
-neptune :: Body
+neptune :: Body Float
 neptune = Body
   { name       = "Neptune"
   , radius     = fromKilometres 24624
