@@ -4,6 +4,7 @@
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( System(..)
+, bodiesAt
 , Body(..)
 , Orbit(..)
 , fromEphemeris
@@ -14,6 +15,7 @@ module Starlight.Body
 , fromCSV
 ) where
 
+import Data.Foldable (find)
 import Linear.Epsilon
 import Linear.Exts
 import Linear.Matrix
@@ -29,6 +31,15 @@ import Unit.Time
 
 newtype System a = System { getSystem :: [Body a] }
   deriving (Show)
+
+bodiesAt :: (Epsilon a, RealFloat a) => Seconds a -> System a -> [(Body a, M44 a, Quaternion a)]
+bodiesAt t (System bs) = bs' where
+  bs' = map go bs
+  go b = (b, rel !*! transformAt (orbit b) t, orientationAt b t) where
+    rel = maybe identity (\ (_, m, _) -> m) $ do
+      p <- parent b
+      find (\ (b', _, _) -> name b' == name p) bs'
+
 
 data Body a = Body
   { name        :: String
