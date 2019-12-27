@@ -262,7 +262,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
       { matrix = Just
           $   window
           !*! translated (unP position)
-          !*! scaled     (V3 25 25 1)
+          !*! scaled     (V3 15 15 1)
           !*! rotated    rotation
       , colour = Just white
       }
