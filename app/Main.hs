@@ -351,3 +351,6 @@ _velocity = lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens' GameState (Quaternion Float)
 _rotation = lens rotation (\ s r -> s { rotation = r })
+
+_target :: Lens' GameState (Maybe Int)
+_target = lens target (\ s t -> s { target = t })
