@@ -1,2 +1,7 @@
 module Starlight.Body.TH
-() where
+( System(..)
+, Body(..)
+, Orbit(..)
+) where
+
+import Starlight.Body
