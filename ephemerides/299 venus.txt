@@ -1,6 +1,6 @@
 *******************************************************************************
  Revised: July 31, 2013                 Venus                           299 / 2
-
+ 
  PHYSICAL DATA (updated 2019-Apr-22):
   Vol. Mean Radius (km) =  6051.84+-0.01 Density (g/cm^3)      =  5.204
   Mass x10^23 (kg)      =    48.685      Volume (x10^10 km^3)  = 92.843
@@ -20,10 +20,12 @@
   Maximum Planetary IR (W/m^2)    153         153         153
   Minimum Planetary IR (W/m^2)    153         153         153
 *******************************************************************************
+ 
 
+ 
 
 *******************************************************************************
-Ephemeris / WWW_USER Thu Dec 26 14:38:35 2019 Pasadena, USA      / Horizons
+Ephemeris / WWW_USER Thu Dec 26 16:04:17 2019 Pasadena, USA      / Horizons    
 *******************************************************************************
 Target body name: Venus (299)                     {source: DE431mx}
 Center body name: Sun (10)                        {source: DE431mx}
@@ -35,13 +37,13 @@ Step-size       : 1440 minutes
 *******************************************************************************
 Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
 Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
-Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
 Keplerian GM    : 1.3271276490053130E+11 km^3/s^2
-Output units    : KM-S, deg
+Output units    : KM-S, deg                                                    
 Output type     : GEOMETRIC osculating elements
 Output format   : 10
-Reference frame : ICRF/J2000.0
-Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch
+Reference frame : ICRF/J2000.0                                                 
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
 *******************************************************************************
             JDTDB,            Calendar Date (TDB),                     EC,                     QR,                     IN,                     OM,                      W,                     Tp,                      N,                     MA,                     TA,                      A,                     AD,                     PR,
 **************************************************************************************************************************************************************************************************************************************************************************************************************************************************
@@ -94,18 +96,18 @@ Coordinate system description:
   Symbol meaning:
 
     JDTDB    Julian Day Number, Barycentric Dynamical Time
-      EC     Eccentricity, e
-      QR     Periapsis distance, q (km)
-      IN     Inclination w.r.t XY-plane, i (degrees)
-      OM     Longitude of Ascending Node, OMEGA, (degrees)
-      W      Argument of Perifocus, w (degrees)
-      Tp     Time of periapsis relative to epoch (P-E) (sec)
-      N      Mean motion, n (degrees/sec)
-      MA     Mean anomaly, M (degrees)
-      TA     True anomaly, nu (degrees)
-      A      Semi-major axis, a (km)
-      AD     Apoapsis distance (km)
-      PR     Sidereal orbit period (sec)
+      EC     Eccentricity, e                                                   
+      QR     Periapsis distance, q (km)                                        
+      IN     Inclination w.r.t XY-plane, i (degrees)                           
+      OM     Longitude of Ascending Node, OMEGA, (degrees)                     
+      W      Argument of Perifocus, w (degrees)                                
+      Tp     Time of periapsis relative to epoch (P-E) (sec)                   
+      N      Mean motion, n (degrees/sec)                                      
+      MA     Mean anomaly, M (degrees)                                         
+      TA     True anomaly, nu (degrees)                                        
+      A      Semi-major axis, a (km)                                           
+      AD     Apoapsis distance (km)                                            
+      PR     Sidereal orbit period (sec)                                       
 
 Geometric states/elements have no aberrations applied.
 
