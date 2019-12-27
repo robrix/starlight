@@ -23,7 +23,7 @@ import Linear.Epsilon
 import Linear.Exts
 import Linear.Matrix
 import Linear.Quaternion
-import Linear.V4
+import Linear.V3
 import Linear.Vector
 import Text.Read
 import UI.Colour
@@ -95,7 +95,7 @@ orbitTimeScale = 1
 transformAt :: RealFloat a => Orbit a -> Seconds a -> M44 a
 transformAt orbit@Orbit{ orientation } t = mkTransformation
   orientation
-  (ext (uncurry cartesian2 (positionAt orbit t)) 0)
+  (positionAt orbit t)
 
 orientationAt :: (Epsilon a, RealFloat a) => Body a -> Seconds a -> Quaternion a
 orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } } t
@@ -104,8 +104,8 @@ orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } 
   * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / period))
 
 
-positionAt :: RealFloat a => Orbit a -> Seconds a -> (Radians a, a)
-positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = (Radians trueAnomaly, r) where
+positionAt :: RealFloat a => Orbit a -> Seconds a -> V3 a
+positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = ext (cartesian2 (Radians trueAnomaly) r) 0 where
   t' = timeOfPeriapsis + t * orbitTimeScale
   meanAnomaly = getSeconds (meanMotion * t')
   meanMotion = (2 * pi) / period
