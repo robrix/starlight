@@ -273,15 +273,15 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
   let drawBody rel b@S.Body { radius = Metres r, colour, orbit, satellites } = do
         let trans = rel !*! S.transform orbit (getDelta t * timeScale)
             rot b r = mkTransformation (axisAngle (unit b) r) 0
+            base
+              =   scaled (V4 sx sy 1 1)
+              !*! translated3 (ext (negated (unP position)) 0)
+              !*! trans
+              !*! scaled (V4 r r r 1)
+              !*! mkTransformation (S.orientationAt b (getDelta t)) 0
             draw rot = do
               set Body.U
-                { matrix = Just
-                    $   scaled (V4 sx sy 1 1)
-                    !*! translated3 (ext (negated (unP position)) 0)
-                    !*! trans
-                    !*! scaled (V4 r r r 1)
-                    !*! mkTransformation (S.orientationAt b (getDelta t)) 0
-                    !*! rot
+                { matrix = Just (base !*! rot)
                 , colour = Just colour
                 }
 
