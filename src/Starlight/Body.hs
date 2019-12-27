@@ -40,8 +40,8 @@ data Instant a = Instant
   }
   deriving (Show)
 
-bodiesAt :: (Epsilon a, RealFloat a) => Seconds a -> System a -> [Instant a]
-bodiesAt t (System bs) = bs' where
+bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> [Instant a]
+bodiesAt (System bs) t = bs' where
   bs' = map go bs
   go b = Instant b (rel !*! transformAt (orbit b) t) (orientationAt b t) where
     rel = maybe identity transform $ do
