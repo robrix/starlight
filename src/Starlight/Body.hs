@@ -1,4 +1,7 @@
-{-# LANGUAGE DuplicateRecordFields, KindSignatures, NamedFieldPuns, TypeOperators #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( Body(..)
 , Orbit(..)
