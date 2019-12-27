@@ -15,6 +15,7 @@ module Starlight.Body
   -- * Ephemerides
 , Ephemeris(..)
 , fromCSV
+, Per(..)
 ) where
 
 import Data.Foldable (find)
