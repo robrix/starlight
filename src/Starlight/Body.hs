@@ -24,8 +24,6 @@ import Unit.Length
 import Unit.Mass
 import Unit.Time
 
--- FIXME: right-ascension
--- FIXME: declination
 data Body a = Body
   { name        :: String
   , radius      :: Metres a
