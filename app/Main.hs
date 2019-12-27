@@ -84,7 +84,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       radarP <- build Radar.shader
       bodyP  <- build Body.shader
 
-      label <- label
+      label <- Label.label
 
       quadA   <- load quadV
       shipA   <- load shipV
@@ -97,7 +97,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_PROGRAM_POINT_SIZE
 
       setColour label white
-      let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP }
+      let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label }
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
@@ -329,6 +329,7 @@ data DrawState = DrawState
   , shipP   :: Program Ship.U  Ship.V  Ship.O
   , bodyP   :: Program Body.U  Body.V  Body.O
   , radarP  :: Program Radar.U Radar.V Radar.O
+  , label   :: Label
   }
 
 
