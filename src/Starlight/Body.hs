@@ -9,6 +9,7 @@ module Starlight.Body
 , Body(..)
 , Orbit(..)
 , fromEphemeris
+, rotationTimeScale
 , transformAt
 , orientationAt
   -- * Ephemerides
@@ -84,6 +85,10 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
     , timeOfPeriapsis = realToFrac <$> timeOfPeriapsisRelativeToEpoch
     }
 
+
+rotationTimeScale :: Num a => a
+rotationTimeScale = 3600
+
 transformAt :: RealFloat a => Orbit a -> Seconds a -> M44 a
 transformAt orbit@Orbit{ orientation } t = mkTransformation
   orientation
@@ -93,7 +98,7 @@ orientationAt :: (Epsilon a, RealFloat a) => Body a -> Seconds a -> Quaternion a
 orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } } t
   = orbit
   * orientation
-  * axisAngle (unit _z) (getSeconds (t * 3600 / period))
+  * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / period))
 
 
 positionAt :: RealFloat a => Orbit a -> Seconds a -> (Radians a, a)
