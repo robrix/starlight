@@ -161,7 +161,7 @@ physics bodies input = do
 
   thrust <- (dt *) <$> Lens.use _throttle
 
-  let angular = dt *^ 5
+  let angular = dt *^ Radians 5
 
   when (pressed SDL.KeycodeUp   input) $ do
     rotation <- Lens.use _rotation
