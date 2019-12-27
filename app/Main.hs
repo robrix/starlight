@@ -337,7 +337,7 @@ data GameState = GameState
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
   }
-  deriving (Eq, Ord, Show)
+  deriving (Show)
 
 _throttle :: Lens' GameState Float
 _throttle = lens throttle (\ s v -> s { throttle = v })
