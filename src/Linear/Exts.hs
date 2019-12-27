@@ -3,7 +3,6 @@
 module Linear.Exts
 ( translated
 , translated3
-, rotated
 , scaled
 , orient
 , reject
@@ -38,14 +37,6 @@ translated3 (V3 tx ty tz) = V4
   (V4 0 1 0 ty)
   (V4 0 0 1 tz)
   (V4 0 0 0 1)
-
-rotated :: Radians Float -> M33 Float
-rotated (Radians theta) = V3
-  (V3 cosT (-sinT) 0)
-  (V3 sinT cosT    0)
-  (V3 0    0       1) where
-  cosT = cos theta
-  sinT = sin theta
 
 
 orient :: (Epsilon a, RealFloat a) => Radians a -> Radians a -> Radians a -> Quaternion a
