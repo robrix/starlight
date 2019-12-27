@@ -1,4 +1,4 @@
-{-# LANGUAGE DuplicateRecordFields, NamedFieldPuns #-}
+{-# LANGUAGE DuplicateRecordFields, KindSignatures, NamedFieldPuns, TypeOperators #-}
 module Starlight.Body
 ( Body(..)
 , Orbit(..)
@@ -16,6 +16,9 @@ module Starlight.Body
 , saturn
 , uranus
 , neptune
+  -- * Ephemerides
+, Ephemeris(..)
+, fromCSV
 ) where
 
 import Linear.Exts
@@ -23,6 +26,7 @@ import Linear.Matrix
 import Linear.Quaternion
 import Linear.V4
 import Linear.Vector
+import Text.Read
 import UI.Colour
 import Unit.Angle
 import Unit.Length
@@ -289,3 +293,49 @@ neptune = Body
   , parent     = Just sol
   , satellites = []
   }
+
+
+data Ephemeris = Ephemeris
+  { julianDayNumberBarycentricDynamicalTime :: Double
+  , calendarDate                            :: String
+  , eccentricity                            :: Double
+  , periapsisDistance                       :: Kilometres Double
+  , inclination                             :: Degrees Double
+  , longitudeOfAscendingNode                :: Degrees Double
+  , argumentOfPerifocus                     :: Degrees Double
+  , timeOfPeriapsisRelativeToEpoch          :: Seconds Double
+  , meanMotion                              :: (Degrees `Per` Seconds) Double
+  , meanAnomaly                             :: Degrees Double
+  , trueAnomaly                             :: Degrees Double
+  , semimajor                               :: Kilometres Double
+  , apoapsisDistance                        :: Kilometres Double
+  , siderealOrbitPeriod                     :: Seconds Double
+  }
+  deriving (Eq, Ord, Show)
+
+fromCSV :: String -> Either String Ephemeris
+fromCSV = toBody . splitOnCommas where
+  splitOnCommas s = case break (== ',') s of
+    ("", _) -> []
+    (s, ss) -> s : splitOnCommas (drop 2 ss)
+  toBody (julianDayNumberBarycentricDynamicalTime : calendarDate : eccentricity : periapsisDistance : inclination : longitudeOfAscendingNode : argumentOfPerifocus : timeOfPeriapsisRelativeToEpoch : meanMotion : meanAnomaly : trueAnomaly : semimajor : apoapsisDistance : siderealOrbitPeriod : _) = Ephemeris
+    <$> readEither' "julianDayNumberBarycentricDynamicalTime" id         julianDayNumberBarycentricDynamicalTime
+    <*> pure                                                             calendarDate
+    <*> readEither' "eccentricity"                            id         eccentricity
+    <*> readEither' "periapsisDistance"                       Kilometres periapsisDistance
+    <*> readEither' "inclination"                             Degrees    inclination
+    <*> readEither' "longitudeOfAscendingNode"                Degrees    longitudeOfAscendingNode
+    <*> readEither' "argumentOfPerifocus"                     Degrees    argumentOfPerifocus
+    <*> readEither' "timeOfPeriapsisRelativeToEpoch"          Seconds    timeOfPeriapsisRelativeToEpoch
+    <*> readEither' "meanMotion"                              Per        meanMotion
+    <*> readEither' "meanAnomaly"                             Degrees    meanAnomaly
+    <*> readEither' "trueAnomaly"                             Degrees    trueAnomaly
+    <*> readEither' "semimajor"                               Kilometres semimajor
+    <*> readEither' "apoapsisDistance"                        Kilometres apoapsisDistance
+    <*> readEither' "siderealOrbitPeriod"                     Seconds    siderealOrbitPeriod
+  toBody vs = Left $ "lol no: " <> show vs
+  readEither' :: Read a => String -> (a -> b) -> String -> Either String b
+  readEither' err f = either (Left . ((err <> ": ") <>)) (Right . f) . readEither
+
+newtype Per (f :: * -> *) (g :: * -> *) a = Per { getPer :: a }
+  deriving (Eq, Ord, Show)
