@@ -324,9 +324,8 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
           drawAtRadius 150 minSweep (colour & _a .~ 0.5)
 
-          when (name == S.name target) $ for_ [1..n] $ \ i -> do
-            let radius = step * fromIntegral i
-            drawAtRadius radius (minSweep * Radians (radius / (step * 7))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
+          when (name == S.name target) $ for_ [1..n] $ \ i ->
+            drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / 7)) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
           for_ satellites (drawBlip trans)
 
