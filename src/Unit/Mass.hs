@@ -12,7 +12,7 @@ import GL.Type as GL
 import GL.Uniform
 
 newtype Kilograms a = Kilograms { getKilograms :: a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
 
 instance GL.Type a => GL.Type (Kilograms a) where
   glType _ = glType (Proxy @a)
