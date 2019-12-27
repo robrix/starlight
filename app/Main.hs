@@ -99,7 +99,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
       fix $ \ loop -> do
         t <- realToFrac <$> since start
-        let bodies = S.bodiesAt S.system (getDelta t)
+        let bodies = S.bodiesAt S.system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $ do
           draw drawState bodies =<< physics bodies =<< input
         speed <- Lens.uses _velocity norm
@@ -117,6 +117,9 @@ roundToPlaces n x = fromInteger (round (x * n')) / n' where
 
 distanceScale :: Float
 distanceScale = 10000 / getMetres (S.radius S.sol)
+
+systemTrans :: M44 Float
+systemTrans = scaled (V4 distanceScale distanceScale distanceScale 1) -- scale solar system distances down
 
 
 shipV :: [Ship.V Identity]
@@ -179,10 +182,9 @@ physics bodies input = do
   when (pressed SDL.KeycodeRight input) $
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  let rel = scaled (V4 distanceScale distanceScale distanceScale 1)
-      applyGravity S.Instant { transform, body = S.Body { mass }} = do
+  let applyGravity S.Instant { transform, body = S.Body { mass }} = do
         P position <- Lens.use _position
-        let pos = ((rel + transform) !* V4 0 0 0 1) ^. _xy
+        let pos = (transform !* V4 0 0 0 1) ^. _xy
             r = qd pos position
             bigG = 6.67430e-11
         _velocity += Delta (P (dt * bigG * distanceScale * distanceScale * getKilograms mass / r *^ normalize (pos ^-^ position)))
@@ -250,7 +252,6 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
   size <- Window.size
   let V2 sx sy = scale / size ^* (1 / zoomOut)
       window = scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
-      systemScale = scaled (V4 distanceScale distanceScale distanceScale 1) -- scale solar system distances down
 
   use shipP $ do
     set Ship.U
@@ -269,7 +270,6 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
             base
               =   window
               !*! translated3 (ext (negated (unP position)) 0)
-              !*! systemScale
               !*! transform
               !*! scaled (V4 r r r 1)
               !*! mkTransformation rotation 0
@@ -287,9 +287,8 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
 
   use radarP $ do
     let drawBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
-          let trans = systemScale !*! transform
-              here = unP position
-              there = (trans !* V4 0 0 0 1) ^. _xy
+          let here = unP position
+              there = (transform !* V4 0 0 0 1) ^. _xy
               angle = angleTo here there
               d = distance here there
               direction = normalize (there ^-^ here)
