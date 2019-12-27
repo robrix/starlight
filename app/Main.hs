@@ -305,7 +305,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
           drawAtRadius 100 minSweep (colour & _a .~ 0.5)
 
-          when (Just name == fmap S.name target) $ for_ [1..n] $ \ i ->
+          when (Just name == (target >>= \ i -> S.name (S.body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / 7)) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
     bindArray radarA $ for_ bodies drawBlip
@@ -336,7 +336,7 @@ data GameState = GameState
   , position :: !(Point V2 Float)
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
-  , target   :: !(Maybe (S.Body Float))
+  , target   :: !(Maybe Int)
   }
   deriving (Show)
 
