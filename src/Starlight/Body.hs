@@ -9,7 +9,6 @@ module Starlight.Body
 , fromEphemeris
 , transformAt
 , orientationAt
-, position
   -- * Ephemerides
 , Ephemeris(..)
 , fromCSV
