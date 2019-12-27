@@ -12,6 +12,7 @@ module Starlight.Body
 , rotationTimeScale
 , transformAt
 , orientationAt
+, positionAt
 , velocityAt
   -- * Ephemerides
 , Ephemeris(..)
