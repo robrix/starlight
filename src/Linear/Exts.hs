@@ -68,6 +68,9 @@ angleTo :: RealFloat a => V2 a -> V2 a -> Radians a
 angleTo v1 v2 = angleOf (v2 - v1)
 
 
+-- | Compute the axis/angle of a rotation represented as a unit quaternion.
+--
+-- NB: Assumes unit magnitude. The axis is undefined for 0-rotations.
 toAxisAngle :: (Floating a, Ord a) => Quaternion a -> (V3 a, Radians a)
 toAxisAngle (Quaternion qw qv) = (v, Radians phi) where
   v   = sign *^ qv ^/ sqrt (1 - qw ^ (2 :: Int))
