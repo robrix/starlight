@@ -103,8 +103,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         t <- realToFrac <$> since start
         system <- ask
         let bodies = S.bodiesAt system systemTrans (getDelta t)
-        continue <- fmap isJust . runEmpty $ do
-          draw drawState bodies =<< physics bodies =<< input
+        continue <- fmap isJust . runEmpty $
+          input >>= physics bodies >>= draw drawState bodies
         when continue $ do
           Window.swap
           loop
