@@ -15,7 +15,7 @@ import GL.Type as GL
 import GL.Uniform
 
 newtype Metres a = Metres { getMetres :: a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
 
 instance GL.Type a => GL.Type (Metres a) where
   glType _ = glType (Proxy @a)
@@ -30,7 +30,7 @@ fromAUs a = Metres (149597870700 * a)
 
 
 newtype Kilometres a = Kilometres { getKilometres :: a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
 
 instance GL.Type a => GL.Type (Kilometres a) where
   glType _ = glType (Proxy @a)
