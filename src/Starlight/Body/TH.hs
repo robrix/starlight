@@ -42,5 +42,5 @@ mkOrbit s = do
 mkOrbitFromFile :: FilePath -> Q Exp
 mkOrbitFromFile path = do
   lines <- lines <$> runIO (readFile path)
-  last <- maybe (fail "no ephemerides found") (pure . pred) (elemIndex "$$EOE" lines)
+  last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
   mkOrbit (lines !! last)
