@@ -7,7 +7,7 @@ module Starlight.Body
 , Body(..)
 , Orbit(..)
 , fromEphemeris
-, transform
+, transformAt
 , orientationAt
 , position
   -- * Ephemerides
@@ -66,8 +66,8 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
     , timeOfPeriapsis = realToFrac <$> timeOfPeriapsisRelativeToEpoch
     }
 
-transform :: RealFloat a => Orbit a -> Seconds a -> M44 a
-transform orbit@Orbit{ orientation } t = mkTransformation
+transformAt :: RealFloat a => Orbit a -> Seconds a -> M44 a
+transformAt orbit@Orbit{ orientation } t = mkTransformation
   orientation
   (ext (uncurry cartesian2 (position orbit t)) 0)
 

@@ -184,7 +184,7 @@ physics t input = do
 
   let applyGravity rel S.Body { mass, orbit, satellites } = do
         P position <- Lens.use _position
-        let trans = rel + S.transform orbit (getDelta t * timeScale)
+        let trans = rel + S.transformAt orbit (getDelta t * timeScale)
             pos = (trans !* V4 0 0 0 1) ^. _xy
             r = qd pos position
             bigG = 6.67430e-11
@@ -271,7 +271,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
       drawArrays LineLoop (Interval 0 4)
 
   let drawBody rel b@S.Body { radius = Metres r, colour, orbit, satellites } = do
-        let trans = rel !*! S.transform orbit (getDelta t * timeScale)
+        let trans = rel !*! S.transformAt orbit (getDelta t * timeScale)
             rot b r = mkTransformation (axisAngle (unit b) r) 0
             base
               =   scaled (V4 sx sy 1 1)
@@ -296,7 +296,7 @@ draw DrawState { quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } t
 
   use radarP $ do
     let drawBlip rel S.Body { name, radius = Metres r, colour, orbit, satellites } = do
-          let trans = rel !*! S.transform orbit (getDelta t * timeScale) :: M44 Float
+          let trans = rel !*! S.transformAt orbit (getDelta t * timeScale) :: M44 Float
               here = unP position
               there = (trans !* V4 0 0 0 1) ^. _xy
               angle = angleTo here there
