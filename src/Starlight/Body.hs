@@ -2,6 +2,7 @@
 module Starlight.Body
 ( Body(..)
 , Orbit(..)
+, fromEphemeris
 , transform
 , orientationAt
 , position
@@ -53,6 +54,18 @@ data Orbit = Orbit
   , orientation              :: Quaternion Float -- relative to ecliptic
   , period                   :: Seconds Float
   }
+
+fromEphemeris :: Ephemeris -> Orbit
+fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod }
+  = Orbit
+    { eccentricity = realToFrac eccentricity
+    , semimajor    = realToFrac <$> fromKilometres semimajor
+    , orientation  = orient
+      (realToFrac <$> fromDegrees longitudeOfAscendingNode)
+      (realToFrac <$> fromDegrees inclination)
+      (realToFrac <$> fromDegrees argumentOfPerifocus)
+    , period       = realToFrac <$> siderealOrbitPeriod
+    }
 
 transform :: Orbit -> Seconds Float -> M44 Float
 transform orbit t = mkTransformation
