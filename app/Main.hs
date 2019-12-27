@@ -101,8 +101,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         t <- realToFrac <$> since start
         let bodies = S.bodiesAt S.system (getDelta t)
         continue <- fmap isJust . runEmpty $ do
-          state <- physics bodies =<< input
-          draw drawState bodies t state
+          draw drawState bodies =<< physics bodies =<< input
         speed <- Lens.uses _velocity norm
         throttle <- Lens.use _throttle
         setLabel label font $ show (roundToPlaces 1 throttle) <> ", " <> show (roundToPlaces 1 speed)
@@ -223,10 +222,9 @@ draw
      )
   => DrawState
   -> [S.Instant Float]
-  -> Delta Seconds Float
   -> PlayerState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bodies t PlayerState{ position, velocity, rotation } = runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bodies PlayerState{ position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -294,8 +292,9 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
   use bodyP . bindArray circleA $ for_ bodies drawBody
 
   use radarP $ do
-    let drawBlip rel S.Body { name, radius = Metres r, colour, orbit, satellites } = do
-          let trans = rel !*! S.transformAt orbit (getDelta t * timeScale) :: M44 Float
+    let rel = scaled (V4 distanceScale distanceScale distanceScale 1)
+        drawBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
+          let trans = rel !*! transform
               here = unP position
               there = (trans !* V4 0 0 0 1) ^. _xy
               angle = angleTo here there
@@ -324,10 +323,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
           when (name == S.name target) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / 7)) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
-          for_ satellites (drawBlip trans)
-
-    bindArray radarA $
-      drawBlip (scaled (V4 distanceScale distanceScale distanceScale 1)) S.sol
+    bindArray radarA $ for_ bodies drawBlip
 
 
 data DrawState = DrawState
