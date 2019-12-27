@@ -9,6 +9,7 @@ module Linear.Exts
 , reject
 , angleOf
 , angleTo
+, toAxisAngle
 , cartesian2
 , polar2
 , Ext(..)
@@ -65,6 +66,14 @@ angleOf (V2 x y) = Radians (atan2 y x)
 -- | The angle from the first vector to the second.
 angleTo :: RealFloat a => V2 a -> V2 a -> Radians a
 angleTo v1 v2 = angleOf (v2 - v1)
+
+
+toAxisAngle :: (Floating a, Ord a) => Quaternion a -> (V3 a, Radians a)
+toAxisAngle (Quaternion qw qv) = (v, Radians phi) where
+  v   = sign *^ qv ^/ sqrt (1 - qw ^ (2 :: Int))
+  phi = sign * 2 * acos qw
+  sign | qv >= 0   =  1
+       | otherwise = -1
 
 
 cartesian2 :: Floating a => Radians a -> a -> V2 a
