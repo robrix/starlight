@@ -59,7 +59,6 @@ data Body a = Body
   , colour      :: Colour a
   , orbit       :: Orbit a
   , parent      :: Maybe (Body a)
-  , satellites  :: [Body a]
   }
   deriving (Show)
 

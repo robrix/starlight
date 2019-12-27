@@ -54,16 +54,6 @@ sol = Body
     , timeOfPeriapsis = 0
     }
   , parent      = Nothing
-  , satellites  =
-    [ mercury
-    , venus
-    , earth
-    , mars
-    , jupiter
-    , saturn
-    , uranus
-    , neptune
-    ]
   }
 
 mercury :: Body Float
@@ -85,7 +75,6 @@ mercury = Body
     , timeOfPeriapsis          = Seconds 1573587.126154357
     }
   , parent      = Just sol
-  , satellites  = []
   }
 
 venus :: Body Float
@@ -107,7 +96,6 @@ venus = Body
     , timeOfPeriapsis          = Seconds 4762456.111587039
     }
   , parent      = Just sol
-  , satellites  = []
   }
 
 earth :: Body Float
@@ -129,7 +117,6 @@ earth = Body
     , timeOfPeriapsis          = Seconds (-1713701.526424574)
     }
   , parent      = Just sol
-  , satellites  = [ luna ]
   }
 
 luna :: Body Float
@@ -151,7 +138,6 @@ luna = Body
     , timeOfPeriapsis          = Seconds (-1.37156595221758e7)
     }
   , parent      = Just earth
-  , satellites  = []
   }
 
 mars :: Body Float
@@ -173,7 +159,6 @@ mars = Body
     , timeOfPeriapsis          = Seconds 1.654351298829472e7
     }
   , parent      = Just sol
-  , satellites  = []
   }
 
 jupiter :: Body Float
@@ -195,7 +180,6 @@ jupiter = Body
     , timeOfPeriapsis          = Seconds 9.42235965064165e7
     }
   , parent      = Just sol
-  , satellites  = []
   }
 
 saturn :: Body Float
@@ -217,7 +201,6 @@ saturn = Body
     , timeOfPeriapsis          = Seconds 4.065001346578497e8
     }
   , parent      = Just sol
-  , satellites  = []
   }
 
 uranus :: Body Float
@@ -239,7 +222,6 @@ uranus = Body
     , timeOfPeriapsis          = Seconds 9.85355993991342e8
     }
   , parent      = Just sol
-  , satellites  = []
   }
 
 neptune :: Body Float
@@ -261,5 +243,4 @@ neptune = Body
     , timeOfPeriapsis          = Seconds 4.50852467415131e8
     }
   , parent      = Just sol
-  , satellites  = []
   }
