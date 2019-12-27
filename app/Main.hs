@@ -250,6 +250,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
   size <- Window.size
   let V2 sx sy = scale / size ^* (1 / zoomOut)
       window = scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
+      systemScale = scaled (V4 distanceScale distanceScale distanceScale 1) -- scale solar system distances down
 
   use shipP $ do
     set Ship.U
@@ -263,13 +264,12 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
     bindArray shipA $
       drawArrays LineLoop (Interval 0 4)
 
-  let rel = scaled (V4 distanceScale distanceScale distanceScale 1)
-      drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
+  let drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
         let rot b r = mkTransformation (axisAngle (unit b) r) 0
             base
               =   window
               !*! translated3 (ext (negated (unP position)) 0)
-              !*! rel
+              !*! systemScale
               !*! transform
               !*! scaled (V4 r r r 1)
               !*! mkTransformation rotation 0
@@ -286,9 +286,8 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP } bo
   use bodyP . bindArray circleA $ for_ bodies drawBody
 
   use radarP $ do
-    let rel = scaled (V4 distanceScale distanceScale distanceScale 1)
-        drawBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
-          let trans = rel !*! transform
+    let drawBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
+          let trans = systemScale !*! transform
               here = unP position
               there = (trans !* V4 0 0 0 1) ^. _xy
               angle = angleTo here there
