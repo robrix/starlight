@@ -171,7 +171,7 @@ physics bodies input = do
 
   when (pressed SDL.KeycodeUp   input) $ do
     rotation <- Lens.use _rotation
-    _velocity += Delta (P (rotate rotation (V3 thrust 0 0) ^. _xy))
+    _velocity += Delta (P (rotate rotation (unit _x ^* thrust) ^. _xy))
   when (pressed SDL.KeycodeDown input) $ do
     rotation <- Lens.use _rotation
     velocity <- Lens.use _velocity
