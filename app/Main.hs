@@ -71,7 +71,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     evalState @Input mempty
-    . evalState PlayerState
+    . evalState GameState
       { throttle = 20
       , position = P (V2 25000 0)
       , velocity = Delta (P (V2 0 75))
@@ -145,12 +145,12 @@ radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] wher
 
 physics
   :: ( Has (State UTCTime) sig m
-     , Has (State PlayerState) sig m
+     , Has (State GameState) sig m
      , Has Time sig m
      )
   => [S.Instant Float]
   -> Input
-  -> m PlayerState
+  -> m GameState
 physics bodies input = do
   dt <- fmap (getSeconds . getDelta . realToFrac) . since =<< get
   put =<< now
@@ -189,7 +189,7 @@ physics bodies input = do
 
   for_ bodies applyGravity
 
-  s@PlayerState { velocity } <- get
+  s@GameState { velocity } <- get
   _position += getDelta velocity
   pure s
 
@@ -218,9 +218,9 @@ draw
      )
   => DrawState
   -> [S.Instant Float]
-  -> PlayerState
+  -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies PlayerState{ throttle, position, velocity, rotation } = runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ throttle, position, velocity, rotation } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -331,7 +331,7 @@ data DrawState = DrawState
   }
 
 
-data PlayerState = PlayerState
+data GameState = GameState
   { throttle :: !Float
   , position :: !(Point V2 Float)
   , velocity :: !(Delta (Point V2) Float)
@@ -339,14 +339,14 @@ data PlayerState = PlayerState
   }
   deriving (Eq, Ord, Show)
 
-_throttle :: Lens' PlayerState Float
+_throttle :: Lens' GameState Float
 _throttle = lens throttle (\ s v -> s { throttle = v })
 
-_position :: Lens' PlayerState (Point V2 Float)
+_position :: Lens' GameState (Point V2 Float)
 _position = lens position (\ s v -> s { position = v })
 
-_velocity :: Lens' PlayerState (Delta (Point V2) Float)
+_velocity :: Lens' GameState (Delta (Point V2) Float)
 _velocity = lens velocity (\ s v -> s { velocity = v })
 
-_rotation :: Lens' PlayerState (Quaternion Float)
+_rotation :: Lens' GameState (Quaternion Float)
 _rotation = lens rotation (\ s r -> s { rotation = r })
