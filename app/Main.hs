@@ -16,7 +16,6 @@ import           Control.Applicative (liftA2)
 import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
 import           Control.Carrier.Profile.Time
-import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Carrier.Time
 import           Control.Effect.Lens ((%=), (*=), (+=), (-=), (.=))
@@ -59,7 +58,7 @@ import           Linear.V4
 import           Linear.Vector as Linear
 import           Physics.Delta
 import qualified SDL
-import qualified Starlight.Body as S
+import           Starlight.Body as S
 import           Starlight.Input
 import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Shader.Radar as Radar
@@ -90,9 +89,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
         , rotation = axisAngle (unit _z) (pi/2)
         , target   = Nothing
         }
+      , system = S.system
       }
-    . evalState start
-    . runReader S.system $ do
+    . evalState start $ do
       starsP <- build Stars.shader
       shipP  <- build Ship.shader
       radarP <- build Radar.shader
@@ -114,7 +113,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
-          system <- ask
+          system <- Lens.use _system
           let bodies = S.bodiesAt system systemTrans (getDelta t)
           continue <- fmap isJust . runEmpty $
             measure "input" input >>= controls bodies label >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
@@ -377,6 +376,7 @@ data DrawState = DrawState
 data GameState = GameState
   { throttle :: !Float
   , player   :: !Actor
+  , system   :: !(System Float)
   }
   deriving (Show)
 
@@ -385,6 +385,9 @@ _throttle = lens throttle (\ s v -> s { throttle = v })
 
 _player :: Lens' GameState Actor
 _player = lens player (\ s p -> s { player = p })
+
+_system :: Lens' GameState (System Float)
+_system = lens system (\ s p -> s { system = p })
 
 
 data Actor = Actor
@@ -402,7 +405,7 @@ _velocity :: Lens' Actor (V2 Float)
 _velocity = lens velocity (\ s v -> s { velocity = v })
 
 _rotation :: Lens' Actor (Quaternion Float)
-_rotation = lens rotation (\ s r -> s { rotation = r })
+_rotation = lens Main.rotation (\ s r -> s { Main.rotation = r })
 
 _target :: Lens' Actor (Maybe Int)
 _target = lens target (\ s t -> s { target = t })
