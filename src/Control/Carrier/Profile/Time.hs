@@ -8,12 +8,13 @@ module Control.Carrier.Profile.Time
 , module Control.Effect.Profile
 ) where
 
+import           Control.Carrier.Writer.Strict
 import           Control.Effect.Profile
 import           Control.Monad.IO.Class
 import qualified Data.Map as Map
 import           Data.Time.Clock
 
-newtype ProfileC m a = ProfileC (m a)
+newtype ProfileC m a = ProfileC (WriterC Timings m a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
 
