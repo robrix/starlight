@@ -37,7 +37,7 @@ layoutGlyphs = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState 0 id 
   go (LayoutState offset is prev) g@Glyph{ char, bounds_ } = LayoutState
     { offset  = offset + advanceWidth g
     , result  = is . (Instance char offset bounds_ :)
-    , bounds_ = prev <> Just (Union bounds_)
+    , bounds_ = prev <> Just (Union (transformRect (translated (V2 offset 0)) bounds_))
     }
 
 data LayoutState = LayoutState
