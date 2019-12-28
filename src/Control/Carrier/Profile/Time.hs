@@ -33,3 +33,6 @@ newtype Timings = Timings (Map.Map String Timing)
 
 instance Semigroup Timings where
   Timings t1 <> Timings t2 = Timings (Map.unionWith (<>) t1 t2)
+
+instance Monoid Timings where
+  mempty = Timings mempty
