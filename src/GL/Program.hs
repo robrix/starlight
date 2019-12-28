@@ -44,7 +44,6 @@ import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
 newtype Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Program { unProgram :: GLuint }
-  deriving (Eq, Ord, Show)
 
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
 
