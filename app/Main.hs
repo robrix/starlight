@@ -106,7 +106,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         system <- ask
         let bodies = S.bodiesAt system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $
-          input >> controls bodies >>= physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
+          input >> controls bodies label >>= physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
         when continue $ do
           Window.swap
           loop
@@ -143,14 +143,16 @@ radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] wher
   n = (16 :: Int)
 
 controls
-  :: ( Has (State Input) sig m
+  :: ( Has (Lift IO) sig m
+     , Has (State Input) sig m
      , Has (State GameState) sig m
      , Has (State UTCTime) sig m
      , Has Time sig m
      )
   => [S.Instant Float]
+  -> Label
   -> m (Delta Seconds Float)
-controls bodies = do
+controls bodies label = do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
@@ -183,6 +185,8 @@ controls bodies = do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
     _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
+
+  setLabel label (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
@@ -237,7 +241,7 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ throttle, position, velocity, rotation, target } = runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ position, velocity, rotation, target } = runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -330,7 +334,6 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
     bindArray radarA $ for_ bodies drawBlip
 
-    setLabel label $ show (roundToPlaces 1 throttle) <> ", " <> show (roundToPlaces 1 (norm velocity)) <> ", " <> maybe "None" (S.name . S.body . (bodies !!)) target
     drawLabel label
 
 roundToPlaces :: RealFloat a => Int -> a -> a
