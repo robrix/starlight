@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RankNTypes #-}
 module Starlight.Input
 ( input
 , Input(..)
@@ -43,3 +44,6 @@ key m = (_input %=) . case m of
 
 pressed :: SDL.Keycode -> Input -> Bool
 pressed code = IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput
+
+_pressed :: SDL.Keycode -> Lens' Input Bool
+_pressed code = lens (pressed code) (\ (Input s) pressed -> Input ((if pressed then IntSet.insert else IntSet.delete) (fromIntegral (SDL.unwrapKeycode code)) s))
