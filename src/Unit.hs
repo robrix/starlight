@@ -1,2 +1,5 @@
 module Unit
-() where
+( Milli(..)
+) where
+
+newtype Milli f a = Milli { getMilli :: f a }
