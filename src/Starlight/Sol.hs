@@ -20,6 +20,8 @@ module Starlight.Sol
 ) where
 
 import           Data.Char (isSpace)
+import           Data.List (sortOn)
+import           Data.Maybe (fromMaybe)
 import qualified Data.IntMap as IntMap
 import           Linear.Quaternion
 import           Linear.V4
@@ -27,6 +29,7 @@ import           Linear.Vector
 import           Numeric (readDec)
 import           Starlight.Body.TH
 import           System.FilePath
+import           UI.Colour
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Time
@@ -53,18 +56,21 @@ bodies = IntMap.fromList $ map ((,) . code <*> id)
   ]
 
 system :: System Float
-system = System
-  [ sol
-  , mercury
-  , venus
-  , earth
-  , luna
-  , mars
-  , jupiter
-  , saturn
-  , uranus
-  , neptune
-  ]
+system = System $ sortOn code
+  [ fromMaybe (placeholder code name orbit) (bodies IntMap.!? code)
+  | (code, (name, orbit)) <- IntMap.toList orbits
+  ] where
+  placeholder code name orbit = Body
+    { name
+    , code
+    , radius      = fromKilometres 1000
+    , mass        = 1.307e22
+    , orientation = axisAngle (unit _x) (getRadians (fromDegrees 5))
+    , period      = fromDays 1
+    , colour      = white
+    , orbit
+    , parent      = Just sol
+    }
 
 
 sol :: Body Float
