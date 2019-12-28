@@ -109,6 +109,7 @@ library
     , opentype
     , prettyprinter
     , sdl2
+    , template-haskell
     , text
     , time ^>= 1.9
     , transformers ^>= 0.5
@@ -130,7 +131,6 @@ executable starlight
     , microlens
     , sdl2
     , starlight
-    , template-haskell
     , time
 
 source-repository head
