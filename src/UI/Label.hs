@@ -112,12 +112,12 @@ setLabel
   -> String
   -> m ()
 setLabel Label{ ref } string = runLiftIO $ do
-  l@LabelState { texture, fbuffer, glyphP, glyphB, glyphA, scale, bounds, font, string = oldString } <- sendIO (readIORef ref)
+  l@LabelState { texture, fbuffer, glyphB, glyphA, scale, bounds, font, string = oldString } <- sendIO (readIORef ref)
 
   when (bounds == Rect 0 0 || oldString /= string) $ do
     glBlendFunc GL_ONE GL_ONE -- add
 
-    let Run instances b = layoutString font string
+    let r@(Run instances b) = layoutString font string
         vertices = geometry . UI.Glyph.glyph =<< instances
         bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
 
@@ -141,9 +141,15 @@ setLabel Label{ ref } string = runLiftIO $ do
     realloc glyphB (length vertices) Static Draw
     copy glyphB 0 (coerce vertices)
 
-    bindArray glyphA $ do
-      configureArray glyphB glyphA
+    bindArray glyphA $ configureArray glyphB glyphA
 
+    sendIO (writeIORef ref l { bounds, string })
+
+    drawGlyphs l r
+
+drawGlyphs :: Has (Lift IO) sig m => LabelState -> Run -> m ()
+drawGlyphs LabelState{ glyphA, glyphP, scale, bounds, font } (Run instances b) = do
+    bindArray glyphA $
       use glyphP $ do
         let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
         for_ instances $ \ Instance{ offset, range } ->
@@ -157,9 +163,7 @@ setLabel Label{ ref } string = runLiftIO $ do
                   !*! translated (V2 offset 0)
                   !*! translated (negated (rectMin b))
               , colour = Just colour }
-            drawArrays Triangles range
-
-    sendIO (writeIORef ref l { bounds, string }) where
+            drawArrays Triangles range where
     jitterPattern
       = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
         , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
