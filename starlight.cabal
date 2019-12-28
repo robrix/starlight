@@ -37,6 +37,7 @@ library
   hs-source-dirs:      src
   exposed-modules:
     Control.Carrier.Finally
+    Control.Carrier.Profile.Identity
     Control.Carrier.Profile.Time
     Control.Carrier.State.IORef
     Control.Carrier.Time
