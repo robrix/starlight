@@ -114,7 +114,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           system <- ask
           let bodies = S.bodiesAt system systemTrans (getDelta t)
           continue <- fmap isJust . runEmpty $
-            measure "input" input >> measure "controls" (controls bodies label) >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
+            measure "input" input >> controls bodies label >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
           continue <$ Window.swap
         when continue loop
 
@@ -158,6 +158,7 @@ radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] wher
 
 controls
   :: ( Has (Lift IO) sig m
+     , Has Profile sig m
      , Has (State Input) sig m
      , Has (State GameState) sig m
      , Has (State UTCTime) sig m
@@ -166,7 +167,7 @@ controls
   => [S.Instant Float]
   -> Label
   -> m (Delta Seconds Float)
-controls bodies label = do
+controls bodies label = measure "controls" $ do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
@@ -200,7 +201,7 @@ controls bodies label = do
     _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
-  setLabel label (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
+  measure "setLabel" $ setLabel label (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
