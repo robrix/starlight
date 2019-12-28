@@ -17,14 +17,24 @@ module Starlight.Sol
 , neptune
 ) where
 
-import Linear.Quaternion
-import Linear.V4
-import Linear.Vector
-import Starlight.Body.TH
-import System.FilePath
-import Unit.Angle
-import Unit.Length
-import Unit.Time
+import           Data.Char (isSpace)
+import qualified Data.IntMap as IntMap
+import           Linear.Quaternion
+import           Linear.V4
+import           Linear.Vector
+import           Numeric (readDec)
+import           Starlight.Body.TH
+import           System.FilePath
+import           Unit.Angle
+import           Unit.Length
+import           Unit.Time
+
+orbits :: IntMap.IntMap (String, Orbit Float)
+orbits = IntMap.fromList
+  [ (code, (dropWhile isSpace (dropExtension rest), orbit))
+  | (path, orbit) <- ([] :: [(String, Orbit Float)])
+  , (code, rest) <- readDec path
+  ]
 
 system :: System Float
 system = System
