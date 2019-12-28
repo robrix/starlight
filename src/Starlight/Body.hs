@@ -36,7 +36,7 @@ import Unit.Mass
 import Unit.Time
 
 newtype System a = System { getSystem :: [Body a] }
-  deriving (Show)
+  deriving (Read, Show)
 
 data Instant a = Instant
   { body      :: Body a
@@ -64,7 +64,7 @@ data Body a = Body
   , orbit       :: Orbit a
   , parent      :: Maybe (Body a)
   }
-  deriving (Show)
+  deriving (Read, Show)
 
 data Orbit a = Orbit
   { eccentricity    :: a
@@ -73,7 +73,7 @@ data Orbit a = Orbit
   , period          :: Seconds a
   , timeOfPeriapsis :: Seconds a    -- relative to epoch
   }
-  deriving (Show)
+  deriving (Read, Show)
 
 fromEphemeris :: (Epsilon a, RealFloat a) => Ephemeris -> Orbit a
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
