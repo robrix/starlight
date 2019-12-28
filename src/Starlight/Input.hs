@@ -6,6 +6,7 @@ module Starlight.Input
 , Input(..)
 , key
 , pressed
+, _pressed
 ) where
 
 import           Control.Effect.Empty
