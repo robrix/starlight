@@ -10,7 +10,6 @@ module Control.Carrier.Profile.Time
   runProfile
 , ProfileC(..)
 , Timing(..)
-, timing
 , mean
 , Timings(..)
   -- * Profile effect
