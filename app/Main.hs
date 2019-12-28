@@ -251,7 +251,7 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ position, velocity, rotation, target } = runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ position, velocity, rotation, target } = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
