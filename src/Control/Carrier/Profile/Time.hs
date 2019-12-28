@@ -2,7 +2,7 @@
 module Control.Carrier.Profile.Time
 ( -- * Profile carrier
   ProfileC(..)
-, Tally(..)
+, Timing(..)
 , Timings(..)
   -- * Profile effect
 , module Control.Effect.Profile
@@ -17,16 +17,16 @@ newtype ProfileC m a = ProfileC (m a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
 
-data Tally a = Tally
-  { tally :: !a
-  , count :: {-# UNPACK #-} !Int
+data Timing = Timing
+  { timing :: !NominalDiffTime
+  , count  :: {-# UNPACK #-} !Int
   }
 
-instance Num a => Semigroup (Tally a) where
-  Tally t1 c1 <> Tally t2 c2 = Tally (t1 + t2) (c1 + c2)
+instance Semigroup Timing where
+  Timing t1 c1 <> Timing t2 c2 = Timing (t1 + t2) (c1 + c2)
 
-instance Num a => Monoid (Tally a) where
-  mempty = Tally 0 0
+instance Monoid Timing where
+  mempty = Timing 0 0
 
 
-newtype Timings = Timings (Map.Map String (Tally NominalDiffTime))
+newtype Timings = Timings (Map.Map String Timing)
