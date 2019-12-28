@@ -83,12 +83,12 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
     evalState @Input mempty
     . evalState GameState
       { throttle = 20
-      , player   = Actor
+      , actors   = Actor
         { position = P (V2 25000 0)
         , velocity = V2 0 75
         , rotation = axisAngle (unit _z) (pi/2)
         , target   = Nothing
-        }
+        } :| []
       , system = S.system
       }
     . evalState start $ do
@@ -223,9 +223,9 @@ physics bodies (Delta (Seconds dt)) = do
   P position <- Lens.use (_player . _position)
   for_ bodies (applyGravity position)
 
-  s@GameState { player = Actor{ velocity } } <- get
+  velocity <- Lens.use (_player . _velocity)
   _player . _position += P velocity
-  pure s where
+  get where
   applyGravity position S.Instant { transform, body = S.Body { mass }} = do
     let pos = (transform !* V4 0 0 0 1) ^. _xy
         r = qd pos position
@@ -260,7 +260,7 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ player = Actor{ position, velocity, rotation, target } } = measure "draw" . runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ actors = Actor{ position, velocity, rotation, target } :| _ } = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -375,7 +375,7 @@ data DrawState = DrawState
 
 data GameState = GameState
   { throttle :: !Float
-  , player   :: !Actor
+  , actors   :: !(NonEmpty Actor)
   , system   :: !(System Float)
   }
   deriving (Show)
@@ -383,8 +383,12 @@ data GameState = GameState
 _throttle :: Lens' GameState Float
 _throttle = lens throttle (\ s v -> s { throttle = v })
 
+_actors :: Lens' GameState (NonEmpty Actor)
+_actors = lens actors (\ s a -> s { actors = a })
+
 _player :: Lens' GameState Actor
-_player = lens player (\ s p -> s { player = p })
+_player = _actors . _head where
+  _head = lens (\ (h:|_) -> h) (\ (_:|t) h -> h:|t)
 
 _system :: Lens' GameState (System Float)
 _system = lens system (\ s p -> s { system = p })
