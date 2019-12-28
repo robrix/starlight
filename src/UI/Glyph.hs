@@ -26,8 +26,8 @@ data Glyph = Glyph
 
 
 data Instance = Instance
-  { char    :: {-# UNPACK #-} !Char
-  , offset  :: {-# UNPACK #-} !Float
+  { char   :: {-# UNPACK #-} !Char
+  , offset :: {-# UNPACK #-} !Float
   }
 
 
