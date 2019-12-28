@@ -18,3 +18,6 @@ data Tally a = Tally
   { tally :: !a
   , count :: {-# UNPACK #-} !Int
   }
+
+instance Num a => Semigroup (Tally a) where
+  Tally t1 c1 <> Tally t2 c2 = Tally (t1 + t2) (c1 + c2)
