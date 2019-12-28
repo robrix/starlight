@@ -31,6 +31,7 @@ import           Data.Function (fix, (&))
 import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Interval
+import qualified Data.IntMap as IntMap
 import           Data.List (sortOn)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
@@ -128,7 +129,7 @@ reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $
 
 
 distanceScale :: Float
-distanceScale = 10000 / getMetres (S.radius S.sol)
+distanceScale = 10000 / getMetres (S.radius (S.bodies IntMap.! 10))
 
 systemTrans :: M44 Float
 systemTrans = scaled (V4 distanceScale distanceScale distanceScale 1) -- scale solar system distances down
