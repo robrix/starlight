@@ -41,6 +41,8 @@ instance (Has (Lift IO) sig m, Effect sig) => Algebra (Profile :+: sig) (Profile
       ProfileC (tell (timing l (end `diffUTCTime` start)))
       k a
     R other -> ProfileC (send (handleCoercible other))
+    where
+    timing l t = Timings (Map.singleton l (Timing t t t 1))
 
 
 data Timing = Timing
@@ -55,9 +57,6 @@ instance Semigroup Timing where
 
 instance Monoid Timing where
   mempty = Timing 0 0 0 0
-
-timing :: Text -> NominalDiffTime -> Timings
-timing l t = Timings (Map.singleton l (Timing t t t 1))
 
 mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
