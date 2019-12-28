@@ -33,16 +33,14 @@ data Instance = Instance
 
 
 layoutGlyphs :: [Glyph] -> Run
-layoutGlyphs = (Run <*> bounds) . ($ []) . result . foldl' go (LayoutState 0 0 id) where
-  go (LayoutState offset i is) g@Glyph{ char, bounds_ } = let i' = i + length (geometry g) in LayoutState
+layoutGlyphs = (Run <*> bounds) . ($ []) . result . foldl' go (LayoutState 0 id) where
+  go (LayoutState offset is) g@Glyph{ char, bounds_ } = LayoutState
     { offset = offset + advanceWidth g
-    , index  = i'
     , result = is . (Instance char offset bounds_ :)
     }
 
 data LayoutState = LayoutState
   { offset :: {-# UNPACK #-} !Float
-  , index  :: {-# UNPACK #-} !Int
   , result :: !([Instance] -> [Instance])
   }
 
