@@ -18,6 +18,7 @@ module Starlight.Body
 , Ephemeris(..)
 , fromCSV
 , fromFile
+, fromDirectory
 , Per(..)
 ) where
 
@@ -30,6 +31,8 @@ import Linear.Matrix
 import Linear.Quaternion
 import Linear.V3
 import Linear.Vector
+import System.Directory
+import System.FilePath
 import Text.Read
 import UI.Colour
 import Unit.Angle
@@ -174,6 +177,12 @@ fromFile path = do
   lines <- lines <$> readFile path
   last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
   either fail (pure . fromEphemeris) (fromCSV (lines !!last))
+
+fromDirectory :: (Epsilon a, RealFloat a) => FilePath -> IO [(FilePath, Orbit a)]
+fromDirectory dir
+  =   listDirectory dir
+  >>= traverse (\ path -> (,) path <$> fromFile (dir </> path)) . filter isRelevant where
+  isRelevant path = takeExtension path == ".txt"
 
 
 newtype Per (f :: * -> *) (g :: * -> *) a = Per { getPer :: a }
