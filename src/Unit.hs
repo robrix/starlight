@@ -25,8 +25,8 @@ instance GL.Type (f a) => GL.Type (Milli f a) where
 getMilli :: Milli f a -> f a
 getMilli (Milli fa) = fa
 
-milli :: Fractional (f a) => f a -> Milli f a
-milli fa = Milli (fa / 1000)
+milli :: Num (f a) => f a -> Milli f a
+milli fa = Milli (fa * 1000)
 
-unMilli :: Num (f a) => Milli f a -> f a
-unMilli (Milli fa) = fa * 1000
+unMilli :: Fractional (f a) => Milli f a -> f a
+unMilli (Milli fa) = fa / 1000
