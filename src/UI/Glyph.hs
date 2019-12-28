@@ -19,7 +19,8 @@ import Linear.V2
 import Linear.V4
 
 data Glyph = Glyph
-  { advanceWidth :: {-# UNPACK #-} !Float
+  { char         :: {-# UNPACK #-} !Char
+  , advanceWidth :: {-# UNPACK #-} !Float
   , geometry     :: ![V4 Float]
   , bounds_      :: {-# UNPACK #-} !(Rect Float)
   }

@@ -53,7 +53,7 @@ readTypeface = fmap toTypeface . sendM . O.readOTFile where
       glyphTable <- glyphTable
       g <- glyphTable !? fromIntegral glyphID
       let vertices = if isPrint char && not (isSeparator char) then glyphVertices g else []
-      pure $! Glyph (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
+      pure $! Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
     cmap = find supportedPlatform (O.getCmaps (O.cmapTable o))
     glyphTable = case O.outlineTables o of
       O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
