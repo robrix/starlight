@@ -284,16 +284,16 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
       drawArrays LineLoop (Interval 0 4)
 
   let origin = window !*! translated3 (ext (negated (unP position)) 0)
+      rot b r = mkTransformation (axisAngle (unit b) r) 0
       drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
-        let rot b r = mkTransformation (axisAngle (unit b) r) 0
-            base
-              =   origin
-              !*! transform
-              !*! scaled (V4 r r r 1)
-              !*! mkTransformation rotation 0
-            draw rot = do
+        let draw rot = do
               set Body.U
-                { matrix = Just (base !*! rot)
+                { matrix = Just
+                    $   origin
+                    !*! transform
+                    !*! scaled (V4 r r r 1)
+                    !*! mkTransformation rotation 0
+                    !*! rot
                 , colour = Just colour
                 }
 
