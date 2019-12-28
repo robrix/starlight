@@ -198,18 +198,17 @@ physics
   -> Delta Seconds Float
   -> m GameState
 physics bodies (Delta (Seconds dt)) = do
-  let applyGravity S.Instant { transform, body = S.Body { mass }} = do
-        P position <- Lens.use _position
-        let pos = (transform !* V4 0 0 0 1) ^. _xy
-            r = qd pos position
-            bigG = 6.67430e-11
-        _velocity += dt * bigG * distanceScale ^ (2 :: Int) * getKilograms mass / r *^ normalize (pos ^-^ position)
-
   for_ bodies applyGravity
 
   s@GameState { velocity } <- get
   _position += P velocity
-  pure s
+  pure s where
+  applyGravity S.Instant { transform, body = S.Body { mass }} = do
+    P position <- Lens.use _position
+    let pos = (transform !* V4 0 0 0 1) ^. _xy
+        r = qd pos position
+        bigG = 6.67430e-11
+    _velocity += dt * bigG * distanceScale ^ (2 :: Int) * getKilograms mass / r *^ normalize (pos ^-^ position)
 
 
 -- | Compute the zoom factor for the given velocity.
