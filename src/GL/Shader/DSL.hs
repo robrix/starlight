@@ -53,6 +53,7 @@ module GL.Shader.DSL
 , gl_PointCoord
 , discard
 , iff
+, switch
 , while
 , eq
 , lt
@@ -187,6 +188,7 @@ data Stmt (k :: Type) a where
   Let :: GLSLType b => String -> Expr k b -> (Const String b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
+  Switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k a -> Stmt k a
   While :: Expr k Bool -> Stmt k () -> Stmt k a -> Stmt k a
   (:.=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
   (:+=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
@@ -205,15 +207,16 @@ instance Applicative (Stmt k) where
   (<*>) = ap
 
 instance Monad (Stmt k) where
-  Pure a      >>= f = f a
-  Let n v   k >>= f = Let n v (f <=< k)
-  Discard   k >>= f = Discard (k >>= f)
-  If c t e  k >>= f = If c t e (k >>= f)
-  While c t k >>= f = While c t (k >>= f)
-  (:.=) r v k >>= f = (r :.= v) (k >>= f)
-  (:+=) r v k >>= f = (r :+= v) (k >>= f)
-  (:*=) r v k >>= f = (r :*= v) (k >>= f)
-  Stmt a    k >>= f = Stmt a (f <=< k)
+  Pure a       >>= f = f a
+  Let n v    k >>= f = Let n v (f <=< k)
+  Discard    k >>= f = Discard (k >>= f)
+  If c t e   k >>= f = If c t e (k >>= f)
+  Switch s c k >>= f = Switch s c (k >>= f)
+  While c t  k >>= f = While c t (k >>= f)
+  (:.=) r v  k >>= f = (r :.= v) (k >>= f)
+  (:+=) r v  k >>= f = (r :+= v) (k >>= f)
+  (:*=) r v  k >>= f = (r :*= v) (k >>= f)
+  Stmt a     k >>= f = Stmt a (f <=< k)
 
 
 data Expr (k :: Type) a where
@@ -411,6 +414,9 @@ discard = Discard (pure ())
 iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
 iff c t e = If c t e (pure ())
 
+switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
+switch s cs = Switch s cs (pure ())
+
 while :: Expr k Bool -> Stmt k () -> Stmt k ()
 while c t = While c t (pure ())
 
@@ -510,6 +516,9 @@ renderStmt = \case
   If c t e k
     -> pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
     <> renderStmt k
+  Switch s cs k
+    -> pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
+    <> renderStmt k
   While c t k
     -> pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
     <> renderStmt k
@@ -525,6 +534,8 @@ renderStmt = \case
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
     <> renderStmt (k b)
+  where
+  renderCase (i, s) = maybe (pretty "default:" <> hardline) (\ i -> pretty "case" <+> pretty i <> pretty ':') i  <> hardline <> renderStmt s
 
 renderExpr :: Expr k a -> Doc ()
 renderExpr = parens . \case
