@@ -31,6 +31,7 @@ import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
 import           Data.Functor.Identity
+import qualified Data.IntMap as IntMap
 import           Data.Traversable (for)
 import qualified Foreign.C.String.Lift as C
 import           GHC.Records
@@ -43,12 +44,15 @@ import           GL.Uniform
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
-newtype Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Program { unProgram :: GLuint }
+data Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Program
+  { locations :: IntMap.IntMap GLint
+  , unProgram :: GLuint
+  }
 
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
 
 
-build :: forall u i o m sig . (HasCallStack, Has Finally sig m, Has (Lift IO) sig m, DSL.Vars i) => DSL.Shader u i o -> m (Program u i o)
+build :: forall u i o m sig . (HasCallStack, Has Finally sig m, Has (Lift IO) sig m, DSL.Vars u, DSL.Vars i) => DSL.Shader u i o -> m (Program u i o)
 build p = runLiftIO $ do
   program <- glCreateProgram
   onExit (glDeleteProgram program)
@@ -64,21 +68,22 @@ build p = runLiftIO $ do
 
   checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS program
 
-  pure (Program program)
+  ls <- DSL.foldVarsM @u (\ DSL.Field{ DSL.name, DSL.location } _ -> do
+    loc <- checkingGLError $ C.withCString name (glGetUniformLocation program)
+    pure (IntMap.singleton location loc)) DSL.defaultVars
+
+  pure (Program ls program)
 
 use :: (Has (Lift IO) sig m) => Program u i o -> ProgramT u i o m a -> m a
-use (Program p) (ProgramT m) = do
+use (Program ls p) (ProgramT m) = do
   sendIO (glUseProgram p)
-  a <- runReader (Program p) m
+  a <- runReader (Program ls p) m
   a <$ sendIO (glUseProgram 0)
 
 set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
-set v = askProgram >>= \ (Program p) ->
-  DSL.foldVarsM (\ DSL.Field { DSL.name } -> \case
-    Just v  -> do
-      location <- checkingGLError . runLiftIO $ C.withCString name (glGetUniformLocation p)
-      checkingGLError $ uniform location v
-    Nothing -> pure ()) v
+set v = askProgram >>= \ (Program ls _) ->
+  DSL.foldVarsM (\ DSL.Field { DSL.location } ->
+    maybe (pure ()) (checkingGLError . uniform (ls IntMap.! location))) v
 
 
 class Monad m => HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u i o where
