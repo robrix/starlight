@@ -9,7 +9,7 @@ module Starlight.Input
 ) where
 
 import           Control.Effect.Empty
-import           Control.Effect.Lens ((%=))
+import           Control.Effect.Lens ((.=))
 import           Control.Effect.State
 import qualified Data.IntSet as IntSet
 import           Lens.Micro (Lens', lens)
@@ -37,10 +37,9 @@ _input = lens unInput (const Input)
 
 
 key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keysym -> m ()
-key m = (_input %=) . case m of
-  { SDL.Pressed  -> IntSet.insert
-  ; SDL.Released -> IntSet.delete }
-  . fromIntegral . SDL.unwrapKeycode . SDL.keysymKeycode
+key m ks = _pressed (SDL.keysymKeycode ks) .= case m of
+  SDL.Pressed  -> True
+  SDL.Released -> False
 
 
 _pressed :: SDL.Keycode -> Lens' Input Bool
