@@ -28,7 +28,7 @@ import           Data.Function (fix, (&))
 import           Data.Functor.Identity
 import           Data.Interval
 import           Data.Maybe (isJust)
-import           Data.Time.Clock (UTCTime)
+import           Data.Time.Clock (NominalDiffTime, UTCTime)
 import           Geometry.Circle
 import           Geometry.Rect
 import           GHC.Stack
@@ -177,12 +177,16 @@ controls bodies input = do
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
   delta <- maybe (pure 1) since =<< Lens.use _targetT
-  when (pressed SDL.KeycodeTab input && delta >= 0.3) $ do
+  when (pressed SDL.KeycodeTab input && delta >= repeatRate) $ do
     _target  %= maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
     t <- now
     _targetT .= Just t
 
   pure (Delta (Seconds dt))
+
+repeatRate :: NominalDiffTime
+repeatRate = 0.3
+
 
 physics
   :: Has (State GameState) sig m
