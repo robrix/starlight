@@ -286,20 +286,22 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
   let origin = window !*! translated3 (ext (negated (unP position)) 0)
       rot b r = mkTransformation (axisAngle (unit b) r) 0
       drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
-        let draw rot = do
+        let base
+              =   origin
+              !*! transform
+              !*! scaled (V4 r r r 1)
+              !*! mkTransformation rotation 0
+            draw rot = do
               set Body.U
                 { matrix = Just
-                    $   origin
-                    !*! transform
-                    !*! scaled (V4 r r r 1)
-                    !*! mkTransformation rotation 0
+                    $   base
                     !*! rot
                 , colour = Just colour
                 }
 
               drawArrays LineLoop (Interval 0 (length circleV))
 
-        for_ [_x, _y, _z] (draw . (`rot` (pi/2)))
+        base `seq` for_ [_x, _y, _z] (draw . (`rot` (pi/2)))
 
   use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
