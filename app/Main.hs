@@ -302,6 +302,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
     let here = unP position
         n = 10 :: Int
         minSweep = 0.0133 -- at d=150, makes approx. 4px blips
+        -- FIXME: skip blips for extremely distant objects
         drawBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
           let there = (transform !* V4 0 0 0 1) ^. _xy
               angle = angleTo here there
