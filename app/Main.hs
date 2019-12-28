@@ -28,7 +28,7 @@ import           Data.Function (fix, (&))
 import           Data.Functor.Identity
 import           Data.Interval
 import           Data.Maybe (isJust)
-import           Data.Time.Clock (NominalDiffTime, UTCTime)
+import           Data.Time.Clock (UTCTime)
 import           Geometry.Circle
 import           Geometry.Rect
 import           GHC.Stack
@@ -77,7 +77,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       , velocity = V2 0 75
       , rotation = axisAngle (unit _z) (pi/2)
       , target   = Nothing
-      , targetT  = Nothing
       }
     . evalState start
     . runReader S.system $ do
@@ -140,8 +139,9 @@ radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] wher
   n = (16 :: Int)
 
 controls
-  :: ( Has (State UTCTime) sig m
+  :: ( Has (State Input) sig m
      , Has (State GameState) sig m
+     , Has (State UTCTime) sig m
      , Has Time sig m
      )
   => [S.Instant Float]
@@ -176,17 +176,12 @@ controls bodies input = do
   when (pressed SDL.KeycodeRight input) $
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  delta <- maybe (pure 1) since =<< Lens.use _targetT
-  when (pressed SDL.KeycodeTab input && delta >= repeatRate) $ do
-    _target  %= advanceTarget
-    t <- now
-    _targetT .= Just t
+  when (pressed SDL.KeycodeTab input) $ do
+    _target %= advanceTarget
+    _pressed SDL.KeycodeTab .= False
 
   pure (Delta (Seconds dt)) where
   advanceTarget = maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
-
-repeatRate :: NominalDiffTime
-repeatRate = 0.3
 
 
 physics
@@ -355,7 +350,6 @@ data GameState = GameState
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
   , target   :: !(Maybe Int)
-  , targetT  :: !(Maybe UTCTime)
   }
   deriving (Show)
 
@@ -373,6 +367,3 @@ _rotation = lens rotation (\ s r -> s { rotation = r })
 
 _target :: Lens' GameState (Maybe Int)
 _target = lens target (\ s t -> s { target = t })
-
-_targetT :: Lens' GameState (Maybe UTCTime)
-_targetT = lens targetT (\ s t -> s { targetT = t })
