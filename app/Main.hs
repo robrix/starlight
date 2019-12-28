@@ -25,7 +25,6 @@ import           Control.Effect.Lift
 import qualified Control.Exception.Lift as E
 import           Control.Monad ((<=<), when)
 import           Control.Monad.IO.Class.Lift (runLiftIO)
-import           Data.Bool (bool)
 import           Data.Coerce
 import           Data.Foldable (foldl', for_)
 import           Data.Function (fix, (&))
@@ -114,7 +113,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           system <- ask
           let bodies = S.bodiesAt system systemTrans (getDelta t)
           continue <- fmap isJust . runEmpty $
-            measure "input" input >> controls bodies label >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
+            measure "input" input >>= controls bodies label >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
           continue <$ Window.swap
         when continue loop
 
@@ -166,24 +165,25 @@ controls
      )
   => [S.Instant Float]
   -> Label
+  -> Input
   -> m (Delta Seconds Float)
-controls bodies label = measure "controls" $ do
+controls bodies label input = measure "controls" $ do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
-  whenM (Lens.use (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
+  when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
-  whenM (Lens.use (_pressed SDL.KeycodeMinus)) $
+  when (input ^. (_pressed SDL.KeycodeMinus)) $
     _throttle -= dt * 10
 
   thrust <- (dt *) <$> Lens.use _throttle
 
   let angular = dt *^ Radians 5
 
-  whenM (Lens.use (_pressed SDL.KeycodeUp)) $ do
+  when (input ^. (_pressed SDL.KeycodeUp)) $ do
     rotation <- Lens.use _rotation
     _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
-  whenM (Lens.use (_pressed SDL.KeycodeDown)) $ do
+  when (input ^. (_pressed SDL.KeycodeDown)) $ do
     rotation <- Lens.use _rotation
     velocity <- Lens.use _velocity
     let angle = fst (polar2 (negated velocity))
@@ -191,12 +191,12 @@ controls bodies label = measure "controls" $ do
         delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
     _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
 
-  whenM (Lens.use (_pressed SDL.KeycodeLeft)) $
+  when (input ^. (_pressed SDL.KeycodeLeft)) $
     _rotation *= axisAngle (unit _z) (getRadians angular)
-  whenM (Lens.use (_pressed SDL.KeycodeRight)) $
+  when (input ^. (_pressed SDL.KeycodeRight)) $
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  whenM (Lens.use (_pressed SDL.KeycodeTab)) $ do
+  when (input ^. (_pressed SDL.KeycodeTab)) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
     _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
@@ -207,7 +207,6 @@ controls bodies label = measure "controls" $ do
   switchTarget = \case
     False -> maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
     True  -> maybe (Just (pred (length bodies))) (\ i -> i - 1 <$ guard (i - 1 >= 0))
-  whenM c t = c >>= bool (pure ()) t
   or = liftA2 (liftA2 (coerce (||)))
 
 
