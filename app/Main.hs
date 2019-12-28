@@ -97,14 +97,12 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
-      let drawState = DrawState { quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label }
-
       fix $ \ loop -> do
         t <- realToFrac <$> since start
         system <- ask
         let bodies = S.bodiesAt system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $
-          input >>= controls bodies >>= physics bodies >>= draw drawState bodies
+          input >>= controls bodies >>= physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
         when continue $ do
           Window.swap
           loop
