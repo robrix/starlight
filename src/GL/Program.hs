@@ -48,11 +48,6 @@ import           Graphics.GL.Types
 newtype Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)
 
-createProgram :: (Has Finally sig m, Has (Lift IO) sig m) => m (Program u i o)
-createProgram = do
-  program <- runLiftIO glCreateProgram
-  Program program <$ onExit (runLiftIO (glDeleteProgram program))
-
 useProgram :: Has (Lift IO) sig m => Program u i o -> m ()
 useProgram = runLiftIO . glUseProgram . unProgram
 
@@ -81,14 +76,15 @@ type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity)
 
 build :: forall u i o m sig . (Has Finally sig m, Has (Lift IO) sig m, DSL.Vars i) => DSL.Shader u i o -> m (Program u i o)
 build p = do
-  program <- createProgram
+  program <- runLiftIO glCreateProgram
+  onExit (runLiftIO (glDeleteProgram program))
   DSL.foldVarsM @i (\ DSL.Field { DSL.name, DSL.location } _ -> runLiftIO . checkingGLError $
-    C.withCString name (glBindAttribLocation (unProgram program) (fromIntegral location))) (DSL.makeVars id)
+    C.withCString name (glBindAttribLocation program (fromIntegral location))) (DSL.makeVars id)
   let s = DSL.shaderSources p
   shaders <- for s $ \ (type', source) -> do
     shader <- createShader type'
     shader <$ compile source shader
-  program <$ link shaders program
+  Program program <$ link shaders (Program program)
 
 use :: (Has (Lift IO) sig m) => Program u i o -> ProgramT u i o m a -> m a
 use p (ProgramT m) = do
