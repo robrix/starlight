@@ -117,6 +117,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           continue <$ Window.swap
         when continue loop
 
+-- FIXME: organize timings into a tree
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
 reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l:|ls, t) -> sendM $ do
   putStrLn $ foldl' label (unpack l) ls <> ": " <> showTiming t where
