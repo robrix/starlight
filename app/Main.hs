@@ -180,7 +180,7 @@ controls bodies = do
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
   whenM (Lens.use (_pressed SDL.KeycodeTab)) $ do
-    shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeLShift)
+    shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
     _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
