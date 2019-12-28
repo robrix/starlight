@@ -2,6 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Profile.Time
@@ -10,6 +11,7 @@ module Control.Carrier.Profile.Time
 , ProfileC(..)
 , Timing(..)
 , timing
+, mean
 , Timings(..)
   -- * Profile effect
 , module Control.Effect.Profile
@@ -22,6 +24,7 @@ import           Control.Effect.Profile
 import           Control.Monad.IO.Class
 import qualified Data.Map as Map
 import           Data.Time.Clock
+import           Prelude hiding (sum)
 
 runProfile :: ProfileC m a -> m (Timings, a)
 runProfile (ProfileC m) = runWriter m
@@ -55,6 +58,9 @@ instance Monoid Timing where
 
 timing :: NominalDiffTime -> Timing
 timing t = Timing t t t 1
+
+mean :: Timing -> NominalDiffTime
+mean Timing{ sum, count } = sum / fromIntegral count
 
 
 newtype Timings = Timings (Map.Map String Timing)
