@@ -5,7 +5,6 @@ module Starlight.Input
 ( input
 , Input(..)
 , key
-, pressed
 , _pressed
 ) where
 
@@ -43,8 +42,8 @@ key m = (_input %=) . case m of
   ; SDL.Released -> IntSet.delete }
   . fromIntegral . SDL.unwrapKeycode . SDL.keysymKeycode
 
-pressed :: SDL.Keycode -> Input -> Bool
-pressed code = IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput
 
 _pressed :: SDL.Keycode -> Lens' Input Bool
-_pressed code = lens (pressed code) (\ (Input s) pressed -> Input ((if pressed then IntSet.insert else IntSet.delete) (fromIntegral (SDL.unwrapKeycode code)) s))
+_pressed code = lens
+  (IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput)
+  (\ (Input s) pressed -> Input ((if pressed then IntSet.insert else IntSet.delete) (fromIntegral (SDL.unwrapKeycode code)) s))
