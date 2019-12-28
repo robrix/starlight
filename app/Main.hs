@@ -2,6 +2,7 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
@@ -153,7 +154,7 @@ controls bodies = do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
-  whenM (Lens.use (liftA2 (coerce (||)) <$> _pressed SDL.KeycodePlus <*> _pressed SDL.KeycodeEquals)) $
+  whenM (Lens.use (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
   whenM (Lens.use (_pressed SDL.KeycodeMinus)) $
     _throttle -= dt * 10
@@ -179,12 +180,16 @@ controls bodies = do
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
   whenM (Lens.use (_pressed SDL.KeycodeTab)) $ do
-    _target %= advanceTarget
+    shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeLShift)
+    _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
   pure (Delta (Seconds dt)) where
-  advanceTarget = maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
+  switchTarget = \case
+    False -> maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
+    True  -> maybe (Just (pred (length bodies))) (\ i -> i - 1 <$ guard (i - 1 >= 0))
   whenM c t = c >>= bool (pure ()) t
+  or = liftA2 (liftA2 (coerce (||)))
 
 
 physics
