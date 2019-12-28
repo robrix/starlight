@@ -45,6 +45,8 @@ mkOrbit s = do
 
 mkOrbitFromFile :: FilePath -> Q Exp
 mkOrbitFromFile path = do
+  _ <- addDependentFileRelative path
+
   lines <- lines <$> runIO (readFile path)
   last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
   mkOrbit (lines !! last)
@@ -53,7 +55,6 @@ mkOrbitFromFile path = do
 -- https://stackoverflow.com/questions/16163948/how-do-i-use-templatehaskells-adddependentfile-on-a-file-relative-to-the-file-b
 addDependentFileRelative :: FilePath -> Q [Dec]
 addDependentFileRelative relativeFile = do
-  currentFilename <- loc_filename <$> location
-  pwd             <- runIO getCurrentDirectory
+  pwd <- runIO getCurrentDirectory
 
-  [] <$ addDependentFile (takeDirectory (pwd </> currentFilename) </> relativeFile)
+  [] <$ addDependentFile (pwd </> relativeFile)
