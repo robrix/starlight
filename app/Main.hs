@@ -178,11 +178,12 @@ controls bodies input = do
 
   delta <- maybe (pure 1) since =<< Lens.use _targetT
   when (pressed SDL.KeycodeTab input && delta >= repeatRate) $ do
-    _target  %= maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
+    _target  %= advanceTarget
     t <- now
     _targetT .= Just t
 
-  pure (Delta (Seconds dt))
+  pure (Delta (Seconds dt)) where
+  advanceTarget = maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
 
 repeatRate :: NominalDiffTime
 repeatRate = 0.3
