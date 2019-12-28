@@ -23,6 +23,7 @@ import           Control.Carrier.Writer.Strict
 import           Control.Effect.Profile
 import           Control.Monad.IO.Class
 import qualified Data.Map as Map
+import           Data.Text (Text)
 import           Data.Time.Clock
 import           Prelude hiding (sum)
 
@@ -63,7 +64,7 @@ mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
 
 
-newtype Timings = Timings (Map.Map String Timing)
+newtype Timings = Timings (Map.Map Text Timing)
 
 instance Semigroup Timings where
   Timings t1 <> Timings t2 = Timings (Map.unionWith (<>) t1 t2)
