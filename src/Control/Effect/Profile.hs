@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
 module Control.Effect.Profile
 ( -- * Profile effect
-  Profile(..)
+  measure
+, Profile(..)
   -- * Re-exports
 , Algebra
 , Effect
@@ -10,6 +11,9 @@ module Control.Effect.Profile
 ) where
 
 import Control.Algebra
+
+measure :: Has Profile sig m => String -> m a -> m a
+measure l m = send (Measure l m pure)
 
 data Profile m k
   = forall a . Measure String (m a) (a -> m k)
