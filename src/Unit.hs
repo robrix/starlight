@@ -5,6 +5,7 @@
 module Unit
 ( Milli(..)
 , getMilli
+, milli
 ) where
 
 import Data.Proxy
@@ -22,3 +23,6 @@ instance GL.Type (f a) => GL.Type (Milli f a) where
 
 getMilli :: Milli f a -> f a
 getMilli (Milli fa) = fa
+
+milli :: (Fractional (f a)) => f a -> Milli f a
+milli fa = Milli (fa / 1000)
