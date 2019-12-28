@@ -110,7 +110,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
         system <- ask
         let bodies = S.bodiesAt system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $
-          input >> controls bodies label >>= physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
+          input >> measure "controls" (controls bodies label) >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
         when continue $ do
           Window.swap
           loop
