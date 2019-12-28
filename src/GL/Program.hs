@@ -94,7 +94,7 @@ build p = do
     shader <$ compile source shader
   program <$ link shaders program
 
-use :: (Has Finally sig m, Has (Lift IO) sig m) => Program u i o -> ProgramT u i o m a -> m a
+use :: (Has (Lift IO) sig m) => Program u i o -> ProgramT u i o m a -> m a
 use p (ProgramT m) = do
   useProgram p
   a <- runReader p m
