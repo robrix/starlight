@@ -164,14 +164,14 @@ drawGlyphs LabelState{ glyphA, glyphP, scale, bounds, font } (Run instances b) =
                   !*! translated (negated (rectMin b))
               , colour = Just colour }
             drawArrays Triangles range where
-    jitterPattern
-      = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
-        , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
-        , (green, V2 ( 3 / 12.0) (-1 / 12.0))
-        , (green, V2 ( 5 / 12.0) ( 5 / 12.0))
-        , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
-        , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
-        ]
+  jitterPattern
+    = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
+      , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
+      , (green, V2 ( 3 / 12.0) (-1 / 12.0))
+      , (green, V2 ( 5 / 12.0) ( 5 / 12.0))
+      , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
+      , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
+      ]
 
 
 drawLabel
