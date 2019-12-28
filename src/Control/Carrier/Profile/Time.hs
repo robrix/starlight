@@ -8,7 +8,7 @@
 module Control.Carrier.Profile.Time
 ( -- * Profile carrier
   runProfile
-, ProfileC(..)
+, ProfileC(ProfileC)
 , Timing(..)
 , mean
 , Timings(..)
@@ -18,31 +18,34 @@ module Control.Carrier.Profile.Time
 
 import           Control.Algebra
 import           Control.Carrier.Lift
+import           Control.Carrier.Reader
 import           Control.Carrier.Writer.Strict
 import           Control.Effect.Profile
 import           Control.Monad.IO.Class
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
 import           Data.Text (Text)
 import           Data.Time.Clock
 import           Prelude hiding (sum)
 
 runProfile :: ProfileC m a -> m (Timings, a)
-runProfile (ProfileC m) = runWriter m
+runProfile (ProfileC m) = runWriter (runReader [] m)
 
-newtype ProfileC m a = ProfileC (WriterC Timings m a)
+newtype ProfileC m a = ProfileC { runProfileC :: ReaderC [Text] (WriterC Timings m) a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (Has (Lift IO) sig m, Effect sig) => Algebra (Profile :+: sig) (ProfileC m) where
   alg = \case
     L (Measure l m k) -> do
       start <- sendM getCurrentTime
-      a <- m
+      a <- ProfileC (local (l:) (runProfileC m))
       end <- sendM getCurrentTime
-      ProfileC (tell (timing l (end `diffUTCTime` start)))
+      ls <- ProfileC ask
+      ProfileC (tell (timing (l:|ls) (end `diffUTCTime` start)))
       k a
     R other -> ProfileC (send (handleCoercible other))
     where
-    timing l t = Timings (Map.singleton l (Timing t t t 1))
+    timing ls t = Timings (Map.singleton ls (Timing t t t 1))
 
 
 data Timing = Timing
@@ -62,7 +65,7 @@ mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
 
 
-newtype Timings = Timings (Map.Map Text Timing)
+newtype Timings = Timings (Map.Map (NonEmpty Text) Timing)
 
 instance Semigroup Timings where
   Timings t1 <> Timings t2 = Timings (Map.unionWith (<>) t1 t2)

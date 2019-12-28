@@ -27,12 +27,13 @@ import           Control.Monad ((<=<), when)
 import           Control.Monad.IO.Class.Lift (runLiftIO)
 import           Data.Bool (bool)
 import           Data.Coerce
-import           Data.Foldable (for_)
+import           Data.Foldable (foldl', for_)
 import           Data.Function (fix, (&))
 import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Interval
 import           Data.List (sortOn)
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           Data.Ord (Down(..))
@@ -118,8 +119,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
         when continue loop
 
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
-reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l, t) -> sendM $ do
-  putStrLn $ unpack l <> ": " <> showTiming t where
+reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l:|ls, t) -> sendM $ do
+  putStrLn $ foldl' label (unpack l) ls <> ": " <> showTiming t where
+  label l' l = unpack l <> "." <> l'
   showTiming t = "{min: " <> showMS (min' t) <> ", mean: " <> showMS (mean t) <> ", max: " <> showMS (max' t) <> "}"
   showMS = (<> "ms") . show . getSeconds . getMilli . milli @Seconds @Double . realToFrac
 
