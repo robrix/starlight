@@ -7,6 +7,7 @@ module UI.Font
 , readTypeface
 , readFontOfSize
 , layoutString
+, glyphsForString
 ) where
 
 import           Control.Monad (guard, join, (<=<))
