@@ -373,8 +373,8 @@ gl_Position = Ref "gl_Position"
 gl_PointSize :: Ref 'Vertex Float
 gl_PointSize = Ref "gl_PointSize"
 
-gl_InstanceID :: Ref 'Vertex Int
-gl_InstanceID = Ref "gl_InstanceID"
+gl_InstanceID :: Expr 'Vertex Int
+gl_InstanceID = Var "gl_InstanceID"
 
 
 gl_FragCoord :: Expr 'Fragment (V2 Float)
