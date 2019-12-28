@@ -28,7 +28,6 @@ data Glyph = Glyph
 data Instance = Instance
   { char    :: {-# UNPACK #-} !Char
   , offset  :: {-# UNPACK #-} !Float
-  , bounds_ :: !(Rect Float)
   }
 
 
@@ -36,7 +35,7 @@ layoutGlyphs :: [Glyph] -> Run
 layoutGlyphs = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState 0 id Nothing) where
   go (LayoutState offset is prev) g@Glyph{ char, bounds_ } = LayoutState
     { offset  = offset + advanceWidth g
-    , result  = is . (Instance char offset bounds_ :)
+    , result  = is . (Instance char offset :)
     , bounds_ = prev <> Just (Union (transformRect (translated (V2 offset 0)) bounds_))
     }
 
@@ -57,9 +56,6 @@ class HasBounds t where
 
 instance HasBounds Glyph where
   bounds = bounds_
-
-instance HasBounds Instance where
-  bounds Instance{ offset, bounds_ } = transformRect (translated (V2 offset 0)) bounds_
 
 instance HasBounds LayoutState where
   bounds LayoutState{ bounds_ } = maybe (Rect 0 0) getUnion bounds_
