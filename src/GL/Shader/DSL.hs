@@ -32,6 +32,7 @@ module GL.Shader.DSL
 , vec2
 , vec3
 , vec4
+, mat3
 , mat4
 , ext3
 , ext4
@@ -268,6 +269,7 @@ data Expr (k :: Type) a where
   Vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
   Vec3 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V3 Float)
   Vec4 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V4 Float)
+  Mat3 :: Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (M33 Float)
   Mat4 :: Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (M44 Float)
   Ext3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
   Ext4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
@@ -350,6 +352,9 @@ vec3 = Vec3
 
 vec4 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V4 Float)
 vec4 = Vec4
+
+mat3 :: Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (M33 Float)
+mat3 = Mat3
 
 mat4 :: Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (M44 Float)
 mat4 = Mat4
@@ -586,6 +591,7 @@ renderExpr = parens . \case
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
   Vec3 a b c -> fn "vec3" [renderExpr a, renderExpr b, renderExpr c]
   Vec4 a b c d -> fn "vec4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
+  Mat3 a b c -> fn "mat3" [renderExpr a, renderExpr b, renderExpr c]
   Mat4 a b c d -> fn "mat4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
   Ext3 a b -> fn "vec3" [renderExpr a, renderExpr b]
   Ext4 a b -> fn "vec4" [renderExpr a, renderExpr b]
