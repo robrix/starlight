@@ -1,7 +1,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Control.Carrier.Profile.Time
 ( -- * Profile carrier
-  ProfileC(..)
+  runProfile
+, ProfileC(..)
 , Timing(..)
 , Timings(..)
   -- * Profile effect
@@ -13,6 +14,9 @@ import           Control.Effect.Profile
 import           Control.Monad.IO.Class
 import qualified Data.Map as Map
 import           Data.Time.Clock
+
+runProfile :: ProfileC m a -> m (Timings, a)
+runProfile (ProfileC m) = runWriter m
 
 newtype ProfileC m a = ProfileC (WriterC Timings m a)
   deriving (Applicative, Functor, Monad, MonadIO)
