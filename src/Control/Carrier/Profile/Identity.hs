@@ -1,2 +1,7 @@
 module Control.Carrier.Profile.Identity
-() where
+( -- * Profiling carrier
+  runProfile
+, ProfileC(ProfileC)
+) where
+
+newtype ProfileC m a = ProfileC { runProfile :: m a }
