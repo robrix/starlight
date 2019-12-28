@@ -208,7 +208,7 @@ physics bodies (Delta (Seconds dt)) = do
     let pos = (transform !* V4 0 0 0 1) ^. _xy
         r = qd pos position
         bigG = 6.67430e-11
-    _velocity += dt * bigG * distanceScale ^ (2 :: Int) * getKilograms mass / r *^ normalize (pos ^-^ position)
+    _velocity += dt * bigG * distanceScale ** 2 * getKilograms mass / r *^ normalize (pos ^-^ position)
 
 
 -- | Compute the zoom factor for the given velocity.
