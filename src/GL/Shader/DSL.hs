@@ -54,6 +54,7 @@ module GL.Shader.DSL
 , discard
 , iff
 , switch
+, break
 , while
 , eq
 , lt
@@ -122,6 +123,7 @@ import           Linear.Matrix (M33, M44)
 import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
+import           Prelude hiding (break)
 import           UI.Colour (Colour)
 import           Unit.Angle
 
@@ -189,6 +191,7 @@ data Stmt (k :: Type) a where
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
   Switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k a -> Stmt k a
+  Break :: Stmt k a -> Stmt k a
   While :: Expr k Bool -> Stmt k () -> Stmt k a -> Stmt k a
   (:.=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
   (:+=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
@@ -212,6 +215,7 @@ instance Monad (Stmt k) where
   Discard    k >>= f = Discard (k >>= f)
   If c t e   k >>= f = If c t e (k >>= f)
   Switch s c k >>= f = Switch s c (k >>= f)
+  Break      k >>= f = Break (k >>= f)
   While c t  k >>= f = While c t (k >>= f)
   (:.=) r v  k >>= f = (r :.= v) (k >>= f)
   (:+=) r v  k >>= f = (r :+= v) (k >>= f)
@@ -417,6 +421,9 @@ iff c t e = If c t e (pure ())
 switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
 switch s cs = Switch s cs (pure ())
 
+break :: Stmt k ()
+break = Break (pure ())
+
 while :: Expr k Bool -> Stmt k () -> Stmt k ()
 while c t = While c t (pure ())
 
@@ -518,6 +525,9 @@ renderStmt = \case
     <> renderStmt k
   Switch s cs k
     -> pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
+    <> renderStmt k
+  Break k
+    -> pretty "break" <+> pretty ';' <> hardline
     <> renderStmt k
   While c t k
     -> pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
