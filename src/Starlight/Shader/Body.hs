@@ -17,8 +17,15 @@ import GL.Shader.DSL
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ pos } None ->
-    gl_Position .= matrix u !* pos)
+  ->  vertex (\ V{ pos } None -> do
+    let cos90 = 6.123233995736766e-17
+    m <- var "m" (matrix u)
+    iff (gl_InstanceID `eq` 0)
+      (pure ())
+      (iff (gl_InstanceID `eq` 1)
+        (m *= mat4 (vec4 1 0 0 0) (vec4 0 cos90 (-1) 0) (vec4 0 1 cos90 0) (vec4 0 0 0 1))
+        (m *= mat4 (vec4 cos90 0 1 0) (vec4 0 1 0 0) (vec4 (-1) 0 cos90 0) (vec4 0 0 0 1)))
+    gl_Position .= get m !* pos)
 
   >>> fragment (\ None O { fragColour } ->
     fragColour .= colour u)
