@@ -106,7 +106,6 @@ label font colour = do
 
 setLabel
   :: ( HasCallStack
-     , Has Finally sig m
      , Has (Lift IO) sig m
      )
   => Label
