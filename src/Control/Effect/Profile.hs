@@ -18,3 +18,6 @@ deriving instance Functor m => Functor (Profile m)
 
 instance HFunctor Profile where
   hmap f (Measure l m k) = Measure l (f m) (f . k)
+
+instance Effect Profile where
+  thread ctx hdl (Measure l m k) = Measure l (hdl (m <$ ctx)) (hdl . fmap k)
