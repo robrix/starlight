@@ -23,9 +23,9 @@ input
   => m Input
 input = Window.input go >> get where
   go (SDL.Event _ p) = case p of
-    SDL.QuitEvent                                                       -> empty
-    SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ (SDL.Keysym _ kc _)) -> key p kc
-    _                                                                   -> pure ()
+    SDL.QuitEvent                                      -> empty
+    SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ ks) -> key p ks
+    _                                                  -> pure ()
 
 
 newtype Input = Input { unInput :: IntSet.IntSet }
@@ -35,11 +35,11 @@ _input :: Lens' Input IntSet.IntSet
 _input = lens unInput (const Input)
 
 
-key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keycode -> m ()
+key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keysym -> m ()
 key m = (_input %=) . case m of
   { SDL.Pressed  -> IntSet.insert
   ; SDL.Released -> IntSet.delete }
-  . fromIntegral . SDL.unwrapKeycode
+  . fromIntegral . SDL.unwrapKeycode . SDL.keysymKeycode
 
 pressed :: SDL.Keycode -> Input -> Bool
 pressed code = IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput
