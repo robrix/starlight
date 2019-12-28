@@ -15,6 +15,7 @@ module Main
 import           Control.Applicative (liftA2)
 import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
+import           Control.Carrier.Profile.Time
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Carrier.Time
@@ -22,7 +23,7 @@ import           Control.Effect.Lens ((%=), (*=), (+=), (-=), (.=))
 import qualified Control.Effect.Lens as Lens
 import           Control.Effect.Lift
 import qualified Control.Exception.Lift as E
-import           Control.Monad (when)
+import           Control.Monad ((<=<), when)
 import           Control.Monad.IO.Class.Lift (runLiftIO)
 import           Data.Bool (bool)
 import           Data.Coerce
@@ -31,6 +32,7 @@ import           Data.Function (fix, (&))
 import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Interval
+import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (UTCTime)
 import           Geometry.Circle
@@ -70,7 +72,7 @@ import           Unit.Mass
 import           Unit.Time
 
 main :: HasCallStack => IO ()
-main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
+main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings . fst <=< runProfile $ do
   font <- readFontOfSize ("fonts" </> "DejaVuSans.ttf") 36
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
@@ -111,6 +113,11 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         when continue $ do
           Window.swap
           loop
+
+reportTimings :: Has (Lift IO) sig m => Timings -> m ()
+reportTimings (Timings ts) = for_ (Map.toList ts) $ \ (l, t) -> sendM $ do
+  putStrLn $ l <> ": " <> showTiming t where
+  showTiming t = "{min: " <> show (min' t) <> ", mean: " <> show (mean t) <> ", max: " <> show (max' t) <> "}"
 
 
 distanceScale :: Float
@@ -236,6 +243,7 @@ easeInOutCubic t
 draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
+     , Has Profile sig m
      , Has Window.Window sig m
      )
   => DrawState
@@ -254,7 +262,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
   let zoomOut = zoomForSpeed size (norm velocity)
 
-  use starsP $ do
+  measure "stars" . use starsP $ do
     scale <- Window.scale
     size <- Window.size
     set Stars.U
@@ -271,7 +279,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
   let V2 sx sy = scale / size ^* (1 / zoomOut)
       window = scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
 
-  use shipP $ do
+  measure "ship" . use shipP $ do
     set Ship.U
       { matrix = Just
           $   window
@@ -296,9 +304,10 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
         drawArraysInstanced LineLoop (Interval 0 (length circleV)) 3
 
-  use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
+  measure "bodies" $
+    use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
-  use radarP $ do
+  measure "radar" . use radarP $ do
     let here = unP position
         n = 10 :: Int
         minSweep = 0.0133 -- at d=150, makes approx. 4px blips
@@ -331,7 +340,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
     bindArray radarA $ for_ bodies drawBlip
 
-  drawLabel label
+  measure "drawLabel" $ drawLabel label
 
 roundToPlaces :: RealFloat a => Int -> a -> a
 roundToPlaces n x = fromInteger (round (x * n')) / n' where
