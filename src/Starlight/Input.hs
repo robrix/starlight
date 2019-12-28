@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE TypeApplications #-}
 module Starlight.Input
 ( input
 , Input(..)
@@ -9,8 +8,8 @@ module Starlight.Input
 ) where
 
 import           Control.Effect.Empty
+import           Control.Effect.Lens ((%=))
 import           Control.Effect.State
-import           Data.Coerce (coerce)
 import qualified Data.IntSet as IntSet
 import           Lens.Micro (Lens', lens)
 import qualified SDL
@@ -37,7 +36,7 @@ _input = lens unInput (const Input)
 
 
 key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keycode -> m ()
-key m = modify @Input . coerce . case m of
+key m = (_input %=) . case m of
   { SDL.Pressed  -> IntSet.insert
   ; SDL.Released -> IntSet.delete }
   . fromIntegral . SDL.unwrapKeycode
