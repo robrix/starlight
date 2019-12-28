@@ -254,8 +254,8 @@ data Expr (k :: Type) a where
   Get :: Ref k a -> Expr k a
 
   Vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
-  Vec3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
-  Vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
+  Ext3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
+  Ext4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
   Norm :: Expr k (v Float) -> Expr k Float
   Dot :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
@@ -330,10 +330,10 @@ vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
 vec2 = Vec2
 
 ext3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
-ext3 = Vec3
+ext3 = Ext3
 
 ext4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
-ext4 = Vec4
+ext4 = Ext4
 
 norm :: Expr k (v Float) -> Expr k Float
 norm = Norm
@@ -539,8 +539,8 @@ renderExpr = parens . \case
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
   Get (Ref n) -> pretty n
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
-  Vec3 a b -> fn "ext3" [renderExpr a, renderExpr b]
-  Vec4 a b -> fn "ext4" [renderExpr a, renderExpr b]
+  Ext3 a b -> fn "ext3" [renderExpr a, renderExpr b]
+  Ext4 a b -> fn "ext4" [renderExpr a, renderExpr b]
   Norm a -> fn "length" [renderExpr a]
   Dot a b -> fn "dot" [renderExpr a, renderExpr b]
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
