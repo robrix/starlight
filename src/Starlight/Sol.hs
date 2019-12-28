@@ -5,6 +5,7 @@
 -- | A familiar star system.
 module Starlight.Sol
 ( system
+, orbits
 , sol
 , mercury
 , venus
