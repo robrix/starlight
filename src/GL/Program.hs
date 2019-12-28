@@ -48,9 +48,6 @@ import           Graphics.GL.Types
 newtype Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Program { unProgram :: GLuint }
   deriving (Eq, Ord, Show)
 
-useProgram :: Has (Lift IO) sig m => Program u i o -> m ()
-useProgram = runLiftIO . glUseProgram . unProgram
-
 link :: (Has (Lift IO) sig m, HasCallStack) => [Shader] -> Program u i o -> m ()
 link shaders (Program program) = runLiftIO $ do
   for_ shaders (glAttachShader program . unShader)
@@ -86,10 +83,10 @@ build p = do
   Program program <$ link shaders (Program program)
 
 use :: (Has (Lift IO) sig m) => Program u i o -> ProgramT u i o m a -> m a
-use p (ProgramT m) = do
-  useProgram p
-  a <- runReader p m
-  a <$ useProgram (Program 0)
+use (Program p) (ProgramT m) = do
+  sendIO (glUseProgram p)
+  a <- runReader (Program p) m
+  a <$ sendIO (glUseProgram 0)
 
 set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
 set v = askProgram >>= \ p ->
