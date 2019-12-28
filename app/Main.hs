@@ -32,8 +32,10 @@ import           Data.Function (fix, (&))
 import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Interval
+import           Data.List (sortOn)
 import qualified Data.Map as Map
 import           Data.Maybe (isJust)
+import           Data.Ord (Down(..))
 import           Data.Text (unpack)
 import           Data.Time.Clock (UTCTime)
 import           Geometry.Circle
@@ -116,7 +118,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           loop
 
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
-reportTimings (Timings ts) = for_ (Map.toList ts) $ \ (l, t) -> sendM $ do
+reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l, t) -> sendM $ do
   putStrLn $ unpack l <> ": " <> showTiming t where
   showTiming t = "{min: " <> show (min' t) <> ", mean: " <> show (mean t) <> ", max: " <> show (max' t) <> "}"
 
