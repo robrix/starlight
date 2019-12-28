@@ -73,6 +73,7 @@ module GL.Shader.DSL
 , _a
 , (^*)
 , (!*)
+, (!*!)
 , renderStmt
 , renderExpr
 , GLSLType(..)
@@ -249,6 +250,7 @@ data Expr (k :: Type) a where
   (:^.) :: Expr k a -> Prj a b -> Expr k b
   (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
   (:!*) :: Expr k (v (v Float)) -> Expr k (v Float) -> Expr k (v Float)
+  (:!*!) :: Expr k (v (v Float)) -> Expr k (v (v Float)) -> Expr k (v (v Float))
 
   Eq :: Expr k a -> Expr k a -> Expr k Bool
   Lt :: Expr k a -> Expr k a -> Expr k Bool
@@ -282,6 +284,7 @@ infixr 8 :**
 infixl 8 :^.
 infixl 7 :^*
 infixl 7 :!*
+infixl 7 :!*!
 
 instance Num (Expr k a) where
   (+) = (:+)
@@ -489,6 +492,11 @@ infixl 7 ^*
 
 infixl 7 !*
 
+(!*!) :: Expr k (v (v Float)) -> Expr k (v (v Float)) -> Expr k (v (v Float))
+(!*!) = (:!*!)
+
+infixl 7 !*!
+
 
 renderStmt :: Stmt k a -> Doc ()
 renderStmt = \case
@@ -549,6 +557,7 @@ renderExpr = parens . \case
   a :^. Prj s -> renderExpr a <> pretty '.' <> pretty s
   a :^* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   a :!* b -> renderExpr a <+> pretty '*' <+> renderExpr b
+  a :!*! b -> renderExpr a <+> pretty '*' <+> renderExpr b
   Eq a b -> renderExpr a <+> pretty "==" <+> renderExpr b
   Lt a b -> renderExpr a <+> pretty '<' <+> renderExpr b
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
