@@ -120,7 +120,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
 reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l, t) -> sendM $ do
   putStrLn $ unpack l <> ": " <> showTiming t where
-  showTiming t = "{min: " <> show (min' t) <> ", mean: " <> show (mean t) <> ", max: " <> show (max' t) <> "}"
+  showTiming t = "{min: " <> showMS (min' t) <> ", mean: " <> showMS (mean t) <> ", max: " <> showMS (max' t) <> "}"
+  showMS = (<> "ms") . show . getSeconds . getMilli . milli @Seconds @Double . realToFrac
 
 
 distanceScale :: Float
