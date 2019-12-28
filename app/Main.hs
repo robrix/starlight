@@ -77,6 +77,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
       , velocity = V2 0 75
       , rotation = axisAngle (unit _z) (pi/2)
       , target   = Nothing
+      , targetT  = Nothing
       }
     . evalState start
     . runReader S.system $ do
@@ -346,6 +347,7 @@ data GameState = GameState
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
   , target   :: !(Maybe Int)
+  , targetT  :: !(Maybe UTCTime)
   }
   deriving (Show)
 
@@ -363,3 +365,6 @@ _rotation = lens rotation (\ s r -> s { rotation = r })
 
 _target :: Lens' GameState (Maybe Int)
 _target = lens target (\ s t -> s { target = t })
+
+_targetT :: Lens' GameState (Maybe UTCTime)
+_targetT = lens targetT (\ s t -> s { targetT = t })
