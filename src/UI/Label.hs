@@ -7,6 +7,7 @@
 module UI.Label
 ( Label
 , label
+, prepareLabel
 , setLabel
 , drawLabel
 ) where
@@ -16,10 +17,11 @@ import           Control.Effect.Lift
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
-import           Data.Foldable (for_)
+import           Data.Foldable (foldl', for_)
 import           Data.Functor.Identity
 import           Data.Interval
 import           Data.IORef
+import qualified Data.Map as Map
 import           Geometry.Rect
 import           GHC.Stack
 import           GL.Array
@@ -40,7 +42,7 @@ import           Linear.Vector
 import           UI.Colour
 import qualified UI.Effect.Window as Window
 import           UI.Font
-import           UI.Glyph (Instance(..), Run(..), geometry)
+import           UI.Glyph (Glyph(Glyph, char, geometry), Instance(..), Run(..))
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 
@@ -60,6 +62,7 @@ data LabelState = LabelState
   , scale   :: !Int
   , font    :: !Font
   , string  :: !String
+  , chars   :: !(Map.Map Char (Interval Int))
   }
 
 
@@ -102,40 +105,31 @@ label font colour = do
 
   scale <- Window.scale
 
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, string = "" })
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, string = "", chars = Map.empty })
 
-setLabel
+-- | Cache the glyphs for the characters available to draw later on.
+prepareLabel
   :: ( HasCallStack
      , Has (Lift IO) sig m
      )
   => Label
   -> String
   -> m ()
-setLabel Label{ ref } string = runLiftIO $ do
-  l@LabelState { texture, fbuffer, glyphB, glyphA, scale, bounds, font, string = oldString } <- sendIO (readIORef ref)
+prepareLabel Label{ ref } string = runLiftIO $ do
+  l@LabelState { texture, glyphB, glyphA, bounds, font, string = oldString } <- sendIO (readIORef ref)
 
   when (bounds == Rect 0 0 || oldString /= string) $ do
     glBlendFunc GL_ONE GL_ONE -- add
 
-    let r@(Run instances b) = layoutString font string
-        vertices = geometry . UI.Glyph.glyph =<< instances
-        bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
+    let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString font string)
+        combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + length geometry in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
+        vertices = vs []
 
     bind (Just texture)
     setParameter Texture2D MagFilter Nearest
     setParameter Texture2D MinFilter Nearest
     setParameter Texture2D WrapS ClampToEdge
     setParameter Texture2D WrapT ClampToEdge
-    setImageFormat Texture2D RGBA8 (scale *^ rectMax bounds) RGBA (Packed8888 True)
-
-    bind (Just fbuffer)
-    attachTexture (GL.Colour 0) texture
-
-    viewport $ scale *^ bounds
-    scissor  $ scale *^ bounds
-
-    setClearColour transparent
-    glClear GL_COLOR_BUFFER_BIT
 
     bind (Just glyphB)
     realloc glyphB (length vertices) Static Draw
@@ -143,16 +137,35 @@ setLabel Label{ ref } string = runLiftIO $ do
 
     bindArray glyphA $ configureArray glyphB glyphA
 
-    sendIO (writeIORef ref l { bounds, string })
+    sendIO (writeIORef ref l { chars })
 
-    drawGlyphs l r
+-- | Set the label’s text.
+--
+-- Characters not in the string passed to 'prepareLabel' will not be drawn.
+setLabel :: Has (Lift IO) sig m => Label -> String -> m ()
+setLabel Label{ ref } string = runLiftIO $ do
+  l@LabelState{ texture, fbuffer, glyphA, glyphP, scale, font, chars } <- sendIO (readIORef ref)
 
-drawGlyphs :: Has (Lift IO) sig m => LabelState -> Run -> m ()
-drawGlyphs LabelState{ glyphA, glyphP, scale, bounds, font } (Run instances b) = do
-    bindArray glyphA $
-      use glyphP $ do
-        let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
-        for_ instances $ \ Instance{ offset, range } ->
+  let Run instances b = layoutString font string
+      bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
+
+  bind (Just texture)
+  setImageFormat Texture2D RGBA8 (scale *^ rectMax bounds) RGBA (Packed8888 True)
+
+  bind (Just fbuffer)
+  attachTexture (GL.Colour 0) texture
+
+  viewport $ scale *^ bounds
+  scissor  $ scale *^ bounds
+
+  setClearColour transparent
+  glClear GL_COLOR_BUFFER_BIT
+
+  bindArray glyphA $
+    use glyphP $ do
+      let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
+      for_ instances $ \ Instance{ char, offset } -> case Map.lookup char chars of
+        Just range ->
           for_ jitterPattern $ \ (colour, V2 tx ty) -> do
             set Glyph.U
               { matrix3 = Just
@@ -163,7 +176,10 @@ drawGlyphs LabelState{ glyphA, glyphP, scale, bounds, font } (Run instances b) =
                   !*! translated (V2 offset 0)
                   !*! translated (negated (rectMin b))
               , colour = Just colour }
-            drawArrays Triangles range where
+            drawArrays Triangles range
+        Nothing -> pure ()
+
+  sendIO (writeIORef ref l { bounds, string })where
   jitterPattern
     = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
       , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
