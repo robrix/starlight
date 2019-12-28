@@ -7,9 +7,11 @@ module Starlight.Body.TH
 , Orbit(..)
 , mkOrbit
 , mkOrbitFromFile
+, mkOrbitsFromDirectory
 , addDependentFileRelative
 ) where
 
+import Control.Monad ((>=>))
 import Data.List (elemIndex)
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
@@ -50,6 +52,12 @@ mkOrbitFromFile path = do
   lines <- lines <$> runIO (readFile path)
   last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
   mkOrbit (lines !! last)
+
+mkOrbitsFromDirectory :: FilePath -> Q Exp
+mkOrbitsFromDirectory
+  =   runIO . listDirectory
+  >=> traverse mkOrbitFromFile
+  >=> listE . map pure
 
 
 -- https://stackoverflow.com/questions/16163948/how-do-i-use-templatehaskells-adddependentfile-on-a-file-relative-to-the-file-b
