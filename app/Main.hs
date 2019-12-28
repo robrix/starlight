@@ -260,7 +260,8 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ actors = Actor{ position, velocity, rotation, target } :| _ } = measure "draw" . runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies game = measure "draw" . runLiftIO $ do
+  let Actor{ position, velocity, target } = game ^. _player
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -287,22 +288,25 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
   scale <- Window.scale
   size <- Window.size
   let V2 sx sy = scale / size ^* (1 / zoomOut)
-      window = scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
+      origin
+        =   scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
+        !*! translated3 (ext (negated (unP position)) 0) -- transform to the origin
 
   measure "ship" . use shipP $ do
-    set Ship.U
-      { matrix = Just
-          $   window
-          !*! scaled (V4 15 15 15 1)
-          !*! mkTransformation rotation 0
-      , colour = Just white
-      }
+    for_ (game ^. _actors) $ \ Actor{ position, rotation } -> do
+      set Ship.U
+        { matrix = Just
+            $   origin
+            !*! translated3 (ext (unP position) 0)
+            !*! scaled (V4 15 15 15 1)
+            !*! mkTransformation rotation 0
+        , colour = Just white
+        }
 
-    bindArray shipA $
-      drawArrays LineLoop (Interval 0 4)
+      bindArray shipA $
+        drawArrays LineLoop (Interval 0 4)
 
-  let origin = window !*! translated3 (ext (negated (unP position)) 0)
-      drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
+  let drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
         set Body.U
           { matrix = Just
               $   origin
