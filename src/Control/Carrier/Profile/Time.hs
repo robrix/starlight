@@ -1,2 +1,6 @@
 module Control.Carrier.Profile.Time
-() where
+( -- * Profile effect
+  module Control.Effect.Profile
+) where
+
+import Control.Effect.Profile
