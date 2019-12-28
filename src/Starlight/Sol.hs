@@ -32,7 +32,7 @@ import           Unit.Time
 orbits :: IntMap.IntMap (String, Orbit Float)
 orbits = IntMap.fromList
   [ (code, (dropWhile isSpace (dropExtension rest), orbit))
-  | (path, orbit) <- ([] :: [(String, Orbit Float)])
+  | (path, orbit) <- $(mkOrbitsFromDirectory "ephemerides")
   , (code, rest) <- readDec path
   ]
 
