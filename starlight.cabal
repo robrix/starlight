@@ -41,6 +41,7 @@ library
     Control.Carrier.Time
     Control.Concurrent.Lift
     Control.Effect.Finally
+    Control.Effect.Profile
     Control.Effect.Time
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
