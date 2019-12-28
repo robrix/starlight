@@ -176,8 +176,11 @@ controls bodies input = do
   when (pressed SDL.KeycodeRight input) $
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  when (pressed SDL.KeycodeTab input) $
-    _target %= maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
+  delta <- maybe (pure 1) since =<< Lens.use _targetT
+  when (pressed SDL.KeycodeTab input && delta >= 0.3) $ do
+    _target  %= maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
+    t <- now
+    _targetT .= Just t
 
   pure (Delta (Seconds dt))
 
