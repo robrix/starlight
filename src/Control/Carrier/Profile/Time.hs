@@ -21,3 +21,6 @@ data Tally a = Tally
 
 instance Num a => Semigroup (Tally a) where
   Tally t1 c1 <> Tally t2 c2 = Tally (t1 + t2) (c1 + c2)
+
+instance Num a => Monoid (Tally a) where
+  mempty = Tally 0 0
