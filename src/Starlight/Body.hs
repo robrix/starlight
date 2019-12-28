@@ -39,9 +39,9 @@ newtype System a = System { getSystem :: [Body a] }
   deriving (Read, Show)
 
 data Instant a = Instant
-  { body      :: Body a
-  , transform :: M44 a
-  , rotation  :: Quaternion a
+  { body      :: !(Body a)
+  , transform :: !(M44 a)
+  , rotation  :: !(Quaternion a)
   }
   deriving (Show)
 
