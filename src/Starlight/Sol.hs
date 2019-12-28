@@ -54,6 +54,7 @@ system = System
 sol :: Body Float
 sol = Body
   { name        = "Sol"
+  , code        = 10
   , radius      = fromKilometres 695500.0
   , mass        = 1.9885e30
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 7.25))
@@ -72,6 +73,7 @@ sol = Body
 mercury :: Body Float
 mercury = Body
   { name        = "Mercury"
+  , code        = 199
   , radius      = fromKilometres 2439.7
   , mass        = 3.302e23
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.034))
@@ -84,6 +86,7 @@ mercury = Body
 venus :: Body Float
 venus = Body
   { name        = "Venus"
+  , code        = 299
   , radius      = fromKilometres 6051.9
   , mass        = 48.685e23
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 177.3))
@@ -96,6 +99,7 @@ venus = Body
 earth :: Body Float
 earth = Body
   { name        = "Earth"
+  , code        = 399
   , radius      = fromKilometres 6378.14
   , mass        = 5.97219e24
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 23.4392911))
@@ -108,6 +112,7 @@ earth = Body
 luna :: Body Float
 luna = Body
   { name        = "Luna"
+  , code        = 301
   , radius      = fromKilometres 1737.5
   , mass        = 7.342e22
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 6.687))
@@ -120,6 +125,7 @@ luna = Body
 mars :: Body Float
 mars = Body
   { name        = "Mars"
+  , code        = 499
   , radius      = fromKilometres 3397
   , mass        = 6.4171e23
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 25.19))
@@ -132,6 +138,7 @@ mars = Body
 jupiter :: Body Float
 jupiter = Body
   { name        = "Jupiter"
+  , code        = 599
   , radius      = fromKilometres 69911
   , mass        = 1898.13e24
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 3.13))
@@ -144,6 +151,7 @@ jupiter = Body
 saturn :: Body Float
 saturn = Body
   { name        = "Saturn"
+  , code        = 699
   , radius      = fromKilometres 58232
   , mass        = 5.6834e26
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 26.73))
@@ -156,6 +164,7 @@ saturn = Body
 uranus :: Body Float
 uranus = Body
   { name        = "Uranus"
+  , code        = 799
   , radius      = fromKilometres 25362
   , mass        = 86.813e24
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 97.77))
@@ -168,6 +177,7 @@ uranus = Body
 neptune :: Body Float
 neptune = Body
   { name        = "Neptune"
+  , code        = 899
   , radius      = fromKilometres 24624
   , mass        = 102.413e24
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 28.32))

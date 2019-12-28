@@ -56,6 +56,7 @@ bodiesAt (System bs) systemTrans t = bs' where
 
 data Body a = Body
   { name        :: String
+  , code        :: Int
   , radius      :: Metres a
   , mass        :: Kilograms a
   , orientation :: Quaternion a -- relative to orbit
