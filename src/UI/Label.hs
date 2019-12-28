@@ -161,27 +161,18 @@ setLabel Label{ ref } string = runLiftIO $ do
 
   let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
   bindArray glyphA . use glyphP $
-    for_ instances $ \ Instance{ offset, range } ->
-      for_ jitterPattern $ \ (colour, V2 tx ty) -> do
-        set Glyph.U
-          { matrix3 = Just
-              $   translated (-1)
-              !*! scaled     (V3 sx sy 1)
-              !*! translated (V2 tx ty * (1 / fromIntegral scale))
-              !*! scaled     (V3 (fontScale font) (fontScale font) 1)
-              !*! translated (V2 offset 0 + negated (rectMin b))
-          , colour = Just colour }
-        drawArrays Triangles range
+    for_ instances $ \ Instance{ offset, range } -> do
+      set Glyph.U
+        { matrix3   = Just
+            $   translated (-1)
+            !*! scaled     (V3 sx sy 1)
+        , scale     = Just (1 / fromIntegral scale)
+        , fontScale = Just (fontScale font)
+        , offset    = Just (V2 offset 0 + negated (rectMin b))
+        }
+      drawArraysInstanced Triangles range 6
 
-  sendIO (writeIORef ref l { bounds, string }) where
-  jitterPattern
-    = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
-      , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
-      , (green, V2 ( 3 / 12.0) (-1 / 12.0))
-      , (green, V2 ( 5 / 12.0) ( 5 / 12.0))
-      , (blue,  V2 ( 7 / 12.0) (-3 / 12.0))
-      , (blue,  V2 ( 9 / 12.0) ( 3 / 12.0))
-      ]
+  sendIO (writeIORef ref l { bounds, string })
 
 
 drawLabel
