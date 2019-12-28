@@ -29,6 +29,7 @@ import           GL.Buffer
 import           GL.Framebuffer as GL
 import           GL.Object
 import           GL.Program
+import           GL.Shader.DSL (defaultVars)
 import           GL.Texture
 import           GL.TextureUnit
 import           Graphics.GL.Core41
@@ -161,20 +162,16 @@ setLabel Label{ ref } string = runLiftIO $ do
 
   let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
   bindArray glyphA . use glyphP $ do
-    set Glyph.U
-      { matrix3   = Nothing
-      , scale     = Just (1 / fromIntegral scale)
-      , fontScale = Just (fontScale font)
-      , offset    = Nothing
+    set defaultVars
+      { Glyph.scale     = Just (1 / fromIntegral scale)
+      , Glyph.fontScale = Just (fontScale font)
       }
     for_ instances $ \ Instance{ offset, range } -> do
-      set Glyph.U
-        { matrix3   = Just
+      set defaultVars
+        { Glyph.matrix3 = Just
             $   translated (-1)
             !*! scaled     (V3 sx sy 1)
-        , scale     = Nothing
-        , fontScale = Nothing
-        , offset    = Just (V2 offset 0 + negated (rectMin b))
+        , Glyph.offset  = Just (V2 offset 0 + negated (rectMin b))
         }
       drawArraysInstanced Triangles range 6
 
