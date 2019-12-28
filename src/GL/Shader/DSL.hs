@@ -88,6 +88,7 @@ module GL.Shader.DSL
 , mapVars
 , forVars
 , sequenceVars
+, defaultVars
 , ApVars(..)
   -- * Re-exports
 , Type(..)
@@ -686,6 +687,9 @@ forVars t f = traverseVars f t
 
 sequenceVars :: (Alternative f, Traversable f, Vars i) => f (i f) -> i f
 sequenceVars = getApVars . traverse (ApVars . mapVars (flip const))
+
+defaultVars :: Vars t => t Maybe
+defaultVars = makeVars (const Nothing)
 
 
 newtype ApVars i (f :: * -> *) a = ApVars { getApVars :: i f }
