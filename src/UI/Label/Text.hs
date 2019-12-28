@@ -37,10 +37,10 @@ shader = program $ \ u
     alphaR <- let' "alphaR" $ min' (abs (upperR - lowerR)) 2
 
     -- Average the energy over the pixels on either side
-    rgba <- let' "rgba" $ ext4 (ext3 (vec2
+    rgba <- let' "rgba" $ vec4
       ((alphaR ^. _x + alphaR ^. _y + alphaR ^. _z) / 6)
-      ((alphaL ^. _y + alphaR ^. _x + alphaR ^. _y) / 6))
-      ((alphaL ^. _x + alphaL ^. _y + alphaR ^. _x) / 6))
+      ((alphaL ^. _y + alphaR ^. _x + alphaR ^. _y) / 6)
+      ((alphaL ^. _x + alphaL ^. _y + alphaR ^. _x) / 6)
       0
 
     iff (colour u ^. _x `eq` 0)
