@@ -63,7 +63,7 @@ system = System $ sortOn code
   placeholder code name orbit = Body
     { name
     , code
-    , radius      = fromKilometres 1000
+    , radius      = unKilo 1000
     , mass        = 1.307e22
     , orientation = axisAngle (unit _x) (getRadians (fromDegrees 5))
     , period      = fromDays 1
@@ -77,7 +77,7 @@ sol :: Body Float
 sol = Body
   { name        = "Sol"
   , code        = 10
-  , radius      = fromKilometres 695500.0
+  , radius      = unKilo 695500.0
   , mass        = 1.9885e30
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 7.25))
   , period      = fromDays 25.05
@@ -90,7 +90,7 @@ mercury :: Body Float
 mercury = Body
   { name        = "Mercury"
   , code        = 199
-  , radius      = fromKilometres 2439.7
+  , radius      = unKilo 2439.7
   , mass        = 3.302e23
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.034))
   , period      = fromDays 58.646
@@ -103,7 +103,7 @@ venus :: Body Float
 venus = Body
   { name        = "Venus"
   , code        = 299
-  , radius      = fromKilometres 6051.9
+  , radius      = unKilo 6051.9
   , mass        = 48.685e23
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 177.3))
   , period      = fromDays 243.025
@@ -116,7 +116,7 @@ earth :: Body Float
 earth = Body
   { name        = "Earth"
   , code        = 399
-  , radius      = fromKilometres 6378.14
+  , radius      = unKilo 6378.14
   , mass        = 5.97219e24
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 23.4392911))
   , period      = fromDays 0.99726968
@@ -129,7 +129,7 @@ luna :: Body Float
 luna = Body
   { name        = "Luna"
   , code        = 301
-  , radius      = fromKilometres 1737.5
+  , radius      = unKilo 1737.5
   , mass        = 7.342e22
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 6.687))
   , period      = fromDays 27.321661
@@ -142,7 +142,7 @@ mars :: Body Float
 mars = Body
   { name        = "Mars"
   , code        = 499
-  , radius      = fromKilometres 3397
+  , radius      = unKilo 3397
   , mass        = 6.4171e23
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 25.19))
   , period      = fromDays 1.025957
@@ -155,7 +155,7 @@ jupiter :: Body Float
 jupiter = Body
   { name        = "Jupiter"
   , code        = 599
-  , radius      = fromKilometres 69911
+  , radius      = unKilo 69911
   , mass        = 1898.13e24
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 3.13))
   , period      = fromHours 9.925
@@ -168,7 +168,7 @@ saturn :: Body Float
 saturn = Body
   { name        = "Saturn"
   , code        = 699
-  , radius      = fromKilometres 58232
+  , radius      = unKilo 58232
   , mass        = 5.6834e26
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 26.73))
   , period      = fromHours 10 + fromMinutes 33 + Seconds 38
@@ -181,7 +181,7 @@ uranus :: Body Float
 uranus = Body
   { name        = "Uranus"
   , code        = 799
-  , radius      = fromKilometres 25362
+  , radius      = unKilo 25362
   , mass        = 86.813e24
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 97.77))
   , period      = fromDays 0.71833
@@ -194,7 +194,7 @@ neptune :: Body Float
 neptune = Body
   { name        = "Neptune"
   , code        = 899
-  , radius      = fromKilometres 24624
+  , radius      = unKilo 24624
   , mass        = 102.413e24
   , orientation = axisAngle (unit _x) (getRadians (fromDegrees 28.32))
   , period      = fromDays 0.6713

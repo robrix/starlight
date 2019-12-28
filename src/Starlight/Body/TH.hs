@@ -26,17 +26,17 @@ mkOrbit :: String -> Q Exp
 mkOrbit s = do
   Ephemeris
     { eccentricity
-    , inclination                    = Degrees    inclination
-    , longitudeOfAscendingNode       = Degrees    longitudeOfAscendingNode
-    , argumentOfPerifocus            = Degrees    argumentOfPerifocus
-    , timeOfPeriapsisRelativeToEpoch = Seconds    timeOfPeriapsisRelativeToEpoch
-    , semimajor                      = Kilometres semimajor
-    , siderealOrbitPeriod            = Seconds    siderealOrbitPeriod
+    , inclination                    = Degrees      inclination
+    , longitudeOfAscendingNode       = Degrees      longitudeOfAscendingNode
+    , argumentOfPerifocus            = Degrees      argumentOfPerifocus
+    , timeOfPeriapsisRelativeToEpoch = Seconds      timeOfPeriapsisRelativeToEpoch
+    , semimajor                      = Kilo (Metres semimajor)
+    , siderealOrbitPeriod            = Seconds      siderealOrbitPeriod
     }
     <- either fail pure (fromCSV s)
   [e| Orbit
     (realToFrac (eccentricity :: Double))
-    (realToFrac <$> fromKilometres (semimajor               :: Kilometres Double))
+    (realToFrac <$> unKilo        (semimajor               :: Kilo Metres Double))
     (orient
       (realToFrac <$> fromDegrees (longitudeOfAscendingNode :: Degrees Double))
       (realToFrac <$> fromDegrees (inclination              :: Degrees Double))

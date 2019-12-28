@@ -80,7 +80,7 @@ fromEphemeris :: (Epsilon a, RealFloat a) => Ephemeris -> Orbit a
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
   = Orbit
     { eccentricity    = realToFrac eccentricity
-    , semimajor       = realToFrac <$> fromKilometres semimajor
+    , semimajor       = realToFrac <$> unKilo semimajor
     , orientation     = orient
       (realToFrac <$> fromDegrees longitudeOfAscendingNode)
       (realToFrac <$> fromDegrees inclination)
@@ -129,7 +129,7 @@ data Ephemeris = Ephemeris
   { julianDayNumberBarycentricDynamicalTime :: Double
   , calendarDate                            :: String
   , eccentricity                            :: Double
-  , periapsisDistance                       :: Kilometres Double
+  , periapsisDistance                       :: Kilo Metres Double
   , inclination                             :: Degrees Double
   , longitudeOfAscendingNode                :: Degrees Double
   , argumentOfPerifocus                     :: Degrees Double
@@ -137,8 +137,8 @@ data Ephemeris = Ephemeris
   , meanMotion                              :: (Degrees `Per` Seconds) Double
   , meanAnomaly                             :: Degrees Double
   , trueAnomaly                             :: Degrees Double
-  , semimajor                               :: Kilometres Double
-  , apoapsisDistance                        :: Kilometres Double
+  , semimajor                               :: Kilo Metres Double
+  , apoapsisDistance                        :: Kilo Metres Double
   , siderealOrbitPeriod                     :: Seconds Double
   }
   deriving (Eq, Ord, Show)
@@ -150,19 +150,19 @@ fromCSV = toBody . splitOnCommas where
     (s, ss) -> s : splitOnCommas (drop 2 ss)
   toBody (julianDayNumberBarycentricDynamicalTime : calendarDate : eccentricity : periapsisDistance : inclination : longitudeOfAscendingNode : argumentOfPerifocus : timeOfPeriapsisRelativeToEpoch : meanMotion : meanAnomaly : trueAnomaly : semimajor : apoapsisDistance : siderealOrbitPeriod : _) = Ephemeris
     <$> readEither' "julianDayNumberBarycentricDynamicalTime" id         julianDayNumberBarycentricDynamicalTime
-    <*> pure                                                             calendarDate
-    <*> readEither' "eccentricity"                            id         eccentricity
-    <*> readEither' "periapsisDistance"                       Kilometres periapsisDistance
-    <*> readEither' "inclination"                             Degrees    inclination
-    <*> readEither' "longitudeOfAscendingNode"                Degrees    longitudeOfAscendingNode
-    <*> readEither' "argumentOfPerifocus"                     Degrees    argumentOfPerifocus
-    <*> readEither' "timeOfPeriapsisRelativeToEpoch"          Seconds    timeOfPeriapsisRelativeToEpoch
-    <*> readEither' "meanMotion"                              Per        meanMotion
-    <*> readEither' "meanAnomaly"                             Degrees    meanAnomaly
-    <*> readEither' "trueAnomaly"                             Degrees    trueAnomaly
-    <*> readEither' "semimajor"                               Kilometres semimajor
-    <*> readEither' "apoapsisDistance"                        Kilometres apoapsisDistance
-    <*> readEither' "siderealOrbitPeriod"                     Seconds    siderealOrbitPeriod
+    <*> pure                                                                  calendarDate
+    <*> readEither' "eccentricity"                            id              eccentricity
+    <*> readEither' "periapsisDistance"                       (Kilo . Metres) periapsisDistance
+    <*> readEither' "inclination"                             Degrees         inclination
+    <*> readEither' "longitudeOfAscendingNode"                Degrees         longitudeOfAscendingNode
+    <*> readEither' "argumentOfPerifocus"                     Degrees         argumentOfPerifocus
+    <*> readEither' "timeOfPeriapsisRelativeToEpoch"          Seconds         timeOfPeriapsisRelativeToEpoch
+    <*> readEither' "meanMotion"                              Per             meanMotion
+    <*> readEither' "meanAnomaly"                             Degrees         meanAnomaly
+    <*> readEither' "trueAnomaly"                             Degrees         trueAnomaly
+    <*> readEither' "semimajor"                               (Kilo . Metres) semimajor
+    <*> readEither' "apoapsisDistance"                        (Kilo . Metres) apoapsisDistance
+    <*> readEither' "siderealOrbitPeriod"                     Seconds         siderealOrbitPeriod
   toBody vs = Left $ "lol no: " <> show vs
   readEither' :: Read a => String -> (a -> b) -> String -> Either String b
   readEither' err f = either (Left . ((err <> ": ") <>)) (Right . f) . readEither
