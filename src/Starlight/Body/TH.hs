@@ -56,7 +56,7 @@ mkOrbitFromFile path = do
 mkOrbitsFromDirectory :: FilePath -> Q Exp
 mkOrbitsFromDirectory
   =   runIO . listDirectory
-  >=> traverse mkOrbitFromFile
+  >=> traverse (\ path -> [e| (path, $(mkOrbitFromFile path)) |])
   >=> listE . map pure
 
 
