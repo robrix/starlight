@@ -6,6 +6,7 @@ module Control.Effect.Time
 , now
 , since
 , time
+, time_
   -- * Re-exports
 , Algebra
 , Has
@@ -35,3 +36,6 @@ time m = do
   start <- now
   a <- m
   flip (,) a <$> since start
+
+time_ :: Has Time sig m => m a -> m NominalDiffTime
+time_ m = now >>= \ start -> m >> since start
