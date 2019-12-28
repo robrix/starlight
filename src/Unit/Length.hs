@@ -8,12 +8,14 @@ module Unit.Length
 , fromKilometres
 , fromAUs
 , Kilometres(..)
+, module Unit
 ) where
 
 import Data.Proxy
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
+import Unit
 
 newtype Metres a = Metres a
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
