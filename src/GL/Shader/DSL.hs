@@ -586,7 +586,7 @@ instance GLSLType (V2 Float) where
   renderTypeOf _ = pretty "vec2"
 
 instance GLSLType (V3 Float) where
-  renderTypeOf _ = pretty "ext3"
+  renderTypeOf _ = pretty "vec3"
 
 instance GLSLType (V3 (V3 Float)) where
   renderTypeOf _ = pretty "mat3"
@@ -595,7 +595,7 @@ instance GLSLType (V4 (V4 Float)) where
   renderTypeOf _ = pretty "mat4"
 
 instance GLSLType (V4 Float) where
-  renderTypeOf _ = pretty "ext4"
+  renderTypeOf _ = pretty "vec4"
 
 instance GLSLType TextureUnit where
   renderTypeOf _ = pretty "sampler2D"
