@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
 module Control.Effect.Profile
-( Profile(..)
+( -- * Profile effect
+  Profile(..)
 ) where
 
 data Profile m k
