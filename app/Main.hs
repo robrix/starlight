@@ -16,7 +16,7 @@ import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Carrier.Time
-import           Control.Effect.Lens ((*=), (+=), (-=), (.=))
+import           Control.Effect.Lens ((%=), (*=), (+=), (-=), (.=))
 import qualified Control.Effect.Lens as Lens
 import           Control.Effect.Lift
 import qualified Control.Exception.Lift as E
@@ -104,7 +104,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         system <- ask
         let bodies = S.bodiesAt system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $
-          input >>= controls >>= physics bodies >>= draw drawState bodies
+          input >>= controls bodies >>= physics bodies >>= draw drawState bodies
         when continue $ do
           Window.swap
           loop
@@ -145,9 +145,10 @@ controls
      , Has (State GameState) sig m
      , Has Time sig m
      )
-  => Input
+  => [S.Instant Float]
+  -> Input
   -> m (Delta Seconds Float)
-controls input = do
+controls bodies input = do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
@@ -175,6 +176,9 @@ controls input = do
     _rotation *= axisAngle (unit _z) (getRadians angular)
   when (pressed SDL.KeycodeRight input) $
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
+
+  when (pressed SDL.KeycodeTab input) $
+    _target %= maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
 
   pure (Delta (Seconds dt))
 
