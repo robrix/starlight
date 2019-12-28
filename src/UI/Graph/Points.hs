@@ -14,7 +14,7 @@ import UI.Graph.Vertex
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } None -> do
-    gl_Position .= vec4 (vec3 ((matrix u !* vec3 pos 1) ^. _xy) 0) 1
+    gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) ^. _xy) 0) 1
     gl_PointSize .= pointSize u)
 
   >>> fragment (\ None O{ fragColour } -> do
@@ -23,7 +23,7 @@ shader = program $ \ u
       discard
       (do
         mag <- let' "mag" (norm p * 2)
-        fragColour .= vec4 (colour u ^. _xyz) (1 - mag * mag * mag / 2)))
+        fragColour .= ext4 (colour u ^. _xyz) (1 - mag * mag * mag / 2)))
 
 
 data U v = U

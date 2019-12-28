@@ -19,7 +19,7 @@ shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } IF{ _coord2 } -> do
     _coord2 .= pos ^. _zw
-    gl_Position .= vec4 (matrix3 u !* vec3 (pos ^. _xy) 1) 0 ^. _xywz)
+    gl_Position .= ext4 (matrix3 u !* ext3 (pos ^. _xy) 1) 0 ^. _xywz)
 
   >>> fragment (\ IF{ _coord2 } O{ fragColour } -> do
     iff (_coord2 ^. _x * _coord2 ^. _x - _coord2 ^. _y `gt` 0)

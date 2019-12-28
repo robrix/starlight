@@ -21,14 +21,14 @@ import GL.Shader.DSL
 shader :: Shader U V O
 shader = program $ \ U{ resolution, origin, zoom }
   ->  vertex (\ V{ pos } None ->
-    gl_Position .= vec4 (vec3 pos 0) 1)
+    gl_Position .= ext4 (ext3 pos 0) 1)
   >>> fragment (\ None O{ fragColour } -> do
     uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
-    dir <- let' "dir" $ vec3 (uv ^* zoom) 1 ^* 0.5
-    origin <- let' "origin" $ vec3 (coerce origin ^* 0.05) 1
+    dir <- let' "dir" $ ext3 (uv ^* zoom) 1 ^* 0.5
+    origin <- let' "origin" $ ext3 (coerce origin ^* 0.05) 1
     s <- var "s" 0.1
     fade <- var "fade" 0.5
-    v <- var "v" $ vec3 (vec2 0 0) 0
+    v <- var "v" $ ext3 (vec2 0 0) 0
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
       p <- var "p" $ origin + dir ^* get s
@@ -46,14 +46,14 @@ shader = program $ \ U{ resolution, origin, zoom }
       iff (get r `gt` 6)
         (fade *= 1.0 - dm)
         (pure ())
-      v += vec3 (vec2 (get fade) (get fade)) (get fade)
-      v += vec3 (vec2 (get s) (get s * get s)) (get s * get s * get s) ^* get a ^* brightness ^* get fade
+      v += ext3 (vec2 (get fade) (get fade)) (get fade)
+      v += ext3 (vec2 (get s) (get s * get s)) (get s * get s * get s) ^* get a ^* brightness ^* get fade
       fade *= distfading
       s += stepsize
       r += 1
     mag <- let' "mag" (norm (get v))
-    v .= lerp saturation (vec3 (vec2 mag mag) mag) (get v)
-    fragColour .= vec4 (get v ^* 0.01) 1)
+    v .= lerp saturation (ext3 (vec2 mag mag) mag) (get v)
+    fragColour .= ext4 (get v ^* 0.01) 1)
   where
   iterations = 17
   formuparam = 0.53

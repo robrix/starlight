@@ -21,7 +21,7 @@ shader = program $ \ u
   ->  vertex (\ V{ pos} IF{ _coord2 } -> do
     v <- let' "v" $ lerp2 (pos * 0.5 + 0.5) (rect u ^. _xy) (rect u ^. _zw)
     _coord2 .= v
-    gl_Position .= vec4 (vec3 (v * 2 - 1) 0) 1)
+    gl_Position .= ext4 (ext3 (v * 2 - 1) 0) 1)
 
   >>> fragment (\ IF{ _coord2 } O{ fragColour } -> do
     -- Get samples for -2/3 and -1/3
@@ -37,7 +37,7 @@ shader = program $ \ u
     alphaR <- let' "alphaR" $ min' (abs (upperR - lowerR)) 2
 
     -- Average the energy over the pixels on either side
-    rgba <- let' "rgba" $ vec4 (vec3 (vec2
+    rgba <- let' "rgba" $ ext4 (ext3 (vec2
       ((alphaR ^. _x + alphaR ^. _y + alphaR ^. _z) / 6)
       ((alphaL ^. _y + alphaR ^. _x + alphaR ^. _y) / 6))
       ((alphaL ^. _x + alphaL ^. _y + alphaR ^. _x) / 6))

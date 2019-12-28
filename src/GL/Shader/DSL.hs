@@ -30,8 +30,8 @@ module GL.Shader.DSL
 , var
 , get
 , vec2
-, vec3
-, vec4
+, ext3
+, ext4
 , norm
 , dot
 , lerp
@@ -329,11 +329,11 @@ get = Get
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
 vec2 = Vec2
 
-vec3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
-vec3 = Vec3
+ext3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
+ext3 = Vec3
 
-vec4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
-vec4 = Vec4
+ext4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
+ext4 = Vec4
 
 norm :: Expr k (v Float) -> Expr k Float
 norm = Norm
@@ -539,8 +539,8 @@ renderExpr = parens . \case
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
   Get (Ref n) -> pretty n
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
-  Vec3 a b -> fn "vec3" [renderExpr a, renderExpr b]
-  Vec4 a b -> fn "vec4" [renderExpr a, renderExpr b]
+  Vec3 a b -> fn "ext3" [renderExpr a, renderExpr b]
+  Vec4 a b -> fn "ext4" [renderExpr a, renderExpr b]
   Norm a -> fn "length" [renderExpr a]
   Dot a b -> fn "dot" [renderExpr a, renderExpr b]
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
@@ -574,7 +574,7 @@ instance GLSLType (V2 Float) where
   renderTypeOf _ = pretty "vec2"
 
 instance GLSLType (V3 Float) where
-  renderTypeOf _ = pretty "vec3"
+  renderTypeOf _ = pretty "ext3"
 
 instance GLSLType (V3 (V3 Float)) where
   renderTypeOf _ = pretty "mat3"
@@ -583,7 +583,7 @@ instance GLSLType (V4 (V4 Float)) where
   renderTypeOf _ = pretty "mat4"
 
 instance GLSLType (V4 Float) where
-  renderTypeOf _ = pretty "vec4"
+  renderTypeOf _ = pretty "ext4"
 
 instance GLSLType TextureUnit where
   renderTypeOf _ = pretty "sampler2D"
