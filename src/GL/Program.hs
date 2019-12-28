@@ -22,7 +22,6 @@ module GL.Program
 , ProgramT(..)
   -- * Uniforms
 , Var(..)
-, setUniformValue
 , HasUniform
 ) where
 
@@ -62,11 +61,6 @@ checkProgram = runLiftIO . checkStatus glGetProgramiv glGetProgramInfoLog Other 
 
 newtype Var (name :: Symbol) t = Var t
 
-setUniformValue :: (Uniform t, Has (Lift IO) sig m, HasCallStack) => Program u i o -> String -> t -> m ()
-setUniformValue program name v = do
-  location <- checkingGLError . runLiftIO $ C.withCString name (glGetUniformLocation (unProgram program))
-  checkingGLError $ uniform location v
-
 
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
 
@@ -89,9 +83,11 @@ use (Program p) (ProgramT m) = do
   a <$ sendIO (glUseProgram 0)
 
 set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
-set v = askProgram >>= \ p ->
+set v = askProgram >>= \ (Program p) ->
   DSL.foldVarsM (\ DSL.Field { DSL.name } -> \case
-    Just v  -> setUniformValue p name v
+    Just v  -> do
+      location <- checkingGLError . runLiftIO $ C.withCString name (glGetUniformLocation p)
+      checkingGLError $ uniform location v
     Nothing -> pure ()) v
 
 
