@@ -3,12 +3,15 @@ module Control.Carrier.Profile.Time
 ( -- * Profile carrier
   ProfileC(..)
 , Tally(..)
+, Timings(..)
   -- * Profile effect
 , module Control.Effect.Profile
 ) where
 
-import Control.Effect.Profile
-import Control.Monad.IO.Class
+import           Control.Effect.Profile
+import           Control.Monad.IO.Class
+import qualified Data.Map as Map
+import           Data.Time.Clock
 
 newtype ProfileC m a = ProfileC (m a)
   deriving (Applicative, Functor, Monad, MonadIO)
@@ -24,3 +27,6 @@ instance Num a => Semigroup (Tally a) where
 
 instance Num a => Monoid (Tally a) where
   mempty = Tally 0 0
+
+
+newtype Timings = Timings (Map.Map String (Tally NominalDiffTime))
