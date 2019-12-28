@@ -12,6 +12,7 @@ import           Control.Effect.Empty
 import           Control.Effect.State
 import           Data.Coerce (coerce)
 import qualified Data.IntSet as IntSet
+import           Lens.Micro (Lens', lens)
 import qualified SDL
 import qualified UI.Effect.Window as Window
 
@@ -30,6 +31,10 @@ input = Window.input go >> get where
 
 newtype Input = Input { unInput :: IntSet.IntSet }
   deriving (Monoid, Semigroup)
+
+_input :: Lens' Input IntSet.IntSet
+_input = lens unInput (const Input)
+
 
 key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keycode -> m ()
 key m = modify @Input . coerce . case m of
