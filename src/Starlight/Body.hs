@@ -58,7 +58,7 @@ data Body a = Body
   { name        :: String
   , code        :: Int
   , radius      :: Metres a
-  , mass        :: Kilograms a
+  , mass        :: Kilo Grams a
   , orientation :: Quaternion a -- relative to orbit
   , period      :: Seconds a    -- sidereal rotation period
   , colour      :: Colour a
