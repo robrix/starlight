@@ -116,7 +116,7 @@ prepareLabel
   -> String
   -> m ()
 prepareLabel Label{ ref } string = runLiftIO $ do
-  l@LabelState { texture, glyphB, glyphA, bounds, font, string = oldString } <- sendIO (readIORef ref)
+  l@LabelState { glyphB, glyphA, bounds, font, string = oldString } <- sendIO (readIORef ref)
 
   when (bounds == Rect 0 0 || oldString /= string) $ do
     glBlendFunc GL_ONE GL_ONE -- add
@@ -124,12 +124,6 @@ prepareLabel Label{ ref } string = runLiftIO $ do
     let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString font string)
         combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + length geometry in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
         vertices = vs []
-
-    bind (Just texture)
-    setParameter Texture2D MagFilter Nearest
-    setParameter Texture2D MinFilter Nearest
-    setParameter Texture2D WrapS ClampToEdge
-    setParameter Texture2D WrapT ClampToEdge
 
     bind (Just glyphB)
     realloc glyphB (length vertices) Static Draw
@@ -150,6 +144,10 @@ setLabel Label{ ref } string = runLiftIO $ do
       bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
 
   bind (Just texture)
+  setParameter Texture2D MagFilter Nearest
+  setParameter Texture2D MinFilter Nearest
+  setParameter Texture2D WrapS ClampToEdge
+  setParameter Texture2D WrapT ClampToEdge
   setImageFormat Texture2D RGBA8 (scale *^ rectMax bounds) RGBA (Packed8888 True)
 
   bind (Just fbuffer)
