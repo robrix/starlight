@@ -84,10 +84,12 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
     evalState @Input mempty
     . evalState GameState
       { throttle = 20
-      , position = P (V2 25000 0)
-      , velocity = V2 0 75
-      , rotation = axisAngle (unit _z) (pi/2)
-      , target   = Nothing
+      , player   = Actor
+        { position = P (V2 25000 0)
+        , velocity = V2 0 75
+        , rotation = axisAngle (unit _z) (pi/2)
+        , target   = Nothing
+        }
       }
     . evalState start
     . runReader S.system $ do
@@ -184,24 +186,24 @@ controls bodies label input = measure "controls" $ do
   let angular = dt *^ Radians 5
 
   when (input ^. (_pressed SDL.KeycodeUp)) $ do
-    rotation <- Lens.use _rotation
-    _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
+    rotation <- Lens.use (_player . _rotation)
+    _player . _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
   when (input ^. (_pressed SDL.KeycodeDown)) $ do
-    rotation <- Lens.use _rotation
-    velocity <- Lens.use _velocity
+    rotation <- Lens.use (_player . _rotation)
+    velocity <- Lens.use (_player . _velocity)
     let angle = fst (polar2 (negated velocity))
         proposed = axisAngle (unit _z) (getRadians angle)
         delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
-    _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
+    _player . _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
 
   when (input ^. (_pressed SDL.KeycodeLeft)) $
-    _rotation *= axisAngle (unit _z) (getRadians angular)
+    _player . _rotation *= axisAngle (unit _z) (getRadians angular)
   when (input ^. (_pressed SDL.KeycodeRight)) $
-    _rotation *= axisAngle (unit _z) (getRadians (-angular))
+    _player . _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
   when (input ^. (_pressed SDL.KeycodeTab)) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
-    _target %= switchTarget shift
+    _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
   measure "setLabel" $ setLabel label (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
@@ -219,17 +221,17 @@ physics
   -> Delta Seconds Float
   -> m GameState
 physics bodies (Delta (Seconds dt)) = do
-  for_ bodies applyGravity
+  P position <- Lens.use (_player . _position)
+  for_ bodies (applyGravity position)
 
-  s@GameState { velocity } <- get
-  _position += P velocity
+  s@GameState { player = Actor{ velocity } } <- get
+  _player . _position += P velocity
   pure s where
-  applyGravity S.Instant { transform, body = S.Body { mass }} = do
-    P position <- Lens.use _position
+  applyGravity position S.Instant { transform, body = S.Body { mass }} = do
     let pos = (transform !* V4 0 0 0 1) ^. _xy
         r = qd pos position
         bigG = 6.67430e-11
-    _velocity += dt * bigG * distanceScale ** 2 * getKilograms mass / r *^ normalize (pos ^-^ position)
+    _player . _velocity += dt * bigG * distanceScale ** 2 * getKilograms mass / r *^ normalize (pos ^-^ position)
 
 
 -- | Compute the zoom factor for the given velocity.
@@ -259,7 +261,7 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ position, velocity, rotation, target } = measure "draw" . runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies GameState{ player = Actor{ position, velocity, rotation, target } } = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -374,24 +376,33 @@ data DrawState = DrawState
 
 data GameState = GameState
   { throttle :: !Float
-  , position :: !(Point V2 Float)
-  , velocity :: !(V2 Float)
-  , rotation :: !(Quaternion Float)
-  , target   :: !(Maybe Int)
+  , player   :: !Actor
   }
   deriving (Show)
 
 _throttle :: Lens' GameState Float
 _throttle = lens throttle (\ s v -> s { throttle = v })
 
-_position :: Lens' GameState (Point V2 Float)
+_player :: Lens' GameState Actor
+_player = lens player (\ s p -> s { player = p })
+
+
+data Actor = Actor
+  { position :: !(Point V2 Float)
+  , velocity :: !(V2 Float)
+  , rotation :: !(Quaternion Float)
+  , target   :: !(Maybe Int)
+  }
+  deriving (Show)
+
+_position :: Lens' Actor (Point V2 Float)
 _position = lens position (\ s v -> s { position = v })
 
-_velocity :: Lens' GameState (V2 Float)
+_velocity :: Lens' Actor (V2 Float)
 _velocity = lens velocity (\ s v -> s { velocity = v })
 
-_rotation :: Lens' GameState (Quaternion Float)
+_rotation :: Lens' Actor (Quaternion Float)
 _rotation = lens rotation (\ s r -> s { rotation = r })
 
-_target :: Lens' GameState (Maybe Int)
+_target :: Lens' Actor (Maybe Int)
 _target = lens target (\ s t -> s { target = t })
