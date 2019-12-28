@@ -174,7 +174,7 @@ setLabel Label{ ref } string = runLiftIO $ do
             drawArrays Triangles range
         Nothing -> pure ()
 
-  sendIO (writeIORef ref l { bounds, string })where
+  sendIO (writeIORef ref l { bounds, string }) where
   jitterPattern
     = [ (red,   V2 (-1 / 12.0) (-5 / 12.0))
       , (red,   V2 ( 1 / 12.0) ( 1 / 12.0))
