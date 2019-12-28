@@ -326,7 +326,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
     bindArray radarA $ for_ bodies drawBlip
 
-    setLabel label $ show (roundToPlaces 1 throttle) <> ", " <> show (roundToPlaces 1 (norm velocity))
+    setLabel label $ show (roundToPlaces 1 throttle) <> ", " <> show (roundToPlaces 1 (norm velocity)) <> ", " <> maybe "None" (S.name . S.body . (bodies !!)) target
     drawLabel label
 
 roundToPlaces :: RealFloat a => Int -> a -> a
