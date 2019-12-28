@@ -55,8 +55,9 @@ mkOrbitFromFile path = do
 mkOrbitsFromDirectory :: FilePath -> Q Exp
 mkOrbitsFromDirectory dir
   =   runIO (listDirectory dir)
-  >>= traverse (\ path -> [e| (path, $(mkOrbitFromFile (dir </> path))) |])
-  >>= listE . map pure
+  >>= traverse (\ path -> [e| (path, $(mkOrbitFromFile (dir </> path))) |]) . filter isRelevant
+  >>= listE . map pure where
+  isRelevant path = takeExtension path == ".txt"
 
 
 -- https://stackoverflow.com/questions/16163948/how-do-i-use-templatehaskells-adddependentfile-on-a-file-relative-to-the-file-b
