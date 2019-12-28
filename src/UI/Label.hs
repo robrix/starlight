@@ -160,14 +160,20 @@ setLabel Label{ ref } string = runLiftIO $ do
   glClear GL_COLOR_BUFFER_BIT
 
   let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
-  bindArray glyphA . use glyphP $
+  bindArray glyphA . use glyphP $ do
+    set Glyph.U
+      { matrix3   = Nothing
+      , scale     = Just (1 / fromIntegral scale)
+      , fontScale = Just (fontScale font)
+      , offset    = Nothing
+      }
     for_ instances $ \ Instance{ offset, range } -> do
       set Glyph.U
         { matrix3   = Just
             $   translated (-1)
             !*! scaled     (V3 sx sy 1)
-        , scale     = Just (1 / fromIntegral scale)
-        , fontScale = Just (fontScale font)
+        , scale     = Nothing
+        , fontScale = Nothing
         , offset    = Just (V2 offset 0 + negated (rectMin b))
         }
       drawArraysInstanced Triangles range 6
