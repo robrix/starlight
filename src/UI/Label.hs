@@ -166,8 +166,10 @@ setLabel Label{ ref } string = runLiftIO $ do
         set Glyph.U
           { matrix3 = Just
               $   translated (-1)
-              !*! scaled     (V3 sx sy 1 * V3 (fontScale font) (fontScale font) 1)
-              !*! translated (V2 tx ty * (1 / fromIntegral scale) + V2 offset 0 + negated (rectMin b))
+              !*! scaled     (V3 sx sy 1)
+              !*! translated (V2 tx ty * (1 / fromIntegral scale))
+              !*! scaled     (V3 (fontScale font) (fontScale font) 1)
+              !*! translated (V2 offset 0 + negated (rectMin b))
           , colour = Just colour }
         drawArrays Triangles range
 
