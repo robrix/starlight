@@ -80,8 +80,7 @@ build p = do
   onExit (runLiftIO (glDeleteProgram program))
   DSL.foldVarsM @i (\ DSL.Field { DSL.name, DSL.location } _ -> runLiftIO . checkingGLError $
     C.withCString name (glBindAttribLocation program (fromIntegral location))) (DSL.makeVars id)
-  let s = DSL.shaderSources p
-  shaders <- for s $ \ (type', source) -> do
+  shaders <- for (DSL.shaderSources p) $ \ (type', source) -> do
     shader <- createShader type'
     shader <$ compile source shader
   Program program <$ link shaders (Program program)
