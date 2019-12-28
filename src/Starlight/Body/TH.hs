@@ -11,7 +11,6 @@ module Starlight.Body.TH
 , addDependentFileRelative
 ) where
 
-import Control.Monad ((>=>))
 import Data.List (elemIndex)
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
@@ -54,10 +53,10 @@ mkOrbitFromFile path = do
   mkOrbit (lines !! last)
 
 mkOrbitsFromDirectory :: FilePath -> Q Exp
-mkOrbitsFromDirectory
-  =   runIO . listDirectory
-  >=> traverse (\ path -> [e| (path, $(mkOrbitFromFile path)) |])
-  >=> listE . map pure
+mkOrbitsFromDirectory dir
+  =   runIO (listDirectory dir)
+  >>= traverse (\ path -> [e| (path, $(mkOrbitFromFile (dir </> path))) |])
+  >>= listE . map pure
 
 
 -- https://stackoverflow.com/questions/16163948/how-do-i-use-templatehaskells-adddependentfile-on-a-file-relative-to-the-file-b
