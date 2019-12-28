@@ -21,7 +21,6 @@ module GL.Program
 , HasProgram(..)
 , ProgramT(..)
   -- * Uniforms
-, Var(..)
 , HasUniform
 ) where
 
@@ -57,9 +56,6 @@ link shaders (Program program) = runLiftIO $ do
 
 checkProgram :: (Has (Lift IO) sig m, HasCallStack) => Program u i o -> m ()
 checkProgram = runLiftIO . checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS . unProgram
-
-
-newtype Var (name :: Symbol) t = Var t
 
 
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
