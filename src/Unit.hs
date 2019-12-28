@@ -7,6 +7,10 @@ module Unit
 , getMilli
 , milli
 , unMilli
+, Kilo(..)
+, getKilo
+, kilo
+, unKilo
 ) where
 
 import Data.Proxy
@@ -30,3 +34,21 @@ milli fa = Milli (fa * 1000)
 
 unMilli :: Fractional (f a) => Milli f a -> f a
 unMilli (Milli fa) = fa / 1000
+
+
+newtype Kilo f a = Kilo (f a)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
+
+instance GL.Type (f a) => GL.Type (Kilo f a) where
+  glType _ = glType (Proxy @(f a))
+
+  glDims _ = glDims (Proxy @(f a))
+
+getKilo :: Kilo f a -> f a
+getKilo (Kilo fa) = fa
+
+kilo :: Fractional (f a) => f a -> Kilo f a
+kilo fa = Kilo (fa / 1000)
+
+unKilo :: Num (f a) => Kilo f a -> f a
+unKilo (Kilo fa) = fa * 1000
