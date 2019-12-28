@@ -5,6 +5,7 @@ module Control.Effect.Time
   Time(..)
 , now
 , since
+, time
   -- * Re-exports
 , Algebra
 , Has
@@ -28,3 +29,9 @@ now = send (Now pure)
 
 since :: Has Time sig m => UTCTime -> m NominalDiffTime
 since t = send (Now (pure . flip diffUTCTime t))
+
+time :: Has Time sig m => m a -> m (NominalDiffTime, a)
+time m = do
+  start <- now
+  a <- m
+  flip (,) a <$> since start
