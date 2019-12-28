@@ -34,21 +34,26 @@ instance (Has (Lift IO) sig m, Effect sig) => Algebra (Profile :+: sig) (Profile
       start <- sendM getCurrentTime
       a <- m
       end <- sendM getCurrentTime
-      ProfileC (tell (Timings (Map.singleton l (Timing (end `diffUTCTime` start) 1))))
+      ProfileC (tell (Timings (Map.singleton l (timing (end `diffUTCTime` start)))))
       k a
     R other -> ProfileC (send (handleCoercible other))
 
 
 data Timing = Timing
   { sum   :: !NominalDiffTime
+  , min'  :: !NominalDiffTime
+  , max'  :: !NominalDiffTime
   , count :: {-# UNPACK #-} !Int
   }
 
 instance Semigroup Timing where
-  Timing t1 c1 <> Timing t2 c2 = Timing (t1 + t2) (c1 + c2)
+  Timing s1 mn1 mx1 c1 <> Timing s2 mn2 mx2 c2 = Timing (s1 + s2) (mn1 `min` mn2) (mx1 `max` mx2) (c1 + c2)
 
 instance Monoid Timing where
-  mempty = Timing 0 0
+  mempty = Timing 0 0 0 0
+
+timing :: NominalDiffTime -> Timing
+timing t = Timing t t t 1
 
 
 newtype Timings = Timings (Map.Map String Timing)
