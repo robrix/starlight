@@ -15,10 +15,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 module GL.Program
 ( Program(..)
-, createProgram
-, useProgram
-, link
-, checkProgram
 , build
 , use
 , set
