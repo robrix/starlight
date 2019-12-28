@@ -44,6 +44,7 @@ import           GHC.Stack
 import           GL.Array
 import           GL.Framebuffer
 import           GL.Program
+import           GL.Shader.DSL (defaultVars)
 import           Graphics.GL.Core41
 import           Lens.Micro (Lens', lens, (.~), (^.))
 import           Linear.Affine
@@ -315,6 +316,9 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
   measure "radar" . use radarP $ do
+    set defaultVars
+      { Radar.matrix = Just (scaled (V3 sx sy 1))
+      }
     let here = unP position
         n = 10 :: Int
         minSweep = 0.0133 -- at d=150, makes approx. 4px blips
@@ -331,7 +335,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
                     sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
                 set Radar.U
-                  { matrix = Just (scaled (V3 sx sy 1))
+                  { matrix = Nothing
                   , radius = Just radius
                   , angle  = Just angle
                   , sweep  = Just sweep
