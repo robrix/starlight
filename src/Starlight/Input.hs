@@ -43,6 +43,6 @@ key m ks = _pressed (SDL.keysymKeycode ks) .= case m of
 
 
 _pressed :: SDL.Keycode -> Lens' Input Bool
-_pressed code = lens
-  (IntSet.member (fromIntegral (SDL.unwrapKeycode code)) . unInput)
-  (\ (Input s) pressed -> Input ((if pressed then IntSet.insert else IntSet.delete) (fromIntegral (SDL.unwrapKeycode code)) s))
+_pressed code = _input . lens
+  (IntSet.member (fromIntegral (SDL.unwrapKeycode code)))
+  (\ s pressed -> (if pressed then IntSet.insert else IntSet.delete) (fromIntegral (SDL.unwrapKeycode code)) s)
