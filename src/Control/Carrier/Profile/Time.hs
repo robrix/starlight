@@ -9,6 +9,7 @@ module Control.Carrier.Profile.Time
   runProfile
 , ProfileC(..)
 , Timing(..)
+, timing
 , Timings(..)
   -- * Profile effect
 , module Control.Effect.Profile
