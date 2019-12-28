@@ -17,10 +17,12 @@ module Starlight.Body
   -- * Ephemerides
 , Ephemeris(..)
 , fromCSV
+, fromFile
 , Per(..)
 ) where
 
 import Data.Foldable (find)
+import Data.List (elemIndex)
 import Linear.Affine
 import Linear.Epsilon
 import Linear.Exts
@@ -166,6 +168,13 @@ fromCSV = toBody . splitOnCommas where
   toBody vs = Left $ "lol no: " <> show vs
   readEither' :: Read a => String -> (a -> b) -> String -> Either String b
   readEither' err f = either (Left . ((err <> ": ") <>)) (Right . f) . readEither
+
+fromFile :: (Epsilon a, RealFloat a) => FilePath -> IO (Orbit a)
+fromFile path = do
+  lines <- lines <$> readFile path
+  last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
+  either fail (pure . fromEphemeris) (fromCSV (lines !!last))
+
 
 newtype Per (f :: * -> *) (g :: * -> *) a = Per { getPer :: a }
   deriving (Eq, Ord, Show)
