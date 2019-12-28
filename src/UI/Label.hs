@@ -119,8 +119,6 @@ prepareLabel Label{ ref } string = runLiftIO $ do
   l@LabelState { glyphB, glyphA, bounds, font, string = oldString } <- sendIO (readIORef ref)
 
   when (bounds == Rect 0 0 || oldString /= string) $ do
-    glBlendFunc GL_ONE GL_ONE -- add
-
     let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString font string)
         combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + length geometry in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
         vertices = vs []
@@ -139,6 +137,8 @@ prepareLabel Label{ ref } string = runLiftIO $ do
 setLabel :: Has (Lift IO) sig m => Label -> String -> m ()
 setLabel Label{ ref } string = runLiftIO $ do
   l@LabelState{ texture, fbuffer, glyphA, glyphP, scale, font, chars } <- sendIO (readIORef ref)
+
+  glBlendFunc GL_ONE GL_ONE -- add
 
   let Run instances b = layoutString font chars string
       bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
