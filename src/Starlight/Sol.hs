@@ -6,6 +6,7 @@
 module Starlight.Sol
 ( system
 , orbits
+, bodies
 , sol
 , mercury
 , venus
@@ -35,6 +36,20 @@ orbits = IntMap.fromList
   [ (code, (dropWhile isSpace (dropExtension rest), orbit))
   | (path, orbit) <- $(mkOrbitsFromDirectory "ephemerides")
   , (code, rest) <- readDec path
+  ]
+
+bodies :: IntMap.IntMap (Body Float)
+bodies = IntMap.fromList $ map ((,) . code <*> id)
+  [ sol
+  , mercury
+  , venus
+  , earth
+  , luna
+  , mars
+  , jupiter
+  , saturn
+  , uranus
+  , neptune
   ]
 
 system :: System Float
