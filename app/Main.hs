@@ -11,6 +11,7 @@ module Main
 , distanceScale
 ) where
 
+import           Control.Applicative (liftA2)
 import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
@@ -22,9 +23,11 @@ import           Control.Effect.Lift
 import qualified Control.Exception.Lift as E
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift (runLiftIO)
+import           Data.Bool (bool)
 import           Data.Coerce
 import           Data.Foldable (for_)
 import           Data.Function (fix, (&))
+import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Interval
 import           Data.Maybe (isJust)
@@ -102,7 +105,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
         system <- ask
         let bodies = S.bodiesAt system systemTrans (getDelta t)
         continue <- fmap isJust . runEmpty $
-          input >>= controls bodies >>= physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
+          input >> controls bodies >>= physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
         when continue $ do
           Window.swap
           loop
@@ -145,25 +148,24 @@ controls
      , Has Time sig m
      )
   => [S.Instant Float]
-  -> Input
   -> m (Delta Seconds Float)
-controls bodies input = do
+controls bodies = do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
-  when (pressed SDL.KeycodePlus  input || pressed SDL.KeycodeEquals input) $
+  whenM (Lens.use (liftA2 (coerce (||)) <$> _pressed SDL.KeycodePlus <*> _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
-  when (pressed SDL.KeycodeMinus input) $
+  whenM (Lens.use (_pressed SDL.KeycodeMinus)) $
     _throttle -= dt * 10
 
   thrust <- (dt *) <$> Lens.use _throttle
 
   let angular = dt *^ Radians 5
 
-  when (pressed SDL.KeycodeUp   input) $ do
+  whenM (Lens.use (_pressed SDL.KeycodeUp)) $ do
     rotation <- Lens.use _rotation
     _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
-  when (pressed SDL.KeycodeDown input) $ do
+  whenM (Lens.use (_pressed SDL.KeycodeDown)) $ do
     rotation <- Lens.use _rotation
     velocity <- Lens.use _velocity
     let angle = fst (polar2 (negated velocity))
@@ -171,17 +173,18 @@ controls bodies input = do
         delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
     _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
 
-  when (pressed SDL.KeycodeLeft  input) $
+  whenM (Lens.use (_pressed SDL.KeycodeLeft)) $
     _rotation *= axisAngle (unit _z) (getRadians angular)
-  when (pressed SDL.KeycodeRight input) $
+  whenM (Lens.use (_pressed SDL.KeycodeRight)) $
     _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  when (pressed SDL.KeycodeTab input) $ do
+  whenM (Lens.use (_pressed SDL.KeycodeTab)) $ do
     _target %= advanceTarget
     _pressed SDL.KeycodeTab .= False
 
   pure (Delta (Seconds dt)) where
   advanceTarget = maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
+  whenM c t = c >>= bool (pure ()) t
 
 
 physics
