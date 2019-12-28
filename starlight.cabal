@@ -92,6 +92,7 @@ library
     UI.Label.Text
     UI.Path
     UI.Window
+    Unit
     Unit.Angle
     Unit.Length
     Unit.Mass
