@@ -11,11 +11,14 @@ module UI.Glyph
 , HasBounds(..)
 ) where
 
-import Data.Foldable (foldl')
-import Geometry.Rect
-import Linear.Exts
-import Linear.V2
-import Linear.V4
+import           Data.Foldable (foldl')
+import           Data.Interval
+import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe)
+import           Geometry.Rect
+import           Linear.Exts
+import           Linear.V2
+import           Linear.V4
 
 data Glyph = Glyph
   { char         :: {-# UNPACK #-} !Char
@@ -28,14 +31,15 @@ data Glyph = Glyph
 data Instance = Instance
   { char   :: {-# UNPACK #-} !Char
   , offset :: {-# UNPACK #-} !Float
+  , range  :: {-# UNPACK #-} !(Interval Int)
   }
 
 
-layoutGlyphs :: [Glyph] -> Run
-layoutGlyphs = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState 0 id Nothing) where
+layoutGlyphs :: Map.Map Char (Interval Int) -> [Glyph] -> Run
+layoutGlyphs chars = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState 0 id Nothing) where
   go (LayoutState offset is prev) g@Glyph{ char, bounds_ } = LayoutState
     { offset  = offset + advanceWidth g
-    , result  = is . (Instance char offset :)
+    , result  = is . (Instance char offset (fromMaybe (Interval 0 0) (chars Map.!? char)) :)
     , bounds_ = prev <> Just (Union (transformRect (translated (V2 offset 0)) bounds_))
     }
 

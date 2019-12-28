@@ -140,7 +140,7 @@ setLabel :: Has (Lift IO) sig m => Label -> String -> m ()
 setLabel Label{ ref } string = runLiftIO $ do
   l@LabelState{ texture, fbuffer, glyphA, glyphP, scale, font, chars } <- sendIO (readIORef ref)
 
-  let Run instances b = layoutString font string
+  let Run instances b = layoutString font chars string
       bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
 
   bind (Just texture)
@@ -162,17 +162,15 @@ setLabel Label{ ref } string = runLiftIO $ do
   bindArray glyphA $
     use glyphP $ do
       let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
-      for_ instances $ \ Instance{ char, offset } -> case Map.lookup char chars of
-        Just range ->
-          for_ jitterPattern $ \ (colour, V2 tx ty) -> do
-            set Glyph.U
-              { matrix3 = Just
-                  $   translated (-1)
-                  !*! scaled     (V3 sx sy 1 * V3 (fontScale font) (fontScale font) 1)
-                  !*! translated (V2 tx ty * (1 / fromIntegral scale) + V2 offset 0 + negated (rectMin b))
-              , colour = Just colour }
-            drawArrays Triangles range
-        Nothing -> pure ()
+      for_ instances $ \ Instance{ offset, range } ->
+        for_ jitterPattern $ \ (colour, V2 tx ty) -> do
+          set Glyph.U
+            { matrix3 = Just
+                $   translated (-1)
+                !*! scaled     (V3 sx sy 1 * V3 (fontScale font) (fontScale font) 1)
+                !*! translated (V2 tx ty * (1 / fromIntegral scale) + V2 offset 0 + negated (rectMin b))
+            , colour = Just colour }
+          drawArrays Triangles range
 
   sendIO (writeIORef ref l { bounds, string }) where
   jitterPattern
