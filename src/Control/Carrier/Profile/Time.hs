@@ -40,8 +40,8 @@ instance (Has (Lift IO) sig m, Effect sig) => Algebra (Profile :+: sig) (Profile
 
 
 data Timing = Timing
-  { timing :: !NominalDiffTime
-  , count  :: {-# UNPACK #-} !Int
+  { sum   :: !NominalDiffTime
+  , count :: {-# UNPACK #-} !Int
   }
 
 instance Semigroup Timing where
