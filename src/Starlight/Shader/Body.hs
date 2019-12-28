@@ -14,6 +14,7 @@ import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
+import Prelude hiding (break)
 
 shader :: Shader U V O
 shader = program $ \ u
@@ -21,8 +22,8 @@ shader = program $ \ u
     let cos90 = 6.123233995736766e-17
     m <- var "m" (matrix u)
     switch gl_InstanceID
-      [ (Just 1, m *= mat4 (vec4 1 0 0 0) (vec4 0 cos90 (-1) 0) (vec4 0 1 cos90 0) (vec4 0 0 0 1))
-      , (Just 2, m *= mat4 (vec4 cos90 0 1 0) (vec4 0 1 0 0) (vec4 (-1) 0 cos90 0) (vec4 0 0 0 1))
+      [ (Just 1, m *= mat4 (vec4 1 0 0 0) (vec4 0 cos90 (-1) 0) (vec4 0 1 cos90 0) (vec4 0 0 0 1) >> break)
+      , (Just 2, m *= mat4 (vec4 cos90 0 1 0) (vec4 0 1 0 0) (vec4 (-1) 0 cos90 0) (vec4 0 0 0 1) >> break)
       ]
     gl_Position .= get m !* pos)
 
