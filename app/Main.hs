@@ -108,14 +108,14 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       glEnable GL_PROGRAM_POINT_SIZE
 
       fix $ \ loop -> do
-        t <- realToFrac <$> since start
-        system <- ask
-        let bodies = S.bodiesAt system systemTrans (getDelta t)
-        continue <- fmap isJust . runEmpty $
-          measure "input" input >> measure "controls" (controls bodies label) >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
-        when continue $ do
-          Window.swap
-          loop
+        continue <- measure "frame" $ do
+          t <- realToFrac <$> since start
+          system <- ask
+          let bodies = S.bodiesAt system systemTrans (getDelta t)
+          continue <- fmap isJust . runEmpty $
+            measure "input" input >> measure "controls" (controls bodies label) >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
+          continue <$ Window.swap
+        when continue loop
 
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
 reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l, t) -> sendM $ do
