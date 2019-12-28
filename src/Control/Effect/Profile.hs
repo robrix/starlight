@@ -15,3 +15,6 @@ data Profile m k
   = forall a . Measure String (m a) (a -> m k)
 
 deriving instance Functor m => Functor (Profile m)
+
+instance HFunctor Profile where
+  hmap f (Measure l m k) = Measure l (f m) (f . k)
