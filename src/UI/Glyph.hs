@@ -29,8 +29,7 @@ data Glyph = Glyph
 
 
 data Instance = Instance
-  { char   :: {-# UNPACK #-} !Char
-  , offset :: {-# UNPACK #-} !Float
+  { offset :: {-# UNPACK #-} !Float
   , range  :: {-# UNPACK #-} !(Interval Int)
   }
 
@@ -39,7 +38,7 @@ layoutGlyphs :: Map.Map Char (Interval Int) -> [Glyph] -> Run
 layoutGlyphs chars = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState 0 id Nothing) where
   go (LayoutState offset is prev) g@Glyph{ char, bounds_ } = LayoutState
     { offset  = offset + advanceWidth g
-    , result  = is . (Instance char offset (fromMaybe (Interval 0 0) (chars Map.!? char)) :)
+    , result  = is . (Instance offset (fromMaybe (Interval 0 0) (chars Map.!? char)) :)
     , bounds_ = prev <> Just (Union (transformRect (translated (V2 offset 0)) bounds_))
     }
 
