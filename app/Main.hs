@@ -304,16 +304,16 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
   use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
   use radarP $ do
-    let drawBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
-          let here = unP position
-              there = (transform !* V4 0 0 0 1) ^. _xy
+    let here = unP position
+        n = 10 :: Int
+        minSweep = 0.0133 -- at d=150, makes approx. 4px blips
+        drawBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
+          let there = (transform !* V4 0 0 0 1) ^. _xy
               angle = angleTo here there
               d = distance here there
               direction = normalize (there ^-^ here)
-              n = 10 :: Int
               -- FIXME: apply easing so this works more like a spring
               step = max 1 (min (50 * zoomOut) (d / fromIntegral n))
-              minSweep = 0.0133 -- at d=150, makes approx. 4px blips
               drawAtRadius radius minSweep colour = do
                 let edge = distanceScale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
                     sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
