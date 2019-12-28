@@ -32,9 +32,6 @@ input = Window.input go >> get where
 newtype Input = Input { unInput :: IntSet.IntSet }
   deriving (Monoid, Semigroup)
 
-_input :: Lens' Input IntSet.IntSet
-_input = lens unInput (const Input)
-
 
 key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keysym -> m ()
 key m ks = _pressed (SDL.keysymKeycode ks) .= case m of
