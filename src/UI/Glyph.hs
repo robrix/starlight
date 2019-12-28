@@ -26,9 +26,10 @@ data Glyph = Glyph
 
 
 data Instance = Instance
-  { glyph  :: {-# UNPACK #-} !Glyph
-  , offset :: {-# UNPACK #-} !Float
-  , range  :: {-# UNPACK #-} !(Interval Int)
+  { glyph   :: {-# UNPACK #-} !Glyph
+  , offset  :: {-# UNPACK #-} !Float
+  , bounds_ :: !(Rect Float)
+  , range   :: {-# UNPACK #-} !(Interval Int)
   }
 
 
@@ -37,7 +38,7 @@ layoutGlyphs = (Run <*> bounds) . ($ []) . result . foldl' go (LayoutState 0 0 i
   go (LayoutState offset i is) g = let i' = i + length (geometry g) in LayoutState
     { offset = offset + advanceWidth g
     , index  = i'
-    , result = is . (Instance g offset (Interval i i') :)
+    , result = is . (Instance g offset (bounds g) (Interval i i') :)
     }
 
 data LayoutState = LayoutState
@@ -59,7 +60,7 @@ instance HasBounds Glyph where
   bounds = bounds_
 
 instance HasBounds Instance where
-  bounds = transformRect . translated . (\ Instance { offset } -> V2 offset 0) <*> bounds . glyph
+  bounds Instance{ offset, bounds_ } = transformRect (translated (V2 offset 0)) bounds_
 
 instance HasBounds t => HasBounds [t] where
   bounds = maybe (Rect 0 0) getUnion . foldMap (Just . Union . bounds)
