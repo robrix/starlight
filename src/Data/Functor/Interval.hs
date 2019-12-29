@@ -5,12 +5,14 @@ module Data.Functor.Interval
 , size
 , toUnit
 , fromUnit
+, wrap
 , _min
 , _max
 , Bounding(..)
 ) where
 
 import Control.Applicative (liftA2)
+import Data.Fixed (mod')
 import Lens.Micro
 
 data Interval f a = Interval
@@ -95,6 +97,10 @@ size (Interval min max) = max - min
 toUnit, fromUnit :: Fractional (f a) => Interval f a -> f a -> f a
 toUnit   i x = (x - min_ i) / size i
 fromUnit i x =  x * size i  + min_ i
+
+
+wrap :: Real (f a) => Interval f a -> f a -> f a
+wrap i x = ((x + max_ i) `mod'` size i) + min_ i
 
 
 _min :: Lens' (Interval f a) (f a)
