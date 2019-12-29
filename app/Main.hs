@@ -105,7 +105,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
 
       face <- readTypeface ("fonts" </> "DejaVuSans.ttf")
 
-      label <- measure "label" . Label.label face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./"
+      label <- measure "label" $ Label.label face
 
       quadA   <- load quadV
       shipA   <- load shipV

@@ -10,6 +10,7 @@ module UI.Typeface
 , readFontOfSize
 , layoutString
 , glyphsForString
+, drawingGlyphs
 ) where
 
 import           Control.Effect.Finally
@@ -160,11 +161,15 @@ safeToEnum :: forall n. (Bounded n, Enum n) => Int -> Maybe n
 safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (minBound @n))
 
 
-layoutString :: Font -> Map.Map Char (Interval I Int) -> String -> Run
-layoutString font chars = layoutGlyphs chars . glyphsForString (face font)
+layoutString :: Typeface -> String -> Run
+layoutString face = layoutGlyphs (ranges face) . glyphsForString face
 
 glyphsForString :: Typeface -> String -> [Glyph]
 glyphsForString face = catMaybes . map (join . (allGlyphs face Map.!?))
+
+
+drawingGlyphs :: Has (Lift IO) sig m => Typeface -> ProgramT Glyph.U Glyph.V Glyph.O (ArrayT Glyph.V m) a -> m a
+drawingGlyphs Typeface{ glyphP, glyphA } = bindArray glyphA . use glyphP
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord

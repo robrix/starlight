@@ -16,11 +16,10 @@ import           Control.Effect.Lift
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
-import           Data.Foldable (foldl', for_)
+import           Data.Foldable (for_)
 import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.IORef
-import qualified Data.Map as Map
 import           GHC.Stack
 import           GL.Array
 import           GL.Buffer
@@ -41,7 +40,7 @@ import           Linear.V4
 import           Linear.Vector
 import           UI.Colour
 import qualified UI.Effect.Window as Window
-import           UI.Glyph (Glyph(Glyph, char, geometry), Instance(..), Run(..))
+import           UI.Glyph (Instance(..), Run(..))
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 import           UI.Typeface
@@ -50,16 +49,12 @@ newtype Label = Label { ref :: IORef LabelState }
 
 data LabelState = LabelState
   { textP   :: !(Program Text.U  Text.V  Text.O)
-  , glyphP  :: !(Program Glyph.U Glyph.V Glyph.O)
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
-  , glyphB  :: !(Buffer 'GL.Buffer.Array (Glyph.V I))
-  , glyphA  :: !(Array (Glyph.V I))
   , quadA   :: !(Array (Text.V  I))
   , bounds  :: !(Interval V2 Int)
   , scale   :: !Int
   , face    :: !Typeface
-  , chars   :: !(Map.Map Char (Interval I Int))
   }
 
 
@@ -70,17 +65,12 @@ label
      , HasCallStack
      )
   => Typeface
-  -> String
   -> m Label
-label face string = do
+label face = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
-  glyphP <- build Glyph.shader
   textP  <- build Text.shader
-
-  glyphA <- gen1
-  glyphB <- gen1
 
   quadA <- do
     let vertices =
@@ -102,17 +92,7 @@ label face string = do
 
   scale <- Window.scale
 
-  let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString face string)
-      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
-      vertices = vs []
-
-  bind (Just glyphB)
-  realloc glyphB (length vertices) Static Draw
-  copy glyphB 0 (coerce vertices)
-
-  bindArray glyphA $ configureArray glyphB glyphA
-
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, texture, fbuffer, glyphB, glyphA, quadA, bounds = Interval 0 0, scale, face, chars })
+  Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, bounds = Interval 0 0, scale, face })
 
 
 -- | Set the label’s text.
@@ -120,12 +100,12 @@ label face string = do
 -- Characters not in the string passed to 'label' will not be drawn.
 setLabel :: Has (Lift IO) sig m => Label -> Float -> String -> m ()
 setLabel Label{ ref } size string = runLiftIO $ do
-  l@LabelState{ texture, fbuffer, glyphA, glyphP, scale, face, chars } <- sendIO (readIORef ref)
+  l@LabelState{ texture, fbuffer, scale, face } <- sendIO (readIORef ref)
 
   glBlendFunc GL_ONE GL_ONE -- add
 
   let font = Font face size
-      Run instances b = layoutString font chars string
+      Run instances b = layoutString face string
       bounds = let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b in Interval 0 (max_ b' - min_ b')
 
   bind (Just texture)
@@ -145,7 +125,7 @@ setLabel Label{ ref } size string = runLiftIO $ do
   glClear GL_COLOR_BUFFER_BIT
 
   let V2 sx sy = fromIntegral scale / fmap fromIntegral (max_ bounds)
-  bindArray glyphA . use glyphP $ do
+  drawingGlyphs face $ do
     set defaultVars
       { Glyph.scale     = Just (1 / fromIntegral scale)
       , Glyph.fontScale = Just (fontScale font)
