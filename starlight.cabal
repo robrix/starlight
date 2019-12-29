@@ -136,6 +136,7 @@ executable starlight
     , microlens
     , sdl2
     , starlight
+    , text
     , time
 
 source-repository head
