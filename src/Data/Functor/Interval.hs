@@ -3,6 +3,8 @@ module Data.Functor.Interval
 ( Interval(..)
 , point
 , size
+, toUnit
+, fromUnit
 , _min
 , _max
 , Bounding(..)
@@ -89,6 +91,10 @@ point fa = Interval fa fa
 
 size :: Num (f a) => Interval f a -> f a
 size (Interval min max) = max - min
+
+toUnit, fromUnit :: Fractional (f a) => Interval f a -> f a -> f a
+toUnit   i x = (x - min_ i) / size i
+fromUnit i x =  x * size i  + min_ i
 
 
 _min :: Lens' (Interval f a) (f a)
