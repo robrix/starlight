@@ -24,6 +24,7 @@ module Starlight.Body
 , Per(..)
 ) where
 
+import Control.Effect.Lift
 import Data.Foldable (find)
 import Data.List (elemIndex)
 import Lens.Micro
@@ -186,15 +187,15 @@ fromCSV = toBody . splitOnCommas where
   readEither' :: Read a => String -> (a -> b) -> String -> Either String b
   readEither' err f = either (Left . ((err <> ": ") <>)) (Right . f) . readEither
 
-fromFile :: (Epsilon a, RealFloat a) => FilePath -> IO (Orbit a)
+fromFile :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePath -> m (Orbit a)
 fromFile path = do
-  lines <- lines <$> readFile path
+  lines <- lines <$> sendM (readFile path)
   last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
   either fail (pure . fromEphemeris) (fromCSV (lines !!last))
 
-fromDirectory :: (Epsilon a, RealFloat a) => FilePath -> IO [(FilePath, Orbit a)]
+fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePath -> m [(FilePath, Orbit a)]
 fromDirectory dir
-  =   listDirectory dir
+  =   sendM (listDirectory dir)
   >>= traverse (\ path -> (,) path <$> fromFile (dir </> path)) . filter isRelevant where
   isRelevant path = takeExtension path == ".txt"
 
