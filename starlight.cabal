@@ -47,6 +47,7 @@ library
     Control.Effect.Time
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
+    Data.Functor.I
     Data.Functor.Interval
     Data.Interval
     Foreign.C.String.Lift
