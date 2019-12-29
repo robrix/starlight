@@ -75,7 +75,7 @@ import           Unit.Time
 
 main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings . fst <=< runProfile $ do
-  system <- sendM S.system
+  system <- S.system
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     evalState @Input mempty

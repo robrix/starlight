@@ -6,6 +6,7 @@ module Starlight.Sol
 ( system
 ) where
 
+import           Control.Effect.Lift
 import           Data.Char (isSpace)
 import           Data.List (sortOn)
 import           Data.Maybe (fromMaybe)
@@ -157,7 +158,7 @@ bodies orbits = bodies where
       }
     ]
 
-system :: IO (System Float)
+system :: (Has (Lift IO) sig m, MonadFail m) => m (System Float)
 system = do
   orbits <- fromDirectory "ephemerides" >>= \ orbits -> pure (IntMap.fromList
     [ (code, (dropWhile isSpace (dropExtension rest), orbit))
