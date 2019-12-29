@@ -292,7 +292,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
   scale <- Window.scale
   size <- Window.size
-  let V2 sx sy = scale / size ^* (1 / zoomOut)
+  let V2 sx sy = 1 / size ^* scale ^* (1 / zoomOut)
       origin
         =   scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
         !*! translated3 (ext (negated (unP position)) 0) -- transform to the origin
@@ -311,7 +311,8 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  let drawBody S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = do
+  let isNear S.Instant{ body = S.Body{ radius }, transform } position = distance ((transform !* V4 0 0 0 1) ^. _xy) position - getMetres (distanceScale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
+      drawBody i@S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (i `isNear` unP position) $ do
         set Body.U
           { matrix = Just
               $   origin
