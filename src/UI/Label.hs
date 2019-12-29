@@ -105,7 +105,8 @@ setLabel Label{ ref } size string = runLiftIO $ do
   Run instances b <- layoutString face string
 
   let font = Font face size
-      bounds = let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b in Interval 0 (max_ b' - min_ b')
+      b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
+      bounds = Interval 0 (max_ b' - min_ b')
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest
