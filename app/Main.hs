@@ -29,7 +29,7 @@ import           Data.Foldable (foldl', for_)
 import           Data.Function (fix, (&))
 import           Data.Functor.Const
 import           Data.Functor.I
-import           Data.Interval
+import           Data.Functor.Interval
 import qualified Data.IntMap as IntMap
 import           Data.List (sortOn)
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -243,9 +243,9 @@ physics bodies (Delta (Seconds dt)) = do
 -- Higher values correlate to more of the scene being visible.
 zoomForSpeed :: V2 Int -> Float -> Float
 zoomForSpeed size x
-  | x < min_ speed = min_ zoom
-  | x > max_ speed = max_ zoom
-  | otherwise      = fromUnit zoom (easeInOutCubic (toUnit speed x)) where
+  | I x < min_ speed = getI (min_ zoom)
+  | I x > max_ speed = getI (max_ zoom)
+  | otherwise        = getI (fromUnit zoom (coerce easeInOutCubic (toUnit speed (I x)))) where
   zoom = Interval 1 6
   speed = speedAt <$> zoom
   speedAt x = x / 25 * fromIntegral (maximum size)
@@ -321,7 +321,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
           , colour = Just colour
           }
 
-        drawArraysInstanced LineLoop (Interval 0 (length circleV)) 3
+        drawArraysInstanced LineLoop (Interval 0 (I (length circleV))) 3
 
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
@@ -353,7 +353,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
                   , colour = Just colour
                   }
 
-                drawArrays LineStrip (Interval 0 (length radarV))
+                drawArrays LineStrip (Interval 0 (I (length radarV)))
 
           drawAtRadius 100 minSweep (colour & _a .~ 0.5)
 

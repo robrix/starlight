@@ -27,7 +27,7 @@ import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Coerce
 import           Data.Functor.I
-import           Data.Interval
+import           Data.Functor.Interval
 import           Foreign.Ptr
 import qualified Foreign.Storable as S
 import           GHC.Stack
@@ -88,7 +88,7 @@ drawArrays
      , HasProgram u i o m
      )
   => Mode
-  -> Interval Int
+  -> Interval I Int
   -> m ()
 drawArrays mode i = askProgram >> askArray >> checkingGLError (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i))))
 
@@ -99,7 +99,7 @@ drawArraysInstanced
      , HasProgram u i o m
      )
   => Mode
-  -> Interval Int
+  -> Interval I Int
   -> Int
   -> m ()
 drawArraysInstanced mode i n = askProgram >> askArray >> checkingGLError (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i)) (fromIntegral n)))

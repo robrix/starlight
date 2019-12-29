@@ -49,7 +49,6 @@ library
     Control.Monad.IO.Class.Lift
     Data.Functor.I
     Data.Functor.Interval
-    Data.Interval
     Foreign.C.String.Lift
     Foreign.Marshal.Alloc.Lift
     Foreign.Marshal.Array.Lift

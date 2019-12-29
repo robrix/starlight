@@ -13,7 +13,7 @@ import           Control.Carrier.Finally
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Functor.I
-import           Data.Interval
+import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
 import           Graphics.GL.Core41

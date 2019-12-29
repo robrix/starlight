@@ -15,7 +15,8 @@ import           Control.Monad.IO.Class.Lift
 import           Data.Bifunctor (first)
 import           Data.Char (isPrint, isSeparator, ord)
 import           Data.Foldable (find)
-import           Data.Interval (Interval)
+import           Data.Functor.I (I)
+import           Data.Functor.Interval (Interval)
 import qualified Data.Map as Map
 import           Data.Maybe (catMaybes)
 import qualified Data.Text as T
@@ -105,7 +106,7 @@ safeToEnum :: forall n. (Bounded n, Enum n) => Int -> Maybe n
 safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (minBound @n))
 
 
-layoutString :: Font -> Map.Map Char (Interval Int) -> String -> Run
+layoutString :: Font -> Map.Map Char (Interval I Int) -> String -> Run
 layoutString font chars = layoutGlyphs chars . glyphsForString font
 
 glyphsForString :: Font -> String -> [Glyph]

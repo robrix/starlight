@@ -18,7 +18,7 @@ import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Foldable (foldl', for_)
 import           Data.Functor.I
-import           Data.Interval
+import           Data.Functor.Interval
 import           Data.IORef
 import qualified Data.Map as Map
 import           Geometry.Rect
@@ -59,7 +59,7 @@ data LabelState = LabelState
   , bounds  :: !(Rect Int)
   , scale   :: !Int
   , font    :: !Font
-  , chars   :: !(Map.Map Char (Interval Int))
+  , chars   :: !(Map.Map Char (Interval I Int))
   }
 
 
@@ -103,7 +103,7 @@ label font string = do
   scale <- Window.scale
 
   let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString font string)
-      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + length geometry in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
+      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
   bind (Just glyphB)
