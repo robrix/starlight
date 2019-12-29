@@ -52,7 +52,7 @@ shader = program $ \ u
         m =   matrix u
           !*! trans2 (get t ^* scale u)
           !*! scale2 (fontScale u)
-          !*! trans2 (offset u)
+          !*! trans2 (vec2 (offset u) 0)
     gl_Position .= ext4 (m !* ext3 (pos ^. _xy) 1) 0 ^. _xywz)
 
   >>> fragment (\ IF{ _coord2, colour } O{ fragColour } -> do
@@ -69,7 +69,7 @@ data U v = U
   { matrix    :: v (M33 Float)
   , scale     :: v Float
   , fontScale :: v Float
-  , offset    :: v (V2 Float)
+  , offset    :: v Float
   }
   deriving (Generic)
 

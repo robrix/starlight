@@ -136,7 +136,7 @@ setLabel Label{ ref } fontSize string = runLiftIO $ do
             $   translated (-1)
             !*! scaled     (V3 sx sy 1)
             !*! translated (fromIntegral <$> negated (min_ b'))
-        , Glyph.offset = Just (V2 offset 0)
+        , Glyph.offset = Just offset
         }
       drawArraysInstanced Triangles range 6
 
