@@ -9,7 +9,6 @@ module UI.Typeface
 , readTypeface
 , readFontOfSize
 , layoutString
-, glyphsForString
 , drawingGlyphs
 ) where
 
