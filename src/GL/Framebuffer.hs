@@ -13,6 +13,7 @@ import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Proxy
 import           Foreign.Storable
+import           GHC.Stack
 import           GL.Enum as GL
 import           GL.Error
 import           GL.Object
@@ -39,7 +40,7 @@ instance GL.Enum Attachment where
     Colour n -> GL_COLOR_ATTACHMENT0 + fromIntegral n
 
 
-attachTexture :: forall ty sig m . Has (Lift IO) sig m => GL.KnownType ty => Attachment -> GL.Texture ty -> m ()
+attachTexture :: forall ty sig m . (HasCallStack, Has (Lift IO) sig m) => GL.KnownType ty => Attachment -> GL.Texture ty -> m ()
 attachTexture attachment (GL.Texture texture) = runLiftIO $ do
   checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER (glEnum attachment) (glEnum (GL.typeVal (Proxy :: Proxy ty))) texture 0
   status <- glCheckFramebufferStatus GL_FRAMEBUFFER
