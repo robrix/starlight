@@ -129,14 +129,14 @@ setLabel Label{ ref } fontSize string = runLiftIO $ do
     set defaultVars
       { Glyph.scale     = Just (1 / fromIntegral scale)
       , Glyph.fontScale = Just (fontScale font)
+      , Glyph.matrix    = Just
+        $   translated (-1)
+        !*! scaled     (V3 sx sy 1)
+        !*! translated (fromIntegral <$> negated (min_ b'))
       }
     for_ instances $ \ Instance{ offset, range } -> do
       set defaultVars
-        { Glyph.matrix = Just
-            $   translated (-1)
-            !*! scaled     (V3 sx sy 1)
-            !*! translated (fromIntegral <$> negated (min_ b'))
-        , Glyph.offset = Just offset
+        { Glyph.offset = Just offset
         }
       drawArraysInstanced Triangles range 6
 
