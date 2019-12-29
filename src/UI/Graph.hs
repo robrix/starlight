@@ -61,7 +61,7 @@ drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = bin
   runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
   use points $ do
     set Points.U { matrix = Just matrix, pointSize = Just pointSize, colour = Just colour }
-    drawArrays Points    (Interval 0 count)
+    drawArrays Points    (Interval 0 (I count))
   use lines $ do
     set Lines.U { matrix = Just matrix, colour = Just colour }
-    drawArrays LineStrip (Interval 0 count)
+    drawArrays LineStrip (Interval 0 (I count))
