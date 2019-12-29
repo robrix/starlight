@@ -84,7 +84,6 @@ library
     UI.Carrier.Window
     UI.Colour
     UI.Effect.Window
-    UI.Font
     UI.Glyph
     UI.Graph
     UI.Graph.Lines
@@ -94,6 +93,7 @@ library
     UI.Label.Glyph
     UI.Label.Text
     UI.Path
+    UI.Typeface
     UI.Window
     Unit
     Unit.Angle

@@ -41,10 +41,10 @@ import           Linear.V4
 import           Linear.Vector
 import           UI.Colour
 import qualified UI.Effect.Window as Window
-import           UI.Font
 import           UI.Glyph (Glyph(Glyph, char, geometry), Instance(..), Run(..))
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
+import           UI.Typeface
 
 newtype Label = Label { ref :: IORef LabelState }
 

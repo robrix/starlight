@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
-module UI.Font
+module UI.Typeface
 ( Typeface(name)
 , Font(..)
 , fontScale

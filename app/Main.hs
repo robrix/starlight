@@ -66,8 +66,8 @@ import qualified Starlight.Sol as S
 import           System.FilePath
 import qualified UI.Carrier.Window as Window
 import           UI.Colour
-import           UI.Font as Font
 import           UI.Label as Label
+import           UI.Typeface
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
