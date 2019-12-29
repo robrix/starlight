@@ -13,7 +13,7 @@ import GL.Type as GL
 import GL.Uniform
 
 newtype I a = I a
-  deriving (Eq, Floating, Foldable, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
+  deriving (Enum, Eq, Floating, Foldable, Fractional, Functor, Integral, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
 
 instance Applicative I where
   pure = coerce
