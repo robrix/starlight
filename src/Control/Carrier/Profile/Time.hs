@@ -49,9 +49,9 @@ instance (Has (Lift IO) sig m, Effect sig) => Algebra (Profile :+: sig) (Profile
 
 
 data Timing = Timing
-  { sum   :: {-# UNPACK #-} !NominalDiffTime
-  , min'  :: {-# UNPACK #-} !NominalDiffTime
-  , max'  :: {-# UNPACK #-} !NominalDiffTime
+  { sum   :: !NominalDiffTime
+  , min'  :: !NominalDiffTime
+  , max'  :: !NominalDiffTime
   , count :: {-# UNPACK #-} !Int
   }
 
