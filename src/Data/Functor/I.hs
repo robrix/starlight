@@ -7,10 +7,13 @@ module Data.Functor.I
 ) where
 
 import Data.Coerce
+import Data.Proxy
 import Foreign.Storable
+import GL.Type as GL
+import GL.Uniform
 
 newtype I a = I a
-  deriving (Eq, Floating, Foldable, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable)
+  deriving (Eq, Floating, Foldable, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
 
 instance Applicative I where
   pure = coerce
@@ -19,6 +22,15 @@ instance Applicative I where
 instance Monad I where
   I a >>= f = f a
 
+instance GL.Type a => GL.Type (I a) where
+  glType = glType . proxyForElemOf
+
+  glDims = glDims . proxyForElemOf
+
 
 getI :: I a -> a
 getI (I a) = a
+
+
+proxyForElemOf :: proxy (f a) -> Proxy a
+proxyForElemOf _ = Proxy
