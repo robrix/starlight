@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- | An abbreviation of "Data.Functor.Identity".
 module Data.Functor.I
 ( I(..)
@@ -6,9 +7,10 @@ module Data.Functor.I
 ) where
 
 import Data.Coerce
+import Foreign.Storable
 
 newtype I a = I a
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Eq, Foldable, Functor, Ord, Show, Storable, Traversable)
 
 instance Applicative I where
   pure = coerce
