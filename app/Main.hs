@@ -75,8 +75,6 @@ import           Unit.Time
 
 main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings . fst <=< runProfile $ do
-  font <- readTypeface ("fonts" </> "DejaVuSans.ttf")
-
   system <- sendM S.system
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
@@ -104,6 +102,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       shipP  <- build Ship.shader
       radarP <- build Radar.shader
       bodyP  <- build Body.shader
+
+      font <- readTypeface ("fonts" </> "DejaVuSans.ttf")
 
       label <- measure "label" . Label.label font $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./"
 
