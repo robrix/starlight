@@ -208,7 +208,7 @@ controls bodies fpsL input = measure "controls" $ do
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
-    False -> maybe (Just 0) (\ i -> i + 1 <$ guard (i + 1 < length bodies))
+    False -> maybe (Just 0)                      (\ i -> i + 1 <$ guard (i + 1 < length bodies))
     True  -> maybe (Just (pred (length bodies))) (\ i -> i - 1 <$ guard (i - 1 >= 0))
   or = liftA2 (liftA2 (coerce (||)))
 
