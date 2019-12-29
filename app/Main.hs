@@ -83,12 +83,13 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
     evalState @Input mempty
     . evalState GameState
       { throttle = 20
-      , actors   = Actor
+      , player   = Actor
         { position = P (V2 25000 0)
         , velocity = V2 0 75
         , rotation = axisAngle (unit _z) (pi/2)
         , target   = Nothing
-        } :|
+        }
+      , npcs =
         [ Actor
           { position = P (V2 25000 0)
           , velocity = V2 0 75
@@ -384,7 +385,8 @@ data DrawState = DrawState
 
 data GameState = GameState
   { throttle :: !Float
-  , actors   :: !(NonEmpty Actor)
+  , player   :: !Actor
+  , npcs     :: ![Actor]
   , system   :: !(System Float)
   }
   deriving (Show)
@@ -393,11 +395,10 @@ _throttle :: Lens' GameState Float
 _throttle = lens throttle (\ s v -> s { throttle = v })
 
 _actors :: Lens' GameState (NonEmpty Actor)
-_actors = lens actors (\ s a -> s { actors = a })
+_actors = lens ((:|) . player <*> npcs) (\ s (p:|o) -> s { player = p, npcs = o })
 
 _player :: Lens' GameState Actor
-_player = _actors . _head where
-  _head = lens (\ (h:|_) -> h) (\ (_:|t) h -> h:|t)
+_player = lens player (\ s p -> s { player = p })
 
 _system :: Lens' GameState (System Float)
 _system = lens system (\ s p -> s { system = p })
