@@ -121,7 +121,7 @@ label font colour string = do
 
 -- | Set the label’s text.
 --
--- Characters not in the string passed to 'prepareLabel' will not be drawn.
+-- Characters not in the string passed to 'label' will not be drawn.
 setLabel :: Has (Lift IO) sig m => Label -> String -> m ()
 setLabel Label{ ref } string = runLiftIO $ do
   l@LabelState{ texture, fbuffer, glyphA, glyphP, scale, font, chars } <- sendIO (readIORef ref)
