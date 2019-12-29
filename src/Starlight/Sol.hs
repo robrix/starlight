@@ -118,6 +118,18 @@ bodies = IntMap.fromList $ map ((,) . code <*> id)
     }
 
   , Body
+    { name        = "Io"
+    , code        = 501
+    , radius      = unKilo 1821.3
+    , mass        = 893.3e20
+    , orientation = axisAngle (unit _x) (getRadians (fromDegrees 1)) -- unknown
+    , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 501) -- synchronous
+    , colour      = V4 0.5 0.5 0.5 1
+    , orbit       = snd (orbits IntMap.! 501)
+    , parent      = Just (bodies IntMap.! 599)
+    }
+
+  , Body
     { name        = "Saturn"
     , code        = 699
     , radius      = unKilo 58232
