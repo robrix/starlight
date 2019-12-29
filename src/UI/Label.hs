@@ -125,7 +125,7 @@ setLabel Label{ ref } string = runLiftIO $ do
   glBlendFunc GL_ONE GL_ONE -- add
 
   let Run instances b = layoutString font chars string
-      bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (max_ b' - min_ b')
+      bounds = let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b in Rect 0 (max_ b' - min_ b')
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest

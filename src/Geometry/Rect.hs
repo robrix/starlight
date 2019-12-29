@@ -5,7 +5,6 @@ module Geometry.Rect
 , pattern Rect
 , _min
 , _max
-, outsetToIntegralCoords
 , transformRect
 , viewport
 , scissor
@@ -24,10 +23,6 @@ type Rect = Interval V2
 
 pattern Rect :: V2 a -> V2 a -> Rect a
 pattern Rect a b = Interval a b
-
-
-outsetToIntegralCoords :: RealFrac a => Rect a -> Rect Int
-outsetToIntegralCoords (Interval min max) = Interval (floor <$> min) (ceiling <$> max)
 
 
 transformRect :: Num a => M33 a -> Rect a -> Rect a
