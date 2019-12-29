@@ -105,7 +105,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       radarP <- build Radar.shader
       bodyP  <- build Body.shader
 
-      label <- measure "label" . Label.label font white $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./"
+      label <- measure "label" . Label.label font $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./"
 
       quadA   <- load quadV
       shipA   <- load shipV
@@ -362,7 +362,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
     bindArray radarA $ for_ bodies drawBlip
 
-  measure "drawLabel" $ drawLabel label
+  measure "drawLabel" $ drawLabel label white Nothing
 
 roundToPlaces :: RealFloat a => Int -> a -> a
 roundToPlaces n x = fromInteger (round (x * n')) / n' where

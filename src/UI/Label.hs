@@ -51,8 +51,6 @@ newtype Label = Label { ref :: IORef LabelState }
 data LabelState = LabelState
   { textP   :: !(Program Text.U  Text.V  Text.O)
   , glyphP  :: !(Program Glyph.U Glyph.V Glyph.O)
-  , colour  :: !(Colour Float)
-  , bcolour :: !(Maybe (Colour Float))
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
   , glyphB  :: !(Buffer 'GL.Buffer.Array (Glyph.V Identity))
@@ -73,10 +71,9 @@ label
      , HasCallStack
      )
   => Font
-  -> Colour Float
   -> String
   -> m Label
-label font colour string = do
+label font string = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
@@ -116,7 +113,7 @@ label font colour string = do
 
   bindArray glyphA $ configureArray glyphB glyphA
 
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, string = "", chars })
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, string = "", chars })
 
 
 -- | Set the label’s text.
@@ -171,9 +168,11 @@ drawLabel
      , Has (Lift IO) sig m
      )
   => Label
+  -> Colour Float
+  -> Maybe (Colour Float)
   -> m ()
-drawLabel Label{ ref } = runLiftIO $ do
-  LabelState { texture, textP, colour, bcolour, quadA, bounds, scale } <- sendIO (readIORef ref)
+drawLabel Label{ ref } colour bcolour = runLiftIO $ do
+  LabelState { texture, textP, quadA, bounds, scale } <- sendIO (readIORef ref)
   glBlendFunc GL_ZERO GL_SRC_COLOR
 
   bind @Framebuffer Nothing
