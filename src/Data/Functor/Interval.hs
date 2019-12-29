@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 module Data.Functor.Interval
 ( Interval(..)
+, point
 , size
 , _min
 , _max
@@ -82,6 +83,9 @@ instance (Applicative f, Floating a) => Floating (Interval f a) where
   acosh = fmap acosh
   {-# INLINE acosh #-}
 
+
+point :: f a -> Interval f a
+point fa = Interval fa fa
 
 size :: Num (f a) => Interval f a -> f a
 size (Interval min max) = max - min
