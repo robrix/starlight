@@ -105,7 +105,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
 
-      label <- measure "label" $ Label.label face
+      fpsL <- measure "label" $ Label.label face
 
       quadA   <- load quadV
       shipA   <- load shipV
@@ -123,7 +123,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           system <- Lens.use _system
           let bodies = S.bodiesAt system (getDelta t)
           continue <- fmap isJust . runEmpty $
-            measure "input" input >>= controls bodies label >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
+            measure "input" input >>= controls bodies fpsL >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL } bodies
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -170,7 +170,7 @@ controls
   -> Label
   -> Input
   -> m (Delta Seconds Float)
-controls bodies label input = measure "controls" $ do
+controls bodies fpsL input = measure "controls" $ do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
@@ -204,7 +204,7 @@ controls bodies label input = measure "controls" $ do
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
-  measure "setLabel" $ setLabel label 36 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
+  measure "setLabel" $ setLabel fpsL 36 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fpsL")
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
@@ -258,7 +258,7 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, label } bodies game = measure "draw" . runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL } bodies game = measure "draw" . runLiftIO $ do
   let Actor{ position, velocity, target } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -356,7 +356,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
     bindArray radarA $ for_ bodies drawBlip
 
-  measure "drawLabel" $ drawLabel label (V2 0 0) white Nothing
+  measure "drawLabel" $ drawLabel fpsL (V2 0 0) white Nothing
 
 roundToPlaces :: RealFloat a => Int -> a -> a
 roundToPlaces n x = fromInteger (round (x * n')) / n' where
@@ -372,7 +372,7 @@ data DrawState = DrawState
   , shipP   :: Program Ship.U  Ship.V  Ship.O
   , bodyP   :: Program Body.U  Body.V  Body.O
   , radarP  :: Program Radar.U Radar.V Radar.O
-  , label   :: Label
+  , fpsL    :: Label
   }
 
 
