@@ -7,7 +7,7 @@ module Geometry.Rect
 , transformRect
 , viewport
 , scissor
-, Union(..)
+, Bounding(..)
 ) where
 
 import Control.Monad.IO.Class.Lift
@@ -47,7 +47,7 @@ scissor r = runLiftIO (glScissor x1 y1 x2 y2) where
   Rect (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
 
 
-newtype Union a = Union { getUnion :: Rect a }
+newtype Bounding a = Bounding { getBounding :: Rect a }
 
-instance Ord a => Semigroup (Union a) where
-  Union (Rect min1 max1) <> Union (Rect min2 max2) = Union (Rect (min <$> min1 <*> min2) (max <$> max1 <*> max2))
+instance Ord a => Semigroup (Bounding a) where
+  Bounding (Rect min1 max1) <> Bounding (Rect min2 max2) = Bounding (Rect (min <$> min1 <*> min2) (max <$> max1 <*> max2))
