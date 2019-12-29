@@ -104,6 +104,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       bodyP  <- build Body.shader
 
       face <- readTypeface ("fonts" </> "DejaVuSans.ttf")
+      cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
 
       label <- measure "label" $ Label.label face
 

@@ -8,6 +8,7 @@ module UI.Typeface
 , fontScale
 , readTypeface
 , readFontOfSize
+, cacheCharactersForDrawing
 , layoutString
 , drawingGlyphs
 ) where
@@ -90,18 +91,7 @@ readTypeface path = do
       supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
       glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours o
 
-      string = ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
-      (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
-      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
-      vertices = vs []
-
-  bind (Just glyphB)
-  realloc glyphB (length vertices) Static Draw
-  copy glyphB 0 (coerce vertices)
-
-  bindArray glyphA $ configureArray glyphB glyphA
-
-  rangesRef <- sendM (newIORef ranges)
+  rangesRef <- sendM (newIORef Map.empty)
 
   pure Typeface
     { name = opentypeFontName o
@@ -122,6 +112,22 @@ readFontOfSize
   -> Float
   -> m Font
 readFontOfSize path size = (`Font` size) <$> readTypeface path
+
+
+cacheCharactersForDrawing :: Has (Lift IO) sig m => Typeface -> String -> m ()
+cacheCharactersForDrawing Typeface{ allGlyphs, glyphA, glyphB, rangesRef } string = do
+  let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
+      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
+      vertices = vs []
+
+  bind (Just glyphB)
+  realloc glyphB (length vertices) Static Draw
+  copy glyphB 0 (coerce vertices)
+
+  bindArray glyphA $ configureArray glyphB glyphA
+
+  sendM (writeIORef rangesRef ranges)
+
 
 data NameID
   = Copyright
