@@ -48,7 +48,7 @@ data Typeface = Typeface
   , glyphP       :: Program Glyph.U Glyph.V Glyph.O
   , glyphB       :: Buffer 'B.Array (Glyph.V I)
   , glyphA       :: Array (Glyph.V I)
-  , chars        :: Map.Map Char (Interval I Int)
+  , ranges       :: Map.Map Char (Interval I Int)
   }
 
 data Font = Font
@@ -92,7 +92,7 @@ readTypeface path = do
       glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours o
 
       string = ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
-      (vs, chars, _) = foldl' combine (id, Map.empty, 0) (catMaybes (map (join . (allGlyphs Map.!?)) string))
+      (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (catMaybes (map (join . (allGlyphs Map.!?)) string))
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
@@ -110,7 +110,7 @@ readTypeface path = do
     , glyphP
     , glyphA
     , glyphB
-    , chars
+    , ranges
     }
 
 readFontOfSize
