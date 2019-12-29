@@ -102,8 +102,9 @@ setLabel Label{ ref } size string = runLiftIO $ do
 
   glBlendFunc GL_ONE GL_ONE -- add
 
+  Run instances b <- layoutString face string
+
   let font = Font face size
-      Run instances b = layoutString face string
       bounds = let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b in Interval 0 (max_ b' - min_ b')
 
   bind (Just texture)

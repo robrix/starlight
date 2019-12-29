@@ -21,6 +21,7 @@ import           Data.Coerce (coerce)
 import           Data.Foldable (find, foldl')
 import           Data.Functor.I (I(..))
 import           Data.Functor.Interval (Interval(..))
+import           Data.IORef
 import qualified Data.Map as Map
 import           Data.Maybe (catMaybes)
 import qualified Data.Text as T
@@ -47,7 +48,7 @@ data Typeface = Typeface
   , glyphP       :: Program Glyph.U Glyph.V Glyph.O
   , glyphB       :: Buffer 'B.Array (Glyph.V I)
   , glyphA       :: Array (Glyph.V I)
-  , ranges       :: Map.Map Char (Interval I Int)
+  , rangesRef    :: IORef (Map.Map Char (Interval I Int))
   }
 
 data Font = Font
@@ -100,6 +101,8 @@ readTypeface path = do
 
   bindArray glyphA $ configureArray glyphB glyphA
 
+  rangesRef <- sendM (newIORef ranges)
+
   pure Typeface
     { name = opentypeFontName o
     , allGlyphs
@@ -107,7 +110,7 @@ readTypeface path = do
     , glyphP
     , glyphA
     , glyphB
-    , ranges
+    , rangesRef
     }
 
 readFontOfSize
@@ -160,8 +163,10 @@ safeToEnum :: forall n. (Bounded n, Enum n) => Int -> Maybe n
 safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (minBound @n))
 
 
-layoutString :: Typeface -> String -> Run
-layoutString face = layoutGlyphs (ranges face) . glyphsForString (allGlyphs face)
+layoutString :: Has (Lift IO) sig m => Typeface -> String -> m Run
+layoutString face string = do
+  ranges <- sendM (readIORef (rangesRef face))
+  pure (layoutGlyphs ranges (glyphsForString (allGlyphs face) string))
 
 glyphsForString :: Map.Map Char (Maybe Glyph) -> String -> [Glyph]
 glyphsForString allGlyphs = catMaybes . map (join . (allGlyphs Map.!?))
