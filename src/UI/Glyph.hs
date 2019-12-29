@@ -17,9 +17,8 @@ import           Data.Functor.Interval
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe)
 import           Geometry.Rect
-import           Linear.Exts
 import           Linear.V2
-import           Linear.V4
+import           Linear.V4 (V4)
 
 data Glyph = Glyph
   { char         :: {-# UNPACK #-} !Char
@@ -40,7 +39,7 @@ layoutGlyphs chars = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState
   go (LayoutState offset is prev) g@Glyph{ char, bounds_ } = LayoutState
     { offset  = offset + advanceWidth g
     , result  = is . (Instance offset (fromMaybe (Interval 0 0) (chars Map.!? char)) :)
-    , bounds_ = prev <> Just (Bounding (transformRect (translated (V2 offset 0)) bounds_))
+    , bounds_ = prev <> Just (Bounding (point (V2 offset 0) + bounds_))
     }
 
 data LayoutState = LayoutState
