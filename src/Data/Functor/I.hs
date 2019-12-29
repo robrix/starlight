@@ -12,3 +12,6 @@ newtype I a = I a
 instance Applicative I where
   pure = coerce
   (<*>) = coerce
+
+instance Monad I where
+  I a >>= f = f a
