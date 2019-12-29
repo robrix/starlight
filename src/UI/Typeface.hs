@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module UI.Typeface
@@ -10,29 +12,43 @@ module UI.Typeface
 , glyphsForString
 ) where
 
+import           Control.Effect.Finally
 import           Control.Monad (guard, join, (<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Bifunctor (first)
 import           Data.Char (isPrint, isSeparator, ord)
-import           Data.Foldable (find)
-import           Data.Functor.I (I)
-import           Data.Functor.Interval (Interval)
+import           Data.Coerce (coerce)
+import           Data.Foldable (find, foldl')
+import           Data.Functor.I (I(..))
+import           Data.Functor.Interval (Interval(..))
 import qualified Data.Map as Map
 import           Data.Maybe (catMaybes)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import           Data.Vector ((!?))
 import           Geometry.Triangle
+import           GHC.Stack
+import           GL.Array
+import           GL.Buffer as B
+import           GL.Framebuffer
+import           GL.Object
+import           GL.Program
 import           Lens.Micro
 import           Linear.V2
 import qualified Opentype.Fileformat as O
 import           UI.Glyph
+import qualified UI.Label.Glyph as Glyph
 import           UI.Path
 
 data Typeface = Typeface
   { name         :: Maybe String
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
+  , fbuffer      :: Framebuffer
+  , glyphP       :: Program Glyph.U Glyph.V Glyph.O
+  , glyphB       :: Buffer 'B.Array (Glyph.V I)
+  , glyphA       :: Array (Glyph.V I)
+  , chars        :: Map.Map Char (Interval I Int)
   }
 
 data Font = Font
@@ -45,25 +61,67 @@ fontScale (Font face size) = size * scale where
   scale = 1 / fromIntegral (O.unitsPerEm (O.headTable (opentypeFont face)))
 
 
-readTypeface :: Has (Lift IO) sig m => FilePath -> m Typeface
-readTypeface = fmap toTypeface . sendM . O.readOTFile where
-  toTypeface o = Typeface (opentypeFontName o) allGlyphs o where
-    allGlyphs = Map.fromList (map ((,) <*> lookupGlyph) [minBound..maxBound])
-    lookupGlyph char = do
-      table <- O.glyphMap <$> cmap
-      glyphID <- table Map.!? fromIntegral (ord char)
-      glyphTable <- glyphTable
-      g <- glyphTable !? fromIntegral glyphID
-      let vertices = if isPrint char && not (isSeparator char) then glyphVertices g else []
-      pure $! Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
-    cmap = find supportedPlatform (O.getCmaps (O.cmapTable o))
-    glyphTable = case O.outlineTables o of
-      O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
-      _                                   -> Nothing
-    supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
-    glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours o
+readTypeface
+  :: ( HasCallStack
+     , Has Finally sig m
+     , Has (Lift IO) sig m
+     )
+  => FilePath
+  -> m Typeface
+readTypeface path = do
+  o <- sendM (O.readOTFile path)
 
-readFontOfSize :: Has (Lift IO) sig m => FilePath -> Float -> m Font
+  fbuffer <- gen1
+  glyphP <- build Glyph.shader
+  glyphA <- gen1
+  glyphB <- gen1
+
+  let allGlyphs = Map.fromList (map ((,) <*> lookupGlyph) [minBound..maxBound])
+      lookupGlyph char = do
+        table <- O.glyphMap <$> cmap
+        glyphID <- table Map.!? fromIntegral (ord char)
+        glyphTable <- glyphTable
+        g <- glyphTable !? fromIntegral glyphID
+        let vertices = if isPrint char && not (isSeparator char) then glyphVertices g else []
+        pure $! Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
+      cmap = find supportedPlatform (O.getCmaps (O.cmapTable o))
+      glyphTable = case O.outlineTables o of
+        O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
+        _                                   -> Nothing
+      supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
+      glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours o
+
+      string = ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
+      (vs, chars, _) = foldl' combine (id, Map.empty, 0) (catMaybes (map (join . (allGlyphs Map.!?)) string))
+      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
+      vertices = vs []
+
+  bind (Just glyphB)
+  realloc glyphB (length vertices) Static Draw
+  copy glyphB 0 (coerce vertices)
+
+  bindArray glyphA $ configureArray glyphB glyphA
+
+
+  pure Typeface
+    { name = opentypeFontName o
+    , allGlyphs
+    , opentypeFont = o
+    , fbuffer
+    , glyphP
+    , glyphA
+    , glyphB
+    , chars
+    }
+
+readFontOfSize
+  :: ( HasCallStack
+     , Has Finally sig m
+     , Has (Lift IO) sig m
+     )
+  => FilePath
+  -> Float
+  -> m Font
 readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 data NameID
