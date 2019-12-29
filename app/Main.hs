@@ -39,12 +39,12 @@ import           Data.Ord (Down(..))
 import           Data.Text (unpack)
 import           Data.Time.Clock (UTCTime)
 import           Geometry.Circle
-import           Geometry.Rect
 import           GHC.Stack
 import           GL.Array
 import           GL.Framebuffer
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
+import           GL.Viewport
 import           Graphics.GL.Core41
 import           Lens.Micro (Lens', (.~), (^.), each, lens)
 import           Linear.Affine

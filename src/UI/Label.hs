@@ -21,7 +21,6 @@ import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.IORef
 import qualified Data.Map as Map
-import           Geometry.Rect
 import           GHC.Stack
 import           GL.Array
 import           GL.Buffer
@@ -31,6 +30,7 @@ import           GL.Program
 import           GL.Shader.DSL (defaultVars)
 import           GL.Texture
 import           GL.TextureUnit
+import           GL.Viewport
 import           Graphics.GL.Core41
 import           Lens.Micro ((^.))
 import           Linear.Exts

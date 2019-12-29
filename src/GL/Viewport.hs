@@ -1,4 +1,4 @@
-module Geometry.Rect
+module GL.Viewport
 ( _min
 , _max
 , viewport
