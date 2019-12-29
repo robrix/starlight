@@ -1,3 +1,6 @@
 -- | An abbreviation of "Data.Functor.Identity".
 module Data.Functor.I
-() where
+( I(..)
+) where
+
+newtype I a = I a
