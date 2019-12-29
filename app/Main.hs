@@ -117,7 +117,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           let bodies = S.bodiesAt system systemTrans (getDelta t)
           continue <- fmap isJust . runEmpty $
             measure "input" input >>= controls bodies label >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
-          continue <$ Window.swap
+          continue <$ measure "swap" Window.swap
         when continue loop
 
 -- FIXME: organize timings into a tree
