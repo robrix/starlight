@@ -9,7 +9,6 @@
 {-# LANGUAGE TypeOperators #-}
 module Main
 ( main
-, distanceScale
 ) where
 
 import           Control.Applicative (liftA2)
@@ -30,7 +29,6 @@ import           Data.Function (fix, (&))
 import           Data.Functor.Const
 import           Data.Functor.I
 import           Data.Functor.Interval
-import qualified Data.IntMap as IntMap
 import           Data.List (sortOn)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
@@ -79,6 +77,8 @@ main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings . fst <=< runProfile $ do
   font <- readFontOfSize ("fonts" </> "DejaVuSans.ttf") 36
 
+  system <- sendM S.system
+
   Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
     evalState @Input mempty
     . evalState GameState
@@ -97,7 +97,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           , target   = Nothing
           }
         ]
-      , system = S.system
+      , system = system
       }
     . evalState start $ do
       starsP <- build Stars.shader
@@ -121,7 +121,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
-          let bodies = S.bodiesAt system systemTrans (getDelta t)
+          let bodies = S.bodiesAt system (getDelta t)
           continue <- fmap isJust . runEmpty $
             measure "input" input >>= controls bodies label >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, label } bodies
           continue <$ measure "swap" Window.swap
@@ -134,13 +134,6 @@ reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $
   label l' l = unpack l <> "." <> l'
   showTiming t = "{min: " <> showMS (min' t) <> ", mean: " <> showMS (mean t) <> ", max: " <> showMS (max' t) <> "}"
   showMS = (<> "ms") . show . getSeconds . getMilli . milli @Seconds @Double . realToFrac
-
-
-distanceScale :: Float
-distanceScale = 10000 / getMetres (S.radius (S.bodies IntMap.! 10))
-
-systemTrans :: M44 Float
-systemTrans = scaled (V4 distanceScale distanceScale distanceScale 1) -- scale solar system distances down
 
 
 shipV :: [Ship.V I]
@@ -227,10 +220,11 @@ physics
   -> Delta Seconds Float
   -> m GameState
 physics bodies (Delta (Seconds dt)) = do
-  _actors . each %= updatePosition . flip (foldr applyGravity) bodies
+  scale <- Lens.uses _system scale
+  _actors . each %= updatePosition . flip (foldr (applyGravity scale)) bodies
   get where
   updatePosition a@Actor{ position, velocity } = a { position = position .+^ velocity }
-  applyGravity S.Instant{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
+  applyGravity distanceScale S.Instant{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
     = a { velocity = velocity + dt * distanceScale ** 2 * force *^ normalize (pos ^-^ unP position) } where
     force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
     pos = (transform !* V4 0 0 0 1) ^. _xy -- compute body location in 3d, but only use xy
@@ -311,7 +305,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  let onScreen S.Instant{ body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (distanceScale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
+  let onScreen S.Instant{ body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (game ^. _system . _scale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
       drawBody i@S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
         set Body.U
           { matrix = Just
@@ -343,7 +337,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
               -- FIXME: apply easing so this works more like a spring
               step = max 1 (min (50 * zoomOut) (d / fromIntegral n))
               drawAtRadius radius minSweep colour = do
-                let edge = distanceScale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
+                let edge = game ^. _system . _scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
                     sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
                 set Radar.U

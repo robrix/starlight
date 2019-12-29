@@ -4,6 +4,8 @@
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( System(..)
+, systemTrans
+, _scale
 , Instant(..)
 , bodiesAt
 , Body(..)
@@ -24,12 +26,14 @@ module Starlight.Body
 
 import Data.Foldable (find)
 import Data.List (elemIndex)
+import Lens.Micro
 import Linear.Affine
 import Linear.Epsilon
 import Linear.Exts
 import Linear.Matrix
 import Linear.Quaternion
 import Linear.V3
+import Linear.V4
 import Linear.Vector
 import System.Directory
 import System.FilePath
@@ -40,8 +44,18 @@ import Unit.Length
 import Unit.Mass
 import Unit.Time
 
-newtype System a = System { getSystem :: [Body a] }
+data System a = System
+  { scale  :: !a
+  , bodies :: ![Body a]
+  }
   deriving (Read, Show)
+
+systemTrans :: Num a => System a -> M44 a
+systemTrans (System scale _) = scaled (V4 scale scale scale 1)
+
+_scale :: Lens' (System a) a
+_scale = lens scale (\ s s' -> s { scale = s' })
+
 
 data Instant a = Instant
   { body      :: Body a
@@ -50,11 +64,11 @@ data Instant a = Instant
   }
   deriving (Show)
 
-bodiesAt :: (Epsilon a, RealFloat a) => System a -> M44 a -> Seconds a -> [Instant a]
-bodiesAt (System bs) systemTrans t = bs' where
+bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> [Instant a]
+bodiesAt sys@(System _ bs) t = bs' where
   bs' = map go bs
   go b = Instant b (rel !*! transformAt (orbit b) t) (orientationAt b t) where
-    rel = maybe systemTrans transform $ do
+    rel = maybe (systemTrans sys) transform $ do
       p <- parent b
       find ((== name p) . name . body) bs'
 
