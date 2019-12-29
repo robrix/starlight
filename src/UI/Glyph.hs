@@ -45,7 +45,7 @@ layoutGlyphs chars = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState
 data LayoutState = LayoutState
   { offset  :: {-# UNPACK #-} !Float
   , result  :: !([Instance] -> [Instance])
-  , bounds_ :: !(Maybe (Bounding Float))
+  , bounds_ :: !(Maybe (Bounding V2 Float))
   }
 
 data Run = Run

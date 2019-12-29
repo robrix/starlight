@@ -1,6 +1,10 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE PatternSynonyms #-}
 module Geometry.Rect
-( Rect(..)
+( Rect
+, pattern Rect
+, rectMin
+, rectMax
 , _min
 , _max
 , outsetToIntegralCoords
@@ -11,43 +15,37 @@ module Geometry.Rect
 ) where
 
 import Control.Monad.IO.Class.Lift
+import Data.Functor.Interval
 import Graphics.GL.Core41
 import Lens.Micro
 import Linear.Exts
 import Linear.Matrix
 import Linear.V2
 
-data Rect a = Rect
-  { rectMin :: {-# UNPACK #-} !(V2 a)
-  , rectMax :: {-# UNPACK #-} !(V2 a)
-  }
-  deriving (Eq, Functor, Show)
+type Rect = Interval V2
 
-_min :: Lens' (Rect a) (V2 a)
-_min = lens rectMin (\ r v -> r { rectMin = v })
+pattern Rect :: V2 a -> V2 a -> Rect a
+pattern Rect a b = Interval a b
 
-_max :: Lens' (Rect a) (V2 a)
-_max = lens rectMax (\ r v -> r { rectMax = v })
+rectMin :: Rect a -> V2 a
+rectMin = min_
+
+rectMax :: Rect a -> V2 a
+rectMax = max_
 
 
 outsetToIntegralCoords :: RealFrac a => Rect a -> Rect Int
-outsetToIntegralCoords (Rect min max) = Rect (floor <$> min) (ceiling <$> max)
+outsetToIntegralCoords (Interval min max) = Interval (floor <$> min) (ceiling <$> max)
 
 
 transformRect :: Num a => M33 a -> Rect a -> Rect a
-transformRect m (Rect v1 v2) = Rect ((m !* ext v1 1) ^. _xy) ((m !* ext v2 1) ^. _xy)
+transformRect m (Interval v1 v2) = Interval ((m !* ext v1 1) ^. _xy) ((m !* ext v2 1) ^. _xy)
 
 
 viewport :: Has (Lift IO) sig m => Rect Int -> m ()
 viewport r = runLiftIO (glViewport x1 y1 x2 y2) where
-  Rect (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
+  Interval (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
 
 scissor :: Has (Lift IO) sig m => Rect Int -> m ()
 scissor r = runLiftIO (glScissor x1 y1 x2 y2) where
-  Rect (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
-
-
-newtype Bounding a = Bounding { getBounding :: Rect a }
-
-instance Ord a => Semigroup (Bounding a) where
-  Bounding (Rect min1 max1) <> Bounding (Rect min2 max2) = Bounding (Rect (min <$> min1 <*> min2) (max <$> max1 <*> max2))
+  Interval (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
