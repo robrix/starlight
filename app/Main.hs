@@ -105,8 +105,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       radarP <- build Radar.shader
       bodyP  <- build Body.shader
 
-      label <- measure "label" $ Label.label font white
-      measure "prepareLabel" $ prepareLabel label $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./"
+      label <- measure "label" . Label.label font white $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./"
 
       quadA   <- load quadV
       shipA   <- load shipV

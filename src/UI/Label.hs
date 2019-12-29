@@ -7,7 +7,6 @@
 module UI.Label
 ( Label
 , label
-, prepareLabel
 , setLabel
 , drawLabel
 ) where
@@ -75,8 +74,9 @@ label
      )
   => Font
   -> Colour Float
+  -> String
   -> m Label
-label font colour = do
+label font colour string = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
@@ -106,31 +106,18 @@ label font colour = do
 
   scale <- Window.scale
 
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, string = "", chars = Map.empty })
+  let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString font string)
+      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + length geometry in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
+      vertices = vs []
 
--- | Cache the glyphs for the characters available to draw later on.
-prepareLabel
-  :: ( HasCallStack
-     , Has (Lift IO) sig m
-     )
-  => Label
-  -> String
-  -> m ()
-prepareLabel Label{ ref } string = runLiftIO $ do
-  l@LabelState { glyphB, glyphA, bounds, font, string = oldString } <- sendIO (readIORef ref)
+  bind (Just glyphB)
+  realloc glyphB (length vertices) Static Draw
+  copy glyphB 0 (coerce vertices)
 
-  when (bounds == Rect 0 0 || oldString /= string) $ do
-    let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString font string)
-        combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + length geometry in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
-        vertices = vs []
+  bindArray glyphA $ configureArray glyphB glyphA
 
-    bind (Just glyphB)
-    realloc glyphB (length vertices) Static Draw
-    copy glyphB 0 (coerce vertices)
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, colour, bcolour = Nothing, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, string = "", chars })
 
-    bindArray glyphA $ configureArray glyphB glyphA
-
-    sendIO (writeIORef ref l { chars })
 
 -- | Set the label’s text.
 --
