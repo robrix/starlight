@@ -18,7 +18,7 @@ import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Foldable (for_)
 import           Data.Functor.I
-import           Data.Functor.Interval
+import           Data.Functor.Interval as Interval
 import           Data.IORef
 import           GHC.Stack
 import           GL.Array
@@ -97,16 +97,16 @@ label face = do
 
 -- | Set the label’s text.
 setLabel :: Has (Lift IO) sig m => Label -> Float -> String -> m ()
-setLabel Label{ ref } size string = runLiftIO $ do
+setLabel Label{ ref } fontSize string = runLiftIO $ do
   l@LabelState{ texture, fbuffer, scale, face } <- sendIO (readIORef ref)
 
   glBlendFunc GL_ONE GL_ONE -- add
 
   Run instances b <- layoutString face string
 
-  let font = Font face size
+  let font = Font face fontSize
       b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
-      bounds = Interval 0 (max_ b' - min_ b')
+      bounds = Interval 0 (Interval.size b')
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest
