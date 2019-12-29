@@ -23,8 +23,8 @@ Alternatively, `cabal run exe:starlight` will launch the game.
 
 Controls are currently hard-coded; I intend to eventually make them configurable.
 
-Up arrow: forward thrust
-Left/right arrows: turn left/right
-Down arrow: turn to face opposite direction from current heading
-+/-: increase/decrease throttle (controls rate of thrust)
-tab/shift tab: switch to the next/prev target
+- Up arrow: forward thrust
+- Left/right arrows: turn left/right
+- Down arrow: turn to face opposite direction from current heading
+- +/-: increase/decrease throttle (controls rate of thrust)
+- tab/shift tab: switch to the next/prev target
