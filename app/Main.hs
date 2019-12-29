@@ -311,8 +311,8 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  let isNear S.Instant{ body = S.Body{ radius }, transform } position = distance ((transform !* V4 0 0 0 1) ^. _xy) position - getMetres (distanceScale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
-      drawBody i@S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (i `isNear` unP position) $ do
+  let onScreen S.Instant{ body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (distanceScale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
+      drawBody i@S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
         set Body.U
           { matrix = Just
               $   origin
