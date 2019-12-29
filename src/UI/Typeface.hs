@@ -90,7 +90,7 @@ readTypeface path = do
       glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours o
 
       string = ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
-      (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (catMaybes (map (join . (allGlyphs Map.!?)) string))
+      (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
@@ -161,10 +161,10 @@ safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (mi
 
 
 layoutString :: Typeface -> String -> Run
-layoutString face = layoutGlyphs (ranges face) . glyphsForString face
+layoutString face = layoutGlyphs (ranges face) . glyphsForString (allGlyphs face)
 
-glyphsForString :: Typeface -> String -> [Glyph]
-glyphsForString face = catMaybes . map (join . (allGlyphs face Map.!?))
+glyphsForString :: Map.Map Char (Maybe Glyph) -> String -> [Glyph]
+glyphsForString allGlyphs = catMaybes . map (join . (allGlyphs Map.!?))
 
 
 drawingGlyphs :: Has (Lift IO) sig m => Typeface -> ProgramT Glyph.U Glyph.V Glyph.O (ArrayT Glyph.V m) a -> m a
