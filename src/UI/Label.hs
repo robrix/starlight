@@ -96,8 +96,6 @@ label face = do
 
 
 -- | Set the label’s text.
---
--- Characters not in the string passed to 'label' will not be drawn.
 setLabel :: Has (Lift IO) sig m => Label -> Float -> String -> m ()
 setLabel Label{ ref } size string = runLiftIO $ do
   l@LabelState{ texture, fbuffer, scale, face } <- sendIO (readIORef ref)
