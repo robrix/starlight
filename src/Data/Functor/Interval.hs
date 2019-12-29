@@ -30,3 +30,11 @@ instance (Applicative f, Num a) => Num (Interval f a) where
   {-# INLINE negate #-}
   fromInteger = pure . fromInteger
   {-# INLINE fromInteger #-}
+
+instance (Applicative f, Fractional a) => Fractional (Interval f a) where
+  recip = fmap recip
+  {-# INLINE recip #-}
+  (/) = liftA2 (/)
+  {-# INLINE (/) #-}
+  fromRational = pure . fromRational
+  {-# INLINE fromRational #-}
