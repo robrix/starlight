@@ -103,8 +103,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       radarP <- build Radar.shader
       bodyP  <- build Body.shader
 
-      face <- readTypeface ("fonts" </> "DejaVuSans.ttf")
-      cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
+      face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
+      measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
 
       label <- measure "label" $ Label.label face
 
