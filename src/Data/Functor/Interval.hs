@@ -2,9 +2,12 @@
 module Data.Functor.Interval
 ( Interval(..)
 , size
+, _min
+, _max
 ) where
 
 import Control.Applicative (liftA2)
+import Lens.Micro
 
 data Interval f a = Interval
   { min_ :: !(f a)
@@ -81,3 +84,10 @@ instance (Applicative f, Floating a) => Floating (Interval f a) where
 
 size :: Num (f a) => Interval f a -> f a
 size (Interval min max) = max - min
+
+
+_min :: Lens' (Interval f a) (f a)
+_min = lens min_ (\ r v -> r { min_ = v })
+
+_max :: Lens' (Interval f a) (f a)
+_max = lens max_ (\ r v -> r { max_ = v })
