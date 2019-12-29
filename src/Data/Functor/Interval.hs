@@ -1,2 +1,9 @@
 module Data.Functor.Interval
-() where
+( Interval(..)
+) where
+
+data Interval f a = Interval
+  { min_ :: !(f a)
+  , max_ :: !(f a)
+  }
+  deriving (Eq, Show)
