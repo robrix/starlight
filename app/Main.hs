@@ -271,8 +271,8 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
   scale <- Window.scale
   size <- Window.size
-  viewport $ scale *^ Rect 0 size
-  scissor  $ scale *^ Rect 0 size
+  viewport $ scale *^ Interval 0 size
+  scissor  $ scale *^ Interval 0 size
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 

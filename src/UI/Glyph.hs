@@ -61,10 +61,10 @@ instance HasBounds Glyph where
   bounds = bounds_
 
 instance HasBounds LayoutState where
-  bounds LayoutState{ bounds_ } = maybe (Rect 0 0) getBounding bounds_
+  bounds LayoutState{ bounds_ } = maybe (Interval 0 0) getBounding bounds_
 
 instance HasBounds t => HasBounds [t] where
-  bounds = maybe (Rect 0 0) getBounding . foldMap (Just . Bounding . bounds)
+  bounds = maybe (Interval 0 0) getBounding . foldMap (Just . Bounding . bounds)
 
 instance HasBounds (V2 Float) where
-  bounds = Rect <*> id
+  bounds = Interval <*> id

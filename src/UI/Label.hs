@@ -112,7 +112,7 @@ label font string = do
 
   bindArray glyphA $ configureArray glyphB glyphA
 
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, chars })
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, texture, fbuffer, glyphB, glyphA, quadA, bounds = Interval 0 0, scale, font, chars })
 
 
 -- | Set the label’s text.
@@ -125,7 +125,7 @@ setLabel Label{ ref } string = runLiftIO $ do
   glBlendFunc GL_ONE GL_ONE -- add
 
   let Run instances b = layoutString font chars string
-      bounds = let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b in Rect 0 (max_ b' - min_ b')
+      bounds = let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b in Interval 0 (max_ b' - min_ b')
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest

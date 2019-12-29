@@ -1,8 +1,5 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE PatternSynonyms #-}
 module Geometry.Rect
 ( Rect
-, pattern Rect
 , _min
 , _max
 , viewport
@@ -16,9 +13,6 @@ import Graphics.GL.Core41
 import Linear.V2
 
 type Rect = Interval V2
-
-pattern Rect :: V2 a -> V2 a -> Rect a
-pattern Rect a b = Interval a b
 
 
 viewport :: Has (Lift IO) sig m => Rect Int -> m ()
