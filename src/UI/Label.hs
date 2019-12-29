@@ -17,7 +17,7 @@ import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Foldable (foldl', for_)
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Interval
 import           Data.IORef
 import qualified Data.Map as Map
@@ -53,9 +53,9 @@ data LabelState = LabelState
   , glyphP  :: !(Program Glyph.U Glyph.V Glyph.O)
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
-  , glyphB  :: !(Buffer 'GL.Buffer.Array (Glyph.V Identity))
-  , glyphA  :: !(Array (Glyph.V Identity))
-  , quadA   :: !(Array (Text.V  Identity))
+  , glyphB  :: !(Buffer 'GL.Buffer.Array (Glyph.V I))
+  , glyphA  :: !(Array (Glyph.V I))
+  , quadA   :: !(Array (Text.V  I))
   , bounds  :: !(Rect Int)
   , scale   :: !Int
   , font    :: !Font

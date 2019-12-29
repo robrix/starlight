@@ -28,7 +28,7 @@ import           Data.Coerce
 import           Data.Foldable (foldl', for_)
 import           Data.Function (fix, (&))
 import           Data.Functor.Const
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Interval
 import qualified Data.IntMap as IntMap
 import           Data.List (sortOn)
@@ -143,7 +143,7 @@ systemTrans :: M44 Float
 systemTrans = scaled (V4 distanceScale distanceScale distanceScale 1) -- scale solar system distances down
 
 
-shipV :: [Ship.V Identity]
+shipV :: [Ship.V I]
 shipV = coerce @[V2 Float]
   [ V2 1      0
   , V2 0      (-0.5)
@@ -151,7 +151,7 @@ shipV = coerce @[V2 Float]
   , V2 0      0.5
   ]
 
-quadV :: [Stars.V Identity]
+quadV :: [Stars.V I]
 quadV = coerce @[V2 Float]
   [ V2 (-1) (-1)
   , V2   1  (-1)
@@ -159,10 +159,10 @@ quadV = coerce @[V2 Float]
   , V2   1    1
   ]
 
-circleV :: [Body.V Identity]
+circleV :: [Body.V I]
 circleV = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
 
-radarV :: [Radar.V Identity]
+radarV :: [Radar.V I]
 radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
   n = (16 :: Int)
 
@@ -370,10 +370,10 @@ roundToPlaces n x = fromInteger (round (x * n')) / n' where
 
 
 data DrawState = DrawState
-  { quadA   :: Array (Stars.V Identity)
-  , circleA :: Array (Body.V  Identity)
-  , shipA   :: Array (Ship.V  Identity)
-  , radarA  :: Array (Radar.V Identity)
+  { quadA   :: Array (Stars.V I)
+  , circleA :: Array (Body.V  I)
+  , shipA   :: Array (Ship.V  I)
+  , radarA  :: Array (Radar.V I)
   , starsP  :: Program Stars.U Stars.V Stars.O
   , shipP   :: Program Ship.U  Ship.V  Ship.O
   , bodyP   :: Program Body.U  Body.V  Body.O

@@ -110,7 +110,7 @@ import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
 import           Data.Function (fix)
 import           Data.Functor.Const
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Monoid (Ap(..))
 import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
@@ -680,7 +680,7 @@ foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Fiel
 foldVarsM f t = getAp $ foldVars (fmap Ap . f) t
 
 mapVars :: Vars t => (forall a . GLSLType a => Field a -> v a -> v' a) -> t v -> t v'
-mapVars f t = runIdentity $ traverseVars (fmap Identity . f) t
+mapVars f t = getI $ traverseVars (fmap I . f) t
 
 forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => Field a -> v a -> m (v' a)) -> m (t v')
 forVars t f = traverseVars f t

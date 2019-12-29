@@ -12,7 +12,7 @@ module UI.Graph
 import           Control.Carrier.Finally
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Interval
 import           GL.Array
 import           GL.Program
@@ -31,7 +31,7 @@ import           UI.Graph.Vertex
 data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
-  , array     :: !(Array (V Identity))
+  , array     :: !(Array (V I))
   , points    :: !(Program Points.U V Points.O)
   , lines     :: !(Program Lines.U  V Lines.O)
   , pointSize :: !Float
