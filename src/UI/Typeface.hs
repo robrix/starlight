@@ -70,13 +70,14 @@ readTypeface
   => FilePath
   -> m Typeface
 readTypeface path = do
-  o <- sendM (O.readOTFile path)
+  opentypeFont <- sendM (O.readOTFile path)
 
   glyphP <- build Glyph.shader
   glyphA <- gen1
   glyphB <- gen1
 
-  let allGlyphs = Map.fromList (map ((,) <*> lookupGlyph) [minBound..maxBound])
+  let name = T.unpack . T.decodeUtf16BE . O.nameString <$> find ((== Just FullName) . nameID) (O.nameRecords (O.nameTable opentypeFont))
+      allGlyphs = Map.fromList (map ((,) <*> lookupGlyph) [minBound..maxBound])
       lookupGlyph char = do
         table <- O.glyphMap <$> cmap
         glyphID <- table Map.!? fromIntegral (ord char)
@@ -84,19 +85,19 @@ readTypeface path = do
         g <- glyphTable !? fromIntegral glyphID
         let vertices = if isPrint char && not (isSeparator char) then glyphVertices g else []
         pure $! Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
-      cmap = find supportedPlatform (O.getCmaps (O.cmapTable o))
-      glyphTable = case O.outlineTables o of
+      cmap = find supportedPlatform (O.getCmaps (O.cmapTable opentypeFont))
+      glyphTable = case O.outlineTables opentypeFont of
         O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
         _                                   -> Nothing
       supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
-      glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours o
+      glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours opentypeFont
 
   rangesRef <- sendM (newIORef Map.empty)
 
   pure Typeface
-    { name = opentypeFontName o
+    { name
     , allGlyphs
-    , opentypeFont = o
+    , opentypeFont
     , glyphP
     , glyphA
     , glyphB
@@ -157,9 +158,6 @@ data NameID
   | DarkBackgroundPalette
   | VariationsPostScriptNamePrefix
   deriving (Bounded, Enum, Eq, Ord, Show)
-
-opentypeFontName :: O.OpentypeFont -> Maybe String
-opentypeFontName o = T.unpack . T.decodeUtf16BE . O.nameString <$> find ((== Just FullName) . nameID) (O.nameRecords (O.nameTable o))
 
 nameID :: O.NameRecord -> Maybe NameID
 nameID = safeToEnum . fromIntegral . O.nameID
