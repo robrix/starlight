@@ -46,7 +46,7 @@ import           GL.Framebuffer
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
 import           Graphics.GL.Core41
-import           Lens.Micro (Lens', lens, (.~), (^.))
+import           Lens.Micro (Lens', (.~), (^.), each, lens)
 import           Linear.Affine
 import           Linear.Exts
 import           Linear.Matrix
@@ -220,17 +220,14 @@ physics
   -> Delta Seconds Float
   -> m GameState
 physics bodies (Delta (Seconds dt)) = do
-  P position <- Lens.use (_player . _position)
-  for_ bodies (applyGravity position)
-
-  velocity <- Lens.use (_player . _velocity)
-  _player . _position += P velocity
+  _actors . each %= updatePosition . flip (foldr applyGravity) bodies
   get where
-  applyGravity position S.Instant { transform, body = S.Body { mass }} = do
-    let pos = (transform !* V4 0 0 0 1) ^. _xy
-        r = qd pos position
-        bigG = 6.67430e-11
-    _player . _velocity += dt * bigG * distanceScale ** 2 * getKilograms mass / r *^ normalize (pos ^-^ position)
+  updatePosition a@Actor{ position, velocity } = a { position = position .+^ velocity }
+  applyGravity S.Instant{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
+    = a { velocity = velocity + dt * bigG * distanceScale ** 2 * getKilograms mass / r *^ normalize (pos ^-^ unP position) } where
+    pos = (transform !* V4 0 0 0 1) ^. _xy
+    r = qd pos (unP position)
+    bigG = 6.67430e-11
 
 
 -- | Compute the zoom factor for the given velocity.
