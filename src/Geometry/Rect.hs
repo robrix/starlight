@@ -3,8 +3,6 @@
 module Geometry.Rect
 ( Rect
 , pattern Rect
-, rectMin
-, rectMax
 , _min
 , _max
 , outsetToIntegralCoords
@@ -26,12 +24,6 @@ type Rect = Interval V2
 
 pattern Rect :: V2 a -> V2 a -> Rect a
 pattern Rect a b = Interval a b
-
-rectMin :: Rect a -> V2 a
-rectMin = min_
-
-rectMax :: Rect a -> V2 a
-rectMax = max_
 
 
 outsetToIntegralCoords :: RealFrac a => Rect a -> Rect Int

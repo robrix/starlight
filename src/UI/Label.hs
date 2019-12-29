@@ -125,14 +125,14 @@ setLabel Label{ ref } string = runLiftIO $ do
   glBlendFunc GL_ONE GL_ONE -- add
 
   let Run instances b = layoutString font chars string
-      bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (rectMax b' - rectMin b')
+      bounds = let b' = outsetToIntegralCoords (fontScale font *^ b) in Rect 0 (max_ b' - min_ b')
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest
   setParameter Texture2D MinFilter Nearest
   setParameter Texture2D WrapS ClampToEdge
   setParameter Texture2D WrapT ClampToEdge
-  setImageFormat Texture2D RGBA8 (scale *^ rectMax bounds) RGBA (Packed8888 True)
+  setImageFormat Texture2D RGBA8 (scale *^ max_ bounds) RGBA (Packed8888 True)
 
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
@@ -143,7 +143,7 @@ setLabel Label{ ref } string = runLiftIO $ do
   setClearColour transparent
   glClear GL_COLOR_BUFFER_BIT
 
-  let V2 sx sy = fromIntegral scale / fmap fromIntegral (rectMax bounds)
+  let V2 sx sy = fromIntegral scale / fmap fromIntegral (max_ bounds)
   bindArray glyphA . use glyphP $ do
     set defaultVars
       { Glyph.scale     = Just (1 / fromIntegral scale)
@@ -154,7 +154,7 @@ setLabel Label{ ref } string = runLiftIO $ do
         { Glyph.matrix3 = Just
             $   translated (-1)
             !*! scaled     (V3 sx sy 1)
-        , Glyph.offset  = Just (V2 offset 0 + negated (rectMin b))
+        , Glyph.offset  = Just (V2 offset 0 + negated (min_ b))
         }
       drawArraysInstanced Triangles range 6
 
@@ -187,7 +187,7 @@ drawLabel Label{ ref } colour bcolour = runLiftIO $ do
 
   use textP $ do
     let b = fromIntegral <$> bounds
-        V2 w h = rectMax b - rectMin b
+        V2 w h = max_ b - min_ b
         rect = V4
           (b ^. _min . _x / w)
           (b ^. _max . _y / h)
