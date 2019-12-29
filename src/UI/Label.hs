@@ -59,7 +59,6 @@ data LabelState = LabelState
   , bounds  :: !(Rect Int)
   , scale   :: !Int
   , font    :: !Font
-  , string  :: !String
   , chars   :: !(Map.Map Char (Interval Int))
   }
 
@@ -113,7 +112,7 @@ label font string = do
 
   bindArray glyphA $ configureArray glyphB glyphA
 
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, string = "", chars })
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, texture, fbuffer, glyphB, glyphA, quadA, bounds = Rect 0 0, scale, font, chars })
 
 
 -- | Set the label’s text.
@@ -159,7 +158,7 @@ setLabel Label{ ref } string = runLiftIO $ do
         }
       drawArraysInstanced Triangles range 6
 
-  sendIO (writeIORef ref l { bounds, string })
+  sendIO (writeIORef ref l { bounds })
 
 
 drawLabel
