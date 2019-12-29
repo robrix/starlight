@@ -75,7 +75,6 @@ library
     Physics.Delta
     S
     Starlight.Body
-    Starlight.Body.TH
     Starlight.Input
     Starlight.Shader.Body
     Starlight.Shader.Radar
