@@ -356,7 +356,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
     bindArray radarA $ for_ bodies drawBlip
 
-  measure "drawLabel" $ drawLabel label white Nothing
+  measure "drawLabel" $ drawLabel label (V2 0 0) white Nothing
 
 roundToPlaces :: RealFloat a => Int -> a -> a
 roundToPlaces n x = fromInteger (round (x * n')) / n' where

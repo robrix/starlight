@@ -52,7 +52,7 @@ data LabelState = LabelState
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
   , quadA   :: !(Array (Text.V  I))
-  , bounds  :: !(Interval V2 Int)
+  , size    :: !(V2 Int)
   , scale   :: !Int
   , face    :: !Typeface
   }
@@ -92,7 +92,7 @@ label face = do
 
   scale <- Window.scale
 
-  Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, bounds = Interval 0 0, scale, face })
+  Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, size = 0, scale, face })
 
 
 -- | Set the label’s text.
@@ -106,25 +106,25 @@ setLabel Label{ ref } fontSize string = runLiftIO $ do
 
   let font = Font face fontSize
       b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
-      bounds = Interval 0 (Interval.size b')
+      size = Interval.size b'
 
   bind (Just texture)
   setParameter Texture2D MagFilter Nearest
   setParameter Texture2D MinFilter Nearest
   setParameter Texture2D WrapS ClampToEdge
   setParameter Texture2D WrapT ClampToEdge
-  setImageFormat Texture2D RGBA8 (scale *^ max_ bounds) RGBA (Packed8888 True)
+  setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
 
   bind (Just fbuffer)
   attachTexture (GL.Colour 0) texture
 
-  viewport $ scale *^ bounds
-  scissor  $ scale *^ bounds
+  viewport $ scale *^ Interval 0 size
+  scissor  $ scale *^ Interval 0 size
 
   setClearColour transparent
   glClear GL_COLOR_BUFFER_BIT
 
-  let V2 sx sy = fromIntegral scale / fmap fromIntegral (max_ bounds)
+  let V2 sx sy = fromIntegral scale / fmap fromIntegral size
   drawingGlyphs face $ do
     set defaultVars
       { Glyph.scale     = Just (1 / fromIntegral scale)
@@ -140,7 +140,7 @@ setLabel Label{ ref } fontSize string = runLiftIO $ do
         }
       drawArraysInstanced Triangles range 6
 
-  sendIO (writeIORef ref l { bounds })
+  sendIO (writeIORef ref l { UI.Label.size })
 
 
 drawLabel
@@ -149,15 +149,17 @@ drawLabel
      , Has (Lift IO) sig m
      )
   => Label
+  -> V2 Int
   -> Colour Float
   -> Maybe (Colour Float)
   -> m ()
-drawLabel Label{ ref } colour bcolour = runLiftIO $ do
-  LabelState { texture, textP, quadA, bounds, scale } <- sendIO (readIORef ref)
+drawLabel Label{ ref } offset colour bcolour = runLiftIO $ do
+  LabelState { texture, textP, quadA, size, scale } <- sendIO (readIORef ref)
   glBlendFunc GL_ZERO GL_SRC_COLOR
 
   bind @Framebuffer Nothing
 
+  let bounds = Interval offset size
   viewport $ scale *^ bounds
   scissor  $ scale *^ bounds
 
