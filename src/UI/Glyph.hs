@@ -16,7 +16,6 @@ import           Data.Functor.I
 import           Data.Functor.Interval
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe)
-import           Geometry.Rect
 import           Linear.V2
 import           Linear.V4 (V4)
 
@@ -24,7 +23,7 @@ data Glyph = Glyph
   { char         :: {-# UNPACK #-} !Char
   , advanceWidth :: {-# UNPACK #-} !Float
   , geometry     :: ![V4 Float]
-  , bounds_      :: {-# UNPACK #-} !(Rect Float)
+  , bounds_      :: {-# UNPACK #-} !(Interval V2 Float)
   }
 
 
@@ -50,12 +49,12 @@ data LayoutState = LayoutState
 
 data Run = Run
   { instances :: ![Instance]
-  , bounds_   :: {-# UNPACK #-} !(Rect Float)
+  , bounds_   :: {-# UNPACK #-} !(Interval V2 Float)
   }
 
 
 class HasBounds t where
-  bounds :: t -> Rect Float
+  bounds :: t -> Interval V2 Float
 
 instance HasBounds Glyph where
   bounds = bounds_

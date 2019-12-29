@@ -56,7 +56,7 @@ data LabelState = LabelState
   , glyphB  :: !(Buffer 'GL.Buffer.Array (Glyph.V I))
   , glyphA  :: !(Array (Glyph.V I))
   , quadA   :: !(Array (Text.V  I))
-  , bounds  :: !(Rect Int)
+  , bounds  :: !(Interval V2 Int)
   , scale   :: !Int
   , font    :: !Font
   , chars   :: !(Map.Map Char (Interval I Int))
