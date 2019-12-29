@@ -19,7 +19,7 @@ import Control.Monad.IO.Class
 import Data.Time.Clock
 
 newtype TimeC m a = TimeC { runTime :: m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Time :+: sig) (TimeC m) where
   alg = \case

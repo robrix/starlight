@@ -39,7 +39,7 @@ execState :: Has (Lift IO) sig m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 
 newtype StateC s m a = StateC (ReaderC (IORef s) m a)
-  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (State s :+: sig) (StateC s m) where
   alg = \case

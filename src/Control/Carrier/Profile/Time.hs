@@ -32,7 +32,7 @@ runProfile :: ProfileC m a -> m (Timings, a)
 runProfile (ProfileC m) = runWriter (runReader [] m)
 
 newtype ProfileC m a = ProfileC { runProfileC :: ReaderC [Text] (WriterC Timings m) a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Has (Lift IO) sig m, Effect sig) => Algebra (Profile :+: sig) (ProfileC m) where
   alg = \case

@@ -29,7 +29,7 @@ runWindow name size (WindowC m) = UI.withSDL $
       runReader window m
 
 newtype WindowC m a = WindowC (ReaderC UI.Window m a)
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Has (Lift IO) sig m, Effect sig) => Algebra (Window :+: sig) (WindowC m) where
   alg = \case
