@@ -102,7 +102,6 @@ readTypeface path = do
 
   bindArray glyphA $ configureArray glyphB glyphA
 
-
   pure Typeface
     { name = opentypeFontName o
     , allGlyphs
