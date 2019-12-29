@@ -107,10 +107,10 @@ safeToEnum n = toEnum n <$ guard (n < fromEnum (maxBound @n) && n > fromEnum (mi
 
 
 layoutString :: Font -> Map.Map Char (Interval I Int) -> String -> Run
-layoutString font chars = layoutGlyphs chars . glyphsForString font
+layoutString font chars = layoutGlyphs chars . glyphsForString (face font)
 
-glyphsForString :: Font -> String -> [Glyph]
-glyphsForString (Font face _) = catMaybes . map (join . (allGlyphs face Map.!?))
+glyphsForString :: Typeface -> String -> [Glyph]
+glyphsForString face = catMaybes . map (join . (allGlyphs face Map.!?))
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord

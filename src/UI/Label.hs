@@ -58,7 +58,7 @@ data LabelState = LabelState
   , quadA   :: !(Array (Text.V  I))
   , bounds  :: !(Interval V2 Int)
   , scale   :: !Int
-  , font    :: !Font
+  , face    :: !Typeface
   , chars   :: !(Map.Map Char (Interval I Int))
   }
 
@@ -69,10 +69,10 @@ label
      , Has Window.Window sig m
      , HasCallStack
      )
-  => Font
+  => Typeface
   -> String
   -> m Label
-label font string = do
+label face string = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
@@ -102,7 +102,7 @@ label font string = do
 
   scale <- Window.scale
 
-  let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString font string)
+  let (vs, chars, _) = foldl' combine (id, Map.empty, 0) (glyphsForString face string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
@@ -112,19 +112,20 @@ label font string = do
 
   bindArray glyphA $ configureArray glyphB glyphA
 
-  Label <$> sendIO (newIORef LabelState { textP, glyphP, texture, fbuffer, glyphB, glyphA, quadA, bounds = Interval 0 0, scale, font, chars })
+  Label <$> sendIO (newIORef LabelState { textP, glyphP, texture, fbuffer, glyphB, glyphA, quadA, bounds = Interval 0 0, scale, face, chars })
 
 
 -- | Set the label’s text.
 --
 -- Characters not in the string passed to 'label' will not be drawn.
-setLabel :: Has (Lift IO) sig m => Label -> String -> m ()
-setLabel Label{ ref } string = runLiftIO $ do
-  l@LabelState{ texture, fbuffer, glyphA, glyphP, scale, font, chars } <- sendIO (readIORef ref)
+setLabel :: Has (Lift IO) sig m => Label -> Float -> String -> m ()
+setLabel Label{ ref } size string = runLiftIO $ do
+  l@LabelState{ texture, fbuffer, glyphA, glyphP, scale, face, chars } <- sendIO (readIORef ref)
 
   glBlendFunc GL_ONE GL_ONE -- add
 
-  let Run instances b = layoutString font chars string
+  let font = Font face size
+      Run instances b = layoutString font chars string
       bounds = let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b in Interval 0 (max_ b' - min_ b')
 
   bind (Just texture)

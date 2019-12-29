@@ -75,7 +75,7 @@ import           Unit.Time
 
 main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings . fst <=< runProfile $ do
-  font <- readFontOfSize ("fonts" </> "DejaVuSans.ttf") 36
+  font <- readTypeface ("fonts" </> "DejaVuSans.ttf")
 
   system <- sendM S.system
 
@@ -205,7 +205,7 @@ controls bodies label input = measure "controls" $ do
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
-  measure "setLabel" $ setLabel label (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
+  measure "setLabel" $ setLabel label 36 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
