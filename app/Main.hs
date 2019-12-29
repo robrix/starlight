@@ -360,7 +360,7 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, lab
 
 roundToPlaces :: RealFloat a => Int -> a -> a
 roundToPlaces n x = fromInteger (round (x * n')) / n' where
-  n' = 10 ** fromIntegral n
+  n' = 10 ^ n
 
 
 data DrawState = DrawState
