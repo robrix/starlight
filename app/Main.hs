@@ -103,9 +103,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       radarP <- build Radar.shader
       bodyP  <- build Body.shader
 
-      font <- readTypeface ("fonts" </> "DejaVuSans.ttf")
+      face <- readTypeface ("fonts" </> "DejaVuSans.ttf")
 
-      label <- measure "label" . Label.label font $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./"
+      label <- measure "label" . Label.label face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./"
 
       quadA   <- load quadV
       shipA   <- load shipV
