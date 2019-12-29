@@ -69,28 +69,19 @@ readTypeface
      )
   => FilePath
   -> m Typeface
-readTypeface path = do
-  opentypeFont <- sendM (O.readOTFile path)
+readTypeface = fromOpentypeFont <=< sendM . O.readOTFile
 
+fromOpentypeFont
+  :: ( HasCallStack
+     , Has Finally sig m
+     , Has (Lift IO) sig m
+     )
+  => O.OpentypeFont
+  -> m Typeface
+fromOpentypeFont opentypeFont = do
   glyphP <- build Glyph.shader
   glyphA <- gen1
   glyphB <- gen1
-
-  let name = T.unpack . T.decodeUtf16BE . O.nameString <$> find ((== Just FullName) . nameID) (O.nameRecords (O.nameTable opentypeFont))
-      allGlyphs = Map.fromList (map ((,) <*> lookupGlyph) [minBound..maxBound])
-      lookupGlyph char = do
-        table <- O.glyphMap <$> cmap
-        glyphID <- table Map.!? fromIntegral (ord char)
-        glyphTable <- glyphTable
-        g <- glyphTable !? fromIntegral glyphID
-        let vertices = if isPrint char && not (isSeparator char) then glyphVertices g else []
-        pure $! Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
-      cmap = find supportedPlatform (O.getCmaps (O.cmapTable opentypeFont))
-      glyphTable = case O.outlineTables opentypeFont of
-        O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
-        _                                   -> Nothing
-      supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
-      glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours opentypeFont
 
   rangesRef <- sendM (newIORef Map.empty)
 
@@ -102,7 +93,22 @@ readTypeface path = do
     , glyphA
     , glyphB
     , rangesRef
-    }
+    } where
+  name = T.unpack . T.decodeUtf16BE . O.nameString <$> find ((== Just FullName) . nameID) (O.nameRecords (O.nameTable opentypeFont))
+  allGlyphs = Map.fromList (map ((,) <*> lookupGlyph) [minBound..maxBound])
+  lookupGlyph char = do
+    table <- O.glyphMap <$> cmap
+    glyphID <- table Map.!? fromIntegral (ord char)
+    glyphTable <- glyphTable
+    g <- glyphTable !? fromIntegral glyphID
+    let vertices = if isPrint char && not (isSeparator char) then glyphVertices g else []
+    pure $! Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
+  cmap = find supportedPlatform (O.getCmaps (O.cmapTable opentypeFont))
+  glyphTable = case O.outlineTables opentypeFont of
+    O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
+    _                                   -> Nothing
+  supportedPlatform p = O.cmapPlatform p == O.UnicodePlatform || O.cmapPlatform p == O.MicrosoftPlatform && O.cmapEncoding p == 1
+  glyphVertices = uncurry triangleVertices . first (fmap fromIntegral) <=< pathTriangles <=< map contourToPath . O.getScaledContours opentypeFont
 
 readFontOfSize
   :: ( HasCallStack
