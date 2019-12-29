@@ -30,9 +30,9 @@ import           UI.Glyph
 import           UI.Path
 
 data Typeface = Typeface
-  { name      :: Maybe String
-  , allGlyphs :: Map.Map Char (Maybe Glyph)
-  , _font     :: O.OpentypeFont
+  { name         :: Maybe String
+  , allGlyphs    :: Map.Map Char (Maybe Glyph)
+  , opentypeFont :: O.OpentypeFont
   }
 
 data Font = Font
@@ -41,8 +41,8 @@ data Font = Font
   }
 
 fontScale :: Font -> Float
-fontScale (Font (Typeface _ _ o) size) = size * scale where
-  scale = 1 / fromIntegral (O.unitsPerEm (O.headTable o))
+fontScale (Font face size) = size * scale where
+  scale = 1 / fromIntegral (O.unitsPerEm (O.headTable (opentypeFont face)))
 
 
 readTypeface :: Has (Lift IO) sig m => FilePath -> m Typeface
