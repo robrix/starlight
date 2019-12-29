@@ -44,7 +44,6 @@ data Typeface = Typeface
   { name         :: Maybe String
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
-  , fbuffer      :: Framebuffer
   , glyphP       :: Program Glyph.U Glyph.V Glyph.O
   , glyphB       :: Buffer 'B.Array (Glyph.V I)
   , glyphA       :: Array (Glyph.V I)
@@ -71,7 +70,6 @@ readTypeface
 readTypeface path = do
   o <- sendM (O.readOTFile path)
 
-  fbuffer <- gen1
   glyphP <- build Glyph.shader
   glyphA <- gen1
   glyphB <- gen1
@@ -106,7 +104,6 @@ readTypeface path = do
     { name = opentypeFontName o
     , allGlyphs
     , opentypeFont = o
-    , fbuffer
     , glyphP
     , glyphA
     , glyphB
