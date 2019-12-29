@@ -4,6 +4,7 @@ module Data.Functor.Interval
 , size
 , _min
 , _max
+, Union(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -91,3 +92,9 @@ _min = lens min_ (\ r v -> r { min_ = v })
 
 _max :: Lens' (Interval f a) (f a)
 _max = lens max_ (\ r v -> r { max_ = v })
+
+
+newtype Union f a = Union { getUnion :: Interval f a }
+
+instance (Applicative f, Ord a) => Semigroup (Union f a) where
+  Union i1 <> Union i2 = Union (Interval (pure min) (pure max) <*> i1 <*> i2)
