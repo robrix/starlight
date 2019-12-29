@@ -16,7 +16,6 @@ import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
 import           Control.Carrier.Profile.Time
 import           Control.Carrier.State.Strict
-import           Control.Carrier.Time
 import           Control.Effect.Lens ((%=), (*=), (+=), (-=), (.=))
 import qualified Control.Effect.Lens as Lens
 import           Control.Effect.Lift
@@ -35,7 +34,7 @@ import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           Data.Ord (Down(..))
 import           Data.Text (unpack)
-import           Data.Time.Clock (UTCTime)
+import           Data.Time.Clock (NominalDiffTime, UTCTime, getCurrentTime, diffUTCTime)
 import           Geometry.Circle
 import           GHC.Stack
 import           GL.Array
@@ -77,7 +76,7 @@ main :: HasCallStack => IO ()
 main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings . fst <=< runProfile $ do
   system <- S.system
 
-  Window.runWindow "Starlight" (V2 1024 768) . runFinally . runTime $ now >>= \ start ->
+  Window.runWindow "Starlight" (V2 1024 768) . runFinally $ now >>= \ start ->
     evalState @Input mempty
     . evalState GameState
       { throttle = 20
@@ -166,7 +165,6 @@ controls
      , Has (State Input) sig m
      , Has (State GameState) sig m
      , Has (State UTCTime) sig m
-     , Has Time sig m
      )
   => [S.Instant Float]
   -> Label
@@ -418,3 +416,11 @@ _rotation = lens Main.rotation (\ s r -> s { Main.rotation = r })
 
 _target :: Lens' Actor (Maybe Int)
 _target = lens target (\ s t -> s { target = t })
+
+
+
+now :: Has (Lift IO) sig m => m UTCTime
+now = sendM getCurrentTime
+
+since :: Has (Lift IO) sig m => UTCTime -> m NominalDiffTime
+since t = flip diffUTCTime t <$> now
