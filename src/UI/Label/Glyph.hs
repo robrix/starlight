@@ -49,7 +49,7 @@ shader = program $ \ u
       ]
     let trans2 t = mat3 (vec3 1 0 0) (vec3 0 1 0) (vec3 (t ^. _x) (t ^. _y) 1)
         scale2 s = mat3 (vec3 s 0 0) (vec3 0 s 0) (vec3 0 0 1)
-        m =   matrix3 u
+        m =   matrix u
           !*! trans2 (get t ^* scale u)
           !*! scale2 (fontScale u)
           !*! trans2 (offset u)
@@ -66,7 +66,7 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix3   :: v (M33 Float)
+  { matrix    :: v (M33 Float)
   , scale     :: v Float
   , fontScale :: v Float
   , offset    :: v (V2 Float)
