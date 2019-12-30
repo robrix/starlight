@@ -176,17 +176,17 @@ controls bodies fpsL input = measure "controls" $ do
 
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
-  when (input ^. (_pressed SDL.KeycodeMinus)) $
+  when (input ^. _pressed SDL.KeycodeMinus) $
     _throttle -= dt * 10
 
   thrust <- (dt *) <$> Lens.use _throttle
 
   let angular = dt *^ Radians 5
 
-  when (input ^. (_pressed SDL.KeycodeUp)) $ do
+  when (input ^. _pressed SDL.KeycodeUp) $ do
     rotation <- Lens.use (_player . _rotation)
     _player . _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
-  when (input ^. (_pressed SDL.KeycodeDown)) $ do
+  when (input ^. _pressed SDL.KeycodeDown) $ do
     rotation <- Lens.use (_player . _rotation)
     velocity <- Lens.use (_player . _velocity)
     let angle = fst (polar2 (negated velocity))
@@ -194,12 +194,12 @@ controls bodies fpsL input = measure "controls" $ do
         delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
     _player . _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
 
-  when (input ^. (_pressed SDL.KeycodeLeft)) $
+  when (input ^. _pressed SDL.KeycodeLeft) $
     _player . _rotation *= axisAngle (unit _z) (getRadians angular)
-  when (input ^. (_pressed SDL.KeycodeRight)) $
+  when (input ^. _pressed SDL.KeycodeRight) $
     _player . _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  when (input ^. (_pressed SDL.KeycodeTab)) $ do
+  when (input ^. _pressed SDL.KeycodeTab) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
