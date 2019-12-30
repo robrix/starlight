@@ -1,0 +1,107 @@
+*******************************************************************************
+JPL/HORIZONS                      10 Hygiea                2019-Dec-30 09:00:03
+Rec #:      10 (+COV) Soln.date: 2019-Dec-13_20:30:00   # obs: 3442 (1849-2019)
+ 
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+ 
+  EPOCH=  2451581.5 ! 2000-Feb-07.00 (TDB)         Residual RMS= .20665
+   EC= .1194647199969739   QR= 2.76351218870737    TP= 2451662.2030764143
+   OM= 283.6614909076246   W=  314.3589679913575   IN= 3.842694738996761
+   A= 3.138445728941006    MA= 345.6938679406439   ADIST= 3.513379269174642
+   PER= 5.56007            N= .177268727           ANGMOM= .030256406
+   DAN= 2.85518            DDN= 3.3756             L= 238.0849329
+   B= -2.7464171           MOID= 1.75231004        TP= 2000-Apr-27.7030764143
+ 
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= 7.                  RAD= 203.56             ROTPER= 27.63
+   H= 5.43                 G= .150                 B-V= .696
+                           ALBEDO= .0717           STYP= C
+ 
+ASTEROID comments: 
+1: soln ref.= JPL#93, OCC=0
+2: source=ORB
+*******************************************************************************
+ 
+
+ 
+
+*******************************************************************************
+Ephemeris / WWW_USER Mon Dec 30 09:00:03 2019 Pasadena, USA      / Horizons    
+*******************************************************************************
+Target body name: 10 Hygiea                       {source: JPL#93}
+Center body name: Sun (10)                        {source: DE431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2020-Jan-01 00:00:00.0000 TDB
+Stop  time      : A.D. 2020-Jan-01 00:01:00.0000 TDB
+Step-size       : 60 minutes
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Keplerian GM    : 1.3271244004193930E+11 km^3/s^2
+Small perturbers: Yes                             {source: SB431-N16}
+Output units    : KM-S, deg                                                    
+Output type     : GEOMETRIC osculating elements
+Output format   : 10
+Reference frame : ICRF/J2000.0                                                 
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2451581.5 ! 2000-Feb-07.00 (TDB)         Residual RMS= .20665        
+   EC= .1194647199969739   QR= 2.76351218870737    TP= 2451662.2030764143      
+   OM= 283.6614909076246   W=  314.3589679913575   IN= 3.842694738996761       
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-2.130193507332756E+00  Y=-1.562891661430249E+00  Z=-8.598427156668684E-01
+  VX= 7.235935161365305E-03 VY=-7.603918035440608E-03 VZ=-2.922682003958465E-03
+Asteroid physical parameters (km, seconds, rotational period in hours):        
+   GM= 7.                  RAD= 203.56             ROTPER= 27.63               
+   H= 5.43                 G= .150                 B-V= .696                   
+                           ALBEDO= .0717           STYP= C                     
+*******************************************************************************
+            JDTDB,            Calendar Date (TDB),                     EC,                     QR,                     IN,                     OM,                      W,                     Tp,                      N,                     MA,                     TA,                      A,                     AD,                     PR,
+**************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+$$SOE
+2458849.500000000, A.D. 2020-Jan-01 00:00:00.0000,  1.122156412271784E-01,  4.173270643009322E+08,  3.831711254371847E+00,  2.831987828136230E+02,  3.123862263752777E+02,  7.999591572569396E+07,  2.047975976539607E-06,  1.961702863724918E+02,  1.930175223851838E+02,  4.700770633961165E+08,  5.228270624913008E+08,  1.757833119743325E+08,
+$$EOE
+**************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    XY-plane: plane of the Earth's orbit at the reference epoch
+              Note: obliquity of 84381.448 arcseconds wrt ICRF equator (IAU76)
+    X-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    Z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+  Symbol meaning:
+
+    JDTDB    Julian Day Number, Barycentric Dynamical Time
+      EC     Eccentricity, e                                                   
+      QR     Periapsis distance, q (km)                                        
+      IN     Inclination w.r.t XY-plane, i (degrees)                           
+      OM     Longitude of Ascending Node, OMEGA, (degrees)                     
+      W      Argument of Perifocus, w (degrees)                                
+      Tp     Time of periapsis relative to epoch (P-E) (sec)                   
+      N      Mean motion, n (degrees/sec)                                      
+      MA     Mean anomaly, M (degrees)                                         
+      TA     True anomaly, nu (degrees)                                        
+      A      Semi-major axis, a (km)                                           
+      AD     Apoapsis distance (km)                                            
+      PR     Sidereal orbit period (sec)                                       
+
+Geometric states/elements have no aberrations applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  http://ssd.jpl.nasa.gov/?horizons
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************
