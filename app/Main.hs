@@ -259,6 +259,7 @@ ai bodies (Delta (Seconds dt)) = do
         , velocity = if abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation') - angle)) < pi/2 then velocity + rotate rotation' (unit _x ^* thrust) ^. _xy else velocity
         }
     -- FIXME: wander
+    -- FIXME: pick a new target
     Nothing -> a
   angular = dt *^ Radians 5
   thrust  = dt * 1
