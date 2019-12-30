@@ -101,7 +101,7 @@ setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Float -> String -> m
 setLabel Label{ ref } fontSize string = runLiftIO $ do
   l@LabelState{ texture, fbuffer, scale, face, string = oldString } <- sendIO (readIORef ref)
 
-  when (string /= oldString && not (null string)) $ do
+  if (string /= oldString && not (null string)) then do
     glBlendFunc GL_ONE GL_ONE -- add
 
     Run instances b <- layoutString face string
@@ -143,6 +143,8 @@ setLabel Label{ ref } fontSize string = runLiftIO $ do
         drawArraysInstanced Triangles range 6
 
     sendIO (writeIORef ref l { UI.Label.size, string })
+  else
+    sendIO (writeIORef ref l { UI.Label.size = 0, string })
 
 
 drawLabel
