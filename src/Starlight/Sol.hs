@@ -65,7 +65,7 @@ bodies orbits = bodies where
       }
 
     , Body
-      { name        = "Earth"
+      { name        = "Terra"
       , code        = 399
       , radius      = unKilo 6378.14
       , mass        = 5.97219e24
