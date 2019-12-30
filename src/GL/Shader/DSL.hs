@@ -32,6 +32,7 @@ module GL.Shader.DSL
 , vec2
 , vec3
 , vec4
+, mat2
 , mat3
 , mat4
 , ext3
@@ -94,6 +95,7 @@ module GL.Shader.DSL
   -- * Re-exports
 , Type(..)
 , Colour
+, M22
 , M33
 , M44
 , Point(..)
@@ -122,7 +124,7 @@ import           GL.Shader (Type(..))
 import           GL.TextureUnit
 import qualified GL.Uniform as GL
 import           Linear.Affine (Point(..))
-import           Linear.Matrix (M33, M44)
+import           Linear.Matrix (M22, M33, M44)
 import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
@@ -271,6 +273,7 @@ data Expr (k :: Type) a where
   Vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
   Vec3 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V3 Float)
   Vec4 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V4 Float)
+  Mat2 :: Expr k (V2 Float) -> Expr k (V2 Float) -> Expr k (M22 Float)
   Mat3 :: Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (M33 Float)
   Mat4 :: Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (M44 Float)
   Ext3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
@@ -354,6 +357,9 @@ vec3 = Vec3
 
 vec4 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V4 Float)
 vec4 = Vec4
+
+mat2 :: Expr k (V2 Float) -> Expr k (V2 Float) -> Expr k (M22 Float)
+mat2 = Mat2
 
 mat3 :: Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (M33 Float)
 mat3 = Mat3
@@ -596,6 +602,7 @@ renderExpr = parens . \case
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
   Vec3 a b c -> fn "vec3" [renderExpr a, renderExpr b, renderExpr c]
   Vec4 a b c d -> fn "vec4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
+  Mat2 a b -> fn "mat2" [renderExpr a, renderExpr b]
   Mat3 a b c -> fn "mat3" [renderExpr a, renderExpr b, renderExpr c]
   Mat4 a b c d -> fn "mat4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
   Ext3 a b -> fn "vec3" [renderExpr a, renderExpr b]
