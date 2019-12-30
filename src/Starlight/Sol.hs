@@ -13,7 +13,7 @@ import           Control.Monad (guard)
 import           Data.Char (isSpace, toUpper)
 import           Data.List (sortOn)
 import           Data.Maybe (fromMaybe)
-import qualified Data.IntMap as IntMap
+import qualified Data.Map as Map
 import           Linear.Quaternion
 import           Linear.V4
 import           Linear.Vector
@@ -25,9 +25,11 @@ import           Unit.Angle
 import           Unit.Length
 import           Unit.Time
 
-bodies :: IntMap.IntMap (String, Orbit Float) -> IntMap.IntMap (Body Float)
+type Code = Int
+
+bodies :: Map.Map Code (String, Orbit Float) -> Map.Map Code (Body Float)
 bodies orbits = bodies where
-  bodies = IntMap.fromList $ map ((,) . code <*> id)
+  bodies = Map.fromList $ map ((,) . code <*> id)
     [ Body
       { name        = "Sol"
       , code        = 10
@@ -36,7 +38,7 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 7.25))
       , period      = fromDays 25.05
       , colour      = V4 1 1 0 1
-      , orbit       = snd (orbits IntMap.! 10)
+      , orbit       = snd (orbits Map.! 10)
       , parent      = Nothing
       }
 
@@ -48,8 +50,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.034))
       , period      = fromDays 58.646
       , colour      = V4 0.5 0.5 0.5 1
-      , orbit       = snd (orbits IntMap.! 199)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 199)
+      , parent      = bodies Map.!? 10
       }
 
     , Body
@@ -60,8 +62,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 177.3))
       , period      = fromDays 243.025
       , colour      = V4 1 1 0.5 1
-      , orbit       = snd (orbits IntMap.! 299)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 299)
+      , parent      = bodies Map.!? 10
       }
 
     , Body
@@ -72,8 +74,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 23.4392911))
       , period      = fromDays 0.99726968
       , colour      = V4 0 0 1 1
-      , orbit       = snd (orbits IntMap.! 399)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 399)
+      , parent      = bodies Map.!? 10
       }
 
     , Body
@@ -84,8 +86,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 6.687))
       , period      = fromDays 27.321661
       , colour      = V4 0.5 0.5 0.5 1
-      , orbit       = snd (orbits IntMap.! 301)
-      , parent      = bodies IntMap.!? 399
+      , orbit       = snd (orbits Map.! 301)
+      , parent      = bodies Map.!? 399
       }
 
     , Body
@@ -96,8 +98,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 25.19))
       , period      = fromDays 1.025957
       , colour      = V4 1 0 0 1
-      , orbit       = snd (orbits IntMap.! 499)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 499)
+      , parent      = bodies Map.!? 10
       }
 
     , Body
@@ -106,10 +108,10 @@ bodies orbits = bodies where
       , radius      = unKilo 11.2667
       , mass        = 1.0659e16
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
-      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 401) -- synchronous
+      , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 401) -- synchronous
       , colour      = V4 131 120 110 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 401)
-      , parent      = bodies IntMap.!? 499
+      , orbit       = snd (orbits Map.! 401)
+      , parent      = bodies Map.!? 499
       }
 
     , Body
@@ -118,10 +120,10 @@ bodies orbits = bodies where
       , radius      = unKilo 6.2
       , mass        = 1.4762e15
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0)) -- unknown
-      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 402) -- synchronous
+      , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 402) -- synchronous
       , colour      = V4 188 170 145 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 402)
-      , parent      = bodies IntMap.!? 499
+      , orbit       = snd (orbits Map.! 402)
+      , parent      = bodies Map.!? 499
       }
 
     , Body
@@ -132,8 +134,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 3.13))
       , period      = fromHours 9.925
       , colour      = V4 0.5 0.5 0 1
-      , orbit       = snd (orbits IntMap.! 599)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 599)
+      , parent      = bodies Map.!? 10
       }
 
     , Body
@@ -142,10 +144,10 @@ bodies orbits = bodies where
       , radius      = unKilo 1821.3
       , mass        = 893.3e20
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 1)) -- unknown
-      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 501) -- synchronous
+      , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 501) -- synchronous
       , colour      = V4 253 249 156 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 501)
-      , parent      = bodies IntMap.!? 599
+      , orbit       = snd (orbits Map.! 501)
+      , parent      = bodies Map.!? 599
       }
 
     , Body
@@ -154,10 +156,10 @@ bodies orbits = bodies where
       , radius      = unKilo 1560.8
       , mass        = 4.799844e22
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.1))
-      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 502) -- synchronous
+      , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 502) -- synchronous
       , colour      = V4 184 164 130 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 502)
-      , parent      = bodies IntMap.!? 599
+      , orbit       = snd (orbits Map.! 502)
+      , parent      = bodies Map.!? 599
       }
 
     , Body
@@ -166,10 +168,10 @@ bodies orbits = bodies where
       , radius      = unKilo 2634.1
       , mass        = 1.4819e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.33))
-      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 503) -- synchronous
+      , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 503) -- synchronous
       , colour      = V4 143 132 117 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 503)
-      , parent      = bodies IntMap.!? 599
+      , orbit       = snd (orbits Map.! 503)
+      , parent      = bodies Map.!? 599
       }
 
     , Body
@@ -178,10 +180,10 @@ bodies orbits = bodies where
       , radius      = unKilo 2410.3
       , mass        = 1.075938e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
-      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 504) -- synchronous
+      , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 504) -- synchronous
       , colour      = V4 107 95 79 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 504)
-      , parent      = bodies IntMap.!? 599
+      , orbit       = snd (orbits Map.! 504)
+      , parent      = bodies Map.!? 599
       }
 
     , Body
@@ -190,10 +192,10 @@ bodies orbits = bodies where
       , radius      = unKilo 83.5
       , mass        = 2.08e18
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
-      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 505) -- synchronous
+      , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 505) -- synchronous
       , colour      = V4 157 157 157 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 505)
-      , parent      = bodies IntMap.!? 599
+      , orbit       = snd (orbits Map.! 505)
+      , parent      = bodies Map.!? 599
       }
 
     , Body
@@ -204,8 +206,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
       , period      = fromHours 7.782 -- !
       , colour      = V4 203 203 203 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 506)
-      , parent      = bodies IntMap.!? 599
+      , orbit       = snd (orbits Map.! 506)
+      , parent      = bodies Map.!? 599
       }
 
     , Body
@@ -216,8 +218,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 26.73))
       , period      = fromHours 10 + fromMinutes 33 + Seconds 38
       , colour      = V4 (229/255) (216/255) (167/255) 1
-      , orbit       = snd (orbits IntMap.! 699)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 699)
+      , parent      = bodies Map.!? 10
       }
 
     , Body
@@ -228,8 +230,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 97.77))
       , period      = fromDays 0.71833
       , colour      = V4 (196/255) (221/255) (240/255) 1
-      , orbit       = snd (orbits IntMap.! 799)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 799)
+      , parent      = bodies Map.!? 10
       }
 
     , Body
@@ -240,8 +242,8 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 28.32))
       , period      = fromDays 0.6713
       , colour      = V4 (138/255) (163/255) (217/255) 1
-      , orbit       = snd (orbits IntMap.! 899)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 899)
+      , parent      = bodies Map.!? 10
       }
 
     , Body
@@ -252,14 +254,14 @@ bodies orbits = bodies where
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 122.53))
       , period      = fromDays 6.387230
       , colour      = V4 165 157 144 255 ^/ 255
-      , orbit       = snd (orbits IntMap.! 999)
-      , parent      = bodies IntMap.!? 10
+      , orbit       = snd (orbits Map.! 999)
+      , parent      = bodies Map.!? 10
       }
     ]
 
 system :: (Has (Lift IO) sig m, MonadFail m) => m (System Float)
 system = do
-  orbits <- fromDirectory "ephemerides" >>= \ orbits -> pure (IntMap.fromList
+  orbits <- fromDirectory "ephemerides" >>= \ orbits -> pure (Map.fromList
     [ (code, (dropWhile isSpace (dropExtension rest), orbit))
     | (path, orbit) <- orbits
     , (code, rest) <- readDec path
@@ -274,13 +276,13 @@ system = do
         , period      = fromDays 1
         , colour      = white
         , orbit
-        , parent      = guard (isMoon code) *> (bodies IntMap.!? ((code `quot` 100) * 100 + 99)) <|> bodies IntMap.!? 10
+        , parent      = guard (isMoon code) *> (bodies Map.!? ((code `quot` 100) * 100 + 99)) <|> bodies Map.!? 10
         }
-      systemScale = 100000 / getMetres (radius (bodies IntMap.! 10))
+      systemScale = 100000 / getMetres (radius (bodies Map.! 10))
 
   pure . System systemScale $ sortOn code
-    [ fromMaybe (placeholder code (initCap name) orbit) (bodies IntMap.!? code)
-    | (code, (name, orbit)) <- IntMap.toList orbits
+    [ fromMaybe (placeholder code (initCap name) orbit) (bodies Map.!? code)
+    | (code, (name, orbit)) <- Map.toList orbits
     ] where
   isMoon code = code `mod` 100 /= 99
   initCap = \case
