@@ -356,7 +356,8 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fps
 
     bindArray radarA $ for_ bodies drawBlip
 
-  measure "drawLabel" $ drawLabel fpsL (V2 0 0) white Nothing
+  fpsSize <- labelSize fpsL
+  measure "drawLabel" $ drawLabel fpsL (V2 0 (floor (size ^. _y) - fpsSize ^. _y)) white Nothing
 
 roundToPlaces :: RealFloat a => Int -> a -> a
 roundToPlaces n x = fromInteger (round (x * n')) / n' where
