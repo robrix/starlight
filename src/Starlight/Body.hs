@@ -111,7 +111,7 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
 
 
 rotationTimeScale :: Num a => Seconds a
-rotationTimeScale = 3600
+rotationTimeScale = 1
 
 orbitTimeScale :: Num a => Seconds a
 orbitTimeScale = 1
