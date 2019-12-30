@@ -6,6 +6,7 @@ module Starlight.Sol
 ( system
 ) where
 
+import           Control.Applicative ((<|>))
 import           Control.Effect.Lift
 import           Data.Char (isSpace)
 import           Data.List (sortOn)
@@ -259,7 +260,7 @@ system = do
         , period      = fromDays 1
         , colour      = white
         , orbit
-        , parent      = Just (bodies IntMap.! 10)
+        , parent      = (if code `mod` 100 == 99 then Nothing else bodies IntMap.!? (((code `quot` 100) * 100) + 99)) <|> bodies IntMap.!? 10
         }
       systemScale = 100000 / getMetres (radius (bodies IntMap.! 10))
 
