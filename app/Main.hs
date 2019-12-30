@@ -127,7 +127,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
             input <- measure "input" input
             dt <- controls bodies fpsL targetL input
             gameState <- measure "physics" (physics bodies dt)
-            draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL } bodies gameState
+            draw View{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL } bodies gameState
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -262,11 +262,11 @@ draw
      , Has Profile sig m
      , Has Window.Window sig m
      )
-  => DrawState
+  => View
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
+draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
   let Actor{ position, velocity, target } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -373,7 +373,7 @@ roundToPlaces n x = fromInteger (round (x * n')) / n' where
   n' = 10 ^ n
 
 
-data DrawState = DrawState
+data View = View
   { quadA   :: Array (Stars.V I)
   , circleA :: Array (Body.V  I)
   , shipA   :: Array (Ship.V  I)
