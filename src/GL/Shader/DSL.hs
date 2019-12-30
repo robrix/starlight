@@ -548,14 +548,14 @@ renderStmt = \case
   While c t k
     -> pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
     <> renderStmt k
-  (:.=) (Ref r) v k
-    -> pretty r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+  (:.=) r v k
+    -> renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt k
-  (:+=) (Ref r) v k
-    -> pretty r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
+  (:+=) r v k
+    -> renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt k
-  (:*=) (Ref r) v k
-    -> pretty r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+  (:*=) r v k
+    -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt k
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
@@ -598,7 +598,7 @@ renderExpr = parens . \case
   Eq a b -> renderExpr a <+> pretty "==" <+> renderExpr b
   Lt a b -> renderExpr a <+> pretty '<' <+> renderExpr b
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
-  Get (Ref n) -> pretty n
+  Get r -> renderRef r
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
   Vec3 a b c -> fn "vec3" [renderExpr a, renderExpr b, renderExpr c]
   Vec4 a b c d -> fn "vec4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
@@ -619,6 +619,10 @@ renderExpr = parens . \case
   Coerce a -> renderExpr a
   where
   fn n as = pretty n <> tupled as
+
+renderRef :: Ref k a -> Doc ()
+renderRef = \case
+  Ref n        -> pretty n
 
 
 class GL.Uniform a => GLSLType a where
