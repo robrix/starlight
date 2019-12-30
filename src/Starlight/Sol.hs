@@ -2,6 +2,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NumericUnderscores #-}
 -- | A familiar star system.
 module Starlight.Sol
 ( system
@@ -31,8 +32,8 @@ bodies orbits = bodies where
     [ Body
       { name        = "Sol"
       , code        = 10
-      , radius      = unKilo 695500.0
-      , mass        = 1.9885e30
+      , radius      = unKilo 695_500.0
+      , mass        = 1.988_5e30
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 7.25))
       , period      = fromDays 25.05
       , colour      = V4 1 1 0 1
@@ -43,7 +44,7 @@ bodies orbits = bodies where
     , Body
       { name        = "Mercury"
       , code        = 199
-      , radius      = unKilo 2439.7
+      , radius      = unKilo 2_439.7
       , mass        = 3.302e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.034))
       , period      = fromDays 58.646
@@ -55,7 +56,7 @@ bodies orbits = bodies where
     , Body
       { name        = "Venus"
       , code        = 299
-      , radius      = unKilo 6051.9
+      , radius      = unKilo 6_051.9
       , mass        = 48.685e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 177.3))
       , period      = fromDays 243.025
@@ -67,10 +68,10 @@ bodies orbits = bodies where
     , Body
       { name        = "Terra"
       , code        = 399
-      , radius      = unKilo 6378.14
-      , mass        = 5.97219e24
+      , radius      = unKilo 6_378.14
+      , mass        = 5.972_19e24
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 23.4392911))
-      , period      = fromDays 0.99726968
+      , period      = fromDays 0.997_269_68
       , colour      = V4 0 0 1 1
       , orbit       = snd (orbits Map.! 399)
       , parent      = bodies Map.!? 10
@@ -79,10 +80,10 @@ bodies orbits = bodies where
     , Body
       { name        = "Luna"
       , code        = 301
-      , radius      = unKilo 1737.5
+      , radius      = unKilo 1_737.5
       , mass        = 7.342e22
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 6.687))
-      , period      = fromDays 27.321661
+      , period      = fromDays 27.321_661
       , colour      = V4 0.5 0.5 0.5 1
       , orbit       = snd (orbits Map.! 301)
       , parent      = bodies Map.!? 399
@@ -91,8 +92,8 @@ bodies orbits = bodies where
     , Body
       { name        = "Mars"
       , code        = 499
-      , radius      = unKilo 3397
-      , mass        = 6.4171e23
+      , radius      = unKilo 3_397
+      , mass        = 6.417_1e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 25.19))
       , period      = fromDays 1.025957
       , colour      = V4 1 0 0 1
@@ -103,8 +104,8 @@ bodies orbits = bodies where
     , Body
       { name        = "Phobos"
       , code        = 401
-      , radius      = unKilo 11.2667
-      , mass        = 1.0659e16
+      , radius      = unKilo 11.266_7
+      , mass        = 1.065_9e16
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
       , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 401) -- synchronous
       , colour      = V4 131 120 110 255 ^/ 255
@@ -116,7 +117,7 @@ bodies orbits = bodies where
       { name        = "Deimos"
       , code        = 402
       , radius      = unKilo 6.2
-      , mass        = 1.4762e15
+      , mass        = 1.476_2e15
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0)) -- unknown
       , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 402) -- synchronous
       , colour      = V4 188 170 145 255 ^/ 255
@@ -127,8 +128,8 @@ bodies orbits = bodies where
     , Body
       { name        = "Jupiter"
       , code        = 599
-      , radius      = unKilo 69911
-      , mass        = 1898.13e24
+      , radius      = unKilo 69_911
+      , mass        = 1_898.13e24
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 3.13))
       , period      = fromHours 9.925
       , colour      = V4 0.5 0.5 0 1
@@ -139,7 +140,7 @@ bodies orbits = bodies where
     , Body
       { name        = "Io"
       , code        = 501
-      , radius      = unKilo 1821.3
+      , radius      = unKilo 1_821.3
       , mass        = 893.3e20
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 1)) -- unknown
       , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 501) -- synchronous
@@ -151,8 +152,8 @@ bodies orbits = bodies where
     , Body
       { name        = "Europa"
       , code        = 502
-      , radius      = unKilo 1560.8
-      , mass        = 4.799844e22
+      , radius      = unKilo 1_560.8
+      , mass        = 4.799_844e22
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.1))
       , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 502) -- synchronous
       , colour      = V4 184 164 130 255 ^/ 255
@@ -163,8 +164,8 @@ bodies orbits = bodies where
     , Body
       { name        = "Ganymede"
       , code        = 503
-      , radius      = unKilo 2634.1
-      , mass        = 1.4819e23
+      , radius      = unKilo 2_634.1
+      , mass        = 1.481_9e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.33))
       , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 503) -- synchronous
       , colour      = V4 143 132 117 255 ^/ 255
@@ -175,8 +176,8 @@ bodies orbits = bodies where
     , Body
       { name        = "Callisto"
       , code        = 504
-      , radius      = unKilo 2410.3
-      , mass        = 1.075938e23
+      , radius      = unKilo 2_410.3
+      , mass        = 1.075_938e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
       , period      = (\ (_, Orbit{period}) -> period) (orbits Map.! 504) -- synchronous
       , colour      = V4 107 95 79 255 ^/ 255
@@ -211,8 +212,8 @@ bodies orbits = bodies where
     , Body
       { name        = "Saturn"
       , code        = 699
-      , radius      = unKilo 58232
-      , mass        = 5.6834e26
+      , radius      = unKilo 58_232
+      , mass        = 5.683_4e26
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 26.73))
       , period      = fromHours 10 + fromMinutes 33 + Seconds 38
       , colour      = V4 (229/255) (216/255) (167/255) 1
@@ -223,7 +224,7 @@ bodies orbits = bodies where
     , Body
       { name        = "Uranus"
       , code        = 799
-      , radius      = unKilo 25362
+      , radius      = unKilo 25_362
       , mass        = 86.813e24
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 97.77))
       , period      = fromDays 0.71833
@@ -235,7 +236,7 @@ bodies orbits = bodies where
     , Body
       { name        = "Neptune"
       , code        = 899
-      , radius      = unKilo 24624
+      , radius      = unKilo 24_624
       , mass        = 102.413e24
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 28.32))
       , period      = fromDays 0.6713
@@ -247,10 +248,10 @@ bodies orbits = bodies where
     , Body
       { name        = "Pluto"
       , code        = 999
-      , radius      = unKilo 1188.3
+      , radius      = unKilo 1_188.3
       , mass        = 1.303e22
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 122.53))
-      , period      = fromDays 6.387230
+      , period      = fromDays 6.387_230
       , colour      = V4 165 157 144 255 ^/ 255
       , orbit       = snd (orbits Map.! 999)
       , parent      = bodies Map.!? 10
@@ -268,7 +269,7 @@ system = do
       placeholder code name orbit = Body
         { name
         , code
-        , radius      = unKilo 1000
+        , radius      = unKilo 1_000
         , mass        = 1.307e22
         , orientation = axisAngle (unit _x) (getRadians (fromDegrees 5))
         , period      = fromDays 1
@@ -276,7 +277,7 @@ system = do
         , orbit
         , parent      = guard (isMoon code) *> (bodies Map.!? ((code `quot` 100) * 100 + 99)) <|> bodies Map.!? 10
         }
-      systemScale = 100000 / getMetres (radius (bodies Map.! 10))
+      systemScale = 100_000 / getMetres (radius (bodies Map.! 10))
 
   pure . System systemScale $ sortOn code
     [ fromMaybe (placeholder code (initCap name) orbit) (bodies Map.!? code)
