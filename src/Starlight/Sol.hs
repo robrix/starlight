@@ -46,7 +46,7 @@ bodies orbits = bodies where
       , period      = fromDays 58.646
       , colour      = V4 0.5 0.5 0.5 1
       , orbit       = snd (orbits IntMap.! 199)
-      , parent      = Just (bodies IntMap.! 10)
+      , parent      = bodies IntMap.!? 10
       }
 
     , Body
@@ -58,7 +58,7 @@ bodies orbits = bodies where
       , period      = fromDays 243.025
       , colour      = V4 1 1 0.5 1
       , orbit       = snd (orbits IntMap.! 299)
-      , parent      = Just (bodies IntMap.! 10)
+      , parent      = bodies IntMap.!? 10
       }
 
     , Body
@@ -70,7 +70,7 @@ bodies orbits = bodies where
       , period      = fromDays 0.99726968
       , colour      = V4 0 0 1 1
       , orbit       = snd (orbits IntMap.! 399)
-      , parent      = Just (bodies IntMap.! 10)
+      , parent      = bodies IntMap.!? 10
       }
 
     , Body
@@ -82,7 +82,7 @@ bodies orbits = bodies where
       , period      = fromDays 27.321661
       , colour      = V4 0.5 0.5 0.5 1
       , orbit       = snd (orbits IntMap.! 301)
-      , parent      = Just (bodies IntMap.! 399)
+      , parent      = bodies IntMap.!? 399
       }
 
     , Body
@@ -94,7 +94,7 @@ bodies orbits = bodies where
       , period      = fromDays 1.025957
       , colour      = V4 1 0 0 1
       , orbit       = snd (orbits IntMap.! 499)
-      , parent      = Just (bodies IntMap.! 10)
+      , parent      = bodies IntMap.!? 10
       }
 
     , Body
@@ -106,7 +106,7 @@ bodies orbits = bodies where
       , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 401) -- synchronous
       , colour      = V4 131 120 110 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 401)
-      , parent      = Just (bodies IntMap.! 499)
+      , parent      = bodies IntMap.!? 499
       }
 
     , Body
@@ -118,7 +118,7 @@ bodies orbits = bodies where
       , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 402) -- synchronous
       , colour      = V4 188 170 145 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 402)
-      , parent      = Just (bodies IntMap.! 499)
+      , parent      = bodies IntMap.!? 499
       }
 
     , Body
@@ -130,7 +130,7 @@ bodies orbits = bodies where
       , period      = fromHours 9.925
       , colour      = V4 0.5 0.5 0 1
       , orbit       = snd (orbits IntMap.! 599)
-      , parent      = Just (bodies IntMap.! 10)
+      , parent      = bodies IntMap.!? 10
       }
 
     , Body
@@ -142,7 +142,7 @@ bodies orbits = bodies where
       , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 501) -- synchronous
       , colour      = V4 253 249 156 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 501)
-      , parent      = Just (bodies IntMap.! 599)
+      , parent      = bodies IntMap.!? 599
       }
 
     , Body
@@ -154,7 +154,7 @@ bodies orbits = bodies where
       , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 502) -- synchronous
       , colour      = V4 184 164 130 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 502)
-      , parent      = Just (bodies IntMap.! 599)
+      , parent      = bodies IntMap.!? 599
       }
 
     , Body
@@ -166,7 +166,7 @@ bodies orbits = bodies where
       , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 503) -- synchronous
       , colour      = V4 143 132 117 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 503)
-      , parent      = Just (bodies IntMap.! 599)
+      , parent      = bodies IntMap.!? 599
       }
 
     , Body
@@ -178,7 +178,7 @@ bodies orbits = bodies where
       , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 504) -- synchronous
       , colour      = V4 107 95 79 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 504)
-      , parent      = Just (bodies IntMap.! 599)
+      , parent      = bodies IntMap.!? 599
       }
 
     , Body
@@ -190,7 +190,7 @@ bodies orbits = bodies where
       , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 505) -- synchronous
       , colour      = V4 157 157 157 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 505)
-      , parent      = Just (bodies IntMap.! 599)
+      , parent      = bodies IntMap.!? 599
       }
 
     , Body
@@ -202,7 +202,7 @@ bodies orbits = bodies where
       , period      = fromHours 7.782 -- !
       , colour      = V4 203 203 203 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 506)
-      , parent      = Just (bodies IntMap.! 599)
+      , parent      = bodies IntMap.!? 599
       }
 
     , Body
@@ -214,7 +214,7 @@ bodies orbits = bodies where
       , period      = fromHours 10 + fromMinutes 33 + Seconds 38
       , colour      = V4 (229/255) (216/255) (167/255) 1
       , orbit       = snd (orbits IntMap.! 699)
-      , parent      = Just (bodies IntMap.! 10)
+      , parent      = bodies IntMap.!? 10
       }
 
     , Body
@@ -226,7 +226,7 @@ bodies orbits = bodies where
       , period      = fromDays 0.71833
       , colour      = V4 (196/255) (221/255) (240/255) 1
       , orbit       = snd (orbits IntMap.! 799)
-      , parent      = Just (bodies IntMap.! 10)
+      , parent      = bodies IntMap.!? 10
       }
 
     , Body
@@ -238,7 +238,7 @@ bodies orbits = bodies where
       , period      = fromDays 0.6713
       , colour      = V4 (138/255) (163/255) (217/255) 1
       , orbit       = snd (orbits IntMap.! 899)
-      , parent      = Just (bodies IntMap.! 10)
+      , parent      = bodies IntMap.!? 10
       }
     ]
 
