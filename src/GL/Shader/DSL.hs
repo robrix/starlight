@@ -65,6 +65,7 @@ module GL.Shader.DSL
 , (+=)
 , (*=)
 , (^.)
+, (^^.)
 , _x
 , _y
 , _z
@@ -333,7 +334,9 @@ instance Floating (Expr k a) where
   atanh = ATanH
 
 
-newtype Ref (k :: Type) t = Ref String
+data Ref (k :: Type) t
+  = Ref String
+  | forall s . Ref k s :^^. Prj s t
 
 newtype Prj s t = Prj String
 
@@ -475,6 +478,11 @@ infixr 4 *=
 (^.) = (:^.)
 
 infixl 8 ^.
+
+(^^.) :: Ref k a -> Prj a b -> Ref k b
+(^^.) = (:^^.)
+
+infixl 8 ^^.
 
 _x :: Prj (v a) a
 _x = Prj "x"
@@ -623,6 +631,7 @@ renderExpr = parens . \case
 renderRef :: Ref k a -> Doc ()
 renderRef = \case
   Ref n        -> pretty n
+  r :^^. Prj p -> renderRef r <> pretty '.' <> pretty p
 
 
 class GL.Uniform a => GLSLType a where
