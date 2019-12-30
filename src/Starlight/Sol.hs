@@ -98,6 +98,30 @@ bodies orbits = bodies where
       }
 
     , Body
+      { name        = "Phobos"
+      , code        = 401
+      , radius      = unKilo 11.2667
+      , mass        = 1.0659e16
+      , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
+      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 401) -- synchronous
+      , colour      = V4 131 120 110 255 ^/ 255
+      , orbit       = snd (orbits IntMap.! 401)
+      , parent      = Just (bodies IntMap.! 499)
+      }
+
+    , Body
+      { name        = "Deimos"
+      , code        = 402
+      , radius      = unKilo 6.2
+      , mass        = 1.4762e15
+      , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0)) -- unknown
+      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 42) -- synchronous
+      , colour      = V4 188 170 145 255 ^/ 255
+      , orbit       = snd (orbits IntMap.! 402)
+      , parent      = Just (bodies IntMap.! 499)
+      }
+
+    , Body
       { name        = "Jupiter"
       , code        = 599
       , radius      = unKilo 69911
