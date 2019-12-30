@@ -55,6 +55,7 @@ data LabelState = LabelState
   , size    :: !(V2 Int)
   , scale   :: !Int
   , face    :: !Typeface
+  , string  :: !String
   }
 
 
@@ -92,55 +93,56 @@ label face = do
 
   scale <- Window.scale
 
-  Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, size = 0, scale, face })
+  Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, size = 0, scale, face, string = "" })
 
 
 -- | Set the label’s text.
 setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Float -> String -> m ()
 setLabel Label{ ref } fontSize string = runLiftIO $ do
-  l@LabelState{ texture, fbuffer, scale, face } <- sendIO (readIORef ref)
+  l@LabelState{ texture, fbuffer, scale, face, string = oldString } <- sendIO (readIORef ref)
 
-  glBlendFunc GL_ONE GL_ONE -- add
+  when (string /= oldString && not (null string)) $ do
+    glBlendFunc GL_ONE GL_ONE -- add
 
-  Run instances b <- layoutString face string
+    Run instances b <- layoutString face string
 
-  let font = Font face fontSize
-      b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
-      size = Interval.size b'
+    let font = Font face fontSize
+        b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
+        size = Interval.size b'
 
-  bind (Just texture)
-  setParameter Texture2D MagFilter Nearest
-  setParameter Texture2D MinFilter Nearest
-  setParameter Texture2D WrapS ClampToEdge
-  setParameter Texture2D WrapT ClampToEdge
-  setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
+    bind (Just texture)
+    setParameter Texture2D MagFilter Nearest
+    setParameter Texture2D MinFilter Nearest
+    setParameter Texture2D WrapS ClampToEdge
+    setParameter Texture2D WrapT ClampToEdge
+    setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
 
-  bind (Just fbuffer)
-  attachTexture (GL.Colour 0) texture
+    bind (Just fbuffer)
+    attachTexture (GL.Colour 0) texture
 
-  viewport $ scale *^ Interval 0 size
-  scissor  $ scale *^ Interval 0 size
+    viewport $ scale *^ Interval 0 size
+    scissor  $ scale *^ Interval 0 size
 
-  setClearColour transparent
-  glClear GL_COLOR_BUFFER_BIT
+    setClearColour transparent
+    glClear GL_COLOR_BUFFER_BIT
 
-  let V2 sx sy = fromIntegral scale / fmap fromIntegral size
-  drawingGlyphs face $ do
-    set defaultVars
-      { Glyph.scale     = Just (1 / fromIntegral scale)
-      , Glyph.fontScale = Just (fontScale font)
-      , Glyph.matrix    = Just
-        $   translated (-1)
-        !*! scaled     (V3 sx sy 1)
-        !*! translated (fromIntegral <$> negated (min_ b'))
-      }
-    for_ instances $ \ Instance{ offset, range } -> do
+    let V2 sx sy = fromIntegral scale / fmap fromIntegral size
+    drawingGlyphs face $ do
       set defaultVars
-        { Glyph.offset = Just offset
+        { Glyph.scale     = Just (1 / fromIntegral scale)
+        , Glyph.fontScale = Just (fontScale font)
+        , Glyph.matrix    = Just
+          $   translated (-1)
+          !*! scaled     (V3 sx sy 1)
+          !*! translated (fromIntegral <$> negated (min_ b'))
         }
-      drawArraysInstanced Triangles range 6
+      for_ instances $ \ Instance{ offset, range } -> do
+        set defaultVars
+          { Glyph.offset = Just offset
+          }
+        drawArraysInstanced Triangles range 6
 
-  sendIO (writeIORef ref l { UI.Label.size })
+    sendIO (writeIORef ref l { UI.Label.size, string })
 
 
 drawLabel
