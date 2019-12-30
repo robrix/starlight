@@ -130,7 +130,9 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           let bodies = S.bodiesAt system (getDelta t)
           continue <- fmap isJust . runEmpty $ do
             input <- measure "input" input
-            dt <- controls bodies view input
+            dt <- fmap realToFrac . since =<< get
+            put =<< now
+            controls bodies view dt input
             gameState <- measure "physics" (physics bodies dt)
             draw view bodies gameState
           continue <$ measure "swap" Window.swap
@@ -173,16 +175,13 @@ controls
      , Has Profile sig m
      , Has (State Input) sig m
      , Has (State GameState) sig m
-     , Has (State UTCTime) sig m
      )
   => [S.Instant Float]
   -> View
+  -> Delta Seconds Float
   -> Input
-  -> m (Delta Seconds Float)
-controls bodies View{ fpsL, targetL, face } input = measure "controls" $ do
-  Delta (Seconds dt) <- fmap realToFrac . since =<< get
-  put =<< now
-
+  -> m ()
+controls bodies View{ fpsL, targetL, face } (Delta (Seconds dt)) input = measure "controls" $ do
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
   when (input ^. _pressed SDL.KeycodeMinus) $
@@ -223,8 +222,7 @@ controls bodies View{ fpsL, targetL, face } input = measure "controls" $ do
 
   measure "setLabel" $ setLabel fpsL    (Font face 18) (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
   measure "setLabel" $ setLabel targetL (Font face 18) target
-
-  pure (Delta (Seconds dt)) where
+  where
   switchTarget = \case
     False -> maybe (Just 0)                      (\ i -> i + 1 <$ guard (i + 1 < length bodies))
     True  -> maybe (Just (pred (length bodies))) (\ i -> i - 1 <$ guard (i - 1 >= 0))
