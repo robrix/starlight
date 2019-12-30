@@ -32,6 +32,7 @@ import           GL.Texture
 import           GL.TextureUnit
 import           GL.Viewport
 import           Graphics.GL.Core41
+import           Lens.Micro ((^.))
 import           Linear.Exts
 import           Linear.Matrix
 import           Linear.V2
@@ -54,8 +55,9 @@ data Label = Label
   }
 
 data LabelState = LabelState
-  { size   :: !(V2 Int)
-  , string :: !String
+  { size     :: !(V2 Int)
+  , string   :: !String
+  , baseline :: !Int
   }
 
 
@@ -114,6 +116,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font string
 
         let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
             size = Interval.size b'
+            baseline = b' ^. _min . _y
 
         bind (Just texture)
         setParameter Texture2D MagFilter Nearest
@@ -147,7 +150,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font string
               }
             drawArraysInstanced Triangles range 6
 
-        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string }))
+        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline }))
 
 
 drawLabel
@@ -163,12 +166,13 @@ drawLabel
 drawLabel Label{ texture, textP, quadA, scale, ref } offset colour bcolour = runLiftIO $ do
   state <- sendIO (readIORef ref)
   case state of
-    Just LabelState{ size } -> do
+    Just LabelState{ size, baseline } -> do
       glBlendFunc GL_ZERO GL_SRC_COLOR
 
       bind @Framebuffer Nothing
 
-      let bounds = Interval offset (offset + size)
+      let offset' = offset + V2 0 baseline
+          bounds = Interval offset' (offset' + size)
       viewport $ scale *^ bounds
       scissor  $ scale *^ bounds
 
