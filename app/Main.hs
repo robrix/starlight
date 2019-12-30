@@ -81,15 +81,15 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
     . evalState GameState
       { throttle = 20
       , player   = Actor
-        { position = P (V2 25000 0)
-        , velocity = V2 0 75
+        { position = P (V2 250000 0)
+        , velocity = V2 0 150
         , rotation = axisAngle (unit _z) (pi/2)
         , target   = Nothing
         }
       , npcs =
         [ Actor
-          { position = P (V2 25000 0)
-          , velocity = V2 0 75
+          { position = P (V2 250000 0)
+          , velocity = V2 0 150
           , rotation = axisAngle (unit _z) (pi/2)
           , target   = Nothing
           }

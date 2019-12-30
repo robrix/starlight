@@ -177,7 +177,7 @@ system = do
         , orbit
         , parent      = Just (bodies IntMap.! 10)
         }
-      systemScale = 10000 / getMetres (radius (bodies IntMap.! 10))
+      systemScale = 100000 / getMetres (radius (bodies IntMap.! 10))
 
   pure . System systemScale $ sortOn code
     [ fromMaybe (placeholder code name orbit) (bodies IntMap.!? code)
