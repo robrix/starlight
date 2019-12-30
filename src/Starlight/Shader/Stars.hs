@@ -42,12 +42,12 @@ shader = program $ \ U{ resolution, origin, zoom }
         pa .= norm (get p)
         i += 1
       dm <- let' "dm" $ max' 0 (darkmatter - get a * get a * 0.001)
-      a *= get a * get a
+      a *= get a ** 2
       iff (get r `gt` 6)
         (fade *= 1.0 - dm)
         (pure ())
       v += vec3 (get fade) (get fade) (get fade)
-      v += vec3 (get s) (get s * get s) (get s * get s * get s) ^* get a ^* brightness ^* get fade
+      v += vec3 (get s) (get s ** 2) (get s ** 3) ^* get a ^* brightness ^* get fade
       fade *= distfading
       s += stepsize
       r += 1
