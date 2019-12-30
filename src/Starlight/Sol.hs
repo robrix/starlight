@@ -243,6 +243,18 @@ bodies orbits = bodies where
       , orbit       = snd (orbits IntMap.! 899)
       , parent      = bodies IntMap.!? 10
       }
+
+    , Body
+      { name        = "Pluto"
+      , code        = 999
+      , radius      = unKilo 1188.3
+      , mass        = 1.303e22
+      , orientation = axisAngle (unit _x) (getRadians (fromDegrees 122.53))
+      , period      = fromDays 6.387230
+      , colour      = V4 165 157 144 255 ^/ 255
+      , orbit       = snd (orbits IntMap.! 999)
+      , parent      = bodies IntMap.!? 10
+      }
     ]
 
 system :: (Has (Lift IO) sig m, MonadFail m) => m (System Float)
