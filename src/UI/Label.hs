@@ -199,8 +199,8 @@ drawLabel Label{ ref } offset colour bcolour = runLiftIO $ do
       when (opaque colour /= black) $ do
         glBlendFunc GL_ONE GL_ONE
         set Text.U
-          { rect    = Just rect
-          , sampler = Just textureUnit
+          { rect    = Nothing
+          , sampler = Nothing
           , colour  = Just colour
           }
         drawArrays TriangleStrip range
