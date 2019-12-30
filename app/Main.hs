@@ -67,7 +67,7 @@ import           System.FilePath
 import qualified UI.Carrier.Window as Window
 import           UI.Colour
 import           UI.Label as Label
-import           UI.Typeface (Font(..), Typeface, cacheCharactersForDrawing, readTypeface)
+import           UI.Typeface (Font(..), cacheCharactersForDrawing, readTypeface)
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
@@ -114,7 +114,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       circleA <- load circleV
       radarA  <- load radarV
 
-      let view = View{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL, face }
+      let view = View{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -182,7 +182,7 @@ controls
   -> Delta Seconds Float
   -> Input
   -> m ()
-controls bodies View{ fpsL, targetL, face } (Delta (Seconds dt)) input = measure "controls" $ do
+controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "controls" $ do
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
   when (input ^. _pressed SDL.KeycodeMinus) $
@@ -221,8 +221,8 @@ controls bodies View{ fpsL, targetL, face } (Delta (Seconds dt)) input = measure
         = name body ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* scale) (unP position ^* scale)))) "km"
   target <- Lens.uses (_player . _target) (maybe "" describeTarget)
 
-  measure "setLabel" $ setLabel fpsL    (Font face 18) (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
-  measure "setLabel" $ setLabel targetL (Font face 18) target
+  measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
+  measure "setLabel" $ setLabel targetL font target
   where
   switchTarget = \case
     False -> maybe (Just 0)                      (\ i -> i + 1 <$ guard (i + 1 < length bodies))
@@ -400,7 +400,7 @@ data View = View
   , radarP  :: Program Radar.U Radar.V Radar.O
   , fpsL    :: Label
   , targetL :: Label
-  , face    :: Typeface
+  , font    :: Font
   }
 
 
