@@ -66,7 +66,7 @@ import           System.FilePath
 import qualified UI.Carrier.Window as Window
 import           UI.Colour
 import           UI.Label as Label
-import           UI.Typeface
+import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
@@ -105,7 +105,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./" -- characters to preload
 
-      fpsL <- measure "label" $ Label.label face
+      fpsL    <- measure "label" $ Label.label face
+      targetL <- measure "label" $ Label.label face
 
       quadA   <- load quadV
       shipA   <- load shipV
@@ -123,7 +124,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           system <- Lens.use _system
           let bodies = S.bodiesAt system (getDelta t)
           continue <- fmap isJust . runEmpty $
-            measure "input" input >>= controls bodies fpsL >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL } bodies
+            measure "input" input >>= controls bodies fpsL targetL >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL } bodies
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -168,9 +169,10 @@ controls
      )
   => [S.Instant Float]
   -> Label
+  -> Label
   -> Input
   -> m (Delta Seconds Float)
-controls bodies fpsL input = measure "controls" $ do
+controls bodies fpsL targetL input = measure "controls" $ do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
@@ -204,7 +206,10 @@ controls bodies fpsL input = measure "controls" $ do
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
-  measure "setLabel" $ setLabel fpsL 18 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
+  name <- Lens.uses (_player . _target) (maybe "" (name . body . (bodies !!)))
+
+  measure "setLabel" $ setLabel fpsL    18 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
+  measure "setLabel" $ setLabel targetL 18 name
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
@@ -258,7 +263,7 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL } bodies game = measure "draw" . runLiftIO $ do
+draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
   let Actor{ position, velocity, target } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -357,7 +362,8 @@ draw DrawState{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fps
     bindArray radarA $ for_ bodies drawBlip
 
   fpsSize <- labelSize fpsL
-  measure "drawLabel" $ drawLabel fpsL (V2 0 (floor (size ^. _y) - fpsSize ^. _y)) white Nothing
+  measure "drawLabel" $ drawLabel fpsL    (V2 0 (floor (size ^. _y) - fpsSize ^. _y)) white Nothing
+  measure "drawLabel" $ drawLabel targetL (V2 10 10) white Nothing
 
 roundToPlaces :: RealFloat a => Int -> a -> a
 roundToPlaces n x = fromInteger (round (x * n')) / n' where
@@ -374,6 +380,7 @@ data DrawState = DrawState
   , bodyP   :: Program Body.U  Body.V  Body.O
   , radarP  :: Program Radar.U Radar.V Radar.O
   , fpsL    :: Label
+  , targetL :: Label
   }
 
 
