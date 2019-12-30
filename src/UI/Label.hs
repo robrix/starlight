@@ -31,12 +31,10 @@ import           GL.Texture
 import           GL.TextureUnit
 import           GL.Viewport
 import           Graphics.GL.Core41
-import           Lens.Micro ((^.))
 import           Linear.Exts
 import           Linear.Matrix
 import           Linear.V2
 import           Linear.V3
-import           Linear.V4
 import           Linear.Vector
 import           UI.Colour
 import qualified UI.Effect.Window as Window
@@ -174,21 +172,12 @@ drawLabel Label{ ref } offset colour bcolour = runLiftIO $ do
     _ -> pure ()
 
   use textP $ do
-    let b = fromIntegral <$> bounds
-        V2 w h = Interval.size b
-        rect = V4
-          (b ^. _min . _x / w)
-          (b ^. _max . _y / h)
-          (b ^. _max . _x / w)
-          (b ^. _min . _y / h)
-
-        textureUnit = TextureUnit 0
+    let textureUnit = TextureUnit 0
     setActiveTexture textureUnit
     bind (Just texture)
 
     set Text.U
-      { rect    = Just rect
-      , sampler = Just textureUnit
+      { sampler = Just textureUnit
       , colour  = Just transparent
       }
 
@@ -199,8 +188,7 @@ drawLabel Label{ ref } offset colour bcolour = runLiftIO $ do
       when (opaque colour /= black) $ do
         glBlendFunc GL_ONE GL_ONE
         set Text.U
-          { rect    = Nothing
-          , sampler = Nothing
+          { sampler = Nothing
           , colour  = Just colour
           }
         drawArrays TriangleStrip range

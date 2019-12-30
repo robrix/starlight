@@ -19,9 +19,8 @@ import GL.Shader.DSL
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos} IF{ uv } -> do
-    v <- let' "v" $ lerp2 (pos * 0.5 + 0.5) (rect u ^. _xy) (rect u ^. _zw)
-    uv .= v - rect u ^. _xw
-    gl_Position .= ext4 (ext3 (v * 2 - 1) 0) 1)
+    uv .= (pos * vec2 1 (-1)) * 0.5 + 0.5
+    gl_Position .= ext4 (ext3 (pos * vec2 1 (-1)) 0) 1)
 
   >>> fragment (\ IF{ uv } O{ fragColour } -> do
     -- Get samples for -2/3 and -1/3
@@ -49,8 +48,7 @@ shader = program $ \ u
 
 
 data U v = U
-  { rect    :: v (V4 Float)
-  , sampler :: v TextureUnit
+  { sampler :: v TextureUnit
   , colour  :: v (Colour Float)
   }
   deriving (Generic)
