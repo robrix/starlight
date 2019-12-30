@@ -67,7 +67,7 @@ import           System.FilePath
 import qualified UI.Carrier.Window as Window
 import           UI.Colour
 import           UI.Label as Label
-import           UI.Typeface (Font(..), cacheCharactersForDrawing, readTypeface)
+import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypeface)
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
@@ -198,10 +198,7 @@ controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure
   when (input ^. _pressed SDL.KeycodeDown) $ do
     rotation <- Lens.use (_player . _rotation)
     velocity <- Lens.use (_player . _velocity)
-    let angle = angleOf (negated velocity)
-        proposed = axisAngle (unit _z) (getRadians angle)
-        delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
-    _player . _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
+    _player . _rotation .= face angular (angleOf (negated velocity)) rotation
 
   when (input ^. _pressed SDL.KeycodeLeft) $
     _player . _rotation *= axisAngle (unit _z) (getRadians angular)
@@ -228,6 +225,16 @@ controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure
     False -> maybe (Just 0)                      (\ i -> i + 1 <$ guard (i + 1 < length bodies))
     True  -> maybe (Just (pred (length bodies))) (\ i -> i - 1 <$ guard (i - 1 >= 0))
   or = liftA2 (liftA2 (coerce (||)))
+
+-- | Compute a rotation turning to face a desired angle with a given maximum angular thrust.
+face
+  :: Radians Float    -- ^ Angular thrust. (Speed of rotation.)
+  -> Radians Float    -- ^ Desired angle.
+  -> Quaternion Float -- ^ Current rotation.
+  -> Quaternion Float -- ^ Resulting rotation.
+face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
+  proposed = axisAngle (unit _z) (getRadians angle)
+  delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
 
 
 ai
