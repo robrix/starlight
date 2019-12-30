@@ -214,7 +214,7 @@ controls bodies fpsL targetL input = measure "controls" $ do
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
-  scale <- Lens.uses _system ((1/) . scale)
+  scale <- Lens.uses (_system . _scale) (1/)
   position <- Lens.use (_player . _position)
   let describeTarget i
         | S.Instant{ body, transform } <- bodies !! i
@@ -238,8 +238,8 @@ physics
   -> Delta Seconds Float
   -> m GameState
 physics bodies (Delta (Seconds dt)) = do
-  scale <- Lens.uses _system scale
-  _actors . each %= updatePosition . flip (foldr (applyGravity (1/scale))) bodies
+  scale <- Lens.uses (_system . _scale) (1/)
+  _actors . each %= updatePosition . flip (foldr (applyGravity scale)) bodies
   get where
   updatePosition a@Actor{ position, velocity } = a { position = position .+^ velocity }
   applyGravity distanceScale S.Instant{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
