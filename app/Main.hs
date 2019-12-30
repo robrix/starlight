@@ -133,7 +133,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
             dt <- fmap realToFrac . since =<< get
             put =<< now
             controls bodies view dt input
-            ai dt
+            ai bodies dt
             gameState <- measure "physics" (physics bodies dt)
             draw view bodies gameState
           continue <$ measure "swap" Window.swap
@@ -232,9 +232,10 @@ controls bodies View{ fpsL, targetL, face } (Delta (Seconds dt)) input = measure
 
 ai
   :: Has (State GameState) sig m
-  => Delta Seconds Float
+  => [S.Instant Float]
+  -> Delta Seconds Float
   -> m ()
-ai (Delta (Seconds _)) = do
+ai _ (Delta (Seconds _)) = do
   _npcs . each %= go
   where
   go a@Actor{} = a
