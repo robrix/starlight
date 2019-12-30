@@ -50,7 +50,7 @@ data Label = Label
   , fbuffer :: !Framebuffer
   , quadA   :: !(Array (Text.V  I))
   , scale   :: !Int
-  , ref     :: !(IORef LabelState)
+  , ref     :: !(IORef (Maybe LabelState))
   }
 
 data LabelState = LabelState
@@ -92,61 +92,62 @@ label = do
 
   scale <- Window.scale
 
-  ref <- sendIO (newIORef LabelState{ size = 0, string = "" })
+  ref <- sendIO (newIORef Nothing)
   pure Label{ textP, texture, fbuffer, quadA, ref, scale }
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 Int)
-labelSize = sendM . fmap UI.Label.size . readIORef . ref
+labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
 
 
 -- | Set the label’s text.
 setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
-setLabel Label{ texture, fbuffer, scale, ref } font string = runLiftIO $ do
-  l@LabelState{ string = oldString } <- sendIO (readIORef ref)
+setLabel Label{ texture, fbuffer, scale, ref } font string
+  | null string = sendM (writeIORef ref Nothing)
+  | otherwise   = runLiftIO $ do
+    state <- sendIO (readIORef ref)
+    case state of
+      Just LabelState{ string = oldString } | string == oldString -> pure ()
+      _ -> do
+        glBlendFunc GL_ONE GL_ONE -- add
 
-  when (string /= oldString) $ if not (null string) then do
-    glBlendFunc GL_ONE GL_ONE -- add
+        Run instances b <- layoutString (face font) string
 
-    Run instances b <- layoutString (face font) string
+        let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
+            size = Interval.size b'
 
-    let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
-        size = Interval.size b'
+        bind (Just texture)
+        setParameter Texture2D MagFilter Nearest
+        setParameter Texture2D MinFilter Nearest
+        setParameter Texture2D WrapS ClampToEdge
+        setParameter Texture2D WrapT ClampToEdge
+        setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
 
-    bind (Just texture)
-    setParameter Texture2D MagFilter Nearest
-    setParameter Texture2D MinFilter Nearest
-    setParameter Texture2D WrapS ClampToEdge
-    setParameter Texture2D WrapT ClampToEdge
-    setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
+        bind (Just fbuffer)
+        attachTexture (GL.Colour 0) texture
 
-    bind (Just fbuffer)
-    attachTexture (GL.Colour 0) texture
+        viewport $ scale *^ Interval 0 size
+        scissor  $ scale *^ Interval 0 size
 
-    viewport $ scale *^ Interval 0 size
-    scissor  $ scale *^ Interval 0 size
+        setClearColour transparent
+        glClear GL_COLOR_BUFFER_BIT
 
-    setClearColour transparent
-    glClear GL_COLOR_BUFFER_BIT
+        let V2 sx sy = fromIntegral scale / fmap fromIntegral size
+        drawingGlyphs (face font) $ do
+          set defaultVars
+            { Glyph.scale     = Just (1 / fromIntegral scale)
+            , Glyph.fontScale = Just (fontScale font)
+            , Glyph.matrix    = Just
+              $   translated (-1)
+              !*! scaled     (V3 sx sy 1)
+              !*! translated (fromIntegral <$> negated (min_ b'))
+            }
+          for_ instances $ \ Instance{ offset, range } -> do
+            set defaultVars
+              { Glyph.offset = Just offset
+              }
+            drawArraysInstanced Triangles range 6
 
-    let V2 sx sy = fromIntegral scale / fmap fromIntegral size
-    drawingGlyphs (face font) $ do
-      set defaultVars
-        { Glyph.scale     = Just (1 / fromIntegral scale)
-        , Glyph.fontScale = Just (fontScale font)
-        , Glyph.matrix    = Just
-          $   translated (-1)
-          !*! scaled     (V3 sx sy 1)
-          !*! translated (fromIntegral <$> negated (min_ b'))
-        }
-      for_ instances $ \ Instance{ offset, range } -> do
-        set defaultVars
-          { Glyph.offset = Just offset
-          }
-        drawArraysInstanced Triangles range 6
-
-    sendIO (writeIORef ref l { UI.Label.size, string })
-  else
-    sendIO (writeIORef ref l { UI.Label.size = 0, string })
+        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string }))
 
 
 drawLabel
@@ -160,39 +161,42 @@ drawLabel
   -> Maybe (Colour Float)
   -> m ()
 drawLabel Label{ texture, textP, quadA, scale, ref } offset colour bcolour = runLiftIO $ do
-  LabelState { size } <- sendIO (readIORef ref)
-  glBlendFunc GL_ZERO GL_SRC_COLOR
+  state <- sendIO (readIORef ref)
+  case state of
+    Just LabelState{ size } -> do
+      glBlendFunc GL_ZERO GL_SRC_COLOR
 
-  bind @Framebuffer Nothing
+      bind @Framebuffer Nothing
 
-  let bounds = Interval offset (offset + size)
-  viewport $ scale *^ bounds
-  scissor  $ scale *^ bounds
+      let bounds = Interval offset (offset + size)
+      viewport $ scale *^ bounds
+      scissor  $ scale *^ bounds
 
-  case bcolour of
-    Just colour -> do
-      setClearColour colour
-      glClear GL_COLOR_BUFFER_BIT
-    _ -> pure ()
+      case bcolour of
+        Just colour -> do
+          setClearColour colour
+          glClear GL_COLOR_BUFFER_BIT
+        _ -> pure ()
 
-  use textP $ do
-    let textureUnit = TextureUnit 0
-    setActiveTexture textureUnit
-    bind (Just texture)
+      use textP $ do
+        let textureUnit = TextureUnit 0
+        setActiveTexture textureUnit
+        bind (Just texture)
 
-    set Text.U
-      { sampler = Just textureUnit
-      , colour  = Just transparent
-      }
-
-    bindArray quadA $ do
-      let range = Interval 0 4
-      drawArrays TriangleStrip range
-
-      when (opaque colour /= black) $ do
-        glBlendFunc GL_ONE GL_ONE
         set Text.U
-          { sampler = Nothing
-          , colour  = Just colour
+          { sampler = Just textureUnit
+          , colour  = Just transparent
           }
-        drawArrays TriangleStrip range
+
+        bindArray quadA $ do
+          let range = Interval 0 4
+          drawArrays TriangleStrip range
+
+          when (opaque colour /= black) $ do
+            glBlendFunc GL_ONE GL_ONE
+            set Text.U
+              { sampler = Nothing
+              , colour  = Just colour
+              }
+            drawArrays TriangleStrip range
+    _ -> pure ()
