@@ -219,7 +219,7 @@ controls bodies fpsL targetL input = measure "controls" $ do
   let describeTarget i
         | S.Instant{ body, transform } <- bodies !! i
         , pos <- (transform !* V4 0 0 0 1) ^. _xy
-        = name body ++ ": " ++ showEFloat (Just 1) (getMetres (getKilo (kilo (Metres (distance (pos ^* scale) (unP position ^* scale)))))) "km"
+        = name body ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* scale) (unP position ^* scale)))) "km"
   target <- Lens.uses (_player . _target) (maybe "" describeTarget)
 
   measure "setLabel" $ setLabel fpsL    18 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
