@@ -213,10 +213,10 @@ controls bodies fpsL targetL input = measure "controls" $ do
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
-  name <- Lens.uses (_player . _target) (maybe "" (name . body . (bodies !!)))
+  target <- Lens.uses (_player . _target) (maybe "" (name . body . (bodies !!)))
 
   measure "setLabel" $ setLabel fpsL    18 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
-  measure "setLabel" $ setLabel targetL 18 name
+  measure "setLabel" $ setLabel targetL 18 target
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
