@@ -204,7 +204,7 @@ controls bodies fpsL input = measure "controls" $ do
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
-  measure "setLabel" $ setLabel fpsL 36 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fpsL")
+  measure "setLabel" $ setLabel fpsL 36 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
