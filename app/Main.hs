@@ -242,10 +242,22 @@ ai
   => [S.Instant Float]
   -> Delta Seconds Float
   -> m ()
-ai _ (Delta (Seconds _)) = do
+ai bodies (Delta (Seconds dt)) = do
   _npcs . each %= go
   where
-  go a@Actor{} = a
+  go a@Actor{ target, velocity, rotation, position } = case target of
+    Just i
+      | S.Instant{ transform } <- bodies !! i
+      , pos       <- (transform !* V4 0 0 0 1) ^. _xy
+      , angle     <- angleTo (unP position) pos
+      , rotation' <- face angular angle rotation
+      -> a
+        { Main.rotation = rotation'
+        , velocity = if abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation') - angle)) < pi/2 then velocity + rotate rotation' (unit _x ^* thrust) ^. _xy else velocity
+        }
+    Nothing -> a -- FIXME: wander
+  angular = dt *^ Radians 5
+  thrust  = dt * 1
 
 
 physics
