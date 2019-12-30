@@ -44,16 +44,18 @@ import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 import           UI.Typeface
 
-newtype Label = Label { ref :: IORef LabelState }
-
-data LabelState = LabelState
+data Label = Label
   { textP   :: !(Program Text.U  Text.V  Text.O)
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
   , quadA   :: !(Array (Text.V  I))
-  , size    :: !(V2 Int)
   , scale   :: !Int
-  , string  :: !String
+  , ref     :: !(IORef LabelState)
+  }
+
+data LabelState = LabelState
+  { size   :: !(V2 Int)
+  , string :: !String
   }
 
 
@@ -90,7 +92,8 @@ label = do
 
   scale <- Window.scale
 
-  Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, size = 0, scale, string = "" })
+  ref <- sendIO (newIORef LabelState{ size = 0, string = "" })
+  pure Label{ textP, texture, fbuffer, quadA, ref, scale }
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 Int)
 labelSize = sendM . fmap UI.Label.size . readIORef . ref
@@ -98,8 +101,8 @@ labelSize = sendM . fmap UI.Label.size . readIORef . ref
 
 -- | Set the label’s text.
 setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
-setLabel Label{ ref } font string = runLiftIO $ do
-  l@LabelState{ texture, fbuffer, scale, string = oldString } <- sendIO (readIORef ref)
+setLabel Label{ texture, fbuffer, scale, ref } font string = runLiftIO $ do
+  l@LabelState{ string = oldString } <- sendIO (readIORef ref)
 
   when (string /= oldString) $ if not (null string) then do
     glBlendFunc GL_ONE GL_ONE -- add
@@ -156,8 +159,8 @@ drawLabel
   -> Colour Float
   -> Maybe (Colour Float)
   -> m ()
-drawLabel Label{ ref } offset colour bcolour = runLiftIO $ do
-  LabelState { texture, textP, quadA, size, scale } <- sendIO (readIORef ref)
+drawLabel Label{ texture, textP, quadA, scale, ref } offset colour bcolour = runLiftIO $ do
+  LabelState { size } <- sendIO (readIORef ref)
   glBlendFunc GL_ZERO GL_SRC_COLOR
 
   bind @Framebuffer Nothing
