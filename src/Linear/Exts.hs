@@ -6,6 +6,7 @@ module Linear.Exts
 , scaled
 , orient
 , reject
+, direction
 , angleOf
 , angleTo
 , toAxisAngle
@@ -48,6 +49,11 @@ orient alpha beta gamma
 
 reject :: (Metric v, Fractional a) => v a -> v a -> v a
 reject a b = a ^-^ project a b
+
+
+-- | The unit vector in the direction of another vector.
+direction :: (Metric v, Epsilon a, Floating a) => v a -> v a -> v a
+direction a b = normalize (a ^-^ b)
 
 
 -- | The angle of a vector.
