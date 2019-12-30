@@ -20,7 +20,7 @@ shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos} IF{ _coord2 } -> do
     v <- let' "v" $ lerp2 (pos * 0.5 + 0.5) (rect u ^. _xy) (rect u ^. _zw)
-    _coord2 .= v
+    _coord2 .= v - rect u ^. _xw
     gl_Position .= ext4 (ext3 (v * 2 - 1) 0) 1)
 
   >>> fragment (\ IF{ _coord2 } O{ fragColour } -> do
