@@ -24,14 +24,22 @@ shader = program $ \ U{ resolution, origin, zoom }
     gl_Position .= ext4 (ext3 pos 0) 1)
   >>> fragment (\ None O{ fragColour } -> do
     uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
-    dir <- let' "dir" $ ext3 (uv ^* zoom) 1 ^* 0.5
-    origin <- let' "origin" $ ext3 (coerce origin / (resolution ^* 0.1)) 1
+    dir <- var "dir" $ ext3 (uv ^* zoom) 1 ^* 0.5
+    origin <- var "origin" $ ext3 (coerce origin / (resolution ^* 0.1)) 1
+    a1 <- let' "a1" $ 0.4 + norm (get origin) / resolution ^. _x * 2
+    a2 <- let' "a2" $ 0.4 + norm (get origin) / resolution ^. _y * 2
+    rot1 <- let' "rot1" $ mat2 (vec2 (cos a1) (sin a1)) (vec2 (-(sin a1)) (cos a1))
+    rot2 <- let' "rot2" $ mat2 (vec2 (cos a2) (sin a2)) (vec2 (-(sin a2)) (cos a2))
+    dir ^^. _xz *!= rot1
+    dir ^^. _xy *!= rot2
+    origin ^^. _xz *!= rot1
+    origin ^^. _xy *!= rot2
     s <- var "s" 0.1
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 0 0 0
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
-      p <- var "p" $ origin + dir ^* get s
+      p <- var "p" $ get origin + get dir ^* get s
       p .= abs (tile - mod' (get p) (tile ^* 2))
       pa <- var "pa" 0
       a <- var "a" 0
