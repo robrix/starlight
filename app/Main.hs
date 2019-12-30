@@ -253,6 +253,7 @@ ai bodies (Delta (Seconds dt)) = do
       , rotation' <- face angular angle rotation
       -> a
         { Main.rotation = rotation'
+        -- FIXME: don’t just fly directly at the target, dumbass
         , velocity = if abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation') - angle)) < pi/2 then velocity + rotate rotation' (unit _x ^* thrust) ^. _xy else velocity
         }
     Nothing -> a -- FIXME: wander
