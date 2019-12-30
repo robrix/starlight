@@ -232,14 +232,14 @@ physics
   -> m GameState
 physics bodies (Delta (Seconds dt)) = do
   scale <- Lens.uses _system scale
-  _actors . each %= updatePosition . flip (foldr (applyGravity scale)) bodies
+  _actors . each %= updatePosition . flip (foldr (applyGravity (1/scale))) bodies
   get where
   updatePosition a@Actor{ position, velocity } = a { position = position .+^ velocity }
   applyGravity distanceScale S.Instant{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
-    = a { velocity = velocity + dt * distanceScale ** 2 * force *^ normalize (pos ^-^ unP position) } where
+    = a { velocity = velocity + dt * force *^ normalize (pos ^-^ unP position) } where
     force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
     pos = (transform !* V4 0 0 0 1) ^. _xy -- compute body location in 3d, but only use xy
-    r = qd pos (unP position) -- “quadrance” (square of distance between actor & body)
+    r = qd (pos ^* distanceScale) (unP position ^* distanceScale) -- “quadrance” (square of distance between actor & body)
     bigG = 6.67430e-11 -- gravitational constant
 
 
