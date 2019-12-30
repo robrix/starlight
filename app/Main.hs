@@ -198,7 +198,7 @@ controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure
   when (input ^. _pressed SDL.KeycodeDown) $ do
     rotation <- Lens.use (_player . _rotation)
     velocity <- Lens.use (_player . _velocity)
-    let angle = fst (polar2 (negated velocity))
+    let angle = angleOf (negated velocity)
         proposed = axisAngle (unit _z) (getRadians angle)
         delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
     _player . _rotation .= slerp rotation proposed (min 1 (getRadians (angular / delta)))
