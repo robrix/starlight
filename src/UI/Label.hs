@@ -182,7 +182,7 @@ drawLabel Label{ ref } offset colour bcolour = runLiftIO $ do
           (b ^. _max . _x / w)
           (b ^. _min . _y / h)
 
-    let textureUnit = TextureUnit 0
+        textureUnit = TextureUnit 0
     setActiveTexture textureUnit
     bind (Just texture)
 
