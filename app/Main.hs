@@ -123,8 +123,11 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           t <- realToFrac <$> since start
           system <- Lens.use _system
           let bodies = S.bodiesAt system (getDelta t)
-          continue <- fmap isJust . runEmpty $
-            measure "input" input >>= controls bodies fpsL targetL >>= measure "physics" . physics bodies >>= draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL } bodies
+          continue <- fmap isJust . runEmpty $ do
+            input <- measure "input" input
+            dt <- controls bodies fpsL targetL input
+            gameState <- measure "physics" (physics bodies dt)
+            draw DrawState{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL } bodies gameState
           continue <$ measure "swap" Window.swap
         when continue loop
 
