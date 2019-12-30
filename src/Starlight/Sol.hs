@@ -262,15 +262,15 @@ system = do
         , period      = fromDays 1
         , colour      = white
         , orbit
-        , parent      = guard isMoon *> (bodies IntMap.!? ((code `quot` 100) * 100 + 99)) <|> bodies IntMap.!? 10
-        } where
-        isMoon = code `mod` 100 /= 99
+        , parent      = guard (isMoon code) *> (bodies IntMap.!? ((code `quot` 100) * 100 + 99)) <|> bodies IntMap.!? 10
+        }
       systemScale = 100000 / getMetres (radius (bodies IntMap.! 10))
 
   pure . System systemScale $ sortOn code
     [ fromMaybe (placeholder code (initCap name) orbit) (bodies IntMap.!? code)
     | (code, (name, orbit)) <- IntMap.toList orbits
     ] where
+  isMoon code = code `mod` 100 /= 99
   initCap = \case
     ""   -> ""
     c:cs -> toUpper c : cs
