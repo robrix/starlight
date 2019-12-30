@@ -103,7 +103,7 @@ setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Float -> String -> m
 setLabel Label{ ref } fontSize string = runLiftIO $ do
   l@LabelState{ texture, fbuffer, scale, face, string = oldString } <- sendIO (readIORef ref)
 
-  if (string /= oldString && not (null string)) then do
+  when (string /= oldString) $ if not (null string) then do
     glBlendFunc GL_ONE GL_ONE -- add
 
     Run instances b <- layoutString face string
