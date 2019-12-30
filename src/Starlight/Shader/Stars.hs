@@ -26,8 +26,8 @@ shader = program $ \ U{ resolution, origin, zoom }
     uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
     dir <- var "dir" $ ext3 (uv ^* zoom) 1 ^* 0.5
     origin <- var "origin" $ ext3 (coerce origin / (resolution ^* 0.1)) 1
-    a1 <- let' "a1" $ 0.4 + norm (get origin) / resolution ^. _x * 2
-    a2 <- let' "a2" $ 0.4 + norm (get origin) / resolution ^. _y * 2
+    a1 <- let' "a1" $ 0.2 + norm (get origin) / resolution ^. _x * 2
+    a2 <- let' "a2" $ 0.2 + norm (get origin) / resolution ^. _y * 2
     rot1 <- let' "rot1" $ mat2 (vec2 (cos a1) (sin a1)) (vec2 (-(sin a1)) (cos a1))
     rot2 <- let' "rot2" $ mat2 (vec2 (cos a2) (sin a2)) (vec2 (-(sin a2)) (cos a2))
     dir ^^. _xz *!= rot1
