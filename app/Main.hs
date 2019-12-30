@@ -120,6 +120,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
+      put =<< now
+
       fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
