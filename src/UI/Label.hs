@@ -53,7 +53,6 @@ data LabelState = LabelState
   , quadA   :: !(Array (Text.V  I))
   , size    :: !(V2 Int)
   , scale   :: !Int
-  , face    :: !Typeface
   , string  :: !String
   }
 
@@ -64,9 +63,8 @@ label
      , Has Window.Window sig m
      , HasCallStack
      )
-  => Typeface
-  -> m Label
-label face = do
+  => m Label
+label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
@@ -92,24 +90,23 @@ label face = do
 
   scale <- Window.scale
 
-  Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, size = 0, scale, face, string = "" })
+  Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, size = 0, scale, string = "" })
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 Int)
 labelSize = sendM . fmap UI.Label.size . readIORef . ref
 
 
 -- | Set the label’s text.
-setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Float -> String -> m ()
-setLabel Label{ ref } fontSize string = runLiftIO $ do
-  l@LabelState{ texture, fbuffer, scale, face, string = oldString } <- sendIO (readIORef ref)
+setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
+setLabel Label{ ref } font string = runLiftIO $ do
+  l@LabelState{ texture, fbuffer, scale, string = oldString } <- sendIO (readIORef ref)
 
   when (string /= oldString) $ if not (null string) then do
     glBlendFunc GL_ONE GL_ONE -- add
 
-    Run instances b <- layoutString face string
+    Run instances b <- layoutString (face font) string
 
-    let font = Font face fontSize
-        b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
+    let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
         size = Interval.size b'
 
     bind (Just texture)
@@ -129,7 +126,7 @@ setLabel Label{ ref } fontSize string = runLiftIO $ do
     glClear GL_COLOR_BUFFER_BIT
 
     let V2 sx sy = fromIntegral scale / fmap fromIntegral size
-    drawingGlyphs face $ do
+    drawingGlyphs (face font) $ do
       set defaultVars
         { Glyph.scale     = Just (1 / fromIntegral scale)
         , Glyph.fontScale = Just (fontScale font)

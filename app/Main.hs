@@ -67,7 +67,7 @@ import           System.FilePath
 import qualified UI.Carrier.Window as Window
 import           UI.Colour
 import           UI.Label as Label
-import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
+import           UI.Typeface (Font(..), Typeface, cacheCharactersForDrawing, readTypeface)
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
@@ -106,15 +106,15 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:" -- characters to preload
 
-      fpsL    <- measure "label" $ Label.label face
-      targetL <- measure "label" $ Label.label face
+      fpsL    <- measure "label" Label.label
+      targetL <- measure "label" Label.label
 
       quadA   <- load quadV
       shipA   <- load shipV
       circleA <- load circleV
       radarA  <- load radarV
 
-      let view = View{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL }
+      let view = View{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL, face }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -130,7 +130,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           let bodies = S.bodiesAt system (getDelta t)
           continue <- fmap isJust . runEmpty $ do
             input <- measure "input" input
-            dt <- controls bodies fpsL targetL input
+            dt <- controls bodies view input
             gameState <- measure "physics" (physics bodies dt)
             draw view bodies gameState
           continue <$ measure "swap" Window.swap
@@ -176,11 +176,10 @@ controls
      , Has (State UTCTime) sig m
      )
   => [S.Instant Float]
-  -> Label
-  -> Label
+  -> View
   -> Input
   -> m (Delta Seconds Float)
-controls bodies fpsL targetL input = measure "controls" $ do
+controls bodies View{ fpsL, targetL, face } input = measure "controls" $ do
   Delta (Seconds dt) <- fmap realToFrac . since =<< get
   put =<< now
 
@@ -222,8 +221,8 @@ controls bodies fpsL targetL input = measure "controls" $ do
         = name body ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* scale) (unP position ^* scale)))) "km"
   target <- Lens.uses (_player . _target) (maybe "" describeTarget)
 
-  measure "setLabel" $ setLabel fpsL    18 (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
-  measure "setLabel" $ setLabel targetL 18 target
+  measure "setLabel" $ setLabel fpsL    (Font face 18) (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
+  measure "setLabel" $ setLabel targetL (Font face 18) target
 
   pure (Delta (Seconds dt)) where
   switchTarget = \case
@@ -391,6 +390,7 @@ data View = View
   , radarP  :: Program Radar.U Radar.V Radar.O
   , fpsL    :: Label
   , targetL :: Label
+  , face    :: Typeface
   }
 
 
