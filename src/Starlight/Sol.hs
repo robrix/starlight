@@ -1,5 +1,6 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 -- | A familiar star system.
 module Starlight.Sol
@@ -9,7 +10,7 @@ module Starlight.Sol
 import           Control.Applicative ((<|>))
 import           Control.Effect.Lift
 import           Control.Monad (guard)
-import           Data.Char (isSpace)
+import           Data.Char (isSpace, toUpper)
 import           Data.List (sortOn)
 import           Data.Maybe (fromMaybe)
 import qualified Data.IntMap as IntMap
@@ -267,6 +268,9 @@ system = do
       systemScale = 100000 / getMetres (radius (bodies IntMap.! 10))
 
   pure . System systemScale $ sortOn code
-    [ fromMaybe (placeholder code name orbit) (bodies IntMap.!? code)
+    [ fromMaybe (placeholder code (initCap name) orbit) (bodies IntMap.!? code)
     | (code, (name, orbit)) <- IntMap.toList orbits
-    ]
+    ] where
+  initCap = \case
+    ""   -> ""
+    c:cs -> toUpper c : cs
