@@ -92,7 +92,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           { position = P (V2 250000 0)
           , velocity = V2 0 150
           , rotation = axisAngle (unit _z) (pi/2)
-          , target   = Nothing
+          , target   = Just 3
           }
         ]
       , system = system
