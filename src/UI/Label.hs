@@ -175,7 +175,7 @@ drawLabel Label{ ref } offset colour bcolour = runLiftIO $ do
 
   use textP $ do
     let b = fromIntegral <$> bounds
-        V2 w h = max_ b - min_ b
+        V2 w h = Interval.size b
         rect = V4
           (b ^. _min . _x / w)
           (b ^. _max . _y / h)
