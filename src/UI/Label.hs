@@ -96,7 +96,7 @@ label face = do
 
 
 -- | Set the label’s text.
-setLabel :: Has (Lift IO) sig m => Label -> Float -> String -> m ()
+setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Float -> String -> m ()
 setLabel Label{ ref } fontSize string = runLiftIO $ do
   l@LabelState{ texture, fbuffer, scale, face } <- sendIO (readIORef ref)
 
