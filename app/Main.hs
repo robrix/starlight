@@ -235,7 +235,9 @@ ai
   => Delta Seconds Float
   -> m ()
 ai (Delta (Seconds _)) = do
-  pure ()
+  _npcs . each %= go
+  where
+  go a@Actor{} = a
 
 
 physics
