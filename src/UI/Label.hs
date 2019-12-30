@@ -163,7 +163,7 @@ drawLabel Label{ ref } offset colour bcolour = runLiftIO $ do
 
   bind @Framebuffer Nothing
 
-  let bounds = Interval offset size
+  let bounds = Interval offset (offset + size)
   viewport $ scale *^ bounds
   scissor  $ scale *^ bounds
 
