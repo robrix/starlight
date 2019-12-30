@@ -222,7 +222,7 @@ controls bodies fpsL targetL input = measure "controls" $ do
         = name body ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* scale) (unP position ^* scale)))) "km"
   target <- Lens.uses (_player . _target) (maybe "" describeTarget)
 
-  measure "setLabel" $ setLabel fpsL    18 (show (round (dt * 1000) :: Int) <> "ms/" <> show (roundToPlaces 1 (1/dt)) <> "fps")
+  measure "setLabel" $ setLabel fpsL    18 (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
   measure "setLabel" $ setLabel targetL 18 target
 
   pure (Delta (Seconds dt)) where
@@ -378,10 +378,6 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetL (V2 10 10) white Nothing
-
-roundToPlaces :: RealFloat a => Int -> a -> a
-roundToPlaces n x = fromInteger (round (x * n')) / n' where
-  n' = 10 ^ n
 
 
 data View = View
