@@ -412,6 +412,9 @@ data GameState = GameState
 _throttle :: Lens' GameState Float
 _throttle = lens throttle (\ s v -> s { throttle = v })
 
+_npcs :: Lens' GameState [Actor]
+_npcs = lens npcs (\ s n -> s { npcs = n })
+
 _actors :: Lens' GameState (NonEmpty Actor)
 _actors = lens ((:|) . player <*> npcs) (\ s (p:|o) -> s { player = p, npcs = o })
 
