@@ -140,7 +140,7 @@ bodies orbits = bodies where
       , mass        = 893.3e20
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 1)) -- unknown
       , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 501) -- synchronous
-      , colour      = V4 0.5 0.5 0.5 1
+      , colour      = V4 253 249 156 255 ^/ 255
       , orbit       = snd (orbits IntMap.! 501)
       , parent      = Just (bodies IntMap.! 599)
       }
