@@ -70,6 +70,7 @@ module GL.Shader.DSL
 , _w
 , _xy
 , _yz
+, _xw
 , _zw
 , _xyz
 , _xywz
@@ -486,6 +487,9 @@ _xy = Prj "xy"
 
 _yz :: Prj (v a) (V2 a)
 _yz = Prj "yz"
+
+_xw :: Prj (v a) (V2 a)
+_xw = Prj "xw"
 
 _zw :: Prj (v a) (V2 a)
 _zw = Prj "zw"
