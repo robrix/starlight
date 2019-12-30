@@ -371,7 +371,7 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
           drawAtRadius 100 minSweep (colour & _a .~ 0.5)
 
           when (Just name == (target >>= \ i -> S.name (S.body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
-            drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / 7)) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
+            drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
     bindArray radarA $ for_ bodies drawBlip
 
