@@ -246,6 +246,7 @@ ai bodies (Delta (Seconds dt)) = do
   _npcs . each %= go
   where
   go a@Actor{ target, velocity, rotation, position } = case target of
+    -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     Just i
       | S.Instant{ transform } <- bodies !! i
       , pos       <- (transform !* V4 0 0 0 1) ^. _xy
