@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module GL.Viewport
 ( _min
 , _max
@@ -12,9 +13,11 @@ import Graphics.GL.Core41
 import Linear.V2
 
 viewport :: Has (Lift IO) sig m => Interval V2 Int -> m ()
-viewport r = runLiftIO (glViewport x1 y1 x2 y2) where
-  Interval (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
+viewport i = runLiftIO (glViewport x y w h) where
+  V2 x y = fromIntegral <$> min_ i
+  V2 w h = fromIntegral <$> size i
 
 scissor :: Has (Lift IO) sig m => Interval V2 Int -> m ()
-scissor r = runLiftIO (glScissor x1 y1 x2 y2) where
-  Interval (V2 x1 y1) (V2 x2 y2) = fromIntegral <$> r
+scissor i = runLiftIO (glScissor x y w h) where
+  V2 x y = fromIntegral <$> min_ i
+  V2 w h = fromIntegral <$> size i
