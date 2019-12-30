@@ -8,6 +8,7 @@ module Starlight.Body
 , _scale
 , Instant(..)
 , bodiesAt
+, Code
 , Body(..)
 , Orbit(..)
 , fromEphemeris
@@ -73,10 +74,11 @@ bodiesAt sys@(System _ bs) t = bs' where
       p <- parent b
       find ((== name p) . name . body) bs'
 
+type Code = Int
 
 data Body a = Body
   { name        :: String
-  , code        :: Int
+  , code        :: Code
   , radius      :: Metres a
   , mass        :: Kilo Grams a
   , orientation :: Quaternion a -- relative to orbit

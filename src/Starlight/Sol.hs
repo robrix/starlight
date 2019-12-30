@@ -25,8 +25,6 @@ import           Unit.Angle
 import           Unit.Length
 import           Unit.Time
 
-type Code = Int
-
 bodies :: Map.Map Code (String, Orbit Float) -> Map.Map Code (Body Float)
 bodies orbits = bodies where
   bodies = Map.fromList $ map ((,) . code <*> id)
