@@ -64,6 +64,7 @@ module GL.Shader.DSL
 , (.=)
 , (+=)
 , (*=)
+, (*!=)
 , (^.)
 , (^^.)
 , _x
@@ -203,11 +204,13 @@ data Stmt (k :: Type) a where
   (:.=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
   (:+=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
   (:*=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
+  (:*!=) :: Ref k (v b) -> Expr k (v (v b)) -> Stmt k a -> Stmt k a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
 infixr 4 :.=
 infixr 4 :+=
 infixr 4 :*=
+infixr 4 :*!=
 
 instance Functor (Stmt k) where
   fmap = liftM
@@ -227,6 +230,7 @@ instance Monad (Stmt k) where
   (:.=) r v  k >>= f = (r :.= v) (k >>= f)
   (:+=) r v  k >>= f = (r :+= v) (k >>= f)
   (:*=) r v  k >>= f = (r :*= v) (k >>= f)
+  (:*!=) r v k >>= f = (r :*!= v) (k >>= f)
   Stmt a     k >>= f = Stmt a (f <=< k)
 
 
@@ -475,6 +479,11 @@ r *= v = (r :*= v) (pure ())
 
 infixr 4 *=
 
+(*!=) :: Ref k (v a) -> Expr k (v (v a)) -> Stmt k ()
+r *!= v = (r :*!= v) (pure ())
+
+infixr 4 *!=
+
 (^.) :: Expr k a -> Prj a b -> Expr k b
 (^.) = (:^.)
 
@@ -567,6 +576,9 @@ renderStmt = \case
     -> renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt k
   (:*=) r v k
+    -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+    <> renderStmt k
+  (:*!=) r v k
     -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
     <> renderStmt k
   Stmt b k
