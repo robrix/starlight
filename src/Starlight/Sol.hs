@@ -146,6 +146,66 @@ bodies orbits = bodies where
       }
 
     , Body
+      { name        = "Europa"
+      , code        = 502
+      , radius      = unKilo 1560.8
+      , mass        = 4.799844e22
+      , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.1))
+      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 502) -- synchronous
+      , colour      = V4 184 164 130 255 ^/ 255
+      , orbit       = snd (orbits IntMap.! 502)
+      , parent      = Just (bodies IntMap.! 599)
+      }
+
+    , Body
+      { name        = "Ganymede"
+      , code        = 503
+      , radius      = unKilo 2634.1
+      , mass        = 1.4819e23
+      , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.33))
+      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 503) -- synchronous
+      , colour      = V4 143 132 117 255 ^/ 255
+      , orbit       = snd (orbits IntMap.! 503)
+      , parent      = Just (bodies IntMap.! 599)
+      }
+
+    , Body
+      { name        = "Callisto"
+      , code        = 504
+      , radius      = unKilo 2410.3
+      , mass        = 1.075938e23
+      , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
+      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 504) -- synchronous
+      , colour      = V4 107 95 79 255 ^/ 255
+      , orbit       = snd (orbits IntMap.! 504)
+      , parent      = Just (bodies IntMap.! 599)
+      }
+
+    , Body
+      { name        = "Amalthea"
+      , code        = 505
+      , radius      = unKilo 83.5
+      , mass        = 2.08e18
+      , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
+      , period      = (\ (_, Orbit{period}) -> period) (orbits IntMap.! 505) -- synchronous
+      , colour      = V4 157 157 157 255 ^/ 255
+      , orbit       = snd (orbits IntMap.! 505)
+      , parent      = Just (bodies IntMap.! 599)
+      }
+
+    , Body
+      { name        = "Himalia"
+      , code        = 506
+      , radius      = unKilo 85 -- ground estimate
+      , mass        = 4.2e18
+      , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
+      , period      = fromHours 7.782 -- !
+      , colour      = V4 203 203 203 255 ^/ 255
+      , orbit       = snd (orbits IntMap.! 506)
+      , parent      = Just (bodies IntMap.! 599)
+      }
+
+    , Body
       { name        = "Saturn"
       , code        = 699
       , radius      = unKilo 58232
