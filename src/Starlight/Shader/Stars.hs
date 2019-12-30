@@ -25,7 +25,7 @@ shader = program $ \ U{ resolution, origin, zoom }
   >>> fragment (\ None O{ fragColour } -> do
     uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
     dir <- let' "dir" $ ext3 (uv ^* zoom) 1 ^* 0.5
-    origin <- let' "origin" $ ext3 (coerce origin ^* 0.05) 1
+    origin <- let' "origin" $ ext3 (coerce origin / (resolution ^* 0.1)) 1
     s <- var "s" 0.1
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 0 0 0
