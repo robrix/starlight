@@ -6,6 +6,7 @@ module UI.Typeface
 ( Typeface(name)
 , Font(..)
 , fontScale
+, metrics
 , readTypeface
 , readFontOfSize
 , cacheCharactersForDrawing
@@ -60,6 +61,13 @@ data Font = Font
 fontScale :: Font -> Float
 fontScale (Font face size) = size * scale where
   scale = 1 / fromIntegral (O.unitsPerEm (O.headTable (opentypeFont face)))
+
+metrics :: Font -> (Float, Float)
+metrics font = (ascent, descent) where
+  table = O.hheaTable (opentypeFont (face font))
+  scale = fontScale font
+  ascent = scale * fromIntegral (O.ascent table)
+  descent = scale * fromIntegral (O.descent table)
 
 
 readTypeface
