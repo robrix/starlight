@@ -113,6 +113,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       circleA <- load circleV
       radarA  <- load radarV
 
+      let view = View{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL }
+
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
       glEnable GL_SCISSOR_TEST
@@ -127,7 +129,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
             input <- measure "input" input
             dt <- controls bodies fpsL targetL input
             gameState <- measure "physics" (physics bodies dt)
-            draw View{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL } bodies gameState
+            draw view bodies gameState
           continue <$ measure "swap" Window.swap
         when continue loop
 
