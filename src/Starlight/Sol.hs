@@ -8,6 +8,7 @@ module Starlight.Sol
 
 import           Control.Applicative ((<|>))
 import           Control.Effect.Lift
+import           Control.Monad (guard)
 import           Data.Char (isSpace)
 import           Data.List (sortOn)
 import           Data.Maybe (fromMaybe)
@@ -260,8 +261,9 @@ system = do
         , period      = fromDays 1
         , colour      = white
         , orbit
-        , parent      = (if code `mod` 100 == 99 then Nothing else bodies IntMap.!? (((code `quot` 100) * 100) + 99)) <|> bodies IntMap.!? 10
-        }
+        , parent      = guard isMoon *> (bodies IntMap.!? ((code `quot` 100) * 100 + 99)) <|> bodies IntMap.!? 10
+        } where
+        isMoon = code `mod` 100 /= 99
       systemScale = 100000 / getMetres (radius (bodies IntMap.! 10))
 
   pure . System systemScale $ sortOn code
