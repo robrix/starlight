@@ -252,7 +252,7 @@ physics bodies (Delta (Seconds dt)) = do
   get where
   updatePosition a@Actor{ position, velocity } = a { position = position .+^ velocity }
   applyGravity distanceScale S.Instant{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
-    = a { velocity = velocity + dt * force *^ normalize (pos ^-^ unP position) } where
+    = a { velocity = velocity + dt * force *^ direction pos (unP position) } where
     force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
     pos = (transform !* V4 0 0 0 1) ^. _xy -- compute body location in 3d, but only use xy
     r = qd (pos ^* distanceScale) (unP position ^* distanceScale) -- “quadrance” (square of distance between actor & body)
