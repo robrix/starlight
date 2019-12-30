@@ -56,7 +56,6 @@ data Label = Label
 data LabelState = LabelState
   { size   :: !(V2 Int)
   , string :: !String
-  , font   :: !Font
   }
 
 
@@ -148,7 +147,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font string
               }
             drawArraysInstanced Triangles range 6
 
-        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, font }))
+        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string }))
 
 
 drawLabel
