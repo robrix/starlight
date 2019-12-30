@@ -7,6 +7,7 @@
 module UI.Label
 ( Label
 , label
+, labelSize
 , setLabel
 , drawLabel
 ) where
@@ -92,6 +93,9 @@ label face = do
   scale <- Window.scale
 
   Label <$> sendIO (newIORef LabelState { textP, texture, fbuffer, quadA, size = 0, scale, face, string = "" })
+
+labelSize :: Has (Lift IO) sig m => Label -> m (V2 Int)
+labelSize = sendM . fmap UI.Label.size . readIORef . ref
 
 
 -- | Set the label’s text.
