@@ -311,19 +311,16 @@ draw
   => View
   -> GameState
   -> m ()
-draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO $ do
-  let Actor{ position, velocity } = game ^. _player
+draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
+  let Actor{ position } = game ^. _player
   bind @Framebuffer Nothing
 
-  scale <- Window.scale
-  size <- Window.size
+  ViewScale { scale, size, zoom = zoomOut } <- ask
+
   viewport $ scale *^ Interval 0 size
   scissor  $ scale *^ Interval 0 size
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-
-  let zoomOut = zoomForSpeed size (norm velocity)
-      viewScale = ViewScale { scale, size, zoom = zoomOut }
 
   measure "stars" . use starsP $ do
     scale <- Window.scale
@@ -375,11 +372,18 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
-  measure "radar" (runReader viewScale (drawRadar radar (player game) (npcs game)))
+  measure "radar" (drawRadar radar (player game) (npcs game))
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetL (V2 10 10) white Nothing
+  where
+  withViewScale m = do
+    scale <- Window.scale
+    size  <- Window.size
+    let velocity = game ^. _player . _velocity
+        zoomOut = zoomForSpeed size (norm velocity)
+    runReader ViewScale{ scale, size, zoom = zoomOut } m
 
 
 data View = View
