@@ -19,12 +19,13 @@ import           Data.Foldable (for_)
 import           Data.Function ((&))
 import           Data.Functor.I
 import           Data.Functor.Interval
+import           Data.Maybe (fromMaybe)
 import           GL.Array
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
 import           Lens.Micro ((.~), (^.))
 import           Linear.Affine
-import           Linear.Exts
+import           Linear.Exts as Linear
 import           Linear.Matrix
 import           Linear.Metric
 import           Linear.V2
@@ -65,23 +66,8 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
-  let drawBodyBlip StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } = do
-        let there = (transform !* V4 0 0 0 1) ^. _xy
-            angle = angleTo here there
-            d = distance here there
-            direction = normalize (there ^-^ here)
-            edge = scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
-            sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
-
-        set Radar.U
-          { matrix = Nothing
-          , radius = Nothing
-          , angle  = Just angle
-          , sweep  = Just sweep
-          , colour = Just (colour & _a .~ 0.5)
-          }
-
-        drawArrays LineStrip (Interval 0 (I (length radarV)))
+  let drawBodyBlip StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } =
+        drawBlipArc here (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour) Nothing
 
       drawNPCBlip Actor{ position = P there } = do
         set Radar.U
@@ -126,6 +112,46 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
   where
   n = 10 :: Int
   minSweep = 0.0133 -- at d=150, makes approx. 4px blips
+
+drawBlipArc
+  :: ( Has (Lift IO) sig m
+     , HasArray i m
+     , HasProgram Radar.U i o m
+     )
+  => V2 Float
+  -> Blip
+  -> Maybe Float
+  -> m ()
+drawBlipArc here Blip{ angle, direction, d, r, colour } radius = do
+  set Radar.U
+    { matrix = Nothing
+    , radius = radius
+    , angle  = Just angle
+    , sweep  = Just sweep
+    , colour = Just colour
+    }
+
+  drawArrays LineStrip (Interval 0 (I (length radarV)))
+  where
+  radius' = fromMaybe 100 radius
+  edge = r * (min d radius'/d) *^ perp direction + direction ^* radius' + here
+  sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
+  minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
+
+data Blip = Blip
+  { angle     :: Radians Float
+  , d         :: Float -- distance
+  , direction :: V2 Float -- unit vector in the direction of the object
+  , r         :: Float -- magnitude
+  , colour    :: Colour Float
+  }
+
+makeBlip :: V2 Float -> V2 Float -> Float -> Colour Float -> Blip
+makeBlip here there r colour = Blip { angle, d, direction, r, colour } where
+  angle = angleTo here there
+  d = distance here there
+  direction = Linear.direction there here
+
 
 data Radar = Radar
   { radarP :: Program Radar.U Radar.V Radar.O
