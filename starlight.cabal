@@ -86,6 +86,7 @@ library
     Starlight.Sol
     Starlight.View
     Starlight.Weapon.Laser
+    Starlight.Weapon.Laser.Shader
     UI.Colour
     UI.Glyph
     UI.Graph
