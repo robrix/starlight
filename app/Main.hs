@@ -59,8 +59,8 @@ import           Physics.Delta
 import qualified SDL
 import           Starlight.Body as S
 import           Starlight.Input
+import qualified Starlight.Radar.Shader as Radar
 import qualified Starlight.Shader.Body as Body
-import qualified Starlight.Shader.Radar as Radar
 import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
 import qualified Starlight.Sol as S

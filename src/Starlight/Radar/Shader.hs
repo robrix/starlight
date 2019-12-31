@@ -3,7 +3,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Starlight.Shader.Radar
+module Starlight.Radar.Shader
 ( shader
 , U(..)
 , V(..)
