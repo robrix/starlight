@@ -82,6 +82,7 @@ library
     Starlight.Shader.Ship
     Starlight.Shader.Stars
     Starlight.Sol
+    Starlight.View
     UI.Colour
     UI.Glyph
     UI.Graph
