@@ -319,6 +319,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } b
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
   let zoomOut = zoomForSpeed size (norm velocity)
+      viewScale = ViewScale { scale, size, zoom = zoomOut }
 
   measure "stars" . use starsP $ do
     scale <- Window.scale
@@ -369,7 +370,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } b
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
-  measure "radar" (drawRadar radar bodies (player game) (npcs game))
+  measure "radar" (runReader viewScale (drawRadar radar bodies (player game) (npcs game)))
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing

@@ -6,6 +6,7 @@ module Starlight.Radar
 ( radar
 , drawRadar
 , Radar
+, ViewScale(..)
 ) where
 
 import           Control.Effect.Finally
@@ -33,7 +34,6 @@ import           Starlight.Actor
 import           Starlight.Body as Body
 import qualified Starlight.Radar.Shader as Radar
 import           UI.Colour
-import qualified UI.Window as Window
 import           Unit.Angle
 import           Unit.Length
 
@@ -45,17 +45,17 @@ radar = do
 
 
 drawRadar
-  :: (Has (Lift IO) sig m, Has (Reader Window.Window) sig m)
+  :: ( Has (Lift IO) sig m
+     , Has (Reader ViewScale) sig m
+     )
   => Radar
   -> [StateVectors Float]
   -> Actor
   -> [Actor]
   -> m ()
-drawRadar Radar{ radarA, radarP } bodies Actor{ position = P here, velocity, target } npcs = use radarP . bindArray radarA $ do
-  scale <- Window.scale
-  size <- Window.size
-  let zoomOut = zoomForSpeed size (norm velocity)
-      V2 sx sy = 1 / (fromIntegral <$> size) ^* scale ^* (1 / zoomOut)
+drawRadar Radar{ radarA, radarP } bodies Actor{ position = P here, target } npcs = use radarP . bindArray radarA $ do
+  ViewScale{ scale, size, zoom = zoomOut } <- ask
+  let V2 sx sy = 1 / (fromIntegral <$> size ^* scale) ^* (1 / zoomOut)
 
   set defaultVars
     { Radar.matrix = Just (scaled (V3 sx sy 1))
@@ -111,23 +111,12 @@ data Radar = Radar
   , radarA :: Array (Radar.V I)
   }
 
+data ViewScale = ViewScale
+  { scale :: Int
+  , size  :: V2 Int
+  , zoom  :: Float
+  }
+
 radarV :: [Radar.V I]
 radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
   n = (16 :: Int)
-
--- | Compute the zoom factor for the given velocity.
---
--- Higher values correlate to more of the scene being visible.
-zoomForSpeed :: V2 Int -> Float -> Float
-zoomForSpeed size x
-  | I x < min_ speed = getI (min_ zoom)
-  | I x > max_ speed = getI (max_ zoom)
-  | otherwise        = getI (fromUnit zoom (coerce easeInOutCubic (toUnit speed (I x)))) where
-  zoom = Interval 1 6
-  speed = speedAt <$> zoom
-  speedAt x = x / 25 * fromIntegral (maximum size)
-
-easeInOutCubic :: Float -> Float
-easeInOutCubic t
-  | t < 0.5   = 4 * t ** 3
-  | otherwise = (t - 1) * (2 * t - 2) ** 2 + 1
