@@ -382,7 +382,7 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
         n = 10 :: Int
         minSweep = 0.0133 -- at d=150, makes approx. 4px blips
         -- FIXME: skip blips for extremely distant objects
-        drawBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
+        drawBodyBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
           let there = (transform !* V4 0 0 0 1) ^. _xy
               angle = angleTo here there
               d = distance here there
@@ -408,7 +408,7 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
           when (Just name == (target >>= \ i -> S.name (S.body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
-    for_ bodies drawBlip
+    for_ bodies drawBodyBlip
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing
