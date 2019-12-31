@@ -66,7 +66,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
   for_ bodies $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } -> do
-    setBlip (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour)
+    setBlip (makeBlip ((transform !* V4 0 0 0 1) ^. _xy ^-^ here) (r * scale) colour)
     drawArrays LineStrip (Interval 0 (I vertexCount))
 
   set defaultVars
@@ -81,7 +81,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
   let targetVectors = target >>= \ i -> (bodies !! i) <$ guard (i < length bodies)
   for_ targetVectors $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } -> do
-    let blip = makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour
+    let blip = makeBlip ((transform !* V4 0 0 0 1) ^. _xy ^-^ here) (r * scale) colour
     setBlip blip
     for_ [1..n] $ \ i -> do
       let radius = step * fromIntegral i
@@ -122,11 +122,11 @@ data Blip = Blip
   , colour    :: Colour Float  -- ^ colour of the object
   }
 
-makeBlip :: V2 Float -> V2 Float -> Float -> Colour Float -> Blip
-makeBlip here there r colour = Blip { angle, d, direction, r, colour } where
-  angle = angleTo here there
-  d = distance here there
-  direction = Linear.direction there here
+makeBlip :: V2 Float -> Float -> Colour Float -> Blip
+makeBlip there r colour = Blip { angle, d, direction, r, colour } where
+  angle = angleOf there
+  d = norm there
+  direction = normalize there
 
 
 data Radar = Radar
