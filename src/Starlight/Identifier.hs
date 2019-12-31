@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 module Starlight.Identifier
 ( Code
-, Name(..)
+, Name
 , Identifier(..)
 , parentIdentifier
 ) where
@@ -10,8 +10,7 @@ import Data.Text
 
 type Code = Int
 
-newtype Name = Name { getName :: Text }
-  deriving (Eq, Ord, Read, Show)
+type Name = Text
 
 data Identifier
   = Star Code Name
