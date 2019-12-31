@@ -75,3 +75,6 @@ instance Semigroup Timings where
 
 instance Monoid Timings where
   mempty = Timings mempty
+
+instance Pretty Timings where
+  pretty Timings{} = mempty
