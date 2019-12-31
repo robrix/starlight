@@ -128,15 +128,14 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
-          let bodies = S.bodiesAt system (getDelta t)
-          continue <- fmap isJust . runEmpty $ do
+          continue <- fmap isJust . runEmpty . runReader (S.bodiesAt system (getDelta t)) $ do
             input <- measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            controls bodies view dt input
-            ai bodies dt
-            gameState <- measure "physics" (physics bodies dt)
-            draw view bodies gameState
+            controls view dt input
+            ai dt
+            gameState <- measure "physics" (physics dt)
+            draw view gameState
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -171,15 +170,15 @@ circleV = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
 controls
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
+     , Has (Reader [S.StateVectors Float]) sig m
      , Has (State Input) sig m
      , Has (State GameState) sig m
      )
-  => [S.StateVectors Float]
-  -> View
+  => View
   -> Delta Seconds Float
   -> Input
   -> m ()
-controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "controls" $ do
+controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "controls" $ do
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
   when (input ^. _pressed SDL.KeycodeMinus) $
@@ -202,6 +201,10 @@ controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure
   when (input ^. _pressed SDL.KeycodeRight) $
     _player . _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
+  bodies <- ask
+  let switchTarget = \case
+        False -> maybe (Just 0)                      (\ i -> i + 1 <$ guard (i + 1 < length bodies))
+        True  -> maybe (Just (pred (length bodies))) (\ i -> i - 1 <$ guard (i - 1 >= 0))
   when (input ^. _pressed SDL.KeycodeTab) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
     _player . _target %= switchTarget shift
@@ -217,9 +220,6 @@ controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure
   measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
   measure "setLabel" $ setLabel targetL font target
   where
-  switchTarget = \case
-    False -> maybe (Just 0)                      (\ i -> i + 1 <$ guard (i + 1 < length bodies))
-    True  -> maybe (Just (pred (length bodies))) (\ i -> i - 1 <$ guard (i - 1 >= 0))
   or = liftA2 (liftA2 (coerce (||)))
 
 -- | Compute a rotation turning to face a desired angle with a given maximum angular thrust.
@@ -234,14 +234,16 @@ face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angula
 
 
 ai
-  :: Has (State GameState) sig m
-  => [S.StateVectors Float]
-  -> Delta Seconds Float
+  :: ( Has (Reader [S.StateVectors Float]) sig m
+     , Has (State GameState) sig m
+     )
+  => Delta Seconds Float
   -> m ()
-ai bodies (Delta (Seconds dt)) = do
-  _npcs . each %= go
+ai (Delta (Seconds dt)) = do
+  bodies <- ask
+  _npcs . each %= go bodies
   where
-  go a@Actor{ target, velocity, rotation, position } = case target of
+  go bodies a@Actor{ target, velocity, rotation, position } = case target of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     Just i
       | S.StateVectors{ transform } <- bodies !! i
@@ -263,11 +265,13 @@ ai bodies (Delta (Seconds dt)) = do
 
 
 physics
-  :: Has (State GameState) sig m
-  => [S.StateVectors Float]
-  -> Delta Seconds Float
+  :: ( Has (Reader [S.StateVectors Float]) sig m
+     , Has (State GameState) sig m
+     )
+  => Delta Seconds Float
   -> m GameState
-physics bodies (Delta (Seconds dt)) = do
+physics (Delta (Seconds dt)) = do
+  bodies <- ask @[S.StateVectors Float]
   scale <- Lens.uses (_system . _scale) (1/)
   _actors . each %= updatePosition . flip (foldr (applyGravity scale)) bodies
   get where
@@ -301,13 +305,13 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
+     , Has (Reader [S.StateVectors Float]) sig m
      , Has (Reader Window.Window) sig m
      )
   => View
-  -> [S.StateVectors Float]
   -> GameState
   -> m ()
-draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
+draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO $ do
   let Actor{ position, velocity } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -367,10 +371,11 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } b
 
         drawArraysInstanced LineLoop (Interval 0 (I (length circleV))) 3
 
+  bodies <- ask @[S.StateVectors Float]
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
-  measure "radar" (runReader viewScale (drawRadar radar bodies (player game) (npcs game)))
+  measure "radar" (runReader viewScale (drawRadar radar (player game) (npcs game)))
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing

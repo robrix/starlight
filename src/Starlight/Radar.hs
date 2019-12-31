@@ -46,14 +46,15 @@ radar = do
 
 drawRadar
   :: ( Has (Lift IO) sig m
+     , Has (Reader [StateVectors Float]) sig m
      , Has (Reader ViewScale) sig m
      )
   => Radar
-  -> [StateVectors Float]
   -> Actor
   -> [Actor]
   -> m ()
-drawRadar Radar{ radarA, radarP } bodies Actor{ position = P here, target } npcs = use radarP . bindArray radarA $ do
+drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use radarP . bindArray radarA $ do
+  bodies <- ask
   ViewScale{ scale, size, zoom = zoomOut } <- ask
   let V2 sx sy = 1 / (fromIntegral <$> size ^* scale) ^* (1 / zoomOut)
 
