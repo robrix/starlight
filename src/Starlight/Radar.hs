@@ -59,6 +59,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
   set defaultVars
     { Radar.matrix = Just (scaleToViewZoomed viewScale)
+    , Radar.radius = Just 100
     }
 
   -- FIXME: skip blips for extremely distant objects
@@ -84,7 +85,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
       drawNPCBlip Actor{ position = P there } = do
         set Radar.U
           { matrix = Nothing
-          , radius = Just 100
+          , radius = Nothing
           , angle  = Just $ angleTo here there
           , sweep  = Just 0
             -- FIXME: fade colour with distance
