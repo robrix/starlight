@@ -24,10 +24,8 @@ module Starlight.Body
 
 import Control.Effect.Lift
 import Data.Char (isSpace, toUpper)
-import Data.Foldable (find)
 import Data.List (elemIndex)
 import Data.Text (pack)
-import Lens.Micro
 import Linear.Affine
 import Linear.Epsilon
 import Linear.Exts
@@ -35,7 +33,6 @@ import Linear.Matrix
 import Linear.Quaternion
 import Linear.V2
 import Linear.V3
-import Linear.V4
 import Linear.Vector
 import Numeric (readDec)
 import Starlight.Identifier
