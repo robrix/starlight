@@ -19,7 +19,6 @@ import           Data.Foldable (for_)
 import           Data.Function ((&))
 import           Data.Functor.I
 import           Data.Functor.Interval
-import           Data.Maybe (fromMaybe)
 import           GL.Array
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
@@ -130,8 +129,7 @@ drawBlipArc Blip{ angle, direction, d, r, colour } radius = do
 
   drawArrays LineStrip (Interval 0 (I (length radarV)))
   where
-  radius' = fromMaybe 100 radius
-  edge = r * (min d radius'/d) *^ perp direction + direction ^* radius'
+  edge = perp direction ^* r + direction ^* d
   sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))
   minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
 
