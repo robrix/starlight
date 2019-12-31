@@ -3,7 +3,7 @@ module Starlight.Identifier
 ( Code
 , Name
 , Identifier(..)
-, parentIdentifier
+, parent
 , describeIdentifier
 , toList
 , getLeaf
@@ -26,8 +26,8 @@ infixl 5 :/
 
 instance Ord Identifier where compare = compare `on` toList
 
-parentIdentifier :: Identifier -> Maybe Identifier
-parentIdentifier = \case
+parent :: Identifier -> Maybe Identifier
+parent = \case
   parent :/ _ -> Just parent
   _           -> Nothing
 

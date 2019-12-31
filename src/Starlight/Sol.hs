@@ -17,7 +17,7 @@ import           Linear.Quaternion
 import           Linear.V4
 import           Linear.Vector
 import           Starlight.Body
-import           Starlight.Identifier
+import           Starlight.Identifier as Identifier
 import           UI.Colour
 import           Unit.Angle
 import           Unit.Length
@@ -46,7 +46,7 @@ bodies orbits = bodies where
       , period      = fromDays 58.646
       , colour      = V4 0.5 0.5 0.5 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (299, "Venus") in Body
@@ -57,7 +57,7 @@ bodies orbits = bodies where
       , period      = fromDays 243.025
       , colour      = V4 1 1 0.5 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (399, "Terra") in Body
@@ -68,7 +68,7 @@ bodies orbits = bodies where
       , period      = fromDays 0.997_269_68
       , colour      = V4 0 0 1 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (399, "Terra") :/ (301, "Luna") in Body
@@ -79,7 +79,7 @@ bodies orbits = bodies where
       , period      = fromDays 27.321_661
       , colour      = V4 0.5 0.5 0.5 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (499, "Mars") in Body
@@ -90,7 +90,7 @@ bodies orbits = bodies where
       , period      = fromDays 1.025957
       , colour      = V4 1 0 0 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (499, "Mars") :/ (401, "Phobos") in Body
@@ -101,7 +101,7 @@ bodies orbits = bodies where
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
       , colour      = V4 131 120 110 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (499, "Mars") :/ (402, "Deimos") in Body
@@ -112,7 +112,7 @@ bodies orbits = bodies where
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
       , colour      = V4 188 170 145 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (599, "Jupiter") in Body
@@ -123,7 +123,7 @@ bodies orbits = bodies where
       , period      = fromHours 9.925
       , colour      = V4 0.5 0.5 0 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (501, "Io") in Body
@@ -134,7 +134,7 @@ bodies orbits = bodies where
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
       , colour      = V4 253 249 156 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (502, "Europa") in Body
@@ -145,7 +145,7 @@ bodies orbits = bodies where
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
       , colour      = V4 184 164 130 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (503, "Ganymede") in Body
@@ -156,7 +156,7 @@ bodies orbits = bodies where
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
       , colour      = V4 143 132 117 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (504, "Callisto") in Body
@@ -167,7 +167,7 @@ bodies orbits = bodies where
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
       , colour      = V4 107 95 79 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (505, "Amalthea") in Body
@@ -178,7 +178,7 @@ bodies orbits = bodies where
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
       , colour      = V4 157 157 157 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (506, "Himalia") in Body
@@ -189,7 +189,7 @@ bodies orbits = bodies where
       , period      = fromHours 7.782 -- !
       , colour      = V4 203 203 203 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (699, "Saturn") in Body
@@ -200,7 +200,7 @@ bodies orbits = bodies where
       , period      = fromHours 10 + fromMinutes 33 + Seconds 38
       , colour      = V4 (229/255) (216/255) (167/255) 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (799, "Uranus") in Body
@@ -211,7 +211,7 @@ bodies orbits = bodies where
       , period      = fromDays 0.71833
       , colour      = V4 (196/255) (221/255) (240/255) 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (899, "Neptune") in Body
@@ -222,7 +222,7 @@ bodies orbits = bodies where
       , period      = fromDays 0.6713
       , colour      = V4 (138/255) (163/255) (217/255) 1
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
 
     , let identifier = solI :/ (999, "Pluto") in Body
@@ -233,7 +233,7 @@ bodies orbits = bodies where
       , period      = fromDays 6.387_230
       , colour      = V4 165 157 144 255 ^/ 255
       , orbit       = orbits Map.! identifier
-      , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+      , parent      = Identifier.parent identifier >>= (bodies Map.!?)
       }
     ]
 
@@ -249,7 +249,7 @@ system = do
         , period      = fromDays 1
         , colour      = white
         , orbit
-        , parent      = parentIdentifier identifier >>= (bodies Map.!?)
+        , parent      = Identifier.parent identifier >>= (bodies Map.!?)
         }
       systemScale = 100_000 / getMetres (radius (bodies Map.! solI))
 

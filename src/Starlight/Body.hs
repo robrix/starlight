@@ -42,7 +42,7 @@ import Linear.V3
 import Linear.V4
 import Linear.Vector
 import Numeric (readDec)
-import Starlight.Identifier
+import Starlight.Identifier hiding (parent)
 import System.Directory
 import System.FilePath
 import Text.Read
