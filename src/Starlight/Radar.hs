@@ -63,6 +63,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
     }
 
   -- FIXME: skip blips for extremely distant objects
+  -- FIXME: blips should shadow more distant blips
   let drawBodyBlip StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } = do
         let there = (transform !* V4 0 0 0 1) ^. _xy
             angle = angleTo here there
