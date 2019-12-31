@@ -25,7 +25,7 @@ import           Control.Monad ((<=<), when)
 import           Control.Monad.IO.Class.Lift (runLiftIO)
 import           Data.Coerce
 import           Data.Foldable (foldl', for_)
-import           Data.Function (fix, (&))
+import           Data.Function (fix)
 import           Data.Functor.Const
 import           Data.Functor.I
 import           Data.Functor.Interval
@@ -41,10 +41,9 @@ import           GHC.Stack
 import           GL.Array
 import           GL.Framebuffer
 import           GL.Program
-import           GL.Shader.DSL (defaultVars)
 import           GL.Viewport
 import           Graphics.GL.Core41
-import           Lens.Micro (Lens', (.~), (^.), each, lens)
+import           Lens.Micro (Lens', (^.), each, lens)
 import           Linear.Affine
 import           Linear.Exts
 import           Linear.Matrix
@@ -60,7 +59,7 @@ import qualified SDL
 import           Starlight.Actor as Actor
 import           Starlight.Body as S
 import           Starlight.Input
-import qualified Starlight.Radar.Shader as Radar
+import           Starlight.Radar as Radar
 import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
@@ -102,7 +101,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
     . evalState start $ do
       starsP <- build Stars.shader
       shipP  <- build Ship.shader
-      radarP <- build Radar.shader
       bodyP  <- build Body.shader
 
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
@@ -114,10 +112,10 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       quadA   <- load quadV
       shipA   <- load shipV
       circleA <- load circleV
-      radarA  <- load radarV
 
-      let radar = Radar { radarP, radarA }
-          view = View{ quadA, shipA, circleA, radar, starsP, shipP, bodyP, fpsL, targetL, font = Font face 18 }
+      radar <- Radar.radar
+
+      let view = View{ quadA, shipA, circleA, radar, starsP, shipP, bodyP, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -169,10 +167,6 @@ quadV = coerce @[V2 Float]
 
 circleV :: [Body.V I]
 circleV = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
-
-radarV :: [Radar.V I]
-radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
-  n = (16 :: Int)
 
 controls
   :: ( Has (Lift IO) sig m
@@ -393,74 +387,6 @@ data View = View
   , fpsL    :: Label
   , targetL :: Label
   , font    :: Font
-  }
-
-
-drawRadar
-  :: (Has (Lift IO) sig m, Has (Reader Window.Window) sig m)
-  => Radar
-  -> [S.StateVectors Float]
-  -> Actor
-  -> [Actor]
-  -> m ()
-drawRadar Radar{ radarA, radarP } bodies Actor{ position = P here, velocity, target } npcs = use radarP . bindArray radarA $ do
-  scale <- Window.scale
-  size <- Window.size
-  let zoomOut = zoomForSpeed size (norm velocity)
-      V2 sx sy = 1 / (fromIntegral <$> size) ^* scale ^* (1 / zoomOut)
-
-  set defaultVars
-    { Radar.matrix = Just (scaled (V3 sx sy 1))
-    }
-
-  -- FIXME: skip blips for extremely distant objects
-  let drawBodyBlip S.StateVectors{ scale, body = S.Body{ name, radius = Metres r, colour }, transform } = do
-        let there = (transform !* V4 0 0 0 1) ^. _xy
-            angle = angleTo here there
-            d = distance here there
-            direction = normalize (there ^-^ here)
-            -- FIXME: apply easing so this works more like a spring
-            step = max 1 (min (50 * zoomOut) (d / fromIntegral n))
-            drawAtRadius radius minSweep colour = do
-              let edge = scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
-                  sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
-
-              set Radar.U
-                { matrix = Nothing
-                , radius = Just radius
-                , angle  = Just angle
-                , sweep  = Just sweep
-                , colour = Just colour
-                }
-
-              drawArrays LineStrip (Interval 0 (I (length radarV)))
-
-        drawAtRadius 100 minSweep (colour & _a .~ 0.5)
-
-        when (Just name == (target >>= \ i -> S.name (S.body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
-          drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
-
-      drawNPCBlip Actor{ position = P there } = do
-        set Radar.U
-          { matrix = Nothing
-          , radius = Just 100
-          , angle  = Just $ angleTo here there
-          , sweep  = Just 0
-            -- FIXME: fade colour with distance
-          , colour = Just white
-          }
-        let median = length radarV `div` 2
-        drawArrays Points (Interval (I median) (I (median + 1)))
-
-  for_ bodies drawBodyBlip
-  for_ npcs drawNPCBlip
-  where
-  n = 10 :: Int
-  minSweep = 0.0133 -- at d=150, makes approx. 4px blips
-
-data Radar = Radar
-  { radarP  :: Program Radar.U Radar.V Radar.O
-  , radarA  :: Array (Radar.V I)
   }
 
 
