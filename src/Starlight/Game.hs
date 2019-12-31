@@ -125,6 +125,12 @@ runGame = do
           , rotation = axisAngle (unit _z) (pi/2)
           , target   = Just $ Star (10, "Sol")
           }
+        , Actor
+          { position = P (V2 250000 0)
+          , velocity = V2 0 150
+          , rotation = axisAngle (unit _z) (pi/2)
+          , target   = Just $ Star (10, "Sol") :/ (199, "Mercury")
+          }
         ]
       , system = system
       }
