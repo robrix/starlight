@@ -1,4 +1,5 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeOperators #-}
@@ -211,7 +212,9 @@ fromDirectory dir
   =   sendM (listDirectory dir)
   >>= filterM isRelevant
   >>= traverse (\ path -> (,) path <$> fromFile (dir </> path)) where
-  isRelevant path = pure (takeExtension path == ".txt")
+  isRelevant path = do
+    isDir <- sendM (doesDirectoryExist path)
+    pure $! not isDir || takeExtension path == ".txt"
 
 
 newtype Per (f :: * -> *) (g :: * -> *) a = Per { getPer :: a }
