@@ -22,7 +22,9 @@ import           Control.Carrier.Lift
 import           Control.Carrier.Writer.Strict
 import           Control.Effect.Profile
 import           Control.Monad.IO.Class
+import           Data.List (sortOn)
 import qualified Data.Map as Map
+import           Data.Ord (Down(..))
 import           Data.Text (Text)
 import           Data.Text.Prettyprint.Doc
 import           Data.Time.Clock
@@ -86,5 +88,5 @@ instance Monoid Timings where
   mempty = Timings mempty
 
 instance Pretty Timings where
-  pretty (Timings ts) = foldMap go (Map.toList ts) where
+  pretty (Timings ts) = foldMap go (sortOn (Down . mean . snd) (Map.toList ts)) where
     go (k, v) = pretty k <> pretty ':' <> softline <> nest 2 (pretty v) <> hardline
