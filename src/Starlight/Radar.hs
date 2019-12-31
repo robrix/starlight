@@ -69,14 +69,14 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
     setBlip (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour)
     drawArrays LineStrip (Interval 0 (I (length radarV)))
 
+  set defaultVars
+    { Radar.sweep  = Just 0
+      -- FIXME: fade colour with distance
+      -- FIXME: IFF
+    , Radar.colour = Just white
+    }
   for_ npcs $ \ Actor{ position = P there } -> do
-    set defaultVars
-      { Radar.angle  = Just $ angleTo here there
-      , Radar.sweep  = Just 0
-        -- FIXME: fade colour with distance
-        -- FIXME: IFF
-      , Radar.colour = Just white
-      }
+    set defaultVars { Radar.angle  = Just $ angleTo here there }
     let median = length radarV `div` 2
     drawArrays Points (Interval (I median) (I (median + 1)))
 
