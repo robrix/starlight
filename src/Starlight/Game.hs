@@ -67,6 +67,7 @@ import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Sol as S
 import           Starlight.View
+import           Starlight.Weapon.Laser as Laser
 import           System.Environment
 import           System.Exit
 import           System.FilePath
@@ -150,8 +151,9 @@ runGame = do
 
       starfield <- Starfield.starfield
       radar <- Radar.radar
+      laser <- Laser.laser
 
-      let view = View{ starfield, shipA, circleA, radar, shipP, bodyP, fpsL, targetL, font = Font face 18 }
+      let view = View{ starfield, shipA, circleA, radar, laser, shipP, bodyP, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -399,6 +401,7 @@ data View = View
   , shipP     :: Program Ship.U Ship.V Ship.O
   , bodyP     :: Program Body.U Body.V Body.O
   , radar     :: Radar
+  , laser     :: Laser
   , fpsL      :: Label
   , targetL   :: Label
   , font      :: Font
