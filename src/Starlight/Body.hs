@@ -203,7 +203,7 @@ fromFile :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePa
 fromFile path = do
   lines <- lines <$> sendM (readFile path)
   last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
-  either fail (pure . fromEphemeris) (fromCSV (lines !!last))
+  either fail (pure . fromEphemeris) (fromCSV (lines !! last))
 
 fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePath -> m [(FilePath, Orbit a)]
 fromDirectory dir
