@@ -417,7 +417,8 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
               -- FIXME: fade colour with distance
             , colour = Just white
             }
-          drawArrays Points (Interval 0 (I (length radarV)))
+          let median = length radarV `div` 2
+          drawArrays Points (Interval (I median) (I (median + 1)))
 
     for_ bodies drawBodyBlip
     forOf_ (_npcs . each) game drawNPCBlip
