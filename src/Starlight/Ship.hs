@@ -46,7 +46,7 @@ makeDrawShip = do
             !*! mkTransformation rotation 0
         , colour = Just colour
         }
-      drawArrays LineStrip range
+      drawArrays LineLoop range
     }
 
 newtype DrawShip = DrawShip
