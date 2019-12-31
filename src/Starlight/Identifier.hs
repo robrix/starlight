@@ -32,9 +32,8 @@ parentIdentifier = \case
   _           -> Nothing
 
 describeIdentifier :: Identifier -> String
-describeIdentifier = \case
-  Star (code, name) -> show code <> " " <> unpack name
-  _ :/ (code, name) -> show code <> " " <> unpack name
+describeIdentifier = showLeaf . getLeaf where
+  showLeaf (code, name) = show code <> " " <> unpack name
 
 toList :: Identifier -> NonEmpty (Code, Name)
 toList i = go i [] where
