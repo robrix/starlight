@@ -409,14 +409,12 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
             drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
         drawNPCBlip Actor{ position = P there } = do
-          let angle = angleTo here there
-              colour = white
           set Radar.U
             { matrix = Nothing
             , radius = Just 100
-            , angle  = Just angle
+            , angle  = Just $ angleTo here there
             , sweep  = Just minSweep
-            , colour = Just colour
+            , colour = Just white
             }
           drawArrays Points (Interval 0 (I (length radarV)))
 
