@@ -394,10 +394,10 @@ draw View{ starfield, circleA, shipA, radar, shipP, bodyP, fpsL, targetL } game 
 
 data View = View
   { starfield :: Starfield
-  , circleA   :: Array (Body.V  I)
-  , shipA     :: Array (Ship.V  I)
-  , shipP     :: Program Ship.U  Ship.V  Ship.O
-  , bodyP     :: Program Body.U  Body.V  Body.O
+  , circleA   :: Array (Body.V I)
+  , shipA     :: Array (Ship.V I)
+  , shipP     :: Program Ship.U Ship.V Ship.O
+  , bodyP     :: Program Body.U Body.V Body.O
   , radar     :: Radar
   , fpsL      :: Label
   , targetL   :: Label
