@@ -62,6 +62,8 @@ import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
 import qualified Starlight.Sol as S
+import           System.Environment
+import           System.Exit
 import           System.FilePath
 import           UI.Colour
 import           UI.Label as Label
@@ -73,12 +75,23 @@ import           Unit.Mass
 import           Unit.Time
 
 main :: IO ()
-main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
+main = handling $ do
   Options{ profile } <- execParser argumentsParser
   if profile then
     Profile.reportTimings . fst <=< Profile.runProfile $ runGame
   else
     NoProfile.runProfile runGame
+  where
+  handling m = do
+    name <- getProgName
+    -- Exceptions don’t seem to exit in the repl for unknown reasons, so we catch and log them (except for 'ExitCode')
+    if name == "<interactive>" then
+      m `E.catches`
+        [ E.Handler (const @_ @ExitCode (pure ()))
+        , E.Handler (putStrLn . E.displayException @E.SomeException)
+        ]
+    else
+      m
 
 runGame
   :: ( Effect sig
