@@ -5,6 +5,7 @@ module Starlight.Identifier
 , Identifier(..)
 , parentIdentifier
 , describeIdentifier
+, toList
 ) where
 
 import Data.Text
@@ -29,3 +30,9 @@ describeIdentifier :: Identifier -> String
 describeIdentifier = \case
   Star code name -> show code <> " " <> unpack name
   _ :/ (code, name) -> show code <> " " <> unpack name
+
+toList :: Identifier -> [(Code, Name)]
+toList i = go i [] where
+  go = \case
+    Star code name    -> ((code, name):)
+    i :/ (code, name) -> go i . ((code, name):)
