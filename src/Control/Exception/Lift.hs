@@ -1,9 +1,14 @@
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module Control.Exception.Lift
 ( E.Exception(..)
 , E.SomeException(..)
 , throwIO
 , catch
+, catches
+, Handler(..)
 , handle
 , mask
 , bracket
@@ -22,6 +27,21 @@ throwIO = sendM . E.throwIO
 -- | See @"Control.Exception".'E.catch'@.
 catch :: (E.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
 catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `E.catch` (run . (<$ ctx) . h)
+
+-- | See @"Control.Exception".'E.catches'@.
+--
+-- @since 1.0.0.0
+catches :: Has (Lift IO) sig m => m a -> [Handler m a] -> m a
+catches m hs = liftWith $ \ ctx run ->
+  E.catches (run (m <$ ctx)) (map (\ (Handler h) -> E.Handler (run . (<$ ctx) . h)) hs)
+
+-- | See @"Control.Exception".'E.Handler'@.
+--
+-- @since 1.0.0.0
+data Handler m a
+  = forall e . E.Exception e => Handler (e -> m a)
+
+deriving instance Functor m => Functor (Handler m)
 
 -- | See @"Control.Exception".'E.handle'@.
 handle :: (E.Exception e, Has (Lift IO) sig m) => (e -> m a) -> m a -> m a
