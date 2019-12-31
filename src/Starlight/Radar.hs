@@ -77,7 +77,6 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
     }
   for_ npcs $ \ Actor{ position = P there } -> do
     set defaultVars { Radar.angle  = Just $ angleTo here there }
-    let median = length radarV `div` 2
     drawArrays Points (Interval (I median) (I (median + 1)))
 
   let targetVectors = target >>= \ i -> (bodies !! i) <$ guard (i < length bodies)
@@ -97,6 +96,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
       drawArrays LineStrip (Interval 0 (I (length radarV)))
   where
   n = 10 :: Int
+  median = length radarV `div` 2
 
 setBlip
   :: ( Has (Lift IO) sig m
