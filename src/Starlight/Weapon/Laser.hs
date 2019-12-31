@@ -1,4 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Weapon.Laser
 ( laser
@@ -8,6 +9,7 @@ module Starlight.Weapon.Laser
 
 import Control.Effect.Finally
 import Control.Effect.Lift
+import Control.Effect.Profile
 import Control.Effect.Reader
 import Data.Coerce (coerce)
 import Data.Functor.I
@@ -30,12 +32,13 @@ laser = do
 
 drawLaser
   :: ( Has (Lift IO) sig m
+     , Has Profile sig m
      , Has (Reader ViewScale) sig m
      )
   => Laser
   -> Colour Float
   -> m ()
-drawLaser Laser{ program, array } colour = use program . bindArray array $ do
+drawLaser Laser{ program, array } colour = measure "laser" . use program . bindArray array $ do
   matrix <- asks scaleToViewZoomed
   set Laser.U
     { matrix = Just matrix
