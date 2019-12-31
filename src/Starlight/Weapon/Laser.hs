@@ -19,6 +19,7 @@ import GL.Program
 import Starlight.View
 import Starlight.Weapon.Laser.Shader as Laser
 import UI.Colour
+import Unit.Angle
 
 laser
   :: ( Has Finally sig m
@@ -37,12 +38,13 @@ drawLaser
      )
   => Laser
   -> Colour Float
+  -> Radians Float
   -> m ()
-drawLaser Laser{ program, array } colour = measure "laser" . use program . bindArray array $ do
+drawLaser Laser{ program, array } colour angle = measure "laser" . use program . bindArray array $ do
   matrix <- asks scaleToViewZoomed
   set Laser.U
     { matrix = Just matrix
-    , angle  = Just 0
+    , angle  = Just angle
     , colour = Just colour
     }
   drawArrays Lines range

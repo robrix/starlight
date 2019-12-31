@@ -330,7 +330,7 @@ draw
   -> GameState
   -> m ()
 draw View{ starfield, circleA, shipA, radar, laser, shipP, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
-  let Actor{ position } = game ^. _player
+  let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
   viewScale@ViewScale{ scale, size, zoom } <- ask
@@ -360,7 +360,7 @@ draw View{ starfield, circleA, shipA, radar, laser, shipP, bodyP, fpsL, targetL 
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  drawLaser laser green
+  drawLaser laser green (snd (toAxisAngle rotation))
 
   let maxDim = maximum ((fromIntegral <$> size ^* scale) ^* zoom)
 
