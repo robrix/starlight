@@ -94,7 +94,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
       set defaultVars
         { Radar.radius = Just radius
-        , Radar.colour = Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
+        , Radar.colour = Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
         }
 
       drawArrays LineStrip (Interval 0 (I (length radarV)))
