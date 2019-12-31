@@ -21,6 +21,7 @@ shader = program $ \ u
   ->  vertex (\ V{ n } None -> do
     angle <- let' "angle" (coerce (angle u) + n * coerce (sweep u))
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle) ^* radius u)
+    gl_PointSize .= 3
     gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) ^. _xy) 0) 1)
 
   >>> fragment (\ None O{ fragColour } -> fragColour .= colour u)
