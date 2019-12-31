@@ -129,17 +129,7 @@ executable starlight
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
-    , containers
-    , filepath ^>= 1.4
-    , fused-effects
-    , fused-effects-lens
-    , gl
-    , linear
-    , microlens
-    , sdl2
     , starlight
-    , text
-    , time
 
 source-repository head
   type:     git
