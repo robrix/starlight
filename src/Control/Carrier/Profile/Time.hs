@@ -27,6 +27,7 @@ import           Data.Text (Text)
 import           Data.Text.Prettyprint.Doc
 import           Data.Time.Clock
 import           Prelude hiding (sum)
+import           Unit.Time
 
 runProfile :: ProfileC m a -> m (Timings, a)
 runProfile (ProfileC m) = runWriter m
@@ -62,7 +63,15 @@ instance Monoid Timing where
   mempty = Timing 0 0 0 0 mempty
 
 instance Pretty Timing where
-  pretty Timing{} = mempty
+  pretty t@Timing{ min', max', sub } = braces (foldMap go fields) <> hardline <> nest 2 (pretty sub)
+    where
+    fields =
+      [ ("min", prettyMS min')
+      , ("mean", prettyMS (mean t))
+      , ("max", prettyMS max')
+      ]
+    go (k, v) = pretty k <> pretty ':' <+> v
+    prettyMS = (<> pretty "ms") . pretty . getSeconds . getMilli . milli @Seconds @Double . realToFrac
 
 mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
