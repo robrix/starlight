@@ -95,6 +95,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
           , angle  = Just $ angleTo here there
           , sweep  = Just 0
             -- FIXME: fade colour with distance
+            -- FIXME: IFF
           , colour = Just white
           }
         let median = length radarV `div` 2
