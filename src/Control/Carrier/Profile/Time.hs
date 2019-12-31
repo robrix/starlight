@@ -64,7 +64,7 @@ mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
 
 
-newtype Timings = Timings (Map.Map Text Timing)
+newtype Timings = Timings { unTimings :: Map.Map Text Timing }
 
 instance Semigroup Timings where
   Timings t1 <> Timings t2 = Timings (Map.unionWith (<>) t1 t2)
