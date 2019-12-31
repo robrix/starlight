@@ -120,6 +120,7 @@ runGame = do
         , rotation = axisAngle (unit _z) (pi/2)
         , target   = Nothing
         }
+      , firing   = False
       , npcs     =
         [ Actor
           { position = P (V2 250000 0)
@@ -222,6 +223,8 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
     _player . _rotation *= axisAngle (unit _z) (getRadians angular)
   when (input ^. _pressed SDL.KeycodeRight) $
     _player . _rotation *= axisAngle (unit _z) (getRadians (-angular))
+
+  _firing .= input ^. _pressed SDL.KeycodeSpace
 
   System{ scale, bodies } <- ask @(System StateVectors Float)
   let identifiers = Map.keys bodies
@@ -360,7 +363,7 @@ draw View{ starfield, circleA, shipA, radar, laser, shipP, bodyP, fpsL, targetL 
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  drawLaser laser green (snd (toAxisAngle rotation))
+  when (game ^. _firing) $ drawLaser laser green (snd (toAxisAngle rotation))
 
   let maxDim = maximum ((fromIntegral <$> size ^* scale) ^* zoom)
 
@@ -413,6 +416,7 @@ data View = View
 data GameState = GameState
   { throttle :: !Float
   , player   :: !Actor
+  , firing   :: !Bool
   , npcs     :: ![Actor]
   , system   :: !(System Body Float)
   }
@@ -429,6 +433,9 @@ _actors = lens ((:|) . player <*> npcs) (\ s (p:|o) -> s { player = p, npcs = o 
 
 _player :: Lens' GameState Actor
 _player = lens player (\ s p -> s { player = p })
+
+_firing :: Lens' GameState Bool
+_firing = lens firing (\ s p -> s { firing = p })
 
 _system :: Lens' GameState (System Body Float)
 _system = lens system (\ s p -> s { system = p })
