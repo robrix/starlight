@@ -44,7 +44,7 @@ import           GL.Program
 import           GL.Shader.DSL (defaultVars)
 import           GL.Viewport
 import           Graphics.GL.Core41
-import           Lens.Micro (Lens', (.~), (^.), each, forOf_, lens)
+import           Lens.Micro (Lens', (.~), (^.), each, lens)
 import           Linear.Affine
 import           Linear.Exts
 import           Linear.Matrix
@@ -313,8 +313,8 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw View{ quadA, circleA, shipA, radar = Radar { radarP, radarA }, shipP, starsP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
-  let Actor{ position, velocity, target } = game ^. _player
+draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
+  let Actor{ position, velocity } = game ^. _player
   bind @Framebuffer Nothing
 
   scale <- Window.scale
@@ -375,54 +375,7 @@ draw View{ quadA, circleA, shipA, radar = Radar { radarP, radarA }, shipP, stars
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
-  measure "radar" . use radarP . bindArray radarA $ do
-    set defaultVars
-      { Radar.matrix = Just (scaled (V3 sx sy 1))
-      }
-    let here = unP position
-        n = 10 :: Int
-        minSweep = 0.0133 -- at d=150, makes approx. 4px blips
-        -- FIXME: skip blips for extremely distant objects
-        drawBodyBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
-          let there = (transform !* V4 0 0 0 1) ^. _xy
-              angle = angleTo here there
-              d = distance here there
-              direction = normalize (there ^-^ here)
-              -- FIXME: apply easing so this works more like a spring
-              step = max 1 (min (50 * zoomOut) (d / fromIntegral n))
-              drawAtRadius radius minSweep colour = do
-                let edge = game ^. _system . _scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
-                    sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
-
-                set Radar.U
-                  { matrix = Nothing
-                  , radius = Just radius
-                  , angle  = Just angle
-                  , sweep  = Just sweep
-                  , colour = Just colour
-                  }
-
-                drawArrays LineStrip (Interval 0 (I (length radarV)))
-
-          drawAtRadius 100 minSweep (colour & _a .~ 0.5)
-
-          when (Just name == (target >>= \ i -> S.name (S.body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
-            drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
-
-        drawNPCBlip Actor{ position = P there } = do
-          set Radar.U
-            { matrix = Nothing
-            , radius = Just 100
-            , angle  = Just $ angleTo here there
-            , sweep  = Just 0
-              -- FIXME: fade colour with distance
-            , colour = Just white
-            }
-          let median = length radarV `div` 2
-          drawArrays Points (Interval (I median) (I (median + 1)))
-
-    for_ bodies drawBodyBlip
-    forOf_ (_npcs . each) game drawNPCBlip
+  measure "radar" (drawRadar radar bodies game)
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing
@@ -441,6 +394,68 @@ data View = View
   , targetL :: Label
   , font    :: Font
   }
+
+
+drawRadar
+  :: (Has (Lift IO) sig m, Has (Reader Window.Window) sig m)
+  => Radar
+  -> [S.Instant Float]
+  -> GameState
+  -> m ()
+drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ do
+  let Actor{ position = P here, velocity, target } = player game
+  scale <- Window.scale
+  size <- Window.size
+  let zoomOut = zoomForSpeed size (norm velocity)
+  let V2 sx sy = 1 / (fromIntegral <$> size) ^* scale ^* (1 / zoomOut)
+
+  set defaultVars
+    { Radar.matrix = Just (scaled (V3 sx sy 1))
+    }
+
+  let n = 10 :: Int
+      minSweep = 0.0133 -- at d=150, makes approx. 4px blips
+      -- FIXME: skip blips for extremely distant objects
+      drawBodyBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
+        let there = (transform !* V4 0 0 0 1) ^. _xy
+            angle = angleTo here there
+            d = distance here there
+            direction = normalize (there ^-^ here)
+            -- FIXME: apply easing so this works more like a spring
+            step = max 1 (min (50 * zoomOut) (d / fromIntegral n))
+            drawAtRadius radius minSweep colour = do
+              let edge = game ^. _system . _scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
+                  sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
+
+              set Radar.U
+                { matrix = Nothing
+                , radius = Just radius
+                , angle  = Just angle
+                , sweep  = Just sweep
+                , colour = Just colour
+                }
+
+              drawArrays LineStrip (Interval 0 (I (length radarV)))
+
+        drawAtRadius 100 minSweep (colour & _a .~ 0.5)
+
+        when (Just name == (target >>= \ i -> S.name (S.body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
+          drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
+
+      drawNPCBlip Actor{ position = P there } = do
+        set Radar.U
+          { matrix = Nothing
+          , radius = Just 100
+          , angle  = Just $ angleTo here there
+          , sweep  = Just 0
+            -- FIXME: fade colour with distance
+          , colour = Just white
+          }
+        let median = length radarV `div` 2
+        drawArrays Points (Interval (I median) (I (median + 1)))
+
+  for_ bodies drawBodyBlip
+  for_ (npcs game) drawNPCBlip
 
 data Radar = Radar
   { radarP  :: Program Radar.U Radar.V Radar.O
