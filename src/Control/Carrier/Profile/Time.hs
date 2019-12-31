@@ -89,4 +89,4 @@ instance Monoid Timings where
 
 instance Pretty Timings where
   pretty (Timings ts) = foldMap go (sortOn (Down . mean . snd) (Map.toList ts)) where
-    go (k, v) = pretty k <> pretty ':' <> softline <> nest 2 (pretty v) <> hardline
+    go (k, v) = pretty k <> pretty ':' <> softline <> pretty v <> hardline
