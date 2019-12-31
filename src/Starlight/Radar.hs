@@ -75,7 +75,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
         set Radar.U
           { matrix = Nothing
-          , radius = Just radius
+          , radius = Nothing
           , angle  = Just angle
           , sweep  = Just sweep
           , colour = Just (colour & _a .~ 0.5)
