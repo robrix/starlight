@@ -137,11 +137,11 @@ drawBlipArc here Blip{ angle, direction, d, r, colour } radius = do
   minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
 
 data Blip = Blip
-  { angle     :: Radians Float
-  , d         :: Float -- distance
-  , direction :: V2 Float -- unit vector in the direction of the object
-  , r         :: Float -- magnitude
-  , colour    :: Colour Float
+  { angle     :: Radians Float -- ^ angle to the object
+  , d         :: Float         -- ^ distance to the object
+  , direction :: V2 Float      -- ^ unit vector in the direction of the object
+  , r         :: Float         -- ^ magnitude of the object
+  , colour    :: Colour Float  -- ^ colour of the object
   }
 
 makeBlip :: V2 Float -> V2 Float -> Float -> Colour Float -> Blip
