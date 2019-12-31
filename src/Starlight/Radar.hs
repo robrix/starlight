@@ -13,6 +13,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Effect.Reader
 import           Control.Effect.Profile
+import           Control.Monad (when)
 import           Data.Coerce (coerce)
 import           Data.Foldable (for_)
 import           Data.Function ((&))
@@ -55,11 +56,11 @@ drawRadar
   -> m ()
 drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
   System{ scale, bodies } <- ask @(System StateVectors Float)
-  matrix <- asks scaleToView
+  vs <- ask
 
   let radius = 100
   set defaultVars
-    { Radar.matrix = Just matrix
+    { Radar.matrix = Just (scaleToView vs)
     , Radar.radius = Just radius
     }
 
@@ -77,8 +78,8 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = meas
         -- FIXME: IFF
       , Radar.colour = Just white
       }
-    for_ npcs $ \ Actor{ position = P there } -> do
-      set defaultVars { Radar.angle  = Just $ angleTo here there }
+    for_ npcs $ \ Actor{ position = P there } -> let (angle, r) = polar2 (there ^-^ here) in when (r > zoom vs * radius) $ do
+      set defaultVars { Radar.angle  = Just angle }
       drawArrays Points (Interval (I medianVertex) (I (medianVertex + 1)))
 
   measure "targets" $ do
