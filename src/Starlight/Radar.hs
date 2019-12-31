@@ -13,12 +13,12 @@ import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Effect.Reader
 import           Control.Effect.Profile
-import           Control.Monad (guard)
 import           Data.Coerce (coerce)
 import           Data.Foldable (for_)
 import           Data.Function ((&))
 import           Data.Functor.I
 import           Data.Functor.Interval
+import           Data.List (find)
 import           GL.Array
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
@@ -54,7 +54,7 @@ drawRadar
   -> [Actor]
   -> m ()
 drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
-  bodies <- ask
+  bodies <- ask @[StateVectors Float]
   viewScale@ViewScale{ zoom } <- ask
 
   let radius = 100
@@ -82,7 +82,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = meas
       drawArrays Points (Interval (I medianVertex) (I (medianVertex + 1)))
 
   measure "targets" $ do
-    let targetVectors = target >>= \ i -> (bodies !! i) <$ guard (i < length bodies)
+    let targetVectors = target >>= \ i -> find ((== i) . identifier . body) bodies
     for_ targetVectors $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
       let blip = makeBlip (there ^-^ here) (r * scale) colour
       setBlip blip

@@ -26,11 +26,12 @@ import qualified Control.Exception.Lift as E
 import           Control.Monad ((<=<), when)
 import           Control.Monad.IO.Class.Lift (MonadIO, runLiftIO)
 import           Data.Coerce
-import           Data.Foldable (for_)
+import           Data.Foldable (find, for_)
 import           Data.Function (fix)
 import           Data.Functor.Const
 import           Data.Functor.I
 import           Data.Functor.Interval
+import           Data.List (findIndex)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, getCurrentTime, diffUTCTime)
@@ -222,19 +223,22 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
     _player . _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
   bodies <- ask
-  let switchTarget = \case
-        False -> maybe (Just 0)                      (\ i -> i + 1 <$ guard (i + 1 < length bodies))
-        True  -> maybe (Just (pred (length bodies))) (\ i -> i - 1 <$ guard (i - 1 >= 0))
+  let switchTarget shift target = case target >>= \ i -> findIndex ((== i) . identifier . body) bodies of
+        Just i  -> identifier . body . (bodies !!) <$> if shift then
+          i - 1 <$ guard (i - 1 >= 0)
+        else
+          i + 1 <$ guard (i + 1 < length bodies)
+        Nothing -> Just . identifier . body $ if shift then last bodies else head bodies
   when (input ^. _pressed SDL.KeycodeTab) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
   position <- Lens.use (_player . _position)
-  let describeTarget i
-        | S.StateVectors{ scale, body, position = pos } <- bodies !! i
-        = describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
-  target <- Lens.uses (_player . _target) (maybe "" describeTarget)
+  let describeTarget target = case target >>= \ i -> find ((== i) . identifier . body) bodies of
+        Just S.StateVectors{ scale, body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
+        _ -> ""
+  target <- Lens.uses (_player . _target) describeTarget
 
   measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
   measure "setLabel" $ setLabel targetL font target
@@ -259,14 +263,13 @@ ai
   => Delta Seconds Float
   -> m ()
 ai (Delta (Seconds dt)) = do
-  bodies <- ask
+  bodies <- ask @[S.StateVectors Float]
   _npcs . each %= go bodies
   where
-  go bodies a@Actor{ target, velocity, rotation, position } = case target of
+  go bodies a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . body) bodies of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
-    Just i
-      | S.StateVectors{ position = pos } <- bodies !! i
-      , angle     <- angleTo (unP position) pos
+    Just S.StateVectors{ position = pos }
+      | angle     <- angleTo (unP position) pos
       , rotation' <- face angular angle rotation
       -> a
         { Actor.rotation = rotation'
