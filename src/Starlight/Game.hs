@@ -31,6 +31,7 @@ import           Data.Function (fix)
 import           Data.Functor.Const
 import           Data.Functor.I
 import           Data.Functor.Interval
+import           Data.Ix (inRange)
 import           Data.List (findIndex)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
@@ -224,10 +225,7 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
 
   bodies <- ask
   let switchTarget shift target = case target >>= \ i -> findIndex ((== i) . identifier . body) bodies of
-        Just i  -> identifier . body . (bodies !!) <$> if shift then
-          i - 1 <$ guard (i - 1 >= 0)
-        else
-          i + 1 <$ guard (i + 1 < length bodies)
+        Just i  -> identifier . body . (bodies !!) <$> let i' = if shift then i - 1 else i + 1 in i' <$ guard (inRange (0, pred (length bodies)) i')
         Nothing -> Just . identifier . body $ if shift then last bodies else head bodies
   when (input ^. _pressed SDL.KeycodeTab) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
