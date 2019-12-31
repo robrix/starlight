@@ -414,6 +414,7 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
             , radius = Just 100
             , angle  = Just $ angleTo here there
             , sweep  = Just minSweep
+              -- FIXME: fade colour with distance
             , colour = Just white
             }
           drawArrays Points (Interval 0 (I (length radarV)))
