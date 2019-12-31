@@ -74,9 +74,9 @@ renderTiming t@Timing{ min', max', sub } = table (map go fields) <> if null (unT
     where
     table = group . encloseSep (flatAlt "{ " "{") (flatAlt " }" "}") ", "
     fields =
-      [ (annotate (color Green) "min", prettyMS min')
-      , (annotate (color Green) "mean", prettyMS (mean t))
-      , (annotate (color Green) "max", prettyMS max')
+      [ (annotate (colorDull Green) "min", prettyMS min')
+      , (annotate (colorDull Green) "mean", prettyMS (mean t))
+      , (annotate (colorDull Green) "max", prettyMS max')
       ]
     go (k, v) = k <> colon <+> v
     prettyMS = (<> annotate (colorDull White) "ms") . pretty . ($ "") . showFFloat (Just 3) . getSeconds . getMilli . milli @Seconds @Double . realToFrac
