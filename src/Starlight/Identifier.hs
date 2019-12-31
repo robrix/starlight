@@ -15,3 +15,5 @@ data Identifier
   = Star Code Name
   | Identifier :/ (Code, Name)
   deriving (Eq, Ord, Read, Show)
+
+infixl 5 :/
