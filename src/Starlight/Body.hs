@@ -42,7 +42,7 @@ import Linear.V3
 import Linear.V4
 import Linear.Vector
 import Numeric (readDec)
-import Starlight.Identifier hiding (parent)
+import Starlight.Identifier
 import System.Directory
 import System.FilePath
 import Text.Read
@@ -85,8 +85,8 @@ bodiesAt sys@(System scale bs) t = bs' where
     , position = (transform' !* V4 0 0 0 1) ^. _xy
     } where
     rel = maybe (systemTrans sys) transform $ do
-      p <- parent b
-      find ((== identifier p) . identifier . body) bs'
+      p <- parent (identifier b)
+      find ((== p) . identifier . body) bs'
     transform' = rel !*! transformAt (orbit b) t
 
 data Body a = Body
@@ -97,7 +97,6 @@ data Body a = Body
   , period      :: Seconds a    -- sidereal rotation period
   , colour      :: Colour a
   , orbit       :: Orbit a
-  , parent      :: Maybe (Body a)
   }
   deriving (Read, Show)
 
