@@ -27,6 +27,7 @@ import           Data.List (sortOn)
 import qualified Data.Map as Map
 import           Data.Ord (Down(..))
 import           Data.Text (Text)
+import qualified Data.Text as Text
 import           Data.Text.Prettyprint.Doc
 import           Data.Time.Clock
 import           Numeric (showFFloat)
@@ -91,5 +92,10 @@ instance Monoid Timings where
   mempty = Timings mempty
 
 instance Pretty Timings where
-  pretty (Timings ts) = vsep (map go (sortOn (Down . mean . snd) (Map.toList ts))) where
-    go (k, v) = pretty k <> pretty ':' <> softline <> pretty v
+  pretty (Timings ts) = tabulate (sortOn (Down . mean . snd) (Map.toList ts)) where
+    tabulate = \case
+      [] -> mempty
+      cs -> vsep (map go cs') where
+        go ((_, k), v) = fill w k <> space <> pretty v
+        w = maximum (map (fst . fst) cs')
+        cs' = map (\ (k, v) -> ((Text.length k + 1, pretty k <> colon), v)) cs
