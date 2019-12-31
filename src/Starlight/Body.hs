@@ -9,7 +9,7 @@ module Starlight.Body
 , systemTrans
 , _scale
 , StateVectors(..)
-, bodiesAt
+, systemAt
 , Body(..)
 , Orbit(..)
 , fromEphemeris
@@ -68,19 +68,17 @@ _scale = lens (\ System{ scale } -> scale) (\ System { bodies } s' -> System { b
 
 data StateVectors a = StateVectors
   { body      :: Body a
-  , scale     :: a
   , transform :: M44 a
   , rotation  :: Quaternion a
   , position  :: V2 a
   }
   deriving (Show)
 
-bodiesAt :: (Epsilon a, RealFloat a) => System Body a -> Seconds a -> Map.Map Identifier (StateVectors a)
-bodiesAt sys@(System scale bs) t = bs' where
+systemAt :: (Epsilon a, RealFloat a) => System Body a -> Seconds a -> System StateVectors a
+systemAt sys@(System scale bs) t = System scale bs' where
   bs' = fmap go bs
   go b = StateVectors
     { body = b
-    , scale
     , transform = transform'
     , rotation = orientationAt b t
     , position = (transform' !* V4 0 0 0 1) ^. _xy

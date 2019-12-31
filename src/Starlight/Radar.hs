@@ -19,7 +19,6 @@ import           Data.Function ((&))
 import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.List (find)
-import qualified Data.Map as Map
 import           GL.Array
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
@@ -31,7 +30,6 @@ import           Linear.V2
 import           Linear.Vector
 import           Starlight.Actor
 import           Starlight.Body as Body
-import           Starlight.Identifier
 import qualified Starlight.Radar.Shader as Radar
 import           Starlight.View
 import           UI.Colour
@@ -48,7 +46,7 @@ radar = do
 drawRadar
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
+     , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader ViewScale) sig m
      )
   => Radar
@@ -56,7 +54,7 @@ drawRadar
   -> [Actor]
   -> m ()
 drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
-  bodies <- ask @(Map.Map Identifier (StateVectors Float))
+  System{ scale, bodies } <- ask @(System StateVectors Float)
   matrix <- asks scaleToView
 
   let radius = 100
@@ -68,7 +66,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = meas
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
   measure "bodies" $
-    for_ bodies $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
+    for_ bodies $ \ StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
       setBlip (makeBlip (there ^-^ here) (r * scale) colour)
       drawArrays LineStrip (Interval 0 (I vertexCount))
 
@@ -85,7 +83,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = meas
 
   measure "targets" $ do
     let targetVectors = target >>= \ i -> find ((== i) . identifier . body) bodies
-    for_ targetVectors $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
+    for_ targetVectors $ \ StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
       let blip = makeBlip (there ^-^ here) (r * scale) colour
       setBlip blip
       for_ [1..n] $ \ i -> do

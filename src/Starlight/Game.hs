@@ -164,7 +164,7 @@ runGame = do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
-          continue <- fmap isJust . runEmpty . runReader (S.bodiesAt system (getDelta t)) $ do
+          continue <- fmap isJust . runEmpty . runReader (S.systemAt system (getDelta t)) $ do
             input <- measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
@@ -190,7 +190,7 @@ circleV = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
 controls
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
+     , Has (Reader (System StateVectors Float)) sig m
      , Has (State Input) sig m
      , Has (State GameState) sig m
      )
@@ -221,7 +221,7 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
   when (input ^. _pressed SDL.KeycodeRight) $
     _player . _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  bodies <- ask @(Map.Map Identifier (StateVectors Float))
+  System{ scale, bodies } <- ask @(System StateVectors Float)
   let identifiers = Map.keys bodies
       switchTarget shift target = case target >>= (`elemIndex` identifiers) of
         Just i  -> (identifiers !!) <$> let i' = if shift then i - 1 else i + 1 in i' <$ guard (inRange (0, pred (length bodies)) i')
@@ -233,7 +233,7 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
 
   position <- Lens.use (_player . _position)
   let describeTarget target = case target >>= \ i -> find ((== i) . identifier . body) bodies of
-        Just S.StateVectors{ scale, body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
+        Just S.StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
         _ -> ""
   target <- Lens.uses (_player . _target) describeTarget
 
@@ -254,13 +254,13 @@ face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angula
 
 
 ai
-  :: ( Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
+  :: ( Has (Reader (System StateVectors Float)) sig m
      , Has (State GameState) sig m
      )
   => Delta Seconds Float
   -> m ()
 ai (Delta (Seconds dt)) = do
-  bodies <- ask @(Map.Map Identifier (StateVectors Float))
+  bodies <- asks @(System StateVectors Float) bodies
   _npcs . each %= go bodies
   where
   go bodies a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . body) bodies of
@@ -283,15 +283,14 @@ ai (Delta (Seconds dt)) = do
 
 
 physics
-  :: ( Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
+  :: ( Has (Reader (System StateVectors Float)) sig m
      , Has (State GameState) sig m
      )
   => Delta Seconds Float
   -> m GameState
 physics (Delta (Seconds dt)) = do
-  bodies <- ask @(Map.Map Identifier (StateVectors Float))
-  scale <- Lens.uses (_system . _scale) (1/)
-  _actors . each %= updatePosition . flip (foldr (applyGravity scale)) bodies
+  System{ scale, bodies } <- ask @(System StateVectors Float)
+  _actors . each %= updatePosition . flip (foldr (applyGravity (1/scale))) bodies
   get where
   updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
   applyGravity distanceScale S.StateVectors{ position = pos, body = S.Body{ mass } } a@Actor{ position, velocity }
@@ -322,7 +321,7 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
+     , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader Window.Window) sig m
      )
   => View
@@ -360,7 +359,10 @@ draw View{ starfield, circleA, shipA, radar, shipP, bodyP, fpsL, targetL } game 
         drawArrays LineLoop (Interval 0 4)
 
   let maxDim = maximum ((fromIntegral <$> size ^* scale) ^* zoom)
-      onScreen S.StateVectors{ scale, body = S.Body{ radius }, position = pos } = distance pos (unP position) - getMetres (scale *^ radius) < maxDim * 0.5
+
+  System{ scale, bodies } <- ask @(System StateVectors Float)
+
+  let onScreen S.StateVectors{ body = S.Body{ radius }, position = pos } = distance pos (unP position) - getMetres (scale *^ radius) < maxDim * 0.5
       drawBody i@S.StateVectors{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
         set Body.U
           { matrix = Just
@@ -373,7 +375,6 @@ draw View{ starfield, circleA, shipA, radar, shipP, bodyP, fpsL, targetL } game 
 
         drawArraysInstanced LineLoop (Interval 0 (I (length circleV))) 3
 
-  bodies <- ask @(Map.Map Identifier (StateVectors Float))
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
