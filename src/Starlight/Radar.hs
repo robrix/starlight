@@ -67,7 +67,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
   -- FIXME: blips should shadow more distant blips
   for_ bodies $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } -> do
     setBlip (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour)
-    drawArrays LineStrip (Interval 0 (I (length radarV)))
+    drawArrays LineStrip (Interval 0 (I nVertices))
 
   set defaultVars
     { Radar.sweep  = Just 0
@@ -93,10 +93,11 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
         , Radar.colour = Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
         }
 
-      drawArrays LineStrip (Interval 0 (I (length radarV)))
+      drawArrays LineStrip (Interval 0 (I nVertices))
   where
   n = 10 :: Int
-  median = length radarV `div` 2
+  nVertices = length radarV
+  median = nVertices `div` 2
 
 setBlip
   :: ( Has (Lift IO) sig m
