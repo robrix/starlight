@@ -22,13 +22,11 @@ import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
-import           Lens.Micro ((.~), (^.))
+import           Lens.Micro ((.~))
 import           Linear.Affine
 import           Linear.Exts as Linear
-import           Linear.Matrix
 import           Linear.Metric
 import           Linear.V2
-import           Linear.V4
 import           Linear.Vector
 import           Starlight.Actor
 import           Starlight.Body as Body
@@ -65,8 +63,8 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
-  for_ bodies $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } -> do
-    setBlip (makeBlip ((transform !* V4 0 0 0 1) ^. _xy ^-^ here) (r * scale) colour)
+  for_ bodies $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
+    setBlip (makeBlip (there ^-^ here) (r * scale) colour)
     drawArrays LineStrip (Interval 0 (I vertexCount))
 
   set defaultVars
@@ -80,8 +78,8 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
     drawArrays Points (Interval (I medianVertex) (I (medianVertex + 1)))
 
   let targetVectors = target >>= \ i -> (bodies !! i) <$ guard (i < length bodies)
-  for_ targetVectors $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } -> do
-    let blip = makeBlip ((transform !* V4 0 0 0 1) ^. _xy ^-^ here) (r * scale) colour
+  for_ targetVectors $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
+    let blip = makeBlip (there ^-^ here) (r * scale) colour
     setBlip blip
     for_ [1..n] $ \ i -> do
       let radius = step * fromIntegral i
