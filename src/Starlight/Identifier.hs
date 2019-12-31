@@ -4,6 +4,7 @@ module Starlight.Identifier
 , Name
 , Identifier(..)
 , parentIdentifier
+, describeIdentifier
 ) where
 
 import Data.Text
@@ -23,3 +24,8 @@ parentIdentifier :: Identifier -> Maybe Identifier
 parentIdentifier = \case
   parent :/ _ -> Just parent
   _           -> Nothing
+
+describeIdentifier :: Identifier -> String
+describeIdentifier = \case
+  Star code name -> show code <> " " <> unpack name
+  _ :/ (code, name) -> show code <> " " <> unpack name

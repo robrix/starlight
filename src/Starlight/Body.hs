@@ -1,6 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
@@ -9,7 +10,6 @@ module Starlight.Body
 , _scale
 , StateVectors(..)
 , bodiesAt
-, Code
 , Body(..)
 , Orbit(..)
 , fromEphemeris
@@ -27,9 +27,10 @@ module Starlight.Body
 ) where
 
 import Control.Effect.Lift
-import Control.Monad (filterM)
+import Data.Char (isSpace, toUpper)
 import Data.Foldable (find)
 import Data.List (elemIndex)
+import Data.Text (pack)
 import Lens.Micro
 import Linear.Affine
 import Linear.Epsilon
@@ -40,6 +41,8 @@ import Linear.V2
 import Linear.V3
 import Linear.V4
 import Linear.Vector
+import Numeric (readDec)
+import Starlight.Identifier
 import System.Directory
 import System.FilePath
 import Text.Read
@@ -83,14 +86,11 @@ bodiesAt sys@(System scale bs) t = bs' where
     } where
     rel = maybe (systemTrans sys) transform $ do
       p <- parent b
-      find ((== name p) . name . body) bs'
+      find ((== identifier p) . identifier . body) bs'
     transform' = rel !*! transformAt (orbit b) t
 
-type Code = Int
-
 data Body a = Body
-  { name        :: String
-  , code        :: Code
+  { identifier  :: Identifier
   , radius      :: Metres a
   , mass        :: Kilo Grams a
   , orientation :: Quaternion a -- relative to orbit
@@ -207,14 +207,28 @@ fromFile path = do
   last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
   either fail (pure . fromEphemeris) (fromCSV (lines !! last))
 
-fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePath -> m [(FilePath, Orbit a)]
-fromDirectory dir
-  =   sendM (listDirectory dir)
-  >>= filterM isRelevant
-  >>= traverse (\ path -> (,) path <$> fromFile (dir </> path)) where
-  isRelevant path = do
-    isDir <- sendM (doesDirectoryExist path)
-    pure $! not isDir || takeExtension path == ".txt"
+fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePath -> m [(Identifier, Orbit a)]
+fromDirectory = go Nothing
+  where
+  go :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => Maybe Identifier -> FilePath -> m [(Identifier, Orbit a)]
+  go root dir
+    =   sendM (listDirectory dir)
+    >>= traverse (\ path -> do
+      isDir <- sendM (doesDirectoryExist (dir </> path))
+      case parseIdentifier root path of
+        [identifier] -> if isDir then
+          go (Just identifier) (dir </> path)
+        else
+          pure . (,) identifier <$> fromFile (dir </> path)
+        _ -> pure [])
+    >>= pure . concat
+  parseIdentifier root path = do
+    (code, rest) <- readDec path
+    let name = pack (initCap (dropWhile isSpace (dropExtension rest)))
+    pure (maybe (Star code name) (:/ (code, name)) root)
+  initCap = \case
+    ""   -> ""
+    c:cs -> toUpper c : cs
 
 
 newtype Per (f :: * -> *) (g :: * -> *) a = Per { getPer :: a }

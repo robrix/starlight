@@ -56,6 +56,7 @@ import qualified SDL
 import           Starlight.Actor as Actor
 import           Starlight.Body as S
 import           Starlight.CLI
+import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Radar as Radar
 import qualified Starlight.Shader.Body as Body
@@ -232,7 +233,7 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
   position <- Lens.use (_player . _position)
   let describeTarget i
         | S.StateVectors{ scale, body, position = pos } <- bodies !! i
-        = name body ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
+        = describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
   target <- Lens.uses (_player . _target) (maybe "" describeTarget)
 
   measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
