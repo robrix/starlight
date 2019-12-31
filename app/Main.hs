@@ -115,7 +115,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
       circleA <- load circleV
       radarA  <- load radarV
 
-      let view = View{ quadA, shipA, circleA, radarA, starsP, shipP, radarP, bodyP, fpsL, targetL, font = Font face 18 }
+      let radar = Radar { radarP, radarA }
+          view = View{ quadA, shipA, circleA, radar, starsP, shipP, bodyP, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -312,7 +313,7 @@ draw
   -> [S.Instant Float]
   -> GameState
   -> m ()
-draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
+draw View{ quadA, circleA, shipA, radar = Radar { radarP, radarA }, shipP, starsP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
   let Actor{ position, velocity, target } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -432,14 +433,18 @@ data View = View
   { quadA   :: Array (Stars.V I)
   , circleA :: Array (Body.V  I)
   , shipA   :: Array (Ship.V  I)
-  , radarA  :: Array (Radar.V I)
   , starsP  :: Program Stars.U Stars.V Stars.O
   , shipP   :: Program Ship.U  Ship.V  Ship.O
   , bodyP   :: Program Body.U  Body.V  Body.O
-  , radarP  :: Program Radar.U Radar.V Radar.O
+  , radar   :: Radar
   , fpsL    :: Label
   , targetL :: Label
   , font    :: Font
+  }
+
+data Radar = Radar
+  { radarP  :: Program Radar.U Radar.V Radar.O
+  , radarA  :: Array (Radar.V I)
   }
 
 
