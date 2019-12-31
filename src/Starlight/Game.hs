@@ -61,9 +61,9 @@ import           Starlight.CLI
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Radar as Radar
+import           Starlight.Starfield as Starfield
 import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Shader.Ship as Ship
-import qualified Starlight.Shader.Stars as Stars
 import qualified Starlight.Sol as S
 import           Starlight.View
 import           System.Environment
@@ -129,7 +129,6 @@ runGame = do
       , system = system
       }
     . evalState start $ do
-      starsP <- build Stars.shader
       shipP  <- build Ship.shader
       bodyP  <- build Body.shader
 
@@ -139,13 +138,13 @@ runGame = do
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      quadA   <- load quadV
       shipA   <- load shipV
       circleA <- load circleV
 
+      starfield <- Starfield.starfield
       radar <- Radar.radar
 
-      let view = View{ quadA, shipA, circleA, radar, starsP, shipP, bodyP, fpsL, targetL, font = Font face 18 }
+      let view = View{ starfield, shipA, circleA, radar, shipP, bodyP, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -176,14 +175,6 @@ shipV = coerce @[V2 Float]
   , V2 0      (-0.5)
   , V2 (-0.5) 0
   , V2 0      0.5
-  ]
-
-quadV :: [Stars.V I]
-quadV = coerce @[V2 Float]
-  [ V2 (-1) (-1)
-  , V2   1  (-1)
-  , V2 (-1)   1
-  , V2   1    1
   ]
 
 circleV :: [Body.V I]
@@ -329,7 +320,7 @@ draw
   => View
   -> GameState
   -> m ()
-draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
+draw View{ starfield, circleA, shipA, radar, shipP, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
   let Actor{ position } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -340,15 +331,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
-  measure "stars" . use starsP $ do
-    set Stars.U
-      { resolution = Just (fromIntegral <$> size ^* scale)
-      , origin     = Just (position / P (fromIntegral <$> size))
-      , zoom       = Just zoom
-      }
-
-    bindArray quadA $
-      drawArrays TriangleStrip (Interval 0 4)
+  drawStarfield starfield position
 
   let origin
         =   scaleToViewZoomed viewScale
@@ -401,16 +384,15 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
 
 
 data View = View
-  { quadA   :: Array (Stars.V I)
-  , circleA :: Array (Body.V  I)
-  , shipA   :: Array (Ship.V  I)
-  , starsP  :: Program Stars.U Stars.V Stars.O
-  , shipP   :: Program Ship.U  Ship.V  Ship.O
-  , bodyP   :: Program Body.U  Body.V  Body.O
-  , radar   :: Radar
-  , fpsL    :: Label
-  , targetL :: Label
-  , font    :: Font
+  { starfield :: Starfield
+  , circleA   :: Array (Body.V  I)
+  , shipA     :: Array (Ship.V  I)
+  , shipP     :: Program Ship.U  Ship.V  Ship.O
+  , bodyP     :: Program Body.U  Body.V  Body.O
+  , radar     :: Radar
+  , fpsL      :: Label
+  , targetL   :: Label
+  , font      :: Font
   }
 
 
