@@ -374,7 +374,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } b
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
-  measure "radar" (drawRadar radar bodies game)
+  measure "radar" (drawRadar radar bodies (player game) (npcs game))
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing
@@ -399,9 +399,10 @@ drawRadar
   :: (Has (Lift IO) sig m, Has (Reader Window.Window) sig m)
   => Radar
   -> [S.StateVectors Float]
-  -> GameState
+  -> Actor
+  -> [Actor]
   -> m ()
-drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ do
+drawRadar Radar{ radarA, radarP } bodies Actor{ position = P here, velocity, target } npcs = use radarP . bindArray radarA $ do
   scale <- Window.scale
   size <- Window.size
   let zoomOut = zoomForSpeed size (norm velocity)
@@ -451,9 +452,8 @@ drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ 
         drawArrays Points (Interval (I median) (I (median + 1)))
 
   for_ bodies drawBodyBlip
-  for_ (npcs game) drawNPCBlip
+  for_ npcs drawNPCBlip
   where
-  Actor{ position = P here, velocity, target } = player game
   n = 10 :: Int
   minSweep = 0.0133 -- at d=150, makes approx. 4px blips
 
