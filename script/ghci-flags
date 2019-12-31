@@ -22,7 +22,10 @@ function flags {
   echo "-stubdir $build_products_dir"
 
   echo "-optP-include"
-  echo "-optP$build_products_dir/autogen/cabal_macros.h"
+  echo "-optPdist-newstyle/build/x86_64-osx/ghc-$ghc_version/starlight-0.0.0.0/build/autogen/cabal_macros.h"
+
+  echo "-Idist-newstyle/build/x86_64-osx/ghc-$ghc_version/starlight-0.0.0.0/build/autogen/"
+  echo "-idist-newstyle/build/x86_64-osx/ghc-$ghc_version/starlight-0.0.0.0/build/autogen/"
 
   echo "-iapp"
   echo "-isrc"
