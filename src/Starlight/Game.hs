@@ -64,7 +64,7 @@ import           Starlight.Input
 import           Starlight.Radar as Radar
 import qualified Starlight.Shader.Body as Body
 import           Starlight.Ship as Ship
-import qualified Starlight.Sol as S
+import qualified Starlight.Sol as Sol
 import           Starlight.Starfield as Starfield
 import           Starlight.System
 import           Starlight.View
@@ -109,7 +109,7 @@ runGame
      )
   => m ()
 runGame = do
-  system <- S.system
+  system <- Sol.system
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally $ now >>= \ start ->
     evalState @Input mempty
