@@ -67,7 +67,7 @@ instance Monoid Timing where
   mempty = Timing 0 0 0 0 mempty
 
 instance Pretty Timing where
-  pretty t@Timing{ min', max', sub } = table (map go fields) <> hardline <> nest 2 (pretty sub)
+  pretty t@Timing{ min', max', sub } = table (map go fields) <> if null (unTimings sub) then mempty else nest 2 (line <> pretty sub)
     where
     table = group . encloseSep (flatAlt "{ " "{") (flatAlt " }" "}") ", "
     fields =
@@ -91,5 +91,5 @@ instance Monoid Timings where
   mempty = Timings mempty
 
 instance Pretty Timings where
-  pretty (Timings ts) = foldMap go (sortOn (Down . mean . snd) (Map.toList ts)) where
-    go (k, v) = pretty k <> pretty ':' <> softline <> pretty v <> hardline
+  pretty (Timings ts) = vsep (map go (sortOn (Down . mean . snd) (Map.toList ts))) where
+    go (k, v) = pretty k <> pretty ':' <> softline <> pretty v
