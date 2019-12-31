@@ -56,7 +56,7 @@ drawRadar
 drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use radarP . bindArray radarA $ do
   bodies <- ask
   ViewScale{ scale, size, zoom = zoomOut } <- ask
-  let V2 sx sy = 1 / (fromIntegral <$> size ^* scale) ^* (1 / zoomOut)
+  let V2 sx sy = 1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoomOut)
 
   set defaultVars
     { Radar.matrix = Just (scaled (V3 sx sy 1))

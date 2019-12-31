@@ -323,20 +323,16 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
   measure "stars" . use starsP $ do
-    scale <- Window.scale
-    size <- Window.size
     set Stars.U
-      { resolution = Just (size ^* scale)
-      , origin     = Just (position / P size)
+      { resolution = Just (fromIntegral <$> size ^* scale)
+      , origin     = Just (position / P (fromIntegral <$> size))
       , zoom       = Just zoomOut
       }
 
     bindArray quadA $
       drawArrays TriangleStrip (Interval 0 4)
 
-  scale <- Window.scale
-  size <- Window.size
-  let V2 sx sy = 1 / size ^* scale ^* (1 / zoomOut)
+  let V2 sx sy = 1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoomOut)
       origin
         =   scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
         !*! translated3 (ext (negated (unP position)) 0) -- transform to the origin
@@ -355,7 +351,8 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  let onScreen S.StateVectors{ scale, body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (scale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
+  let maxDim = maximum ((fromIntegral <$> size ^* scale) ^* zoomOut)
+      onScreen S.StateVectors{ scale, body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (scale *^ radius) < maxDim * 0.5
       drawBody i@S.StateVectors{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
         set Body.U
           { matrix = Just
@@ -375,7 +372,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
   measure "radar" (drawRadar radar (player game) (npcs game))
 
   fpsSize <- labelSize fpsL
-  measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing
+  measure "drawLabel" $ drawLabel fpsL    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetL (V2 10 10) white Nothing
   where
   withViewScale m = do
