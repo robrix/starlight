@@ -1,8 +1,11 @@
 module Starlight.Identifier
-( Identifier(..)
+( Code
+, Identifier(..)
 ) where
 
 import Data.Text
 
+type Code = Int
+
 data Identifier
-  = Star Int Text
+  = Star Code Text
