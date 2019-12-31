@@ -4,6 +4,7 @@ module Starlight.Identifier
 , Name
 , Identifier(..)
 , parent
+, rootLeaf
 , describeIdentifier
 , toList
 , getLeaf
@@ -30,6 +31,11 @@ parent :: Identifier -> Maybe Identifier
 parent = \case
   parent :/ _ -> Just parent
   _           -> Nothing
+
+rootLeaf :: Identifier -> (Code, Name)
+rootLeaf = \case
+  parent :/ _ -> rootLeaf parent
+  root        -> getLeaf root
 
 describeIdentifier :: Identifier -> String
 describeIdentifier = showLeaf . getLeaf where
