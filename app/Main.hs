@@ -24,7 +24,7 @@ import qualified Control.Exception.Lift as E
 import           Control.Monad ((<=<), when)
 import           Control.Monad.IO.Class.Lift (runLiftIO)
 import           Data.Coerce
-import           Data.Foldable (foldl', for_)
+import           Data.Foldable (for_)
 import           Data.Function (fix)
 import           Data.Functor.Const
 import           Data.Functor.I
@@ -141,9 +141,8 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
 
 -- FIXME: organize timings into a tree
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
-reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l:|ls, t) -> sendM $ do
-  putStrLn $ foldl' label (unpack l) ls <> ": " <> showTiming t where
-  label l' l = unpack l <> "." <> l'
+reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l, t) -> sendM $ do
+  putStrLn $ unpack l <> ": " <> showTiming t where
   showTiming t = "{min: " <> showMS (min' t) <> ", mean: " <> showMS (mean t) <> ", max: " <> showMS (max' t) <> "}"
   showMS = (<> "ms") . show . getSeconds . getMilli . milli @Seconds @Double . realToFrac
 
