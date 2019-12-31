@@ -1,7 +1,9 @@
+{-# LANGUAGE LambdaCase #-}
 module Starlight.Identifier
 ( Code
 , Name(..)
 , Identifier(..)
+, parentIdentifier
 ) where
 
 import Data.Text
@@ -17,3 +19,8 @@ data Identifier
   deriving (Eq, Ord, Read, Show)
 
 infixl 5 :/
+
+parentIdentifier :: Identifier -> Maybe Identifier
+parentIdentifier = \case
+  parent :/ _ -> Just parent
+  _           -> Nothing
