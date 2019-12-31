@@ -66,6 +66,7 @@ import           Starlight.Ship as Ship
 import           Starlight.Starfield as Starfield
 import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Sol as S
+import           Starlight.System
 import           Starlight.View
 import           Starlight.Weapon.Laser as Laser
 import           System.Environment

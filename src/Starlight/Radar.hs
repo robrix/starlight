@@ -32,6 +32,7 @@ import           Linear.Vector
 import           Starlight.Actor
 import           Starlight.Body as Body
 import qualified Starlight.Radar.Shader as Radar
+import           Starlight.System
 import           Starlight.View
 import           UI.Colour
 import           Unit.Angle

@@ -5,10 +5,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
-( System(..)
-, systemTrans
-, _scale
-, StateVectors(..)
+( StateVectors(..)
 , systemAt
 , Body(..)
 , Orbit(..)
@@ -26,45 +23,32 @@ module Starlight.Body
 , Per(..)
 ) where
 
-import           Control.Effect.Lift
-import           Data.Char (isSpace, toUpper)
-import           Data.Foldable (find)
-import           Data.List (elemIndex)
-import qualified Data.Map as Map
-import           Data.Text (pack)
-import           Lens.Micro
-import           Linear.Affine
-import           Linear.Epsilon
-import           Linear.Exts
-import           Linear.Matrix
-import           Linear.Quaternion
-import           Linear.V2
-import           Linear.V3
-import           Linear.V4
-import           Linear.Vector
-import           Numeric (readDec)
-import           Starlight.Identifier
-import           System.Directory
-import           System.FilePath
-import           Text.Read
-import           UI.Colour
-import           Unit.Angle
-import           Unit.Length
-import           Unit.Mass
-import           Unit.Time
-
-data System f a = System
-  { scale  :: !a
-  , bodies :: !(Map.Map Identifier (f a))
-  }
-  deriving (Read, Show)
-
-systemTrans :: Num a => System f a -> M44 a
-systemTrans (System scale _) = scaled (V4 scale scale scale 1)
-
-_scale :: Lens' (System f a) a
-_scale = lens (\ System{ scale } -> scale) (\ System { bodies } s' -> System { bodies, scale = s' })
-
+import Control.Effect.Lift
+import Data.Char (isSpace, toUpper)
+import Data.Foldable (find)
+import Data.List (elemIndex)
+import Data.Text (pack)
+import Lens.Micro
+import Linear.Affine
+import Linear.Epsilon
+import Linear.Exts
+import Linear.Matrix
+import Linear.Quaternion
+import Linear.V2
+import Linear.V3
+import Linear.V4
+import Linear.Vector
+import Numeric (readDec)
+import Starlight.Identifier
+import Starlight.System
+import System.Directory
+import System.FilePath
+import Text.Read
+import UI.Colour
+import Unit.Angle
+import Unit.Length
+import Unit.Mass
+import Unit.Time
 
 data StateVectors a = StateVectors
   { body      :: Body a
