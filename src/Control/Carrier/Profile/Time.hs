@@ -77,4 +77,5 @@ instance Monoid Timings where
   mempty = Timings mempty
 
 instance Pretty Timings where
-  pretty Timings{} = mempty
+  pretty (Timings ts) = foldMap go (Map.toList ts) where
+    go (k, v) = pretty k <> pretty ':' <> softline <> nest 2 (pretty v) <> hardline
