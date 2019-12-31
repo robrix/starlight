@@ -62,7 +62,7 @@ import           Starlight.CLI
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Radar as Radar
-import qualified Starlight.Ship.Shader as Ship
+import           Starlight.Ship as Ship
 import           Starlight.Starfield as Starfield
 import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Sol as S
@@ -138,7 +138,6 @@ runGame = do
       , system   = system
       }
     . evalState start $ do
-      shipP  <- build Ship.shader
       bodyP  <- build Body.shader
 
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
@@ -147,14 +146,14 @@ runGame = do
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      shipA   <- load shipV
       circleA <- load circleV
 
+      ship <- Ship.makeDrawShip
       starfield <- Starfield.starfield
       radar <- Radar.radar
       laser <- Laser.laser
 
-      let view = View{ starfield, shipA, circleA, radar, laser, shipP, bodyP, fpsL, targetL, font = Font face 18 }
+      let view = View{ starfield, circleA, radar, laser, ship, bodyP, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -177,15 +176,6 @@ runGame = do
             draw view gameState
           continue <$ measure "swap" Window.swap
         when continue loop
-
-
-shipV :: [Ship.V I]
-shipV = coerce @[V2 Float]
-  [ V2 1      0
-  , V2 0      (-0.5)
-  , V2 (-0.5) 0
-  , V2 0      0.5
-  ]
 
 circleV :: [Body.V I]
 circleV = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
@@ -332,7 +322,7 @@ draw
   => View
   -> GameState
   -> m ()
-draw View{ starfield, circleA, shipA, radar, laser, shipP, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
+draw View{ starfield, circleA, radar, laser, ship, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -349,19 +339,7 @@ draw View{ starfield, circleA, shipA, radar, laser, shipP, bodyP, fpsL, targetL 
         =   scaleToViewZoomed viewScale
         !*! translated3 (ext (negated (unP position)) 0) -- transform to the origin
 
-  measure "ship" . use shipP $ do
-    for_ (game ^. _actors) $ \ Actor{ position, rotation } -> do
-      set Ship.U
-        { matrix = Just
-            $   origin
-            !*! translated3 (ext (unP position) 0)
-            !*! scaled (V4 15 15 15 1)
-            !*! mkTransformation rotation 0
-        , colour = Just white
-        }
-
-      bindArray shipA $
-        drawArrays LineLoop (Interval 0 4)
+  for_ (game ^. _actors) (drawShip ship position white)
 
   when (game ^. _firing) $ drawLaser laser green (snd (toAxisAngle rotation))
 
@@ -402,11 +380,10 @@ draw View{ starfield, circleA, shipA, radar, laser, shipP, bodyP, fpsL, targetL 
 data View = View
   { starfield :: Starfield
   , circleA   :: Array (Body.V I)
-  , shipA     :: Array (Ship.V I)
-  , shipP     :: Program Ship.U Ship.V Ship.O
   , bodyP     :: Program Body.U Body.V Body.O
   , radar     :: Radar
   , laser     :: DrawLaser
+  , ship      :: DrawShip
   , fpsL      :: Label
   , targetL   :: Label
   , font      :: Font
