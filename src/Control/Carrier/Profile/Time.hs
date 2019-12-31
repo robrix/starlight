@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -66,14 +67,15 @@ instance Monoid Timing where
   mempty = Timing 0 0 0 0 mempty
 
 instance Pretty Timing where
-  pretty t@Timing{ min', max', sub } = braces (foldMap go fields) <> hardline <> nest 2 (pretty sub)
+  pretty t@Timing{ min', max', sub } = table (map go fields) <> hardline <> nest 2 (pretty sub)
     where
+    table = group . encloseSep (flatAlt "{ " "{") (flatAlt " }" "}") ", "
     fields =
       [ ("min", prettyMS min')
       , ("mean", prettyMS (mean t))
       , ("max", prettyMS max')
       ]
-    go (k, v) = pretty k <> pretty ':' <+> v
+    go (k, v) = k <> colon <+> v
     prettyMS = pretty . ($ "ms") . showFFloat (Just 3) . getSeconds . getMilli . milli @Seconds @Double . realToFrac
 
 mean :: Timing -> NominalDiffTime
