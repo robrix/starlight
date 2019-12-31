@@ -82,6 +82,7 @@ library
     Starlight.Shader.Body
     Starlight.Shader.Ship
     Starlight.Shader.Stars
+    Starlight.Ship
     Starlight.Starfield
     Starlight.Sol
     Starlight.View
