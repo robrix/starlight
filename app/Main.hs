@@ -179,7 +179,7 @@ controls
      , Has (State Input) sig m
      , Has (State GameState) sig m
      )
-  => [S.Instant Float]
+  => [S.StateVectors Float]
   -> View
   -> Delta Seconds Float
   -> Input
@@ -214,7 +214,7 @@ controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure
 
   position <- Lens.use (_player . _position)
   let describeTarget i
-        | S.Instant{ scale, body, transform } <- bodies !! i
+        | S.StateVectors{ scale, body, transform } <- bodies !! i
         , pos <- (transform !* V4 0 0 0 1) ^. _xy
         = name body ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
   target <- Lens.uses (_player . _target) (maybe "" describeTarget)
@@ -240,7 +240,7 @@ face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angula
 
 ai
   :: Has (State GameState) sig m
-  => [S.Instant Float]
+  => [S.StateVectors Float]
   -> Delta Seconds Float
   -> m ()
 ai bodies (Delta (Seconds dt)) = do
@@ -249,7 +249,7 @@ ai bodies (Delta (Seconds dt)) = do
   go a@Actor{ target, velocity, rotation, position } = case target of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     Just i
-      | S.Instant{ transform } <- bodies !! i
+      | S.StateVectors{ transform } <- bodies !! i
       , pos       <- (transform !* V4 0 0 0 1) ^. _xy
       , angle     <- angleTo (unP position) pos
       , rotation' <- face angular angle rotation
@@ -269,7 +269,7 @@ ai bodies (Delta (Seconds dt)) = do
 
 physics
   :: Has (State GameState) sig m
-  => [S.Instant Float]
+  => [S.StateVectors Float]
   -> Delta Seconds Float
   -> m GameState
 physics bodies (Delta (Seconds dt)) = do
@@ -277,7 +277,7 @@ physics bodies (Delta (Seconds dt)) = do
   _actors . each %= updatePosition . flip (foldr (applyGravity scale)) bodies
   get where
   updatePosition a@Actor{ position, velocity } = a { position = position .+^ velocity }
-  applyGravity distanceScale S.Instant{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
+  applyGravity distanceScale S.StateVectors{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
     = a { velocity = velocity + dt * force *^ direction pos (unP position) } where
     force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
     pos = (transform !* V4 0 0 0 1) ^. _xy -- compute body location in 3d, but only use xy
@@ -309,7 +309,7 @@ draw
      , Has (Reader Window.Window) sig m
      )
   => View
-  -> [S.Instant Float]
+  -> [S.StateVectors Float]
   -> GameState
   -> m ()
 draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } bodies game = measure "draw" . runLiftIO $ do
@@ -358,8 +358,8 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } b
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  let onScreen S.Instant{ scale, body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (scale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
-      drawBody i@S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
+  let onScreen S.StateVectors{ scale, body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (scale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
+      drawBody i@S.StateVectors{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
         set Body.U
           { matrix = Just
               $   origin
@@ -398,7 +398,7 @@ data View = View
 drawRadar
   :: (Has (Lift IO) sig m, Has (Reader Window.Window) sig m)
   => Radar
-  -> [S.Instant Float]
+  -> [S.StateVectors Float]
   -> GameState
   -> m ()
 drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ do
@@ -412,7 +412,7 @@ drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ 
     }
 
   -- FIXME: skip blips for extremely distant objects
-  let drawBodyBlip S.Instant{ scale, body = S.Body{ name, radius = Metres r, colour }, transform } = do
+  let drawBodyBlip S.StateVectors{ scale, body = S.Body{ name, radius = Metres r, colour }, transform } = do
         let there = (transform !* V4 0 0 0 1) ^. _xy
             angle = angleTo here there
             d = distance here there

@@ -6,7 +6,7 @@ module Starlight.Body
 ( System(..)
 , systemTrans
 , _scale
-, Instant(..)
+, StateVectors(..)
 , bodiesAt
 , Code
 , Body(..)
@@ -59,7 +59,7 @@ _scale :: Lens' (System a) a
 _scale = lens (\ System{ scale } -> scale) (\ System { bodies } s' -> System { bodies, scale = s' })
 
 
-data Instant a = Instant
+data StateVectors a = StateVectors
   { body      :: Body a
   , scale     :: a
   , transform :: M44 a
@@ -67,10 +67,10 @@ data Instant a = Instant
   }
   deriving (Show)
 
-bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> [Instant a]
+bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> [StateVectors a]
 bodiesAt sys@(System scale bs) t = bs' where
   bs' = map go bs
-  go b = Instant b scale (rel !*! transformAt (orbit b) t) (orientationAt b t) where
+  go b = StateVectors b scale (rel !*! transformAt (orbit b) t) (orientationAt b t) where
     rel = maybe (systemTrans sys) transform $ do
       p <- parent b
       find ((== name p) . name . body) bs'
