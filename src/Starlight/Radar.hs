@@ -113,8 +113,8 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
 drawBlipArc
   :: ( Has (Lift IO) sig m
-     , HasArray i m
-     , HasProgram Radar.U i o m
+     , HasArray           Radar.V         m
+     , HasProgram Radar.U Radar.V Radar.O m
      )
   => V2 Float
   -> Blip
