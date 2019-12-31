@@ -406,7 +406,7 @@ data View = View
   , shipP     :: Program Ship.U Ship.V Ship.O
   , bodyP     :: Program Body.U Body.V Body.O
   , radar     :: Radar
-  , laser     :: Laser
+  , laser     :: DrawLaser
   , fpsL      :: Label
   , targetL   :: Label
   , font      :: Font

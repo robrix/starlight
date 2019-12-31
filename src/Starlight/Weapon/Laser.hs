@@ -1,9 +1,10 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Weapon.Laser
 ( laser
-, Laser
+, DrawLaser
 , drawLaser
 ) where
 
@@ -25,35 +26,33 @@ laser
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => m Laser
+  => m DrawLaser
 laser = do
   program <- build Laser.shader
   array <- load vertices
-  pure Laser{ program, array }
-
-drawLaser
-  :: ( Has (Lift IO) sig m
-     , Has Profile sig m
-     , Has (Reader ViewScale) sig m
-     )
-  => Laser
-  -> Colour Float
-  -> Radians Float
-  -> m ()
-drawLaser Laser{ program, array } colour angle = measure "laser" . use program . bindArray array $ do
-  matrix <- asks scaleToViewZoomed
-  set Laser.U
-    { matrix = Just matrix
-    , angle  = Just angle
-    , colour = Just colour
-    }
-  drawArrays Lines range
-
-
-data Laser = Laser
-  { program :: Program Laser.U Laser.V Laser.O
-  , array   :: Array (Laser.V I)
+  pure DrawLaser
+    { drawLaser = \ colour angle -> measure "laser" . use program . bindArray array $ do
+      matrix <- asks scaleToViewZoomed
+      set Laser.U
+        { matrix = Just matrix
+        , angle  = Just angle
+        , colour = Just colour
+        }
+      drawArrays Lines range
   }
+
+newtype DrawLaser = DrawLaser
+  { drawLaser
+    :: forall sig m
+    .  ( Has (Lift IO) sig m
+      , Has Profile sig m
+      , Has (Reader ViewScale) sig m
+      )
+    => Colour Float
+    -> Radians Float
+    -> m ()
+  }
+
 
 vertices :: [Laser.V I]
 vertices = coerce @[Float] [0, 1]
