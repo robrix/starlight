@@ -23,7 +23,7 @@ import qualified Control.Effect.Lens as Lens
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import qualified Control.Exception.Lift as E
-import           Control.Monad ((<=<), when)
+import           Control.Monad (when, (<=<))
 import           Control.Monad.IO.Class.Lift (MonadIO, runLiftIO)
 import           Data.Coerce
 import           Data.Foldable (find, for_)
@@ -36,14 +36,14 @@ import           Data.List (elemIndex)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
 import           Data.Maybe (isJust)
-import           Data.Time.Clock (NominalDiffTime, UTCTime, getCurrentTime, diffUTCTime)
+import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           Geometry.Circle
 import           GL.Array
 import           GL.Framebuffer
 import           GL.Program
 import           GL.Viewport
 import           Graphics.GL.Core41
-import           Lens.Micro (Lens', (^.), each, lens)
+import           Lens.Micro (Lens', each, lens, (^.))
 import           Linear.Affine
 import           Linear.Exts
 import           Linear.Matrix
@@ -62,10 +62,10 @@ import           Starlight.CLI
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Radar as Radar
-import           Starlight.Ship as Ship
-import           Starlight.Starfield as Starfield
 import qualified Starlight.Shader.Body as Body
+import           Starlight.Ship as Ship
 import qualified Starlight.Sol as S
+import           Starlight.Starfield as Starfield
 import           Starlight.System
 import           Starlight.View
 import           Starlight.Weapon.Laser as Laser
