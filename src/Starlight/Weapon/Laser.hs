@@ -44,9 +44,9 @@ newtype DrawLaser = DrawLaser
   { drawLaser
     :: forall sig m
     .  ( Has (Lift IO) sig m
-      , Has Profile sig m
-      , Has (Reader ViewScale) sig m
-      )
+       , Has Profile sig m
+       , Has (Reader ViewScale) sig m
+       )
     => Colour Float
     -> Radians Float
     -> m ()
