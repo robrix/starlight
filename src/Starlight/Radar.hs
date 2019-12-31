@@ -102,7 +102,6 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
               angle = angleTo here there
               d = distance here there
               direction = normalize (there ^-^ here)
-              -- drawAtRadius radius minSweep colour = do
               minSweep' = (minSweep * Radians (fromIntegral i / (zoom * 3)))
               radius = step * fromIntegral i
               -- FIXME: apply easing so this works more like a spring
