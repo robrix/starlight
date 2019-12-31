@@ -315,7 +315,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
   let Actor{ position } = game ^. _player
   bind @Framebuffer Nothing
 
-  ViewScale { scale, size, zoom = zoomOut } <- ask
+  ViewScale { scale, size, zoom } <- ask
 
   viewport $ scale *^ Interval 0 size
   scissor  $ scale *^ Interval 0 size
@@ -326,13 +326,13 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
     set Stars.U
       { resolution = Just (fromIntegral <$> size ^* scale)
       , origin     = Just (position / P (fromIntegral <$> size))
-      , zoom       = Just zoomOut
+      , zoom       = Just zoom
       }
 
     bindArray quadA $
       drawArrays TriangleStrip (Interval 0 4)
 
-  let V2 sx sy = 1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoomOut)
+  let V2 sx sy = 1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoom)
       origin
         =   scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
         !*! translated3 (ext (negated (unP position)) 0) -- transform to the origin
@@ -351,7 +351,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  let maxDim = maximum ((fromIntegral <$> size ^* scale) ^* zoomOut)
+  let maxDim = maximum ((fromIntegral <$> size ^* scale) ^* zoom)
       onScreen S.StateVectors{ scale, body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (scale *^ radius) < maxDim * 0.5
       drawBody i@S.StateVectors{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
         set Body.U
@@ -379,8 +379,8 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
     scale <- Window.scale
     size  <- Window.size
     let velocity = game ^. _player . _velocity
-        zoomOut = zoomForSpeed size (norm velocity)
-    runReader ViewScale{ scale, size, zoom = zoomOut } m
+        zoom = zoomForSpeed size (norm velocity)
+    runReader ViewScale{ scale, size, zoom } m
 
 
 data View = View
