@@ -70,14 +70,12 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
         drawBlipArc here (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour) Nothing
 
       drawNPCBlip Actor{ position = P there } = do
-        set Radar.U
-          { matrix = Nothing
-          , radius = Nothing
-          , angle  = Just $ angleTo here there
-          , sweep  = Just 0
+        set defaultVars
+          { Radar.angle  = Just $ angleTo here there
+          , Radar.sweep  = Just 0
             -- FIXME: fade colour with distance
             -- FIXME: IFF
-          , colour = Just white
+          , Radar.colour = Just white
           }
         let median = length radarV `div` 2
         drawArrays Points (Interval (I median) (I (median + 1)))
