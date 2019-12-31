@@ -6,6 +6,7 @@ module Starlight.Identifier
 , parentIdentifier
 , describeIdentifier
 , toList
+, getLeaf
 ) where
 
 import Data.Function (on)
@@ -40,3 +41,8 @@ toList i = go i [] where
   go = \case
     Star leaf -> (leaf:|)
     i :/ leaf -> go i . (leaf:)
+
+getLeaf :: Identifier -> (Code, Name)
+getLeaf = \case
+  Star leaf -> leaf
+  _ :/ leaf -> leaf
