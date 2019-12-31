@@ -44,7 +44,7 @@ import           GL.Program
 import           GL.Shader.DSL (defaultVars)
 import           GL.Viewport
 import           Graphics.GL.Core41
-import           Lens.Micro (Lens', (.~), (^.), each, lens)
+import           Lens.Micro (Lens', (.~), (^.), each, forOf_, lens)
 import           Linear.Affine
 import           Linear.Exts
 import           Linear.Matrix
@@ -408,7 +408,20 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
           when (Just name == (target >>= \ i -> S.name (S.body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
+        drawNPCBlip Actor{ position = P there } = do
+          let angle = angleTo here there
+              colour = white
+          set Radar.U
+            { matrix = Nothing
+            , radius = Just 100
+            , angle  = Just angle
+            , sweep  = Just minSweep
+            , colour = Just colour
+            }
+          drawArrays Points (Interval 0 (I (length radarV)))
+
     for_ bodies drawBodyBlip
+    forOf_ (_npcs . each) game drawNPCBlip
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing
