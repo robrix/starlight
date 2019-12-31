@@ -5,4 +5,4 @@ module Starlight.Identifier
 import Data.Text
 
 data Identifier
-  = Star Text Int
+  = Star Int Text
