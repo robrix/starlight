@@ -1,0 +1,2 @@
+module Starlight.Game
+() where
