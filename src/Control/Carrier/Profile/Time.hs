@@ -24,6 +24,7 @@ import           Control.Effect.Profile
 import           Control.Monad.IO.Class
 import qualified Data.Map as Map
 import           Data.Text (Text)
+import           Data.Text.Prettyprint.Doc
 import           Data.Time.Clock
 import           Prelude hiding (sum)
 
@@ -59,6 +60,9 @@ instance Semigroup Timing where
 
 instance Monoid Timing where
   mempty = Timing 0 0 0 0 mempty
+
+instance Pretty Timing where
+  pretty Timing{} = mempty
 
 mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
