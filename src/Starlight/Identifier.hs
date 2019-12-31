@@ -16,7 +16,7 @@ type Code = Int
 type Name = Text
 
 data Identifier
-  = Star Code Name
+  = Star (Code, Name)
   | Identifier :/ (Code, Name)
   deriving (Eq, Read, Show)
 
@@ -31,11 +31,11 @@ parentIdentifier = \case
 
 describeIdentifier :: Identifier -> String
 describeIdentifier = \case
-  Star code name -> show code <> " " <> unpack name
+  Star (code, name) -> show code <> " " <> unpack name
   _ :/ (code, name) -> show code <> " " <> unpack name
 
 toList :: Identifier -> [(Code, Name)]
 toList i = go i [] where
   go = \case
-    Star code name    -> ((code, name):)
-    i :/ (code, name) -> go i . ((code, name):)
+    Star leaf -> (leaf:)
+    i :/ leaf -> go i . (leaf:)

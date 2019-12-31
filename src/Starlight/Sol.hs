@@ -25,7 +25,7 @@ import           Unit.Time
 
 bodies :: Map.Map Identifier (Orbit Float) -> Map.Map Identifier (Body Float)
 bodies orbits = bodies where
-  solI = Star 10 "Sol"
+  solI = Star (10, "Sol")
   bodies = Map.fromList $ map ((,) . identifier <*> id)
     [ let identifier = solI in Body
       { identifier  = solI
@@ -258,4 +258,4 @@ system = do
     | (identifier, orbit) <- Map.toList orbits
     ]
   where
-  solI = Star 10 "Sol"
+  solI = Star (10, "Sol")

@@ -225,7 +225,8 @@ fromDirectory = go Nothing
   parseIdentifier root path = do
     (code, rest) <- readDec path
     let name = pack (initCap (dropWhile isSpace (dropExtension rest)))
-    pure (maybe (Star code name) (:/ (code, name)) root)
+        leaf = (code, name)
+    pure (maybe (Star leaf) (:/ leaf) root)
   initCap = \case
     ""   -> ""
     c:cs -> toUpper c : cs
