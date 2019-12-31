@@ -1,2 +1,6 @@
 module Starlight.Identifier
-() where
+( Identifier(..)
+) where
+
+data Identifier
+  = Star Int
