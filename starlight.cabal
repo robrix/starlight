@@ -74,6 +74,7 @@ library
     S
     Starlight.Actor
     Starlight.Body
+    Starlight.CLI
     Starlight.Input
     Starlight.Radar
     Starlight.Radar.Shader
