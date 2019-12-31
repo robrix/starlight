@@ -67,7 +67,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
   let drawBodyBlip StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } =
-        drawBlipArc here (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour) Nothing
+        drawBlipArc (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour) Nothing
 
       drawNPCBlip Actor{ position = P there } = do
         set defaultVars
@@ -90,8 +90,8 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
               radius = step * fromIntegral i
               -- FIXME: apply easing so this works more like a spring
               step = max 1 (min (50 * zoom) (d / fromIntegral n))
-              edge = scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
-              sweep = max minSweep' (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
+              edge = scale * r * (min d radius/d) *^ perp direction + direction ^* radius
+              sweep = max minSweep' (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))
 
           set Radar.U
             { matrix = Nothing
@@ -116,11 +116,10 @@ drawBlipArc
      , HasArray           Radar.V         m
      , HasProgram Radar.U Radar.V Radar.O m
      )
-  => V2 Float
-  -> Blip
+  => Blip
   -> Maybe Float
   -> m ()
-drawBlipArc here Blip{ angle, direction, d, r, colour } radius = do
+drawBlipArc Blip{ angle, direction, d, r, colour } radius = do
   set Radar.U
     { matrix = Nothing
     , radius = radius
@@ -132,8 +131,8 @@ drawBlipArc here Blip{ angle, direction, d, r, colour } radius = do
   drawArrays LineStrip (Interval 0 (I (length radarV)))
   where
   radius' = fromMaybe 100 radius
-  edge = r * (min d radius'/d) *^ perp direction + direction ^* radius' + here
-  sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
+  edge = r * (min d radius'/d) *^ perp direction + direction ^* radius'
+  sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))
   minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
 
 data Blip = Blip
