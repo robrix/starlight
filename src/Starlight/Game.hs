@@ -136,7 +136,7 @@ runGame = do
           , target   = Just $ Star (10, "Sol") :/ (199, "Mercury")
           }
         ]
-      , system   = system
+      , system
       }
     . evalState start $ do
       bodyP  <- build Body.shader
