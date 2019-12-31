@@ -26,6 +26,7 @@ module Starlight.Body
 ) where
 
 import Control.Effect.Lift
+import Control.Monad (filterM)
 import Data.Foldable (find)
 import Data.List (elemIndex)
 import Lens.Micro
@@ -208,8 +209,9 @@ fromFile path = do
 fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePath -> m [(FilePath, Orbit a)]
 fromDirectory dir
   =   sendM (listDirectory dir)
-  >>= traverse (\ path -> (,) path <$> fromFile (dir </> path)) . filter isRelevant where
-  isRelevant path = takeExtension path == ".txt"
+  >>= filterM isRelevant
+  >>= traverse (\ path -> (,) path <$> fromFile (dir </> path)) where
+  isRelevant path = pure (takeExtension path == ".txt")
 
 
 newtype Per (f :: * -> *) (g :: * -> *) a = Per { getPer :: a }
