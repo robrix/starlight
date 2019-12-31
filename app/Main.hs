@@ -57,6 +57,7 @@ import           Linear.Vector as Linear
 import           Numeric
 import           Physics.Delta
 import qualified SDL
+import           Starlight.Actor as Actor
 import           Starlight.Body as S
 import           Starlight.Input
 import qualified Starlight.Radar.Shader as Radar
@@ -254,7 +255,7 @@ ai bodies (Delta (Seconds dt)) = do
       , angle     <- angleTo (unP position) pos
       , rotation' <- face angular angle rotation
       -> a
-        { Main.rotation = rotation'
+        { Actor.rotation = rotation'
         -- FIXME: don’t just fly directly at the target, dumbass
         -- FIXME: factor in the target’s velocity & distance
         -- FIXME: allow other behaviours relating to targets, e.g. following
@@ -485,28 +486,6 @@ _player = lens player (\ s p -> s { player = p })
 
 _system :: Lens' GameState (System Float)
 _system = lens system (\ s p -> s { system = p })
-
-
-data Actor = Actor
-  { position :: !(Point V2 Float)
-  , velocity :: !(V2 Float)
-  , rotation :: !(Quaternion Float)
-  , target   :: !(Maybe Int)
-  }
-  deriving (Show)
-
-_position :: Lens' Actor (Point V2 Float)
-_position = lens position (\ s v -> s { position = v })
-
-_velocity :: Lens' Actor (V2 Float)
-_velocity = lens velocity (\ s v -> s { velocity = v })
-
-_rotation :: Lens' Actor (Quaternion Float)
-_rotation = lens Main.rotation (\ s r -> s { Main.rotation = r })
-
-_target :: Lens' Actor (Maybe Int)
-_target = lens target (\ s t -> s { target = t })
-
 
 
 now :: Has (Lift IO) sig m => m UTCTime
