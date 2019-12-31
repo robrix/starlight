@@ -79,7 +79,7 @@ renderTiming t@Timing{ min', max', sub } = table (map go fields) <> if null (unT
       , (annotate (color Green) "max", prettyMS max')
       ]
     go (k, v) = k <> colon <+> v
-    prettyMS = pretty . ($ "ms") . showFFloat (Just 3) . getSeconds . getMilli . milli @Seconds @Double . realToFrac
+    prettyMS = (<> annotate (colorDull White) "ms") . pretty . ($ "") . showFFloat (Just 3) . getSeconds . getMilli . milli @Seconds @Double . realToFrac
 
 mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
