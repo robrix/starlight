@@ -408,7 +408,7 @@ data GameState = GameState
   { throttle :: !Float
   , player   :: !Actor
   , npcs     :: ![Actor]
-  , system   :: !(System Float)
+  , system   :: !(System Body Float)
   }
   deriving (Show)
 
@@ -424,7 +424,7 @@ _actors = lens ((:|) . player <*> npcs) (\ s (p:|o) -> s { player = p, npcs = o 
 _player :: Lens' GameState Actor
 _player = lens player (\ s p -> s { player = p })
 
-_system :: Lens' GameState (System Float)
+_system :: Lens' GameState (System Body Float)
 _system = lens system (\ s p -> s { system = p })
 
 

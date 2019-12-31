@@ -53,16 +53,16 @@ import           Unit.Length
 import           Unit.Mass
 import           Unit.Time
 
-data System a = System
+data System f a = System
   { scale  :: !a
-  , bodies :: !(Map.Map Identifier (Body a))
+  , bodies :: !(Map.Map Identifier (f a))
   }
   deriving (Read, Show)
 
-systemTrans :: Num a => System a -> M44 a
+systemTrans :: Num a => System f a -> M44 a
 systemTrans (System scale _) = scaled (V4 scale scale scale 1)
 
-_scale :: Lens' (System a) a
+_scale :: Lens' (System f a) a
 _scale = lens (\ System{ scale } -> scale) (\ System { bodies } s' -> System { bodies, scale = s' })
 
 
@@ -75,7 +75,7 @@ data StateVectors a = StateVectors
   }
   deriving (Show)
 
-bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> Map.Map Identifier (StateVectors a)
+bodiesAt :: (Epsilon a, RealFloat a) => System Body a -> Seconds a -> Map.Map Identifier (StateVectors a)
 bodiesAt sys@(System scale bs) t = bs' where
   bs' = fmap go bs
   go b = StateVectors
