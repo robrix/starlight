@@ -3,7 +3,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Starlight.Shader.Ship
+module Starlight.Ship.Shader
 ( shader
 , U(..)
 , V(..)

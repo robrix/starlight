@@ -80,9 +80,9 @@ library
     Starlight.Radar
     Starlight.Radar.Shader
     Starlight.Shader.Body
-    Starlight.Shader.Ship
     Starlight.Shader.Stars
     Starlight.Ship
+    Starlight.Ship.Shader
     Starlight.Starfield
     Starlight.Sol
     Starlight.View
