@@ -275,7 +275,7 @@ physics (Delta (Seconds dt)) = do
   scale <- Lens.uses (_system . _scale) (1/)
   _actors . each %= updatePosition . flip (foldr (applyGravity scale)) bodies
   get where
-  updatePosition a@Actor{ position, velocity } = a { position = position .+^ velocity }
+  updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
   applyGravity distanceScale S.StateVectors{ transform, body = S.Body{ mass } } a@Actor{ position, velocity }
     = a { velocity = velocity + dt * force *^ direction pos (unP position) } where
     force = bigG * getKilograms mass / r -- assume actors’ mass is negligible

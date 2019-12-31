@@ -34,6 +34,7 @@ import Linear.Epsilon
 import Linear.Exts
 import Linear.Matrix
 import Linear.Quaternion
+import Linear.V2
 import Linear.V3
 import Linear.V4
 import Linear.Vector
@@ -64,6 +65,7 @@ data StateVectors a = StateVectors
   , scale     :: a
   , transform :: M44 a
   , rotation  :: Quaternion a
+  , position  :: V2 a
   }
   deriving (Show)
 
@@ -73,12 +75,14 @@ bodiesAt sys@(System scale bs) t = bs' where
   go b = StateVectors
     { body = b
     , scale
-    , transform = rel !*! transformAt (orbit b) t
+    , transform = transform'
     , rotation = orientationAt b t
+    , position = (transform' !* V4 0 0 0 1) ^. _xy
     } where
     rel = maybe (systemTrans sys) transform $ do
       p <- parent b
       find ((== name p) . name . body) bs'
+    transform' = rel !*! transformAt (orbit b) t
 
 type Code = Int
 
