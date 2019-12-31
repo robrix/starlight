@@ -57,9 +57,10 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
   bodies <- ask
   viewScale@ViewScale{ zoom } <- ask
 
+  let radius = 100
   set defaultVars
     { Radar.matrix = Just (scaleToViewZoomed viewScale)
-    , Radar.radius = Just 100
+    , Radar.radius = Just radius
     }
 
   -- FIXME: skip blips for extremely distant objects
@@ -68,7 +69,6 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
         let there = (transform !* V4 0 0 0 1) ^. _xy
             angle = angleTo here there
             d = distance here there
-            radius = 100
             direction = normalize (there ^-^ here)
             edge = scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
             sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
