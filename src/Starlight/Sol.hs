@@ -10,7 +10,6 @@ module Starlight.Sol
 ) where
 
 import           Control.Effect.Lift
-import           Data.List (sortOn)
 import           Data.Maybe (fromMaybe)
 import qualified Data.Map as Map
 import           Linear.Quaternion
@@ -233,8 +232,8 @@ system = do
         }
       systemScale = 100_000 / getMetres (radius (bodies Map.! solI))
 
-  pure . System systemScale $ sortOn identifier
-    [ fromMaybe (placeholder identifier orbit) (bodies Map.!? identifier)
+  pure . System systemScale $ Map.fromList
+    [ (identifier, fromMaybe (placeholder identifier orbit) (bodies Map.!? identifier))
     | (identifier, orbit) <- Map.toList orbits
     ]
   where

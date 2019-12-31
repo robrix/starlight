@@ -26,35 +26,36 @@ module Starlight.Body
 , Per(..)
 ) where
 
-import Control.Effect.Lift
-import Data.Char (isSpace, toUpper)
-import Data.Foldable (find)
-import Data.List (elemIndex)
-import Data.Text (pack)
-import Lens.Micro
-import Linear.Affine
-import Linear.Epsilon
-import Linear.Exts
-import Linear.Matrix
-import Linear.Quaternion
-import Linear.V2
-import Linear.V3
-import Linear.V4
-import Linear.Vector
-import Numeric (readDec)
-import Starlight.Identifier
-import System.Directory
-import System.FilePath
-import Text.Read
-import UI.Colour
-import Unit.Angle
-import Unit.Length
-import Unit.Mass
-import Unit.Time
+import           Control.Effect.Lift
+import           Data.Char (isSpace, toUpper)
+import           Data.Foldable (find)
+import           Data.List (elemIndex)
+import qualified Data.Map as Map
+import           Data.Text (pack)
+import           Lens.Micro
+import           Linear.Affine
+import           Linear.Epsilon
+import           Linear.Exts
+import           Linear.Matrix
+import           Linear.Quaternion
+import           Linear.V2
+import           Linear.V3
+import           Linear.V4
+import           Linear.Vector
+import           Numeric (readDec)
+import           Starlight.Identifier
+import           System.Directory
+import           System.FilePath
+import           Text.Read
+import           UI.Colour
+import           Unit.Angle
+import           Unit.Length
+import           Unit.Mass
+import           Unit.Time
 
 data System a = System
   { scale  :: !a
-  , bodies :: ![Body a]
+  , bodies :: !(Map.Map Identifier (Body a))
   }
   deriving (Read, Show)
 
@@ -74,9 +75,9 @@ data StateVectors a = StateVectors
   }
   deriving (Show)
 
-bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> [StateVectors a]
+bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> Map.Map Identifier (StateVectors a)
 bodiesAt sys@(System scale bs) t = bs' where
-  bs' = map go bs
+  bs' = fmap go bs
   go b = StateVectors
     { body = b
     , scale

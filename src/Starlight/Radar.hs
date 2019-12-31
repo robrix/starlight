@@ -19,6 +19,7 @@ import           Data.Function ((&))
 import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.List (find)
+import qualified Data.Map as Map
 import           GL.Array
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
@@ -30,6 +31,7 @@ import           Linear.V2
 import           Linear.Vector
 import           Starlight.Actor
 import           Starlight.Body as Body
+import           Starlight.Identifier
 import qualified Starlight.Radar.Shader as Radar
 import           Starlight.View
 import           UI.Colour
@@ -46,7 +48,7 @@ radar = do
 drawRadar
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader [StateVectors Float]) sig m
+     , Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
      , Has (Reader ViewScale) sig m
      )
   => Radar
@@ -54,7 +56,7 @@ drawRadar
   -> [Actor]
   -> m ()
 drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
-  bodies <- ask @[StateVectors Float]
+  bodies <- ask @(Map.Map Identifier (StateVectors Float))
   matrix <- asks scaleToView
 
   let radius = 100

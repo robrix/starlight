@@ -32,8 +32,9 @@ import           Data.Functor.Const
 import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.Ix (inRange)
-import           Data.List (findIndex)
+import           Data.List (elemIndex)
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, getCurrentTime, diffUTCTime)
 import           Geometry.Circle
@@ -189,7 +190,7 @@ circleV = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
 controls
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader [S.StateVectors Float]) sig m
+     , Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
      , Has (State Input) sig m
      , Has (State GameState) sig m
      )
@@ -220,10 +221,11 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
   when (input ^. _pressed SDL.KeycodeRight) $
     _player . _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  bodies <- ask
-  let switchTarget shift target = case target >>= \ i -> findIndex ((== i) . identifier . body) bodies of
-        Just i  -> identifier . body . (bodies !!) <$> let i' = if shift then i - 1 else i + 1 in i' <$ guard (inRange (0, pred (length bodies)) i')
-        Nothing -> Just . identifier . body $ if shift then last bodies else head bodies
+  bodies <- ask @(Map.Map Identifier (StateVectors Float))
+  let identifiers = Map.keys bodies
+      switchTarget shift target = case target >>= (`elemIndex` identifiers) of
+        Just i  -> (identifiers !!) <$> let i' = if shift then i - 1 else i + 1 in i' <$ guard (inRange (0, pred (length bodies)) i')
+        Nothing -> Just $ if shift then last identifiers else head identifiers
   when (input ^. _pressed SDL.KeycodeTab) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
     _player . _target %= switchTarget shift
@@ -252,13 +254,13 @@ face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angula
 
 
 ai
-  :: ( Has (Reader [S.StateVectors Float]) sig m
+  :: ( Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
      , Has (State GameState) sig m
      )
   => Delta Seconds Float
   -> m ()
 ai (Delta (Seconds dt)) = do
-  bodies <- ask @[S.StateVectors Float]
+  bodies <- ask @(Map.Map Identifier (StateVectors Float))
   _npcs . each %= go bodies
   where
   go bodies a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . body) bodies of
@@ -281,13 +283,13 @@ ai (Delta (Seconds dt)) = do
 
 
 physics
-  :: ( Has (Reader [S.StateVectors Float]) sig m
+  :: ( Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
      , Has (State GameState) sig m
      )
   => Delta Seconds Float
   -> m GameState
 physics (Delta (Seconds dt)) = do
-  bodies <- ask @[S.StateVectors Float]
+  bodies <- ask @(Map.Map Identifier (StateVectors Float))
   scale <- Lens.uses (_system . _scale) (1/)
   _actors . each %= updatePosition . flip (foldr (applyGravity scale)) bodies
   get where
@@ -320,7 +322,7 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader [S.StateVectors Float]) sig m
+     , Has (Reader (Map.Map Identifier (StateVectors Float))) sig m
      , Has (Reader Window.Window) sig m
      )
   => View
@@ -371,7 +373,7 @@ draw View{ starfield, circleA, shipA, radar, shipP, bodyP, fpsL, targetL } game 
 
         drawArraysInstanced LineLoop (Interval 0 (I (length circleV))) 3
 
-  bodies <- ask @[S.StateVectors Float]
+  bodies <- ask @(Map.Map Identifier (StateVectors Float))
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
