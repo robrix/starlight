@@ -15,6 +15,7 @@ import           Control.Applicative (liftA2)
 import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
 import           Control.Carrier.Profile.Time
+import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Lens ((%=), (*=), (+=), (-=), (.=))
 import qualified Control.Effect.Lens as Lens
@@ -64,10 +65,10 @@ import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
 import qualified Starlight.Sol as S
 import           System.FilePath
-import qualified UI.Carrier.Window as Window
 import           UI.Colour
 import           UI.Label as Label
 import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypeface)
+import qualified UI.Window as Window
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
@@ -305,7 +306,7 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
-     , Has Window.Window sig m
+     , Has (Reader Window.Window) sig m
      )
   => View
   -> [S.Instant Float]

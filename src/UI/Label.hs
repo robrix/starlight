@@ -14,6 +14,7 @@ module UI.Label
 
 import           Control.Effect.Finally
 import           Control.Effect.Lift
+import           Control.Effect.Reader
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -39,11 +40,11 @@ import           Linear.V2
 import           Linear.V3
 import           Linear.Vector
 import           UI.Colour
-import qualified UI.Effect.Window as Window
 import           UI.Glyph (Instance(..), Run(..))
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 import           UI.Typeface
+import qualified UI.Window as Window
 
 data Label = Label
   { textP   :: !(Program Text.U  Text.V  Text.O)
@@ -64,7 +65,7 @@ data LabelState = LabelState
 label
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
-     , Has Window.Window sig m
+     , Has (Reader Window.Window) sig m
      , HasCallStack
      )
   => m Label

@@ -10,16 +10,17 @@ module Starlight.Input
 
 import           Control.Effect.Empty
 import           Control.Effect.Lens ((.=))
+import           Control.Effect.Lift
 import           Control.Effect.State
 import qualified Data.IntSet as IntSet
 import           Lens.Micro (Lens', lens)
 import qualified SDL
-import qualified UI.Effect.Window as Window
+import qualified UI.Window as Window
 
 input
   :: ( Has Empty sig m
+     , Has (Lift IO) sig m
      , Has (State Input) sig m
-     , Has Window.Window sig m
      )
   => m Input
 input = Window.input go >> get where

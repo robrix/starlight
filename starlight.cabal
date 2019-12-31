@@ -79,9 +79,7 @@ library
     Starlight.Shader.Ship
     Starlight.Shader.Stars
     Starlight.Sol
-    UI.Carrier.Window
     UI.Colour
-    UI.Effect.Window
     UI.Glyph
     UI.Graph
     UI.Graph.Lines
