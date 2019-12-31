@@ -131,8 +131,6 @@ executable starlight
     , gl
     , linear
     , microlens
-    , prettyprinter
-    , prettyprinter-ansi-terminal
     , sdl2
     , starlight
     , text

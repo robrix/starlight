@@ -31,8 +31,6 @@ import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
-import           Data.Text.Prettyprint.Doc (defaultLayoutOptions, layoutPretty, line)
-import           Data.Text.Prettyprint.Doc.Render.Terminal (renderIO)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, getCurrentTime, diffUTCTime)
 import           Geometry.Circle
 import           GHC.Stack
@@ -63,7 +61,6 @@ import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
 import qualified Starlight.Sol as S
 import           System.FilePath
-import           System.IO
 import           UI.Colour
 import           UI.Label as Label
 import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypeface)
@@ -137,9 +134,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
             draw view gameState
           continue <$ measure "swap" Window.swap
         when continue loop
-
-reportTimings :: Has (Lift IO) sig m => Timings -> m ()
-reportTimings = sendM . renderIO stderr . layoutPretty defaultLayoutOptions . (<> line) . renderTimings
 
 
 shipV :: [Ship.V I]

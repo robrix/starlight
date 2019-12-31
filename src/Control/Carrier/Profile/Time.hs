@@ -16,6 +16,7 @@ module Control.Carrier.Profile.Time
 , mean
 , Timings(..)
 , renderTimings
+, reportTimings
   -- * Profile effect
 , module Control.Effect.Profile
 ) where
@@ -34,6 +35,7 @@ import           Data.Text.Prettyprint.Doc.Render.Terminal
 import           Data.Time.Clock
 import           Numeric (showFFloat)
 import           Prelude hiding (sum)
+import           System.IO (stderr)
 import           Unit.Time
 
 runProfile :: ProfileC m a -> m (Timings, a)
@@ -96,3 +98,6 @@ instance Monoid Timings where
 renderTimings :: Timings -> Doc AnsiStyle
 renderTimings (Timings ts) = vsep (map go (sortOn (Down . mean . snd) (Map.toList ts))) where
   go (k, v) = annotate (color Green) (pretty k) <> pretty ':' <> softline <> renderTiming v
+
+reportTimings :: Has (Lift IO) sig m => Timings -> m ()
+reportTimings = sendM . renderIO stderr . layoutPretty defaultLayoutOptions . (<> line) . renderTimings
