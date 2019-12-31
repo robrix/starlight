@@ -12,3 +12,4 @@ newtype Name = Name { getName :: Text }
 
 data Identifier
   = Star Code Name
+  | Identifier :/ (Code, Name)
