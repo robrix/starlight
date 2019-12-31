@@ -413,7 +413,7 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
             { matrix = Nothing
             , radius = Just 100
             , angle  = Just $ angleTo here there
-            , sweep  = Just minSweep
+            , sweep  = Just 0
               -- FIXME: fade colour with distance
             , colour = Just white
             }
