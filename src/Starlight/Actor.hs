@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Starlight.Actor
 ( Actor(..)
 , _target
@@ -24,22 +25,22 @@ _target :: Lens' Actor (Maybe Identifier)
 _target = lens target (\ s t -> s { target = t })
 
 
-class HasPosition t where
-  _position :: Lens' t (Point V2 Float)
+class HasPosition t a | t -> a where
+  _position :: Lens' t (Point V2 a)
 
-instance HasPosition Actor where
+instance HasPosition Actor Float where
   _position = lens position (\ s v -> s { position = v })
 
 
-class HasVelocity t where
-  _velocity :: Lens' t (V2 Float)
+class HasVelocity t a | t -> a where
+  _velocity :: Lens' t (V2 a)
 
-instance HasVelocity Actor where
+instance HasVelocity Actor Float where
   _velocity = lens velocity (\ s v -> s { velocity = v })
 
 
-class HasRotation t where
-  _rotation :: Lens' t (Quaternion Float)
+class HasRotation t a | t -> a where
+  _rotation :: Lens' t (Quaternion a)
 
-instance HasRotation Actor where
+instance HasRotation Actor Float where
   _rotation = lens rotation (\ s r -> s { rotation = r })
