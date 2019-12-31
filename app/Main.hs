@@ -403,20 +403,17 @@ drawRadar
   -> GameState
   -> m ()
 drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ do
-  let Actor{ position = P here, velocity, target } = player game
   scale <- Window.scale
   size <- Window.size
   let zoomOut = zoomForSpeed size (norm velocity)
-  let V2 sx sy = 1 / (fromIntegral <$> size) ^* scale ^* (1 / zoomOut)
+      V2 sx sy = 1 / (fromIntegral <$> size) ^* scale ^* (1 / zoomOut)
 
   set defaultVars
     { Radar.matrix = Just (scaled (V3 sx sy 1))
     }
 
-  let n = 10 :: Int
-      minSweep = 0.0133 -- at d=150, makes approx. 4px blips
-      -- FIXME: skip blips for extremely distant objects
-      drawBodyBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
+  -- FIXME: skip blips for extremely distant objects
+  let drawBodyBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
         let there = (transform !* V4 0 0 0 1) ^. _xy
             angle = angleTo here there
             d = distance here there
@@ -456,6 +453,10 @@ drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ 
 
   for_ bodies drawBodyBlip
   for_ (npcs game) drawNPCBlip
+  where
+  Actor{ position = P here, velocity, target } = player game
+  n = 10 :: Int
+  minSweep = 0.0133 -- at d=150, makes approx. 4px blips
 
 data Radar = Radar
   { radarP  :: Program Radar.U Radar.V Radar.O
