@@ -212,12 +212,11 @@ controls bodies View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
 
-  scale <- Lens.uses (_system . _scale) (1/)
   position <- Lens.use (_player . _position)
   let describeTarget i
-        | S.Instant{ body, transform } <- bodies !! i
+        | S.Instant{ scale, body, transform } <- bodies !! i
         , pos <- (transform !* V4 0 0 0 1) ^. _xy
-        = name body ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* scale) (unP position ^* scale)))) "km"
+        = name body ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
   target <- Lens.uses (_player . _target) (maybe "" describeTarget)
 
   measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
@@ -359,7 +358,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } b
       bindArray shipA $
         drawArrays LineLoop (Interval 0 4)
 
-  let onScreen S.Instant{ body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (game ^. _system . _scale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
+  let onScreen S.Instant{ scale, body = S.Body{ radius }, transform } = distance ((transform !* V4 0 0 0 1) ^. _xy) (unP position) - getMetres (scale *^ radius) < maximum (size ^* scale ^* zoomOut) * 0.5
       drawBody i@S.Instant{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
         set Body.U
           { matrix = Just
@@ -413,7 +412,7 @@ drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ 
     }
 
   -- FIXME: skip blips for extremely distant objects
-  let drawBodyBlip S.Instant{ body = S.Body { name, radius = Metres r, colour }, transform } = do
+  let drawBodyBlip S.Instant{ scale, body = S.Body{ name, radius = Metres r, colour }, transform } = do
         let there = (transform !* V4 0 0 0 1) ^. _xy
             angle = angleTo here there
             d = distance here there
@@ -421,7 +420,7 @@ drawRadar Radar{ radarA, radarP } bodies game = use radarP . bindArray radarA $ 
             -- FIXME: apply easing so this works more like a spring
             step = max 1 (min (50 * zoomOut) (d / fromIntegral n))
             drawAtRadius radius minSweep colour = do
-              let edge = game ^. _system . _scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
+              let edge = scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
                   sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
 
               set Radar.U
