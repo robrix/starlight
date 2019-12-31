@@ -84,6 +84,7 @@ library
     Starlight.Ship
     Starlight.Ship.Shader
     Starlight.Starfield
+    Starlight.System
     Starlight.Sol
     Starlight.View
     Starlight.Weapon.Laser
