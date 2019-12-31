@@ -62,6 +62,7 @@ import qualified Starlight.Shader.Body as Body
 import qualified Starlight.Shader.Ship as Ship
 import qualified Starlight.Shader.Stars as Stars
 import qualified Starlight.Sol as S
+import           Starlight.View
 import           System.Environment
 import           System.Exit
 import           System.FilePath

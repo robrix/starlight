@@ -6,8 +6,6 @@ module Starlight.Radar
 ( radar
 , drawRadar
 , Radar
-, ViewScale(..)
-, scaleToViewZoomed
 ) where
 
 import           Control.Effect.Finally
@@ -31,6 +29,7 @@ import           Linear.Vector
 import           Starlight.Actor
 import           Starlight.Body as Body
 import qualified Starlight.Radar.Shader as Radar
+import           Starlight.View
 import           UI.Colour
 import           Unit.Angle
 import           Unit.Length
@@ -131,16 +130,6 @@ data Radar = Radar
   { radarP :: Program Radar.U Radar.V Radar.O
   , radarA :: Array (Radar.V I)
   }
-
-data ViewScale = ViewScale
-  { scale :: Int
-  , size  :: V2 Int
-  , zoom  :: Float
-  }
-
--- | Return a matrix transforming the [[-1,1], [-1,1]] interval to zoomed device coordinates.
-scaleToViewZoomed :: (Applicative v, Traversable v, R2 v) => ViewScale -> v (v Float)
-scaleToViewZoomed ViewScale{ scale, size, zoom } = scaled (pure 1 & _xy .~ (1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoom)))
 
 
 radarV :: [Radar.V I]
