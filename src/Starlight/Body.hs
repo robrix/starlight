@@ -6,7 +6,6 @@
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( StateVectors(..)
-, systemAt
 , Body(..)
 , Orbit(..)
 , fromEphemeris
@@ -40,7 +39,6 @@ import Linear.V4
 import Linear.Vector
 import Numeric (readDec)
 import Starlight.Identifier
-import Starlight.System
 import System.Directory
 import System.FilePath
 import Text.Read
@@ -57,20 +55,6 @@ data StateVectors a = StateVectors
   , position  :: V2 a
   }
   deriving (Show)
-
-systemAt :: (Epsilon a, RealFloat a) => System Body a -> Seconds a -> System StateVectors a
-systemAt sys@(System scale bs) t = System scale bs' where
-  bs' = fmap go bs
-  go b = StateVectors
-    { body = b
-    , transform = transform'
-    , rotation = orientationAt b t
-    , position = (transform' !* V4 0 0 0 1) ^. _xy
-    } where
-    rel = maybe (systemTrans sys) transform $ do
-      p <- parent (identifier b)
-      find ((== p) . identifier . body) bs'
-    transform' = rel !*! transformAt (orbit b) t
 
 data Body a = Body
   { identifier  :: Identifier
