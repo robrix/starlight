@@ -374,7 +374,7 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
   measure "bodies" $
     use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
 
-  measure "radar" . use radarP $ do
+  measure "radar" . use radarP . bindArray radarA $ do
     set defaultVars
       { Radar.matrix = Just (scaled (V3 sx sy 1))
       }
@@ -408,7 +408,7 @@ draw View{ quadA, circleA, shipA, radarA, shipP, starsP, radarP, bodyP, fpsL, ta
           when (Just name == (target >>= \ i -> S.name (S.body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
             drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
-    bindArray radarA $ for_ bodies drawBlip
+    for_ bodies drawBlip
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (floor (size ^. _y) - fpsSize ^. _y - 10)) white Nothing
