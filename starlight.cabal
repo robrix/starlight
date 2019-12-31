@@ -110,6 +110,7 @@ library
     , microlens
     , opentype
     , prettyprinter
+    , prettyprinter-ansi-terminal
     , sdl2
     , text
     , time ^>= 1.9
@@ -131,6 +132,7 @@ executable starlight
     , linear
     , microlens
     , prettyprinter
+    , prettyprinter-ansi-terminal
     , sdl2
     , starlight
     , text

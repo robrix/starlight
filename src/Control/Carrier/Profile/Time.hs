@@ -12,8 +12,10 @@ module Control.Carrier.Profile.Time
   runProfile
 , ProfileC(ProfileC)
 , Timing(..)
+, renderTiming
 , mean
 , Timings(..)
+, renderTimings
   -- * Profile effect
 , module Control.Effect.Profile
 ) where
@@ -28,6 +30,7 @@ import qualified Data.Map as Map
 import           Data.Ord (Down(..))
 import           Data.Text (Text)
 import           Data.Text.Prettyprint.Doc
+import           Data.Text.Prettyprint.Doc.Render.Terminal
 import           Data.Time.Clock
 import           Numeric (showFFloat)
 import           Prelude hiding (sum)
@@ -66,14 +69,14 @@ instance Semigroup Timing where
 instance Monoid Timing where
   mempty = Timing 0 0 0 0 mempty
 
-instance Pretty Timing where
-  pretty t@Timing{ min', max', sub } = table (map go fields) <> if null (unTimings sub) then mempty else nest 2 (line <> pretty sub)
+renderTiming :: Timing -> Doc AnsiStyle
+renderTiming t@Timing{ min', max', sub } = table (map go fields) <> if null (unTimings sub) then mempty else nest 2 (line <> renderTimings sub)
     where
     table = group . encloseSep (flatAlt "{ " "{") (flatAlt " }" "}") ", "
     fields =
-      [ ("min", prettyMS min')
-      , ("mean", prettyMS (mean t))
-      , ("max", prettyMS max')
+      [ (annotate (color Green) "min", prettyMS min')
+      , (annotate (color Green) "mean", prettyMS (mean t))
+      , (annotate (color Green) "max", prettyMS max')
       ]
     go (k, v) = k <> colon <+> v
     prettyMS = pretty . ($ "ms") . showFFloat (Just 3) . getSeconds . getMilli . milli @Seconds @Double . realToFrac
@@ -90,6 +93,6 @@ instance Semigroup Timings where
 instance Monoid Timings where
   mempty = Timings mempty
 
-instance Pretty Timings where
-  pretty (Timings ts) = vsep (map go (sortOn (Down . mean . snd) (Map.toList ts))) where
-    go (k, v) = pretty k <> pretty ':' <> softline <> pretty v
+renderTimings :: Timings -> Doc AnsiStyle
+renderTimings (Timings ts) = vsep (map go (sortOn (Down . mean . snd) (Map.toList ts))) where
+  go (k, v) = annotate (color Green) (pretty k) <> pretty ':' <> softline <> renderTiming v
