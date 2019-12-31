@@ -22,6 +22,7 @@ import Linear.Exts
 import Linear.Matrix
 import Linear.V2
 import Linear.V4
+import Linear.Vector
 import Starlight.Actor
 import Starlight.Ship.Shader as Ship
 import Starlight.View
@@ -36,11 +37,12 @@ makeDrawShip = do
   program <- build Ship.shader
   array <- load vertices
   pure DrawShip
-    { drawShip = \ colour Actor{ position, rotation } -> measure "ship" . use program . bindArray array $ do
+    { drawShip = \ focus colour Actor{ position, rotation } -> measure "ship" . use program . bindArray array $ do
       matrix <- asks scaleToViewZoomed
       set Ship.U
         { matrix = Just
             $   matrix
+            !*! translated3 (ext (negated (unP focus)) 0)
             !*! translated3 (ext (unP position) 0)
             !*! scaled (V4 15 15 15 1)
             !*! mkTransformation rotation 0
@@ -56,7 +58,8 @@ newtype DrawShip = DrawShip
        , Has Profile sig m
        , Has (Reader ViewScale) sig m
        )
-    => Colour Float
+    => Point V2 Float
+    -> Colour Float
     -> Actor
     -> m ()
   }
