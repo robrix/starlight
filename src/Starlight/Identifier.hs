@@ -9,6 +9,7 @@ module Starlight.Identifier
 ) where
 
 import Data.Function (on)
+import Data.List.NonEmpty (NonEmpty(..))
 import Data.Text
 
 type Code = Int
@@ -34,8 +35,8 @@ describeIdentifier = \case
   Star (code, name) -> show code <> " " <> unpack name
   _ :/ (code, name) -> show code <> " " <> unpack name
 
-toList :: Identifier -> [(Code, Name)]
+toList :: Identifier -> NonEmpty (Code, Name)
 toList i = go i [] where
   go = \case
-    Star leaf -> (leaf:)
+    Star leaf -> (leaf:|)
     i :/ leaf -> go i . (leaf:)
