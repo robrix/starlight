@@ -14,9 +14,9 @@ brew bundle # for sdl2
 cabal build # to set up dist-newstyle with the ghc package db
 ```
 
-Run `script/repl` to load the project (both library & executable) into the REPL. In the REPL, `:main` will launch the game.
+Run `script/repl` to load the project (both library & executable) into the REPL. In the REPL, `:main` will launch the game. Use `:main --profile` to enable profiling (timings for various parts of the game, shown on exit).
 
-Alternatively, `cabal run starlight` will launch the game.
+Alternatively, `cabal run starlight` will launch the game. Use `cabal run starlight -- --profile` to enable profiling.
 
 
 ## Controls
