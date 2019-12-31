@@ -28,6 +28,7 @@ import           Data.Ord (Down(..))
 import           Data.Text (Text)
 import           Data.Text.Prettyprint.Doc
 import           Data.Time.Clock
+import           Numeric (showFFloat)
 import           Prelude hiding (sum)
 import           Unit.Time
 
@@ -73,7 +74,7 @@ instance Pretty Timing where
       , ("max", prettyMS max')
       ]
     go (k, v) = pretty k <> pretty ':' <+> v
-    prettyMS = (<> pretty "ms") . pretty . getSeconds . getMilli . milli @Seconds @Double . realToFrac
+    prettyMS = pretty . ($ "ms") . showFFloat (Just 3) . getSeconds . getMilli . milli @Seconds @Double . realToFrac
 
 mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
