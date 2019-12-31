@@ -71,7 +71,6 @@ library
     GL.Uniform
     Linear.Exts
     Physics.Delta
-    S
     Starlight.Actor
     Starlight.Body
     Starlight.CLI
