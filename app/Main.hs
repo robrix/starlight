@@ -137,7 +137,6 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
           continue <$ measure "swap" Window.swap
         when continue loop
 
--- FIXME: organize timings into a tree
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
 reportTimings ts = sendM . putStrLn . renderString . layoutPretty defaultLayoutOptions $ pretty ts
 
