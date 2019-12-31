@@ -56,14 +56,14 @@ withSDLWindow name size = E.bracket
   (runLiftIO (createWindow name windowConfig))
   (runLiftIO . destroyWindow) where
   windowConfig = defaultWindow
-    { windowInitialSize = fromIntegral <$> size
-    , windowResizable = True
-    , windowPosition = Centered
+    { windowInitialSize     = fromIntegral <$> size
+    , windowResizable       = True
+    , windowPosition        = Centered
     , windowGraphicsContext = OpenGLContext glConfig
-    , windowHighDPI = True
+    , windowHighDPI         = True
     }
   glConfig = defaultOpenGL
-    { glProfile = Core Normal 4 1
+    { glProfile        = Core Normal 4 1
     , glColorPrecision = V4 8 8 8 8
     }
 
