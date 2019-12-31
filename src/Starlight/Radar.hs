@@ -55,11 +55,11 @@ drawRadar
   -> m ()
 drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
   bodies <- ask @[StateVectors Float]
-  viewScale@ViewScale{ zoom } <- ask
+  matrix <- asks scaleToView
 
   let radius = 100
   set defaultVars
-    { Radar.matrix = Just (scaleToViewZoomed viewScale)
+    { Radar.matrix = Just matrix
     , Radar.radius = Just radius
     }
 
@@ -89,7 +89,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = meas
       for_ [1..n] $ \ i -> do
         let radius = step * fromIntegral i
             -- FIXME: apply easing so this works more like a spring
-            step = max 1 (min (50 * zoom) (d blip / fromIntegral n))
+            step = max 1 (min 50 (d blip / fromIntegral n))
 
         set defaultVars
           { Radar.radius = Just radius
