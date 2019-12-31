@@ -8,6 +8,7 @@ module Starlight.Identifier
 , toList
 ) where
 
+import Data.Function (on)
 import Data.Text
 
 type Code = Int
@@ -17,9 +18,11 @@ type Name = Text
 data Identifier
   = Star Code Name
   | Identifier :/ (Code, Name)
-  deriving (Eq, Ord, Read, Show)
+  deriving (Eq, Read, Show)
 
 infixl 5 :/
+
+instance Ord Identifier where compare = compare `on` toList
 
 parentIdentifier :: Identifier -> Maybe Identifier
 parentIdentifier = \case
