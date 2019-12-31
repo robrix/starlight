@@ -70,7 +70,12 @@ data StateVectors a = StateVectors
 bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> [StateVectors a]
 bodiesAt sys@(System scale bs) t = bs' where
   bs' = map go bs
-  go b = StateVectors b scale (rel !*! transformAt (orbit b) t) (orientationAt b t) where
+  go b = StateVectors
+    { body = b
+    , scale
+    , transform = rel !*! transformAt (orbit b) t
+    , rotation = orientationAt b t
+    } where
     rel = maybe (systemTrans sys) transform $ do
       p <- parent b
       find ((== name p) . name . body) bs'
