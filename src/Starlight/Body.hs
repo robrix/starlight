@@ -56,20 +56,21 @@ systemTrans :: Num a => System a -> M44 a
 systemTrans (System scale _) = scaled (V4 scale scale scale 1)
 
 _scale :: Lens' (System a) a
-_scale = lens scale (\ s s' -> s { scale = s' })
+_scale = lens (\ System{ scale } -> scale) (\ System { bodies } s' -> System { bodies, scale = s' })
 
 
 data Instant a = Instant
   { body      :: Body a
+  , scale     :: a
   , transform :: M44 a
   , rotation  :: Quaternion a
   }
   deriving (Show)
 
 bodiesAt :: (Epsilon a, RealFloat a) => System a -> Seconds a -> [Instant a]
-bodiesAt sys@(System _ bs) t = bs' where
+bodiesAt sys@(System scale bs) t = bs' where
   bs' = map go bs
-  go b = Instant b (rel !*! transformAt (orbit b) t) (orientationAt b t) where
+  go b = Instant b scale (rel !*! transformAt (orbit b) t) (orientationAt b t) where
     rel = maybe (systemTrans sys) transform $ do
       p <- parent b
       find ((== name p) . name . body) bs'
