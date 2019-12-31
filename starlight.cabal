@@ -121,6 +121,8 @@ executable starlight
   import:              common
   hs-source-dirs:      app
   main-is:             Main.hs
+  other-modules:
+    Paths_starlight
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
@@ -131,6 +133,7 @@ executable starlight
     , gl
     , linear
     , microlens
+    , optparse-applicative
     , sdl2
     , starlight
     , text

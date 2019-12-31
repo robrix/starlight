@@ -11,18 +11,19 @@ module Main
 ( main
 ) where
 
-import           Control.Applicative (liftA2)
 import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
-import           Control.Carrier.Profile.Time
+import qualified Control.Carrier.Profile.Identity as NoProfile
+import qualified Control.Carrier.Profile.Time as Profile
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Lens ((%=), (*=), (+=), (-=), (.=))
 import qualified Control.Effect.Lens as Lens
 import           Control.Effect.Lift
+import           Control.Effect.Profile
 import qualified Control.Exception.Lift as E
 import           Control.Monad ((<=<), when)
-import           Control.Monad.IO.Class.Lift (runLiftIO)
+import           Control.Monad.IO.Class.Lift (MonadIO, runLiftIO)
 import           Data.Coerce
 import           Data.Foldable (for_)
 import           Data.Function (fix)
@@ -32,8 +33,8 @@ import           Data.Functor.Interval
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, getCurrentTime, diffUTCTime)
+import           Data.Version (showVersion)
 import           Geometry.Circle
-import           GHC.Stack
 import           GL.Array
 import           GL.Framebuffer
 import           GL.Program
@@ -50,6 +51,8 @@ import           Linear.V3 as Linear
 import           Linear.V4
 import           Linear.Vector as Linear
 import           Numeric
+import           Options.Applicative
+import qualified Paths_starlight as Library (version)
 import           Physics.Delta
 import qualified SDL
 import           Starlight.Actor as Actor
@@ -70,8 +73,23 @@ import           Unit.Length
 import           Unit.Mass
 import           Unit.Time
 
-main :: HasCallStack => IO ()
-main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings . fst <=< runProfile $ do
+main :: IO ()
+main = E.handle (putStrLn . E.displayException @E.SomeException) $ do
+  Options{ profile } <- execParser argumentsParser
+  if profile then
+    Profile.reportTimings . fst <=< Profile.runProfile $ runGame
+  else
+    NoProfile.runProfile runGame
+
+runGame
+  :: ( Effect sig
+     , Has (Lift IO) sig m
+     , Has Profile sig m
+     , MonadFail m
+     , MonadIO m
+     )
+  => m ()
+runGame = do
   system <- S.system
 
   Window.runWindow "Starlight" (V2 1024 768) . runFinally $ now >>= \ start ->
@@ -410,3 +428,25 @@ now = sendM getCurrentTime
 
 since :: Has (Lift IO) sig m => UTCTime -> m NominalDiffTime
 since t = flip diffUTCTime t <$> now
+
+
+data Options = Options
+  { profile :: Bool
+  }
+
+argumentsParser :: ParserInfo Options
+argumentsParser = info
+  (version <*> helper <*> options)
+  (  fullDesc
+  <> progDesc "Starlight is a game about spaceships in space."
+  <> header   "Starlight - spaceships in space")
+
+options :: Parser Options
+options = Options <$> switch (long "profile" <> help "run with profiling enabled")
+
+
+versionString :: String
+versionString = "starlight version " <> showVersion Library.version
+
+version :: Parser (a -> a)
+version = infoOption versionString (long "version" <> short 'V' <> help "Output version info.")
