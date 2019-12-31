@@ -65,8 +65,9 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
-  let drawBodyBlip StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } =
-        drawBlipArc (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour) Nothing
+  let drawBodyBlip StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } = do
+        setBlip (makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour)
+        drawArrays LineStrip (Interval 0 (I (length radarV)))
 
       drawNPCBlip Actor{ position = P there } = do
         set defaultVars
@@ -79,55 +80,39 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
         let median = length radarV `div` 2
         drawArrays Points (Interval (I median) (I (median + 1)))
 
-      drawTargetBlip StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } = do
-        for_ [1..n] $ \ i -> do
-          let there = (transform !* V4 0 0 0 1) ^. _xy
-              angle = angleTo here there
-              d = distance here there
-              direction = normalize (there ^-^ here)
-              minSweep' = (minSweep * Radians (fromIntegral i / (zoom * 3)))
-              radius = step * fromIntegral i
-              -- FIXME: apply easing so this works more like a spring
-              step = max 1 (min (50 * zoom) (d / fromIntegral n))
-              edge = scale * r * (min d radius/d) *^ perp direction + direction ^* radius
-              sweep = max minSweep' (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))
-
-          set Radar.U
-            { matrix = Nothing
-            , radius = Just radius
-            , angle  = Just angle
-            , sweep  = Just sweep
-            , colour = Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
-            }
-
-          drawArrays LineStrip (Interval 0 (I (length radarV)))
-
-
   for_ bodies drawBodyBlip
   for_ npcs drawNPCBlip
-  for_ (target >>= \ i -> (bodies !! i) <$ guard (i < length bodies)) drawTargetBlip
+
+  let targetVectors = target >>= \ i -> (bodies !! i) <$ guard (i < length bodies)
+  for_ targetVectors $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, transform } -> do
+    let blip = makeBlip here ((transform !* V4 0 0 0 1) ^. _xy) (r * scale) colour
+    setBlip blip
+    for_ [1..n] $ \ i -> do
+      let radius = step * fromIntegral i
+          -- FIXME: apply easing so this works more like a spring
+          step = max 1 (min (50 * zoom) (d blip / fromIntegral n))
+
+      set defaultVars
+        { Radar.radius = Just radius
+        , Radar.colour = Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
+        }
+
+      drawArrays LineStrip (Interval 0 (I (length radarV)))
   where
   n = 10 :: Int
-  minSweep = 0.0133 -- at d=150, makes approx. 4px blips
 
-drawBlipArc
+setBlip
   :: ( Has (Lift IO) sig m
-     , HasArray           Radar.V         m
      , HasProgram Radar.U Radar.V Radar.O m
      )
   => Blip
-  -> Maybe Float
   -> m ()
-drawBlipArc Blip{ angle, direction, d, r, colour } radius = do
-  set Radar.U
-    { matrix = Nothing
-    , radius = radius
-    , angle  = Just angle
-    , sweep  = Just sweep
-    , colour = Just colour
+setBlip Blip{ angle, direction, d, r, colour } = do
+  set defaultVars
+    { Radar.angle  = Just angle
+    , Radar.sweep  = Just sweep
+    , Radar.colour = Just colour
     }
-
-  drawArrays LineStrip (Interval 0 (I (length radarV)))
   where
   edge = perp direction ^* r + direction ^* d
   sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))
