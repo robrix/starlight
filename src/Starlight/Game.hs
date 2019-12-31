@@ -62,9 +62,9 @@ import           Starlight.CLI
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Radar as Radar
+import qualified Starlight.Ship.Shader as Ship
 import           Starlight.Starfield as Starfield
 import qualified Starlight.Shader.Body as Body
-import qualified Starlight.Ship.Shader as Ship
 import qualified Starlight.Sol as S
 import           Starlight.View
 import           Starlight.Weapon.Laser as Laser
