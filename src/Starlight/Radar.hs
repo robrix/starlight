@@ -7,6 +7,7 @@ module Starlight.Radar
 , drawRadar
 , Radar
 , ViewScale(..)
+, scaleToViewZoomed
 ) where
 
 import           Control.Effect.Finally
@@ -27,7 +28,6 @@ import           Linear.Exts
 import           Linear.Matrix
 import           Linear.Metric
 import           Linear.V2
-import           Linear.V3
 import           Linear.V4
 import           Linear.Vector
 import           Starlight.Actor
@@ -55,11 +55,10 @@ drawRadar
   -> m ()
 drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use radarP . bindArray radarA $ do
   bodies <- ask
-  ViewScale{ scale, size, zoom } <- ask
-  let V2 sx sy = 1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoom)
+  viewScale@ViewScale{ zoom } <- ask
 
   set defaultVars
-    { Radar.matrix = Just (scaled (V3 sx sy 1))
+    { Radar.matrix = Just (scaleToViewZoomed viewScale)
     }
 
   -- FIXME: skip blips for extremely distant objects
@@ -117,6 +116,11 @@ data ViewScale = ViewScale
   , size  :: V2 Int
   , zoom  :: Float
   }
+
+-- | Return a matrix transforming the [[-1,1], [-1,1]] interval to zoomed device coordinates.
+scaleToViewZoomed :: (Applicative v, Traversable v, R2 v) => ViewScale -> v (v Float)
+scaleToViewZoomed ViewScale{ scale, size, zoom } = scaled (pure 1 & _xy .~ (1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoom)))
+
 
 radarV :: [Radar.V I]
 radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where

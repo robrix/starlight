@@ -315,7 +315,7 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
   let Actor{ position } = game ^. _player
   bind @Framebuffer Nothing
 
-  ViewScale { scale, size, zoom } <- ask
+  viewScale@ViewScale{ scale, size, zoom } <- ask
 
   viewport $ scale *^ Interval 0 size
   scissor  $ scale *^ Interval 0 size
@@ -332,9 +332,8 @@ draw View{ quadA, circleA, shipA, radar, shipP, starsP, bodyP, fpsL, targetL } g
     bindArray quadA $
       drawArrays TriangleStrip (Interval 0 4)
 
-  let V2 sx sy = 1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoom)
-      origin
-        =   scaled (V4 sx sy 1 1) -- transform the [[-1,1], [-1,1]] interval to window coordinates
+  let origin
+        =   scaleToViewZoomed viewScale
         !*! translated3 (ext (negated (unP position)) 0) -- transform to the origin
 
   measure "ship" . use shipP $ do
