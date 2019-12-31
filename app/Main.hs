@@ -11,6 +11,7 @@ module Main
 ( main
 ) where
 
+import           Control.Applicative (liftA2)
 import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
 import qualified Control.Carrier.Profile.Identity as NoProfile
@@ -33,7 +34,6 @@ import           Data.Functor.Interval
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, getCurrentTime, diffUTCTime)
-import           Data.Version (showVersion)
 import           Geometry.Circle
 import           GL.Array
 import           GL.Framebuffer
@@ -51,12 +51,11 @@ import           Linear.V3 as Linear
 import           Linear.V4
 import           Linear.Vector as Linear
 import           Numeric
-import           Options.Applicative
-import qualified Paths_starlight as Library (version)
 import           Physics.Delta
 import qualified SDL
 import           Starlight.Actor as Actor
 import           Starlight.Body as S
+import           Starlight.CLI
 import           Starlight.Input
 import           Starlight.Radar as Radar
 import qualified Starlight.Shader.Body as Body
@@ -428,25 +427,3 @@ now = sendM getCurrentTime
 
 since :: Has (Lift IO) sig m => UTCTime -> m NominalDiffTime
 since t = flip diffUTCTime t <$> now
-
-
-data Options = Options
-  { profile :: Bool
-  }
-
-argumentsParser :: ParserInfo Options
-argumentsParser = info
-  (version <*> helper <*> options)
-  (  fullDesc
-  <> progDesc "Starlight is a game about spaceships in space."
-  <> header   "Starlight - spaceships in space")
-
-options :: Parser Options
-options = Options <$> switch (long "profile" <> help "run with profiling enabled")
-
-
-versionString :: String
-versionString = "starlight version " <> showVersion Library.version
-
-version :: Parser (a -> a)
-version = infoOption versionString (long "version" <> short 'V' <> help "Output version info.")
