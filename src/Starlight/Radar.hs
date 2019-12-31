@@ -1,6 +1,7 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Radar
 ( radar
@@ -11,6 +12,7 @@ module Starlight.Radar
 import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Effect.Reader
+import           Control.Effect.Profile
 import           Control.Monad (guard)
 import           Data.Coerce (coerce)
 import           Data.Foldable (for_)
@@ -43,6 +45,7 @@ radar = do
 
 drawRadar
   :: ( Has (Lift IO) sig m
+     , Has Profile sig m
      , Has (Reader [StateVectors Float]) sig m
      , Has (Reader ViewScale) sig m
      )
@@ -50,7 +53,7 @@ drawRadar
   -> Actor
   -> [Actor]
   -> m ()
-drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use radarP . bindArray radarA $ do
+drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
   bodies <- ask
   viewScale@ViewScale{ zoom } <- ask
 
@@ -62,35 +65,38 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
-  for_ bodies $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
-    setBlip (makeBlip (there ^-^ here) (r * scale) colour)
-    drawArrays LineStrip (Interval 0 (I vertexCount))
-
-  set defaultVars
-    { Radar.sweep  = Just 0
-      -- FIXME: fade colour with distance
-      -- FIXME: IFF
-    , Radar.colour = Just white
-    }
-  for_ npcs $ \ Actor{ position = P there } -> do
-    set defaultVars { Radar.angle  = Just $ angleTo here there }
-    drawArrays Points (Interval (I medianVertex) (I (medianVertex + 1)))
-
-  let targetVectors = target >>= \ i -> (bodies !! i) <$ guard (i < length bodies)
-  for_ targetVectors $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
-    let blip = makeBlip (there ^-^ here) (r * scale) colour
-    setBlip blip
-    for_ [1..n] $ \ i -> do
-      let radius = step * fromIntegral i
-          -- FIXME: apply easing so this works more like a spring
-          step = max 1 (min (50 * zoom) (d blip / fromIntegral n))
-
-      set defaultVars
-        { Radar.radius = Just radius
-        , Radar.colour = Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
-        }
-
+  measure "bodies" $
+    for_ bodies $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
+      setBlip (makeBlip (there ^-^ here) (r * scale) colour)
       drawArrays LineStrip (Interval 0 (I vertexCount))
+
+  measure "npcs" $ do
+    set defaultVars
+      { Radar.sweep  = Just 0
+        -- FIXME: fade colour with distance
+        -- FIXME: IFF
+      , Radar.colour = Just white
+      }
+    for_ npcs $ \ Actor{ position = P there } -> do
+      set defaultVars { Radar.angle  = Just $ angleTo here there }
+      drawArrays Points (Interval (I medianVertex) (I (medianVertex + 1)))
+
+  measure "targets" $ do
+    let targetVectors = target >>= \ i -> (bodies !! i) <$ guard (i < length bodies)
+    for_ targetVectors $ \ StateVectors{ scale, body = Body{ radius = Metres r, colour }, position = there } -> do
+      let blip = makeBlip (there ^-^ here) (r * scale) colour
+      setBlip blip
+      for_ [1..n] $ \ i -> do
+        let radius = step * fromIntegral i
+            -- FIXME: apply easing so this works more like a spring
+            step = max 1 (min (50 * zoom) (d blip / fromIntegral n))
+
+        set defaultVars
+          { Radar.radius = Just radius
+          , Radar.colour = Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
+          }
+
+        drawArrays LineStrip (Interval 0 (I vertexCount))
   where
   n = 10 :: Int
 
