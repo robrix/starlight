@@ -55,8 +55,8 @@ drawRadar
   -> m ()
 drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use radarP . bindArray radarA $ do
   bodies <- ask
-  ViewScale{ scale, size, zoom = zoomOut } <- ask
-  let V2 sx sy = 1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoomOut)
+  ViewScale{ scale, size, zoom } <- ask
+  let V2 sx sy = 1 / (fromIntegral <$> size) ^* fromIntegral scale ^* (1 / zoom)
 
   set defaultVars
     { Radar.matrix = Just (scaled (V3 sx sy 1))
@@ -69,7 +69,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
             d = distance here there
             direction = normalize (there ^-^ here)
             -- FIXME: apply easing so this works more like a spring
-            step = max 1 (min (50 * zoomOut) (d / fromIntegral n))
+            step = max 1 (min (50 * zoom) (d / fromIntegral n))
             drawAtRadius radius minSweep colour = do
               let edge = scale * r * (min d radius/d) *^ perp direction + direction ^* radius + here
                   sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleTo here edge - angle)))
@@ -87,7 +87,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = use 
         drawAtRadius 100 minSweep (colour & _a .~ 0.5)
 
         when (Just name == (target >>= \ i -> Body.name (body (bodies !! i)) <$ guard (i < length bodies))) $ for_ [1..n] $ \ i ->
-          drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoomOut * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
+          drawAtRadius (step * fromIntegral i) (minSweep * Radians (fromIntegral i / (zoom * 3))) ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ (fromIntegral i / fromIntegral n))
 
       drawNPCBlip Actor{ position = P there } = do
         set Radar.U
