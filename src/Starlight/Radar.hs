@@ -55,7 +55,7 @@ drawRadar
   -> Actor
   -> [Actor]
   -> m ()
-drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
+drawRadar Radar{ radarA, radarP } Actor{ position = here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
   System{ scale, bodies } <- ask @(System StateVectors Float)
   vs <- ask
 
@@ -79,7 +79,7 @@ drawRadar Radar{ radarA, radarP } Actor{ position = P here, target } npcs = meas
         -- FIXME: IFF
       , Radar.colour = Just white
       }
-    for_ npcs $ \ Actor{ position = P there } -> let (angle, r) = polar2 (there ^-^ here) in when (r > zoom vs * radius) $ do
+    for_ npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here)) in when (r > zoom vs * radius) $ do
       set defaultVars { Radar.angle  = Just angle }
       drawArrays Points (Interval (I medianVertex) (I (medianVertex + 1)))
 
@@ -127,8 +127,8 @@ data Blip = Blip
   , colour    :: Colour Float  -- ^ colour of the object
   }
 
-makeBlip :: V2 Float -> Float -> Colour Float -> Blip
-makeBlip there r colour = Blip { angle, d, direction, r, colour } where
+makeBlip :: Point V2 Float -> Float -> Colour Float -> Blip
+makeBlip (P there) r colour = Blip { angle, d, direction, r, colour } where
   angle = angleOf there
   d = norm there
   direction = normalize there

@@ -229,7 +229,7 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
 
   position <- Lens.use (_player . _position)
   let describeTarget target = case target >>= \ i -> find ((== i) . identifier . body) bodies of
-        Just S.StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (unP position ^* scale)))) "km"
+        Just S.StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* scale)))) "km"
         _ -> ""
   target <- Lens.uses (_player . _target) describeTarget
 
@@ -261,7 +261,7 @@ ai (Delta (Seconds dt)) = do
   where
   go bodies a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . body) bodies of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
-    Just S.StateVectors{ position = pos }
+    Just S.StateVectors{ position = P pos }
       | angle     <- angleTo (unP position) pos
       , rotation' <- face angular angle rotation
       -> a
@@ -290,9 +290,9 @@ physics (Delta (Seconds dt)) = do
   get where
   updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
   applyGravity distanceScale S.StateVectors{ position = pos, body = S.Body{ mass } } a@Actor{ position, velocity }
-    = a { velocity = velocity + dt * force *^ direction pos (unP position) } where
+    = a { velocity = velocity + unP (dt * force *^ direction pos position) } where
     force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
-    r = qd (pos ^* distanceScale) (unP position ^* distanceScale) -- “quadrance” (square of distance between actor & body)
+    r = qd (pos ^* distanceScale) (position ^* distanceScale) -- “quadrance” (square of distance between actor & body)
     bigG = 6.67430e-11 -- gravitational constant
 
 
@@ -348,7 +348,7 @@ draw View{ starfield, circleA, radar, laser, ship, bodyP, fpsL, targetL } game =
 
   System{ scale, bodies } <- ask @(System StateVectors Float)
 
-  let onScreen S.StateVectors{ body = S.Body{ radius }, position = pos } = distance pos (unP position) - getMetres (scale *^ radius) < maxDim * 0.5
+  let onScreen S.StateVectors{ body = S.Body{ radius }, position = pos } = distance pos position - getMetres (scale *^ radius) < maxDim * 0.5
       drawBody i@S.StateVectors{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
         set Body.U
           { matrix = Just

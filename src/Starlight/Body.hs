@@ -49,7 +49,7 @@ data StateVectors a = StateVectors
   { body      :: Body a
   , transform :: M44 a
   , rotation  :: Quaternion a
-  , position  :: V2 a
+  , position  :: Point V2 a
   }
   deriving (Show)
 

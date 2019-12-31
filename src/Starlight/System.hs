@@ -9,6 +9,7 @@ module Starlight.System
 import           Data.Foldable (find)
 import qualified Data.Map as Map
 import           Lens.Micro (Lens', lens, (^.))
+import           Linear.Affine
 import           Linear.Epsilon
 import           Linear.Matrix
 import           Linear.V4
@@ -38,7 +39,7 @@ systemAt sys@(System scale bs) t = System scale bs' where
     { body = b
     , transform = transform'
     , rotation = orientationAt b t
-    , position = (transform' !* V4 0 0 0 1) ^. _xy
+    , position = P ((transform' !* V4 0 0 0 1) ^. _xy)
     } where
     rel = maybe (systemTrans sys) transform $ do
       p <- parent (identifier b)
