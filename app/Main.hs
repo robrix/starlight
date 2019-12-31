@@ -29,12 +29,10 @@ import           Data.Function (fix)
 import           Data.Functor.Const
 import           Data.Functor.I
 import           Data.Functor.Interval
-import           Data.List (sortOn)
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.Map as Map
 import           Data.Maybe (isJust)
-import           Data.Ord (Down(..))
-import           Data.Text (unpack)
+import           Data.Text.Prettyprint.Doc (defaultLayoutOptions, layoutPretty, pretty)
+import           Data.Text.Prettyprint.Doc.Render.String (renderString)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, getCurrentTime, diffUTCTime)
 import           Geometry.Circle
 import           GHC.Stack
@@ -141,10 +139,7 @@ main = E.handle (putStrLn . E.displayException @E.SomeException) $ reportTimings
 
 -- FIXME: organize timings into a tree
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
-reportTimings (Timings ts) = for_ (sortOn (Down . mean . snd) (Map.toList ts)) $ \ (l, t) -> sendM $ do
-  putStrLn $ unpack l <> ": " <> showTiming t where
-  showTiming t = "{min: " <> showMS (min' t) <> ", mean: " <> showMS (mean t) <> ", max: " <> showMS (max' t) <> "}"
-  showMS = (<> "ms") . show . getSeconds . getMilli . milli @Seconds @Double . realToFrac
+reportTimings ts = sendM . putStrLn . renderString . layoutPretty defaultLayoutOptions $ pretty ts
 
 
 shipV :: [Ship.V I]
