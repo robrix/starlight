@@ -15,8 +15,14 @@ module Starlight.Body
 , positionAt
 , velocityAt
 , systemAt
+  -- * Drawing
+, DrawBody
+, drawBody
 ) where
 
+import Control.Effect.Lift
+import Control.Effect.Profile
+import Control.Effect.Reader
 import Data.Foldable (find)
 import Lens.Micro ((^.))
 import Linear.Affine
@@ -30,6 +36,7 @@ import Linear.V4
 import Linear.Vector
 import Starlight.Identifier
 import Starlight.System
+import Starlight.View
 import UI.Colour
 import Unit.Angle
 import Unit.Length
@@ -113,3 +120,16 @@ systemAt sys@(System scale bs) t = System scale bs' where
       p <- parent (identifier b)
       find ((== p) . identifier . body) bs'
     transform' = rel !*! transformAt (orbit b) t
+
+
+newtype DrawBody = DrawBody
+  { drawBody
+    :: forall sig m
+    .  ( Has (Lift IO) sig m
+       , Has Profile sig m
+       , Has (Reader (System StateVectors Float)) sig m
+       , Has (Reader ViewScale) sig m
+       )
+    => StateVectors Float
+    -> m ()
+  }
