@@ -70,7 +70,6 @@ library
     GL.Viewport
     GL.Uniform
     Linear.Exts
-    Physics.Delta
     Starlight.Actor
     Starlight.Body
     Starlight.Body.Shader

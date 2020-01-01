@@ -9,7 +9,6 @@ import Linear.Affine
 import Linear.Exts
 import Linear.Metric
 import Linear.Vector
-import Physics.Delta
 import Starlight.Actor as Actor
 import Starlight.Body
 import Starlight.System

@@ -49,7 +49,6 @@ import           Linear.V2 as Linear
 import           Linear.V3 as Linear
 import           Linear.Vector as Linear
 import           Numeric
-import           Physics.Delta
 import qualified SDL
 import           Starlight.Actor as Actor
 import           Starlight.Body as Body
