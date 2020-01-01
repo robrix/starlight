@@ -2,6 +2,7 @@
 module Starlight.Actor
 ( Actor(..)
 , _target
+, _health
 , HasPosition(..)
 , HasVelocity(..)
 , HasRotation(..)
