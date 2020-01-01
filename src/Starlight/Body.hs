@@ -3,7 +3,9 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( StateVectors(..)
@@ -16,14 +18,22 @@ module Starlight.Body
 , velocityAt
 , systemAt
   -- * Drawing
+, makeDrawBody
 , DrawBody
 , drawBody
 ) where
 
+import Control.Effect.Finally
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
+import Data.Coerce (coerce)
 import Data.Foldable (find)
+import Data.Functor.I
+import Data.Functor.Interval
+import Geometry.Circle
+import GL.Array
+import GL.Program
 import Lens.Micro ((^.))
 import Linear.Affine
 import Linear.Epsilon
@@ -34,6 +44,7 @@ import Linear.V2
 import Linear.V3
 import Linear.V4
 import Linear.Vector
+import Starlight.Body.Shader as Shader
 import Starlight.Identifier
 import Starlight.System
 import Starlight.View
@@ -122,6 +133,32 @@ systemAt sys@(System scale bs) t = System scale bs' where
     transform' = rel !*! transformAt (orbit b) t
 
 
+makeDrawBody
+  :: ( Has Finally sig m
+     , Has (Lift IO) sig m
+     )
+  => m DrawBody
+makeDrawBody = do
+  program <- build Shader.shader
+  array   <- load vertices
+  pure DrawBody
+    { drawBody = \ StateVectors{ body = Body{ radius = Metres r, colour }, transform, rotation } -> measure "bodies" . use program . bindArray array $ do
+      vs@ViewScale{ focus } <- ask
+      let origin
+            =   scaleToViewZoomed vs
+            !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
+      set Shader.U
+        { matrix = Just
+          $   origin
+          !*! transform
+          !*! scaled (V4 r r r 1)
+          !*! mkTransformation rotation 0
+        , colour = Just colour
+        }
+      drawArraysInstanced LineLoop range 3
+    }
+
+
 newtype DrawBody = DrawBody
   { drawBody
     :: forall sig m
@@ -133,3 +170,9 @@ newtype DrawBody = DrawBody
     => StateVectors Float
     -> m ()
   }
+
+vertices :: [Shader.V I]
+vertices = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
+
+range :: Interval I Int
+range = Interval 0 (I (length vertices))
