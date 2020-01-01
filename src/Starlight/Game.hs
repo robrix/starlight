@@ -238,11 +238,6 @@ zoomForSpeed size x
   speed = speedAt <$> zoom
   speedAt x = x / 25 * fromIntegral (maximum size)
 
-easeInOutCubic :: Float -> Float
-easeInOutCubic t
-  | t < 0.5   = 4 * t ** 3
-  | otherwise = (t - 1) * (2 * t - 2) ** 2 + 1
-
 draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m

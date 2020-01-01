@@ -6,6 +6,7 @@ module Linear.Exts
 , scaled
 , orient
 , face
+, easeInOutCubic
 , reject
 , direction
 , angleOf
@@ -58,6 +59,12 @@ face
 face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
   proposed = axisAngle (unit _z) (getRadians angle)
   delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
+
+
+easeInOutCubic :: Float -> Float
+easeInOutCubic t
+  | t < 0.5   = 4 * t ** 3
+  | otherwise = (t - 1) * (2 * t - 2) ** 2 + 1
 
 
 reject :: (Metric v, Fractional a) => v a -> v a -> v a
