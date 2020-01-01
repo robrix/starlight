@@ -137,7 +137,7 @@ runGame = do
       , system
       } $ do
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
-      measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:" -- characters to preload
+      measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
 
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
