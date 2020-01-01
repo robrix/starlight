@@ -99,7 +99,7 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
 runRadar :: (Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
 runRadar m = do
   program <- build Radar.shader
-  array   <- load radarV
+  array   <- load vertices
   runReader (Drawable UI.Drawable{ program, array }) m
 
 
@@ -138,12 +138,12 @@ makeBlip (P there) r colour = Blip { angle, d, direction, r, colour } where
 newtype Drawable = Drawable { getDrawable :: UI.Drawable Radar.U Radar.V Radar.O }
 
 
-radarV :: [Radar.V I]
-radarV = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
+vertices :: [Radar.V I]
+vertices = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
   n = (16 :: Int)
 
 vertexCount :: Int
-vertexCount = length radarV
+vertexCount = length vertices
 
 medianVertex :: Int
 medianVertex = vertexCount `div` 2
