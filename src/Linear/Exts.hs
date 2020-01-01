@@ -3,7 +3,6 @@
 module Linear.Exts
 ( translated
 , translated3
-, scaled
 , orient
 , face
 , easeInOutCubic
@@ -15,9 +14,20 @@ module Linear.Exts
 , cartesian2
 , polar2
 , Ext(..)
+, module Linear.Affine
+, module Linear.Epsilon
+, module Linear.Matrix
+, module Linear.Metric
+, module Linear.Quaternion
+, module Linear.V1
+, module Linear.V2
+, module Linear.V3
+, module Linear.V4
+, module Linear.Vector
 ) where
 
 import Data.Functor.Interval
+import Linear.Affine
 import Linear.Epsilon
 import Linear.Matrix
 import Linear.Metric

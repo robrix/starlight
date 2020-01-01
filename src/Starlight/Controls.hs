@@ -17,9 +17,6 @@ import           Data.List (elemIndex)
 import qualified Data.Map as Map
 import           Lens.Micro
 import           Linear.Exts
-import           Linear.Quaternion
-import           Linear.V3
-import           Linear.Vector
 import qualified SDL
 import           Starlight.Actor
 import           Starlight.Body

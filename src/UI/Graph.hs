@@ -19,10 +19,6 @@ import           GL.Program
 import           Graphics.GL.Core41
 import           Lens.Micro ((^.))
 import           Linear.Exts
-import           Linear.Matrix
-import           Linear.V2
-import           Linear.V4
-import           Linear.Vector
 import           UI.Colour
 import qualified UI.Graph.Lines as Lines
 import qualified UI.Graph.Points as Points

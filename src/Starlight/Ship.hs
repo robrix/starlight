@@ -18,12 +18,7 @@ import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
-import           Linear.Affine
 import           Linear.Exts
-import           Linear.Matrix
-import           Linear.V2
-import           Linear.V4
-import           Linear.Vector
 import           Starlight.Actor
 import           Starlight.Ship.Shader
 import           Starlight.View

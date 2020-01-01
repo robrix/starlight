@@ -33,13 +33,7 @@ import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           Graphics.GL.Core41
 import           Lens.Micro (Lens', each, lens, (^.))
-import           Linear.Affine
 import           Linear.Exts
-import           Linear.Metric
-import           Linear.Quaternion
-import           Linear.V2 as Linear
-import           Linear.V3 as Linear
-import           Linear.Vector as Linear
 import           Starlight.Actor as Actor
 import           Starlight.AI
 import           Starlight.Body as Body

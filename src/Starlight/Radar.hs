@@ -24,11 +24,7 @@ import           GL.Array
 import           GL.Program
 import           GL.Shader.DSL (defaultVars)
 import           Lens.Micro ((.~))
-import           Linear.Affine
 import           Linear.Exts as Linear
-import           Linear.Metric
-import           Linear.V2
-import           Linear.Vector
 import           Starlight.Actor
 import           Starlight.Body as Body hiding (Drawable)
 import qualified Starlight.Radar.Shader as Radar

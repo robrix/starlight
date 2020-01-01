@@ -5,10 +5,7 @@ module Starlight.Physics
 ( physics
 ) where
 
-import Linear.Affine
 import Linear.Exts
-import Linear.Metric
-import Linear.Vector
 import Starlight.Actor as Actor
 import Starlight.Body
 import Starlight.System

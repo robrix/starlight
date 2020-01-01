@@ -18,9 +18,6 @@ import GL.Viewport
 import Graphics.GL.Core41
 import Lens.Micro
 import Linear.Exts
-import Linear.Metric
-import Linear.V2
-import Linear.Vector
 import Numeric
 import Starlight.Actor
 import Starlight.Body as Body

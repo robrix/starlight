@@ -34,10 +34,6 @@ import           GL.Viewport
 import           Graphics.GL.Core41
 import           Lens.Micro ((^.))
 import           Linear.Exts
-import           Linear.Matrix
-import           Linear.V2
-import           Linear.V3
-import           Linear.Vector
 import           UI.Colour
 import           UI.Drawable
 import           UI.Glyph (Instance(..), Run(..))

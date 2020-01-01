@@ -35,15 +35,7 @@ import           Geometry.Circle
 import           GL.Array
 import           GL.Program
 import           Lens.Micro ((^.))
-import           Linear.Affine
-import           Linear.Epsilon
 import           Linear.Exts
-import           Linear.Matrix
-import           Linear.Quaternion
-import           Linear.V2
-import           Linear.V3
-import           Linear.V4
-import           Linear.Vector
 import           Starlight.Body.Shader as Shader
 import           Starlight.Identifier
 import           Starlight.System

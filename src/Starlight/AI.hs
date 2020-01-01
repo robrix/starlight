@@ -7,11 +7,7 @@ module Starlight.AI
 import Data.Foldable (find)
 import Data.Functor.Interval
 import Lens.Micro ((^.))
-import Linear.Affine
 import Linear.Exts
-import Linear.Quaternion
-import Linear.V2
-import Linear.Vector
 import Starlight.Actor as Actor
 import Starlight.Body as Body
 import Starlight.System
