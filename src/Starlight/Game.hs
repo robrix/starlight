@@ -56,6 +56,7 @@ import           Starlight.Body as Body
 import           Starlight.CLI
 import           Starlight.Identifier
 import           Starlight.Input
+import           Starlight.Physics
 import           Starlight.Radar as Radar
 import           Starlight.Ship as Ship
 import qualified Starlight.Sol as Sol
@@ -72,7 +73,6 @@ import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypefac
 import qualified UI.Window as Window
 import           Unit.Angle
 import           Unit.Length
-import           Unit.Mass
 import           Unit.Time
 
 main :: IO ()
@@ -158,7 +158,9 @@ runGame = do
             put =<< now
             controls fpsL targetL (Font face 18) dt input
             ai dt
-            gameState <- measure "physics" (physics dt)
+            system <- ask
+            measure "physics" (_actors . each %= physics dt system)
+            gameState <- get
             withView gameState (draw fpsL targetL gameState)
           continue <$ measure "swap" Window.swap
         when continue loop
@@ -262,24 +264,6 @@ ai (Delta (Seconds dt)) = do
     Nothing -> a
   angular = dt *^ Radians 5
   thrust  = dt * 1
-
-
-physics
-  :: ( Has (Reader (System StateVectors Float)) sig m
-     , Has (State GameState) sig m
-     )
-  => Delta Seconds Float
-  -> m GameState
-physics (Delta (Seconds dt)) = do
-  System{ scale, bodies } <- ask @(System StateVectors Float)
-  _actors . each %= updatePosition . flip (foldr (applyGravity (1/scale))) bodies
-  get where
-  updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
-  applyGravity distanceScale StateVectors{ position = pos, body = Body{ mass } } a@Actor{ position, velocity }
-    = a { velocity = velocity + unP (dt * force *^ direction pos position) } where
-    force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
-    r = qd (pos ^* distanceScale) (position ^* distanceScale) -- “quadrance” (square of distance between actor & body)
-    bigG = 6.67430e-11 -- gravitational constant
 
 
 -- | Compute the zoom factor for the given velocity.
