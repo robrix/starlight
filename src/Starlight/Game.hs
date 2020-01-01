@@ -233,8 +233,7 @@ zoomForSpeed size x
   speedAt x = x / 25 * fromIntegral (maximum size)
 
 draw
-  :: ( Has Finally sig m
-     , Has (Lift IO) sig m
+  :: ( Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Body.Drawable) sig m
      , Has (Reader Laser.Drawable) sig m

@@ -144,7 +144,6 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
 
 drawLabel
   :: ( HasCallStack
-     , Has Finally sig m
      , Has (Lift IO) sig m
      )
   => Label
