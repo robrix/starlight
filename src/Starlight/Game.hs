@@ -220,7 +220,9 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
   System{ scale, bodies } <- ask @(System StateVectors Float)
   let identifiers = Map.keys bodies
       switchTarget shift target = case target >>= (`elemIndex` identifiers) of
-        Just i  -> let i' = if shift then i - 1 else i + 1 in identifiers !! i' <$ guard (inRange (0, pred (length bodies)) i')
+        Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length bodies)) i') where
+          i' | shift     = i - 1
+             | otherwise = i + 1
         Nothing -> Just $ if shift then last identifiers else head identifiers
   when (input ^. _pressed SDL.KeycodeTab) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
