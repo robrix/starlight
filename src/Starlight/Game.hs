@@ -24,17 +24,14 @@ import           Control.Effect.Lift
 import           Control.Effect.Profile
 import qualified Control.Exception.Lift as E
 import           Control.Monad (when, (<=<))
-import           Control.Monad.IO.Class.Lift (MonadIO, runLiftIO)
+import           Control.Monad.IO.Class.Lift (MonadIO)
 import           Data.Coerce
-import           Data.Foldable (find, for_)
 import           Data.Function (fix)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
-import           GL.Framebuffer
-import           GL.Viewport
 import           Graphics.GL.Core41
 import           Lens.Micro (Lens', each, lens, (^.))
 import           Linear.Affine
@@ -44,12 +41,12 @@ import           Linear.Quaternion
 import           Linear.V2 as Linear
 import           Linear.V3 as Linear
 import           Linear.Vector as Linear
-import           Numeric
 import           Starlight.Actor as Actor
 import           Starlight.AI
 import           Starlight.Body as Body
 import           Starlight.CLI
 import           Starlight.Controls
+import           Starlight.Draw
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
@@ -64,12 +61,10 @@ import           Starlight.Weapon.Laser as Laser
 import           System.Environment
 import           System.Exit
 import           System.FilePath
-import           UI.Colour
 import           UI.Label as Label
 import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
 import           Unit.Length
-import           Unit.Time
 
 main :: IO ()
 main = handling $ do
@@ -159,7 +154,7 @@ runGame = do
             measure "ai"      (_npcs   . each %= ai      dt system)
             measure "physics" (_actors . each %= physics dt system)
             gameState <- get
-            withView gameState (draw dt fpsL targetL (Font face 18) gameState)
+            withView gameState (draw dt fpsL targetL (Font face 18) (player gameState) (npcs gameState))
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -179,61 +174,6 @@ zoomForSpeed size x
   zoom = Interval 1 6
   speed = speedAt <$> zoom
   speedAt x = x / 25 * fromIntegral (maximum size)
-
-draw
-  :: ( Has (Lift IO) sig m
-     , Has Profile sig m
-     , Has (Reader Body.Drawable) sig m
-     , Has (Reader Laser.Drawable) sig m
-     , Has (Reader Radar.Drawable) sig m
-     , Has (Reader Ship.Drawable) sig m
-     , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader (System StateVectors Float)) sig m
-     , Has (Reader View) sig m
-     )
-  => Delta Seconds Float
-  -> Label
-  -> Label
-  -> Font
-  -> GameState
-  -> m ()
-draw dt fpsL targetL font game = measure "draw" . runLiftIO $ do
-  let Actor{ position, rotation, target } = game ^. _player . _actor
-  bind @Framebuffer Nothing
-
-  View{ scale, size, zoom } <- ask
-
-  viewport $ scale *^ Interval 0 size
-  scissor  $ scale *^ Interval 0 size
-
-  glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-
-  drawStarfield
-
-  for_ (game ^. _actors) (drawShip white)
-
-  when (game ^. _player . _firing) $ drawLaser green (snd (toAxisAngle rotation))
-
-  let maxDim = maximum (fromIntegral <$> size ^* scale) * zoom
-
-  System{ scale, bodies } <- ask @(System StateVectors Float)
-
-  let onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - scale * getMetres radius < maxDim * 0.5
-
-  for_ bodies $ \ sv -> when (onScreen sv) (drawBody sv)
-
-  drawRadar (game ^. _player . _actor) (npcs game)
-
-  let describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
-        Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* (1/scale))))) "km"
-        _ -> ""
-
-  measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
-  measure "setLabel" $ setLabel targetL font (describeTarget target)
-
-  fpsSize <- labelSize fpsL
-  measure "drawLabel" $ drawLabel fpsL    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
-  measure "drawLabel" $ drawLabel targetL (V2 10 10) white Nothing
 
 withView
   :: ( Has (Lift IO) sig m
