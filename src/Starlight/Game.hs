@@ -326,7 +326,7 @@ draw View{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "
 
   drawStarfield starfield position
 
-  for_ (game ^. _actors) (drawShip ship position white)
+  for_ (game ^. _actors) (drawShip ship white)
 
   when (game ^. _firing) $ drawLaser laser green (snd (toAxisAngle rotation))
 
