@@ -91,6 +91,7 @@ library
     Starlight.Weapon.Laser
     Starlight.Weapon.Laser.Shader
     UI.Colour
+    UI.Drawable
     UI.Glyph
     UI.Graph
     UI.Graph.Lines
