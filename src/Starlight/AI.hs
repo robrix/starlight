@@ -29,7 +29,10 @@ ai (Delta (Seconds dt)) System{ bodies } a@Actor{ target, velocity, rotation, po
       -- FIXME: don’t just fly directly at the target at full throttle, dumbass
       -- FIXME: factor in the target’s velocity & distance
       -- FIXME: allow other behaviours relating to targets, e.g. following
-      , velocity = if abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation') - angle)) < pi/2 then velocity + rotate rotation' (unit _x ^* thrust) ^. _xy else velocity
+      , velocity = if abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation') - angle)) < pi/2 then
+        velocity + rotate rotation' (unit _x ^* thrust) ^. _xy
+      else
+        velocity
       }
   -- FIXME: wander
   -- FIXME: pick a new target
