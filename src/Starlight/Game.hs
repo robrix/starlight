@@ -120,6 +120,7 @@ runGame = do
           , health   = 100
           }
         ]
+      , beams  = []
       , system
       } $ do
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
@@ -187,6 +188,7 @@ withView game m = do
 data GameState = GameState
   { player :: !Player
   , npcs   :: ![Actor]
+  , beams  :: ![Beam]
   , system :: !(System Body Float)
   }
   deriving (Show)
