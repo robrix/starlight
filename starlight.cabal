@@ -79,6 +79,7 @@ library
     Starlight.Game
     Starlight.Identifier
     Starlight.Input
+    Starlight.Physics
     Starlight.Radar
     Starlight.Radar.Shader
     Starlight.Ship
