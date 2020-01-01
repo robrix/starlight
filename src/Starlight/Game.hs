@@ -349,7 +349,8 @@ draw View{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "
     size  <- Window.size
     let velocity = game ^. _player . _velocity
         zoom = zoomForSpeed size (norm velocity)
-    runReader ViewScale{ scale, size, zoom, focus = game ^. _player . _position } m
+        focus = game ^. _player . _position
+    runReader ViewScale{ scale, size, zoom, focus } m
 
 
 data View = View
