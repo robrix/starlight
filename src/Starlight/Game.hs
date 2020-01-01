@@ -139,8 +139,8 @@ runGame = do
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      ship <- Ship.makeDrawShip
-      body <- Body.makeDrawBody
+      ship <- makeDrawShip
+      body <- makeDrawBody
       starfield <- Starfield.starfield
       radar <- Radar.radar
       laser <- Laser.laser
