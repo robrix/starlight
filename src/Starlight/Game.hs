@@ -140,10 +140,9 @@ runGame = do
       targetL <- measure "label" Label.label
 
       body <- makeDrawBody
-      radar <- Radar.radar
       laser <- makeDrawLaser
 
-      let scene = Scene{ body, radar, laser, fpsL, targetL, font = Font face 18 }
+      let scene = Scene{ body, laser, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -151,7 +150,7 @@ runGame = do
       glEnable GL_PROGRAM_POINT_SIZE
 
       start <- now
-      evalState start . runStarfield . runShip . fix $ \ loop -> do
+      evalState start . runStarfield . runShip . runRadar . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
@@ -304,6 +303,7 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
+     , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
      , Has (Reader (System StateVectors Float)) sig m
@@ -312,7 +312,7 @@ draw
   => Scene
   -> GameState
   -> m ()
-draw Scene{ body, radar, laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
+draw Scene{ body, laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -337,7 +337,7 @@ draw Scene{ body, radar, laser, fpsL, targetL } game = measure "draw" . runLiftI
 
   for_ bodies $ \ sv -> when (onScreen sv) (drawBody body sv)
 
-  drawRadar radar (player game) (npcs game)
+  radar (player game) (npcs game)
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
@@ -361,7 +361,6 @@ withView game m = do
 
 data Scene = Scene
   { body      :: DrawBody
-  , radar     :: Radar
   , laser     :: DrawLaser
   , fpsL      :: Label
   , targetL   :: Label

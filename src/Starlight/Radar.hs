@@ -5,13 +5,13 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Radar
 ( radar
-, drawRadar
-, Radar
+, runRadar
+, Drawable
 ) where
 
+import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lift
-import           Control.Effect.Reader
 import           Control.Effect.Profile
 import           Control.Monad (when)
 import           Data.Coerce (coerce)
@@ -35,27 +35,21 @@ import qualified Starlight.Radar.Shader as Radar
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour
+import qualified UI.Drawable as UI
 import           Unit.Angle
 import           Unit.Length
 
-radar :: (Has Finally sig m, Has (Lift IO) sig m) => m Radar
-radar = do
-  radarP <- build Radar.shader
-  radarA <- load radarV
-  pure Radar { radarP, radarA }
-
-
-drawRadar
+radar
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
+     , Has (Reader Drawable) sig m
      , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader View) sig m
      )
-  => Radar
-  -> Actor
+  => Actor
   -> [Actor]
   -> m ()
-drawRadar Radar{ radarA, radarP } Actor{ position = here, target } npcs = measure "radar" . use radarP . bindArray radarA $ do
+radar Actor{ position = here, target } npcs = measure "radar" . UI.using getDrawable $ do
   System{ scale, bodies } <- ask @(System StateVectors Float)
   vs <- ask
 
@@ -102,6 +96,13 @@ drawRadar Radar{ radarA, radarP } Actor{ position = here, target } npcs = measur
   where
   n = 10 :: Int
 
+runRadar :: (Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
+runRadar m = do
+  program <- build Radar.shader
+  array   <- load radarV
+  runReader (Drawable UI.Drawable{ program, array }) m
+
+
 setBlip
   :: ( Has (Lift IO) sig m
      , HasProgram Radar.U Radar.V Radar.O m
@@ -134,10 +135,7 @@ makeBlip (P there) r colour = Blip { angle, d, direction, r, colour } where
   direction = normalize there
 
 
-data Radar = Radar
-  { radarP :: Program Radar.U Radar.V Radar.O
-  , radarA :: Array (Radar.V I)
-  }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable Radar.U Radar.V Radar.O }
 
 
 radarV :: [Radar.V I]
