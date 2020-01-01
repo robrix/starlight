@@ -209,8 +209,7 @@ controls (Delta (Seconds dt)) = do
              | otherwise = i + 1
         Nothing -> Just $ if shift then last identifiers else head identifiers
   when (input ^. _pressed SDL.KeycodeTab) $ do
-    shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
-    _player . _actor . _target %= switchTarget shift
+    _player . _actor . _target %= switchTarget (input ^. (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift))
     _pressed SDL.KeycodeTab .= False
   where
   or = liftA2 (liftA2 (coerce (||)))
