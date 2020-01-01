@@ -18,8 +18,7 @@ import qualified Control.Carrier.Profile.Identity as NoProfile
 import qualified Control.Carrier.Profile.Time as Profile
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
-import           Control.Effect.Lens ((%=), (.=))
-import qualified Control.Effect.Lens as Lens
+import           Control.Effect.Lens
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import qualified Control.Exception.Lift as E
@@ -144,7 +143,7 @@ runGame = do
       evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
-          system <- Lens.use _system
+          system <- use _system
           continue <- evalEmpty . runReader (systemAt system (getDelta t)) $ do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
@@ -159,7 +158,7 @@ runGame = do
         when continue loop
 
 (%%=) :: Has (State s) sig m => Lens' s a -> StateC a m () -> m ()
-lens %%= action = Lens.use lens >>= (`execState` action) >>= (lens .=)
+lens %%= action = use lens >>= (`execState` action) >>= (lens .=)
 
 infix 4 %%=
 
