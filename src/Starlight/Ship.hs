@@ -1,3 +1,4 @@
+{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
@@ -5,40 +6,41 @@
 module Starlight.Ship
 ( ship
 , runShip
-, DrawShip
+, Drawable
 ) where
 
-import Control.Effect.Finally
-import Control.Effect.Lift
-import Control.Effect.Profile
-import Control.Carrier.Reader
-import Data.Coerce (coerce)
-import Data.Functor.I
-import Data.Functor.Interval
-import GL.Array
-import GL.Program
-import Linear.Affine
-import Linear.Exts
-import Linear.Matrix
-import Linear.V2
-import Linear.V4
-import Linear.Vector
-import Starlight.Actor
-import Starlight.Ship.Shader
-import Starlight.View
-import UI.Colour
+import           Control.Carrier.Reader
+import           Control.Effect.Finally
+import           Control.Effect.Lift
+import           Control.Effect.Profile
+import           Data.Coerce (coerce)
+import           Data.Functor.I
+import           Data.Functor.Interval
+import           GL.Array
+import           GL.Program
+import           Linear.Affine
+import           Linear.Exts
+import           Linear.Matrix
+import           Linear.V2
+import           Linear.V4
+import           Linear.Vector
+import           Starlight.Actor
+import           Starlight.Ship.Shader
+import           Starlight.View
+import           UI.Colour
+import qualified UI.Drawable as UI
 
 ship
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader DrawShip) sig m
+     , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
   => Colour Float
   -> Actor
   -> m ()
 ship colour Actor{ position, rotation } = do
-  DrawShip{ program, array } <- ask
+  UI.Drawable{ program, array } <- asks getDrawable
   measure "ship" . use program . bindArray array $ do
     vs@View{ focus } <- ask
     let matrix = scaleToViewZoomed vs
@@ -58,18 +60,15 @@ runShip
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => ReaderC DrawShip m a
+  => ReaderC Drawable m a
   -> m a
 runShip m = do
   program <- build shader
   array   <- load vertices
-  runReader DrawShip{ program, array } m
+  runReader (Drawable UI.Drawable{ program, array }) m
 
 
-data DrawShip = DrawShip
-  { program :: Program U V O
-  , array   :: Array (V I)
-  }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
 vertices :: [V I]
