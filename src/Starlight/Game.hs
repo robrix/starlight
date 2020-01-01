@@ -37,28 +37,22 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
-import           Geometry.Circle
-import           GL.Array
 import           GL.Framebuffer
-import           GL.Program
 import           GL.Viewport
 import           Graphics.GL.Core41
 import           Lens.Micro (Lens', each, lens, (^.))
 import           Linear.Affine
 import           Linear.Exts
-import           Linear.Matrix
 import           Linear.Metric
 import           Linear.Quaternion
 import           Linear.V2 as Linear
 import           Linear.V3 as Linear
-import           Linear.V4
 import           Linear.Vector as Linear
 import           Numeric
 import           Physics.Delta
 import qualified SDL
 import           Starlight.Actor as Actor
-import           Starlight.Body as S
-import qualified Starlight.Body.Shader as Body
+import           Starlight.Body as Body
 import           Starlight.CLI
 import           Starlight.Identifier
 import           Starlight.Input
@@ -139,22 +133,19 @@ runGame = do
       , system
       }
     . evalState start $ do
-      bodyP  <- build Body.shader
-
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:" -- characters to preload
 
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      circleA <- load circleV
-
       ship <- Ship.makeDrawShip
+      body <- Body.makeDrawBody
       starfield <- Starfield.starfield
       radar <- Radar.radar
       laser <- Laser.laser
 
-      let view = View{ starfield, circleA, radar, laser, ship, bodyP, fpsL, targetL, font = Font face 18 }
+      let view = View{ starfield, body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -167,7 +158,7 @@ runGame = do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
-          continue <- fmap isJust . runEmpty . runReader (S.systemAt system (getDelta t)) $ do
+          continue <- fmap isJust . runEmpty . runReader (systemAt system (getDelta t)) $ do
             input <- measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
@@ -177,9 +168,6 @@ runGame = do
             draw view gameState
           continue <$ measure "swap" Window.swap
         when continue loop
-
-circleV :: [Body.V I]
-circleV = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
 
 controls
   :: ( Has (Lift IO) sig m
@@ -230,8 +218,8 @@ controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "contr
     _pressed SDL.KeycodeTab .= False
 
   position <- Lens.use (_player . _position)
-  let describeTarget target = case target >>= \ i -> find ((== i) . identifier . body) bodies of
-        Just S.StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* scale)))) "km"
+  let describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
+        Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* scale)))) "km"
         _ -> ""
   target <- Lens.uses (_player . _target) describeTarget
 
@@ -261,9 +249,9 @@ ai (Delta (Seconds dt)) = do
   bodies <- asks @(System StateVectors Float) bodies
   _npcs . each %= go bodies
   where
-  go bodies a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . body) bodies of
+  go bodies a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
-    Just S.StateVectors{ position = P pos }
+    Just StateVectors{ position = P pos }
       | angle     <- angleTo (unP position) pos
       , rotation' <- face angular angle rotation
       -> a
@@ -291,7 +279,7 @@ physics (Delta (Seconds dt)) = do
   _actors . each %= updatePosition . flip (foldr (applyGravity (1/scale))) bodies
   get where
   updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
-  applyGravity distanceScale S.StateVectors{ position = pos, body = S.Body{ mass } } a@Actor{ position, velocity }
+  applyGravity distanceScale StateVectors{ position = pos, body = Body{ mass } } a@Actor{ position, velocity }
     = a { velocity = velocity + unP (dt * force *^ direction pos position) } where
     force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
     r = qd (pos ^* distanceScale) (position ^* distanceScale) -- “quadrance” (square of distance between actor & body)
@@ -325,11 +313,11 @@ draw
   => View
   -> GameState
   -> m ()
-draw View{ starfield, circleA, radar, laser, ship, bodyP, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
+draw View{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
-  viewScale@ViewScale{ scale, size, zoom } <- ask
+  ViewScale{ scale, size, zoom } <- ask
 
   viewport $ scale *^ Interval 0 size
   scissor  $ scale *^ Interval 0 size
@@ -337,10 +325,6 @@ draw View{ starfield, circleA, radar, laser, ship, bodyP, fpsL, targetL } game =
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
   drawStarfield starfield position
-
-  let origin
-        =   scaleToViewZoomed viewScale
-        !*! translated3 (ext (negated (unP position)) 0) -- transform to the origin
 
   for_ (game ^. _actors) (drawShip ship position white)
 
@@ -350,21 +334,9 @@ draw View{ starfield, circleA, radar, laser, ship, bodyP, fpsL, targetL } game =
 
   System{ scale, bodies } <- ask @(System StateVectors Float)
 
-  let onScreen S.StateVectors{ body = S.Body{ radius }, position = pos } = distance pos position - getMetres (scale *^ radius) < maxDim * 0.5
-      drawBody i@S.StateVectors{ body = S.Body{ radius = Metres r, colour }, transform, rotation } = when (onScreen i) $ do
-        set Body.U
-          { matrix = Just
-              $   origin
-              !*! transform
-              !*! scaled (V4 r r r 1)
-              !*! mkTransformation rotation 0
-          , colour = Just colour
-          }
+  let onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - getMetres (scale *^ radius) < maxDim * 0.5
 
-        drawArraysInstanced LineLoop (Interval 0 (I (length circleV))) 3
-
-  measure "bodies" $
-    use bodyP . bindArray circleA $ origin `seq` for_ bodies drawBody
+  for_ bodies $ \ sv -> when (onScreen sv) (drawBody body sv)
 
   drawRadar radar (player game) (npcs game)
 
@@ -382,8 +354,7 @@ draw View{ starfield, circleA, radar, laser, ship, bodyP, fpsL, targetL } game =
 
 data View = View
   { starfield :: Starfield
-  , circleA   :: Array (Body.V I)
-  , bodyP     :: Program Body.U Body.V Body.O
+  , body      :: DrawBody
   , radar     :: Radar
   , laser     :: DrawLaser
   , ship      :: DrawShip
