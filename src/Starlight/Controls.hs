@@ -2,10 +2,6 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Controls
 ( controls
-, Player(..)
-, _actor
-, _throttle
-, _firing
 ) where
 
 import           Control.Applicative (liftA2)
@@ -28,6 +24,7 @@ import qualified SDL
 import           Starlight.Actor
 import           Starlight.Body
 import           Starlight.Input
+import           Starlight.Player
 import           Starlight.System
 import           Unit.Angle
 import           Unit.Time
@@ -78,20 +75,3 @@ controls (Delta (Seconds dt)) = do
     _pressed SDL.KeycodeTab .= False
   where
   or = liftA2 (liftA2 (coerce (||)))
-
-
-data Player = Player
-  { actor    :: !Actor
-  , throttle :: !Float
-  , firing   :: !Bool
-  }
-  deriving (Show)
-
-_actor :: Lens' Player Actor
-_actor = lens actor (\ s a -> s { actor = a })
-
-_throttle :: Lens' Player Float
-_throttle = lens throttle (\ s v -> s { throttle = v })
-
-_firing :: Lens' Player Bool
-_firing = lens firing (\ s p -> s { firing = p })

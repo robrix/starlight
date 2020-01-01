@@ -53,6 +53,7 @@ import           Starlight.Controls
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
+import           Starlight.Player
 import           Starlight.Radar as Radar
 import           Starlight.Ship as Ship
 import qualified Starlight.Sol as Sol
