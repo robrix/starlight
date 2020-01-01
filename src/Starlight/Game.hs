@@ -115,6 +115,7 @@ runGame = do
         , velocity = V2 0 150
         , rotation = axisAngle (unit _z) (pi/2)
         , target   = Nothing
+        , health   = 1000
         }
       , firing   = False
       , npcs     =
@@ -123,12 +124,14 @@ runGame = do
           , velocity = V2 0 150
           , rotation = axisAngle (unit _z) (pi/2)
           , target   = Just $ Star (10, "Sol")
+          , health   = 100
           }
         , Actor
           { position = P (V2 250000 0)
           , velocity = V2 0 150
           , rotation = axisAngle (unit _z) (pi/2)
           , target   = Just $ Star (10, "Sol") :/ (199, "Mercury")
+          , health   = 100
           }
         ]
       , system

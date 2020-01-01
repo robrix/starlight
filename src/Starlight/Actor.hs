@@ -18,11 +18,15 @@ data Actor = Actor
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
   , target   :: !(Maybe Identifier)
+  , health   :: !Float
   }
   deriving (Show)
 
 _target :: Lens' Actor (Maybe Identifier)
 _target = lens target (\ s t -> s { target = t })
+
+_health :: Lens' Actor Float
+_health = lens health (\ s h -> s { health = h })
 
 
 class HasPosition t a | t -> a where
