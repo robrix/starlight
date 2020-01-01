@@ -5,6 +5,7 @@ module Linear.Exts
 , translated3
 , scaled
 , orient
+, face
 , reject
 , direction
 , angleOf
@@ -15,6 +16,7 @@ module Linear.Exts
 , Ext(..)
 ) where
 
+import Data.Functor.Interval
 import Linear.Epsilon
 import Linear.Matrix
 import Linear.Metric
@@ -45,6 +47,17 @@ orient alpha beta gamma
   = axisAngle (unit _z) (getRadians alpha)
   * axisAngle (unit _x) (getRadians beta)
   * axisAngle (unit _z) (getRadians gamma)
+
+
+-- | Compute a rotation turning to face a desired angle with a given maximum angular thrust.
+face
+  :: Radians Float    -- ^ Angular thrust. (Speed of rotation.)
+  -> Radians Float    -- ^ Desired angle.
+  -> Quaternion Float -- ^ Current rotation.
+  -> Quaternion Float -- ^ Resulting rotation.
+face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
+  proposed = axisAngle (unit _z) (getRadians angle)
+  delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
 
 
 reject :: (Metric v, Fractional a) => v a -> v a -> v a

@@ -92,7 +92,7 @@ labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
 
 -- | Set the label’s text.
 setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
-setLabel Label{ texture, fbuffer, scale, ref } font string
+setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
   | null string = sendM (writeIORef ref Nothing)
   | otherwise   = runLiftIO $ do
     state <- sendIO (readIORef ref)
@@ -101,7 +101,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font string
       _ -> do
         glBlendFunc GL_ONE GL_ONE -- add
 
-        Run instances b <- layoutString (face font) string
+        Run instances b <- layoutString face string
 
         let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
             size = Interval.size b'
@@ -124,7 +124,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font string
         glClear GL_COLOR_BUFFER_BIT
 
         let V2 sx sy = fromIntegral scale / fmap fromIntegral size
-        drawingGlyphs (face font) $ do
+        drawingGlyphs face $ do
           set defaultVars
             { Glyph.scale     = Just (1 / fromIntegral scale)
             , Glyph.fontScale = Just (fontScale font)

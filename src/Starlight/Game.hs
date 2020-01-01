@@ -225,16 +225,6 @@ controls fpsL targetL font (Delta (Seconds dt)) input = measure "controls" $ do
   where
   or = liftA2 (liftA2 (coerce (||)))
 
--- | Compute a rotation turning to face a desired angle with a given maximum angular thrust.
-face
-  :: Radians Float    -- ^ Angular thrust. (Speed of rotation.)
-  -> Radians Float    -- ^ Desired angle.
-  -> Quaternion Float -- ^ Current rotation.
-  -> Quaternion Float -- ^ Resulting rotation.
-face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
-  proposed = axisAngle (unit _z) (getRadians angle)
-  delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
-
 
 ai
   :: Delta Seconds Float
