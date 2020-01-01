@@ -167,7 +167,7 @@ runGame = do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
-          continue <- fmap isJust . runEmpty . runReader (systemAt system (getDelta t)) $ do
+          continue <- fmap isJust . runEmpty . runReader (S.systemAt system (getDelta t)) $ do
             input <- measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now

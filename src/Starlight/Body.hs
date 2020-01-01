@@ -3,6 +3,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( StateVectors(..)
@@ -13,8 +14,11 @@ module Starlight.Body
 , orientationAt
 , positionAt
 , velocityAt
+, systemAt
 ) where
 
+import Data.Foldable (find)
+import Lens.Micro ((^.))
 import Linear.Affine
 import Linear.Epsilon
 import Linear.Exts
@@ -22,8 +26,10 @@ import Linear.Matrix
 import Linear.Quaternion
 import Linear.V2
 import Linear.V3
+import Linear.V4
 import Linear.Vector
 import Starlight.Identifier
+import Starlight.System
 import UI.Colour
 import Unit.Angle
 import Unit.Length
@@ -92,3 +98,18 @@ positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = P (ext
 
 velocityAt :: RealFloat a => Orbit a -> Seconds a -> V3 a
 velocityAt orbit t = positionAt orbit (t + 1) .-. positionAt orbit t
+
+
+systemAt :: (Epsilon a, RealFloat a) => System Body a -> Seconds a -> System StateVectors a
+systemAt sys@(System scale bs) t = System scale bs' where
+  bs' = fmap go bs
+  go b = StateVectors
+    { body = b
+    , transform = transform'
+    , rotation = orientationAt b t
+    , position = P ((transform' !* V4 0 0 0 1) ^. _xy)
+    } where
+    rel = maybe (systemTrans sys) transform $ do
+      p <- parent (identifier b)
+      find ((== p) . identifier . body) bs'
+    transform' = rel !*! transformAt (orbit b) t
