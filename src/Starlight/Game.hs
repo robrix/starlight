@@ -167,10 +167,11 @@ infix 4 %%=
 --
 -- Higher values correlate to more of the scene being visible.
 zoomForSpeed :: V2 Int -> Float -> Float
-zoomForSpeed size x
-  | Identity x < min_ speed = runIdentity (min_ zoom)
-  | Identity x > max_ speed = runIdentity (max_ zoom)
-  | otherwise        = runIdentity (fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))) where
+zoomForSpeed size x = runIdentity go where
+  go
+    | Identity x < min_ speed = min_ zoom
+    | Identity x > max_ speed = max_ zoom
+    | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
   zoom = Interval 1 6
   speed = speedAt <$> zoom
   speedAt x = x / 25 * fromIntegral (maximum size)
