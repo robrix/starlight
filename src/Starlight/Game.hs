@@ -34,9 +34,9 @@ import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurr
 import           Graphics.GL.Core41
 import           Lens.Micro (Lens', each, lens, (^.))
 import           Linear.Exts
-import           Starlight.Actor as Actor
+import           Starlight.Actor
 import           Starlight.AI
-import           Starlight.Body as Body
+import           Starlight.Body
 import           Starlight.CLI
 import           Starlight.Controls
 import           Starlight.Draw
@@ -44,13 +44,13 @@ import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
 import           Starlight.Player
-import           Starlight.Radar as Radar
-import           Starlight.Ship as Ship
+import           Starlight.Radar
+import           Starlight.Ship
 import qualified Starlight.Sol as Sol
-import           Starlight.Starfield as Starfield
+import           Starlight.Starfield
 import           Starlight.System
 import           Starlight.View
-import           Starlight.Weapon.Laser as Laser
+import           Starlight.Weapon.Laser
 import           System.Environment
 import           System.Exit
 import           System.FilePath
