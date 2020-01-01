@@ -30,7 +30,7 @@ import           Linear.Metric
 import           Linear.V2
 import           Linear.Vector
 import           Starlight.Actor
-import           Starlight.Body as Body
+import           Starlight.Body as Body hiding (Drawable)
 import qualified Starlight.Radar.Shader as Radar
 import           Starlight.System
 import           Starlight.View

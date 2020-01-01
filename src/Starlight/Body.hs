@@ -18,41 +18,42 @@ module Starlight.Body
 , velocityAt
 , systemAt
   -- * Drawing
-, makeDrawBody
-, DrawBody
+, runBody
+, Drawable
 , drawBody
 ) where
 
-import Control.Effect.Finally
-import Control.Effect.Lift
-import Control.Effect.Profile
-import Control.Effect.Reader
-import Data.Coerce (coerce)
-import Data.Foldable (find)
-import Data.Functor.I
-import Data.Functor.Interval
-import Geometry.Circle
-import GL.Array
-import GL.Program
-import Lens.Micro ((^.))
-import Linear.Affine
-import Linear.Epsilon
-import Linear.Exts
-import Linear.Matrix
-import Linear.Quaternion
-import Linear.V2
-import Linear.V3
-import Linear.V4
-import Linear.Vector
-import Starlight.Body.Shader as Shader
-import Starlight.Identifier
-import Starlight.System
-import Starlight.View
-import UI.Colour
-import Unit.Angle
-import Unit.Length
-import Unit.Mass
-import Unit.Time
+import           Control.Carrier.Reader
+import           Control.Effect.Finally
+import           Control.Effect.Lift
+import           Control.Effect.Profile
+import           Data.Coerce (coerce)
+import           Data.Foldable (find)
+import           Data.Functor.I
+import           Data.Functor.Interval
+import           Geometry.Circle
+import           GL.Array
+import           GL.Program
+import           Lens.Micro ((^.))
+import           Linear.Affine
+import           Linear.Epsilon
+import           Linear.Exts
+import           Linear.Matrix
+import           Linear.Quaternion
+import           Linear.V2
+import           Linear.V3
+import           Linear.V4
+import           Linear.Vector
+import           Starlight.Body.Shader as Shader
+import           Starlight.Identifier
+import           Starlight.System
+import           Starlight.View
+import           UI.Colour
+import qualified UI.Drawable as UI
+import           Unit.Angle
+import           Unit.Length
+import           Unit.Mass
+import           Unit.Time
 
 data StateVectors a = StateVectors
   { body      :: Body a
@@ -133,43 +134,43 @@ systemAt sys@(System scale bs) t = System scale bs' where
     transform' = rel !*! transformAt (orbit b) t
 
 
-makeDrawBody
+runBody
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => m DrawBody
-makeDrawBody = do
+  => ReaderC Drawable m a
+  -> m a
+runBody m = do
   program <- build Shader.shader
   array   <- load vertices
-  pure DrawBody
-    { drawBody = \ StateVectors{ body = Body{ radius = Metres r, colour }, transform, rotation } -> measure "bodies" . use program . bindArray array $ do
-      vs@View{ focus } <- ask
-      let origin
-            =   scaleToViewZoomed vs
-            !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
-      set Shader.U
-        { matrix = Just
-          $   origin
-          !*! transform
-          !*! scaled (V4 r r r 1)
-          !*! mkTransformation rotation 0
-        , colour = Just colour
-        }
-      drawArraysInstanced LineLoop range 3
+  runReader (Drawable UI.Drawable{ program, array }) m
+
+drawBody
+  :: ( Has (Lift IO) sig m
+     , Has Profile sig m
+     , Has (Reader Drawable) sig m
+     , Has (Reader View) sig m
+     )
+  => StateVectors Float
+  -> m ()
+drawBody StateVectors{ body = Body{ radius = Metres r, colour }, transform, rotation } = measure "bodies" . UI.using getDrawable $ do
+  vs@View{ focus } <- ask
+  let origin
+        =   scaleToViewZoomed vs
+        !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
+  set Shader.U
+    { matrix = Just
+      $   origin
+      !*! transform
+      !*! scaled (V4 r r r 1)
+      !*! mkTransformation rotation 0
+    , colour = Just colour
     }
+  drawArraysInstanced LineLoop range 3
 
 
-newtype DrawBody = DrawBody
-  { drawBody
-    :: forall sig m
-    .  ( Has (Lift IO) sig m
-       , Has Profile sig m
-       , Has (Reader (System StateVectors Float)) sig m
-       , Has (Reader View) sig m
-       )
-    => StateVectors Float
-    -> m ()
-  }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable Shader.U Shader.V Shader.O }
+
 
 vertices :: [Shader.V I]
 vertices = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128

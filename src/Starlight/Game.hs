@@ -139,10 +139,9 @@ runGame = do
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      body <- makeDrawBody
       laser <- makeDrawLaser
 
-      let scene = Scene{ body, laser, fpsL, targetL, font = Font face 18 }
+      let scene = Scene{ laser, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -150,7 +149,7 @@ runGame = do
       glEnable GL_PROGRAM_POINT_SIZE
 
       start <- now
-      evalState start . runStarfield . runShip . runRadar . fix $ \ loop -> do
+      evalState start . runStarfield . runShip . runRadar . runBody . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
@@ -303,6 +302,7 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
+     , Has (Reader Body.Drawable) sig m
      , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
@@ -312,7 +312,7 @@ draw
   => Scene
   -> GameState
   -> m ()
-draw Scene{ body, laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
+draw Scene{ laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -335,7 +335,7 @@ draw Scene{ body, laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
 
   let onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - getMetres (scale *^ radius) < maxDim * 0.5
 
-  for_ bodies $ \ sv -> when (onScreen sv) (drawBody body sv)
+  for_ bodies $ \ sv -> when (onScreen sv) (drawBody sv)
 
   drawRadar (player game) (npcs game)
 
@@ -360,8 +360,7 @@ withView game m = do
 
 
 data Scene = Scene
-  { body      :: DrawBody
-  , laser     :: DrawLaser
+  { laser     :: DrawLaser
   , fpsL      :: Label
   , targetL   :: Label
   , font      :: Font
