@@ -68,7 +68,7 @@ draw dt fpsL targetL font player npcs = measure "draw" . runLiftIO $ do
 
   for_ (player ^. actor_ : npcs) (drawShip white)
 
-  when (player ^. firing_) $ drawLaser green (snd (toAxisAngle rotation))
+  when (player ^. firing_) $ drawLaser Beam { colour = green, angle = snd (toAxisAngle rotation), position }
 
   let maxDim = maximum (fromIntegral <$> size ^* scale) * zoom
 

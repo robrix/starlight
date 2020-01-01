@@ -52,10 +52,9 @@ drawLaser
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
-  => Colour Float
-  -> Radians Float
+  => Beam
   -> m ()
-drawLaser colour angle = measure "laser" . UI.using getDrawable $ do
+drawLaser Beam{ colour, angle } = measure "laser" . UI.using getDrawable $ do
   matrix <- asks scaleToViewZoomed
   set Laser.U
     { matrix = Just matrix
