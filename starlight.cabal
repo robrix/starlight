@@ -73,13 +73,13 @@ library
     Physics.Delta
     Starlight.Actor
     Starlight.Body
+    Starlight.Body.Shader
     Starlight.CLI
     Starlight.Game
     Starlight.Identifier
     Starlight.Input
     Starlight.Radar
     Starlight.Radar.Shader
-    Starlight.Shader.Body
     Starlight.Shader.Stars
     Starlight.Ship
     Starlight.Ship.Shader

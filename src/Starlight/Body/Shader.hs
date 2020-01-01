@@ -3,7 +3,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Starlight.Shader.Body
+module Starlight.Body.Shader
 ( shader
 , U(..)
 , V(..)

@@ -58,11 +58,11 @@ import           Physics.Delta
 import qualified SDL
 import           Starlight.Actor as Actor
 import           Starlight.Body as S
+import qualified Starlight.Body.Shader as Body
 import           Starlight.CLI
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Radar as Radar
-import qualified Starlight.Shader.Body as Body
 import           Starlight.Ship as Ship
 import qualified Starlight.Sol as Sol
 import           Starlight.Starfield as Starfield
