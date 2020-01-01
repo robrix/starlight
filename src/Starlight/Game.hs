@@ -158,7 +158,7 @@ runGame = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            controls dt
+            measure "controls" $ controls dt
             system <- ask
             measure "ai"      (_npcs   . each %= ai      dt system)
             measure "physics" (_actors . each %= physics dt system)
@@ -169,14 +169,13 @@ runGame = do
 
 controls
   :: ( Has (Lift IO) sig m
-     , Has Profile sig m
      , Has (Reader (System StateVectors Float)) sig m
      , Has (State Input) sig m
      , Has (State GameState) sig m
      )
   => Delta Seconds Float
   -> m ()
-controls (Delta (Seconds dt)) = measure "controls" $ do
+controls (Delta (Seconds dt)) = do
   input <- get
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _player . _throttle += dt * 10
