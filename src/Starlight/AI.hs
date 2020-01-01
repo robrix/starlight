@@ -40,4 +40,4 @@ ai (Delta (Seconds dt)) System{ bodies } a@Actor{ target, velocity, rotation, po
   Nothing -> a
   where
   angular = dt *^ Radians 5
-  thrust  = dt * 1
+  thrust  = dt * 5
