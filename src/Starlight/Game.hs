@@ -383,17 +383,17 @@ data GameState = GameState
 _throttle :: Lens' GameState Float
 _throttle = lens throttle (\ s v -> s { throttle = v })
 
-_npcs :: Lens' GameState [Actor]
-_npcs = lens npcs (\ s n -> s { npcs = n })
-
-_actors :: Lens' GameState (NonEmpty Actor)
-_actors = lens ((:|) . player <*> npcs) (\ s (p:|o) -> s { player = p, npcs = o })
-
 _player :: Lens' GameState Actor
 _player = lens player (\ s p -> s { player = p })
 
 _firing :: Lens' GameState Bool
 _firing = lens firing (\ s p -> s { firing = p })
+
+_npcs :: Lens' GameState [Actor]
+_npcs = lens npcs (\ s n -> s { npcs = n })
+
+_actors :: Lens' GameState (NonEmpty Actor)
+_actors = lens ((:|) . player <*> npcs) (\ s (p:|o) -> s { player = p, npcs = o })
 
 _system :: Lens' GameState (System Body Float)
 _system = lens system (\ s p -> s { system = p })
