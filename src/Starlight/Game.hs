@@ -156,12 +156,12 @@ runGame = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            controls fpsL targetL (Font face 18) dt
+            controls dt
             system <- ask
             measure "ai"      (_npcs   . each %= ai      dt system)
             measure "physics" (_actors . each %= physics dt system)
             gameState <- get
-            withView gameState (draw fpsL targetL gameState)
+            withView gameState (draw dt fpsL targetL (Font face 18) gameState)
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -172,12 +172,9 @@ controls
      , Has (State Input) sig m
      , Has (State GameState) sig m
      )
-  => Label
-  -> Label
-  -> Font
-  -> Delta Seconds Float
+  => Delta Seconds Float
   -> m ()
-controls fpsL targetL font (Delta (Seconds dt)) = measure "controls" $ do
+controls (Delta (Seconds dt)) = measure "controls" $ do
   input <- get
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
@@ -203,7 +200,7 @@ controls fpsL targetL font (Delta (Seconds dt)) = measure "controls" $ do
 
   _firing .= input ^. _pressed SDL.KeycodeSpace
 
-  System{ scale, bodies } <- ask @(System StateVectors Float)
+  System{ bodies } <- ask @(System StateVectors Float)
   let identifiers = Map.keys bodies
       switchTarget shift target = case target >>= (`elemIndex` identifiers) of
         Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length bodies)) i') where
@@ -214,15 +211,6 @@ controls fpsL targetL font (Delta (Seconds dt)) = measure "controls" $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
     _player . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
-
-  position <- Lens.use (_player . _position)
-  let describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
-        Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* scale)))) "km"
-        _ -> ""
-  target <- Lens.uses (_player . _target) describeTarget
-
-  measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
-  measure "setLabel" $ setLabel targetL font target
   where
   or = liftA2 (liftA2 (coerce (||)))
 
@@ -250,12 +238,14 @@ draw
      , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader View) sig m
      )
-  => Label
+  => Delta Seconds Float
   -> Label
+  -> Label
+  -> Font
   -> GameState
   -> m ()
-draw fpsL targetL game = measure "draw" . runLiftIO $ do
-  let Actor{ position, rotation } = game ^. _player
+draw dt fpsL targetL font game = measure "draw" . runLiftIO $ do
+  let Actor{ position, rotation, target } = game ^. _player
   bind @Framebuffer Nothing
 
   View{ scale, size, zoom } <- ask
@@ -280,6 +270,13 @@ draw fpsL targetL game = measure "draw" . runLiftIO $ do
   for_ bodies $ \ sv -> when (onScreen sv) (drawBody sv)
 
   drawRadar (player game) (npcs game)
+
+  let describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
+        Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* (1/scale))))) "km"
+        _ -> ""
+
+  measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
+  measure "setLabel" $ setLabel targetL font (describeTarget target)
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
