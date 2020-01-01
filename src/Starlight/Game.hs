@@ -153,10 +153,10 @@ runGame = do
           t <- realToFrac <$> since start
           system <- Lens.use _system
           continue <- evalEmpty . runReader (systemAt system (getDelta t)) $ do
-            input <- measure "input" input
+            measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            controls fpsL targetL (Font face 18) dt input
+            controls fpsL targetL (Font face 18) dt
             system <- ask
             measure "ai"      (_npcs   . each %= ai      dt system)
             measure "physics" (_actors . each %= physics dt system)
@@ -176,9 +176,9 @@ controls
   -> Label
   -> Font
   -> Delta Seconds Float
-  -> Input
   -> m ()
-controls fpsL targetL font (Delta (Seconds dt)) input = measure "controls" $ do
+controls fpsL targetL font (Delta (Seconds dt)) = measure "controls" $ do
+  input <- get
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
   when (input ^. _pressed SDL.KeycodeMinus) $

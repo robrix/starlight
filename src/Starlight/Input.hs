@@ -22,8 +22,8 @@ input
      , Has (Lift IO) sig m
      , Has (State Input) sig m
      )
-  => m Input
-input = Window.input go >> get where
+  => m ()
+input = Window.input go where
   go (SDL.Event _ p) = case p of
     SDL.QuitEvent                                      -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ ks) -> key p ks
