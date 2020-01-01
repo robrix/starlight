@@ -145,7 +145,7 @@ runGame = do
       radar <- Radar.radar
       laser <- makeDrawLaser
 
-      let view = Scene{ starfield, body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
+      let scene = Scene{ starfield, body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -161,10 +161,10 @@ runGame = do
             input <- measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            controls view dt input
+            controls scene dt input
             ai dt
             gameState <- measure "physics" (physics dt)
-            withViewScale gameState (draw view gameState)
+            withViewScale gameState (draw scene gameState)
           continue <$ measure "swap" Window.swap
         when continue loop
 
