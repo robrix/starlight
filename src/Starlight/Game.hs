@@ -182,7 +182,7 @@ controls (Delta (Seconds dt)) = do
   when (input ^. _pressed SDL.KeycodeMinus) $
     _player . _throttle -= dt * 10
 
-  thrust <- (dt *) <$> Lens.use (_player . _throttle)
+  thrust <- Lens.uses (_player . _throttle) (dt *)
 
   let angular = dt *^ Radians 5
 
