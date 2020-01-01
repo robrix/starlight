@@ -40,14 +40,13 @@ drawStarfield
      , Has (Reader View) sig m
      )
   => Starfield
-  -> Point V2 Float
   -> m ()
-drawStarfield Starfield{ program, array } position = measure "starfield" . use program . bindArray array $ do
-  View{ scale, size, zoom } <- ask
+drawStarfield Starfield{ program, array } = measure "starfield" . use program . bindArray array $ do
+  View{ scale, size, zoom, focus } <- ask
 
   set Starfield.U
     { resolution = Just (fromIntegral <$> size ^* scale)
-    , origin     = Just (position / P (fromIntegral <$> size))
+    , origin     = Just (focus / P (fromIntegral <$> size))
     , zoom       = Just zoom
     }
 

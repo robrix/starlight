@@ -323,7 +323,7 @@ draw Scene{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure 
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
-  drawStarfield starfield position
+  drawStarfield starfield
 
   for_ (game ^. _actors) (drawShip ship white)
 
