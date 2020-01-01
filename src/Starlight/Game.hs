@@ -139,9 +139,7 @@ runGame = do
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      laser <- makeDrawLaser
-
-      let scene = Scene{ laser, fpsL, targetL, font = Font face 18 }
+      let scene = Scene{ fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -149,7 +147,7 @@ runGame = do
       glEnable GL_PROGRAM_POINT_SIZE
 
       start <- now
-      evalState start . runStarfield . runShip . runRadar . runBody . fix $ \ loop -> do
+      evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
@@ -303,6 +301,7 @@ draw
      , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Body.Drawable) sig m
+     , Has (Reader Laser.Drawable) sig m
      , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
@@ -312,7 +311,7 @@ draw
   => Scene
   -> GameState
   -> m ()
-draw Scene{ laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
+draw Scene{ fpsL, targetL } game = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -327,7 +326,7 @@ draw Scene{ laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
 
   for_ (game ^. _actors) (drawShip white)
 
-  when (game ^. _firing) $ drawLaser laser green (snd (toAxisAngle rotation))
+  when (game ^. _firing) $ drawLaser green (snd (toAxisAngle rotation))
 
   let maxDim = maximum ((fromIntegral <$> size ^* scale) ^* zoom)
 
@@ -360,8 +359,7 @@ withView game m = do
 
 
 data Scene = Scene
-  { laser     :: DrawLaser
-  , fpsL      :: Label
+  { fpsL      :: Label
   , targetL   :: Label
   , font      :: Font
   }
