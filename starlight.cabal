@@ -75,6 +75,7 @@ library
     Starlight.Body
     Starlight.Body.Shader
     Starlight.CLI
+    Starlight.Ephemeris
     Starlight.Game
     Starlight.Identifier
     Starlight.Input
