@@ -3,8 +3,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Weapon.Laser
-( drawLaser
+( Beam(..)
 , runLaser
+, drawLaser
 , Drawable
 ) where
 
@@ -17,11 +18,20 @@ import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
+import           Linear.Affine
+import           Linear.V2
 import           Starlight.View
 import           Starlight.Weapon.Laser.Shader as Laser
 import           UI.Colour
 import qualified UI.Drawable as UI
 import           Unit.Angle
+
+data Beam = Beam
+  { position :: Point V2 Float
+  , angle    :: Radians Float
+  }
+  deriving (Show)
+
 
 runLaser
   :: ( Has Finally sig m
