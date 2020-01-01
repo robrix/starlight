@@ -24,7 +24,6 @@ import           Data.Functor.Interval as Interval
 import           Data.IORef
 import           GHC.Stack
 import           GL.Array
-import           GL.Buffer
 import           GL.Framebuffer as GL
 import           GL.Object
 import           GL.Program
@@ -75,23 +74,12 @@ label = do
 
   program  <- build Text.shader
 
-  array <- do
-    let vertices =
-          [ V2 (-1) (-1)
-          , V2   1  (-1)
-          , V2 (-1)   1
-          , V2   1    1  :: V2 Float
-          ]
-
-    buffer <- gen1
-    array  <- gen1
-
-    bind (Just buffer)
-    realloc buffer (length vertices) Static Draw
-    copy buffer 0 (coerce vertices)
-
-    bind (Just array)
-    array <$ configureArray buffer array
+  array <- load $ coerce @[V2 Float]
+    [ V2 (-1) (-1)
+    , V2   1  (-1)
+    , V2 (-1)   1
+    , V2   1    1
+    ]
 
   scale <- Window.scale
 
