@@ -157,7 +157,7 @@ runGame = do
             put =<< now
             controls fpsL targetL (Font face 18) dt input
             system <- ask
-            ai dt system
+            measure "ai"      (_npcs   . each %= ai      dt system)
             measure "physics" (_actors . each %= physics dt system)
             gameState <- get
             withView gameState (draw fpsL targetL gameState)
@@ -237,27 +237,26 @@ face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angula
 
 
 ai
-  :: Has (State GameState) sig m
-  => Delta Seconds Float
+  :: Delta Seconds Float
   -> System StateVectors Float
-  -> m ()
-ai (Delta (Seconds dt)) System{ bodies } = _npcs . each %= go bodies
+  -> Actor
+  -> Actor
+ai (Delta (Seconds dt)) System{ bodies } a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
+  -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
+  Just StateVectors{ position = P pos }
+    | angle     <- angleTo (unP position) pos
+    , rotation' <- face angular angle rotation
+    -> a
+      { Actor.rotation = rotation'
+      -- FIXME: don’t just fly directly at the target at full throttle, dumbass
+      -- FIXME: factor in the target’s velocity & distance
+      -- FIXME: allow other behaviours relating to targets, e.g. following
+      , velocity = if abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation') - angle)) < pi/2 then velocity + rotate rotation' (unit _x ^* thrust) ^. _xy else velocity
+      }
+  -- FIXME: wander
+  -- FIXME: pick a new target
+  Nothing -> a
   where
-  go bodies a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
-    -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
-    Just StateVectors{ position = P pos }
-      | angle     <- angleTo (unP position) pos
-      , rotation' <- face angular angle rotation
-      -> a
-        { Actor.rotation = rotation'
-        -- FIXME: don’t just fly directly at the target at full throttle, dumbass
-        -- FIXME: factor in the target’s velocity & distance
-        -- FIXME: allow other behaviours relating to targets, e.g. following
-        , velocity = if abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation') - angle)) < pi/2 then velocity + rotate rotation' (unit _x ^* thrust) ^. _xy else velocity
-        }
-    -- FIXME: wander
-    -- FIXME: pick a new target
-    Nothing -> a
   angular = dt *^ Radians 5
   thrust  = dt * 1
 
