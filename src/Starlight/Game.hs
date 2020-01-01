@@ -165,7 +165,7 @@ runGame = do
             controls view dt input
             ai dt
             gameState <- measure "physics" (physics dt)
-            draw view gameState
+            withViewScale gameState (draw view gameState)
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -308,12 +308,12 @@ draw
      , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader (System StateVectors Float)) sig m
-     , Has (Reader Window.Window) sig m
+     , Has (Reader ViewScale) sig m
      )
   => View
   -> GameState
   -> m ()
-draw View{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "draw" . runLiftIO . withViewScale $ do
+draw View{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -343,14 +343,21 @@ draw View{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetL (V2 10 10) white Nothing
-  where
-  withViewScale m = do
-    scale <- Window.scale
-    size  <- Window.size
-    let velocity = game ^. _player . _velocity
-        zoom = zoomForSpeed size (norm velocity)
-        focus = game ^. _player . _position
-    runReader ViewScale{ scale, size, zoom, focus } m
+
+withViewScale
+  :: ( Has (Lift IO) sig m
+     , Has (Reader Window.Window) sig m
+     )
+  => GameState
+  -> ReaderC ViewScale m a
+  -> m a
+withViewScale game m = do
+  scale <- Window.scale
+  size  <- Window.size
+  let velocity = game ^. _player . _velocity
+      zoom = zoomForSpeed size (norm velocity)
+      focus = game ^. _player . _position
+  runReader ViewScale{ scale, size, zoom, focus } m
 
 
 data View = View
