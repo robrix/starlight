@@ -156,8 +156,8 @@ runGame = do
             dt <- fmap realToFrac . since =<< get
             put =<< now
             controls fpsL targetL (Font face 18) dt input
-            ai dt
             system <- ask
+            ai dt system
             measure "physics" (_actors . each %= physics dt system)
             gameState <- get
             withView gameState (draw fpsL targetL gameState)
@@ -237,14 +237,11 @@ face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angula
 
 
 ai
-  :: ( Has (Reader (System StateVectors Float)) sig m
-     , Has (State GameState) sig m
-     )
+  :: Has (State GameState) sig m
   => Delta Seconds Float
+  -> System StateVectors Float
   -> m ()
-ai (Delta (Seconds dt)) = do
-  bodies <- asks @(System StateVectors Float) bodies
-  _npcs . each %= go bodies
+ai (Delta (Seconds dt)) System{ bodies } = _npcs . each %= go bodies
   where
   go bodies a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
