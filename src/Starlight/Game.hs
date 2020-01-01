@@ -359,9 +359,9 @@ withView game m = do
 
 
 data Scene = Scene
-  { fpsL      :: Label
-  , targetL   :: Label
-  , font      :: Font
+  { fpsL    :: Label
+  , targetL :: Label
+  , font    :: Font
   }
 
 
