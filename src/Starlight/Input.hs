@@ -5,7 +5,7 @@ module Starlight.Input
 ( input
 , Input(..)
 , key
-, _pressed
+, pressed_
 ) where
 
 import           Control.Effect.Empty
@@ -33,17 +33,17 @@ input = Window.input go where
 newtype Input = Input { unInput :: IntSet.IntSet }
   deriving (Monoid, Semigroup)
 
-_input :: Lens' Input IntSet.IntSet
-_input = lens unInput (const Input)
+input_ :: Lens' Input IntSet.IntSet
+input_ = lens unInput (const Input)
 
 
 key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keysym -> m ()
-key m ks = _pressed (SDL.keysymKeycode ks) .= case m of
+key m ks = pressed_ (SDL.keysymKeycode ks) .= case m of
   SDL.Pressed  -> True
   SDL.Released -> False
 
 
-_pressed :: SDL.Keycode -> Lens' Input Bool
-_pressed code = _input . lens
+pressed_ :: SDL.Keycode -> Lens' Input Bool
+pressed_ code = input_ . lens
   (IntSet.member (fromIntegral (SDL.unwrapKeycode code)))
   (\ s pressed -> (if pressed then IntSet.insert else IntSet.delete) (fromIntegral (SDL.unwrapKeycode code)) s)

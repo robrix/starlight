@@ -57,7 +57,7 @@ draw
   -> [Actor]
   -> m ()
 draw dt fpsL targetL font player npcs = measure "draw" . runLiftIO $ do
-  let Actor{ position, rotation, target } = player ^. _actor
+  let Actor{ position, rotation, target } = player ^. actor_
   bind @Framebuffer Nothing
 
   View{ scale, size, zoom } <- ask
@@ -69,9 +69,9 @@ draw dt fpsL targetL font player npcs = measure "draw" . runLiftIO $ do
 
   drawStarfield
 
-  for_ (player ^. _actor : npcs) (drawShip white)
+  for_ (player ^. actor_ : npcs) (drawShip white)
 
-  when (player ^. _firing) $ drawLaser green (snd (toAxisAngle rotation))
+  when (player ^. firing_) $ drawLaser green (snd (toAxisAngle rotation))
 
   let maxDim = maximum (fromIntegral <$> size ^* scale) * zoom
 
@@ -81,7 +81,7 @@ draw dt fpsL targetL font player npcs = measure "draw" . runLiftIO $ do
 
   for_ bodies $ \ sv -> when (onScreen sv) (drawBody sv)
 
-  drawRadar (player ^. _actor) npcs
+  drawRadar (player ^. actor_) npcs
 
   let describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
         Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* (1/scale))))) "km"

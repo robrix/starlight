@@ -39,29 +39,29 @@ controls
   -> m ()
 controls (Delta (Seconds dt)) = do
   input <- get
-  when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
-    _throttle += dt * 10
-  when (input ^. _pressed SDL.KeycodeMinus) $
-    _throttle -= dt * 10
+  when (input ^. (pressed_ SDL.KeycodePlus `or` pressed_ SDL.KeycodeEquals)) $
+    throttle_ += dt * 10
+  when (input ^. pressed_ SDL.KeycodeMinus) $
+    throttle_ -= dt * 10
 
-  thrust <- uses _throttle (dt *)
+  thrust <- uses throttle_ (dt *)
 
   let angular = dt *^ Radians 5
 
-  when (input ^. _pressed SDL.KeycodeUp) $ do
-    rotation <- use (_actor . _rotation)
-    _actor . _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
-  when (input ^. _pressed SDL.KeycodeDown) $ do
-    rotation <- use (_actor . _rotation)
-    velocity <- use (_actor . _velocity)
-    _actor . _rotation .= face angular (angleOf (negated velocity)) rotation
+  when (input ^. pressed_ SDL.KeycodeUp) $ do
+    rotation <- use (actor_ . rotation_)
+    actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
+  when (input ^. pressed_ SDL.KeycodeDown) $ do
+    rotation <- use (actor_ . rotation_)
+    velocity <- use (actor_ . velocity_)
+    actor_ . rotation_ .= face angular (angleOf (negated velocity)) rotation
 
-  when (input ^. _pressed SDL.KeycodeLeft) $
-    _actor . _rotation *= axisAngle (unit _z) (getRadians angular)
-  when (input ^. _pressed SDL.KeycodeRight) $
-    _actor . _rotation *= axisAngle (unit _z) (getRadians (-angular))
+  when (input ^. pressed_ SDL.KeycodeLeft) $
+    actor_ . rotation_ *= axisAngle (unit _z) (getRadians angular)
+  when (input ^. pressed_ SDL.KeycodeRight) $
+    actor_ . rotation_ *= axisAngle (unit _z) (getRadians (-angular))
 
-  _firing .= input ^. _pressed SDL.KeycodeSpace
+  firing_ .= input ^. pressed_ SDL.KeycodeSpace
 
   System{ bodies } <- ask @(System StateVectors Float)
   let identifiers = Map.keys bodies
@@ -70,8 +70,8 @@ controls (Delta (Seconds dt)) = do
           i' | shift     = i - 1
              | otherwise = i + 1
         Nothing -> Just $ if shift then last identifiers else head identifiers
-  when (input ^. _pressed SDL.KeycodeTab) $ do
-    _actor . _target %= switchTarget (input ^. (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift))
-    _pressed SDL.KeycodeTab .= False
+  when (input ^. pressed_ SDL.KeycodeTab) $ do
+    actor_ . target_ %= switchTarget (input ^. (pressed_ SDL.KeycodeLShift `or` pressed_ SDL.KeycodeRShift))
+    pressed_ SDL.KeycodeTab .= False
   where
   or = liftA2 (liftA2 (coerce (||)))

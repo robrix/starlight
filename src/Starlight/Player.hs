@@ -1,8 +1,8 @@
 module Starlight.Player
 ( Player(..)
-, _actor
-, _throttle
-, _firing
+, actor_
+, throttle_
+, firing_
 ) where
 
 import Lens.Micro (Lens', lens)
@@ -15,11 +15,11 @@ data Player = Player
   }
   deriving (Show)
 
-_actor :: Lens' Player Actor
-_actor = lens actor (\ s a -> s { actor = a })
+actor_ :: Lens' Player Actor
+actor_ = lens actor (\ s a -> s { actor = a })
 
-_throttle :: Lens' Player Float
-_throttle = lens throttle (\ s v -> s { throttle = v })
+throttle_ :: Lens' Player Float
+throttle_ = lens throttle (\ s v -> s { throttle = v })
 
-_firing :: Lens' Player Bool
-_firing = lens firing (\ s p -> s { firing = p })
+firing_ :: Lens' Player Bool
+firing_ = lens firing (\ s p -> s { firing = p })

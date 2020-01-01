@@ -143,15 +143,15 @@ runGame = do
       evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
-          system <- use _system
+          system <- use system_
           continue <- evalEmpty . runReader (systemAt system (getDelta t)) $ do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ _player %%= controls dt
+            measure "controls" $ player_ %%= controls dt
             system <- ask
-            measure "ai"      (_npcs   . each %= ai      dt system)
-            measure "physics" (_actors . each %= physics dt system)
+            measure "ai"      (npcs_   . each %= ai      dt system)
+            measure "physics" (actors_ . each %= physics dt system)
             gameState <- get
             withView gameState (draw dt fpsL targetL (Font face 18) (player gameState) (npcs gameState))
           continue <$ measure "swap" Window.swap
@@ -185,9 +185,9 @@ withView
 withView game m = do
   scale <- Window.scale
   size  <- Window.size
-  let velocity = game ^. _player . _actor . _velocity
+  let velocity = game ^. player_ . actor_ . velocity_
       zoom = zoomForSpeed size (norm velocity)
-      focus = game ^. _player . _actor . _position
+      focus = game ^. player_ . actor_ . position_
   runReader View{ scale, size, zoom, focus } m
 
 data GameState = GameState
@@ -197,17 +197,17 @@ data GameState = GameState
   }
   deriving (Show)
 
-_player :: Lens' GameState Player
-_player = lens player (\ s p -> s { player = p })
+player_ :: Lens' GameState Player
+player_ = lens player (\ s p -> s { player = p })
 
-_npcs :: Lens' GameState [Actor]
-_npcs = lens npcs (\ s n -> s { npcs = n })
+npcs_ :: Lens' GameState [Actor]
+npcs_ = lens npcs (\ s n -> s { npcs = n })
 
-_actors :: Lens' GameState (NonEmpty Actor)
-_actors = lens ((:|) . actor . player <*> npcs) (\ s (a:|o) -> s { player = (player s) { actor = a }, npcs = o })
+actors_ :: Lens' GameState (NonEmpty Actor)
+actors_ = lens ((:|) . actor . player <*> npcs) (\ s (a:|o) -> s { player = (player s) { actor = a }, npcs = o })
 
-_system :: Lens' GameState (System Body Float)
-_system = lens system (\ s p -> s { system = p })
+system_ :: Lens' GameState (System Body Float)
+system_ = lens system (\ s p -> s { system = p })
 
 
 now :: Has (Lift IO) sig m => m UTCTime
