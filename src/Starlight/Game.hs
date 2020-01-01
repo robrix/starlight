@@ -145,7 +145,7 @@ runGame = do
       radar <- Radar.radar
       laser <- makeDrawLaser
 
-      let view = View{ starfield, body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
+      let view = Scene{ starfield, body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -175,11 +175,11 @@ controls
      , Has (State Input) sig m
      , Has (State GameState) sig m
      )
-  => View
+  => Scene
   -> Delta Seconds Float
   -> Input
   -> m ()
-controls View{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "controls" $ do
+controls Scene{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "controls" $ do
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
   when (input ^. _pressed SDL.KeycodeMinus) $
@@ -309,10 +309,10 @@ draw
      , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader ViewScale) sig m
      )
-  => View
+  => Scene
   -> GameState
   -> m ()
-draw View{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "draw" . runLiftIO $ do
+draw Scene{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -359,7 +359,7 @@ withViewScale game m = do
   runReader ViewScale{ scale, size, zoom, focus } m
 
 
-data View = View
+data Scene = Scene
   { starfield :: Starfield
   , body      :: DrawBody
   , radar     :: Radar
