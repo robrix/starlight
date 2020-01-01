@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Weapon.Laser
-( laser
+( makeDrawLaser
 , DrawLaser
 , drawLaser
 ) where
@@ -21,12 +21,12 @@ import Starlight.Weapon.Laser.Shader as Laser
 import UI.Colour
 import Unit.Angle
 
-laser
+makeDrawLaser
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
   => m DrawLaser
-laser = do
+makeDrawLaser = do
   program <- build Laser.shader
   array <- load vertices
   pure DrawLaser

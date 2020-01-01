@@ -143,7 +143,7 @@ runGame = do
       body <- makeDrawBody
       starfield <- Starfield.starfield
       radar <- Radar.radar
-      laser <- Laser.laser
+      laser <- makeDrawLaser
 
       let view = View{ starfield, body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
 
