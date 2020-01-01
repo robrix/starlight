@@ -109,16 +109,18 @@ runGame = do
     . runFinally
     . evalState @Input mempty
     . evalState GameState
-      { throttle = 20
-      , player   = Actor
-        { position = P (V2 250000 0)
-        , velocity = V2 0 150
-        , rotation = axisAngle (unit _z) (pi/2)
-        , target   = Nothing
-        , health   = 1000
+      { player = Player
+        { actor    = Actor
+          { position = P (V2 250000 0)
+          , velocity = V2 0 150
+          , rotation = axisAngle (unit _z) (pi/2)
+          , target   = Nothing
+          , health   = 1000
+          }
+        , throttle = 20
+        , firing   = False
         }
-      , firing   = False
-      , npcs     =
+      , npcs   =
         [ Actor
           { position = P (V2 250000 0)
           , velocity = V2 0 150
@@ -177,28 +179,28 @@ controls
 controls (Delta (Seconds dt)) = measure "controls" $ do
   input <- get
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
-    _throttle += dt * 10
+    _player . _throttle += dt * 10
   when (input ^. _pressed SDL.KeycodeMinus) $
-    _throttle -= dt * 10
+    _player . _throttle -= dt * 10
 
-  thrust <- (dt *) <$> Lens.use _throttle
+  thrust <- (dt *) <$> Lens.use (_player . _throttle)
 
   let angular = dt *^ Radians 5
 
   when (input ^. _pressed SDL.KeycodeUp) $ do
-    rotation <- Lens.use (_player . _rotation)
-    _player . _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
+    rotation <- Lens.use (_player . _actor . _rotation)
+    _player . _actor . _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
   when (input ^. _pressed SDL.KeycodeDown) $ do
-    rotation <- Lens.use (_player . _rotation)
-    velocity <- Lens.use (_player . _velocity)
-    _player . _rotation .= face angular (angleOf (negated velocity)) rotation
+    rotation <- Lens.use (_player . _actor . _rotation)
+    velocity <- Lens.use (_player . _actor . _velocity)
+    _player . _actor . _rotation .= face angular (angleOf (negated velocity)) rotation
 
   when (input ^. _pressed SDL.KeycodeLeft) $
-    _player . _rotation *= axisAngle (unit _z) (getRadians angular)
+    _player . _actor . _rotation *= axisAngle (unit _z) (getRadians angular)
   when (input ^. _pressed SDL.KeycodeRight) $
-    _player . _rotation *= axisAngle (unit _z) (getRadians (-angular))
+    _player . _actor . _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  _firing .= input ^. _pressed SDL.KeycodeSpace
+  _player . _firing .= input ^. _pressed SDL.KeycodeSpace
 
   System{ bodies } <- ask @(System StateVectors Float)
   let identifiers = Map.keys bodies
@@ -209,7 +211,7 @@ controls (Delta (Seconds dt)) = measure "controls" $ do
         Nothing -> Just $ if shift then last identifiers else head identifiers
   when (input ^. _pressed SDL.KeycodeTab) $ do
     shift <- Lens.use (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift)
-    _player . _target %= switchTarget shift
+    _player . _actor . _target %= switchTarget shift
     _pressed SDL.KeycodeTab .= False
   where
   or = liftA2 (liftA2 (coerce (||)))
@@ -245,7 +247,7 @@ draw
   -> GameState
   -> m ()
 draw dt fpsL targetL font game = measure "draw" . runLiftIO $ do
-  let Actor{ position, rotation, target } = game ^. _player
+  let Actor{ position, rotation, target } = game ^. _player . _actor
   bind @Framebuffer Nothing
 
   View{ scale, size, zoom } <- ask
@@ -259,7 +261,7 @@ draw dt fpsL targetL font game = measure "draw" . runLiftIO $ do
 
   for_ (game ^. _actors) (drawShip white)
 
-  when (game ^. _firing) $ drawLaser green (snd (toAxisAngle rotation))
+  when (game ^. _player . _firing) $ drawLaser green (snd (toAxisAngle rotation))
 
   let maxDim = maximum (fromIntegral <$> size ^* scale) * zoom
 
@@ -269,7 +271,7 @@ draw dt fpsL targetL font game = measure "draw" . runLiftIO $ do
 
   for_ bodies $ \ sv -> when (onScreen sv) (drawBody sv)
 
-  drawRadar (player game) (npcs game)
+  drawRadar (game ^. _player . _actor) (npcs game)
 
   let describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
         Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* (1/scale))))) "km"
@@ -292,35 +294,42 @@ withView
 withView game m = do
   scale <- Window.scale
   size  <- Window.size
-  let velocity = game ^. _player . _velocity
+  let velocity = game ^. _player . _actor . _velocity
       zoom = zoomForSpeed size (norm velocity)
-      focus = game ^. _player . _position
+      focus = game ^. _player . _actor . _position
   runReader View{ scale, size, zoom, focus } m
 
+data Player = Player
+  { actor :: !Actor
+  , throttle :: !Float
+  , firing   :: !Bool
+  }
+  deriving (Show)
+
+_actor :: Lens' Player Actor
+_actor = lens actor (\ s a -> s { actor = a })
+
+_throttle :: Lens' Player Float
+_throttle = lens throttle (\ s v -> s { throttle = v })
+
+_firing :: Lens' Player Bool
+_firing = lens firing (\ s p -> s { firing = p })
 
 data GameState = GameState
-  { throttle :: !Float
-  , player   :: !Actor
-  , firing   :: !Bool
+  { player   :: !Player
   , npcs     :: ![Actor]
   , system   :: !(System Body Float)
   }
   deriving (Show)
 
-_throttle :: Lens' GameState Float
-_throttle = lens throttle (\ s v -> s { throttle = v })
-
-_player :: Lens' GameState Actor
+_player :: Lens' GameState Player
 _player = lens player (\ s p -> s { player = p })
-
-_firing :: Lens' GameState Bool
-_firing = lens firing (\ s p -> s { firing = p })
 
 _npcs :: Lens' GameState [Actor]
 _npcs = lens npcs (\ s n -> s { npcs = n })
 
 _actors :: Lens' GameState (NonEmpty Actor)
-_actors = lens ((:|) . player <*> npcs) (\ s (p:|o) -> s { player = p, npcs = o })
+_actors = lens ((:|) . actor . player <*> npcs) (\ s (a:|o) -> s { player = (player s) { actor = a }, npcs = o })
 
 _system :: Lens' GameState (System Body Float)
 _system = lens system (\ s p -> s { system = p })
