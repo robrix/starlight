@@ -38,7 +38,7 @@ makeDrawShip = do
   array <- load vertices
   pure DrawShip
     { drawShip = \ colour Actor{ position, rotation } -> measure "ship" . use program . bindArray array $ do
-      vs@ViewScale{ focus } <- ask
+      vs@View{ focus } <- ask
       let matrix = scaleToViewZoomed vs
       set Ship.U
         { matrix = Just
@@ -57,7 +57,7 @@ newtype DrawShip = DrawShip
     :: forall sig m
     .  ( Has (Lift IO) sig m
        , Has Profile sig m
-       , Has (Reader ViewScale) sig m
+       , Has (Reader View) sig m
        )
     => Colour Float
     -> Actor

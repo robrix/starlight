@@ -307,7 +307,7 @@ draw
      , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader (System StateVectors Float)) sig m
-     , Has (Reader ViewScale) sig m
+     , Has (Reader View) sig m
      )
   => Scene
   -> GameState
@@ -316,7 +316,7 @@ draw Scene{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure 
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
-  ViewScale{ scale, size, zoom } <- ask
+  View{ scale, size, zoom } <- ask
 
   viewport $ scale *^ Interval 0 size
   scissor  $ scale *^ Interval 0 size
@@ -348,7 +348,7 @@ withViewScale
      , Has (Reader Window.Window) sig m
      )
   => GameState
-  -> ReaderC ViewScale m a
+  -> ReaderC View m a
   -> m a
 withViewScale game m = do
   scale <- Window.scale
@@ -356,7 +356,7 @@ withViewScale game m = do
   let velocity = game ^. _player . _velocity
       zoom = zoomForSpeed size (norm velocity)
       focus = game ^. _player . _position
-  runReader ViewScale{ scale, size, zoom, focus } m
+  runReader View{ scale, size, zoom, focus } m
 
 
 data Scene = Scene

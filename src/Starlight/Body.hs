@@ -143,7 +143,7 @@ makeDrawBody = do
   array   <- load vertices
   pure DrawBody
     { drawBody = \ StateVectors{ body = Body{ radius = Metres r, colour }, transform, rotation } -> measure "bodies" . use program . bindArray array $ do
-      vs@ViewScale{ focus } <- ask
+      vs@View{ focus } <- ask
       let origin
             =   scaleToViewZoomed vs
             !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
@@ -165,7 +165,7 @@ newtype DrawBody = DrawBody
     .  ( Has (Lift IO) sig m
        , Has Profile sig m
        , Has (Reader (System StateVectors Float)) sig m
-       , Has (Reader ViewScale) sig m
+       , Has (Reader View) sig m
        )
     => StateVectors Float
     -> m ()
