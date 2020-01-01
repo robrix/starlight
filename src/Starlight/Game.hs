@@ -157,7 +157,7 @@ runGame = do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
-          continue <- fmap isJust . runEmpty . runReader (systemAt system (getDelta t)) $ do
+          continue <- evalEmpty . runReader (systemAt system (getDelta t)) $ do
             input <- measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
@@ -404,3 +404,7 @@ now = sendM getCurrentTime
 
 since :: Has (Lift IO) sig m => UTCTime -> m NominalDiffTime
 since t = flip diffUTCTime t <$> now
+
+
+evalEmpty :: Functor m => EmptyC m a -> m Bool
+evalEmpty = fmap isJust . runEmpty
