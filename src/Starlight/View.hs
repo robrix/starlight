@@ -8,6 +8,7 @@ module Starlight.View
 
 import Data.Function ((&))
 import Lens.Micro ((.~), (^.))
+import Linear.Affine
 import Linear.Matrix
 import Linear.V2
 import Linear.Vector
@@ -16,6 +17,7 @@ data ViewScale = ViewScale
   { scale :: Int
   , size  :: V2 Int
   , zoom  :: Float
+  , focus :: Point V2 Float
   }
 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to device coordinates.
