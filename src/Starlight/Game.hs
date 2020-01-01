@@ -192,9 +192,9 @@ withView game m = do
   runReader View{ scale, size, zoom, focus } m
 
 data GameState = GameState
-  { player   :: !Player
-  , npcs     :: ![Actor]
-  , system   :: !(System Body Float)
+  { player :: !Player
+  , npcs   :: ![Actor]
+  , system :: !(System Body Float)
   }
   deriving (Show)
 
