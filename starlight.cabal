@@ -71,6 +71,7 @@ library
     GL.Uniform
     Linear.Exts
     Starlight.Actor
+    Starlight.AI
     Starlight.Body
     Starlight.Body.Shader
     Starlight.CLI
