@@ -105,8 +105,9 @@ runGame
 runGame = do
   system <- Sol.system
 
-  Window.runWindow "Starlight" (V2 1024 768) . runFinally $ now >>= \ start ->
-    evalState @Input mempty
+  Window.runWindow "Starlight" (V2 1024 768)
+    . runFinally
+    . evalState @Input mempty
     . evalState GameState
       { throttle = 20
       , player   = Actor
@@ -131,8 +132,7 @@ runGame = do
           }
         ]
       , system
-      }
-    . evalState start $ do
+      } $ do
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:" -- characters to preload
 
@@ -152,9 +152,8 @@ runGame = do
       glEnable GL_SCISSOR_TEST
       glEnable GL_PROGRAM_POINT_SIZE
 
-      put =<< now
-
-      fix $ \ loop -> do
+      start <- now
+      evalState start . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
