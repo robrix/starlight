@@ -5,7 +5,7 @@
 module Starlight.Ship
 ( ship
 , runShip
-, Ship
+, DrawShip
 ) where
 
 import Control.Effect.Finally
@@ -31,14 +31,14 @@ import UI.Colour
 ship
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader Ship) sig m
+     , Has (Reader DrawShip) sig m
      , Has (Reader View) sig m
      )
   => Colour Float
   -> Actor
   -> m ()
 ship colour Actor{ position, rotation } = do
-  Ship{ program, array } <- ask
+  DrawShip{ program, array } <- ask
   measure "ship" . use program . bindArray array $ do
     vs@View{ focus } <- ask
     let matrix = scaleToViewZoomed vs
@@ -58,15 +58,15 @@ runShip
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => ReaderC Ship m a
+  => ReaderC DrawShip m a
   -> m a
 runShip m = do
   program <- build shader
   array   <- load vertices
-  runReader Ship{ program, array } m
+  runReader DrawShip{ program, array } m
 
 
-data Ship = Ship
+data DrawShip = DrawShip
   { program :: Program U V O
   , array   :: Array (V I)
   }

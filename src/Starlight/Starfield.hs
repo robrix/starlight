@@ -6,7 +6,7 @@
 module Starlight.Starfield
 ( starfield
 , runStarfield
-, Starfield
+, DrawStarfield
 ) where
 
 import           Control.Effect.Finally
@@ -27,12 +27,12 @@ import           Starlight.View
 starfield
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader Starfield) sig m
+     , Has (Reader DrawStarfield) sig m
      , Has (Reader View) sig m
      )
   => m ()
 starfield = do
-  Starfield { program, array } <- ask
+  DrawStarfield { program, array } <- ask
   measure "starfield" . use program . bindArray array $ do
     View{ scale, size, zoom, focus } <- ask
 
@@ -49,15 +49,15 @@ runStarfield
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => ReaderC Starfield m a
+  => ReaderC DrawStarfield m a
   -> m a
 runStarfield m = do
   program <- build Starfield.shader
   array   <- load vertices
-  runReader Starfield{ program, array } m
+  runReader DrawStarfield{ program, array } m
 
 
-data Starfield = Starfield
+data DrawStarfield = DrawStarfield
   { program :: Program Starfield.U Starfield.V Starfield.O
   , array   :: Array (Starfield.V I)
   }

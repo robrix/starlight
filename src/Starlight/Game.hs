@@ -304,8 +304,8 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader Ship) sig m
-     , Has (Reader Starfield) sig m
+     , Has (Reader DrawShip) sig m
+     , Has (Reader DrawStarfield) sig m
      , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader View) sig m
      )
