@@ -44,7 +44,7 @@ controls (Delta (Seconds dt)) = do
   when (input ^. _pressed SDL.KeycodeMinus) $
     _throttle -= dt * 10
 
-  thrust <- uses (_throttle) (dt *)
+  thrust <- uses _throttle (dt *)
 
   let angular = dt *^ Radians 5
 
