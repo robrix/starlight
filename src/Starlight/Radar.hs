@@ -140,7 +140,7 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable Radar.U Radar.V Radar.O
 
 vertices :: [Radar.V I]
 vertices = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
-  n = (16 :: Int)
+  n = 16 :: Int
 
 range :: Interval I Int
 range = Interval 0 (I (length vertices))
