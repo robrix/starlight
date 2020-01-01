@@ -139,12 +139,11 @@ runGame = do
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      ship <- makeDrawShip
       body <- makeDrawBody
       radar <- Radar.radar
       laser <- makeDrawLaser
 
-      let scene = Scene{ body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
+      let scene = Scene{ body, radar, laser, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -152,7 +151,7 @@ runGame = do
       glEnable GL_PROGRAM_POINT_SIZE
 
       start <- now
-      evalState start . runStarfield . fix $ \ loop -> do
+      evalState start . runStarfield . runShip . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
@@ -305,6 +304,7 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
+     , Has (Reader Ship) sig m
      , Has (Reader Starfield) sig m
      , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader View) sig m
@@ -312,7 +312,7 @@ draw
   => Scene
   -> GameState
   -> m ()
-draw Scene{ body, radar, laser, ship, fpsL, targetL } game = measure "draw" . runLiftIO $ do
+draw Scene{ body, radar, laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -325,7 +325,7 @@ draw Scene{ body, radar, laser, ship, fpsL, targetL } game = measure "draw" . ru
 
   starfield
 
-  for_ (game ^. _actors) (drawShip ship white)
+  for_ (game ^. _actors) (ship white)
 
   when (game ^. _firing) $ drawLaser laser green (snd (toAxisAngle rotation))
 
@@ -363,7 +363,6 @@ data Scene = Scene
   { body      :: DrawBody
   , radar     :: Radar
   , laser     :: DrawLaser
-  , ship      :: DrawShip
   , fpsL      :: Label
   , targetL   :: Label
   , font      :: Font

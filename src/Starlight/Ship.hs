@@ -3,15 +3,15 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Ship
-( makeDrawShip
-, DrawShip
-, drawShip
+( ship
+, runShip
+, Ship
 ) where
 
 import Control.Effect.Finally
 import Control.Effect.Lift
 import Control.Effect.Profile
-import Control.Effect.Reader
+import Control.Carrier.Reader
 import Data.Coerce (coerce)
 import Data.Functor.I
 import Data.Functor.Interval
@@ -24,48 +24,55 @@ import Linear.V2
 import Linear.V4
 import Linear.Vector
 import Starlight.Actor
-import Starlight.Ship.Shader as Ship
+import Starlight.Ship.Shader
 import Starlight.View
 import UI.Colour
 
-makeDrawShip
+ship
+  :: ( Has (Lift IO) sig m
+     , Has Profile sig m
+     , Has (Reader Ship) sig m
+     , Has (Reader View) sig m
+     )
+  => Colour Float
+  -> Actor
+  -> m ()
+ship colour Actor{ position, rotation } = do
+  Ship{ program, array } <- ask
+  measure "ship" . use program . bindArray array $ do
+    vs@View{ focus } <- ask
+    let matrix = scaleToViewZoomed vs
+    set U
+      { matrix = Just
+          $   matrix
+          !*! translated3 (ext (negated (unP focus)) 0)
+          !*! translated3 (ext (unP position) 0)
+          !*! scaled (V4 15 15 15 1)
+          !*! mkTransformation rotation 0
+      , colour = Just colour
+      }
+    drawArrays LineLoop range
+
+
+runShip
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => m DrawShip
-makeDrawShip = do
-  program <- build Ship.shader
-  array <- load vertices
-  pure DrawShip
-    { drawShip = \ colour Actor{ position, rotation } -> measure "ship" . use program . bindArray array $ do
-      vs@View{ focus } <- ask
-      let matrix = scaleToViewZoomed vs
-      set Ship.U
-        { matrix = Just
-            $   matrix
-            !*! translated3 (ext (negated (unP focus)) 0)
-            !*! translated3 (ext (unP position) 0)
-            !*! scaled (V4 15 15 15 1)
-            !*! mkTransformation rotation 0
-        , colour = Just colour
-        }
-      drawArrays LineLoop range
-    }
+  => ReaderC Ship m a
+  -> m a
+runShip m = do
+  program <- build shader
+  array   <- load vertices
+  runReader Ship{ program, array } m
 
-newtype DrawShip = DrawShip
-  { drawShip
-    :: forall sig m
-    .  ( Has (Lift IO) sig m
-       , Has Profile sig m
-       , Has (Reader View) sig m
-       )
-    => Colour Float
-    -> Actor
-    -> m ()
+
+data Ship = Ship
+  { program :: Program U V O
+  , array   :: Array (V I)
   }
 
 
-vertices :: [Ship.V I]
+vertices :: [V I]
 vertices = coerce @[V2 Float]
   [ V2 1      0
   , V2 0      (-0.5)
