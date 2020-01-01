@@ -4,15 +4,15 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Starfield
-( makeDrawStarfield
-, DrawStarfield
-, drawStarfield
+( starfield
+, runStarfield
+, Starfield
 ) where
 
 import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Effect.Profile
-import           Control.Effect.Reader
+import           Control.Carrier.Reader
 import           Data.Coerce (coerce)
 import           Data.Functor.I
 import           Data.Functor.Interval
@@ -24,36 +24,42 @@ import           Linear.Vector
 import qualified Starlight.Starfield.Shader as Starfield
 import           Starlight.View
 
-makeDrawStarfield
+starfield
+  :: ( Has (Lift IO) sig m
+     , Has Profile sig m
+     , Has (Reader Starfield) sig m
+     , Has (Reader View) sig m
+     )
+  => m ()
+starfield = do
+  Starfield { program, array } <- ask
+  measure "starfield" . use program . bindArray array $ do
+    View{ scale, size, zoom, focus } <- ask
+
+    set Starfield.U
+      { resolution = Just (fromIntegral <$> size ^* scale)
+      , origin     = Just (focus / P (fromIntegral <$> size))
+      , zoom       = Just zoom
+      }
+
+    drawArrays TriangleStrip range
+
+
+runStarfield
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => m DrawStarfield
-makeDrawStarfield = do
+  => ReaderC Starfield m a
+  -> m a
+runStarfield m = do
   program <- build Starfield.shader
-  array <- load vertices
-  pure DrawStarfield
-    { drawStarfield = measure "starfield" . use program . bindArray array $ do
-      View{ scale, size, zoom, focus } <- ask
-
-      set Starfield.U
-        { resolution = Just (fromIntegral <$> size ^* scale)
-        , origin     = Just (focus / P (fromIntegral <$> size))
-        , zoom       = Just zoom
-        }
-
-      drawArrays TriangleStrip range
-    }
+  array   <- load vertices
+  runReader Starfield{ program, array } m
 
 
-newtype DrawStarfield = DrawStarfield
-  { drawStarfield
-    :: forall sig m
-    .  ( Has (Lift IO) sig m
-       , Has Profile sig m
-       , Has (Reader View) sig m
-       )
-    => m ()
+data Starfield = Starfield
+  { program :: Program Starfield.U Starfield.V Starfield.O
+  , array   :: Array (Starfield.V I)
   }
 
 

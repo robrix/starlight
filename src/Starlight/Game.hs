@@ -141,11 +141,10 @@ runGame = do
 
       ship <- makeDrawShip
       body <- makeDrawBody
-      starfield <- makeDrawStarfield
       radar <- Radar.radar
       laser <- makeDrawLaser
 
-      let scene = Scene{ starfield, body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
+      let scene = Scene{ body, radar, laser, ship, fpsL, targetL, font = Font face 18 }
 
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
@@ -153,7 +152,7 @@ runGame = do
       glEnable GL_PROGRAM_POINT_SIZE
 
       start <- now
-      evalState start . fix $ \ loop -> do
+      evalState start . runStarfield . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since start
           system <- Lens.use _system
@@ -306,13 +305,14 @@ draw
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
+     , Has (Reader Starfield) sig m
      , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader View) sig m
      )
   => Scene
   -> GameState
   -> m ()
-draw Scene{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure "draw" . runLiftIO $ do
+draw Scene{ body, radar, laser, ship, fpsL, targetL } game = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -323,7 +323,7 @@ draw Scene{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure 
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
-  drawStarfield starfield
+  starfield
 
   for_ (game ^. _actors) (drawShip ship white)
 
@@ -360,8 +360,7 @@ withView game m = do
 
 
 data Scene = Scene
-  { starfield :: DrawStarfield
-  , body      :: DrawBody
+  { body      :: DrawBody
   , radar     :: Radar
   , laser     :: DrawLaser
   , ship      :: DrawShip
