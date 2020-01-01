@@ -29,6 +29,7 @@ import           Unit.Angle
 data Beam = Beam
   { position :: Point V2 Float
   , angle    :: Radians Float
+  , colour   :: Colour Float
   }
   deriving (Show)
 
