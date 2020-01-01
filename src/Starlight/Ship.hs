@@ -4,7 +4,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Ship
-( ship
+( drawShip
 , runShip
 , Drawable
 ) where
@@ -30,7 +30,7 @@ import           Starlight.View
 import           UI.Colour
 import qualified UI.Drawable as UI
 
-ship
+drawShip
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
@@ -39,7 +39,7 @@ ship
   => Colour Float
   -> Actor
   -> m ()
-ship colour Actor{ position, rotation } = measure "ship" . UI.using getDrawable $ do
+drawShip colour Actor{ position, rotation } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   let matrix = scaleToViewZoomed vs
   set U

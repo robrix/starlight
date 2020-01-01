@@ -323,9 +323,9 @@ draw Scene{ body, laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
-  starfield
+  drawStarfield
 
-  for_ (game ^. _actors) (ship white)
+  for_ (game ^. _actors) (drawShip white)
 
   when (game ^. _firing) $ drawLaser laser green (snd (toAxisAngle rotation))
 
@@ -337,7 +337,7 @@ draw Scene{ body, laser, fpsL, targetL } game = measure "draw" . runLiftIO $ do
 
   for_ bodies $ \ sv -> when (onScreen sv) (drawBody body sv)
 
-  radar (player game) (npcs game)
+  drawRadar (player game) (npcs game)
 
   fpsSize <- labelSize fpsL
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing

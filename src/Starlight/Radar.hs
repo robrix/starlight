@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Radar
-( radar
+( drawRadar
 , runRadar
 , Drawable
 ) where
@@ -39,7 +39,7 @@ import qualified UI.Drawable as UI
 import           Unit.Angle
 import           Unit.Length
 
-radar
+drawRadar
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
@@ -49,7 +49,7 @@ radar
   => Actor
   -> [Actor]
   -> m ()
-radar Actor{ position = here, target } npcs = measure "radar" . UI.using getDrawable $ do
+drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using getDrawable $ do
   System{ scale, bodies } <- ask @(System StateVectors Float)
   vs <- ask
 

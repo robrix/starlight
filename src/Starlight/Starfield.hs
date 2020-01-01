@@ -4,7 +4,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Starfield
-( starfield
+( drawStarfield
 , runStarfield
 , Drawable
 ) where
@@ -25,14 +25,14 @@ import           Starlight.Starfield.Shader
 import           Starlight.View
 import qualified UI.Drawable as UI
 
-starfield
+drawStarfield
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
   => m ()
-starfield = measure "starfield" . UI.using getDrawable $ do
+drawStarfield = measure "starfield" . UI.using getDrawable $ do
   View{ scale, size, zoom, focus } <- ask
 
   set U
