@@ -141,7 +141,7 @@ runGame = do
 
       ship <- makeDrawShip
       body <- makeDrawBody
-      starfield <- Starfield.starfield
+      starfield <- makeDrawStarfield
       radar <- Radar.radar
       laser <- makeDrawLaser
 
@@ -360,7 +360,7 @@ withView game m = do
 
 
 data Scene = Scene
-  { starfield :: Starfield
+  { starfield :: DrawStarfield
   , body      :: DrawBody
   , radar     :: Radar
   , laser     :: DrawLaser

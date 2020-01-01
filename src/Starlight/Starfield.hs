@@ -1,11 +1,12 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Starfield
-( starfield
+( makeDrawStarfield
+, DrawStarfield
 , drawStarfield
-, Starfield
 ) where
 
 import           Control.Effect.Finally
@@ -23,39 +24,36 @@ import           Linear.Vector
 import qualified Starlight.Starfield.Shader as Starfield
 import           Starlight.View
 
-starfield
+makeDrawStarfield
   :: ( Has Finally sig m
      , Has (Lift IO) sig m
      )
-  => m Starfield
-starfield = do
+  => m DrawStarfield
+makeDrawStarfield = do
   program <- build Starfield.shader
   array <- load vertices
-  pure Starfield { program, array }
+  pure DrawStarfield
+    { drawStarfield = measure "starfield" . use program . bindArray array $ do
+      View{ scale, size, zoom, focus } <- ask
 
+      set Starfield.U
+        { resolution = Just (fromIntegral <$> size ^* scale)
+        , origin     = Just (focus / P (fromIntegral <$> size))
+        , zoom       = Just zoom
+        }
 
-drawStarfield
-  :: ( Has (Lift IO) sig m
-     , Has Profile sig m
-     , Has (Reader View) sig m
-     )
-  => Starfield
-  -> m ()
-drawStarfield Starfield{ program, array } = measure "starfield" . use program . bindArray array $ do
-  View{ scale, size, zoom, focus } <- ask
-
-  set Starfield.U
-    { resolution = Just (fromIntegral <$> size ^* scale)
-    , origin     = Just (focus / P (fromIntegral <$> size))
-    , zoom       = Just zoom
+      drawArrays TriangleStrip range
     }
 
-  drawArrays TriangleStrip range
 
-
-data Starfield = Starfield
-  { program :: Program Starfield.U Starfield.V Starfield.O
-  , array   :: Array (Starfield.V I)
+newtype DrawStarfield = DrawStarfield
+  { drawStarfield
+    :: forall sig m
+    .  ( Has (Lift IO) sig m
+       , Has Profile sig m
+       , Has (Reader View) sig m
+       )
+    => m ()
   }
 
 
