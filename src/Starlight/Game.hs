@@ -139,8 +139,6 @@ runGame = do
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      let scene = Scene{ fpsL, targetL, font = Font face 18 }
-
       glEnable GL_BLEND
       glEnable GL_DEPTH_CLAMP
       glEnable GL_SCISSOR_TEST
@@ -155,10 +153,10 @@ runGame = do
             input <- measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            controls scene dt input
+            controls fpsL targetL (Font face 18) dt input
             ai dt
             gameState <- measure "physics" (physics dt)
-            withView gameState (draw scene gameState)
+            withView gameState (draw fpsL targetL gameState)
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -169,11 +167,13 @@ controls
      , Has (State Input) sig m
      , Has (State GameState) sig m
      )
-  => Scene
+  => Label
+  -> Label
+  -> Font
   -> Delta Seconds Float
   -> Input
   -> m ()
-controls Scene{ fpsL, targetL, font } (Delta (Seconds dt)) input = measure "controls" $ do
+controls fpsL targetL font (Delta (Seconds dt)) input = measure "controls" $ do
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
     _throttle += dt * 10
   when (input ^. _pressed SDL.KeycodeMinus) $
@@ -308,10 +308,11 @@ draw
      , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader View) sig m
      )
-  => Scene
+  => Label
+  -> Label
   -> GameState
   -> m ()
-draw Scene{ fpsL, targetL } game = measure "draw" . runLiftIO $ do
+draw fpsL targetL game = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation } = game ^. _player
   bind @Framebuffer Nothing
 
@@ -356,13 +357,6 @@ withView game m = do
       zoom = zoomForSpeed size (norm velocity)
       focus = game ^. _player . _position
   runReader View{ scale, size, zoom, focus } m
-
-
-data Scene = Scene
-  { fpsL    :: Label
-  , targetL :: Label
-  , font    :: Font
-  }
 
 
 data GameState = GameState
