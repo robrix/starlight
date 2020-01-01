@@ -5,6 +5,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Game
@@ -158,7 +159,7 @@ runGame = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ controls dt
+            measure "controls" $ _player %%= controls dt
             system <- ask
             measure "ai"      (_npcs   . each %= ai      dt system)
             measure "physics" (_actors . each %= physics dt system)
@@ -171,35 +172,35 @@ controls
   :: ( Has (Lift IO) sig m
      , Has (Reader (System StateVectors Float)) sig m
      , Has (State Input) sig m
-     , Has (State GameState) sig m
+     , Has (State Player) sig m
      )
   => Delta Seconds Float
   -> m ()
 controls (Delta (Seconds dt)) = do
   input <- get
   when (input ^. (_pressed SDL.KeycodePlus `or` _pressed SDL.KeycodeEquals)) $
-    _player . _throttle += dt * 10
+    _throttle += dt * 10
   when (input ^. _pressed SDL.KeycodeMinus) $
-    _player . _throttle -= dt * 10
+    _throttle -= dt * 10
 
-  thrust <- Lens.uses (_player . _throttle) (dt *)
+  thrust <- Lens.uses (_throttle) (dt *)
 
   let angular = dt *^ Radians 5
 
   when (input ^. _pressed SDL.KeycodeUp) $ do
-    rotation <- Lens.use (_player . _actor . _rotation)
-    _player . _actor . _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
+    rotation <- Lens.use (_actor . _rotation)
+    _actor . _velocity += rotate rotation (unit _x ^* thrust) ^. _xy
   when (input ^. _pressed SDL.KeycodeDown) $ do
-    rotation <- Lens.use (_player . _actor . _rotation)
-    velocity <- Lens.use (_player . _actor . _velocity)
-    _player . _actor . _rotation .= face angular (angleOf (negated velocity)) rotation
+    rotation <- Lens.use (_actor . _rotation)
+    velocity <- Lens.use (_actor . _velocity)
+    _actor . _rotation .= face angular (angleOf (negated velocity)) rotation
 
   when (input ^. _pressed SDL.KeycodeLeft) $
-    _player . _actor . _rotation *= axisAngle (unit _z) (getRadians angular)
+    _actor . _rotation *= axisAngle (unit _z) (getRadians angular)
   when (input ^. _pressed SDL.KeycodeRight) $
-    _player . _actor . _rotation *= axisAngle (unit _z) (getRadians (-angular))
+    _actor . _rotation *= axisAngle (unit _z) (getRadians (-angular))
 
-  _player . _firing .= input ^. _pressed SDL.KeycodeSpace
+  _firing .= input ^. _pressed SDL.KeycodeSpace
 
   System{ bodies } <- ask @(System StateVectors Float)
   let identifiers = Map.keys bodies
@@ -209,10 +210,15 @@ controls (Delta (Seconds dt)) = do
              | otherwise = i + 1
         Nothing -> Just $ if shift then last identifiers else head identifiers
   when (input ^. _pressed SDL.KeycodeTab) $ do
-    _player . _actor . _target %= switchTarget (input ^. (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift))
+    _actor . _target %= switchTarget (input ^. (_pressed SDL.KeycodeLShift `or` _pressed SDL.KeycodeRShift))
     _pressed SDL.KeycodeTab .= False
   where
   or = liftA2 (liftA2 (coerce (||)))
+
+(%%=) :: Has (State s) sig m => Lens' s a -> StateC a m () -> m ()
+lens %%= action = Lens.use lens >>= (`execState` action) >>= (lens .=)
+
+infix 4 %%=
 
 -- | Compute the zoom factor for the given velocity.
 --
