@@ -14,7 +14,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Data.Coerce (coerce)
-import           Data.Functor.I
+import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
@@ -69,7 +69,7 @@ runShip m = do
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [V I]
+vertices :: [V Identity]
 vertices = coerce @[V2 Float]
   [ V2 1      0
   , V2 0      (-0.5)
@@ -77,5 +77,5 @@ vertices = coerce @[V2 Float]
   , V2 0      0.5
   ]
 
-range :: Interval I Int
+range :: Interval Identity Int
 range = Interval 0 4

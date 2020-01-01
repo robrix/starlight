@@ -18,7 +18,7 @@ module GL.Buffer
 
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
-import           Data.Functor.I
+import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
@@ -44,11 +44,11 @@ instance KnownType ty => Bind (Buffer ty v) where
 realloc :: (KnownType ty, S.Storable v, Has (Lift IO) sig m) => Buffer ty v -> Int -> Update -> Usage -> m ()
 realloc b n update usage = runLiftIO (glBufferData (glEnum (typeOf b)) (fromIntegral (n * sizeOfElem b)) nullPtr (glEnum (Hint update usage)))
 
-copyPtr :: (KnownType ty, Has (Lift IO) sig m) => Buffer ty a -> Interval I Int -> Ptr a -> m ()
+copyPtr :: (KnownType ty, Has (Lift IO) sig m) => Buffer ty a -> Interval Identity Int -> Ptr a -> m ()
 copyPtr b i = checkingGLError . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min_ i)) (fromIntegral (size i)) . castPtr
 
 copy :: (KnownType ty, S.Storable v, Has (Lift IO) sig m) => Buffer ty v -> Int -> [v] -> m ()
-copy b offset vertices = A.withArray vertices $ copyPtr b ((Interval 0 (I (length vertices)) + pure offset) ^* sizeOfElem b)
+copy b offset vertices = A.withArray vertices $ copyPtr b ((Interval 0 (Identity (length vertices)) + pure offset) ^* sizeOfElem b)
 
 typeOf :: KnownType ty => Buffer ty a -> Type
 typeOf b = typeVal (typeProxy b)

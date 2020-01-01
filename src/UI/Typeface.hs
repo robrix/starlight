@@ -21,7 +21,7 @@ import           Data.Bifunctor (first)
 import           Data.Char (isPrint, isSeparator, ord)
 import           Data.Coerce (coerce)
 import           Data.Foldable (find, foldl')
-import           Data.Functor.I (I(..))
+import           Data.Functor.Identity
 import           Data.Functor.Interval (Interval(..))
 import           Data.IORef
 import qualified Data.Map as Map
@@ -48,9 +48,9 @@ data Typeface = Typeface
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
   , glyphP       :: Program Glyph.U Glyph.V Glyph.O
-  , glyphB       :: Buffer 'B.Array (Glyph.V I)
-  , glyphA       :: Array (Glyph.V I)
-  , rangesRef    :: IORef (Map.Map Char (Interval I Int))
+  , glyphB       :: Buffer 'B.Array (Glyph.V Identity)
+  , glyphA       :: Array (Glyph.V Identity)
+  , rangesRef    :: IORef (Map.Map Char (Interval Identity Int))
   }
 
 data Font = Font
@@ -132,7 +132,7 @@ readFontOfSize path size = (`Font` size) <$> readTypeface path
 cacheCharactersForDrawing :: (HasCallStack, Has (Lift IO) sig m) => Typeface -> String -> m ()
 cacheCharactersForDrawing Typeface{ allGlyphs, glyphA, glyphB, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
-      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
+      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + Identity (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
   bind (Just glyphB)

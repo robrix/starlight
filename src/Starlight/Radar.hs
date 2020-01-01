@@ -17,7 +17,7 @@ import           Control.Monad (when)
 import           Data.Coerce (coerce)
 import           Data.Foldable (for_)
 import           Data.Function ((&))
-import           Data.Functor.I
+import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.List (find)
 import           GL.Array
@@ -138,13 +138,13 @@ makeBlip (P there) r colour = Blip { angle, d, direction, r, colour } where
 newtype Drawable = Drawable { getDrawable :: UI.Drawable Radar.U Radar.V Radar.O }
 
 
-vertices :: [Radar.V I]
+vertices :: [Radar.V Identity]
 vertices = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
   n = 16 :: Int
 
-range :: Interval I Int
-range = Interval 0 (I (length vertices))
+range :: Interval Identity Int
+range = Interval 0 (Identity (length vertices))
 
-medianRange :: Interval I Int
+medianRange :: Interval Identity Int
 medianRange = Interval n (n + 1) where
   n = max_ range `div` 2

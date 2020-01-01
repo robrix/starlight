@@ -29,7 +29,7 @@ import           Data.Coerce
 import           Data.Foldable (find, for_)
 import           Data.Function (fix)
 import           Data.Functor.Const
-import           Data.Functor.I
+import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.Ix (inRange)
 import           Data.List (elemIndex)
@@ -219,9 +219,9 @@ controls (Delta (Seconds dt)) = measure "controls" $ do
 -- Higher values correlate to more of the scene being visible.
 zoomForSpeed :: V2 Int -> Float -> Float
 zoomForSpeed size x
-  | I x < min_ speed = getI (min_ zoom)
-  | I x > max_ speed = getI (max_ zoom)
-  | otherwise        = getI (fromUnit zoom (coerce easeInOutCubic (toUnit speed (I x)))) where
+  | Identity x < min_ speed = runIdentity (min_ zoom)
+  | Identity x > max_ speed = runIdentity (max_ zoom)
+  | otherwise        = runIdentity (fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))) where
   zoom = Interval 1 6
   speed = speedAt <$> zoom
   speedAt x = x / 25 * fromIntegral (maximum size)

@@ -13,7 +13,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Data.Coerce (coerce)
-import           Data.Functor.I
+import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
@@ -57,8 +57,8 @@ drawLaser colour angle = measure "laser" . UI.using getDrawable $ do
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [Laser.V I]
+vertices :: [Laser.V Identity]
 vertices = coerce @[Float] [0, 1]
 
-range :: Interval I Int
-range = Interval 0 (I (length vertices))
+range :: Interval Identity Int
+range = Interval 0 (Identity (length vertices))

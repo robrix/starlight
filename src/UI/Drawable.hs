@@ -6,13 +6,13 @@ module UI.Drawable
 
 import Control.Effect.Lift
 import Control.Effect.Reader
-import Data.Functor.I
+import Data.Functor.Identity
 import GL.Array
 import GL.Program
 
 data Drawable u v o = Drawable
   { program :: Program u v o
-  , array   :: Array (v I)
+  , array   :: Array (v Identity)
   }
 
 using

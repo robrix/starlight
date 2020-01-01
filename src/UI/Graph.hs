@@ -12,7 +12,7 @@ module UI.Graph
 import           Control.Carrier.Finally
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
-import           Data.Functor.I
+import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
@@ -31,7 +31,7 @@ import           UI.Graph.Vertex
 data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
-  , array     :: !(Array (V I))
+  , array     :: !(Array (V Identity))
   , points    :: !(Program Points.U V Points.O)
   , lines     :: !(Program Lines.U  V Lines.O)
   , pointSize :: !Float
@@ -61,7 +61,7 @@ drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = bin
   runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
   use points $ do
     set Points.U { matrix = Just matrix, pointSize = Just pointSize, colour = Just colour }
-    drawArrays Points    (Interval 0 (I count))
+    drawArrays Points    (Interval 0 (Identity count))
   use lines $ do
     set Lines.U { matrix = Just matrix, colour = Just colour }
-    drawArrays LineStrip (Interval 0 (I count))
+    drawArrays LineStrip (Interval 0 (Identity count))

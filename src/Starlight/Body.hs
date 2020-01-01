@@ -29,7 +29,7 @@ import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Data.Coerce (coerce)
 import           Data.Foldable (find)
-import           Data.Functor.I
+import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Geometry.Circle
 import           GL.Array
@@ -172,8 +172,8 @@ drawBody StateVectors{ body = Body{ radius = Metres r, colour }, transform, rota
 newtype Drawable = Drawable { getDrawable :: UI.Drawable Shader.U Shader.V Shader.O }
 
 
-vertices :: [Shader.V I]
+vertices :: [Shader.V Identity]
 vertices = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
 
-range :: Interval I Int
-range = Interval 0 (I (length vertices))
+range :: Interval Identity Int
+range = Interval 0 (Identity (length vertices))
