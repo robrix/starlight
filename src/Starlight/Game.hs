@@ -275,7 +275,7 @@ draw fpsL targetL game = measure "draw" . runLiftIO $ do
 
   System{ scale, bodies } <- ask @(System StateVectors Float)
 
-  let onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - getMetres (scale *^ radius) < maxDim * 0.5
+  let onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - scale * getMetres radius < maxDim * 0.5
 
   for_ bodies $ \ sv -> when (onScreen sv) (drawBody sv)
 
