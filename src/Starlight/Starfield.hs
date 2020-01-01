@@ -32,18 +32,16 @@ starfield
      , Has (Reader View) sig m
      )
   => m ()
-starfield = do
-  UI.Drawable { program, array } <- asks getDrawable
-  measure "starfield" . use program . bindArray array $ do
-    View{ scale, size, zoom, focus } <- ask
+starfield = measure "starfield" . UI.using getDrawable $ do
+  View{ scale, size, zoom, focus } <- ask
 
-    set U
-      { resolution = Just (fromIntegral <$> size ^* scale)
-      , origin     = Just (focus / P (fromIntegral <$> size))
-      , zoom       = Just zoom
-      }
+  set U
+    { resolution = Just (fromIntegral <$> size ^* scale)
+    , origin     = Just (focus / P (fromIntegral <$> size))
+    , zoom       = Just zoom
+    }
 
-    drawArrays TriangleStrip range
+  drawArrays TriangleStrip range
 
 
 runStarfield

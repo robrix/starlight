@@ -39,21 +39,19 @@ ship
   => Colour Float
   -> Actor
   -> m ()
-ship colour Actor{ position, rotation } = do
-  UI.Drawable{ program, array } <- asks getDrawable
-  measure "ship" . use program . bindArray array $ do
-    vs@View{ focus } <- ask
-    let matrix = scaleToViewZoomed vs
-    set U
-      { matrix = Just
-          $   matrix
-          !*! translated3 (ext (negated (unP focus)) 0)
-          !*! translated3 (ext (unP position) 0)
-          !*! scaled (V4 15 15 15 1)
-          !*! mkTransformation rotation 0
-      , colour = Just colour
-      }
-    drawArrays LineLoop range
+ship colour Actor{ position, rotation } = measure "ship" . UI.using getDrawable $ do
+  vs@View{ focus } <- ask
+  let matrix = scaleToViewZoomed vs
+  set U
+    { matrix = Just
+        $   matrix
+        !*! translated3 (ext (negated (unP focus)) 0)
+        !*! translated3 (ext (unP position) 0)
+        !*! scaled (V4 15 15 15 1)
+        !*! mkTransformation rotation 0
+    , colour = Just colour
+    }
+  drawArrays LineLoop range
 
 
 runShip
