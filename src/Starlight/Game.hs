@@ -51,6 +51,7 @@ import           Linear.Vector as Linear
 import           Numeric
 import qualified SDL
 import           Starlight.Actor as Actor
+import           Starlight.AI
 import           Starlight.Body as Body
 import           Starlight.CLI
 import           Starlight.Identifier
@@ -224,32 +225,6 @@ controls fpsL targetL font (Delta (Seconds dt)) input = measure "controls" $ do
   measure "setLabel" $ setLabel targetL font target
   where
   or = liftA2 (liftA2 (coerce (||)))
-
-
-ai
-  :: Delta Seconds Float
-  -> System StateVectors Float
-  -> Actor
-  -> Actor
-ai (Delta (Seconds dt)) System{ bodies } a@Actor{ target, velocity, rotation, position } = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
-  -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
-  Just StateVectors{ position = P pos }
-    | angle     <- angleTo (unP position) pos
-    , rotation' <- face angular angle rotation
-    -> a
-      { Actor.rotation = rotation'
-      -- FIXME: don’t just fly directly at the target at full throttle, dumbass
-      -- FIXME: factor in the target’s velocity & distance
-      -- FIXME: allow other behaviours relating to targets, e.g. following
-      , velocity = if abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation') - angle)) < pi/2 then velocity + rotate rotation' (unit _x ^* thrust) ^. _xy else velocity
-      }
-  -- FIXME: wander
-  -- FIXME: pick a new target
-  Nothing -> a
-  where
-  angular = dt *^ Radians 5
-  thrust  = dt * 1
-
 
 -- | Compute the zoom factor for the given velocity.
 --
