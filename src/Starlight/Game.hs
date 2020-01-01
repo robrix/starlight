@@ -271,7 +271,7 @@ draw fpsL targetL game = measure "draw" . runLiftIO $ do
 
   when (game ^. _firing) $ drawLaser green (snd (toAxisAngle rotation))
 
-  let maxDim = maximum ((fromIntegral <$> size ^* scale) ^* zoom)
+  let maxDim = maximum (fromIntegral <$> size ^* scale) * zoom
 
   System{ scale, bodies } <- ask @(System StateVectors Float)
 
