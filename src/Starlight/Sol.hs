@@ -16,6 +16,7 @@ import           Linear.Quaternion
 import           Linear.V4
 import           Linear.Vector
 import           Starlight.Body
+import           Starlight.Ephemeris
 import           Starlight.Identifier as Identifier
 import           Starlight.System
 import           UI.Colour
