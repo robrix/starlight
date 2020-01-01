@@ -20,8 +20,8 @@ using
      , Has (Reader a) sig m
      )
   => (a -> Drawable u v o)
-  -> ArrayT v (ProgramT u v o m) a
-  -> m a
+  -> ArrayT v (ProgramT u v o m) b
+  -> m b
 using getDrawable m = do
   Drawable { program, array } <- asks getDrawable
   use program $ bindArray array m
