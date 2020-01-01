@@ -64,7 +64,7 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
   measure "bodies" $
     for_ bodies $ \ StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
       setBlip (makeBlip (there ^-^ here) (r * scale) colour)
-      drawArrays LineStrip (Interval 0 (I vertexCount))
+      drawArrays LineStrip range
 
   measure "npcs" $ do
     set defaultVars
@@ -75,7 +75,7 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
       }
     for_ npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here)) in when (r > zoom vs * radius) $ do
       set defaultVars { Radar.angle  = Just angle }
-      drawArrays Points (Interval (I medianVertex) (I (medianVertex + 1)))
+      drawArrays Points medianRange
 
   measure "targets" $ do
     let targetVectors = target >>= \ i -> find ((== i) . identifier . body) bodies
@@ -92,7 +92,7 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
           , Radar.colour = Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
           }
 
-        drawArrays LineStrip (Interval 0 (I vertexCount))
+        drawArrays LineStrip range
   where
   n = 10 :: Int
 
@@ -142,8 +142,9 @@ vertices :: [Radar.V I]
 vertices = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
   n = (16 :: Int)
 
-vertexCount :: Int
-vertexCount = length vertices
+range :: Interval I Int
+range = Interval 0 (I (length vertices))
 
-medianVertex :: Int
-medianVertex = vertexCount `div` 2
+medianRange :: Interval I Int
+medianRange = Interval n (n + 1) where
+  n = max_ range `div` 2
