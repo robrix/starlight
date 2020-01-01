@@ -164,7 +164,7 @@ runGame = do
             controls scene dt input
             ai dt
             gameState <- measure "physics" (physics dt)
-            withViewScale gameState (draw scene gameState)
+            withView gameState (draw scene gameState)
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -343,14 +343,14 @@ draw Scene{ starfield, body, radar, laser, ship, fpsL, targetL } game = measure 
   measure "drawLabel" $ drawLabel fpsL    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetL (V2 10 10) white Nothing
 
-withViewScale
+withView
   :: ( Has (Lift IO) sig m
      , Has (Reader Window.Window) sig m
      )
   => GameState
   -> ReaderC View m a
   -> m a
-withViewScale game m = do
+withView game m = do
   scale <- Window.scale
   size  <- Window.size
   let velocity = game ^. _player . _velocity
