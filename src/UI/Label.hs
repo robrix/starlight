@@ -12,9 +12,9 @@ module UI.Label
 , drawLabel
 ) where
 
+import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lift
-import           Control.Effect.Reader
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -40,6 +40,7 @@ import           Linear.V2
 import           Linear.V3
 import           Linear.Vector
 import           UI.Colour
+import           UI.Drawable
 import           UI.Glyph (Instance(..), Run(..))
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
@@ -47,10 +48,9 @@ import           UI.Typeface
 import qualified UI.Window as Window
 
 data Label = Label
-  { textP   :: !(Program Text.U  Text.V  Text.O)
+  { text    :: !(Drawable Text.U  Text.V  Text.O)
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
-  , quadA   :: !(Array (Text.V  I))
   , scale   :: !Int
   , ref     :: !(IORef (Maybe LabelState))
   }
@@ -73,9 +73,9 @@ label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
-  textP  <- build Text.shader
+  program  <- build Text.shader
 
-  quadA <- do
+  array <- do
     let vertices =
           [ V2 (-1) (-1)
           , V2   1  (-1)
@@ -96,7 +96,7 @@ label = do
   scale <- Window.scale
 
   ref <- sendIO (newIORef Nothing)
-  pure Label{ textP, texture, fbuffer, quadA, ref, scale }
+  pure Label{ text = Drawable{ program, array }, texture, fbuffer, ref, scale }
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 Int)
 labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
@@ -164,7 +164,7 @@ drawLabel
   -> Colour Float
   -> Maybe (Colour Float)
   -> m ()
-drawLabel Label{ texture, textP, quadA, scale, ref } offset colour bcolour = runLiftIO $ do
+drawLabel label@Label{ texture, scale, ref } offset colour bcolour = runReader label . runLiftIO $ do
   state <- sendIO (readIORef ref)
   case state of
     Just LabelState{ size, baseline } -> do
@@ -183,7 +183,7 @@ drawLabel Label{ texture, textP, quadA, scale, ref } offset colour bcolour = run
           glClear GL_COLOR_BUFFER_BIT
         _ -> pure ()
 
-      use textP $ do
+      using text $ do
         let textureUnit = TextureUnit 0
         setActiveTexture textureUnit
         bind (Just texture)
@@ -193,15 +193,14 @@ drawLabel Label{ texture, textP, quadA, scale, ref } offset colour bcolour = run
           , colour  = Just transparent
           }
 
-        bindArray quadA $ do
-          let range = Interval 0 4
-          drawArrays TriangleStrip range
+        let range = Interval 0 4
+        drawArrays TriangleStrip range
 
-          when (opaque colour /= black) $ do
-            glBlendFunc GL_ONE GL_ONE
-            set Text.U
-              { sampler = Nothing
-              , colour  = Just colour
-              }
-            drawArrays TriangleStrip range
+        when (opaque colour /= black) $ do
+          glBlendFunc GL_ONE GL_ONE
+          set Text.U
+            { sampler = Nothing
+            , colour  = Just colour
+            }
+          drawArrays TriangleStrip range
     _ -> pure ()
