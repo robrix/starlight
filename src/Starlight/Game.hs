@@ -146,7 +146,7 @@ runGame = do
             put =<< now
             measure "controls" $ Lens.zoom player_ (controls >>= Lens.zoom actor_ . traverse_ (runAction dt))
             system <- ask
-            measure "ai"      (npcs_   . each %= ai      dt system)
+            measure "ai" (zoomEach npcs_ (gets (ai system) >>= traverse_ (runAction dt)))
             measure "physics" (actors_ . each %= physics dt system)
             gameState <- get
             withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState) (npcs gameState))
