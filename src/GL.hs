@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
@@ -13,14 +12,15 @@ module GL
 , GLC(..)
 ) where
 
-import Control.Algebra
-import Control.Monad.IO.Class
-import Data.Maybe (fromMaybe)
-import GHC.Generics (Generic)
-import GL.Enum as GL
-import GL.Shader.DSL (Vars)
-import Graphics.GL.Core41
-import Lens.Micro (Lens', lens)
+import           Control.Algebra
+import           Control.Effect.State
+import           Control.Monad.IO.Class.Lift
+import           Data.Foldable (for_)
+import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe)
+import           GL.Enum as GL
+import           Graphics.GL.Core41
+import           Lens.Micro (Lens', lens)
 
 data Capability
   = Blend                      -- ^ GL_BLEND
@@ -77,24 +77,13 @@ instance GL.Enum Capability where
     ProgramPointSize           -> GL_PROGRAM_POINT_SIZE
 
 
-data Capabilities v = Capabilities
-  { blend            :: v Bool
-  , depthClamp       :: v Bool
-  , programPointSize :: v Bool
-  , scissorTest      :: v Bool
-  }
-  deriving (Generic)
+newtype Capabilities = Capabilities { getCapabilities :: Map.Map Capability Bool }
 
-instance Vars Capabilities
-
-enabled_ :: Capability -> Lens' (Capabilities Maybe) Bool
-enabled_ = \case
-  Blend            -> lens (orFalse . blend)            (\ u v -> u { blend            = Just v })
-  DepthClamp       -> lens (orFalse . depthClamp)       (\ u v -> u { depthClamp       = Just v })
-  ProgramPointSize -> lens (orFalse . programPointSize) (\ u v -> u { programPointSize = Just v })
-  ScissorTest      -> lens (orFalse . scissorTest)      (\ u v -> u { scissorTest      = Just v })
+enabled_ :: Capability -> Lens' Capabilities Bool
+enabled_ cap = lens (get cap) (set cap)
   where
-  orFalse = fromMaybe False
+  get cap = fromMaybe False . Map.lookup cap . getCapabilities
+  set cap (Capabilities caps) v = Capabilities (Map.insert cap v caps)
 
 
 runGLC :: GLC m a -> m a
