@@ -6,8 +6,6 @@ module Starlight.Controls
 , actions
 , runAction
 , controlRelations
-, Continuity(..)
-, actionContinuity
 ) where
 
 import           Control.Applicative (Alternative(..))
@@ -70,16 +68,6 @@ controlRelations =
   ]
   where
   shift = expect (pressed_ SDL.KeycodeLShift) <|> expect (pressed_ SDL.KeycodeRShift)
-
-data Continuity
-  = Continuous
-  | Discrete
-  deriving (Eq, Ord, Show)
-
-actionContinuity :: Action -> Continuity
-actionContinuity = \case
-  ChangeTarget _ -> Discrete
-  _              -> Continuous
 
 
 runAction
