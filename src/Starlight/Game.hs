@@ -144,7 +144,7 @@ runGame = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ Lens.zoom player_ (controls >>= traverse_ (runAction dt))
+            measure "controls" $ Lens.zoom player_ (controls >>= Lens.zoom actor_ . traverse_ (runAction dt))
             system <- ask
             measure "ai"      (npcs_   . each %= ai      dt system)
             measure "physics" (actors_ . each %= physics dt system)

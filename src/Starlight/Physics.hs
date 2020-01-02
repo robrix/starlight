@@ -21,7 +21,6 @@ import           Linear.Exts
 import           Starlight.Action
 import           Starlight.Actor as Actor
 import           Starlight.Body
-import           Starlight.Player
 import           Starlight.System
 import           Unit.Angle
 import           Unit.Mass
@@ -48,39 +47,39 @@ applyGravity (Delta (Seconds dt)) distanceScale StateVectors{ position = pos, bo
 runAction
   :: ( Has (Lift IO) sig m
      , Has (Reader (System StateVectors Float)) sig m
-     , Has (State Player) sig m
+     , Has (State Actor) sig m
      )
   => Delta Seconds Float
   -> Action
   -> m ()
 runAction (Delta (Seconds dt)) = \case
   Thrust -> do
-    rotation <- use (actor_ . rotation_)
-    actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
+    rotation <- use (rotation_ @Actor)
+    velocity_ @Actor += rotate rotation (unit _x ^* thrust) ^. _xy
   Face dir -> do
     direction <- case dir of
       Forwards  -> do
-        velocity <- use (actor_ . velocity_)
+        velocity <- use (velocity_ @Actor)
         pure (Just velocity)
       Backwards -> do
-        velocity <- use (actor_ . velocity_)
+        velocity <- use (velocity_ @Actor)
         pure (Just (negated velocity))
       Target    -> do
         System{ bodies } <- ask @(System StateVectors Float)
-        target   <- use (actor_ . target_)
-        position <- use (actor_ . position_)
+        target   <- use target_
+        position <- use (position_ @Actor)
         pure ((^. position_ . to (unP . flip direction position)) <$> (target >>= (bodies Map.!?)))
     for_ direction $ \ direction -> do
-      rotation <- use (actor_ . rotation_)
-      actor_ . rotation_ .= face angular (angleOf direction) rotation
-  Turn t -> actor_ . rotation_ *= axisAngle (unit _z) (getRadians (case t of
+      rotation <- use (rotation_ @Actor)
+      rotation_ @Actor .= face angular (angleOf direction) rotation
+  Turn t -> rotation_ @Actor *= axisAngle (unit _z) (getRadians (case t of
     L -> angular
     R -> -angular))
   Fire Main -> pure ()
   ChangeTarget change -> do
     System{ bodies } <- ask @(System StateVectors Float)
     let identifiers = Map.keys bodies
-    actor_ . target_ %= case change of
+    target_ %= case change of
       Nothing -> const Nothing
       Just dir -> \ target -> case target >>= (`elemIndex` identifiers) of
           Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length bodies)) i') where
