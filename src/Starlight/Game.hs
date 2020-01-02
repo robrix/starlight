@@ -78,7 +78,6 @@ game = do
           , target   = Nothing
           , health   = 1000
           }
-        , firing   = False
         }
       , npcs   =
         [ Actor
