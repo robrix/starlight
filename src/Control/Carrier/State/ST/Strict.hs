@@ -6,6 +6,7 @@ module Control.Carrier.State.ST.Strict
 ( -- * State carrier
   runStateRef
 , runState
+, evalState
 , StateC(..)
   -- * State effect
 , module Control.Effect.State
@@ -27,6 +28,9 @@ runState s m = runST $ do
   a <- runStateRef ref m
   s' <- readSTRef ref
   pure (s', a)
+
+evalState :: s -> StateC s a -> a
+evalState s = snd . runState s
 
 newtype StateC s a = StateC (forall t . ReaderC (STRef t s) (ST t) a)
   deriving (Functor)
