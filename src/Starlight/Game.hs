@@ -31,6 +31,7 @@ import           Data.Functor.Interval
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
+import           GL
 import           Graphics.GL.Core41
 import           Lens.Micro (Lens', each, lens, (^.))
 import           Linear.Exts
@@ -90,6 +91,7 @@ runGame = do
   system <- Sol.system
 
   Window.runWindow "Starlight" (V2 1024 768)
+    . runGLC
     . runFinally
     . evalState @Input mempty
     . evalState GameState
@@ -129,10 +131,10 @@ runGame = do
       fpsL    <- measure "label" Label.label
       targetL <- measure "label" Label.label
 
-      glEnable GL_BLEND
-      glEnable GL_DEPTH_CLAMP
-      glEnable GL_SCISSOR_TEST
-      glEnable GL_PROGRAM_POINT_SIZE
+      enabled_ Blend            .= True
+      enabled_ DepthClamp       .= True
+      enabled_ ProgramPointSize .= True
+      enabled_ ScissorTest      .= True
 
       start <- now
       evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
