@@ -62,8 +62,8 @@ import           Unit.Length
 
 main :: IO ()
 main = handling $ do
-  Options{ profile } <- execParser argumentsParser
-  runProfile Options{ profile } runGame
+  options <- execParser argumentsParser
+  runProfile options runGame
   where
   handling m = do
     name <- getProgName
