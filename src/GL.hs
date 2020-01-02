@@ -81,8 +81,7 @@ instance GL.Enum Capability where
 newtype Capabilities = Capabilities { getCapabilities :: Map.Map Capability Bool }
 
 enabled_ :: Capability -> Lens' Capabilities Bool
-enabled_ cap = lens (get cap) (set cap)
-  where
+enabled_ cap = lens (get cap) (set cap) where
   get cap = fromMaybe False . Map.lookup cap . getCapabilities
   set cap (Capabilities caps) v = Capabilities (Map.insert cap v caps)
 
