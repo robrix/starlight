@@ -10,17 +10,15 @@ module Starlight.Controls
 , actionContinuity
 ) where
 
-import           Control.Applicative (Alternative(..), liftA2)
+import           Control.Applicative (Alternative(..))
 import           Control.Carrier.Reader.Predicate
 import           Control.Effect.Lens
 import           Control.Effect.Lift
 import           Control.Effect.Reader
 import           Control.Effect.State
-import           Control.Monad (guard, when)
-import           Data.Coerce (coerce)
-import           Data.Foldable (for_)
+import           Control.Monad (guard)
+import           Data.Foldable (for_, traverse_)
 import           Data.Functor (($>))
-import           Data.Functor.Const
 import           Data.Ix
 import           Data.List (elemIndex)
 import qualified Data.Map as Map
@@ -46,45 +44,7 @@ controls
      )
   => Delta Seconds Float
   -> m ()
-controls (Delta (Seconds dt)) = do
-  input <- get
-  when (input ^. (pressed_ SDL.KeycodePlus `or` pressed_ SDL.KeycodeEquals)) $
-    throttle_ += dt * 10
-  when (input ^. pressed_ SDL.KeycodeMinus) $
-    throttle_ -= dt * 10
-
-
-  let angular = dt *^ Radians 5
-
-  when (input ^. pressed_ SDL.KeycodeUp) $ do
-    thrust <- uses throttle_ (dt *)
-    rotation <- use (actor_ . rotation_)
-    actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
-  when (input ^. pressed_ SDL.KeycodeDown) $ do
-    rotation <- use (actor_ . rotation_)
-    velocity <- use (actor_ . velocity_)
-    actor_ . rotation_ .= face angular (angleOf (negated velocity)) rotation
-
-  when (input ^. pressed_ SDL.KeycodeLeft) $
-    actor_ . rotation_ *= axisAngle (unit _z) (getRadians angular)
-  when (input ^. pressed_ SDL.KeycodeRight) $
-    actor_ . rotation_ *= axisAngle (unit _z) (getRadians (-angular))
-
-  firing_ .= input ^. pressed_ SDL.KeycodeSpace
-
-  System{ bodies } <- ask @(System StateVectors Float)
-  let identifiers = Map.keys bodies
-      switchTarget dir target = case target >>= (`elemIndex` identifiers) of
-        Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length bodies)) i') where
-          i' = case dir of
-            Prev -> i - 1
-            Next -> i + 1
-        Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
-  when (input ^. pressed_ SDL.KeycodeTab) $ do
-    actor_ . target_ %= switchTarget (if input ^. (pressed_ SDL.KeycodeLShift `or` pressed_ SDL.KeycodeRShift) then Prev else Next)
-    pressed_ SDL.KeycodeTab .= False
-  where
-  or = liftA2 (liftA2 (coerce (||)))
+controls dt = actions >>= traverse_ (runAction dt)
 
 actions
   :: Has (State Input) sig m
