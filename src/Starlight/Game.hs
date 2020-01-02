@@ -65,7 +65,7 @@ import qualified UI.Window as Window
 import           Unit.Length
 
 main :: IO ()
-main = handling $ CLI.execParser CLI.argumentsParser >>= (`runReader` (runProfile (runTrace runGame)))
+main = handling $ CLI.execParser CLI.argumentsParser >>= (`runReader` (runProfile (runTrace game)))
   where
   handling m = do
     name <- getProgName
@@ -95,13 +95,13 @@ runTrace
   -> m a
 runTrace m = view CLI.trace_ >>= bool (NoTrace.runTrace m) (Trace.runTrace m)
 
-runGame
+game
   :: ( Effect sig
      , Has (Lift IO) sig m
      , Has Profile sig m
      )
   => m ()
-runGame = do
+game = do
   system <- Sol.system
 
   Window.runWindow "Starlight" (V2 1024 768)
