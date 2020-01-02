@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Controls
@@ -5,6 +6,7 @@ module Starlight.Controls
 , actions
 , controlPredicates
 , Continuity(..)
+, actionContinuity
 ) where
 
 import           Control.Applicative (Alternative(..), liftA2)
@@ -103,3 +105,8 @@ data Continuity
   = Continuous
   | Discrete
   deriving (Eq, Ord, Show)
+
+actionContinuity :: Action -> Continuity
+actionContinuity = \case
+  ChangeTarget _ -> Discrete
+  _              -> Continuous
