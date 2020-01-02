@@ -23,7 +23,6 @@ import           Control.Effect.Lift
 import           Control.Effect.Profile
 import qualified Control.Exception.Lift as E
 import           Control.Monad (when, (<=<))
-import           Control.Monad.IO.Class.Lift (MonadIO)
 import           Data.Coerce
 import           Data.Function (fix)
 import           Data.Functor.Identity
@@ -32,7 +31,6 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           GL
-import           Graphics.GL.Core41
 import           Lens.Micro (Lens', each, lens, (^.))
 import           Linear.Exts
 import           Starlight.Actor
@@ -84,7 +82,6 @@ runGame
      , Has (Lift IO) sig m
      , Has Profile sig m
      , MonadFail m
-     , MonadIO m
      )
   => m ()
 runGame = do
