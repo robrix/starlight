@@ -24,8 +24,10 @@ ai System{ bodies } Actor{ target, position = P here, rotation } = case target >
   -- FIXME: allow other behaviours relating to targets, e.g. following
   Just StateVectors{ position = P there } -> Set.fromList $ concat
     [ [ Face Target ]
-    , [ Thrust | abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo here there)) < pi/2 ]
+    , [ Thrust | isFacing there ]
     ]
   -- FIXME: wander
   -- FIXME: pick a new target
   Nothing -> mempty
+  where
+  isFacing there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo here there)) < pi/2
