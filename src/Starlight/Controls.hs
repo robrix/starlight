@@ -49,11 +49,11 @@ controls (Delta (Seconds dt)) = do
   when (input ^. pressed_ SDL.KeycodeMinus) $
     throttle_ -= dt * 10
 
-  thrust <- uses throttle_ (dt *)
 
   let angular = dt *^ Radians 5
 
   when (input ^. pressed_ SDL.KeycodeUp) $ do
+    thrust <- uses throttle_ (dt *)
     rotation <- use (actor_ . rotation_)
     actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
   when (input ^. pressed_ SDL.KeycodeDown) $ do
