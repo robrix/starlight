@@ -142,7 +142,7 @@ runGame = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ player_ %%= controls dt
+            measure "controls" $ Starlight.Game.zoom player_ (controls dt)
             system <- ask
             measure "ai"      (npcs_   . each %= ai      dt system)
             measure "physics" (actors_ . each %= physics dt system)
@@ -151,10 +151,10 @@ runGame = do
           continue <$ measure "swap" Window.swap
         when continue loop
 
-(%%=) :: Has (State s) sig m => Lens' s a -> StateC a m () -> m ()
-lens %%= action = use lens >>= (`execState` action) >>= (lens .=)
+zoom :: Has (State s) sig m => Lens' s a -> StateC a m () -> m ()
+zoom lens action = use lens >>= (`execState` action) >>= (lens .=)
 
-infix 4 %%=
+infixr 2 `zoom`
 
 -- | Compute the zoom factor for the given velocity.
 --
