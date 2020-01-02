@@ -43,6 +43,7 @@ library
     Control.Carrier.State.ST.Strict
     Control.Concurrent.Lift
     Control.Effect.Finally
+    Control.Effect.Lens.Exts
     Control.Effect.Profile
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
