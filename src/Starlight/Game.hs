@@ -78,7 +78,6 @@ game = do
           , target   = Nothing
           , health   = 1000
           }
-        , throttle = 20
         , firing   = False
         }
       , npcs   =
