@@ -11,6 +11,7 @@ module Starlight.Radar
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
+import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Monad (when)
@@ -83,8 +84,8 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
             -- FIXME: apply easing so this works more like a spring
             step = max 1 (min 50 (d blip / fromIntegral n))
 
-        Radar.radius_ &= radius
-        Radar.colour_ &= ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
+        Radar.radius_ .= Just radius
+        Radar.colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
 
         drawArrays LineStrip range
   where
