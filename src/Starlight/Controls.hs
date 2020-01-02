@@ -4,7 +4,7 @@ module Starlight.Controls
 ( controls
 , actions
 , controlPredicates
-, ControlType(..)
+, Continuity(..)
 ) where
 
 import           Control.Applicative (Alternative(..), liftA2)
@@ -99,7 +99,7 @@ controlPredicates =
   where
   shift = expect (pressed_ SDL.KeycodeLShift) <|> expect (pressed_ SDL.KeycodeRShift)
 
-data ControlType
+data Continuity
   = Continuous
   | Discrete
   deriving (Eq, Ord, Show)
