@@ -41,7 +41,7 @@ import           Linear.Exts hiding (Trace)
 import           Starlight.Actor
 import           Starlight.AI
 import           Starlight.Body
-import           Starlight.CLI
+import qualified Starlight.CLI as CLI
 import           Starlight.Controls
 import           Starlight.Draw
 import           Starlight.Identifier
@@ -65,7 +65,7 @@ import           Unit.Length
 
 main :: IO ()
 main = handling $ do
-  options <- execParser argumentsParser
+  options <- CLI.execParser CLI.argumentsParser
   runProfile options (runTrace options runGame)
   where
   handling m = do
@@ -83,10 +83,10 @@ runProfile
   :: ( Has (Lift IO) sig m
      , Effect sig
      )
-  => Options
+  => CLI.Options
   -> (forall t . Algebra (Profile :+: sig) (t m) => t m a)
   -> m a
-runProfile Options{ profile } m
+runProfile CLI.Options{ profile } m
   | profile   = do
     (t, a) <- Profile.runProfile m
     a <$ Profile.reportTimings t
@@ -94,10 +94,10 @@ runProfile Options{ profile } m
 
 runTrace
   :: Has (Lift IO) sig m
-  => Options
+  => CLI.Options
   -> (forall t . Algebra (Trace :+: sig) (t m) => t m a)
   -> m a
-runTrace Options{ trace }
+runTrace CLI.Options{ trace }
   | trace     = Trace.runTrace
   | otherwise = NoTrace.runTrace
 
