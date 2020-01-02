@@ -19,11 +19,14 @@ import qualified Control.Carrier.Profile.Identity as NoProfile
 import qualified Control.Carrier.Profile.Time as Profile
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
+import qualified Control.Carrier.Trace.Ignoring as NoTrace
+import qualified Control.Carrier.Trace.Lift as Trace
 import           Control.Effect.Lens.Exts as Lens
-import           Control.Effect.Lift
 import           Control.Effect.Profile
+import           Control.Effect.Trace
 import qualified Control.Exception.Lift as E
 import           Control.Monad (when)
+import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Foldable (traverse_)
 import           Data.Function (fix)
@@ -34,7 +37,7 @@ import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           GL
 import           Lens.Micro (Lens', each, lens, (^.))
-import           Linear.Exts
+import           Linear.Exts hiding (Trace)
 import           Starlight.Actor
 import           Starlight.AI
 import           Starlight.Body
@@ -63,7 +66,7 @@ import           Unit.Length
 main :: IO ()
 main = handling $ do
   options <- execParser argumentsParser
-  runProfile options runGame
+  runProfile options (runTrace options runGame)
   where
   handling m = do
     name <- getProgName
@@ -88,6 +91,15 @@ runProfile Options{ profile } m
     (t, a) <- Profile.runProfile m
     a <$ Profile.reportTimings t
   | otherwise = NoProfile.runProfile m
+
+runTrace
+  :: Has (Lift IO) sig m
+  => Options
+  -> (forall t . Algebra (Trace :+: sig) (t m) => t m a)
+  -> m a
+runTrace Options{ trace }
+  | trace     = Trace.runTrace
+  | otherwise = NoTrace.runTrace
 
 runGame
   :: ( Effect sig
