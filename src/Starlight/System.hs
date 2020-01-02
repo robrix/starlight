@@ -21,7 +21,7 @@ data System f a = System
   deriving (Read, Show)
 
 systemTrans :: Num a => System f a -> M44 a
-systemTrans (System scale _) = scaled (V4 scale scale scale 1)
+systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
 _scale :: Lens' (System f a) a
 _scale = lens (\ System{ scale } -> scale) (\ System { bodies } s' -> System { bodies, scale = s' })
