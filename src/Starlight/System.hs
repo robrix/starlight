@@ -5,6 +5,7 @@ module Starlight.System
 , scale_
 , bodies_
 , lookup
+, (!?)
 ) where
 
 import qualified Data.Map as Map
@@ -34,3 +35,6 @@ bodies_ = lens bodies (\ s bodies -> s { bodies })
 
 lookup :: Identifier -> System f a -> Maybe (f a)
 lookup i = Map.lookup i . bodies
+
+(!?) :: System f a -> Identifier -> Maybe (f a)
+(!?) = flip lookup
