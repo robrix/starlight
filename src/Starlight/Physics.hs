@@ -12,7 +12,6 @@ import           Control.Effect.Lift
 import           Control.Effect.Reader
 import           Control.Effect.State
 import           Control.Monad (guard)
-import           Data.Foldable (for_)
 import           Data.Ix (inRange)
 import           Data.List (elemIndex)
 import qualified Data.Map as Map
@@ -66,9 +65,7 @@ runAction (Delta (Seconds dt)) = \case
         target   <- use target_
         position <- use (position_ @Actor)
         pure ((^. position_ . to (unP . flip direction position)) <$> (target >>= (bodies Map.!?)))
-    for_ direction $ \ direction -> do
-      rotation <- use (rotation_ @Actor)
-      rotation_ @Actor .= face angular (angleOf direction) rotation
+    maybe (pure ()) (modifying (rotation_ @Actor) . face angular . angleOf) direction
   Turn t -> rotation_ @Actor *= axisAngle (unit _z) (getRadians (case t of
     L -> angular
     R -> -angular))
