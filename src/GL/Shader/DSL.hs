@@ -653,6 +653,9 @@ renderRef = \case
 class GL.Uniform a => GLSLType a where
   renderTypeOf :: expr a -> Doc ()
 
+instance GLSLType Bool where
+  renderTypeOf _ = pretty "bool"
+
 instance GLSLType a => GLSLType (Radians a) where
   renderTypeOf _ = renderTypeOf (Proxy @a)
 
