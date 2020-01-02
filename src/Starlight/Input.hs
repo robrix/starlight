@@ -4,6 +4,7 @@
 module Starlight.Input
 ( input
 , Input(..)
+, singleton
 , fromList
 , key
 , pressed_
@@ -33,6 +34,9 @@ input = Window.input go where
 
 newtype Input = Input { unInput :: IntSet.IntSet }
   deriving (Monoid, Semigroup)
+
+singleton :: SDL.Keycode -> Input
+singleton = Input . IntSet.singleton . fromIntegral . SDL.unwrapKeycode
 
 fromList :: [SDL.Keycode] -> Input
 fromList = Input . IntSet.fromList . map (fromIntegral . SDL.unwrapKeycode)
