@@ -18,7 +18,7 @@ instance GL.Type TextureUnit where
   glType _ = GL_INT
 
 instance Uniform TextureUnit where
-  uniform location = runLiftIO . glUniform1i location . unTextureUnit
+  uniform loc = runLiftIO . glUniform1i loc . unTextureUnit
 
 
 setActiveTexture :: Has (Lift IO) sig m => TextureUnit -> m ()

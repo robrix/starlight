@@ -38,39 +38,39 @@ instance Uniform Double where
   uniform loc = runLiftIO . glUniform1d loc
 
 instance Uniform (Linear.V2 Float) where
-  uniform location (Linear.V2 x y) = runLiftIO $ glUniform2f location x y
+  uniform loc (Linear.V2 x y) = runLiftIO $ glUniform2f loc x y
 
 instance Uniform (Linear.V2 Double) where
-  uniform location (Linear.V2 x y) = runLiftIO $ glUniform2d location x y
+  uniform loc (Linear.V2 x y) = runLiftIO $ glUniform2d loc x y
 
 instance Uniform (Linear.V3 Float) where
-  uniform location (Linear.V3 x y z) = runLiftIO $ glUniform3f location x y z
+  uniform loc (Linear.V3 x y z) = runLiftIO $ glUniform3f loc x y z
 
 instance Uniform (Linear.V3 Double) where
-  uniform location (Linear.V3 x y z) = runLiftIO $ glUniform3d location x y z
+  uniform loc (Linear.V3 x y z) = runLiftIO $ glUniform3d loc x y z
 
 instance Uniform (Linear.V4 Float) where
-  uniform location (Linear.V4 x y z w) = runLiftIO $ glUniform4f location x y z w
+  uniform loc (Linear.V4 x y z w) = runLiftIO $ glUniform4f loc x y z w
 
 instance Uniform (Linear.V4 Double) where
-  uniform location (Linear.V4 x y z w) = runLiftIO $ glUniform4d location x y z w
+  uniform loc (Linear.V4 x y z w) = runLiftIO $ glUniform4d loc x y z w
 
 instance Uniform (Linear.M22 Float) where
-  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix2fv location 1 GL_FALSE . castPtr)
+  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix2fv loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M22 Double) where
-  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix2dv location 1 GL_FALSE . castPtr)
+  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix2dv loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M33 Float) where
-  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3fv location 1 GL_FALSE . castPtr)
+  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3fv loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M33 Double) where
-  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3dv location 1 GL_FALSE . castPtr)
+  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3dv loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M44 Float) where
-  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4fv location 1 GL_FALSE . castPtr)
+  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4fv loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M44 Double) where
-  uniform location matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4dv location 1 GL_FALSE . castPtr)
+  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4dv loc 1 GL_FALSE . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Linear.Point f a)
