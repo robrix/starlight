@@ -119,8 +119,8 @@ velocityAt orbit t = positionAt orbit (t + 1) .-. positionAt orbit t
 
 
 systemAt :: (Epsilon a, RealFloat a) => System Body a -> Seconds a -> System StateVectors a
-systemAt sys@(System scale bs) t = System scale bs' where
-  bs' = fmap go bs
+systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
+  bodies' = fmap go bodies
   go b = StateVectors
     { body = b
     , transform = transform'
@@ -129,7 +129,7 @@ systemAt sys@(System scale bs) t = System scale bs' where
     } where
     rel = maybe (systemTrans sys) transform $ do
       p <- parent (identifier b)
-      find ((== p) . identifier . body) bs'
+      find ((== p) . identifier . body) bodies'
     transform' = rel !*! transformAt (orbit b) t
 
 
