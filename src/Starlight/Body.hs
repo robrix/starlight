@@ -1,7 +1,9 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
@@ -35,8 +37,9 @@ import           Data.Functor.Interval
 import           Geometry.Circle
 import           GL.Array
 import           GL.Program
-import           Lens.Micro ((^.))
+import           Lens.Micro (lens, (^.))
 import           Linear.Exts
+import           Starlight.Actor (HasPosition(..))
 import           Starlight.Body.Shader as Shader
 import           Starlight.Identifier
 import           Starlight.System
@@ -55,6 +58,9 @@ data StateVectors a = StateVectors
   , position  :: Point V2 a
   }
   deriving (Show)
+
+instance HasPosition (StateVectors a) a where
+  position_ = lens position (\ s position -> s { position })
 
 data Body a = Body
   { identifier  :: Identifier
