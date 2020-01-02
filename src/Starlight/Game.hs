@@ -24,6 +24,7 @@ import           Control.Effect.Profile
 import qualified Control.Exception.Lift as E
 import           Control.Monad (when, (<=<))
 import           Data.Coerce
+import           Data.Foldable (traverse_)
 import           Data.Function (fix)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -143,7 +144,7 @@ runGame = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ Lens.zoom player_ (controls dt)
+            measure "controls" $ Lens.zoom player_ (controls >>= traverse_ (runAction dt))
             system <- ask
             measure "ai"      (npcs_   . each %= ai      dt system)
             measure "physics" (actors_ . each %= physics dt system)
