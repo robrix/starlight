@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
-module Control.Carrier.State.ST
+module Control.Carrier.State.ST.Strict
 ( -- * State carrier
   StateC(..)
   -- * State effect
@@ -13,7 +13,7 @@ import Control.Algebra
 import Control.Carrier.Reader
 import Control.Effect.State
 import Control.Monad (ap)
-import Control.Monad.ST
+import Control.Monad.ST.Strict
 import Data.STRef
 
 newtype StateC s a = StateC (forall t . ReaderC (STRef t s) (ST t) a)
