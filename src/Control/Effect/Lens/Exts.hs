@@ -1,2 +1,5 @@
 module Control.Effect.Lens.Exts
-() where
+( module Control.Effect.Lens
+) where
+
+import Control.Effect.Lens
