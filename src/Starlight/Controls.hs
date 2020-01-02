@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Controls
 ( controls
@@ -36,7 +37,7 @@ controlRelations =
   , expect (pressed_ SDL.KeycodeRight) $> (mempty, Turn R)
   , expect (pressed_ SDL.KeycodeSpace) $> (mempty, Fire Main)
   , expect (pressed_ SDL.KeycodeT)     $> (mempty, Face Target)
-  , (,) (singleton SDL.KeycodeTab) . ChangeTarget . Just
+  , (singleton SDL.KeycodeTab,) . ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)
     <*> (Prev <$ shift <|> pure Next)
   ]
