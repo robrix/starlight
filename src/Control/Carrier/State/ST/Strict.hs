@@ -17,10 +17,12 @@ import Control.Monad (ap)
 import Control.Monad.ST.Strict
 import Data.STRef
 
-runState :: s -> StateC s a -> a
+runState :: s -> StateC s a -> (s, a)
 runState s (StateC m) = runST $ do
   ref <- newSTRef s
-  runReader ref m
+  a <- runReader ref m
+  s' <- readSTRef ref
+  pure (s', a)
 
 newtype StateC s a = StateC (forall t . ReaderC (STRef t s) (ST t) a)
   deriving (Functor)
