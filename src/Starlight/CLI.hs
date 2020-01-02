@@ -1,6 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Starlight.CLI
 ( Options(..)
+, defaultOptions
 , profile_
 , argumentsParser
   -- * Re-exports
@@ -14,6 +15,11 @@ import qualified Paths_starlight as Library (version)
 
 data Options = Options
   { profile :: Bool
+  }
+
+defaultOptions :: Options
+defaultOptions = Options
+  { profile = False
   }
 
 profile_ :: Lens' Options Bool
