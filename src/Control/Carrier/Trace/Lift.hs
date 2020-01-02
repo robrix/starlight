@@ -1,2 +1,6 @@
 module Control.Carrier.Trace.Lift
-() where
+( -- * Trace carrier
+  TraceC(..)
+) where
+
+newtype TraceC m a = TraceC (m a)
