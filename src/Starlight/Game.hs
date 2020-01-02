@@ -85,10 +85,8 @@ runProfile
   => (forall t . Algebra (Profile :+: sig) (t m) => t m a)
   -> m a
 runProfile m = view CLI.profile_ >>= \case
-  True  -> do
-    (t, a) <- Profile.runProfile m
-    a <$ Profile.reportTimings t
-  False -> NoProfile.runProfile m
+  True  -> Profile.reportProfile m
+  False -> NoProfile.runProfile  m
 
 runTrace
   :: ( Has (Lift IO) sig m
