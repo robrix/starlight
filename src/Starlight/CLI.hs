@@ -8,8 +8,10 @@ module Starlight.CLI
 , execParser
 ) where
 
+import           Data.Foldable (foldl')
+import           Data.Function ((&))
 import           Data.Version (showVersion)
-import           Lens.Micro (Lens', lens)
+import           Lens.Micro (Lens', lens, (.~))
 import           Options.Applicative
 import qualified Paths_starlight as Library (version)
 
@@ -34,7 +36,9 @@ argumentsParser = info
   <> header   "Starlight - spaceships in space")
 
 options :: Parser Options
-options = Options <$> switch (long "profile" <> help "run with profiling enabled")
+options = foldl' (&) defaultOptions <$> foldr (<|>) (pure [])
+  [ flag' [profile_ .~ True] (long "profile" <> help "run with profiling enabled")
+  ]
 
 
 versionString :: String
