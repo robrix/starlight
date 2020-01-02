@@ -1,2 +1,6 @@
 module Control.Carrier.State.ST
-() where
+( -- * State effect
+  module Control.Effect.State
+) where
+
+import Control.Effect.State
