@@ -57,10 +57,12 @@ draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation, target } = player ^. actor_
   bind @Framebuffer Nothing
 
-  View{ scale, size, zoom } <- ask
+  v@View{ size, zoom } <- ask
 
-  viewport $ scale *^ Interval 0 size
-  scissor  $ scale *^ Interval 0 size
+  let dsize = deviceSize v
+
+  viewport $ Interval 0 dsize
+  scissor  $ Interval 0 dsize
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
@@ -70,7 +72,7 @@ draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
 
   when (player ^. firing_) $ drawLaser Beam { colour = green, angle = snd (toAxisAngle rotation), position }
 
-  let maxDim = maximum (fromIntegral <$> size ^* scale) * zoom
+  let maxDim = maximum (fromIntegral <$> dsize) * zoom
 
   System{ scale, bodies } <- ask @(System StateVectors Float)
 
