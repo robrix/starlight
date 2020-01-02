@@ -6,9 +6,7 @@ module Starlight.Player
 import Lens.Micro (Lens', lens)
 import Starlight.Actor
 
-data Player = Player
-  { actor    :: !Actor
-  }
+newtype Player = Player { actor :: Actor }
   deriving (Show)
 
 actor_ :: Lens' Player Actor
