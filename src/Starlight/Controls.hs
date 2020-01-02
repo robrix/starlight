@@ -36,7 +36,7 @@ controlRelations =
   , expect (pressed_ SDL.KeycodeRight) $> (mempty, Turn R)
   , expect (pressed_ SDL.KeycodeSpace) $> (mempty, Fire Main)
   , expect (pressed_ SDL.KeycodeT)     $> (mempty, Face Target)
-  , (,) (fromList [SDL.KeycodeTab]) . ChangeTarget . Just
+  , (,) (singleton SDL.KeycodeTab) . ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)
     <*> (Prev <$ shift <|> pure Next)
   ]
