@@ -176,8 +176,8 @@ withView game m = do
   scale <- Window.scale
   size  <- Window.size
   let velocity = game ^. player_ . actor_ . velocity_
-      zoom = zoomForSpeed size (norm velocity)
-      focus = game ^. player_ . actor_ . position_
+      zoom     = zoomForSpeed size (norm velocity)
+      focus    = game ^. player_ . actor_ . position_
   runReader View{ scale, size, zoom, focus } m
 
 data GameState = GameState
