@@ -53,7 +53,7 @@ draw
   -> Player
   -> [Actor]
   -> m ()
-draw dt fpsL targetL font player npcs = measure "draw" . runLiftIO $ do
+draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation, target } = player ^. actor_
   bind @Framebuffer Nothing
 
@@ -84,9 +84,9 @@ draw dt fpsL targetL font player npcs = measure "draw" . runLiftIO $ do
         Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* (1/scale))))) "km"
         _ -> ""
 
-  measure "setLabel" $ setLabel fpsL    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
-  measure "setLabel" $ setLabel targetL font (describeTarget target)
+  measure "setLabel" $ setLabel fpsLabel    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
+  measure "setLabel" $ setLabel targetLabel font (describeTarget target)
 
-  fpsSize <- labelSize fpsL
-  measure "drawLabel" $ drawLabel fpsL    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
-  measure "drawLabel" $ drawLabel targetL (V2 10 10) white Nothing
+  fpsSize <- labelSize fpsLabel
+  measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
+  measure "drawLabel" $ drawLabel targetLabel (V2 10 10) white Nothing

@@ -125,8 +125,8 @@ runGame = do
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
 
-      fpsL    <- measure "label" Label.label
-      targetL <- measure "label" Label.label
+      fpsLabel    <- measure "label" Label.label
+      targetLabel <- measure "label" Label.label
 
       enabled_ Blend            .= True
       enabled_ DepthClamp       .= True
@@ -147,7 +147,7 @@ runGame = do
             measure "ai"      (npcs_   . each %= ai      dt system)
             measure "physics" (actors_ . each %= physics dt system)
             gameState <- get
-            withView gameState (draw dt fpsL targetL (Font face 18) (player gameState) (npcs gameState))
+            withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState) (npcs gameState))
           continue <$ measure "swap" Window.swap
         when continue loop
 
