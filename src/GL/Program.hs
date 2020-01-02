@@ -87,8 +87,8 @@ set v = askProgram >>= \ (Program ls _) ->
   DSL.foldVarsM (\ DSL.Field { DSL.location } ->
     maybe (pure ()) (checkingGLError . uniform (ls IntMap.! location))) v
 
-(&=) :: (HasProgram u i o m, Has (Lift IO) sig m, DSL.Vars t, DSL.Vars u) => ASetter (t Maybe) (u Maybe) a b -> b -> m ()
-l &= a = set $ DSL.defaultVars & l .~ a
+(&=) :: (HasProgram u i o m, Has (Lift IO) sig m, DSL.Vars t, DSL.Vars u) => ASetter (t Maybe) (u Maybe) a (Maybe b) -> b -> m ()
+l &= a = set $ DSL.defaultVars & l .~ Just a
 
 infixr 4 &=
 
