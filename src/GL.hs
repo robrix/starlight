@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 module GL
 ( Capability(..)
+, runGLC
 , GLC(..)
 ) where
 
@@ -63,6 +64,9 @@ instance GL.Enum Capability where
     TextureCubeMapSeamless     -> GL_TEXTURE_CUBE_MAP_SEAMLESS
     ProgramPointSize           -> GL_PROGRAM_POINT_SIZE
 
+
+runGLC :: GLC m a -> m a
+runGLC (GLC m) = m
 
 newtype GLC m a = GLC (m a)
   deriving (Applicative, Functor, Monad, MonadIO)
