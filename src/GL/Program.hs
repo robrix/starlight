@@ -17,7 +17,6 @@ module GL.Program
 ( Program(..)
 , build
 , use
-, set
 , HasProgram(..)
 , ProgramT(..)
   -- * Uniforms
@@ -80,11 +79,6 @@ use (Program ls p) (ProgramT m) = do
   sendIO (glUseProgram p)
   a <- runReader (Program ls p) m
   a <$ sendIO (glUseProgram 0)
-
-set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
-set v = askProgram >>= \ (Program ls _) ->
-  DSL.foldVarsM (\ DSL.Field { DSL.location } ->
-    maybe (pure ()) (checkingGLError . uniform (ls IntMap.! location))) v
 
 
 class Monad m => HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u i o where
