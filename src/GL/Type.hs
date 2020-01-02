@@ -21,6 +21,9 @@ class S.Storable n => Type n where
   glDims :: proxy n -> GLint
   glDims _ = 1
 
+instance Type Bool where
+  glType _ = GL_BOOL
+
 instance Type Float where
   glType _ = GL_FLOAT
 
