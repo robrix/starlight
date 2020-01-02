@@ -1,2 +1,6 @@
 module Control.Carrier.Reader.Predicate
-() where
+( -- * Predicates
+  Predicate(..)
+) where
+
+newtype Predicate i a = Predicate (i -> Maybe a)
