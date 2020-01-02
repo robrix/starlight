@@ -2,18 +2,22 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
 module GL
 ( Capability(..)
 , Capabilities(..)
+, enabled_
 , runGLC
 , GLC(..)
 ) where
 
 import Control.Algebra
 import Control.Monad.IO.Class
+import Data.Maybe (fromMaybe)
 import GL.Enum as GL
 import Graphics.GL.Core41
+import Lens.Micro (Lens', lens)
 
 data Capability
   = Blend                      -- ^ GL_BLEND
@@ -76,6 +80,15 @@ data Capabilities v = Capabilities
   , programPointSize :: v Bool
   , scissorTest      :: v Bool
   }
+
+enabled_ :: Capability -> Lens' (Capabilities Maybe) Bool
+enabled_ = \case
+  Blend            -> lens (orFalse . blend)            (\ u v -> u { blend            = Just v })
+  DepthClamp       -> lens (orFalse . depthClamp)       (\ u v -> u { depthClamp       = Just v })
+  ProgramPointSize -> lens (orFalse . programPointSize) (\ u v -> u { programPointSize = Just v })
+  ScissorTest      -> lens (orFalse . scissorTest)      (\ u v -> u { scissorTest      = Just v })
+  where
+  orFalse = fromMaybe False
 
 
 runGLC :: GLC m a -> m a
