@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Controls
 ( controls
+, controlActions
 ) where
 
 import           Control.Applicative (liftA2)
@@ -18,6 +19,7 @@ import qualified Data.Map as Map
 import           Lens.Micro
 import           Linear.Exts
 import qualified SDL
+import           Starlight.Action
 import           Starlight.Actor
 import           Starlight.Body
 import           Starlight.Input
@@ -72,3 +74,15 @@ controls (Delta (Seconds dt)) = do
     pressed_ SDL.KeycodeTab .= False
   where
   or = liftA2 (liftA2 (coerce (||)))
+
+-- FIXME: make this user-configurable
+controlActions :: [(SDL.Keycode, Action)]
+controlActions =
+  [ (SDL.KeycodeUp,    Thrust)
+  , (SDL.KeycodeDown,  Face Backwards)
+  , (SDL.KeycodeLeft,  TurnL)
+  , (SDL.KeycodeRight, TurnR)
+  , (SDL.KeycodeSpace, Fire Main)
+  , (SDL.KeycodeQ,     ChangeTarget (Just Prev))
+  , (SDL.KeycodeE,     ChangeTarget (Just Next))
+  ]
