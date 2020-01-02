@@ -3,6 +3,7 @@ module Starlight.CLI
 ( Options(..)
 , defaultOptions
 , profile_
+, trace_
 , argumentsParser
   -- * Re-exports
 , execParser
