@@ -12,15 +12,19 @@ data Action
   | Face Direction
   | Fire Weapon
   | ChangeTarget (Maybe Change)
+  deriving (Eq, Ord, Show)
 
 data Direction
   = Backwards
   | Forwards
   | Target
+  deriving (Eq, Ord, Show)
 
 data Change
   = Prev
   | Next
+  deriving (Eq, Ord, Show)
 
 data Weapon
   = Main
+  deriving (Eq, Ord, Show)
