@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module Starlight.System
 ( System(..)
@@ -38,7 +39,9 @@ identifiers :: System f a -> [Identifier]
 identifiers = map B . Map.keys . bodies
 
 lookup :: Identifier -> System f a -> Maybe (f a)
-lookup (B i) = Map.lookup i . bodies
+lookup = \case
+  B i -> Map.lookup i . bodies
+  S _ -> const Nothing
 
 (!?) :: System f a -> Identifier -> Maybe (f a)
 (!?) = flip lookup

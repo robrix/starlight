@@ -21,11 +21,14 @@ type Name = Text
 
 data Identifier
   = B BodyIdentifier
+  | S Int
   deriving (Eq, Ord, Show)
 
 describeIdentifier :: Identifier -> String
-describeIdentifier (B i) = showLeaf (getLeaf i) where
-  showLeaf (code, name) = show code <> " " <> unpack name
+describeIdentifier = \case
+  B i -> showLeaf (getLeaf i) where
+    showLeaf (code, name) = show code <> " " <> unpack name
+  S i -> show i
 
 
 data BodyIdentifier
