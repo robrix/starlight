@@ -39,7 +39,7 @@ library
     Control.Carrier.Finally
     Control.Carrier.Profile.Identity
     Control.Carrier.Profile.Time
-    Control.Carrier.Reader.Predicate
+    Control.Carrier.Reader.Relation
     Control.Carrier.State.IORef
     Control.Carrier.State.ST.Strict
     Control.Concurrent.Lift

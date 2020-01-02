@@ -5,13 +5,13 @@ module Starlight.Controls
 ( controls
 , actions
 , runAction
-, controlPredicates
+, controlRelations
 , Continuity(..)
 , actionContinuity
 ) where
 
 import           Control.Applicative (Alternative(..))
-import           Control.Carrier.Reader.Predicate
+import           Control.Carrier.Reader.Relation
 import           Control.Effect.Lens
 import           Control.Effect.Lift
 import           Control.Effect.Reader
@@ -51,15 +51,15 @@ actions
   => m (Set.Set Action)
 actions = do
   input <- get
-  let actions = catMaybes (map (runPredicate input) controlPredicates)
+  let actions = catMaybes (map (runRelation input) controlRelations)
   for_ actions $ \ (key, action) -> case actionContinuity action of
     Continuous -> pure ()
     Discrete   -> pressed_ key .= False
   pure (Set.fromList (map snd actions))
 
 -- FIXME: make this user-configurable
-controlPredicates :: [Predicate Input (SDL.Keycode, Action)]
-controlPredicates =
+controlRelations :: [Relation Input (SDL.Keycode, Action)]
+controlRelations =
   [ expect (pressed_ SDL.KeycodeUp)    $> (SDL.KeycodeUp,    Thrust)
   , expect (pressed_ SDL.KeycodeDown)  $> (SDL.KeycodeDown,  Face Backwards)
   , expect (pressed_ SDL.KeycodeLeft)  $> (SDL.KeycodeLeft,  Turn L)

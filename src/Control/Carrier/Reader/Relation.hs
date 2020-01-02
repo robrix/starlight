@@ -1,9 +1,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-module Control.Carrier.Reader.Predicate
-( -- * Predicates
-  runPredicate
-, Predicate(..)
+module Control.Carrier.Reader.Relation
+( -- * Relations
+  runRelation
+, Relation(..)
 , expect
 ) where
 
@@ -14,14 +14,14 @@ import Control.Effect.Lens (view)
 import Control.Monad (guard, (<=<))
 import Lens.Micro (Getting)
 
-runPredicate :: i -> Predicate i a -> Maybe a
-runPredicate i (Predicate m) = runReader i m
+runRelation :: i -> Relation i a -> Maybe a
+runRelation i (Relation m) = runReader i m
 
-newtype Predicate i a = Predicate (ReaderC i Maybe a)
+newtype Relation i a = Relation (ReaderC i Maybe a)
   deriving (Alternative, Applicative, Functor, Monad)
 
-instance Algebra (Reader i) (Predicate i) where
-  alg = Predicate . send . handleCoercible
+instance Algebra (Reader i) (Relation i) where
+  alg = Relation . send . handleCoercible
 
 
 expect :: (Alternative m, Has (Reader r) sig m) => Getting Bool r Bool -> m ()
