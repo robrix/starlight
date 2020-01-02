@@ -57,13 +57,10 @@ runAction (Delta (Seconds dt)) = \case
     rotation <- use (rotation_ @Actor)
     velocity_ @Actor += rotate rotation (unit _x ^* thrust) ^. _xy
   Face dir -> do
+    velocity <- use (velocity_ @Actor)
     direction <- case dir of
-      Forwards  -> do
-        velocity <- use (velocity_ @Actor)
-        pure (Just velocity)
-      Backwards -> do
-        velocity <- use (velocity_ @Actor)
-        pure (Just (negated velocity))
+      Forwards  -> pure (Just velocity)
+      Backwards -> pure (Just (-velocity))
       Target    -> do
         System{ bodies } <- ask @(System StateVectors Float)
         target   <- use target_
