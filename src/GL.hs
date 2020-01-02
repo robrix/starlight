@@ -5,6 +5,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module GL
 ( Capability(..)
+, Capabilities(..)
 , runGLC
 , GLC(..)
 ) where
@@ -67,6 +68,14 @@ instance GL.Enum Capability where
     -- StencilTest                -> GL_STENCIL_TEST
     -- TextureCubeMapSeamless     -> GL_TEXTURE_CUBE_MAP_SEAMLESS
     ProgramPointSize           -> GL_PROGRAM_POINT_SIZE
+
+
+data Capabilities v = Capabilities
+  { blend            :: v Bool
+  , depthClamp       :: v Bool
+  , programPointSize :: v Bool
+  , scissorTest      :: v Bool
+  }
 
 
 runGLC :: GLC m a -> m a
