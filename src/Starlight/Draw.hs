@@ -80,8 +80,9 @@ draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
 
   drawRadar (player ^. actor_) npcs
 
-  let describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
-        Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* (1/scale)) (position ^* (1/scale))))) "km"
+  let rscale = 1/scale
+      describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
+        Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* rscale) (position ^* rscale)))) "km"
         _ -> ""
 
   measure "setLabel" $ setLabel fpsLabel    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")
