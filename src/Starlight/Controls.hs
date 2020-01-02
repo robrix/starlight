@@ -40,6 +40,7 @@ controlRelations =
   , (singleton SDL.KeycodeTab,) . ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)
     <*> (Prev <$ shift <|> pure Next)
+  <|> expect (pressed_ SDL.KeycodeEscape) $> (singleton SDL.KeycodeEscape, ChangeTarget Nothing)
   ]
   where
   shift = expect (pressed_ SDL.KeycodeLShift) <|> expect (pressed_ SDL.KeycodeRShift)
