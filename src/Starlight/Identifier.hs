@@ -3,10 +3,10 @@ module Starlight.Identifier
 ( Code
 , Name
 , Identifier(..)
+, describeIdentifier
 , BodyIdentifier(..)
 , parent
 , rootLeaf
-, describeIdentifier
 , toList
 , getLeaf
 ) where
@@ -22,6 +22,11 @@ type Name = Text
 data Identifier
   = B BodyIdentifier
   deriving (Eq, Ord, Show)
+
+describeIdentifier :: Identifier -> String
+describeIdentifier (B i) = showLeaf (getLeaf i) where
+  showLeaf (code, name) = show code <> " " <> unpack name
+
 
 data BodyIdentifier
   = Star (Code, Name)
@@ -41,10 +46,6 @@ rootLeaf :: BodyIdentifier -> (Code, Name)
 rootLeaf = \case
   parent :/ _ -> rootLeaf parent
   root        -> getLeaf root
-
-describeIdentifier :: BodyIdentifier -> String
-describeIdentifier = showLeaf . getLeaf where
-  showLeaf (code, name) = show code <> " " <> unpack name
 
 toList :: BodyIdentifier -> NonEmpty (Code, Name)
 toList i = go i [] where

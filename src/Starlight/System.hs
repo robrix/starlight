@@ -40,5 +40,5 @@ identifiers = map B . Map.keys . bodies
 lookup :: BodyIdentifier -> System f a -> Maybe (f a)
 lookup i = Map.lookup i . bodies
 
-(!?) :: System f a -> BodyIdentifier -> Maybe (f a)
-(!?) = flip lookup
+(!?) :: System f a -> Identifier -> Maybe (f a)
+system !? B identifier = lookup identifier system

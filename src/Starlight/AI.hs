@@ -18,7 +18,7 @@ ai
   => System StateVectors Float
   -> Actor
   -> m (Set.Set Action)
-ai system Actor{ target, position = P here, rotation } = case target >>= (`System.lookup` system) of
+ai system Actor{ target, position = P here, rotation } = case target >>= (system !?) of
   -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
   -- FIXME: don’t just fly directly at the target at full throttle, dumbass
   -- FIXME: factor in the target’s velocity & distance

@@ -7,23 +7,22 @@ module Starlight.Physics
 , runAction
 ) where
 
-import           Control.Effect.Lens
-import           Control.Effect.Lift
-import           Control.Effect.Reader
-import           Control.Effect.State
-import           Control.Monad (guard)
-import           Data.Ix (inRange)
-import           Data.List (elemIndex)
-import qualified Data.Map as Map
-import           Lens.Micro
-import           Linear.Exts
-import           Starlight.Action
-import           Starlight.Actor as Actor
-import           Starlight.Body
-import           Starlight.System
-import           Unit.Angle
-import           Unit.Mass
-import           Unit.Time
+import Control.Effect.Lens
+import Control.Effect.Lift
+import Control.Effect.Reader
+import Control.Effect.State
+import Control.Monad (guard)
+import Data.Ix (inRange)
+import Data.List (elemIndex)
+import Lens.Micro
+import Linear.Exts
+import Starlight.Action
+import Starlight.Actor as Actor
+import Starlight.Body
+import Starlight.System
+import Unit.Angle
+import Unit.Mass
+import Unit.Time
 
 physics
   :: Delta Seconds Float
@@ -61,22 +60,21 @@ runAction (Delta (Seconds dt)) = \case
       Forwards  -> pure (Just velocity)
       Backwards -> pure (Just (-velocity))
       Target    -> do
-        System{ bodies } <- ask @(System StateVectors Float)
+        system <- ask @(System StateVectors Float)
         target   <- use target_
         position <- use (position_ @Actor)
-        pure ((^. position_ . to (unP . flip direction position)) <$> (target >>= (bodies Map.!?)))
+        pure ((^. position_ . to (unP . flip direction position)) <$> (target >>= (system !?)))
     maybe (pure ()) (modifying (rotation_ @Actor) . face angular . angleOf) direction
   Turn t -> rotation_ @Actor *= axisAngle (unit _z) (getRadians (case t of
     L -> angular
     R -> -angular))
   Fire Main -> pure ()
   ChangeTarget change -> do
-    System{ bodies } <- ask @(System StateVectors Float)
-    let identifiers = Map.keys bodies
+    identifiers <- view @(System StateVectors Float) (to identifiers)
     target_ %= case change of
       Nothing -> const Nothing
       Just dir -> \ target -> case target >>= (`elemIndex` identifiers) of
-          Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length bodies)) i') where
+          Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
             i' = case dir of
               Prev -> i - 1
               Next -> i + 1

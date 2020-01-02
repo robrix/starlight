@@ -18,12 +18,12 @@ data Actor = Actor
   { position :: !(Point V2 Float)
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
-  , target   :: !(Maybe BodyIdentifier)
+  , target   :: !(Maybe Identifier)
   , health   :: !Float
   }
   deriving (Show)
 
-target_ :: Lens' Actor (Maybe BodyIdentifier)
+target_ :: Lens' Actor (Maybe Identifier)
 target_ = lens target (\ s t -> s { target = t })
 
 health_ :: Lens' Actor Float
