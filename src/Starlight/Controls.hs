@@ -89,8 +89,8 @@ controlPredicates :: [Predicate Input Action]
 controlPredicates =
   [ Thrust <$ expect (pressed_ SDL.KeycodeUp)
   , Face Backwards <$ expect (pressed_ SDL.KeycodeDown)
-  , TurnL <$ expect (pressed_ SDL.KeycodeLeft)
-  , TurnR <$ expect (pressed_ SDL.KeycodeRight)
+  , Turn L <$ expect (pressed_ SDL.KeycodeLeft)
+  , Turn R <$ expect (pressed_ SDL.KeycodeRight)
   , Fire Main <$ expect (pressed_ SDL.KeycodeSpace)
   , ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)

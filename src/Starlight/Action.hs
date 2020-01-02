@@ -1,20 +1,25 @@
 module Starlight.Action
 ( Action(..)
-, Direction(..)
+, Turn(..)
+, Face(..)
 , Change(..)
 , Weapon(..)
 ) where
 
 data Action
   = Thrust
-  | TurnL
-  | TurnR
-  | Face Direction
+  | Turn Turn
+  | Face Face
   | Fire Weapon
   | ChangeTarget (Maybe Change)
   deriving (Eq, Ord, Show)
 
-data Direction
+data Turn
+  = L
+  | R
+  deriving (Eq, Ord, Show)
+
+data Face
   = Backwards
   | Forwards
   | Target
