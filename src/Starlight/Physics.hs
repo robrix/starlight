@@ -63,7 +63,7 @@ runAction (Delta (Seconds dt)) = \case
         system <- ask @(System StateVectors)
         target   <- use target_
         position <- use (position_ @Actor)
-        pure ((^. position_ . to (unP . flip direction position)) <$> (target >>= (system !?)))
+        pure (either (^. position_ . to (unP . flip direction position)) (^. position_ . to (unP . flip direction position)) <$> (target >>= (system !?)))
     maybe (pure ()) (modifying (rotation_ @Actor) . face angular . angleOf) direction
   Turn t -> rotation_ @Actor *= axisAngle (unit _z) (getRadians (case t of
     L -> angular

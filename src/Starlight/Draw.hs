@@ -84,7 +84,8 @@ draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
 
   let rscale = 1/scale
       describeTarget target = case target >>= fmap . (,) <*> (system !?) of
-        Just (identifier, StateVectors{ position = pos }) -> describeIdentifier identifier ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* rscale) (position ^* rscale)))) "km"
+        Just (identifier, t)
+          | pos <- either (^. position_) (^. position_) t -> describeIdentifier identifier ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* rscale) (position ^* rscale)))) "km"
         _ -> ""
 
   measure "setLabel" $ setLabel fpsLabel    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")

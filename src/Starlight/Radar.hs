@@ -1,5 +1,6 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
@@ -72,18 +73,20 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
 
   measure "targets" $ do
     let targetVectors = target >>= (system !?)
-    for_ targetVectors $ \ StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
-      let blip = makeBlip (there ^-^ here) (r * scale) colour
-      setBlip blip
-      for_ [1..n] $ \ i -> do
-        let radius = step * fromIntegral i
-            -- FIXME: apply easing so this works more like a spring
-            step = max 1 (min 50 (d blip / fromIntegral n))
+    for_ targetVectors $ \case
+      Left StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
+        let blip = makeBlip (there ^-^ here) (r * scale) colour
+        setBlip blip
+        for_ [1..n] $ \ i -> do
+          let radius = step * fromIntegral i
+              -- FIXME: apply easing so this works more like a spring
+              step = max 1 (min 50 (d blip / fromIntegral n))
 
-        radius_ .= Just radius
-        colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
+          radius_ .= Just radius
+          colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
 
-        drawArrays LineStrip range
+          drawArrays LineStrip range
+      Right _ -> pure ()
   where
   n = 10 :: Int
 

@@ -23,12 +23,12 @@ ai system Actor{ target, position = P here, rotation } = case target >>= (system
   -- FIXME: don’t just fly directly at the target at full throttle, dumbass
   -- FIXME: factor in the target’s velocity & distance
   -- FIXME: allow other behaviours relating to targets, e.g. following
-  Just StateVectors{ position = P there } -> pure . Set.fromList $ concat
+  Just (Left StateVectors{ position = P there }) -> pure . Set.fromList $ concat
     [ [ Face Target ]
     , [ Thrust | isFacing there ]
     ]
   -- FIXME: wander
   -- FIXME: pick a new target
-  Nothing -> pure mempty
+  _ -> pure mempty
   where
   isFacing there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo here there)) < pi/2

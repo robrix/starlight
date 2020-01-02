@@ -38,10 +38,10 @@ bodies_ = lens bodies (\ s bodies -> s { bodies })
 identifiers :: System a -> [Identifier]
 identifiers = map B . Map.keys . bodies
 
-lookup :: Identifier -> System a -> Maybe a
+lookup :: Identifier -> System a -> Maybe (Either a Actor)
 lookup = \case
-  B i -> Map.lookup i . bodies
+  B i -> fmap Left . Map.lookup i . bodies
   S _ -> const Nothing
 
-(!?) :: System a -> Identifier -> Maybe a
+(!?) :: System a -> Identifier -> Maybe (Either a Actor)
 (!?) = flip lookup
