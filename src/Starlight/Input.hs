@@ -6,6 +6,7 @@ module Starlight.Input
 , Input(..)
 , singleton
 , fromList
+, (\\)
 , key
 , pressed_
 ) where
@@ -43,6 +44,11 @@ fromList = Input . IntSet.fromList . map (fromIntegral . SDL.unwrapKeycode)
 
 input_ :: Lens' Input IntSet.IntSet
 input_ = lens unInput (const Input)
+
+(\\) :: Input -> Input -> Input
+Input a \\ Input b = Input (a IntSet.\\ b)
+
+infixl 9 \\
 
 
 key :: Has (State Input) sig m => SDL.InputMotion -> SDL.Keysym -> m ()
