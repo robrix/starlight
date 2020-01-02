@@ -54,6 +54,7 @@ library
     Foreign.Marshal.Utils.Lift
     Geometry.Circle
     Geometry.Triangle
+    GL
     GL.Array
     GL.Buffer
     GL.Carrier.Bind
