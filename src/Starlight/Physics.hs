@@ -55,7 +55,6 @@ runAction
   -> m ()
 runAction (Delta (Seconds dt)) = \case
   Thrust -> do
-    thrust <- uses throttle_ (dt *)
     rotation <- use (actor_ . rotation_)
     actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
   Face dir -> do
@@ -90,4 +89,5 @@ runAction (Delta (Seconds dt)) = \case
               Next -> i + 1
           Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
   where
+  thrust  = dt * 20
   angular = dt *^ Radians 5
