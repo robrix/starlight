@@ -63,7 +63,7 @@ main :: IO ()
 main = handling $ do
   Options{ profile } <- execParser argumentsParser
   if profile then
-    Profile.reportTimings . fst <=< Profile.runProfile $ runGame
+    Profile.reportTimings <=< Profile.execProfile $ runGame
   else
     NoProfile.runProfile runGame
   where
