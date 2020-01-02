@@ -31,9 +31,9 @@ import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Data.Coerce (coerce)
-import           Data.Foldable (find)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
+import qualified Data.Map as Map
 import           Geometry.Circle
 import           GL.Array
 import           GL.Program
@@ -127,9 +127,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     , rotation = orientationAt b t
     , position = P ((transform' !* V4 0 0 0 1) ^. _xy)
     } where
-    rel = maybe (systemTrans sys) transform $ do
-      p <- parent (identifier b)
-      find ((== p) . identifier . body) bodies'
+    rel = maybe (systemTrans sys) transform $ parent (identifier b) >>= (bodies' Map.!?)
     transform' = rel !*! transformAt (orbit b) t
 
 

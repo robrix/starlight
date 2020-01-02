@@ -21,10 +21,9 @@ import           Data.Foldable (for_)
 import           Data.Function ((&))
 import           Data.Functor.Identity
 import           Data.Functor.Interval
-import           Data.List (find)
 import           GL.Array
 import           GL.Program
-import           Lens.Micro ((.~))
+import           Lens.Micro ((.~), forOf_, traversed)
 import           Linear.Exts as Linear
 import           Starlight.Actor
 import           Starlight.Body as Body hiding (Drawable)
@@ -47,7 +46,7 @@ drawRadar
   -> [Actor]
   -> m ()
 drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using getDrawable $ do
-  System{ scale, bodies } <- ask @(System StateVectors Float)
+  system@System{ scale } <- ask @(System StateVectors Float)
   vs <- ask
 
   let radius = 100
@@ -57,7 +56,7 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
   measure "bodies" $
-    for_ bodies $ \ StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
+    forOf_ (bodies_ . traversed) system $ \ StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
       setBlip (makeBlip (there ^-^ here) (r * scale) colour)
       drawArrays LineStrip range
 
@@ -72,7 +71,7 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
       drawArrays Points medianRange
 
   measure "targets" $ do
-    let targetVectors = target >>= \ i -> find ((== i) . identifier . body) bodies
+    let targetVectors = target >>= (system !?)
     for_ targetVectors $ \ StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
       let blip = makeBlip (there ^-^ here) (r * scale) colour
       setBlip blip

@@ -11,7 +11,7 @@ import Control.Effect.Profile
 import Control.Effect.Reader
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
-import Data.Foldable (find, for_)
+import Data.Foldable (for_)
 import Data.Functor.Interval
 import GL.Framebuffer
 import GL.Viewport
@@ -74,16 +74,16 @@ draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
 
-  System{ scale, bodies } <- ask @(System StateVectors Float)
+  system@System{ scale } <- ask @(System StateVectors Float)
 
   let onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - scale * getMetres radius < maxDim * 0.5
 
-  for_ bodies $ \ sv -> when (onScreen sv) (drawBody sv)
+  forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
 
   drawRadar (player ^. actor_) npcs
 
   let rscale = 1/scale
-      describeTarget target = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
+      describeTarget target = case target >>= (system !?) of
         Just StateVectors{ body, position = pos } -> describeIdentifier (identifier body) ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* rscale) (position ^* rscale)))) "km"
         _ -> ""
 
