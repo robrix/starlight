@@ -47,7 +47,7 @@ data Capability
   -- StencilTest                -- ^ GL_STENCIL_TEST
   -- TextureCubeMapSeamless     -- ^ GL_TEXTURE_CUBE_MAP_SEAMLESS
   | ProgramPointSize           -- ^ GL_PROGRAM_POINT_SIZE
-  deriving (Show)
+  deriving (Eq, Ord, Show)
 
 instance GL.Enum Capability where
   glEnum = \case
