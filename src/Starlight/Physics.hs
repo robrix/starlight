@@ -77,7 +77,7 @@ runAction (Delta (Seconds dt)) = \case
   Turn t -> actor_ . rotation_ *= axisAngle (unit _z) (getRadians (case t of
     L -> angular
     R -> -angular))
-  Fire Main -> firing_ .= True
+  Fire Main -> pure ()
   ChangeTarget change -> do
     System{ bodies } <- ask @(System StateVectors Float)
     let identifiers = Map.keys bodies
