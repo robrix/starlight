@@ -29,7 +29,7 @@ module Linear.Exts
 import Data.Functor.Interval
 import Linear.Affine
 import Linear.Epsilon
-import Linear.Matrix
+import Linear.Matrix hiding (Trace)
 import Linear.Metric
 import Linear.Quaternion
 import Linear.V1

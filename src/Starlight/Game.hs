@@ -31,7 +31,7 @@ import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           GL
 import           Lens.Micro (Lens', each, lens, (^.))
-import           Linear.Exts hiding (Trace)
+import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.AI
 import           Starlight.Body
