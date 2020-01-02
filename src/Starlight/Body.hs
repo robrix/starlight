@@ -147,12 +147,10 @@ drawBody
   -> m ()
 drawBody StateVectors{ body = Body{ radius = Metres r, colour }, transform, rotation } = measure "bodies" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
-  let origin
-        =   scaleToViewZoomed vs
-        !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
   set Shader.U
     { matrix = Just
-      $   origin
+      $   scaleToViewZoomed vs
+      !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
       !*! transform
       !*! scaled (V4 r r r 1)
       !*! mkTransformation rotation 0
