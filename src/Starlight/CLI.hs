@@ -13,6 +13,7 @@ data Options = Options
   { profile :: Bool
   }
 
+
 argumentsParser :: ParserInfo Options
 argumentsParser = info
   (version <*> helper <*> options)
