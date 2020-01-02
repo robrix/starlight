@@ -18,7 +18,7 @@ import qualified Control.Carrier.Profile.Identity as NoProfile
 import qualified Control.Carrier.Profile.Time as Profile
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
-import           Control.Effect.Lens
+import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import qualified Control.Exception.Lift as E
@@ -142,7 +142,7 @@ runGame = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ Starlight.Game.zoom player_ (controls dt)
+            measure "controls" $ Lens.zoom player_ (controls dt)
             system <- ask
             measure "ai"      (npcs_   . each %= ai      dt system)
             measure "physics" (actors_ . each %= physics dt system)
@@ -150,11 +150,6 @@ runGame = do
             withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState) (npcs gameState))
           continue <$ measure "swap" Window.swap
         when continue loop
-
-zoom :: Has (State s) sig m => Lens' s a -> StateC a m () -> m ()
-zoom lens action = use lens >>= (`execState` action) >>= (lens .=)
-
-infixr 2 `zoom`
 
 -- | Compute the zoom factor for the given velocity.
 --

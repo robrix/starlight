@@ -1,12 +1,22 @@
+{-# LANGUAGE RankNTypes #-}
 module Control.Effect.Lens.Exts
 ( (&~)
+, zoom
 , module Control.Effect.Lens
 ) where
 
-import Control.Carrier.State.ST.Strict
+import Control.Carrier.State.ST.Strict as ST
+import Control.Carrier.State.Strict as Strict
 import Control.Effect.Lens
+import Lens.Micro (Lens')
 
-(&~) :: s -> StateC s a -> s
-(&~) = execState
+(&~) :: s -> ST.StateC s a -> s
+(&~) = ST.execState
 
 infixl 1 &~
+
+
+zoom :: Has (State s) sig m => Lens' s a -> Strict.StateC a m () -> m ()
+zoom lens action = use lens >>= (`Strict.execState` action) >>= (lens .=)
+
+infixr 2 `zoom`
