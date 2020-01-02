@@ -17,6 +17,7 @@ import           Control.Effect.Reader
 import           Control.Effect.State
 import           Control.Monad (guard, when)
 import           Data.Coerce (coerce)
+import           Data.Functor (($>))
 import           Data.Functor.Const
 import           Data.Ix
 import           Data.List (elemIndex)
@@ -89,11 +90,11 @@ actions input = Set.fromList (catMaybes (map (runPredicate input) controlPredica
 -- FIXME: make this user-configurable
 controlPredicates :: [Predicate Input Action]
 controlPredicates =
-  [ Thrust <$ expect (pressed_ SDL.KeycodeUp)
-  , Face Backwards <$ expect (pressed_ SDL.KeycodeDown)
-  , Turn L <$ expect (pressed_ SDL.KeycodeLeft)
-  , Turn R <$ expect (pressed_ SDL.KeycodeRight)
-  , Fire Main <$ expect (pressed_ SDL.KeycodeSpace)
+  [ expect (pressed_ SDL.KeycodeUp)    $> Thrust
+  , expect (pressed_ SDL.KeycodeDown)  $> Face Backwards
+  , expect (pressed_ SDL.KeycodeLeft)  $> Turn L
+  , expect (pressed_ SDL.KeycodeRight) $> Turn R
+  , expect (pressed_ SDL.KeycodeSpace) $> Fire Main
   , ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)
     <*> (Prev <$ shift <|> pure Next)
