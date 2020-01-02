@@ -232,11 +232,14 @@ system = do
         , colour      = white
         , orbit
         }
-      systemScale = 100_000 / getMetres (radius (bodies Map.! solI))
+      scale = 100_000 / getMetres (radius (bodies Map.! solI))
 
-  pure . System systemScale $ Map.fromList
-    [ (identifier, fromMaybe (placeholder identifier orbit) (bodies Map.!? identifier))
-    | (identifier, orbit) <- Map.toList orbits
-    ]
+  pure System
+    { scale
+    , bodies = Map.fromList
+      [ (identifier, fromMaybe (placeholder identifier orbit) (bodies Map.!? identifier))
+      | (identifier, orbit) <- Map.toList orbits
+      ]
+    }
   where
   solI = Star (10, "Sol")
