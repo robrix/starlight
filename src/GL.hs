@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
@@ -15,6 +16,7 @@ module GL
 import Control.Algebra
 import Control.Monad.IO.Class
 import Data.Maybe (fromMaybe)
+import GHC.Generics (Generic)
 import GL.Enum as GL
 import Graphics.GL.Core41
 import Lens.Micro (Lens', lens)
@@ -80,6 +82,7 @@ data Capabilities v = Capabilities
   , programPointSize :: v Bool
   , scissorTest      :: v Bool
   }
+  deriving (Generic)
 
 enabled_ :: Capability -> Lens' (Capabilities Maybe) Bool
 enabled_ = \case
