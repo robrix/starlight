@@ -2,7 +2,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Control.Carrier.Reader.Predicate
 ( -- * Predicates
-  Predicate(..)
+  runPredicate
+, Predicate(..)
 ) where
 
 import Control.Algebra
