@@ -22,7 +22,7 @@ using
      , Vars u
      )
   => (a -> Drawable u v o)
-  -> ArrayT v (ProgramC u v o m) b
+  -> ArrayC v (ProgramC u v o m) b
   -> m b
 using getDrawable m = do
   Drawable { program, array } <- asks getDrawable

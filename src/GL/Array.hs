@@ -16,7 +16,7 @@ module GL.Array
 , drawArraysInstanced
 , load
 , bindArray
-, ArrayT(..)
+, ArrayC(..)
 , HasArray(..)
 ) where
 
@@ -117,8 +117,8 @@ load is = do
   a <$ configureArray b a
 
 
-bindArray :: Has (Lift IO) sig m => Array (i Identity) -> ArrayT i m a -> m a
-bindArray array (ArrayT m) = do
+bindArray :: Has (Lift IO) sig m => Array (i Identity) -> ArrayC i m a -> m a
+bindArray array (ArrayC m) = do
   bind (Just array)
   a <- runReader array m
   a <$ bind @(Array _) Nothing
@@ -127,17 +127,17 @@ class Monad m => HasArray i m | m -> i where
   askArray :: m (Array (i Identity))
 
 
-newtype ArrayT i m a = ArrayT { runArrayT :: ReaderC (Array (i Identity)) m a }
+newtype ArrayC i m a = ArrayC { runArrayT :: ReaderC (Array (i Identity)) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 deriving instance HasArray     i   m => HasArray     i   (ProgramC u i o m)
-deriving instance HasProgram u i o m => HasProgram u i o (ArrayT     i   m)
+deriving instance HasProgram u i o m => HasProgram u i o (ArrayC     i   m)
 
 instance HasArray i m => HasArray i (ReaderC r m) where
   askArray = lift askArray
 
-instance Algebra sig m => Algebra sig (ArrayT i m) where
-  alg = ArrayT . send . handleCoercible
+instance Algebra sig m => Algebra sig (ArrayC i m) where
+  alg = ArrayC . send . handleCoercible
 
-instance Algebra sig m => HasArray i (ArrayT i m) where
-  askArray = ArrayT ask
+instance Algebra sig m => HasArray i (ArrayC i m) where
+  askArray = ArrayC ask
