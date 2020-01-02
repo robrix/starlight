@@ -28,7 +28,7 @@ import           Lens.Micro ((.~))
 import           Linear.Exts as Linear
 import           Starlight.Actor
 import           Starlight.Body as Body hiding (Drawable)
-import qualified Starlight.Radar.Shader as Shader
+import           Starlight.Radar.Shader
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour
@@ -51,8 +51,8 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
   vs <- ask
 
   let radius = 100
-  Shader.matrix_ .= Just (scaleToView vs)
-  Shader.radius_ .= Just radius
+  matrix_ .= Just (scaleToView vs)
+  radius_ .= Just radius
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -62,13 +62,13 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
       drawArrays LineStrip range
 
   measure "npcs" $ do
-    Shader.sweep_  .= Just 0
+    sweep_  .= Just 0
     -- FIXME: fade colour with distance
     -- FIXME: IFF
-    Shader.colour_ .= Just white
+    colour_ .= Just white
 
     for_ npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here)) in when (r > zoom vs * radius) $ do
-      Shader.angle_ .= Just angle
+      angle_ .= Just angle
       drawArrays Points medianRange
 
   measure "targets" $ do
@@ -81,8 +81,8 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
             -- FIXME: apply easing so this works more like a spring
             step = max 1 (min 50 (d blip / fromIntegral n))
 
-        Shader.radius_ .= Just radius
-        Shader.colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
+        radius_ .= Just radius
+        colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
 
         drawArrays LineStrip range
   where
@@ -90,21 +90,21 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
 
 runRadar :: (Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
 runRadar m = do
-  program <- build Shader.shader
+  program <- build shader
   array   <- load vertices
   runReader (Drawable UI.Drawable{ program, array }) m
 
 
 setBlip
   :: ( Has (Lift IO) sig m
-     , Has (State (Shader.U Maybe)) sig m
+     , Has (State (U Maybe)) sig m
      )
   => Blip
   -> m ()
 setBlip Blip{ angle, direction, d, r, colour } = do
-  Shader.angle_  .= Just angle
-  Shader.sweep_  .= Just sweep
-  Shader.colour_ .= Just colour
+  angle_  .= Just angle
+  sweep_  .= Just sweep
+  colour_ .= Just colour
   where
   edge = perp direction ^* r + direction ^* d
   sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))
@@ -125,10 +125,10 @@ makeBlip (P there) r colour = Blip { angle, d, direction, r, colour } where
   direction = normalize there
 
 
-newtype Drawable = Drawable { getDrawable :: UI.Drawable Shader.U Shader.V Shader.O }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [Shader.V Identity]
+vertices :: [V Identity]
 vertices = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
   n = 16 :: Int
 
