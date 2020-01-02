@@ -148,7 +148,7 @@ runAction (Delta (Seconds dt)) = \case
         System{ bodies } <- ask @(System StateVectors Float)
         target   <- use (actor_ . target_)
         position <- use (actor_ . position_)
-        pure ((^. position_ . to (unP . direction position)) <$> (target >>= (bodies Map.!?)))
+        pure ((^. position_ . to (unP . flip direction position)) <$> (target >>= (bodies Map.!?)))
     for_ direction $ \ direction -> do
       rotation <- use (actor_ . rotation_)
       actor_ . rotation_ .= face angular (angleOf direction) rotation
