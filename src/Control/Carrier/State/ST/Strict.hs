@@ -4,7 +4,8 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.State.ST.Strict
 ( -- * State carrier
-  runState
+  runStateRef
+, runState
 , StateC(..)
   -- * State effect
 , module Control.Effect.State
@@ -17,10 +18,13 @@ import Control.Monad (ap)
 import Control.Monad.ST.Strict
 import Data.STRef
 
+runStateRef :: STRef t s -> StateC s a -> ST t a
+runStateRef ref (StateC m) = runReader ref m
+
 runState :: s -> StateC s a -> (s, a)
-runState s (StateC m) = runST $ do
+runState s m = runST $ do
   ref <- newSTRef s
-  a <- runReader ref m
+  a <- runStateRef ref m
   s' <- readSTRef ref
   pure (s', a)
 
