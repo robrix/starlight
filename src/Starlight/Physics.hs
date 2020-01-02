@@ -74,10 +74,9 @@ runAction (Delta (Seconds dt)) = \case
     for_ direction $ \ direction -> do
       rotation <- use (actor_ . rotation_)
       actor_ . rotation_ .= face angular (angleOf direction) rotation
-  Turn L -> do
-    actor_ . rotation_ *= axisAngle (unit _z) (getRadians angular)
-  Turn R -> do
-    actor_ . rotation_ *= axisAngle (unit _z) (getRadians (-angular))
+  Turn t -> actor_ . rotation_ *= axisAngle (unit _z) (getRadians (case t of
+    L -> angular
+    R -> -angular))
   Fire Main -> firing_ .= True
   ChangeTarget change -> do
     System{ bodies } <- ask @(System StateVectors Float)
