@@ -64,9 +64,7 @@ import qualified UI.Window as Window
 import           Unit.Length
 
 main :: IO ()
-main = handling $ do
-  options <- CLI.execParser CLI.argumentsParser
-  runProfile options (runTrace options runGame)
+main = handling $ CLI.execParser CLI.argumentsParser >>= (`runReader` (runProfile (runTrace runGame)))
   where
   handling m = do
     name <- getProgName
@@ -82,24 +80,25 @@ main = handling $ do
 runProfile
   :: ( Has (Lift IO) sig m
      , Effect sig
+     , Has (Reader CLI.Options) sig m
      )
-  => CLI.Options
-  -> (forall t . Algebra (Profile :+: sig) (t m) => t m a)
+  => (forall t . Algebra (Profile :+: sig) (t m) => t m a)
   -> m a
-runProfile CLI.Options{ profile } m
-  | profile   = do
+runProfile m = view CLI.profile_ >>= \case
+  True  -> do
     (t, a) <- Profile.runProfile m
     a <$ Profile.reportTimings t
-  | otherwise = NoProfile.runProfile m
+  False -> NoProfile.runProfile m
 
 runTrace
-  :: Has (Lift IO) sig m
-  => CLI.Options
-  -> (forall t . Algebra (Trace :+: sig) (t m) => t m a)
+  :: ( Has (Lift IO) sig m
+     , Has (Reader CLI.Options) sig m
+     )
+  => (forall t . Algebra (Trace :+: sig) (t m) => t m a)
   -> m a
-runTrace CLI.Options{ trace }
-  | trace     = Trace.runTrace
-  | otherwise = NoTrace.runTrace
+runTrace m = view CLI.trace_ >>= \case
+  True  -> Trace.runTrace   m
+  False -> NoTrace.runTrace m
 
 runGame
   :: ( Effect sig
