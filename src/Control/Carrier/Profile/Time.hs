@@ -10,6 +10,7 @@
 module Control.Carrier.Profile.Time
 ( -- * Profile carrier
   runProfile
+, reportProfile
 , execProfile
 , ProfileC(ProfileC)
 , Timing(..)
@@ -41,6 +42,11 @@ import           Unit.Time
 
 runProfile :: ProfileC m a -> m (Timings, a)
 runProfile (ProfileC m) = runWriter m
+
+reportProfile :: Has (Lift IO) sig m => ProfileC m a -> m a
+reportProfile m = do
+  (t, a) <- runProfile m
+  a <$ reportTimings t
 
 execProfile :: Functor m => ProfileC m a -> m Timings
 execProfile = fmap fst . runProfile
