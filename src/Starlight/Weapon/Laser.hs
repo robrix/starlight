@@ -20,7 +20,7 @@ import           GL.Array
 import           GL.Program
 import           Linear.Exts
 import           Starlight.View
-import           Starlight.Weapon.Laser.Shader as Laser
+import           Starlight.Weapon.Laser.Shader as Shader
 import           UI.Colour
 import qualified UI.Drawable as UI
 import           Unit.Angle
@@ -40,7 +40,7 @@ runLaser
   => ReaderC Drawable m a
   -> m a
 runLaser m = do
-  program <- build Laser.shader
+  program <- build Shader.shader
   array   <- load vertices
   runReader (Drawable UI.Drawable{ program, array }) m
 
@@ -55,7 +55,7 @@ drawLaser
   -> m ()
 drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
-  set Laser.U
+  set Shader.U
     { matrix = Just
       $   scaleToViewZoomed vs
       !*! translated3 (ext (negated (unP focus)) 0)
@@ -69,7 +69,7 @@ drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawab
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [Laser.V Identity]
+vertices :: [Shader.V Identity]
 vertices = coerce @[Float] [0, 1]
 
 range :: Interval Identity Int
