@@ -17,6 +17,7 @@ import           Control.Effect.Reader
 import           Control.Effect.State
 import           Control.Monad (guard, when)
 import           Data.Coerce (coerce)
+import           Data.Foldable (for_)
 import           Data.Functor (($>))
 import           Data.Functor.Const
 import           Data.Ix
@@ -84,18 +85,26 @@ controls (Delta (Seconds dt)) = do
   where
   or = liftA2 (liftA2 (coerce (||)))
 
-actions :: Input -> Set.Set Action
-actions input = Set.fromList (catMaybes (map (runPredicate input) controlPredicates))
+actions
+  :: Has (State Input) sig m
+  => m (Set.Set Action)
+actions = do
+  input <- get
+  let actions = catMaybes (map (runPredicate input) controlPredicates)
+  for_ actions $ \ (key, action) -> case actionContinuity action of
+    Continuous -> pure ()
+    Discrete   -> pressed_ key .= False
+  pure (Set.fromList (map snd actions))
 
 -- FIXME: make this user-configurable
-controlPredicates :: [Predicate Input Action]
+controlPredicates :: [Predicate Input (SDL.Keycode, Action)]
 controlPredicates =
-  [ expect (pressed_ SDL.KeycodeUp)    $> Thrust
-  , expect (pressed_ SDL.KeycodeDown)  $> Face Backwards
-  , expect (pressed_ SDL.KeycodeLeft)  $> Turn L
-  , expect (pressed_ SDL.KeycodeRight) $> Turn R
-  , expect (pressed_ SDL.KeycodeSpace) $> Fire Main
-  , ChangeTarget . Just
+  [ expect (pressed_ SDL.KeycodeUp)    $> (SDL.KeycodeUp,    Thrust)
+  , expect (pressed_ SDL.KeycodeDown)  $> (SDL.KeycodeDown,  Face Backwards)
+  , expect (pressed_ SDL.KeycodeLeft)  $> (SDL.KeycodeLeft,  Turn L)
+  , expect (pressed_ SDL.KeycodeRight) $> (SDL.KeycodeRight, Turn R)
+  , expect (pressed_ SDL.KeycodeSpace) $> (SDL.KeycodeSpace, Fire Main)
+  , (,) SDL.KeycodeTab . ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)
     <*> (Prev <$ shift <|> pure Next)
   ]
