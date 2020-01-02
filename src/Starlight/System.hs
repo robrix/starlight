@@ -37,8 +37,8 @@ bodies_ = lens bodies (\ s bodies -> s { bodies })
 identifiers :: System f a -> [Identifier]
 identifiers = map B . Map.keys . bodies
 
-lookup :: BodyIdentifier -> System f a -> Maybe (f a)
-lookup i = Map.lookup i . bodies
+lookup :: Identifier -> System f a -> Maybe (f a)
+lookup (B i) = Map.lookup i . bodies
 
 (!?) :: System f a -> Identifier -> Maybe (f a)
-system !? B identifier = lookup identifier system
+(!?) = flip lookup
