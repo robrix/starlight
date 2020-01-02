@@ -10,6 +10,7 @@
 module Control.Carrier.Profile.Time
 ( -- * Profile carrier
   runProfile
+, execProfile
 , ProfileC(ProfileC)
 , Timing(..)
 , renderTiming
@@ -40,6 +41,9 @@ import           Unit.Time
 
 runProfile :: ProfileC m a -> m (Timings, a)
 runProfile (ProfileC m) = runWriter m
+
+execProfile :: Functor m => ProfileC m a -> m Timings
+execProfile = fmap fst . runProfile
 
 newtype ProfileC m a = ProfileC { runProfileC :: WriterC Timings m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
