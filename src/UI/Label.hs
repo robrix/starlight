@@ -14,6 +14,7 @@ module UI.Label
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
+import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
@@ -27,7 +28,6 @@ import           GL.Array
 import           GL.Framebuffer as GL
 import           GL.Object
 import           GL.Program
-import           GL.Shader.DSL (defaultVars)
 import           GL.Texture
 import           GL.TextureUnit
 import           GL.Viewport
@@ -121,18 +121,14 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
 
         let V2 sx sy = fromIntegral scale / fmap fromIntegral size
         drawingGlyphs face $ do
-          set defaultVars
-            { Glyph.scale     = Just (1 / fromIntegral scale)
-            , Glyph.fontScale = Just (fontScale font)
-            , Glyph.matrix    = Just
-              $   translated (-1)
-              !*! scaled     (V3 sx sy 1)
-              !*! translated (fromIntegral <$> negated (min_ b'))
-            }
+          Glyph.scale_     .= Just (1 / fromIntegral scale)
+          Glyph.fontScale_ .= Just (fontScale font)
+          Glyph.matrix_    .= Just
+            (   translated (-1)
+            !*! scaled     (V3 sx sy 1)
+            !*! translated (fromIntegral <$> negated (min_ b')))
           for_ instances $ \ Instance{ offset, range } -> do
-            set defaultVars
-              { Glyph.offset = Just offset
-              }
+            Glyph.offset_ .= Just offset
             drawArraysInstanced Triangles range 6
 
         sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline }))
@@ -171,19 +167,14 @@ drawLabel label@Label{ texture, scale, ref } offset colour bcolour = runReader l
         setActiveTexture textureUnit
         bind (Just texture)
 
-        set Text.U
-          { sampler = Just textureUnit
-          , colour  = Just transparent
-          }
+        Text.sampler_ .= Just textureUnit
+        Text.colour_  .= Just transparent
 
         let range = Interval 0 4
         drawArrays TriangleStrip range
 
         when (opaque colour /= black) $ do
           glBlendFunc GL_ONE GL_ONE
-          set Text.U
-            { sampler = Nothing
-            , colour  = Just colour
-            }
+          Text.colour_ .= Just colour
           drawArrays TriangleStrip range
     _ -> pure ()

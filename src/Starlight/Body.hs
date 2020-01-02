@@ -25,6 +25,7 @@ module Starlight.Body
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
+import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Data.Coerce (coerce)
@@ -147,15 +148,14 @@ drawBody
   -> m ()
 drawBody StateVectors{ body = Body{ radius = Metres r, colour }, transform, rotation } = measure "bodies" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
-  set Shader.U
-    { matrix = Just
-      $   scaleToViewZoomed vs
-      !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
-      !*! transform
-      !*! scaled (V4 r r r 1)
-      !*! mkTransformation rotation 0
-    , colour = Just colour
-    }
+  matrix_ .= Just
+    (   scaleToViewZoomed vs
+    !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
+    !*! transform
+    !*! scaled (V4 r r r 1)
+    !*! mkTransformation rotation 0)
+  colour_ .= Just colour
+
   drawArraysInstanced LineLoop range 3
 
 

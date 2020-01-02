@@ -11,6 +11,7 @@ module Starlight.Ship
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
+import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Data.Coerce (coerce)
@@ -37,15 +38,13 @@ drawShip
 drawShip colour Actor{ position, rotation } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   let matrix = scaleToViewZoomed vs
-  set U
-    { matrix = Just
-        $   matrix
-        !*! translated3 (ext (negated (unP focus)) 0)
-        !*! translated3 (ext (unP position) 0)
-        !*! scaled (V4 15 15 15 1)
-        !*! mkTransformation rotation 0
-    , colour = Just colour
-    }
+  matrix_ .= Just
+    (   matrix
+    !*! translated3 (ext (negated (unP focus)) 0)
+    !*! translated3 (ext (unP position) 0)
+    !*! scaled (V4 15 15 15 1)
+    !*! mkTransformation rotation 0)
+  colour_ .= Just colour
   drawArrays LineLoop range
 
 
