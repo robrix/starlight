@@ -7,7 +7,6 @@ module Starlight.Controls
 , ControlType(..)
 ) where
 
-import           Control.Algebra
 import           Control.Applicative (Alternative(..), liftA2)
 import           Control.Carrier.Reader.Predicate
 import           Control.Effect.Lens
