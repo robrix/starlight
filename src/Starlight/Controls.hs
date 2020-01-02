@@ -4,6 +4,7 @@ module Starlight.Controls
 ( controls
 , actions
 , controlActions
+, ControlType(..)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -92,3 +93,8 @@ controlActions =
   , (SDL.KeycodeQ,     ChangeTarget (Just Prev))
   , (SDL.KeycodeE,     ChangeTarget (Just Next))
   ]
+
+data ControlType
+  = Continuous
+  | Discrete
+  deriving (Eq, Ord, Show)
