@@ -1,17 +1,23 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Starlight.CLI
 ( Options(..)
+, profile_
 , argumentsParser
   -- * Re-exports
 , execParser
 ) where
 
 import           Data.Version (showVersion)
+import           Lens.Micro (Lens', lens)
 import           Options.Applicative
 import qualified Paths_starlight as Library (version)
 
 data Options = Options
   { profile :: Bool
   }
+
+profile_ :: Lens' Options Bool
+profile_ = lens profile (\ o profile -> o { profile })
 
 
 argumentsParser :: ParserInfo Options
