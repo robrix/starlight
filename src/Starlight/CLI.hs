@@ -41,9 +41,9 @@ argumentsParser = info
   <> header   "Starlight - spaceships in space")
 
 options :: Parser Options
-options = foldl' (&) defaultOptions <$> foldr (<|>) (pure [])
-  [ flag' [profile_ .~ True] (long "profile" <> help "run with profiling enabled")
-  , flag' [trace_   .~ True] (long "trace"   <> help "run with tracing enabled")
+options = foldl' (&) defaultOptions <$> sequenceA
+  [ flag id (profile_ .~ True) (long "profile" <> help "run with profiling enabled")
+  , flag id (trace_   .~ True) (long "trace"   <> help "run with tracing enabled")
   ]
 
 
