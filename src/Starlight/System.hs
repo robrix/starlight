@@ -19,7 +19,7 @@ data System f a = System
   { scale  :: !a
   , bodies :: !(Map.Map Identifier (f a))
   }
-  deriving (Read, Show)
+  deriving (Show)
 
 systemTrans :: Num a => System f a -> M44 a
 systemTrans System{ scale } = scaled (V4 scale scale scale 1)
