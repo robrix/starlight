@@ -18,8 +18,7 @@ import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
-import           Linear.Affine
-import           Linear.V2
+import           Linear.Exts
 import           Starlight.View
 import           Starlight.Weapon.Laser.Shader as Laser
 import           UI.Colour
@@ -54,10 +53,13 @@ drawLaser
      )
   => Beam
   -> m ()
-drawLaser Beam{ colour, angle } = measure "laser" . UI.using getDrawable $ do
-  matrix <- asks scaleToViewZoomed
+drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawable $ do
+  vs@View{ focus } <- ask
   set Laser.U
-    { matrix = Just matrix
+    { matrix = Just
+      $   scaleToViewZoomed vs
+      !*! translated3 (ext (negated (unP focus)) 0)
+      !*! translated3 (ext (unP position) 0)
     , angle  = Just angle
     , colour = Just colour
     }
