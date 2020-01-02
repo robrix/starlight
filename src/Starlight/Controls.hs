@@ -52,21 +52,19 @@ actions
 actions = do
   input <- get
   let actions = catMaybes (map (runRelation input) controlRelations)
-  for_ actions $ \ (key, action) -> case actionContinuity action of
-    Continuous -> pure ()
-    Discrete   -> pressed_ key .= False
+  traverse_ (modify . (\\) . fst) actions
   pure (Set.fromList (map snd actions))
 
 -- FIXME: make this user-configurable
-controlRelations :: [Relation Input (SDL.Keycode, Action)]
+controlRelations :: [Relation Input (Input, Action)]
 controlRelations =
-  [ expect (pressed_ SDL.KeycodeUp)    $> (SDL.KeycodeUp,    Thrust)
-  , expect (pressed_ SDL.KeycodeDown)  $> (SDL.KeycodeDown,  Face Backwards)
-  , expect (pressed_ SDL.KeycodeLeft)  $> (SDL.KeycodeLeft,  Turn L)
-  , expect (pressed_ SDL.KeycodeRight) $> (SDL.KeycodeRight, Turn R)
-  , expect (pressed_ SDL.KeycodeSpace) $> (SDL.KeycodeSpace, Fire Main)
-  , expect (pressed_ SDL.KeycodeT)     $> (SDL.KeycodeT,     Face Target)
-  , (,) SDL.KeycodeTab . ChangeTarget . Just
+  [ expect (pressed_ SDL.KeycodeUp)    $> (mempty, Thrust)
+  , expect (pressed_ SDL.KeycodeDown)  $> (mempty, Face Backwards)
+  , expect (pressed_ SDL.KeycodeLeft)  $> (mempty, Turn L)
+  , expect (pressed_ SDL.KeycodeRight) $> (mempty, Turn R)
+  , expect (pressed_ SDL.KeycodeSpace) $> (mempty, Fire Main)
+  , expect (pressed_ SDL.KeycodeT)     $> (mempty, Face Target)
+  , (,) (fromList [SDL.KeycodeTab]) . ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)
     <*> (Prev <$ shift <|> pure Next)
   ]
