@@ -18,6 +18,7 @@ import Control.Monad.IO.Class
 import Data.Maybe (fromMaybe)
 import GHC.Generics (Generic)
 import GL.Enum as GL
+import GL.Shader.DSL (Vars)
 import Graphics.GL.Core41
 import Lens.Micro (Lens', lens)
 
@@ -83,6 +84,8 @@ data Capabilities v = Capabilities
   , scissorTest      :: v Bool
   }
   deriving (Generic)
+
+instance Vars Capabilities
 
 enabled_ :: Capability -> Lens' (Capabilities Maybe) Bool
 enabled_ = \case
