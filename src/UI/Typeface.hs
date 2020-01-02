@@ -13,7 +13,6 @@ module UI.Typeface
 , layoutString
 ) where
 
-import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Monad (guard, join, (<=<))
 import           Control.Monad.IO.Class.Lift
