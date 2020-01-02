@@ -82,7 +82,6 @@ runGame
   :: ( Effect sig
      , Has (Lift IO) sig m
      , Has Profile sig m
-     , MonadFail m
      )
   => m ()
 runGame = do

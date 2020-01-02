@@ -83,16 +83,16 @@ fromCSV = toBody . splitOnCommas where
   readEither' :: Read a => String -> (a -> b) -> String -> Either String b
   readEither' err f = either (Left . ((err <> ": ") <>)) (Right . f) . readEither
 
-fromFile :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePath -> m (Orbit a)
+fromFile :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => FilePath -> m (Orbit a)
 fromFile path = do
   lines <- lines <$> sendM (readFile path)
-  last <- maybe (fail ("no ephemerides found in file: " <> path)) (pure . pred) (elemIndex "$$EOE" lines)
-  either fail (pure . fromEphemeris) (fromCSV (lines !! last))
+  last <- maybe (pure (error ("no ephemerides found in file: " <> path))) (pure . pred) (elemIndex "$$EOE" lines)
+  either (pure . error) (pure . fromEphemeris) (fromCSV (lines !! last))
 
-fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => FilePath -> m [(Identifier, Orbit a)]
+fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => FilePath -> m [(Identifier, Orbit a)]
 fromDirectory = go Nothing
   where
-  go :: (Epsilon a, RealFloat a, Has (Lift IO) sig m, MonadFail m) => Maybe Identifier -> FilePath -> m [(Identifier, Orbit a)]
+  go :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => Maybe Identifier -> FilePath -> m [(Identifier, Orbit a)]
   go root dir
     =   sendM (listDirectory dir)
     >>= traverse (\ path -> do

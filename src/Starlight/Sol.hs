@@ -219,7 +219,7 @@ bodies orbits = bodies where
       }
     ]
 
-system :: (Has (Lift IO) sig m, MonadFail m) => m (System Body Float)
+system :: Has (Lift IO) sig m => m (System Body Float)
 system = do
   orbits <- Map.fromList <$> fromDirectory "ephemerides"
   let bodies = Starlight.Sol.bodies orbits
