@@ -17,6 +17,6 @@ infixl 1 &~
 
 
 zoom :: Has (State s) sig m => Lens' s a -> Strict.StateC a m () -> m ()
-zoom lens action = use lens >>= (`Strict.execState` action) >>= (lens .=)
+zoom lens action = use lens >>= (`Strict.execState` action) >>= assign lens
 
 infixr 2 `zoom`
