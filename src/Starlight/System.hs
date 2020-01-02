@@ -4,6 +4,7 @@ module Starlight.System
 , systemTrans
 , scale_
 , bodies_
+, identifiers
 , lookup
 , (!?)
 ) where
@@ -32,6 +33,9 @@ scale_ = lens scale (\ s scale -> s { scale })
 
 bodies_ :: Lens (System f a) (System g a) (Map.Map BodyIdentifier (f a)) (Map.Map BodyIdentifier (g a))
 bodies_ = lens bodies (\ s bodies -> s { bodies })
+
+identifiers :: System f a -> [Identifier]
+identifiers = map B . Map.keys . bodies
 
 lookup :: BodyIdentifier -> System f a -> Maybe (f a)
 lookup i = Map.lookup i . bodies
