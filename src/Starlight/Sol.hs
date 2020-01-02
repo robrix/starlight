@@ -240,6 +240,7 @@ system = do
       [ (identifier, fromMaybe (placeholder identifier orbit) (bodies Map.!? identifier))
       | (identifier, orbit) <- Map.toList orbits
       ]
+    , actors = Map.empty
     }
   where
   solI = Star (10, "Sol")

@@ -13,11 +13,13 @@ import           Linear.Matrix
 import           Linear.V4
 import           Linear.Vector
 import           Prelude hiding (lookup)
+import           Starlight.Actor
 import           Starlight.Identifier
 
 data System f a = System
   { scale  :: !a
   , bodies :: !(Map.Map Identifier (f a))
+  , actors :: !(Map.Map Int Actor)
   }
   deriving (Show)
 
