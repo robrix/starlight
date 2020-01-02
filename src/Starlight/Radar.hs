@@ -24,7 +24,6 @@ import           Data.Functor.Interval
 import           Data.List (find)
 import           GL.Array
 import           GL.Program
-import           GL.Shader.DSL (defaultVars)
 import           Lens.Micro ((.~))
 import           Linear.Exts as Linear
 import           Starlight.Actor
@@ -52,10 +51,8 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
   vs <- ask
 
   let radius = 100
-  set defaultVars
-    { Radar.matrix = Just (scaleToView vs)
-    , Radar.radius = Just radius
-    }
+  Radar.matrix_ .= Just (scaleToView vs)
+  Radar.radius_ .= Just radius
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -65,14 +62,13 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
       drawArrays LineStrip range
 
   measure "npcs" $ do
-    set defaultVars
-      { Radar.sweep  = Just 0
-        -- FIXME: fade colour with distance
-        -- FIXME: IFF
-      , Radar.colour = Just white
-      }
+    Radar.sweep_  .= Just 0
+    -- FIXME: fade colour with distance
+    -- FIXME: IFF
+    Radar.colour_ .= Just white
+
     for_ npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here)) in when (r > zoom vs * radius) $ do
-      set defaultVars { Radar.angle  = Just angle }
+      Radar.angle_ .= Just angle
       drawArrays Points medianRange
 
   measure "targets" $ do
