@@ -14,6 +14,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
+import           Control.Effect.State
 import           Control.Monad (when)
 import           Data.Coerce (coerce)
 import           Data.Foldable (for_)
@@ -100,16 +101,14 @@ runRadar m = do
 
 setBlip
   :: ( Has (Lift IO) sig m
-     , HasProgram Radar.U Radar.V Radar.O m
+     , Has (State (Radar.U Maybe)) sig m
      )
   => Blip
   -> m ()
 setBlip Blip{ angle, direction, d, r, colour } = do
-  set defaultVars
-    { Radar.angle  = Just angle
-    , Radar.sweep  = Just sweep
-    , Radar.colour = Just colour
-    }
+  Radar.angle_  .= Just angle
+  Radar.sweep_  .= Just sweep
+  Radar.colour_ .= Just colour
   where
   edge = perp direction ^* r + direction ^* d
   sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))
