@@ -51,7 +51,7 @@ draw
   -> Label
   -> Font
   -> Player
-  -> [Actor Float]
+  -> [Actor]
   -> m ()
 draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation, target } = player ^. actor_

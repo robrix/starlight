@@ -158,7 +158,7 @@ withView game m = do
 
 data GameState = GameState
   { player :: !Player
-  , npcs   :: ![Actor Float]
+  , npcs   :: ![Actor]
   , beams  :: ![Beam]
   , system :: !(System Body Float)
   }
@@ -167,10 +167,10 @@ data GameState = GameState
 player_ :: Lens' GameState Player
 player_ = lens player (\ s p -> s { player = p })
 
-npcs_ :: Lens' GameState [Actor Float]
+npcs_ :: Lens' GameState [Actor]
 npcs_ = lens npcs (\ s n -> s { npcs = n })
 
-actors_ :: Lens' GameState (NonEmpty (Actor Float))
+actors_ :: Lens' GameState (NonEmpty Actor)
 actors_ = lens ((:|) . actor . player <*> npcs) (\ s (a:|o) -> s { player = (player s) { actor = a }, npcs = o })
 
 system_ :: Lens' GameState (System Body Float)

@@ -16,7 +16,7 @@ import           Starlight.System as System
 ai
   :: Has Trace sig m
   => System StateVectors Float
-  -> Actor Float
+  -> Actor
   -> m (Set.Set Action)
 ai system Actor{ target, position = P here, rotation } = case target >>= (system !?) of
   -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
