@@ -27,6 +27,7 @@ import           Control.Effect.Trace
 import qualified Control.Exception.Lift as E
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
+import           Data.Bool (bool)
 import           Data.Coerce
 import           Data.Foldable (traverse_)
 import           Data.Function (fix)
@@ -84,9 +85,7 @@ runProfile
      )
   => (forall t . Algebra (Profile :+: sig) (t m) => t m a)
   -> m a
-runProfile m = view CLI.profile_ >>= \case
-  True  -> Profile.reportProfile m
-  False -> NoProfile.runProfile  m
+runProfile m = view CLI.profile_ >>= bool (NoProfile.runProfile m) (Profile.reportProfile m)
 
 runTrace
   :: ( Has (Lift IO) sig m
@@ -94,9 +93,7 @@ runTrace
      )
   => (forall t . Algebra (Trace :+: sig) (t m) => t m a)
   -> m a
-runTrace m = view CLI.trace_ >>= \case
-  True  -> Trace.runTrace   m
-  False -> NoTrace.runTrace m
+runTrace m = view CLI.trace_ >>= bool (NoTrace.runTrace m) (Trace.runTrace m)
 
 runGame
   :: ( Effect sig
