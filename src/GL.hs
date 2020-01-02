@@ -1,9 +1,11 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 module GL
 ( Capability(..)
 , GLC(..)
 ) where
 
+import Control.Monad.IO.Class
 import GL.Enum as GL
 import Graphics.GL.Core41
 
@@ -63,3 +65,4 @@ instance GL.Enum Capability where
 
 
 newtype GLC m a = GLC (m a)
+  deriving (Applicative, Functor, Monad, MonadIO)
