@@ -2,7 +2,8 @@
 module Starlight.Identifier
 ( Code
 , Name
-, Identifier(..)
+, Identifier
+, BodyIdentifier(..)
 , parent
 , rootLeaf
 , describeIdentifier
@@ -18,36 +19,38 @@ type Code = Int
 
 type Name = Text
 
-data Identifier
+type Identifier = BodyIdentifier
+
+data BodyIdentifier
   = Star (Code, Name)
-  | Identifier :/ (Code, Name)
+  | BodyIdentifier :/ (Code, Name)
   deriving (Eq, Read, Show)
 
 infixl 5 :/
 
-instance Ord Identifier where compare = compare `on` toList
+instance Ord BodyIdentifier where compare = compare `on` toList
 
-parent :: Identifier -> Maybe Identifier
+parent :: BodyIdentifier -> Maybe BodyIdentifier
 parent = \case
   parent :/ _ -> Just parent
   _           -> Nothing
 
-rootLeaf :: Identifier -> (Code, Name)
+rootLeaf :: BodyIdentifier -> (Code, Name)
 rootLeaf = \case
   parent :/ _ -> rootLeaf parent
   root        -> getLeaf root
 
-describeIdentifier :: Identifier -> String
+describeIdentifier :: BodyIdentifier -> String
 describeIdentifier = showLeaf . getLeaf where
   showLeaf (code, name) = show code <> " " <> unpack name
 
-toList :: Identifier -> NonEmpty (Code, Name)
+toList :: BodyIdentifier -> NonEmpty (Code, Name)
 toList i = go i [] where
   go = \case
     Star leaf -> (leaf:|)
     i :/ leaf -> go i . (leaf:)
 
-getLeaf :: Identifier -> (Code, Name)
+getLeaf :: BodyIdentifier -> (Code, Name)
 getLeaf = \case
   Star leaf -> leaf
   _ :/ leaf -> leaf
