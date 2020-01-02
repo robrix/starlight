@@ -2,7 +2,7 @@
 module Starlight.System
 ( System(..)
 , systemTrans
-, _scale
+, scale_
 , lookup
 ) where
 
@@ -23,8 +23,8 @@ data System f a = System
 systemTrans :: Num a => System f a -> M44 a
 systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
-_scale :: Lens' (System f a) a
-_scale = lens scale (\ s scale -> s { scale })
+scale_ :: Lens' (System f a) a
+scale_ = lens scale (\ s scale -> s { scale })
 
 lookup :: Identifier -> System f a -> Maybe (f a)
 lookup i = Map.lookup i . bodies
