@@ -24,7 +24,7 @@ controls
 controls = do
   input <- get
   let actions = catMaybes (map (runRelation input) controlRelations)
-  traverse_ (modify . (\\) . fst) actions
+  traverse_ (modify . flip (\\) . fst) actions
   pure (Set.fromList (map snd actions))
 
 -- FIXME: make this user-configurable
