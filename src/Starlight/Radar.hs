@@ -42,8 +42,8 @@ drawRadar
      , Has (Reader (System StateVectors Float)) sig m
      , Has (Reader View) sig m
      )
-  => Actor
-  -> [Actor]
+  => Actor Float
+  -> [Actor Float]
   -> m ()
 drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using getDrawable $ do
   system@System{ scale } <- ask @(System StateVectors Float)

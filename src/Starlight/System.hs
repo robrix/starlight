@@ -22,7 +22,7 @@ import           Starlight.Identifier
 data System f a = System
   { scale  :: !a
   , bodies :: !(Map.Map BodyIdentifier (f a))
-  , actors :: !(Map.Map Int Actor)
+  , actors :: !(Map.Map Int (Actor a))
   }
   deriving (Show)
 

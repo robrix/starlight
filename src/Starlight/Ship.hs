@@ -33,7 +33,7 @@ drawShip
      , Has (Reader View) sig m
      )
   => Colour Float
-  -> Actor
+  -> Actor Float
   -> m ()
 drawShip colour Actor{ position, rotation } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
