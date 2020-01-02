@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Controls
 ( controls
+, actions
 , controlActions
 ) where
 
@@ -12,10 +13,12 @@ import           Control.Effect.Reader
 import           Control.Effect.State
 import           Control.Monad (guard, when)
 import           Data.Coerce (coerce)
+import           Data.Functor (($>))
 import           Data.Functor.Const
 import           Data.Ix
 import           Data.List (elemIndex)
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import           Lens.Micro
 import           Linear.Exts
 import qualified SDL
@@ -74,6 +77,9 @@ controls (Delta (Seconds dt)) = do
     pressed_ SDL.KeycodeTab .= False
   where
   or = liftA2 (liftA2 (coerce (||)))
+
+actions :: Input -> Set.Set Action
+actions input = Set.fromList (concatMap (\ (kc, act) -> guard (input ^. pressed_ kc) $> act) controlActions)
 
 -- FIXME: make this user-configurable
 controlActions :: [(SDL.Keycode, Action)]
