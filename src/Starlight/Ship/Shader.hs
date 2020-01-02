@@ -21,7 +21,7 @@ import Lens.Micro (Lens', lens)
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } None ->
-    gl_Position .= (matrix u !* ext4 (ext3 pos 1) 1))
+    gl_Position .= matrix u !* ext4 (ext3 pos 1) 1)
 
   >>> fragment (\ None O { fragColour } ->
     fragColour .= colour u)
