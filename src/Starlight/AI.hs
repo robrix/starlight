@@ -4,20 +4,19 @@ module Starlight.AI
 ( ai
 ) where
 
-import           Data.Foldable (find)
 import           Data.Functor.Interval
 import qualified Data.Set as Set
 import           Linear.Exts
 import           Starlight.Action
 import           Starlight.Actor as Actor
 import           Starlight.Body as Body
-import           Starlight.System
+import           Starlight.System as System
 
 ai
   :: System StateVectors Float
   -> Actor
   -> Set.Set Action
-ai System{ bodies } Actor{ target, position = P here, rotation } = case target >>= \ i -> find ((== i) . identifier . Body.body) bodies of
+ai system Actor{ target, position = P here, rotation } = case target >>= (`System.lookup` system) of
   -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
   -- FIXME: don’t just fly directly at the target at full throttle, dumbass
   -- FIXME: factor in the target’s velocity & distance
