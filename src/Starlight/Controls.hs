@@ -4,6 +4,7 @@
 module Starlight.Controls
 ( controls
 , actions
+, runAction
 , controlPredicates
 , Continuity(..)
 , actionContinuity
@@ -120,3 +121,43 @@ actionContinuity :: Action -> Continuity
 actionContinuity = \case
   ChangeTarget _ -> Discrete
   _              -> Continuous
+
+
+runAction
+  :: ( Has (Lift IO) sig m
+     , Has (Reader (System StateVectors Float)) sig m
+     , Has (State Player) sig m
+     )
+  => Delta Seconds Float
+  -> Action
+  -> m ()
+runAction (Delta (Seconds dt)) = \case
+  Thrust -> do
+    thrust <- uses throttle_ (dt *)
+    rotation <- use (actor_ . rotation_)
+    actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
+  Face dir -> case dir of
+    Forwards  -> pure ()
+    Backwards -> do
+      rotation <- use (actor_ . rotation_)
+      velocity <- use (actor_ . velocity_)
+      actor_ . rotation_ .= face angular (angleOf (negated velocity)) rotation
+    Target    -> pure ()
+  Turn L -> do
+    actor_ . rotation_ *= axisAngle (unit _z) (getRadians angular)
+  Turn R -> do
+    actor_ . rotation_ *= axisAngle (unit _z) (getRadians (-angular))
+  Fire Main -> firing_ .= True
+  ChangeTarget change -> do
+    System{ bodies } <- ask @(System StateVectors Float)
+    let identifiers = Map.keys bodies
+    actor_ . target_ %= case change of
+      Nothing -> const Nothing
+      Just dir -> \ target -> case target >>= (`elemIndex` identifiers) of
+          Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length bodies)) i') where
+            i' = case dir of
+              Prev -> i - 1
+              Next -> i + 1
+          Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
+  where
+  angular = dt *^ Radians 5
