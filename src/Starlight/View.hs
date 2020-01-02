@@ -4,6 +4,7 @@ module Starlight.View
 , scaleToView
 , scaleToViewZoomed
 , aspectRatio
+, deviceSize
 ) where
 
 import Data.Function ((&))
@@ -31,3 +32,6 @@ scaleToViewZoomed vs@View{ zoom } = scaleToView vs !*! scaled (pure 1 & _xy .~ p
 aspectRatio :: View -> Float
 aspectRatio View{ size } = size' ^. _x / size' ^. _y where
   size' = fromIntegral <$> size
+
+deviceSize :: View -> V2 Int
+deviceSize View{ scale, size } = scale *^ size
