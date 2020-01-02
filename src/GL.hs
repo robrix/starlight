@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 module GL
 ( Capability(..)
+, GLC(..)
 ) where
 
 import GL.Enum as GL
@@ -59,3 +60,6 @@ instance GL.Enum Capability where
     StencilTest                -> GL_STENCIL_TEST
     TextureCubeMapSeamless     -> GL_TEXTURE_CUBE_MAP_SEAMLESS
     ProgramPointSize           -> GL_PROGRAM_POINT_SIZE
+
+
+newtype GLC m a = GLC (m a)
