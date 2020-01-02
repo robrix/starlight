@@ -32,10 +32,10 @@ instance Uniform Int32 where
   uniform loc = runLiftIO . glUniform1i loc
 
 instance Uniform Float where
-  uniform = fmap runLiftIO . glUniform1f
+  uniform loc = runLiftIO . glUniform1f loc
 
 instance Uniform Double where
-  uniform = fmap runLiftIO . glUniform1d
+  uniform loc = runLiftIO . glUniform1d loc
 
 instance Uniform (Linear.V2 Float) where
   uniform location (Linear.V2 x y) = runLiftIO $ glUniform2f location x y
