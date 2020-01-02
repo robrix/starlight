@@ -12,6 +12,7 @@ module Starlight.Game
 ( main
 ) where
 
+import           Control.Algebra
 import           Control.Carrier.Empty.Maybe
 import           Control.Carrier.Finally
 import qualified Control.Carrier.Profile.Identity as NoProfile
@@ -22,7 +23,7 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import qualified Control.Exception.Lift as E
-import           Control.Monad (when, (<=<))
+import           Control.Monad (when)
 import           Data.Coerce
 import           Data.Foldable (traverse_)
 import           Data.Function (fix)
@@ -62,10 +63,7 @@ import           Unit.Length
 main :: IO ()
 main = handling $ do
   Options{ profile } <- execParser argumentsParser
-  if profile then
-    Profile.reportTimings <=< Profile.execProfile $ runGame
-  else
-    NoProfile.runProfile runGame
+  runProfile Options{ profile } runGame
   where
   handling m = do
     name <- getProgName
@@ -77,6 +75,19 @@ main = handling $ do
         ]
     else
       m
+
+runProfile
+  :: ( Has (Lift IO) sig m
+     , Effect sig
+     )
+  => Options
+  -> (forall t . Algebra (Profile :+: sig) (t m) => t m a)
+  -> m a
+runProfile Options{ profile } m
+  | profile   = do
+    (t, a) <- Profile.runProfile m
+    a <$ Profile.reportTimings t
+  | otherwise = NoProfile.runProfile m
 
 runGame
   :: ( Effect sig
