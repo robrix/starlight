@@ -31,7 +31,7 @@ data Capability
   -- DepthTest                  -- ^ GL_DEPTH_TEST
   -- Dither                     -- ^ GL_DITHER
   -- FramebufferSRGB            -- ^ GL_FRAMEBUFFER_SRGB
-  -- LineSmooth                 -- ^ GL_LINE_SMOOTH
+  | LineSmooth                 -- ^ GL_LINE_SMOOTH
   -- Multisample                -- ^ GL_MULTISAMPLE
   -- PolygonOffsetFill          -- ^ GL_POLYGON_OFFSET_FILL
   -- PolygonOffsetLine          -- ^ GL_POLYGON_OFFSET_LINE
@@ -59,7 +59,7 @@ instance GL.Enum Capability where
     -- DepthTest                  -> GL_DEPTH_TEST
     -- Dither                     -> GL_DITHER
     -- FramebufferSRGB            -> GL_FRAMEBUFFER_SRGB
-    -- LineSmooth                 -> GL_LINE_SMOOTH
+    LineSmooth                 -> GL_LINE_SMOOTH
     -- Multisample                -> GL_MULTISAMPLE
     -- PolygonOffsetFill          -> GL_POLYGON_OFFSET_FILL
     -- PolygonOffsetLine          -> GL_POLYGON_OFFSET_LINE
