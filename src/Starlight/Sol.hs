@@ -25,7 +25,7 @@ import           Unit.Angle
 import           Unit.Length
 import           Unit.Time
 
-bodies :: Map.Map Identifier (Orbit Float) -> Map.Map Identifier (Body Float)
+bodies :: Map.Map BodyIdentifier (Orbit Float) -> Map.Map BodyIdentifier (Body Float)
 bodies orbits = bodies where
   solI = Star (10, "Sol")
   bodies = Map.fromList $

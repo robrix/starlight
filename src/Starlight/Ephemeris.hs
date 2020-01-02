@@ -89,10 +89,10 @@ fromFile path = do
   last <- maybe (pure (error ("no ephemerides found in file: " <> path))) (pure . pred) (elemIndex "$$EOE" lines)
   either (pure . error) (pure . fromEphemeris) (fromCSV (lines !! last))
 
-fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => FilePath -> m [(Identifier, Orbit a)]
+fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => FilePath -> m [(BodyIdentifier, Orbit a)]
 fromDirectory = go Nothing
   where
-  go :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => Maybe Identifier -> FilePath -> m [(Identifier, Orbit a)]
+  go :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => Maybe BodyIdentifier -> FilePath -> m [(BodyIdentifier, Orbit a)]
   go root dir
     =   sendM (listDirectory dir)
     >>= traverse (\ path -> do

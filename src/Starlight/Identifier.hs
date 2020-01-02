@@ -2,7 +2,6 @@
 module Starlight.Identifier
 ( Code
 , Name
-, Identifier
 , BodyIdentifier(..)
 , parent
 , rootLeaf
@@ -18,8 +17,6 @@ import Data.Text
 type Code = Int
 
 type Name = Text
-
-type Identifier = BodyIdentifier
 
 data BodyIdentifier
   = Star (Code, Name)
