@@ -136,16 +136,18 @@ runAction (Delta (Seconds dt)) = \case
     thrust <- uses throttle_ (dt *)
     rotation <- use (actor_ . rotation_)
     actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
-  Face dir -> case dir of
-    Forwards  -> do
+  Face dir -> do
+    direction <- case dir of
+      Forwards  -> do
+        velocity <- use (actor_ . velocity_)
+        pure (Just velocity)
+      Backwards -> do
+        velocity <- use (actor_ . velocity_)
+        pure (Just (negated velocity))
+      Target    -> pure Nothing
+    for_ direction $ \ direction -> do
       rotation <- use (actor_ . rotation_)
-      velocity <- use (actor_ . velocity_)
-      actor_ . rotation_ .= face angular (angleOf velocity) rotation
-    Backwards -> do
-      rotation <- use (actor_ . rotation_)
-      velocity <- use (actor_ . velocity_)
-      actor_ . rotation_ .= face angular (angleOf (negated velocity)) rotation
-    Target    -> pure ()
+      actor_ . rotation_ .= face angular (angleOf direction) rotation
   Turn L -> do
     actor_ . rotation_ *= axisAngle (unit _z) (getRadians angular)
   Turn R -> do
