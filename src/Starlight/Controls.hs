@@ -3,22 +3,24 @@
 module Starlight.Controls
 ( controls
 , actions
-, controlActions
+, controlPredicates
 , ControlType(..)
 ) where
 
-import           Control.Applicative (liftA2)
+import           Control.Algebra
+import           Control.Applicative (Alternative(..), liftA2)
+import           Control.Carrier.Reader.Predicate
 import           Control.Effect.Lens
 import           Control.Effect.Lift
 import           Control.Effect.Reader
 import           Control.Effect.State
 import           Control.Monad (guard, when)
 import           Data.Coerce (coerce)
-import           Data.Functor (($>))
 import           Data.Functor.Const
 import           Data.Ix
 import           Data.List (elemIndex)
 import qualified Data.Map as Map
+import           Data.Maybe (catMaybes)
 import qualified Data.Set as Set
 import           Lens.Micro
 import           Linear.Exts
@@ -81,19 +83,22 @@ controls (Delta (Seconds dt)) = do
   or = liftA2 (liftA2 (coerce (||)))
 
 actions :: Input -> Set.Set Action
-actions input = Set.fromList (concatMap (\ (kc, act) -> guard (input ^. pressed_ kc) $> act) controlActions)
+actions input = Set.fromList (catMaybes (map (runPredicate input) controlPredicates))
 
 -- FIXME: make this user-configurable
-controlActions :: [(SDL.Keycode, Action)]
-controlActions =
-  [ (SDL.KeycodeUp,    Thrust)
-  , (SDL.KeycodeDown,  Face Backwards)
-  , (SDL.KeycodeLeft,  TurnL)
-  , (SDL.KeycodeRight, TurnR)
-  , (SDL.KeycodeSpace, Fire Main)
-  , (SDL.KeycodeQ,     ChangeTarget (Just Prev))
-  , (SDL.KeycodeE,     ChangeTarget (Just Next))
+controlPredicates :: [Predicate Input Action]
+controlPredicates =
+  [ Thrust <$ expect (pressed_ SDL.KeycodeUp)
+  , Face Backwards <$ expect (pressed_ SDL.KeycodeDown)
+  , TurnL <$ expect (pressed_ SDL.KeycodeLeft)
+  , TurnR <$ expect (pressed_ SDL.KeycodeRight)
+  , Fire Main <$ expect (pressed_ SDL.KeycodeSpace)
+  , ChangeTarget . Just
+    <$  expect (pressed_ SDL.KeycodeTab)
+    <*> (Prev <$ shift <|> pure Next)
   ]
+  where
+  shift = expect (pressed_ SDL.KeycodeLShift) <|> expect (pressed_ SDL.KeycodeRShift)
 
 data ControlType
   = Continuous
