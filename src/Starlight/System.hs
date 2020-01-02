@@ -24,7 +24,7 @@ systemTrans :: Num a => System f a -> M44 a
 systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
 _scale :: Lens' (System f a) a
-_scale = lens (\ System{ scale } -> scale) (\ System { bodies } s' -> System { bodies, scale = s' })
+_scale = lens scale (\ s scale -> s { scale })
 
 lookup :: Identifier -> System f a -> Maybe (f a)
 lookup i = Map.lookup i . bodies
