@@ -29,3 +29,4 @@ Controls are currently hard-coded; I intend to eventually make them configurable
 - +/-: increase/decrease throttle (controls rate of thrust)
 - tab/shift tab: switch to the next/prev target
 - space: fire weapons in the direction you’re facing
+- t: turn to face the selected target (if any)

@@ -65,6 +65,7 @@ controlPredicates =
   , expect (pressed_ SDL.KeycodeLeft)  $> (SDL.KeycodeLeft,  Turn L)
   , expect (pressed_ SDL.KeycodeRight) $> (SDL.KeycodeRight, Turn R)
   , expect (pressed_ SDL.KeycodeSpace) $> (SDL.KeycodeSpace, Fire Main)
+  , expect (pressed_ SDL.KeycodeT)     $> (SDL.KeycodeT,     Face Target)
   , (,) SDL.KeycodeTab . ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)
     <*> (Prev <$ shift <|> pure Next)
