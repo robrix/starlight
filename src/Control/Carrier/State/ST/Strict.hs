@@ -4,7 +4,8 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.State.ST.Strict
 ( -- * State carrier
-  StateC(..)
+  runState
+, StateC(..)
   -- * State effect
 , module Control.Effect.State
 ) where
@@ -15,6 +16,11 @@ import Control.Effect.State
 import Control.Monad (ap)
 import Control.Monad.ST.Strict
 import Data.STRef
+
+runState :: s -> StateC s a -> a
+runState s (StateC m) = runST $ do
+  ref <- newSTRef s
+  runReader ref m
 
 newtype StateC s a = StateC (forall t . ReaderC (STRef t s) (ST t) a)
   deriving (Functor)
