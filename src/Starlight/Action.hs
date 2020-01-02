@@ -2,6 +2,7 @@ module Starlight.Action
 ( Action(..)
 , Direction(..)
 , Change(..)
+, Weapon(..)
 ) where
 
 data Action
@@ -9,7 +10,7 @@ data Action
   | TurnL
   | TurnR
   | Face Direction
-  | FireMain
+  | Fire Weapon
   | ChangeTarget (Maybe Change)
 
 data Direction
@@ -20,3 +21,6 @@ data Direction
 data Change
   = Prev
   | Next
+
+data Weapon
+  = Main
