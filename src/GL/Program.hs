@@ -18,7 +18,6 @@ module GL.Program
 , build
 , use
 , set
-, (&=)
 , HasProgram(..)
 , ProgramT(..)
   -- * Uniforms
@@ -45,7 +44,6 @@ import qualified GL.Shader.DSL as DSL
 import           GL.Uniform
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
-import           Lens.Micro (ASetter, (&), (.~))
 
 data Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Program
   { locations :: IntMap.IntMap GLint
@@ -87,11 +85,6 @@ set :: (DSL.Vars u, HasProgram u i o m, Has (Lift IO) sig m) => u Maybe -> m ()
 set v = askProgram >>= \ (Program ls _) ->
   DSL.foldVarsM (\ DSL.Field { DSL.location } ->
     maybe (pure ()) (checkingGLError . uniform (ls IntMap.! location))) v
-
-(&=) :: (HasProgram u i o m, Has (Lift IO) sig m, DSL.Vars t, DSL.Vars u) => ASetter (t Maybe) (u Maybe) a (Maybe b) -> b -> m ()
-l &= a = set $ DSL.defaultVars & l .~ Just a
-
-infixr 4 &=
 
 
 class Monad m => HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u i o where
