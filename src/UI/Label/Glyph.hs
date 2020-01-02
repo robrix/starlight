@@ -6,6 +6,10 @@
 module UI.Label.Glyph
 ( shader
 , U(..)
+, matrix_
+, scale_
+, fontScale_
+, offset_
 , V(..)
 , O(..)
 ) where
@@ -14,6 +18,7 @@ import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL hiding (Field(..))
+import Lens.Micro (Lens', lens)
 import Prelude hiding (break)
 
 shader :: Shader U V O
@@ -74,6 +79,19 @@ data U v = U
   deriving (Generic)
 
 instance Vars U
+
+matrix_ :: Lens' (U v) (v (M33 Float))
+matrix_ = lens matrix (\ u matrix -> u { matrix })
+
+scale_ :: Lens' (U v) (v Float)
+scale_ = lens scale (\ u scale -> u { scale })
+
+fontScale_ :: Lens' (U v) (v Float)
+fontScale_ = lens fontScale (\ u fontScale -> u { fontScale })
+
+offset_ :: Lens' (U v) (v Float)
+offset_ = lens offset (\ u offset -> u { offset })
+
 
 newtype V v = V { pos :: v (V4 Float) }
   deriving (Generic)

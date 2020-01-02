@@ -3,12 +3,15 @@
 module UI.Graph.Lines
 ( shader
 , U(..)
+, matrix_
+, colour_
 , V(..)
 , O(..)
 ) where
 
 import GHC.Generics (Generic)
 import GL.Shader.DSL
+import Lens.Micro (Lens', lens)
 import UI.Graph.Vertex
 
 shader :: Shader U V O
@@ -27,6 +30,13 @@ data U v = U
   deriving (Generic)
 
 instance Vars U
+
+matrix_ :: Lens' (U v) (v (M33 Float))
+matrix_ = lens matrix (\ u matrix -> u { matrix })
+
+colour_ :: Lens' (U v) (v (Colour Float))
+colour_ = lens colour (\ u colour -> u { colour })
+
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)

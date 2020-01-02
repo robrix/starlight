@@ -7,6 +7,9 @@
 module Starlight.Starfield.Shader
 ( shader
 , U(..)
+, resolution_
+, origin_
+, zoom_
 , V(..)
 , O(..)
 ) where
@@ -15,6 +18,7 @@ import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
+import Lens.Micro (Lens', lens)
 
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
 
@@ -82,6 +86,15 @@ data U v = U
   deriving (Generic)
 
 instance Vars U
+
+resolution_ :: Lens' (U v) (v (V2 Float))
+resolution_ = lens resolution (\ u resolution -> u { resolution })
+
+origin_ :: Lens' (U v) (v (Point V2 Float))
+origin_ = lens origin (\ u origin -> u { origin })
+
+zoom_ :: Lens' (U v) (v Float)
+zoom_ = lens zoom (\ u zoom -> u { zoom })
 
 newtype V v = V { pos :: v (V2 Float) }
   deriving (Generic)

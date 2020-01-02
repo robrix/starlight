@@ -6,6 +6,8 @@
 module Starlight.Ship.Shader
 ( shader
 , U(..)
+, matrix_
+, colour_
 , V(..)
 , O(..)
 ) where
@@ -14,6 +16,7 @@ import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
+import Lens.Micro (Lens', lens)
 
 shader :: Shader U V O
 shader = program $ \ u
@@ -31,6 +34,13 @@ data U v = U
   deriving (Generic)
 
 instance Vars U
+
+matrix_ :: Lens' (U v) (v (M44 Float))
+matrix_ = lens matrix (\ u matrix -> u { matrix })
+
+colour_ :: Lens' (U v) (v (Colour Float))
+colour_ = lens colour (\ u colour -> u { colour })
+
 
 newtype V v = V { pos :: v (V2 Float) }
   deriving (Generic)
