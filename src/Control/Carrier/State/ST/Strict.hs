@@ -7,6 +7,7 @@ module Control.Carrier.State.ST.Strict
   runStateRef
 , runState
 , evalState
+, execState
 , StateC(..)
   -- * State effect
 , module Control.Effect.State
@@ -31,6 +32,9 @@ runState s m = runST $ do
 
 evalState :: s -> StateC s a -> a
 evalState s = snd . runState s
+
+execState :: s -> StateC s a -> s
+execState s = fst . runState s
 
 newtype StateC s a = StateC (forall t . ReaderC (STRef t s) (ST t) a)
   deriving (Functor)
