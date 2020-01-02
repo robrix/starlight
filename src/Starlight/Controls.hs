@@ -68,13 +68,14 @@ controls (Delta (Seconds dt)) = do
 
   System{ bodies } <- ask @(System StateVectors Float)
   let identifiers = Map.keys bodies
-      switchTarget shift target = case target >>= (`elemIndex` identifiers) of
+      switchTarget dir target = case target >>= (`elemIndex` identifiers) of
         Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length bodies)) i') where
-          i' | shift     = i - 1
-             | otherwise = i + 1
-        Nothing -> Just $ if shift then last identifiers else head identifiers
+          i' = case dir of
+            Prev -> i - 1
+            Next -> i + 1
+        Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
   when (input ^. pressed_ SDL.KeycodeTab) $ do
-    actor_ . target_ %= switchTarget (input ^. (pressed_ SDL.KeycodeLShift `or` pressed_ SDL.KeycodeRShift))
+    actor_ . target_ %= switchTarget (if input ^. (pressed_ SDL.KeycodeLShift `or` pressed_ SDL.KeycodeRShift) then Prev else Next)
     pressed_ SDL.KeycodeTab .= False
   where
   or = liftA2 (liftA2 (coerce (||)))
