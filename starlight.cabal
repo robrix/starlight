@@ -42,6 +42,7 @@ library
     Control.Carrier.Reader.Relation
     Control.Carrier.State.IORef
     Control.Carrier.State.ST.Strict
+    Control.Carrier.Trace.Lift
     Control.Concurrent.Lift
     Control.Effect.Finally
     Control.Effect.Lens.Exts
