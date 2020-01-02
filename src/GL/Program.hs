@@ -28,6 +28,7 @@ module GL.Program
 import           Control.Algebra
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
+import           Control.Effect.State
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
@@ -103,8 +104,15 @@ newtype ProgramT (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) 
 instance HasProgram u i o m => HasProgram u i o (ReaderC r m) where
   askProgram = lift askProgram
 
-instance Algebra sig m => Algebra sig (ProgramT u i o m) where
-  alg = ProgramT . send . handleCoercible
+instance (Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramT u i o m) where
+  alg = \case
+    L (Get   k) -> k DSL.defaultVars
+    L (Put s k) -> do
+      Program ls _ <- askProgram
+      DSL.foldVarsM (\ DSL.Field { DSL.location } ->
+        maybe (pure ()) (checkingGLError . uniform (ls IntMap.! location))) s
+      k
+    R other     -> ProgramT (send (handleCoercible other))
 
 instance Algebra sig m => HasProgram u i o (ProgramT u i o m) where
   askProgram = ProgramT ask

@@ -9,6 +9,7 @@ import Control.Effect.Reader
 import Data.Functor.Identity
 import GL.Array
 import GL.Program
+import GL.Shader.DSL (Vars)
 
 data Drawable u v o = Drawable
   { program :: Program u v o
@@ -18,6 +19,7 @@ data Drawable u v o = Drawable
 using
   :: ( Has (Lift IO) sig m
      , Has (Reader a) sig m
+     , Vars u
      )
   => (a -> Drawable u v o)
   -> ArrayT v (ProgramT u v o m) b
