@@ -3,7 +3,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module UI.Typeface
-( Typeface(name)
+( Typeface(name, glyphs)
 , Font(..)
 , fontScale
 , metrics
@@ -11,7 +11,6 @@ module UI.Typeface
 , readFontOfSize
 , cacheCharactersForDrawing
 , layoutString
-, usingGlyphs
 ) where
 
 import           Control.Carrier.Reader
@@ -49,7 +48,7 @@ data Typeface = Typeface
   { name         :: Maybe String
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
-  , glyphD       :: Drawable Glyph.U Glyph.V Glyph.O
+  , glyphs       :: Drawable Glyph.U Glyph.V Glyph.O
   , glyphB       :: Buffer 'B.Array (Glyph.V Identity)
   , rangesRef    :: IORef (Map.Map Char (Interval Identity Int))
   }
@@ -98,7 +97,7 @@ fromOpentypeFont opentypeFont = do
     { name
     , allGlyphs
     , opentypeFont
-    , glyphD = Drawable{ program, array }
+    , glyphs = Drawable{ program, array }
     , glyphB
     , rangesRef
     } where
@@ -130,7 +129,7 @@ readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 
 cacheCharactersForDrawing :: (HasCallStack, Has (Lift IO) sig m) => Typeface -> String -> m ()
-cacheCharactersForDrawing Typeface{ allGlyphs, glyphD = Drawable { array }, glyphB, rangesRef } string = do
+cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { array }, glyphB, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + Identity (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
@@ -188,10 +187,6 @@ layoutString face string = do
 
 glyphsForString :: Map.Map Char (Maybe Glyph) -> String -> [Glyph]
 glyphsForString allGlyphs = catMaybes . map (join . (allGlyphs Map.!?))
-
-
-usingGlyphs :: Has (Lift IO) sig m => Typeface -> ArrayT Glyph.V (ProgramC Glyph.U Glyph.V Glyph.O (ReaderC Typeface m)) a -> m a
-usingGlyphs face = runReader face . using glyphD
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
