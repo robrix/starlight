@@ -20,57 +20,57 @@ import           Linear.V3 as Linear
 import           Linear.V4 as Linear
 
 class GL.Type t => Uniform t where
-  uniform :: (HasCallStack, Has (Lift IO) sig m) => GLint -> t -> m ()
+  uniform :: (HasCallStack, Has (Lift IO) sig m) => GLuint -> GLint -> t -> m ()
 
 instance Uniform Bool where
-  uniform loc = runLiftIO . glUniform1i loc . fromIntegral . fromEnum
+  uniform prog loc = runLiftIO . glProgramUniform1i prog loc . fromIntegral . fromEnum
 
 instance Uniform Int where
-  uniform loc = runLiftIO . glUniform1i loc . fromIntegral
+  uniform prog loc = runLiftIO . glProgramUniform1i prog loc . fromIntegral
 
 instance Uniform Int32 where
-  uniform loc = runLiftIO . glUniform1i loc
+  uniform prog loc = runLiftIO . glProgramUniform1i prog loc
 
 instance Uniform Float where
-  uniform loc = runLiftIO . glUniform1f loc
+  uniform prog loc = runLiftIO . glProgramUniform1f prog loc
 
 instance Uniform Double where
-  uniform loc = runLiftIO . glUniform1d loc
+  uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
 instance Uniform (Linear.V2 Float) where
-  uniform loc (Linear.V2 x y) = runLiftIO $ glUniform2f loc x y
+  uniform prog loc (Linear.V2 x y) = runLiftIO $ glProgramUniform2f prog loc x y
 
 instance Uniform (Linear.V2 Double) where
-  uniform loc (Linear.V2 x y) = runLiftIO $ glUniform2d loc x y
+  uniform prog loc (Linear.V2 x y) = runLiftIO $ glProgramUniform2d prog loc x y
 
 instance Uniform (Linear.V3 Float) where
-  uniform loc (Linear.V3 x y z) = runLiftIO $ glUniform3f loc x y z
+  uniform prog loc (Linear.V3 x y z) = runLiftIO $ glProgramUniform3f prog loc x y z
 
 instance Uniform (Linear.V3 Double) where
-  uniform loc (Linear.V3 x y z) = runLiftIO $ glUniform3d loc x y z
+  uniform prog loc (Linear.V3 x y z) = runLiftIO $ glProgramUniform3d prog loc x y z
 
 instance Uniform (Linear.V4 Float) where
-  uniform loc (Linear.V4 x y z w) = runLiftIO $ glUniform4f loc x y z w
+  uniform prog loc (Linear.V4 x y z w) = runLiftIO $ glProgramUniform4f prog loc x y z w
 
 instance Uniform (Linear.V4 Double) where
-  uniform loc (Linear.V4 x y z w) = runLiftIO $ glUniform4d loc x y z w
+  uniform prog loc (Linear.V4 x y z w) = runLiftIO $ glProgramUniform4d prog loc x y z w
 
 instance Uniform (Linear.M22 Float) where
-  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix2fv loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix2fv prog loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M22 Double) where
-  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix2dv loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix2dv prog loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M33 Float) where
-  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3fv loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix3fv prog loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M33 Double) where
-  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix3dv loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix3dv prog loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M44 Float) where
-  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4fv loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix4fv prog loc 1 GL_FALSE . castPtr)
 
 instance Uniform (Linear.M44 Double) where
-  uniform loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glUniformMatrix4dv loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix4dv prog loc 1 GL_FALSE . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Linear.Point f a)

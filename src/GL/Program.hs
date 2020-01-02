@@ -95,9 +95,9 @@ instance (Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u Maybe) :+: sig) 
   alg = \case
     L (Get   k) -> k DSL.defaultVars
     L (Put s k) -> do
-      Program ls _ <- askProgram
+      Program ls prog <- askProgram
       DSL.foldVarsM (\ DSL.Field { DSL.location } ->
-        maybe (pure ()) (checkingGLError . uniform (ls IntMap.! location))) s
+        maybe (pure ()) (checkingGLError . uniform prog (ls IntMap.! location))) s
       k
     R other     -> ProgramT (send (handleCoercible other))
 
