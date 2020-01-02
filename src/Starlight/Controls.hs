@@ -137,7 +137,10 @@ runAction (Delta (Seconds dt)) = \case
     rotation <- use (actor_ . rotation_)
     actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
   Face dir -> case dir of
-    Forwards  -> pure ()
+    Forwards  -> do
+      rotation <- use (actor_ . rotation_)
+      velocity <- use (actor_ . velocity_)
+      actor_ . rotation_ .= face angular (angleOf velocity) rotation
     Backwards -> do
       rotation <- use (actor_ . rotation_)
       velocity <- use (actor_ . velocity_)
