@@ -23,7 +23,7 @@ data View = View
 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to device coordinates.
 scaleToView :: (Applicative v, Traversable v, R2 v) => View -> v (v Float)
-scaleToView View{ scale, size } = scaled (pure 1 & _xy .~ (1 / (fromIntegral <$> size) ^* fromIntegral scale))
+scaleToView View{ scale, size } = scaled (pure 1 & _xy .~ 1 / (fromIntegral <$> size) ^* fromIntegral scale)
 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to zoomed device coordinates.
 scaleToViewZoomed :: (Additive v, Applicative v, Traversable v, R2 v) => View -> v (v Float)
