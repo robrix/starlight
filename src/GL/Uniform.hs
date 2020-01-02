@@ -22,6 +22,9 @@ import           Linear.V4 as Linear
 class GL.Type t => Uniform t where
   uniform :: Has (Lift IO) sig m => HasCallStack => GLint -> t -> m ()
 
+instance Uniform Bool where
+  uniform loc = runLiftIO . glUniform1i loc . fromIntegral . fromEnum
+
 instance Uniform Int where
   uniform loc = runLiftIO . glUniform1i loc . fromIntegral
 
