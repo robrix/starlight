@@ -27,5 +27,5 @@ Controls are currently hard-coded; I intend to eventually make them configurable
 - Left/right arrows: turn left/right
 - Down arrow: turn to face opposite direction from current heading
 - +/-: increase/decrease throttle (controls rate of thrust)
-- tab/shift tab: switch to the next/prev target
+- q/e: switch to the next/prev target
 - space: fire weapons in the direction you’re facing

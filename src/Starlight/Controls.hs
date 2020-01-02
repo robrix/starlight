@@ -74,9 +74,12 @@ controls (Delta (Seconds dt)) = do
             Prev -> i - 1
             Next -> i + 1
         Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
-  when (input ^. pressed_ SDL.KeycodeTab) $ do
-    actor_ . target_ %= switchTarget (if input ^. (pressed_ SDL.KeycodeLShift `or` pressed_ SDL.KeycodeRShift) then Prev else Next)
-    pressed_ SDL.KeycodeTab .= False
+  when (input ^. pressed_ SDL.KeycodeQ) $ do
+    actor_ . target_ %= switchTarget Prev
+    pressed_ SDL.KeycodeQ .= False
+  when (input ^. pressed_ SDL.KeycodeE) $ do
+    actor_ . target_ %= switchTarget Next
+    pressed_ SDL.KeycodeE .= False
   where
   or = liftA2 (liftA2 (coerce (||)))
 
