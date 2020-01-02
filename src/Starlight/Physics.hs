@@ -26,7 +26,7 @@ import Unit.Time
 
 physics
   :: Delta Seconds Float
-  -> System StateVectors Float
+  -> System StateVectors
   -> Actor
   -> Actor
 physics dt System{ scale, bodies } = updatePosition . flip (foldr (applyGravity dt (1/scale))) bodies
@@ -34,7 +34,7 @@ physics dt System{ scale, bodies } = updatePosition . flip (foldr (applyGravity 
 updatePosition :: Actor -> Actor
 updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
 
-applyGravity :: Delta Seconds Float -> Float -> StateVectors Float -> Actor -> Actor
+applyGravity :: Delta Seconds Float -> Float -> StateVectors -> Actor -> Actor
 applyGravity (Delta (Seconds dt)) distanceScale StateVectors{ position = pos, body = Body{ mass } } a@Actor{ position, velocity }
   = a { velocity = velocity + unP (dt * force *^ direction pos position) } where
   force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
@@ -44,7 +44,7 @@ applyGravity (Delta (Seconds dt)) distanceScale StateVectors{ position = pos, bo
 
 runAction
   :: ( Has (Lift IO) sig m
-     , Has (Reader (System StateVectors Float)) sig m
+     , Has (Reader (System StateVectors)) sig m
      , Has (State Actor) sig m
      )
   => Delta Seconds Float
@@ -60,7 +60,7 @@ runAction (Delta (Seconds dt)) = \case
       Forwards  -> pure (Just velocity)
       Backwards -> pure (Just (-velocity))
       Target    -> do
-        system <- ask @(System StateVectors Float)
+        system <- ask @(System StateVectors)
         target   <- use target_
         position <- use (position_ @Actor)
         pure ((^. position_ . to (unP . flip direction position)) <$> (target >>= (system !?)))
@@ -70,7 +70,7 @@ runAction (Delta (Seconds dt)) = \case
     R -> -angular))
   Fire Main -> pure ()
   ChangeTarget change -> do
-    identifiers <- view @(System StateVectors Float) (to identifiers)
+    identifiers <- view @(System StateVectors) (to identifiers)
     target_ %= case change of
       Nothing -> const Nothing
       Just dir -> \ target -> case target >>= (`elemIndex` identifiers) of

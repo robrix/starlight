@@ -19,29 +19,29 @@ import           Prelude hiding (lookup)
 import           Starlight.Actor
 import           Starlight.Identifier
 
-data System f a = System
-  { scale  :: !a
-  , bodies :: !(Map.Map BodyIdentifier (f a))
+data System a = System
+  { scale  :: !Float
+  , bodies :: !(Map.Map BodyIdentifier a)
   , actors :: !(Map.Map Int Actor)
   }
   deriving (Show)
 
-systemTrans :: Num a => System f a -> M44 a
+systemTrans :: System a -> M44 Float
 systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
-scale_ :: Lens' (System f a) a
+scale_ :: Lens' (System a) Float
 scale_ = lens scale (\ s scale -> s { scale })
 
-bodies_ :: Lens (System f a) (System g a) (Map.Map BodyIdentifier (f a)) (Map.Map BodyIdentifier (g a))
+bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = lens bodies (\ s bodies -> s { bodies })
 
-identifiers :: System f a -> [Identifier]
+identifiers :: System a -> [Identifier]
 identifiers = map B . Map.keys . bodies
 
-lookup :: Identifier -> System f a -> Maybe (f a)
+lookup :: Identifier -> System a -> Maybe a
 lookup = \case
   B i -> Map.lookup i . bodies
   S _ -> const Nothing
 
-(!?) :: System f a -> Identifier -> Maybe (f a)
+(!?) :: System a -> Identifier -> Maybe a
 (!?) = flip lookup

@@ -39,14 +39,14 @@ drawRadar
   :: ( Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
-     , Has (Reader (System StateVectors Float)) sig m
+     , Has (Reader (System StateVectors)) sig m
      , Has (Reader View) sig m
      )
   => Actor
   -> [Actor]
   -> m ()
 drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using getDrawable $ do
-  system@System{ scale } <- ask @(System StateVectors Float)
+  system@System{ scale } <- ask @(System StateVectors)
   vs <- ask
 
   let radius = 100

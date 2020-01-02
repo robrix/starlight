@@ -160,7 +160,7 @@ data GameState = GameState
   { player :: !Player
   , npcs   :: ![Actor]
   , beams  :: ![Beam]
-  , system :: !(System Body Float)
+  , system :: !(System Body)
   }
   deriving (Show)
 
@@ -173,7 +173,7 @@ npcs_ = lens npcs (\ s n -> s { npcs = n })
 actors_ :: Lens' GameState (NonEmpty Actor)
 actors_ = lens ((:|) . actor . player <*> npcs) (\ s (a:|o) -> s { player = (player s) { actor = a }, npcs = o })
 
-system_ :: Lens' GameState (System Body Float)
+system_ :: Lens' GameState (System Body)
 system_ = lens system (\ s p -> s { system = p })
 
 

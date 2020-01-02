@@ -43,7 +43,7 @@ draw
      , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader (System StateVectors Float)) sig m
+     , Has (Reader (System StateVectors)) sig m
      , Has (Reader View) sig m
      )
   => Delta Seconds Float
@@ -74,7 +74,7 @@ draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
 
-  system@System{ scale } <- ask @(System StateVectors Float)
+  system@System{ scale } <- ask @(System StateVectors)
 
   let onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - scale * getMetres radius < maxDim * 0.5
 

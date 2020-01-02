@@ -16,7 +16,6 @@ import Control.Effect.Lift
 import Data.Char (isSpace, toUpper)
 import Data.List (elemIndex)
 import Data.Text (pack)
-import Linear.Epsilon
 import Linear.Exts
 import Numeric (readDec)
 import Starlight.Body
@@ -46,7 +45,7 @@ data Ephemeris = Ephemeris
   }
   deriving (Eq, Ord, Show)
 
-fromEphemeris :: (Epsilon a, RealFloat a) => Ephemeris -> Orbit a
+fromEphemeris :: Ephemeris -> Orbit
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
   = Orbit
     { eccentricity    = realToFrac eccentricity
@@ -83,16 +82,16 @@ fromCSV = toBody . splitOnCommas where
   readEither' :: Read a => String -> (a -> b) -> String -> Either String b
   readEither' err f = either (Left . ((err <> ": ") <>)) (Right . f) . readEither
 
-fromFile :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => FilePath -> m (Orbit a)
+fromFile :: Has (Lift IO) sig m => FilePath -> m Orbit
 fromFile path = do
   lines <- lines <$> sendM (readFile path)
   last <- maybe (pure (error ("no ephemerides found in file: " <> path))) (pure . pred) (elemIndex "$$EOE" lines)
   either (pure . error) (pure . fromEphemeris) (fromCSV (lines !! last))
 
-fromDirectory :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => FilePath -> m [(BodyIdentifier, Orbit a)]
+fromDirectory :: Has (Lift IO) sig m => FilePath -> m [(BodyIdentifier, Orbit)]
 fromDirectory = go Nothing
   where
-  go :: (Epsilon a, RealFloat a, Has (Lift IO) sig m) => Maybe BodyIdentifier -> FilePath -> m [(BodyIdentifier, Orbit a)]
+  go :: Has (Lift IO) sig m => Maybe BodyIdentifier -> FilePath -> m [(BodyIdentifier, Orbit)]
   go root dir
     =   sendM (listDirectory dir)
     >>= traverse (\ path -> do

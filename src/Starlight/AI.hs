@@ -15,7 +15,7 @@ import           Starlight.System as System
 
 ai
   :: Has Trace sig m
-  => System StateVectors Float
+  => System StateVectors
   -> Actor
   -> m (Set.Set Action)
 ai system Actor{ target, position = P here, rotation } = case target >>= (system !?) of
