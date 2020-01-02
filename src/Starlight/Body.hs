@@ -63,8 +63,7 @@ instance HasPosition (StateVectors a) a where
   position_ = lens position (\ s position -> s { position })
 
 data Body a = Body
-  { identifier  :: Identifier
-  , radius      :: Metres a
+  { radius      :: Metres a
   , mass        :: Kilo Grams a
   , orientation :: Quaternion a -- relative to orbit
   , period      :: Seconds a    -- sidereal rotation period
@@ -120,14 +119,14 @@ velocityAt orbit t = positionAt orbit (t + 1) .-. positionAt orbit t
 
 systemAt :: (Epsilon a, RealFloat a) => System Body a -> Seconds a -> System StateVectors a
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
-  bodies' = fmap go bodies
-  go b = StateVectors
+  bodies' = Map.mapWithKey go bodies
+  go identifier b = StateVectors
     { body = b
     , transform = transform'
     , rotation = orientationAt b t
     , position = P ((transform' !* V4 0 0 0 1) ^. _xy)
     } where
-    rel = maybe (systemTrans sys) transform $ parent (identifier b) >>= (bodies' Map.!?)
+    rel = maybe (systemTrans sys) transform $ parent identifier >>= (bodies' Map.!?)
     transform' = rel !*! transformAt (orbit b) t
 
 
