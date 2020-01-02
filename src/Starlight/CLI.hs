@@ -17,15 +17,20 @@ import qualified Paths_starlight as Library (version)
 
 data Options = Options
   { profile :: Bool
+  , trace   :: Bool
   }
 
 defaultOptions :: Options
 defaultOptions = Options
   { profile = False
+  , trace   = False
   }
 
 profile_ :: Lens' Options Bool
 profile_ = lens profile (\ o profile -> o { profile })
+
+trace_ :: Lens' Options Bool
+trace_ = lens trace (\ o trace -> o { trace })
 
 
 argumentsParser :: ParserInfo Options
@@ -38,6 +43,7 @@ argumentsParser = info
 options :: Parser Options
 options = foldl' (&) defaultOptions <$> foldr (<|>) (pure [])
   [ flag' [profile_ .~ True] (long "profile" <> help "run with profiling enabled")
+  , flag' [trace_   .~ True] (long "trace"   <> help "run with tracing enabled")
   ]
 
 
