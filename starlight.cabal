@@ -86,6 +86,7 @@ library
     Starlight.Game
     Starlight.Identifier
     Starlight.Input
+    Starlight.Main
     Starlight.Physics
     Starlight.Player
     Starlight.Radar
