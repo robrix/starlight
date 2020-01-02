@@ -1,7 +1,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Control.Carrier.Trace.Lift
 ( -- * Trace carrier
-  TraceC(..)
+  runTrace
+, TraceC(TraceC)
   -- * Trace effect
 , module Control.Effect.Trace
 ) where
@@ -9,5 +10,5 @@ module Control.Carrier.Trace.Lift
 import Control.Effect.Trace
 import Control.Monad.IO.Class
 
-newtype TraceC m a = TraceC (m a)
+newtype TraceC m a = TraceC { runTrace :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
