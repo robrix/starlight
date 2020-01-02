@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module GL
 ( Capability(..)
@@ -92,5 +93,11 @@ runGLC (GLC m) = m
 newtype GLC m a = GLC (m a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance Algebra sig m => Algebra sig (GLC m) where
-  alg = GLC . send . handleCoercible
+instance Has (Lift IO) sig m => Algebra (State Capabilities :+: sig) (GLC m) where
+  alg = \case
+    L (Get   k) -> k (Capabilities mempty)
+    L (Put s k) -> do
+      for_ (Map.toList (getCapabilities s)) $ \ (cap, b) ->
+        runLiftIO $ (if b then glEnable else glDisable) (glEnum cap)
+      k
+    R other -> GLC (send (handleCoercible other))
