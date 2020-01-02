@@ -11,9 +11,10 @@ module UI.Typeface
 , readFontOfSize
 , cacheCharactersForDrawing
 , layoutString
-, drawingGlyphs
+, usingGlyphs
 ) where
 
+import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Monad (guard, join, (<=<))
 import           Control.Monad.IO.Class.Lift
@@ -39,6 +40,7 @@ import           GL.Program
 import           Lens.Micro
 import           Linear.V2
 import qualified Opentype.Fileformat as O
+import           UI.Drawable
 import           UI.Glyph
 import qualified UI.Label.Glyph as Glyph
 import           UI.Path
@@ -47,9 +49,8 @@ data Typeface = Typeface
   { name         :: Maybe String
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
-  , glyphP       :: Program Glyph.U Glyph.V Glyph.O
+  , glyphD       :: Drawable Glyph.U Glyph.V Glyph.O
   , glyphB       :: Buffer 'B.Array (Glyph.V Identity)
-  , glyphA       :: Array (Glyph.V Identity)
   , rangesRef    :: IORef (Map.Map Char (Interval Identity Int))
   }
 
@@ -87,8 +88,8 @@ fromOpentypeFont
   => O.OpentypeFont
   -> m Typeface
 fromOpentypeFont opentypeFont = do
-  glyphP <- build Glyph.shader
-  glyphA <- gen1
+  program <- build Glyph.shader
+  array  <- gen1
   glyphB <- gen1
 
   rangesRef <- sendM (newIORef Map.empty)
@@ -97,8 +98,7 @@ fromOpentypeFont opentypeFont = do
     { name
     , allGlyphs
     , opentypeFont
-    , glyphP
-    , glyphA
+    , glyphD = Drawable{ program, array }
     , glyphB
     , rangesRef
     } where
@@ -130,7 +130,7 @@ readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 
 cacheCharactersForDrawing :: (HasCallStack, Has (Lift IO) sig m) => Typeface -> String -> m ()
-cacheCharactersForDrawing Typeface{ allGlyphs, glyphA, glyphB, rangesRef } string = do
+cacheCharactersForDrawing Typeface{ allGlyphs, glyphD = Drawable { array }, glyphB, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + Identity (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
@@ -139,7 +139,7 @@ cacheCharactersForDrawing Typeface{ allGlyphs, glyphA, glyphB, rangesRef } strin
   realloc glyphB (length vertices) Static Draw
   copy glyphB 0 (coerce vertices)
 
-  bindArray glyphA $ configureArray glyphB glyphA
+  bindArray array $ configureArray glyphB array
 
   sendM (writeIORef rangesRef ranges)
 
@@ -190,8 +190,8 @@ glyphsForString :: Map.Map Char (Maybe Glyph) -> String -> [Glyph]
 glyphsForString allGlyphs = catMaybes . map (join . (allGlyphs Map.!?))
 
 
-drawingGlyphs :: Has (Lift IO) sig m => Typeface -> ProgramC Glyph.U Glyph.V Glyph.O (ArrayT Glyph.V m) a -> m a
-drawingGlyphs Typeface{ glyphP, glyphA } = bindArray glyphA . use glyphP
+usingGlyphs :: Has (Lift IO) sig m => Typeface -> ArrayT Glyph.V (ProgramC Glyph.U Glyph.V Glyph.O (ReaderC Typeface m)) a -> m a
+usingGlyphs face = runReader face . using glyphD
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord

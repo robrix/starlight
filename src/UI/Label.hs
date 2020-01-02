@@ -120,7 +120,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
         glClear GL_COLOR_BUFFER_BIT
 
         let V2 sx sy = fromIntegral scale / fmap fromIntegral size
-        drawingGlyphs face $ do
+        usingGlyphs face $ do
           Glyph.scale_     .= Just (1 / fromIntegral scale)
           Glyph.fontScale_ .= Just (fontScale font)
           Glyph.matrix_    .= Just
