@@ -18,7 +18,7 @@ module GL.Program
 , build
 , use
 , HasProgram(..)
-, ProgramT(..)
+, ProgramC(..)
   -- * Uniforms
 , HasUniform
 ) where
@@ -74,8 +74,8 @@ build p = runLiftIO $ do
 
   pure (Program ls program)
 
-use :: (Has (Lift IO) sig m) => Program u i o -> ProgramT u i o m a -> m a
-use (Program ls p) (ProgramT m) = do
+use :: (Has (Lift IO) sig m) => Program u i o -> ProgramC u i o m a -> m a
+use (Program ls p) (ProgramC m) = do
   sendIO (glUseProgram p)
   a <- runReader (Program ls p) m
   a <$ sendIO (glUseProgram 0)
@@ -85,13 +85,13 @@ class Monad m => HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -
   askProgram :: m (Program u i o)
 
 
-newtype ProgramT (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramT { runProgramT :: ReaderC (Program u i o) m a }
+newtype ProgramC (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramT :: ReaderC (Program u i o) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 instance HasProgram u i o m => HasProgram u i o (ReaderC r m) where
   askProgram = lift askProgram
 
-instance (Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramT u i o m) where
+instance (Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramC u i o m) where
   alg = \case
     L (Get   k) -> k DSL.defaultVars
     L (Put s k) -> do
@@ -99,7 +99,7 @@ instance (Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u Maybe) :+: sig) 
       DSL.foldVarsM (\ DSL.Field { DSL.location } ->
         maybe (pure ()) (checkingGLError . uniform prog (ls IntMap.! location))) s
       k
-    R other     -> ProgramT (send (handleCoercible other))
+    R other     -> ProgramC (send (handleCoercible other))
 
-instance Algebra sig m => HasProgram u i o (ProgramT u i o m) where
-  askProgram = ProgramT ask
+instance Algebra sig m => HasProgram u i o (ProgramC u i o m) where
+  askProgram = ProgramC ask

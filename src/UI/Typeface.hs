@@ -190,7 +190,7 @@ glyphsForString :: Map.Map Char (Maybe Glyph) -> String -> [Glyph]
 glyphsForString allGlyphs = catMaybes . map (join . (allGlyphs Map.!?))
 
 
-drawingGlyphs :: Has (Lift IO) sig m => Typeface -> ProgramT Glyph.U Glyph.V Glyph.O (ArrayT Glyph.V m) a -> m a
+drawingGlyphs :: Has (Lift IO) sig m => Typeface -> ProgramC Glyph.U Glyph.V Glyph.O (ArrayT Glyph.V m) a -> m a
 drawingGlyphs Typeface{ glyphP, glyphA } = bindArray glyphA . use glyphP
 
 
