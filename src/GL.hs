@@ -1,11 +1,15 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE UndecidableInstances #-}
 module GL
 ( Capability(..)
 , runGLC
 , GLC(..)
 ) where
 
+import Control.Algebra
 import Control.Monad.IO.Class
 import GL.Enum as GL
 import Graphics.GL.Core41
@@ -70,3 +74,6 @@ runGLC (GLC m) = m
 
 newtype GLC m a = GLC (m a)
   deriving (Applicative, Functor, Monad, MonadIO)
+
+instance Algebra sig m => Algebra sig (GLC m) where
+  alg = GLC . send . handleCoercible
