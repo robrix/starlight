@@ -1,4 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
 module Starlight.Actor
 ( Actor(..)
 , target_
@@ -30,22 +29,22 @@ health_ :: Lens' Actor Float
 health_ = lens health (\ s h -> s { health = h })
 
 
-class HasPosition t a | t -> a where
-  position_ :: Lens' t (Point V2 a)
+class HasPosition t where
+  position_ :: Lens' t (Point V2 Float)
 
-instance HasPosition Actor Float where
+instance HasPosition Actor where
   position_ = lens position (\ s v -> s { position = v })
 
 
-class HasVelocity t a | t -> a where
-  velocity_ :: Lens' t (V2 a)
+class HasVelocity t where
+  velocity_ :: Lens' t (V2 Float)
 
-instance HasVelocity Actor Float where
+instance HasVelocity Actor where
   velocity_ = lens velocity (\ s v -> s { velocity = v })
 
 
-class HasRotation t a | t -> a where
-  rotation_ :: Lens' t (Quaternion a)
+class HasRotation t where
+  rotation_ :: Lens' t (Quaternion Float)
 
-instance HasRotation Actor Float where
+instance HasRotation Actor where
   rotation_ = lens rotation (\ s r -> s { rotation = r })

@@ -59,7 +59,7 @@ data StateVectors = StateVectors
   }
   deriving (Show)
 
-instance HasPosition StateVectors Float where
+instance HasPosition StateVectors where
   position_ = lens position (\ s position -> s { position })
 
 data Body = Body
