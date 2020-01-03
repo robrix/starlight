@@ -11,10 +11,10 @@ import           Control.Applicative (Alternative(..))
 import           Control.Carrier.Reader.Relation
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Data.Foldable (traverse_)
 import           Data.Functor (($>))
 import           Data.Maybe (catMaybes)
 import qualified Data.Set as Set
+import           Data.Traversable (for)
 import qualified SDL
 import           Starlight.Action
 import           Starlight.Input
@@ -25,8 +25,8 @@ controls
 controls = do
   input <- get
   let actions = catMaybes (map (runRelation input) controlRelations)
-  traverse_ (modify . flip (\\) . fst) actions
-  pure (Set.fromList (map snd actions))
+  Set.fromList <$> for actions (\ (input, action) ->
+    action <$ modify (\\ input))
 
 -- FIXME: make this user-configurable
 controlRelations :: [Relation Input (Input, Action)]
