@@ -145,7 +145,7 @@ zoomForSpeed size x = runIdentity go where
     | Identity x < min_ speed = min_ zoom
     | Identity x > max_ speed = max_ zoom
     | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
-  zoom = Interval 1 6
+  zoom = Interval 1 5
   speed = speedAt <$> zoom
   speedAt x = x / 25 * fromIntegral (maximum size)
 
