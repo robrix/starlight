@@ -142,7 +142,7 @@ game = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ controls >>= assign (player_ . actions_)
+            measure "controls" $ player_ . actions_ <~ controls
             system <- ask
             measure "ai" (zoomEach npcs_ ai)
             measure "physics" (zoomEach Starlight.Game.characters_ (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character %= physics dt system))

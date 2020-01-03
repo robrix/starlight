@@ -4,7 +4,7 @@ module Starlight.AI
 ( ai
 ) where
 
-import           Control.Effect.Lens
+import           Control.Effect.Lens.Exts
 import           Control.Effect.Reader
 import           Control.Effect.State
 import           Control.Lens ((^.))
@@ -22,7 +22,7 @@ ai
      , Has (State Character) sig m
      )
   => m ()
-ai = go <$> ask <*> get >>= assign actions_ where
+ai = actions_ <~ go <$> ask <*> get where
   go system Character{ actor = Actor{ position = P here, rotation }, target } = case target >>= (system !?) of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
