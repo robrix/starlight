@@ -13,7 +13,7 @@ module Starlight.System
 , (!?)
 ) where
 
-import           Control.Lens (Lens, Lens')
+import           Control.Lens (Lens, Lens', ix, (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
 import           GHC.Generics (Generic)
@@ -48,8 +48,4 @@ identifiers System{ bodies, characters } = map S [0..pred (length characters)] <
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
 (!?) System{ bodies, characters } = \case
   B i -> Left  <$> Map.lookup i bodies
-  S i -> Right <$> characters !? i where
-    []     !? _  = Nothing
-    (x:xs) !? i
-      | i == 0    = Just x
-      | otherwise = xs !? pred i
+  S i -> Right <$> characters ^? ix i where
