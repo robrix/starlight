@@ -25,7 +25,7 @@ Controls are currently hard-coded; I intend to eventually make them configurable
 
 - Up arrow: forward thrust
 - Left/right arrows: turn left/right
-- Down arrow: turn to face opposite direction from current heading
+- Down arrow: turn to face opposite direction from current heading (relative to target’s heading, if any, or absolute otherwise; helps you match speed and heading to target’s)
 - +/-: increase/decrease throttle (controls rate of thrust)
 - tab/shift tab: switch to the next/prev target
 - escape: clear the target
