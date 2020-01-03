@@ -18,6 +18,7 @@ module Starlight.Body
 , orientationAt
 , positionAt
 , velocityAt
+, actorAt
 , systemAt
   -- * Drawing
 , runBody
@@ -27,19 +28,19 @@ module Starlight.Body
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
-import           Control.Effect.Lens ((.=))
+import           Control.Effect.Lens
 import           Control.Effect.Lift
 import           Control.Effect.Profile
-import           Control.Lens ((^.))
+import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
-import           Data.Functor.Interval
+import           Data.Functor.Interval hiding (point)
 import qualified Data.Map as Map
 import           Geometry.Circle
 import           GL.Array
 import           GL.Program
 import           Linear.Exts
-import           Starlight.Actor (Actor(..))
+import           Starlight.Actor
 import           Starlight.Body.Shader as Shader
 import           Starlight.Identifier
 import           Starlight.System
@@ -113,21 +114,49 @@ velocityAt :: Orbit -> Seconds Float -> V3 Float
 velocityAt orbit t = positionAt orbit (t + 1) .-. positionAt orbit t
 
 
+actorAt :: Body -> Seconds Float -> Actor
+actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
+  { position = P position
+  , velocity = position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly
+  , rotation
+    = orientation
+    * axis
+    * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
+  } where
+  position = ext (cartesian2 (Radians trueAnomaly) r) 0
+  t' = timeOfPeriapsis + t * orbitTimeScale
+  meanAnomaly = getSeconds (meanMotion * t')
+  meanMotion = (2 * pi) / period
+  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity * sin ea) meanAnomaly where
+    iter n f = go n where
+      go n a
+        | n <= 0    = a
+        | otherwise = go (n - 1 :: Int) (f a)
+  trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
+  r = getMetres semimajor * (1 - eccentricity * cos eccentricAnomaly)
+  -- extremely dubious
+  mu = 398600.5
+  p = getMetres semimajor * (1 - eccentricity ** 2)
+  h = ((1 - (eccentricity ** 2)) * (getMetres semimajor * mu)) ** 0.5
+  -- hr = h/r
+
+
 systemAt :: System Body -> Seconds Float -> System StateVectors
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
   go identifier b = StateVectors
     { body = b
     , transform = transform'
-    , actor = Actor
-      { position = P ((transform' !* V4 0 0 0 1) ^. _xyz)
-      -- FIXME: figure this out e.g. by differentiation
-      , velocity = 0
-      , rotation = orientationAt b t
-      }
+    , actor = actorAt b t
+      & position_.coerced.pointed %~ (transform' !*)
+      & velocity_.pointed %~ (transform' !*)
     } where
     rel = maybe (systemTrans sys) transform $ parent identifier >>= (bodies' Map.!?)
     transform' = rel !*! transformAt (orbit b) t
+
+-- | Subject to the invariant that w=1.
+pointed :: Num a => Iso (V3 a) (V3 b) (V4 a) (V4 b)
+pointed = iso point (^. _xyz)
 
 
 runBody
