@@ -90,7 +90,6 @@ library
     Starlight.Main
     Starlight.Neighbourhood
     Starlight.Physics
-    Starlight.Player
     Starlight.Radar
     Starlight.Radar.Shader
     Starlight.Ship
