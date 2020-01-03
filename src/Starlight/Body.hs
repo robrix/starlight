@@ -54,8 +54,8 @@ import           Unit.Time
 data StateVectors = StateVectors
   { body      :: Body
   , transform :: M44 Float
-  , rotation  :: Quaternion Float
   , position  :: Point V2 Float
+  , rotation  :: Quaternion Float
   }
   deriving (Show)
 
