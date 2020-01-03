@@ -22,6 +22,7 @@ type Name = Text
 data Identifier
   = B BodyIdentifier
   | S Int
+  | Player
   deriving (Eq, Ord, Show)
 
 describeIdentifier :: Identifier -> String
@@ -29,6 +30,7 @@ describeIdentifier = \case
   B i -> showLeaf (getLeaf i) where
     showLeaf (code, name) = show code <> " " <> unpack name
   S i -> show i
+  Player -> "player"
 
 
 data BodyIdentifier
