@@ -27,6 +27,10 @@ ai system Actor{ target, position = P here, rotation } = case target >>= (system
     [ [ Face Target ]
     , [ Thrust | isFacing there ]
     ]
+  Just (Right Actor{ position = P there }) -> pure . Set.fromList $ concat
+    [ [ Face Target ]
+    , [ Thrust | isFacing there ]
+    ]
   -- FIXME: wander
   -- FIXME: pick a new target
   _ -> pure mempty
