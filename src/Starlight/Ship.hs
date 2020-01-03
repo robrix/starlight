@@ -30,6 +30,7 @@ import qualified UI.Drawable as UI
 data Ship = Ship
   { colour :: Colour Float
   , actor  :: Actor
+  , health :: Float
   }
 
 drawShip
