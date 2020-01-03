@@ -14,10 +14,6 @@ module Starlight.Body
 , Body(..)
 , Orbit(..)
 , rotationTimeScale
-, transformAt
-, orientationAt
-, positionAt
-, velocityAt
 , actorAt
 , systemAt
   -- * Drawing
@@ -85,34 +81,6 @@ rotationTimeScale = 1
 orbitTimeScale :: Num a => Seconds a
 orbitTimeScale = 1
 
-transformAt :: Orbit -> Seconds Float -> M44 Float
-transformAt orbit@Orbit{ orientation } t
-  =   mkTransformation orientation 0
-  !*! translated3 (unP (positionAt orbit t))
-
-orientationAt :: Body -> Seconds Float -> Quaternion Float
-orientationAt Body{ orientation, period, orbit = Orbit{ orientation = orbit } } t
-  = orbit
-  * orientation
-  * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / period))
-
-
-positionAt :: Orbit -> Seconds Float -> Point V3 Float
-positionAt Orbit{ eccentricity, semimajor, period, timeOfPeriapsis } t = P (ext (cartesian2 (Radians trueAnomaly) r) 0) where
-  t' = timeOfPeriapsis + t * orbitTimeScale
-  meanAnomaly = getSeconds (meanMotion * t')
-  meanMotion = (2 * pi) / period
-  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity * sin ea) meanAnomaly where
-    iter n f = go n where
-      go n a
-        | n <= 0    = a
-        | otherwise = go (n - 1 :: Int) (f a)
-  trueAnomaly = atan2 (sqrt (1 - eccentricity * eccentricity) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = getMetres semimajor * (1 - eccentricity * cos eccentricAnomaly)
-
-velocityAt :: Orbit -> Seconds Float -> V3 Float
-velocityAt orbit t = positionAt orbit (t + 1) .-. positionAt orbit t
-
 
 actorAt :: Body -> Seconds Float -> Actor
 actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
@@ -144,15 +112,16 @@ actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, sem
 systemAt :: System Body -> Seconds Float -> System StateVectors
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
-  go identifier b = StateVectors
-    { body = b
-    , transform = transform'
-    , actor = actorAt b t
-      & position_.coerced.pointed %~ (transform' !*)
-      & velocity_.pointed %~ (transform' !*)
+  go identifier body@Body{ orbit = Orbit{ orientation }} = StateVectors
+    { body
+    , transform = rel !*! translated3 (unP (position actor))
+    , actor = actor
+      & position_.coerced.pointed %~ (rel !*)
+      & velocity_.pointed %~ (rel !*)
     } where
-    rel = maybe (systemTrans sys) transform $ parent identifier >>= (bodies' Map.!?)
-    transform' = rel !*! transformAt (orbit b) t
+    actor = actorAt body t
+    rel = maybe (systemTrans sys) transform (parent identifier >>= (bodies' Map.!?))
+      !*! mkTransformation orientation 0
 
 -- | Subject to the invariant that w=1.
 pointed :: Num a => Iso (V3 a) (V3 b) (V4 a) (V4 b)
