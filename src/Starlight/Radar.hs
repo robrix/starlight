@@ -78,7 +78,7 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
       for_ [1..n] $ \ i -> do
         let radius = step * fromIntegral i
             -- FIXME: apply easing so this works more like a spring
-            step = max 1 (min 50 (d blip / fromIntegral n))
+            step = max 1 (min 50 ((1/zoom vs) * d blip / fromIntegral n))
 
         radius_ .= Just radius
         colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
