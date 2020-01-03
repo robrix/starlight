@@ -10,7 +10,6 @@ module Starlight.System
 , (!?)
 ) where
 
-import           Data.List
 import qualified Data.Map as Map
 import           Lens.Micro (Lens, Lens', lens)
 import           Linear.Matrix
@@ -39,9 +38,13 @@ actors_ :: Lens' (System a) [Actor]
 actors_ = lens actors (\ s actors -> s { actors })
 
 identifiers :: System a -> [Identifier]
-identifiers = map B . Map.keys . bodies
+identifiers System{ bodies, actors } = map S [0..pred (length actors)] <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Actor)
 (!?) System{ bodies, actors } = \case
-  B i -> Left        <$> Map.lookup i bodies
-  S i -> Right . fst <$> uncons (drop (pred i) actors)
+  B i -> Left  <$> Map.lookup i bodies
+  S i -> Right <$> actors !? i where
+    []     !? _  = Nothing
+    (x:xs) !? i
+      | i == 0    = Just x
+      | otherwise = xs !? pred i
