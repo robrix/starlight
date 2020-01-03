@@ -97,6 +97,7 @@ library
     Starlight.Sol
     Starlight.Starfield
     Starlight.Starfield.Shader
+    Starlight.State
     Starlight.System
     Starlight.View
     Starlight.Weapon.Laser
