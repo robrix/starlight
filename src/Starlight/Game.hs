@@ -74,7 +74,7 @@ game = do
     . runGLC
     . runFinally
     . evalState @Input mempty
-    . evalState GameState
+    . evalState Game
       { player = Character
         { actor    = Actor
           { position = P (V3 2500000 0 0)
@@ -168,7 +168,7 @@ withView
   :: ( Has (Lift IO) sig m
      , Has (Reader Window.Window) sig m
      )
-  => GameState
+  => Game
   -> ReaderC View m a
   -> m a
 withView game m = do
@@ -179,25 +179,25 @@ withView game m = do
       focus    = game ^. player_ . actor_ . position_ . _xy . to P
   runReader View{ scale, size, zoom, focus } m
 
-data GameState = GameState
+data Game = Game
   { player :: !Character
   , beams  :: ![Beam]
   , system :: !(System Body)
   }
   deriving (Generic, Show)
 
-player_ :: Lens' GameState Character
+player_ :: Lens' Game Character
 player_ = field @"player"
 
-npcs_ :: Lens' GameState [Character]
+npcs_ :: Lens' Game [Character]
 npcs_ = system_ . System.characters_
 
-characters_ :: Lens' GameState (NonEmpty Character)
+characters_ :: Lens' Game (NonEmpty Character)
 characters_ = lens get set where
   get s = s ^. player_ :| s ^. npcs_
   set s (a:|o) = s & player_ .~ a & npcs_ .~ o
 
-system_ :: Lens' GameState (System Body)
+system_ :: Lens' Game (System Body)
 system_ = field @"system"
 
 
