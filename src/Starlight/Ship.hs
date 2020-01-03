@@ -48,7 +48,7 @@ drawShip colour Actor{ position, rotation } = measure "ship" . UI.using getDrawa
   matrix_ .= Just
     (   matrix
     !*! translated3 (ext (negated (unP focus)) 0)
-    !*! translated3 (ext (unP position) 0)
+    !*! translated3 (unP position)
     !*! scaled (V4 15 15 15 1)
     !*! mkTransformation rotation 0)
   colour_ .= Just colour

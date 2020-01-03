@@ -120,7 +120,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     { body = b
     , transform = transform'
     , actor = Actor
-      { position = P ((transform' !* V4 0 0 0 1) ^. _xy)
+      { position = P ((transform' !* V4 0 0 0 1) ^. _xyz)
       -- FIXME: figure this out e.g. by differentiation
       , velocity = 0
       , rotation = orientationAt b t

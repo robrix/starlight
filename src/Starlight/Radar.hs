@@ -24,7 +24,7 @@ import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
-import           Lens.Micro (forOf_, traversed, (.~))
+import           Lens.Micro (forOf_, traversed, (.~), (^.))
 import           Linear.Exts as Linear
 import           Starlight.Actor
 import           Starlight.Body as Body hiding (Drawable)
@@ -67,7 +67,7 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
     -- FIXME: IFF
     colour_ .= Just white
 
-    forOf_ (traversed . actor_) npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here)) in when (r > zoom vs * radius) $ do
+    forOf_ (traversed . actor_) npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy) in when (r > zoom vs * radius) $ do
       angle_ .= Just angle
       drawArrays Points medianRange
 
@@ -94,7 +94,7 @@ runRadar m = do
   runReader (Drawable UI.Drawable{ program, array }) m
 
 
-toBlip :: Point V2 Float -> Float -> Either StateVectors Character -> Blip
+toBlip :: Point V3 Float -> Float -> Either StateVectors Character -> Blip
 toBlip here scale = either fromL fromR where
   fromL StateVectors{ body = Body{ radius = Metres r, colour }, actor = Actor{ position = there } } = makeBlip (there ^-^ here) (r * scale) colour
   fromR Character{ actor = Actor{ position = there } } = makeBlip (there ^-^ here) 15 white
@@ -122,11 +122,12 @@ data Blip = Blip
   , colour    :: Colour Float  -- ^ colour of the object
   }
 
-makeBlip :: Point V2 Float -> Float -> Colour Float -> Blip
+makeBlip :: Point V3 Float -> Float -> Colour Float -> Blip
 makeBlip (P there) r colour = Blip{ angle, d, direction, r, colour } where
-  angle = angleOf there
+  there' = there ^. _xy
+  angle = angleOf there'
   d = norm there
-  direction = normalize there
+  direction = normalize there'
 
 
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }

@@ -10,19 +10,19 @@ module Starlight.Actor
 import Lens.Micro (Lens', lens)
 import Linear.Affine
 import Linear.Quaternion
-import Linear.V2
+import Linear.V3
 
 data Actor = Actor
-  { position :: !(Point V2 Float)
-  , velocity :: !(V2 Float)
+  { position :: !(Point V3 Float)
+  , velocity :: !(V3 Float)
   , rotation :: !(Quaternion Float)
   }
   deriving (Show)
 
-position_ :: Lens' Actor (Point V2 Float)
+position_ :: Lens' Actor (Point V3 Float)
 position_ = lens position (\ s position -> s { position })
 
-velocity_ :: Lens' Actor (V2 Float)
+velocity_ :: Lens' Actor (V3 Float)
 velocity_ = lens velocity (\ s velocity -> s { velocity })
 
 rotation_ :: Lens' Actor (Quaternion Float)

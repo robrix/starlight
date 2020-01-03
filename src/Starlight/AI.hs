@@ -9,6 +9,7 @@ import           Control.Effect.Reader
 import           Control.Effect.State
 import           Data.Functor.Interval
 import qualified Data.Set as Set
+import           Lens.Micro
 import           Linear.Exts
 import           Starlight.Action
 import           Starlight.Actor as Actor
@@ -39,4 +40,4 @@ ai = go <$> ask <*> get >>= assign actions_ where
     -- FIXME: pick a new target
     _ -> mempty
     where
-    isFacing there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo here there)) < pi/2
+    isFacing there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo (here ^. _xy) (there ^. _xy))) < pi/2

@@ -33,7 +33,7 @@ import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           Data.Time.Format.ISO8601
 import           GL
-import           Lens.Micro (Lens', lens, (.~), (^.))
+import           Lens.Micro (Lens', lens, to, (.~), (^.))
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.AI
@@ -74,8 +74,8 @@ game = do
     . evalState GameState
       { player = Character
         { actor    = Actor
-          { position = P (V2 250000 0)
-          , velocity = V2 0 150
+          { position = P (V3 250000 0 0)
+          , velocity = V3 0 150 0
           , rotation = axisAngle (unit _z) (pi/2)
           }
         , target   = Nothing
@@ -86,8 +86,8 @@ game = do
         { characters =
           [ Character
             { actor = Actor
-              { position = P (V2 250000 0)
-              , velocity = V2 0 150
+              { position = P (V3 250000 0 0)
+              , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
             , target   = Nothing
@@ -95,8 +95,8 @@ game = do
             }
           , Character
             { actor = Actor
-              { position = P (V2 250000 0)
-              , velocity = V2 0 150
+              { position = P (V3 250000 0 0)
+              , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
             , target   = Just $ B (Star (10, "Sol"))
@@ -104,8 +104,8 @@ game = do
             }
           , Character
             { actor = Actor
-              { position = P (V2 250000 0)
-              , velocity = V2 0 150
+              { position = P (V3 250000 0 0)
+              , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
             , target   = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
@@ -173,7 +173,7 @@ withView game m = do
   size  <- Window.size
   let velocity = game ^. player_ . actor_ . velocity_
       zoom     = zoomForSpeed size (norm velocity)
-      focus    = game ^. player_ . actor_ . position_
+      focus    = game ^. player_ . actor_ . position_ . _xy . to P
   runReader View{ scale, size, zoom, focus } m
 
 data GameState = GameState

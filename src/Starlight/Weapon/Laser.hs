@@ -27,7 +27,7 @@ import qualified UI.Drawable as UI
 import           Unit.Angle
 
 data Beam = Beam
-  { position :: Point V2 Float
+  { position :: Point V3 Float
   , angle    :: Radians Float
   , colour   :: Colour Float
   }
@@ -59,7 +59,7 @@ drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawab
   matrix_ .= Just
     (  scaleToViewZoomed vs
     !*! translated3 (ext (negated (unP focus)) 0)
-    !*! translated3 (ext (unP position) 0))
+    !*! translated3 (unP position))
   angle_  .= Just angle
   colour_ .= Just colour
 
