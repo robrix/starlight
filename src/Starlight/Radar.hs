@@ -44,10 +44,9 @@ drawRadar
      , Has (Reader View) sig m
      )
   => Actor
-  -> [Actor]
   -> m ()
-drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using getDrawable $ do
-  system@System{ scale } <- ask @(System StateVectors)
+drawRadar Actor{ position = here, target } = measure "radar" . UI.using getDrawable $ do
+  system@System{ scale, actors = npcs } <- ask @(System StateVectors)
   vs <- ask
 
   let radius = 100

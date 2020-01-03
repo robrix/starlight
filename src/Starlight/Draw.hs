@@ -80,7 +80,7 @@ draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
 
   forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
 
-  drawRadar (player ^. actor_) npcs
+  drawRadar (player ^. actor_)
 
   let rscale = 1/scale
       describeTarget target = case target >>= fmap . (,) <*> (system !?) of
