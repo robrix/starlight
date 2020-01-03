@@ -6,9 +6,11 @@ module Starlight.Character
 
 import Lens.Micro (Lens', lens)
 import Starlight.Actor
+import Starlight.Identifier
 
 data Character = Character
-  { actor :: !Actor
+  { actor  :: !Actor
+  , target :: !(Maybe Identifier)
   }
 
 actor_ :: Lens' Character Actor
