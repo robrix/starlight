@@ -5,7 +5,7 @@ module Starlight.System
 , systemTrans
 , scale_
 , bodies_
-, actors_
+, characters_
 , identifiers
 , (!?)
 ) where
@@ -15,13 +15,13 @@ import           Lens.Micro (Lens, Lens', lens)
 import           Linear.Matrix
 import           Linear.V4
 import           Linear.Vector
-import           Starlight.Actor
+import           Starlight.Character
 import           Starlight.Identifier
 
 data System a = System
-  { scale  :: !Float
-  , bodies :: !(Map.Map BodyIdentifier a)
-  , actors :: ![Actor]
+  { scale      :: !Float
+  , bodies     :: !(Map.Map BodyIdentifier a)
+  , characters :: ![Character]
   }
   deriving (Show)
 
@@ -34,16 +34,16 @@ scale_ = lens scale (\ s scale -> s { scale })
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = lens bodies (\ s bodies -> s { bodies })
 
-actors_ :: Lens' (System a) [Actor]
-actors_ = lens actors (\ s actors -> s { actors })
+characters_ :: Lens' (System a) [Character]
+characters_ = lens characters (\ s characters -> s { characters })
 
 identifiers :: System a -> [Identifier]
-identifiers System{ bodies, actors } = map S [0..pred (length actors)] <> map B (Map.keys bodies)
+identifiers System{ bodies, characters } = map S [0..pred (length characters)] <> map B (Map.keys bodies)
 
-(!?) :: System a -> Identifier -> Maybe (Either a Actor)
-(!?) System{ bodies, actors } = \case
+(!?) :: System a -> Identifier -> Maybe (Either a Character)
+(!?) System{ bodies, characters } = \case
   B i -> Left  <$> Map.lookup i bodies
-  S i -> Right <$> actors !? i where
+  S i -> Right <$> characters !? i where
     []     !? _  = Nothing
     (x:xs) !? i
       | i == 0    = Just x

@@ -19,6 +19,7 @@ import Linear.Exts
 import Starlight.Action
 import Starlight.Actor as Actor
 import Starlight.Body
+import Starlight.Character
 import Starlight.System
 import Unit.Angle
 import Unit.Mass
@@ -45,27 +46,27 @@ applyGravity (Delta (Seconds dt)) distanceScale StateVectors{ position = pos, bo
 runAction
   :: ( Has (Lift IO) sig m
      , Has (Reader (System StateVectors)) sig m
-     , Has (State Actor) sig m
+     , Has (State Character) sig m
      )
   => Delta Seconds Float
   -> Action
   -> m ()
 runAction (Delta (Seconds dt)) = \case
   Thrust -> do
-    rotation <- use (rotation_ @Actor)
-    velocity_ @Actor += rotate rotation (unit _x ^* thrust) ^. _xy
+    rotation <- use (actor_ . rotation_ @Actor)
+    actor_ . velocity_ @Actor += rotate rotation (unit _x ^* thrust) ^. _xy
   Face dir -> do
-    velocity <- use (velocity_ @Actor)
+    velocity <- use (actor_ . velocity_ @Actor)
     direction <- case dir of
       Forwards  -> pure (Just velocity)
       Backwards -> pure (Just (-velocity))
       Target    -> do
         system <- ask @(System StateVectors)
         target   <- use target_
-        position <- use (position_ @Actor)
-        pure (either (^. position_ . to (unP . flip direction position)) (^. position_ . to (unP . flip direction position)) <$> (target >>= (system !?)))
-    maybe (pure ()) (modifying (rotation_ @Actor) . face angular . angleOf) direction
-  Turn t -> rotation_ @Actor *= axisAngle (unit _z) (getRadians (case t of
+        position <- use (actor_ . position_ @Actor)
+        pure (either (^. position_ . to (unP . flip direction position)) (^. actor_ . position_ . to (unP . flip direction position)) <$> (target >>= (system !?)))
+    maybe (pure ()) (modifying (actor_ . rotation_ @Actor) . face angular . angleOf) direction
+  Turn t -> actor_ . rotation_ @Actor *= axisAngle (unit _z) (getRadians (case t of
     L -> angular
     R -> -angular))
   Fire Main -> pure ()

@@ -24,10 +24,11 @@ import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
-import           Lens.Micro ((.~), forOf_, traversed)
+import           Lens.Micro (forOf_, traversed, (.~))
 import           Linear.Exts as Linear
 import           Starlight.Actor
 import           Starlight.Body as Body hiding (Drawable)
+import           Starlight.Character
 import           Starlight.Radar.Shader
 import           Starlight.System
 import           Starlight.View
@@ -43,10 +44,10 @@ drawRadar
      , Has (Reader (System StateVectors)) sig m
      , Has (Reader View) sig m
      )
-  => Actor
+  => Character
   -> m ()
-drawRadar Actor{ position = here, target } = measure "radar" . UI.using getDrawable $ do
-  system@System{ scale, actors = npcs } <- ask @(System StateVectors)
+drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar" . UI.using getDrawable $ do
+  system@System{ scale, characters = npcs } <- ask @(System StateVectors)
   vs <- ask
 
   let radius = 100
@@ -66,7 +67,7 @@ drawRadar Actor{ position = here, target } = measure "radar" . UI.using getDrawa
     -- FIXME: IFF
     colour_ .= Just white
 
-    for_ npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here)) in when (r > zoom vs * radius) $ do
+    forOf_ (traversed . actor_) npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here)) in when (r > zoom vs * radius) $ do
       angle_ .= Just angle
       drawArrays Points medianRange
 
@@ -93,10 +94,10 @@ runRadar m = do
   runReader (Drawable UI.Drawable{ program, array }) m
 
 
-toBlip :: Point V2 Float -> Float -> Either StateVectors Actor -> Blip
+toBlip :: Point V2 Float -> Float -> Either StateVectors Character -> Blip
 toBlip here scale = either fromL fromR where
   fromL StateVectors{ body = Body{ radius = Metres r, colour }, position = there } = makeBlip (there ^-^ here) (r * scale) colour
-  fromR Actor{ position = there } = makeBlip (there ^-^ here) 15 white
+  fromR Character{ actor = Actor{ position = there } } = makeBlip (there ^-^ here) 15 white
 
 setBlip
   :: ( Has (Lift IO) sig m

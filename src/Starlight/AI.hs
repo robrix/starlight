@@ -13,15 +13,16 @@ import           Linear.Exts
 import           Starlight.Action
 import           Starlight.Actor as Actor
 import           Starlight.Body as Body
+import           Starlight.Character
 import           Starlight.System as System
 
 ai
   :: ( Has (Reader (System StateVectors)) sig m
-     , Has (State Actor) sig m
+     , Has (State Character) sig m
      )
   => m ()
 ai = go <$> ask <*> get >>= assign actions_ where
-  go system Actor{ target, position = P here, rotation } = case target >>= (system !?) of
+  go system Character{ actor = Actor{ position = P here, rotation }, target } = case target >>= (system !?) of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
     -- FIXME: factor in the target’s velocity & distance
@@ -30,7 +31,7 @@ ai = go <$> ask <*> get >>= assign actions_ where
       [ [ Face Target ]
       , [ Thrust | isFacing there ]
       ]
-    Just (Right Actor{ position = P there }) -> Set.fromList $ concat
+    Just (Right Character{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
       [ [ Face Target ]
       , [ Thrust | isFacing there ]
       ]

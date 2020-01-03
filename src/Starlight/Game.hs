@@ -38,12 +38,12 @@ import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.AI
 import           Starlight.Body
+import           Starlight.Character
 import           Starlight.Controls
 import           Starlight.Draw
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
-import           Starlight.Player
 import           Starlight.Radar
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol
@@ -72,36 +72,42 @@ game = do
     . runFinally
     . evalState @Input mempty
     . evalState GameState
-      { player = Player
+      { player = Character
         { actor    = Actor
           { position = P (V2 250000 0)
           , velocity = V2 0 150
           , rotation = axisAngle (unit _z) (pi/2)
-          , target   = Nothing
-          , actions  = mempty
           }
+        , target   = Nothing
+        , actions  = mempty
         }
       , beams  = []
       , system = system
-        { actors =
-          [ Actor
-            { position = P (V2 250000 0)
-            , velocity = V2 0 150
-            , rotation = axisAngle (unit _z) (pi/2)
+        { characters =
+          [ Character
+            { actor = Actor
+              { position = P (V2 250000 0)
+              , velocity = V2 0 150
+              , rotation = axisAngle (unit _z) (pi/2)
+              }
             , target   = Nothing
             , actions  = mempty
             }
-          , Actor
-            { position = P (V2 250000 0)
-            , velocity = V2 0 150
-            , rotation = axisAngle (unit _z) (pi/2)
+          , Character
+            { actor = Actor
+              { position = P (V2 250000 0)
+              , velocity = V2 0 150
+              , rotation = axisAngle (unit _z) (pi/2)
+              }
             , target   = Just $ B (Star (10, "Sol"))
             , actions  = mempty
             }
-          , Actor
-            { position = P (V2 250000 0)
-            , velocity = V2 0 150
-            , rotation = axisAngle (unit _z) (pi/2)
+          , Character
+            { actor = Actor
+              { position = P (V2 250000 0)
+              , velocity = V2 0 150
+              , rotation = axisAngle (unit _z) (pi/2)
+              }
             , target   = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
             , actions  = mempty
             }
@@ -133,10 +139,10 @@ game = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ controls >>= assign (player_ . actor_ . actions_)
+            measure "controls" $ controls >>= assign (player_ . actions_)
             system <- ask
             measure "ai" (zoomEach npcs_ ai)
-            measure "physics" (zoomEach Starlight.Game.actors_ (use actions_ >>= traverse_ (runAction dt) >> modify (physics dt system)))
+            measure "physics" (zoomEach Starlight.Game.characters_ (use actions_ >>= traverse_ (runAction dt) >> actor_ %= physics dt system))
             gameState <- get
             withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState))
           continue <$ measure "swap" Window.swap
@@ -171,22 +177,22 @@ withView game m = do
   runReader View{ scale, size, zoom, focus } m
 
 data GameState = GameState
-  { player :: !Player
+  { player :: !Character
   , beams  :: ![Beam]
   , system :: !(System Body)
   }
   deriving (Show)
 
-player_ :: Lens' GameState Player
+player_ :: Lens' GameState Character
 player_ = lens player (\ s p -> s { player = p })
 
-npcs_ :: Lens' GameState [Actor]
-npcs_ = system_ . System.actors_
+npcs_ :: Lens' GameState [Character]
+npcs_ = system_ . System.characters_
 
-actors_ :: Lens' GameState (NonEmpty Actor)
-actors_ = lens get set where
-  get s = s ^. player_ . actor_ :| s ^. npcs_
-  set s (a:|o) = s & player_ . actor_ .~ a & npcs_ .~ o
+characters_ :: Lens' GameState (NonEmpty Character)
+characters_ = lens get set where
+  get s = s ^. player_  :| s ^. npcs_
+  set s (a:|o) = s & player_ .~ a & npcs_ .~ o
 
 system_ :: Lens' GameState (System Body)
 system_ = lens system (\ s p -> s { system = p })

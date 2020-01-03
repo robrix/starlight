@@ -11,7 +11,6 @@ import Control.Effect.Profile
 import Control.Effect.Reader
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
-import Data.Foldable (for_)
 import Data.Functor.Interval
 import GL.Framebuffer
 import GL.Viewport
@@ -21,8 +20,8 @@ import Linear.Exts
 import Numeric
 import Starlight.Actor
 import Starlight.Body as Body
+import Starlight.Character
 import Starlight.Identifier
-import Starlight.Player
 import Starlight.Radar as Radar
 import Starlight.Ship as Ship
 import Starlight.Starfield as Starfield
@@ -50,10 +49,9 @@ draw
   -> Label
   -> Label
   -> Font
-  -> Player
+  -> Character
   -> m ()
-draw dt fpsLabel targetLabel font player = measure "draw" . runLiftIO $ do
-  let Actor{ position, rotation, target } = player ^. actor_
+draw dt fpsLabel targetLabel font player@Character{ actor = Actor{ position, rotation }, target } = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   v@View{ size, zoom } <- ask
@@ -67,9 +65,9 @@ draw dt fpsLabel targetLabel font player = measure "draw" . runLiftIO $ do
 
   drawStarfield
 
-  system@System{ scale, actors = npcs } <- ask @(System StateVectors)
+  system@System{ scale, characters = npcs } <- ask @(System StateVectors)
 
-  for_ (player ^. actor_ : npcs) (drawShip white)
+  forOf_ (traversed . actor_) (player : npcs) (drawShip white)
 
   when False $ drawLaser Beam { colour = green, angle = snd (toAxisAngle rotation), position }
 
@@ -78,12 +76,12 @@ draw dt fpsLabel targetLabel font player = measure "draw" . runLiftIO $ do
 
   forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
 
-  drawRadar (player ^. actor_)
+  drawRadar player
 
   let rscale = 1/scale
       describeTarget target = case target >>= fmap . (,) <*> (system !?) of
         Just (identifier, t)
-          | pos <- either (^. position_) (^. position_) t -> describeIdentifier identifier ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* rscale) (position ^* rscale)))) "km"
+          | pos <- either (^. position_) (^. actor_ . position_) t -> describeIdentifier identifier ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* rscale) (position ^* rscale)))) "km"
         _ -> ""
 
   measure "setLabel" $ setLabel fpsLabel    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")

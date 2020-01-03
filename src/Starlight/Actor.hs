@@ -1,35 +1,22 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Starlight.Actor
 ( Actor(..)
-, target_
-, actions_
 , HasPosition(..)
 , HasVelocity(..)
 , HasRotation(..)
 ) where
 
-import Data.Set (Set)
 import Lens.Micro (Lens', lens)
 import Linear.Affine
 import Linear.Quaternion
 import Linear.V2
-import Starlight.Action
-import Starlight.Identifier
 
 data Actor = Actor
   { position :: !(Point V2 Float)
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
-  , target   :: !(Maybe Identifier)
-  , actions  :: !(Set Action)
   }
   deriving (Show)
-
-target_ :: Lens' Actor (Maybe Identifier)
-target_ = lens target (\ s target -> s { target })
-
-actions_ :: Lens' Actor (Set Action)
-actions_ = lens actions (\ s actions -> s { actions })
 
 
 class HasPosition t where
