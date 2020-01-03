@@ -134,7 +134,7 @@ game = do
             put =<< now
             measure "controls" $ Lens.zoom (player_ . actor_ . actions_) (controls >>= put)
             system <- ask
-            measure "ai" (zoomEach npcs_ (get >>= ai system >>= assign actions_))
+            measure "ai" (zoomEach npcs_ (get >>= ai >>= assign actions_))
             measure "physics" (zoomEach Starlight.Game.actors_ (modify (physics dt system) >> use actions_ >>= traverse_ (runAction dt)))
             gameState <- get
             withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState))
