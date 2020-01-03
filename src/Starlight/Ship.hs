@@ -15,6 +15,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
+import           Control.Lens (lens)
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -32,6 +33,10 @@ data Ship = Ship
   , actor  :: Actor
   , health :: Float
   }
+
+instance HasActor Ship where
+  actor_ = lens actor (\ s actor -> s { actor })
+
 
 drawShip
   :: ( Has (Lift IO) sig m
