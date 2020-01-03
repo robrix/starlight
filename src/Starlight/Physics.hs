@@ -62,9 +62,9 @@ runAction (Delta (Seconds dt)) = \case
       Backwards -> pure (Just (-velocity))
       Target    -> do
         system <- ask @(System StateVectors)
-        target   <- use target_
+        target   <- fmap (either Body.actor Character.actor) <$> uses target_ (>>= (system !?))
         position <- use (actor_ . position_)
-        pure ((^. position_ . to (unP . flip direction position)) . either Body.actor Character.actor <$> (target >>= (system !?)))
+        pure ((^. position_ . to (unP . flip direction position)) <$> target)
     maybe (pure ()) (modifying (actor_ . rotation_) . face angular . angleOf . (^. _xy)) direction
   Turn t -> actor_ . rotation_ *= axisAngle (unit _z) (getRadians (case t of
     L -> angular
