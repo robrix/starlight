@@ -4,7 +4,8 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Ship
-( drawShip
+( Ship(..)
+, drawShip
 , runShip
 , Drawable
 ) where
@@ -25,6 +26,8 @@ import           Starlight.Ship.Shader
 import           Starlight.View
 import           UI.Colour
 import qualified UI.Drawable as UI
+
+data Ship = Ship
 
 drawShip
   :: ( Has (Lift IO) sig m
