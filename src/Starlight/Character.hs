@@ -4,13 +4,16 @@ module Starlight.Character
 , actor_
 ) where
 
+import Data.Set (Set)
 import Lens.Micro (Lens', lens)
+import Starlight.Action
 import Starlight.Actor
 import Starlight.Identifier
 
 data Character = Character
-  { actor  :: !Actor
-  , target :: !(Maybe Identifier)
+  { actor   :: !Actor
+  , target  :: !(Maybe Identifier)
+  , actions :: !(Set Action)
   }
 
 actor_ :: Lens' Character Actor
