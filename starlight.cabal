@@ -79,6 +79,7 @@ library
     Starlight.AI
     Starlight.Body
     Starlight.Body.Shader
+    Starlight.Character
     Starlight.CLI
     Starlight.Controls
     Starlight.Draw
