@@ -31,7 +31,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           GL
-import           Lens.Micro (Lens', each, lens, (.~), (^.))
+import           Lens.Micro (Lens', lens, (.~), (^.))
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.AI
@@ -131,10 +131,10 @@ game = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ Lens.zoom player_ (controls >>= Lens.zoom actor_ . traverse_ (runAction dt))
+            measure "controls" $ Lens.zoom (player_ . actor_ . actions_) (controls >>= put)
             system <- ask
-            measure "ai" (zoomEach npcs_ (get >>= ai system >>= traverse_ (runAction dt)))
-            measure "physics" (Starlight.Game.actors_ . each %= physics dt system)
+            measure "ai" (zoomEach npcs_ (get >>= ai system >>= assign actions_))
+            measure "physics" (zoomEach Starlight.Game.actors_ (modify (physics dt system) >> use actions_ >>= traverse_ (runAction dt)))
             gameState <- get
             withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState))
           continue <$ measure "swap" Window.swap
