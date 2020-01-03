@@ -9,13 +9,13 @@ module Starlight.Draw
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
+import Control.Lens
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
 import Data.Functor.Interval
 import GL.Framebuffer
 import GL.Viewport
 import Graphics.GL.Core41
-import Lens.Micro
 import Linear.Exts
 import Numeric
 import Starlight.Actor

@@ -15,8 +15,8 @@ import           Control.Effect.Empty
 import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.State
+import           Control.Lens (Lens', lens)
 import qualified Data.IntSet as IntSet
-import           Lens.Micro (Lens', lens)
 import qualified SDL
 import qualified UI.Window as Window
 

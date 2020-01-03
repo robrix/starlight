@@ -11,10 +11,10 @@ import Control.Effect.Lens
 import Control.Effect.Lift
 import Control.Effect.Reader
 import Control.Effect.State
+import Control.Lens (to, (^.))
 import Control.Monad (guard)
 import Data.Ix (inRange)
 import Data.List (elemIndex)
-import Lens.Micro
 import Linear.Exts
 import Starlight.Action
 import Starlight.Actor as Actor

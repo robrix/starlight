@@ -12,8 +12,8 @@ module Data.Functor.Interval
 ) where
 
 import Control.Applicative (liftA2)
+import Control.Lens
 import Data.Fixed (mod')
-import Lens.Micro
 
 data Interval f a = Interval
   { min_ :: !(f a)

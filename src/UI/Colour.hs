@@ -14,9 +14,9 @@ module UI.Colour
 , setClearColour
 ) where
 
+import Control.Lens
 import Control.Monad.IO.Class.Lift
 import Graphics.GL.Core41
-import Lens.Micro
 import Linear.V4
 
 type Colour = V4

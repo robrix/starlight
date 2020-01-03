@@ -14,11 +14,11 @@ module UI.Label.Glyph
 , O(..)
 ) where
 
+import Control.Lens (Lens', lens)
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL hiding (Field(..))
-import Lens.Micro (Lens', lens)
 import Prelude hiding (break)
 
 shader :: Shader U V O

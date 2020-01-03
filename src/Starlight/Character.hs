@@ -7,8 +7,8 @@ module Starlight.Character
 , actions_
 ) where
 
+import Control.Lens (Lens', lens)
 import Data.Set (Set)
-import Lens.Micro (Lens', lens)
 import Starlight.Action
 import Starlight.Actor (Actor)
 import Starlight.Identifier

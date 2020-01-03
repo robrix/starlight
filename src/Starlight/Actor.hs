@@ -7,7 +7,7 @@ module Starlight.Actor
 , rotation_
 ) where
 
-import Lens.Micro (Lens', lens)
+import Control.Lens (Lens', lens)
 import Linear.Affine
 import Linear.Quaternion
 import Linear.V3

@@ -14,11 +14,11 @@ module Starlight.Starfield.Shader
 , O(..)
 ) where
 
+import Control.Lens (Lens', lens)
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
-import Lens.Micro (Lens', lens)
 
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
 

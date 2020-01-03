@@ -9,7 +9,7 @@ module Control.Effect.Lens.Exts
 import Control.Carrier.State.ST.Strict as ST
 import Control.Carrier.State.Strict as Strict
 import Control.Effect.Lens
-import Lens.Micro (Lens')
+import Control.Lens (Lens')
 
 (&~) :: s -> ST.StateC s a -> s
 (&~) = ST.execState

@@ -12,11 +12,11 @@ module Starlight.Ship.Shader
 , O(..)
 ) where
 
+import Control.Lens (Lens', lens)
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
-import Lens.Micro (Lens', lens)
 
 shader :: Shader U V O
 shader = program $ \ u

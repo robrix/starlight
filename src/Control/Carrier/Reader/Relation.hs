@@ -11,8 +11,8 @@ import Control.Algebra
 import Control.Applicative (Alternative)
 import Control.Carrier.Reader
 import Control.Effect.Lens (view)
+import Control.Lens (Getting)
 import Control.Monad (guard, (<=<))
-import Lens.Micro (Getting)
 
 runRelation :: i -> Relation i a -> Maybe a
 runRelation i (Relation m) = runReader i m

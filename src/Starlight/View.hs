@@ -7,8 +7,8 @@ module Starlight.View
 , deviceSize
 ) where
 
+import Control.Lens ((.~), (^.))
 import Data.Function ((&))
-import Lens.Micro ((.~), (^.))
 import Linear.Affine
 import Linear.Matrix
 import Linear.V2

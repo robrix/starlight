@@ -16,6 +16,7 @@ import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.State
+import           Control.Lens (forOf_, traversed, (.~), (^.))
 import           Control.Monad (when)
 import           Data.Coerce (coerce)
 import           Data.Foldable (for_)
@@ -24,7 +25,6 @@ import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
-import           Lens.Micro (forOf_, traversed, (.~), (^.))
 import           Linear.Exts as Linear
 import           Starlight.Actor
 import           Starlight.Body as Body hiding (Drawable)

@@ -13,11 +13,11 @@ module Starlight.Weapon.Laser.Shader
 , O(..)
 ) where
 
+import Control.Lens (Lens', lens)
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
-import Lens.Micro (Lens', lens)
 import Unit.Angle
 
 shader :: Shader U V O

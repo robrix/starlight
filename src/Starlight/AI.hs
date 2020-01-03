@@ -7,9 +7,9 @@ module Starlight.AI
 import           Control.Effect.Lens
 import           Control.Effect.Reader
 import           Control.Effect.State
+import           Control.Lens ((^.))
 import           Data.Functor.Interval
 import qualified Data.Set as Set
-import           Lens.Micro
 import           Linear.Exts
 import           Starlight.Action
 import           Starlight.Actor as Actor

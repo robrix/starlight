@@ -15,13 +15,13 @@ module GL
 
 import           Control.Algebra
 import           Control.Effect.State
+import           Control.Lens (Lens', lens)
 import           Control.Monad.IO.Class.Lift
 import           Data.Foldable (for_)
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe)
 import           GL.Enum as GL
 import           Graphics.GL.Core41
-import           Lens.Micro (Lens', lens)
 
 data Capability
   = Blend                      -- ^ GL_BLEND

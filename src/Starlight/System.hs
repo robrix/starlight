@@ -10,8 +10,8 @@ module Starlight.System
 , (!?)
 ) where
 
+import           Control.Lens (Lens, Lens', lens)
 import qualified Data.Map as Map
-import           Lens.Micro (Lens, Lens', lens)
 import           Linear.Matrix
 import           Linear.V4
 import           Linear.Vector

@@ -9,9 +9,9 @@ module UI.Graph.Lines
 , O(..)
 ) where
 
+import Control.Lens (Lens', lens)
 import GHC.Generics (Generic)
 import GL.Shader.DSL
-import Lens.Micro (Lens', lens)
 import UI.Graph.Vertex
 
 shader :: Shader U V O

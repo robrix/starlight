@@ -129,8 +129,8 @@ library
     , fused-effects      ^>= 1
     , fused-effects-lens ^>= 1.1
     , gl
+    , lens
     , linear
-    , microlens
     , opentype
     , optparse-applicative
     , prettyprinter

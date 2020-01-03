@@ -9,10 +9,9 @@ module Starlight.CLI
 , execParser
 ) where
 
+import           Control.Lens
 import           Data.Foldable (foldl')
-import           Data.Function ((&))
 import           Data.Version (showVersion)
-import           Lens.Micro (Lens', lens, (.~))
 import           Options.Applicative
 import qualified Paths_starlight as Library (version)
 

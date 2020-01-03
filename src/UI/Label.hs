@@ -16,6 +16,7 @@ import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
+import           Control.Lens ((^.))
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -32,7 +33,6 @@ import           GL.Texture
 import           GL.TextureUnit
 import           GL.Viewport
 import           Graphics.GL.Core41
-import           Lens.Micro ((^.))
 import           Linear.Exts
 import           UI.Colour
 import           UI.Drawable

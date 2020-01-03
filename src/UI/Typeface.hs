@@ -14,13 +14,13 @@ module UI.Typeface
 ) where
 
 import           Control.Effect.Finally
+import           Control.Lens
 import           Control.Monad (guard, join, (<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Bifunctor (first)
 import           Data.Char (isPrint, isSeparator, ord)
 import           Data.Coerce (coerce)
 import           Data.Foldable (find, foldl')
-import           Data.Functor.Identity
 import           Data.Functor.Interval (Interval(..))
 import           Data.IORef
 import qualified Data.Map as Map
@@ -35,7 +35,6 @@ import           GL.Buffer as B
 import           GL.Framebuffer
 import           GL.Object
 import           GL.Program
-import           Lens.Micro
 import           Linear.V2
 import qualified Opentype.Fileformat as O
 import           UI.Drawable

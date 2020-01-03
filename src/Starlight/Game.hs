@@ -21,6 +21,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
+import           Control.Lens (Lens', lens, to, (.~), (^.))
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -33,7 +34,6 @@ import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           Data.Time.Format.ISO8601
 import           GL
-import           Lens.Micro (Lens', lens, to, (.~), (^.))
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.AI

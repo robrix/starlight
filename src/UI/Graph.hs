@@ -11,6 +11,7 @@ module UI.Graph
 
 import           Control.Carrier.Finally
 import           Control.Effect.Lens ((.=))
+import           Control.Lens ((^.))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Functor.Identity
@@ -18,7 +19,6 @@ import           Data.Functor.Interval
 import           GL.Array
 import           GL.Program
 import           Graphics.GL.Core41
-import           Lens.Micro ((^.))
 import           Linear.Exts
 import           UI.Colour
 import qualified UI.Graph.Lines as Lines

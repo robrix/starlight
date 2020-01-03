@@ -30,6 +30,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
+import           Control.Lens ((^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -37,7 +38,6 @@ import qualified Data.Map as Map
 import           Geometry.Circle
 import           GL.Array
 import           GL.Program
-import           Lens.Micro ((^.))
 import           Linear.Exts
 import           Starlight.Actor (Actor(..))
 import           Starlight.Body.Shader as Shader
