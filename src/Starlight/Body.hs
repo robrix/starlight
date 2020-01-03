@@ -85,9 +85,9 @@ orbitTimeScale :: Num a => Seconds a
 orbitTimeScale = 1
 
 transformAt :: Orbit -> Seconds Float -> M44 Float
-transformAt orbit@Orbit{ orientation } t = mkTransformation
-  orientation
-  (unP (positionAt orbit t))
+transformAt orbit@Orbit{ orientation } t
+  =   mkTransformation orientation 0
+  !*! translated3 (unP (positionAt orbit t))
 
 orientationAt :: Body -> Seconds Float -> Quaternion Float
 orientationAt Body{ orientation, period, orbit = Orbit{ orientation = orbit } } t
