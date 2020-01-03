@@ -48,4 +48,4 @@ identifiers System{ bodies, characters } = map S [0..pred (length characters)] <
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
 (!?) System{ bodies, characters } = \case
   B i -> Left  <$> Map.lookup i bodies
-  S i -> Right <$> characters ^? ix i where
+  S i -> Right <$> characters ^? ix i
