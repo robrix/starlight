@@ -140,7 +140,7 @@ game = do
             measure "controls" $ controls >>= assign (player_ . actor_ . actions_)
             system <- ask
             measure "ai" (zoomEach npcs_ ai)
-            measure "physics" (zoomEach Starlight.Game.actors_ (modify (physics dt system) >> use actions_ >>= traverse_ (runAction dt)))
+            measure "physics" (zoomEach Starlight.Game.actors_ (use actions_ >>= traverse_ (runAction dt) >> modify (physics dt system)))
             gameState <- get
             withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState))
           continue <$ measure "swap" Window.swap
