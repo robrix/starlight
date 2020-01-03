@@ -123,7 +123,7 @@ data Blip = Blip
   }
 
 makeBlip :: Point V2 Float -> Float -> Colour Float -> Blip
-makeBlip (P there) r colour = Blip { angle, d, direction, r, colour } where
+makeBlip (P there) r colour = Blip{ angle, d, direction, r, colour } where
   angle = angleOf there
   d = norm there
   direction = normalize there
