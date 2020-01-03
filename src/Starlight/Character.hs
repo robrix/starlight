@@ -3,4 +3,8 @@ module Starlight.Character
 ( Character(..)
 ) where
 
+import Starlight.Actor
+
 data Character = Character
+  { actor :: !Actor
+  }
