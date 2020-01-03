@@ -51,9 +51,8 @@ draw
   -> Label
   -> Font
   -> Player
-  -> [Actor]
   -> m ()
-draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
+draw dt fpsLabel targetLabel font player = measure "draw" . runLiftIO $ do
   let Actor{ position, rotation, target } = player ^. actor_
   bind @Framebuffer Nothing
 
@@ -68,15 +67,14 @@ draw dt fpsLabel targetLabel font player npcs = measure "draw" . runLiftIO $ do
 
   drawStarfield
 
+  system@System{ scale, actors = npcs } <- ask @(System StateVectors)
+
   for_ (player ^. actor_ : npcs) (drawShip white)
 
   when False $ drawLaser Beam { colour = green, angle = snd (toAxisAngle rotation), position }
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
-
-  system@System{ scale } <- ask @(System StateVectors)
-
-  let onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - scale * getMetres radius < maxDim * 0.5
+      onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - scale * getMetres radius < maxDim * 0.5
 
   forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
 
