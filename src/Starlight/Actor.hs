@@ -28,10 +28,10 @@ data Actor = Actor
   deriving (Show)
 
 target_ :: Lens' Actor (Maybe Identifier)
-target_ = lens target (\ s t -> s { target = t })
+target_ = lens target (\ s target -> s { target })
 
 health_ :: Lens' Actor Float
-health_ = lens health (\ s h -> s { health = h })
+health_ = lens health (\ s health -> s { health })
 
 actions_ :: Lens' Actor (Set Action)
 actions_ = lens actions (\ s actions -> s { actions })
@@ -41,18 +41,18 @@ class HasPosition t where
   position_ :: Lens' t (Point V2 Float)
 
 instance HasPosition Actor where
-  position_ = lens position (\ s v -> s { position = v })
+  position_ = lens position (\ s position -> s { position })
 
 
 class HasVelocity t where
   velocity_ :: Lens' t (V2 Float)
 
 instance HasVelocity Actor where
-  velocity_ = lens velocity (\ s v -> s { velocity = v })
+  velocity_ = lens velocity (\ s velocity -> s { velocity })
 
 
 class HasRotation t where
   rotation_ :: Lens' t (Quaternion Float)
 
 instance HasRotation Actor where
-  rotation_ = lens rotation (\ s r -> s { rotation = r })
+  rotation_ = lens rotation (\ s rotation -> s { rotation })
