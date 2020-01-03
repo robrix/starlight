@@ -221,7 +221,7 @@ system = do
       [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
       | (identifier, orbit) <- Map.toList orbits
       ]
-    , actors = Map.empty
+    , actors = mempty
     }
   where
   solI = Star (10, "Sol")

@@ -9,19 +9,19 @@ module Starlight.System
 , (!?)
 ) where
 
+import           Data.List
 import qualified Data.Map as Map
 import           Lens.Micro (Lens, Lens', lens)
 import           Linear.Matrix
 import           Linear.V4
 import           Linear.Vector
-import           Prelude hiding (lookup)
 import           Starlight.Actor
 import           Starlight.Identifier
 
 data System a = System
   { scale  :: !Float
   , bodies :: !(Map.Map BodyIdentifier a)
-  , actors :: !(Map.Map Int Actor)
+  , actors :: ![Actor]
   }
   deriving (Show)
 
@@ -39,5 +39,5 @@ identifiers = map B . Map.keys . bodies
 
 (!?) :: System a -> Identifier -> Maybe (Either a Actor)
 (!?) System{ bodies, actors } = \case
-  B i -> Left  <$> Map.lookup i bodies
-  S i -> Right <$> Map.lookup i actors
+  B i -> Left        <$> Map.lookup i bodies
+  S i -> Right . fst <$> uncons (drop (pred i) actors)
