@@ -1,4 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
+-- | An 'Actor' has 'position', 'velocity', and 'rotation', and can be acted on by the physics simulation.
 module Starlight.Actor
 ( Actor(..)
 , position_
