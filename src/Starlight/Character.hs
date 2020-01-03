@@ -18,6 +18,7 @@ data Character = Character
   , target  :: !(Maybe Identifier)
   , actions :: !(Set Action)
   }
+  deriving (Show)
 
 actor_ :: Lens' Character Actor
 actor_ = lens actor (\ s a -> s { actor = a })
