@@ -1,9 +1,9 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Starlight.Actor
 ( Actor(..)
-, HasPosition(..)
-, HasVelocity(..)
-, HasRotation(..)
+, position_
+, velocity_
+, rotation_
 ) where
 
 import Lens.Micro (Lens', lens)
@@ -18,23 +18,11 @@ data Actor = Actor
   }
   deriving (Show)
 
+position_ :: Lens' Actor (Point V2 Float)
+position_ = lens position (\ s position -> s { position })
 
-class HasPosition t where
-  position_ :: Lens' t (Point V2 Float)
+velocity_ :: Lens' Actor (V2 Float)
+velocity_ = lens velocity (\ s velocity -> s { velocity })
 
-instance HasPosition Actor where
-  position_ = lens position (\ s position -> s { position })
-
-
-class HasVelocity t where
-  velocity_ :: Lens' t (V2 Float)
-
-instance HasVelocity Actor where
-  velocity_ = lens velocity (\ s velocity -> s { velocity })
-
-
-class HasRotation t where
-  rotation_ :: Lens' t (Quaternion Float)
-
-instance HasRotation Actor where
-  rotation_ = lens rotation (\ s rotation -> s { rotation })
+rotation_ :: Lens' Actor (Quaternion Float)
+rotation_ = lens rotation (\ s rotation -> s { rotation })

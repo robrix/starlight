@@ -53,20 +53,20 @@ runAction
   -> m ()
 runAction (Delta (Seconds dt)) = \case
   Thrust -> do
-    rotation <- use (actor_ . rotation_ @Actor)
-    actor_ . velocity_ @Actor += rotate rotation (unit _x ^* thrust) ^. _xy
+    rotation <- use (actor_ . rotation_)
+    actor_ . velocity_ += rotate rotation (unit _x ^* thrust) ^. _xy
   Face dir -> do
-    velocity <- use (actor_ . velocity_ @Actor)
+    velocity <- use (actor_ . velocity_)
     direction <- case dir of
       Forwards  -> pure (Just velocity)
       Backwards -> pure (Just (-velocity))
       Target    -> do
         system <- ask @(System StateVectors)
         target   <- use target_
-        position <- use (actor_ . position_ @Actor)
+        position <- use (actor_ . position_)
         pure ((^. position_ . to (unP . flip direction position)) . either Body.actor Character.actor <$> (target >>= (system !?)))
-    maybe (pure ()) (modifying (actor_ . rotation_ @Actor) . face angular . angleOf) direction
-  Turn t -> actor_ . rotation_ @Actor *= axisAngle (unit _z) (getRadians (case t of
+    maybe (pure ()) (modifying (actor_ . rotation_) . face angular . angleOf) direction
+  Turn t -> actor_ . rotation_ *= axisAngle (unit _z) (getRadians (case t of
     L -> angular
     R -> -angular))
   Fire Main -> pure ()
