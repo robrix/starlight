@@ -194,7 +194,7 @@ npcs_ = system_ . System.characters_
 
 characters_ :: Lens' GameState (NonEmpty Character)
 characters_ = lens get set where
-  get s = s ^. player_  :| s ^. npcs_
+  get s = s ^. player_ :| s ^. npcs_
   set s (a:|o) = s & player_ .~ a & npcs_ .~ o
 
 system_ :: Lens' GameState (System Body)
