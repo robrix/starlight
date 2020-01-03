@@ -15,7 +15,7 @@ import           Control.Effect.Empty
 import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Control.Lens (Lens', lens)
+import           Control.Lens (Iso', Lens', coerced, lens)
 import qualified Data.IntSet as IntSet
 import qualified SDL
 import qualified UI.Window as Window
@@ -42,8 +42,8 @@ singleton = Input . IntSet.singleton . fromIntegral . SDL.unwrapKeycode
 fromList :: [SDL.Keycode] -> Input
 fromList = Input . IntSet.fromList . map (fromIntegral . SDL.unwrapKeycode)
 
-input_ :: Lens' Input IntSet.IntSet
-input_ = lens unInput (const Input)
+input_ :: Iso' Input IntSet.IntSet
+input_ = coerced
 
 (\\) :: Input -> Input -> Input
 Input a \\ Input b = Input (a IntSet.\\ b)

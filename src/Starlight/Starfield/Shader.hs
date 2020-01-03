@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -14,7 +15,8 @@ module Starlight.Starfield.Shader
 , O(..)
 ) where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens')
+import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
@@ -88,13 +90,13 @@ data U v = U
 instance Vars U
 
 resolution_ :: Lens' (U v) (v (V2 Float))
-resolution_ = lens resolution (\ u resolution -> u { resolution })
+resolution_ = field @"resolution"
 
 origin_ :: Lens' (U v) (v (Point V2 Float))
-origin_ = lens origin (\ u origin -> u { origin })
+origin_ = field @"origin"
 
 zoom_ :: Lens' (U v) (v Float)
-zoom_ = lens zoom (\ u zoom -> u { zoom })
+zoom_ = field @"zoom"
 
 newtype V v = V { pos :: v (V2 Float) }
   deriving (Generic)

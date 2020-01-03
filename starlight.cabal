@@ -128,6 +128,7 @@ library
     , filepath ^>= 1.4
     , fused-effects      ^>= 1
     , fused-effects-lens ^>= 1.1
+    , generic-lens
     , gl
     , lens
     , linear

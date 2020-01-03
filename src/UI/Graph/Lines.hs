@@ -1,5 +1,7 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeApplications #-}
 module UI.Graph.Lines
 ( shader
 , U(..)
@@ -9,7 +11,8 @@ module UI.Graph.Lines
 , O(..)
 ) where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens')
+import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
 import GL.Shader.DSL
 import UI.Graph.Vertex
@@ -32,10 +35,10 @@ data U v = U
 instance Vars U
 
 matrix_ :: Lens' (U v) (v (M33 Float))
-matrix_ = lens matrix (\ u matrix -> u { matrix })
+matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))
-colour_ = lens colour (\ u colour -> u { colour })
+colour_ = field @"colour"
 
 
 newtype O v = O { fragColour :: v (Colour Float) }

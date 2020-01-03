@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -27,12 +29,14 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens
 import           Control.Effect.Lift
 import           Control.Effect.Profile
-import           Control.Lens (Iso, coerced, iso, lens, (%~), (&), (^.))
+import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
+import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
 import           Geometry.Circle
+import           GHC.Generics
 import           GL.Array
 import           GL.Program
 import           Linear.Exts
@@ -53,10 +57,10 @@ data StateVectors = StateVectors
   , transform :: M44 Float
   , actor     :: Actor
   }
-  deriving (Show)
+  deriving (Generic, Show)
 
 instance HasActor StateVectors where
-  actor_ = lens actor (\ s actor -> s { actor })
+  actor_ = field @"actor"
 
 data Body = Body
   { radius      :: Metres Float

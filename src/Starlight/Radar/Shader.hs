@@ -1,7 +1,9 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Radar.Shader
 ( shader
@@ -15,7 +17,8 @@ module Starlight.Radar.Shader
 , O(..)
 ) where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens')
+import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
@@ -45,19 +48,19 @@ data U v = U
 instance Vars U
 
 matrix_ :: Lens' (U v) (v (M33 Float))
-matrix_ = lens matrix (\ u matrix -> u { matrix })
+matrix_ = field @"matrix"
 
 radius_ :: Lens' (U v) (v Float)
-radius_ = lens radius (\ u radius -> u { radius })
+radius_ = field @"radius"
 
 angle_ :: Lens' (U v) (v (Radians Float))
-angle_ = lens angle (\ u angle -> u { angle })
+angle_ = field @"angle"
 
 sweep_ :: Lens' (U v) (v (Radians Float))
-sweep_ = lens sweep (\ u sweep -> u { sweep })
+sweep_ = field @"sweep"
 
 colour_ :: Lens' (U v) (v (Colour Float))
-colour_ = lens colour (\ u colour -> u { colour })
+colour_ = field @"colour"
 
 
 newtype V v = V { n :: v Float }

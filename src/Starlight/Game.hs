@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -29,10 +30,12 @@ import           Data.Foldable (traverse_)
 import           Data.Function (fix, (&))
 import           Data.Functor.Identity
 import           Data.Functor.Interval
+import           Data.Generics.Product.Fields
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           Data.Time.Format.ISO8601
+import           GHC.Generics (Generic)
 import           GL
 import           Linear.Exts
 import           Starlight.Actor
@@ -181,10 +184,10 @@ data GameState = GameState
   , beams  :: ![Beam]
   , system :: !(System Body)
   }
-  deriving (Show)
+  deriving (Generic, Show)
 
 player_ :: Lens' GameState Character
-player_ = lens player (\ s p -> s { player = p })
+player_ = field @"player"
 
 npcs_ :: Lens' GameState [Character]
 npcs_ = system_ . System.characters_
@@ -195,7 +198,7 @@ characters_ = lens get set where
   set s (a:|o) = s & player_ .~ a & npcs_ .~ o
 
 system_ :: Lens' GameState (System Body)
-system_ = lens system (\ s p -> s { system = p })
+system_ = field @"system"
 
 
 now :: Has (Lift IO) sig m => m UTCTime

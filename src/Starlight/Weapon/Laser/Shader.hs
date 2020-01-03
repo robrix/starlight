@@ -1,8 +1,10 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TypeApplications #-}
 module Starlight.Weapon.Laser.Shader
 ( shader
 , U(..)
@@ -13,7 +15,8 @@ module Starlight.Weapon.Laser.Shader
 , O(..)
 ) where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens')
+import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
@@ -39,13 +42,13 @@ data U v = U
 instance Vars U
 
 matrix_ :: Lens' (U v) (v (M44 Float))
-matrix_ = lens matrix (\ u matrix -> u { matrix })
+matrix_ = field @"matrix"
 
 angle_ :: Lens' (U v) (v (Radians Float))
-angle_ = lens angle (\ u angle -> u { angle })
+angle_ = field @"angle"
 
 colour_ :: Lens' (U v) (v (Colour Float))
-colour_ = lens colour (\ u colour -> u { colour })
+colour_ = field @"colour"
 
 
 newtype V v = V { r :: v Float }

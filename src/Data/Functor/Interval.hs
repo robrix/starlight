@@ -1,4 +1,7 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE TypeApplications #-}
 module Data.Functor.Interval
 ( Interval(..)
 , point
@@ -14,12 +17,14 @@ module Data.Functor.Interval
 import Control.Applicative (liftA2)
 import Control.Lens
 import Data.Fixed (mod')
+import Data.Generics.Product.Fields
+import GHC.Generics (Generic)
 
 data Interval f a = Interval
   { min_ :: !(f a)
   , max_ :: !(f a)
   }
-  deriving (Eq, Foldable, Functor, Show, Traversable)
+  deriving (Eq, Foldable, Functor, Generic, Show, Traversable)
 
 instance Applicative f => Applicative (Interval f) where
   pure a = Interval (pure a) (pure a)
@@ -104,10 +109,10 @@ wrap i x = ((x + max_ i) `mod'` size i) + min_ i
 
 
 _min :: Lens' (Interval f a) (f a)
-_min = lens min_ (\ r v -> r { min_ = v })
+_min = field @"min_"
 
 _max :: Lens' (Interval f a) (f a)
-_max = lens max_ (\ r v -> r { max_ = v })
+_max = field @"max_"
 
 
 newtype Bounding f a = Bounding { getBounding :: Interval f a }

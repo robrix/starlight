@@ -1,4 +1,7 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeApplications #-}
 module Starlight.CLI
 ( Options(..)
 , defaultOptions
@@ -11,7 +14,9 @@ module Starlight.CLI
 
 import           Control.Lens
 import           Data.Foldable (foldl')
+import           Data.Generics.Product.Fields
 import           Data.Version (showVersion)
+import           GHC.Generics (Generic)
 import           Options.Applicative
 import qualified Paths_starlight as Library (version)
 
@@ -19,6 +24,7 @@ data Options = Options
   { profile :: Bool
   , trace   :: Bool
   }
+  deriving (Generic, Show)
 
 defaultOptions :: Options
 defaultOptions = Options
@@ -27,10 +33,10 @@ defaultOptions = Options
   }
 
 profile_ :: Lens' Options Bool
-profile_ = lens profile (\ o profile -> o { profile })
+profile_ = field @"profile"
 
 trace_ :: Lens' Options Bool
-trace_ = lens trace (\ o trace -> o { trace })
+trace_ = field @"trace"
 
 
 argumentsParser :: ParserInfo Options

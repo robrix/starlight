@@ -1,4 +1,7 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeApplications #-}
 -- | An 'Actor' has 'position', 'velocity', and 'rotation', and can be acted on by the physics simulation.
 module Starlight.Actor
 ( Actor(..)
@@ -8,7 +11,9 @@ module Starlight.Actor
 , HasActor(..)
 ) where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens')
+import Data.Generics.Product.Fields
+import GHC.Generics (Generic)
 import Linear.Affine
 import Linear.Quaternion
 import Linear.V3
@@ -18,16 +23,16 @@ data Actor = Actor
   , velocity :: !(V3 Float)
   , rotation :: !(Quaternion Float)
   }
-  deriving (Show)
+  deriving (Generic, Show)
 
 position_ :: Lens' Actor (Point V3 Float)
-position_ = lens position (\ s position -> s { position })
+position_ = field @"position"
 
 velocity_ :: Lens' Actor (V3 Float)
-velocity_ = lens velocity (\ s velocity -> s { velocity })
+velocity_ = field @"velocity"
 
 rotation_ :: Lens' Actor (Quaternion Float)
-rotation_ = lens rotation (\ s rotation -> s { rotation })
+rotation_ = field @"rotation"
 
 
 class HasActor t where

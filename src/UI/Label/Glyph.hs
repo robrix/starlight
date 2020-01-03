@@ -1,7 +1,9 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module UI.Label.Glyph
 ( shader
@@ -14,7 +16,8 @@ module UI.Label.Glyph
 , O(..)
 ) where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens')
+import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
@@ -81,16 +84,16 @@ data U v = U
 instance Vars U
 
 matrix_ :: Lens' (U v) (v (M33 Float))
-matrix_ = lens matrix (\ u matrix -> u { matrix })
+matrix_ = field @"matrix"
 
 scale_ :: Lens' (U v) (v Float)
-scale_ = lens scale (\ u scale -> u { scale })
+scale_ = field @"scale"
 
 fontScale_ :: Lens' (U v) (v Float)
-fontScale_ = lens fontScale (\ u fontScale -> u { fontScale })
+fontScale_ = field @"fontScale"
 
 offset_ :: Lens' (U v) (v Float)
-offset_ = lens offset (\ u offset -> u { offset })
+offset_ = field @"offset"
 
 
 newtype V v = V { pos :: v (V4 Float) }

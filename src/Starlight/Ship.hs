@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -15,10 +17,11 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
-import           Control.Lens (lens)
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
+import           Data.Generics.Product.Fields
+import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Program
 import           Linear.Exts
@@ -33,9 +36,10 @@ data Ship = Ship
   , actor  :: Actor
   , health :: Float
   }
+  deriving (Generic, Show)
 
 instance HasActor Ship where
-  actor_ = lens actor (\ s actor -> s { actor })
+  actor_ = field @"actor"
 
 
 drawShip

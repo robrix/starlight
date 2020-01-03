@@ -1,5 +1,8 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeApplications #-}
 module Starlight.System
 ( System(..)
 , systemTrans
@@ -10,8 +13,10 @@ module Starlight.System
 , (!?)
 ) where
 
-import           Control.Lens (Lens, Lens', lens)
+import           Control.Lens (Lens, Lens')
+import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
+import           GHC.Generics (Generic)
 import           Linear.Matrix
 import           Linear.V4
 import           Linear.Vector
@@ -23,19 +28,19 @@ data System a = System
   , bodies     :: !(Map.Map BodyIdentifier a)
   , characters :: ![Character]
   }
-  deriving (Show)
+  deriving (Generic, Show)
 
 systemTrans :: System a -> M44 Float
 systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
 scale_ :: Lens' (System a) Float
-scale_ = lens scale (\ s scale -> s { scale })
+scale_ = field @"scale"
 
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
-bodies_ = lens bodies (\ s bodies -> s { bodies })
+bodies_ = field @"bodies"
 
 characters_ :: Lens' (System a) [Character]
-characters_ = lens characters (\ s characters -> s { characters })
+characters_ = field @"characters"
 
 identifiers :: System a -> [Identifier]
 identifiers System{ bodies, characters } = map S [0..pred (length characters)] <> map B (Map.keys bodies)

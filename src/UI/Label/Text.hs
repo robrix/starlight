@@ -1,7 +1,9 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module UI.Label.Text
 ( shader
@@ -12,7 +14,8 @@ module UI.Label.Text
 , O(..)
 ) where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens')
+import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
@@ -58,10 +61,10 @@ data U v = U
 instance Vars U
 
 sampler_ :: Lens' (U v) (v TextureUnit)
-sampler_ = lens sampler (\ u sampler -> u { sampler })
+sampler_ = field @"sampler"
 
 colour_  :: Lens' (U v) (v (Colour Float))
-colour_ = lens colour (\ u colour -> u { colour })
+colour_ = field @"colour"
 
 
 newtype V v = V { pos :: v (V2 Float) }

@@ -1,7 +1,9 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Body.Shader
 ( shader
@@ -12,7 +14,8 @@ module Starlight.Body.Shader
 , O(..)
 ) where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens')
+import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
@@ -43,10 +46,10 @@ data U v = U
 instance Vars U
 
 matrix_ :: Lens' (U v) (v (M44 Float))
-matrix_ = lens matrix (\ u matrix -> u { matrix })
+matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))
-colour_ = lens colour (\ u colour -> u { colour })
+colour_ = field @"colour"
 
 
 newtype V v = V { pos :: v (V4 Float) }
