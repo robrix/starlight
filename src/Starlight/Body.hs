@@ -30,7 +30,7 @@ import           Control.Effect.Profile
 import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
-import           Data.Functor.Interval hiding (point)
+import           Data.Functor.Interval
 import qualified Data.Map as Map
 import           Geometry.Circle
 import           GL.Array
@@ -116,16 +116,16 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     { body
     , transform = rel !*! translated3 (unP (position actor))
     , actor = actor
-      & position_.coerced.pointed %~ (rel !*)
-      & velocity_.pointed %~ (rel !*)
+      & position_.coerced.extended 1 %~ (rel !*)
+      & velocity_.extended 0 %~ (rel !*)
     } where
     actor = actorAt body t
     rel = maybe (systemTrans sys) transform (parent identifier >>= (bodies' Map.!?))
       !*! mkTransformation orientation 0
 
 -- | Subject to the invariant that w=1.
-pointed :: Num a => Iso (V3 a) (V3 b) (V4 a) (V4 b)
-pointed = iso point (^. _xyz)
+extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)
+extended a = iso (`ext` a) (^. _xyz)
 
 
 runBody
