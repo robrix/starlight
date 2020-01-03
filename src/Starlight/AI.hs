@@ -27,7 +27,7 @@ ai = go <$> ask <*> get >>= assign actions_ where
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
     -- FIXME: factor in the target’s velocity & distance
     -- FIXME: allow other behaviours relating to targets, e.g. following
-    Just (Left StateVectors{ position = P there }) -> Set.fromList $ concat
+    Just (Left StateVectors{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
       [ [ Face Target ]
       , [ Thrust | isFacing there ]
       ]

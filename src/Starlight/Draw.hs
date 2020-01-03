@@ -20,7 +20,7 @@ import Linear.Exts
 import Numeric
 import Starlight.Actor
 import Starlight.Body as Body
-import Starlight.Character
+import Starlight.Character as Character
 import Starlight.Identifier
 import Starlight.Radar as Radar
 import Starlight.Ship as Ship
@@ -72,7 +72,7 @@ draw dt fpsLabel targetLabel font player@Character{ actor = Actor{ position, rot
   when False $ drawLaser Beam { colour = green, angle = snd (toAxisAngle rotation), position }
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
-      onScreen StateVectors{ body = Body{ radius }, position = pos } = distance pos position - scale * getMetres radius < maxDim * 0.5
+      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = distance pos position - scale * getMetres radius < maxDim * 0.5
 
   forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
 
@@ -81,7 +81,7 @@ draw dt fpsLabel targetLabel font player@Character{ actor = Actor{ position, rot
   let rscale = 1/scale
       describeTarget target = case target >>= fmap . (,) <*> (system !?) of
         Just (identifier, t)
-          | pos <- either (^. position_) (^. actor_ . position_) t -> describeIdentifier identifier ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* rscale) (position ^* rscale)))) "km"
+          | pos <- either Body.actor Character.actor t ^. position_ -> describeIdentifier identifier ++ ": " ++ showEFloat (Just 1) (kilo (Metres (distance (pos ^* rscale) (position ^* rscale)))) "km"
         _ -> ""
 
   measure "setLabel" $ setLabel fpsLabel    font (showFFloat (Just 1) (dt * 1000) "ms/" <> showFFloat (Just 1) (1/dt) "fps")

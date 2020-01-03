@@ -37,9 +37,9 @@ import qualified Data.Map as Map
 import           Geometry.Circle
 import           GL.Array
 import           GL.Program
-import           Lens.Micro (lens, (^.))
+import           Lens.Micro ((^.))
 import           Linear.Exts
-import           Starlight.Actor (HasPosition(..))
+import           Starlight.Actor (Actor(..))
 import           Starlight.Body.Shader as Shader
 import           Starlight.Identifier
 import           Starlight.System
@@ -54,13 +54,9 @@ import           Unit.Time
 data StateVectors = StateVectors
   { body      :: Body
   , transform :: M44 Float
-  , position  :: Point V2 Float
-  , rotation  :: Quaternion Float
+  , actor     :: Actor
   }
   deriving (Show)
-
-instance HasPosition StateVectors where
-  position_ = lens position (\ s position -> s { position })
 
 data Body = Body
   { radius      :: Metres Float
@@ -123,8 +119,11 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   go identifier b = StateVectors
     { body = b
     , transform = transform'
-    , rotation = orientationAt b t
-    , position = P ((transform' !* V4 0 0 0 1) ^. _xy)
+    , actor = Actor
+      { position = P ((transform' !* V4 0 0 0 1) ^. _xy)
+      , velocity = 0 -- filthy horrible lies
+      , rotation = orientationAt b t
+      }
     } where
     rel = maybe (systemTrans sys) transform $ parent identifier >>= (bodies' Map.!?)
     transform' = rel !*! transformAt (orbit b) t
@@ -149,7 +148,7 @@ drawBody
      )
   => StateVectors
   -> m ()
-drawBody StateVectors{ body = Body{ radius = Metres r, colour }, transform, rotation } = measure "bodies" . UI.using getDrawable $ do
+drawBody StateVectors{ body = Body{ radius = Metres r, colour }, transform, actor = Actor{ rotation } } = measure "bodies" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   matrix_ .= Just
     (   scaleToViewZoomed vs

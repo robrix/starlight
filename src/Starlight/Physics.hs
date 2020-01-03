@@ -18,8 +18,8 @@ import Lens.Micro
 import Linear.Exts
 import Starlight.Action
 import Starlight.Actor as Actor
-import Starlight.Body
-import Starlight.Character
+import Starlight.Body as Body
+import Starlight.Character as Character
 import Starlight.System
 import Unit.Angle
 import Unit.Mass
@@ -36,7 +36,7 @@ updatePosition :: Actor -> Actor
 updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
 
 applyGravity :: Delta Seconds Float -> Float -> StateVectors -> Actor -> Actor
-applyGravity (Delta (Seconds dt)) distanceScale StateVectors{ position = pos, body = Body{ mass } } a@Actor{ position, velocity }
+applyGravity (Delta (Seconds dt)) distanceScale StateVectors{ actor = Actor{ position = pos }, body = Body{ mass } } a@Actor{ position, velocity }
   = a { velocity = velocity + unP (dt * force *^ direction pos position) } where
   force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
   r = qd (pos ^* distanceScale) (position ^* distanceScale) -- “quadrance” (square of distance between actor & body)
@@ -64,7 +64,7 @@ runAction (Delta (Seconds dt)) = \case
         system <- ask @(System StateVectors)
         target   <- use target_
         position <- use (actor_ . position_ @Actor)
-        pure (either (^. position_ . to (unP . flip direction position)) (^. actor_ . position_ . to (unP . flip direction position)) <$> (target >>= (system !?)))
+        pure ((^. position_ . to (unP . flip direction position)) . either Body.actor Character.actor <$> (target >>= (system !?)))
     maybe (pure ()) (modifying (actor_ . rotation_ @Actor) . face angular . angleOf) direction
   Turn t -> actor_ . rotation_ @Actor *= axisAngle (unit _z) (getRadians (case t of
     L -> angular
