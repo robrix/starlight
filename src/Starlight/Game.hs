@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -22,20 +20,17 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (Lens', lens, to, (.~), (^.))
+import           Control.Lens (to, (^.))
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Foldable (traverse_)
-import           Data.Function (fix, (&))
+import           Data.Function (fix)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
-import           Data.Generics.Product.Fields
-import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           Data.Time.Format.ISO8601
-import           GHC.Generics (Generic)
 import           GL
 import           Linear.Exts
 import           Starlight.Actor
@@ -51,6 +46,7 @@ import           Starlight.Radar
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol
 import           Starlight.Starfield
+import           Starlight.State as State
 import           Starlight.System as System
 import           Starlight.View
 import           Starlight.Weapon.Laser
@@ -145,7 +141,7 @@ game = do
             measure "controls" $ player_ . actions_ <~ controls
             system <- ask
             measure "ai" (zoomEach npcs_ ai)
-            measure "physics" (zoomEach Starlight.Game.characters_ (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character %= physics dt system))
+            measure "physics" (zoomEach State.characters_ (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character %= physics dt system))
             game <- get
             withView game (draw dt fpsLabel targetLabel (Font face 18) (player game))
           continue <$ measure "swap" Window.swap
@@ -178,27 +174,6 @@ withView game m = do
       zoom     = zoomForSpeed size (norm velocity)
       focus    = game ^. player_ . actor_ . position_ . _xy . to P
   runReader View{ scale, size, zoom, focus } m
-
-data Game = Game
-  { player :: !Character
-  , beams  :: ![Beam]
-  , system :: !(System Body)
-  }
-  deriving (Generic, Show)
-
-player_ :: Lens' Game Character
-player_ = field @"player"
-
-npcs_ :: Lens' Game [Character]
-npcs_ = system_ . System.characters_
-
-characters_ :: Lens' Game (NonEmpty Character)
-characters_ = lens get set where
-  get s = s ^. player_ :| s ^. npcs_
-  set s (a:|o) = s & player_ .~ a & npcs_ .~ o
-
-system_ :: Lens' Game (System Body)
-system_ = field @"system"
 
 
 now :: Has (Lift IO) sig m => m UTCTime
