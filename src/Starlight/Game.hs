@@ -14,6 +14,7 @@ module Starlight.Game
 
 import           Control.Algebra
 import           Control.Carrier.Empty.Maybe
+import           Control.Carrier.Fail.Either
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
@@ -30,6 +31,7 @@ import           Data.Functor.Interval
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
+import           Data.Time.Format.ISO8601
 import           GL
 import           Lens.Micro (Lens', lens, (.~), (^.))
 import           Linear.Exts
@@ -123,10 +125,13 @@ game = do
       enabled_ ProgramPointSize .= True
       enabled_ ScissorTest      .= True
 
+      -- J2000
+      epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
+
       start <- now
       evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
         continue <- measure "frame" $ do
-          t <- realToFrac <$> since start
+          t <- realToFrac <$> since epoch
           system <- use system_
           continue <- evalEmpty . runReader (systemAt system (getDelta t)) $ do
             measure "input" input
