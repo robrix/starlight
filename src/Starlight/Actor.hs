@@ -1,16 +1,20 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Starlight.Actor
 ( Actor(..)
 , target_
 , health_
+, actions_
 , HasPosition(..)
 , HasVelocity(..)
 , HasRotation(..)
 ) where
 
+import Data.Set (Set)
 import Lens.Micro (Lens', lens)
 import Linear.Affine
 import Linear.Quaternion
 import Linear.V2
+import Starlight.Action
 import Starlight.Identifier
 
 data Actor = Actor
@@ -19,6 +23,7 @@ data Actor = Actor
   , rotation :: !(Quaternion Float)
   , target   :: !(Maybe Identifier)
   , health   :: !Float
+  , actions  :: !(Set Action)
   }
   deriving (Show)
 
@@ -27,6 +32,9 @@ target_ = lens target (\ s t -> s { target = t })
 
 health_ :: Lens' Actor Float
 health_ = lens health (\ s h -> s { health = h })
+
+actions_ :: Lens' Actor (Set Action)
+actions_ = lens actions (\ s actions -> s { actions })
 
 
 class HasPosition t where
