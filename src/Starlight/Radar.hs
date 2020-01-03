@@ -72,21 +72,18 @@ drawRadar Actor{ position = here, target } npcs = measure "radar" . UI.using get
       drawArrays Points medianRange
 
   measure "targets" $ do
-    let targetVectors = target >>= (system !?)
-    for_ targetVectors $ \case
-      Left StateVectors{ body = Body{ radius = Metres r, colour }, position = there } -> do
-        let blip = makeBlip (there ^-^ here) (r * scale) colour
-        setBlip blip
-        for_ [1..n] $ \ i -> do
-          let radius = step * fromIntegral i
-              -- FIXME: apply easing so this works more like a spring
-              step = max 1 (min 50 (d blip / fromIntegral n))
+    let targetVectors = target >>= fmap (toBlip here scale) . (system !?)
+    for_ targetVectors $ \ blip@Blip{ colour } -> do
+      setBlip blip
+      for_ [1..n] $ \ i -> do
+        let radius = step * fromIntegral i
+            -- FIXME: apply easing so this works more like a spring
+            step = max 1 (min 50 (d blip / fromIntegral n))
 
-          radius_ .= Just radius
-          colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
+        radius_ .= Just radius
+        colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
 
-          drawArrays LineStrip range
-      Right _ -> pure ()
+        drawArrays LineStrip range
   where
   n = 10 :: Int
 
@@ -96,6 +93,11 @@ runRadar m = do
   array   <- load vertices
   runReader (Drawable UI.Drawable{ program, array }) m
 
+
+toBlip :: Point V2 Float -> Float -> Either StateVectors Actor -> Blip
+toBlip here scale = either fromL fromR where
+  fromL StateVectors{ body = Body{ radius = Metres r, colour }, position = there } = makeBlip (there ^-^ here) (r * scale) colour
+  fromR Actor{ position = there } = makeBlip (there ^-^ here) 15 white
 
 setBlip
   :: ( Has (Lift IO) sig m
