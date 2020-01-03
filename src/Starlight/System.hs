@@ -5,6 +5,7 @@ module Starlight.System
 , systemTrans
 , scale_
 , bodies_
+, actors_
 , identifiers
 , (!?)
 ) where
@@ -33,6 +34,9 @@ scale_ = lens scale (\ s scale -> s { scale })
 
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = lens bodies (\ s bodies -> s { bodies })
+
+actors_ :: Lens' (System a) [Actor]
+actors_ = lens actors (\ s actors -> s { actors })
 
 identifiers :: System a -> [Identifier]
 identifiers = map B . Map.keys . bodies

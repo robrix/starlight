@@ -24,14 +24,14 @@ import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Foldable (traverse_)
-import           Data.Function (fix)
+import           Data.Function (fix, (&))
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           GL
-import           Lens.Micro (Lens', each, lens, (^.))
+import           Lens.Micro (Lens', each, lens, (.~), (^.))
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.AI
@@ -46,7 +46,7 @@ import           Starlight.Radar
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol
 import           Starlight.Starfield
-import           Starlight.System
+import           Starlight.System as System
 import           Starlight.View
 import           Starlight.Weapon.Laser
 import           System.FilePath
@@ -79,24 +79,25 @@ game = do
           , health   = 1000
           }
         }
-      , npcs   =
-        [ Actor
-          { position = P (V2 250000 0)
-          , velocity = V2 0 150
-          , rotation = axisAngle (unit _z) (pi/2)
-          , target   = Just $ B (Star (10, "Sol"))
-          , health   = 100
-          }
-        , Actor
-          { position = P (V2 250000 0)
-          , velocity = V2 0 150
-          , rotation = axisAngle (unit _z) (pi/2)
-          , target   = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
-          , health   = 100
-          }
-        ]
       , beams  = []
-      , system
+      , system = system
+        { actors =
+          [ Actor
+            { position = P (V2 250000 0)
+            , velocity = V2 0 150
+            , rotation = axisAngle (unit _z) (pi/2)
+            , target   = Just $ B (Star (10, "Sol"))
+            , health   = 100
+            }
+          , Actor
+            { position = P (V2 250000 0)
+            , velocity = V2 0 150
+            , rotation = axisAngle (unit _z) (pi/2)
+            , target   = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
+            , health   = 100
+            }
+          ]
+        }
       } $ do
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
@@ -122,9 +123,9 @@ game = do
             measure "controls" $ Lens.zoom player_ (controls >>= Lens.zoom actor_ . traverse_ (runAction dt))
             system <- ask
             measure "ai" (zoomEach npcs_ (get >>= ai system >>= traverse_ (runAction dt)))
-            measure "physics" (actors_ . each %= physics dt system)
+            measure "physics" (Starlight.Game.actors_ . each %= physics dt system)
             gameState <- get
-            withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState) (npcs gameState))
+            withView gameState (draw dt fpsLabel targetLabel (Font face 18) (player gameState) (gameState ^. npcs_))
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -158,7 +159,6 @@ withView game m = do
 
 data GameState = GameState
   { player :: !Player
-  , npcs   :: ![Actor]
   , beams  :: ![Beam]
   , system :: !(System Body)
   }
@@ -168,10 +168,12 @@ player_ :: Lens' GameState Player
 player_ = lens player (\ s p -> s { player = p })
 
 npcs_ :: Lens' GameState [Actor]
-npcs_ = lens npcs (\ s n -> s { npcs = n })
+npcs_ = system_ . System.actors_
 
 actors_ :: Lens' GameState (NonEmpty Actor)
-actors_ = lens ((:|) . actor . player <*> npcs) (\ s (a:|o) -> s { player = (player s) { actor = a }, npcs = o })
+actors_ = lens get set where
+  get s = s ^. player_ . actor_ :| s ^. npcs_
+  set s (a:|o) = s & player_ . actor_ .~ a & npcs_ .~ o
 
 system_ :: Lens' GameState (System Body)
 system_ = lens system (\ s p -> s { system = p })
