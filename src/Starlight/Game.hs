@@ -78,7 +78,6 @@ game = do
           , velocity = V2 0 150
           , rotation = axisAngle (unit _z) (pi/2)
           , target   = Nothing
-          , health   = 1000
           , actions  = mempty
           }
         }
@@ -90,7 +89,6 @@ game = do
             , velocity = V2 0 150
             , rotation = axisAngle (unit _z) (pi/2)
             , target   = Nothing
-            , health   = 100
             , actions  = mempty
             }
           , Actor
@@ -98,7 +96,6 @@ game = do
             , velocity = V2 0 150
             , rotation = axisAngle (unit _z) (pi/2)
             , target   = Just $ B (Star (10, "Sol"))
-            , health   = 100
             , actions  = mempty
             }
           , Actor
@@ -106,7 +103,6 @@ game = do
             , velocity = V2 0 150
             , rotation = axisAngle (unit _z) (pi/2)
             , target   = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
-            , health   = 100
             , actions  = mempty
             }
           ]

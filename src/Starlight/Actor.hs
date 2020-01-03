@@ -2,7 +2,6 @@
 module Starlight.Actor
 ( Actor(..)
 , target_
-, health_
 , actions_
 , HasPosition(..)
 , HasVelocity(..)
@@ -22,16 +21,12 @@ data Actor = Actor
   , velocity :: !(V2 Float)
   , rotation :: !(Quaternion Float)
   , target   :: !(Maybe Identifier)
-  , health   :: !Float
   , actions  :: !(Set Action)
   }
   deriving (Show)
 
 target_ :: Lens' Actor (Maybe Identifier)
 target_ = lens target (\ s target -> s { target })
-
-health_ :: Lens' Actor Float
-health_ = lens health (\ s health -> s { health })
 
 actions_ :: Lens' Actor (Set Action)
 actions_ = lens actions (\ s actions -> s { actions })
