@@ -28,6 +28,8 @@ import           UI.Colour
 import qualified UI.Drawable as UI
 
 data Ship = Ship
+  { colour :: Colour Float
+  }
 
 drawShip
   :: ( Has (Lift IO) sig m
