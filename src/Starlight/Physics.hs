@@ -11,7 +11,7 @@ import Control.Effect.Lens
 import Control.Effect.Lift
 import Control.Effect.Reader
 import Control.Effect.State
-import Control.Lens (Lens', to, (^.))
+import Control.Lens (Lens', to, (^.), _Just)
 import Control.Monad (guard)
 import Data.Ix (inRange)
 import Data.List (elemIndex)
@@ -62,7 +62,7 @@ runAction (Delta (Seconds dt)) = \case
       Backwards -> pure (Just (-velocity))
       Target    -> do
         system <- ask @(System StateVectors)
-        target   <- fmap (either Body.actor Character.actor) <$> uses target_ (>>= (system !?))
+        target   <- fmap (either Body.actor Character.actor) <$> use (target_ . _Just . to (system !?))
         position <- use (actor_ . position_)
         pure ((^. position_ . to (unP . flip direction position)) <$> target)
     maybe (pure ()) (modifying (actor_ . rotation_) . face angular . angleOf . (^. _xy)) direction
