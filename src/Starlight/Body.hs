@@ -27,7 +27,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens
 import           Control.Effect.Lift
 import           Control.Effect.Profile
-import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
+import           Control.Lens (Iso, coerced, iso, lens, (%~), (&), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -54,6 +54,9 @@ data StateVectors = StateVectors
   , actor     :: Actor
   }
   deriving (Show)
+
+instance HasActor StateVectors where
+  actor_ = lens actor (\ s actor -> s { actor })
 
 data Body = Body
   { radius      :: Metres Float

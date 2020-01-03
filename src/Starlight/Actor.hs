@@ -5,6 +5,7 @@ module Starlight.Actor
 , position_
 , velocity_
 , rotation_
+, HasActor(..)
 ) where
 
 import Control.Lens (Lens', lens)
@@ -27,3 +28,10 @@ velocity_ = lens velocity (\ s velocity -> s { velocity })
 
 rotation_ :: Lens' Actor (Quaternion Float)
 rotation_ = lens rotation (\ s rotation -> s { rotation })
+
+
+class HasActor t where
+  actor_ :: Lens' t Actor
+
+instance HasActor Actor where
+  actor_ = id

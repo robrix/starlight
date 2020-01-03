@@ -2,15 +2,15 @@
 -- | Characters are player or non-player characters.
 module Starlight.Character
 ( Character(..)
-, actor_
 , target_
 , actions_
+, HasActor(..)
 ) where
 
 import Control.Lens (Lens', lens)
 import Data.Set (Set)
 import Starlight.Action
-import Starlight.Actor (Actor)
+import Starlight.Actor (Actor, HasActor(..))
 import Starlight.Identifier
 
 data Character = Character
@@ -20,11 +20,12 @@ data Character = Character
   }
   deriving (Show)
 
-actor_ :: Lens' Character Actor
-actor_ = lens actor (\ s a -> s { actor = a })
-
 target_ :: Lens' Character (Maybe Identifier)
 target_ = lens target (\ s target -> s { target })
 
 actions_ :: Lens' Character (Set Action)
 actions_ = lens actions (\ s actions -> s { actions })
+
+
+instance HasActor Character where
+  actor_ = lens actor (\ s a -> s { actor = a })

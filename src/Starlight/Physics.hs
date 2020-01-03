@@ -11,7 +11,7 @@ import Control.Effect.Lens
 import Control.Effect.Lift
 import Control.Effect.Reader
 import Control.Effect.State
-import Control.Lens (to, (^.))
+import Control.Lens (Lens', to, (^.))
 import Control.Monad (guard)
 import Data.Ix (inRange)
 import Data.List (elemIndex)
@@ -83,3 +83,5 @@ runAction (Delta (Seconds dt)) = \case
   where
   thrust  = dt * 20
   angular = dt *^ Radians 5
+  actor_ :: Lens' Character Actor
+  actor_ = Character.actor_ @Character
