@@ -77,7 +77,7 @@ game = do
     . evalState GameState
       { player = Character
         { actor    = Actor
-          { position = P (V3 250000 0 0)
+          { position = P (V3 2500000 0 0)
           , velocity = V3 0 150 0
           , rotation = axisAngle (unit _z) (pi/2)
           }
@@ -89,7 +89,7 @@ game = do
         { characters =
           [ Character
             { actor = Actor
-              { position = P (V3 250000 0 0)
+              { position = P (V3 2500000 0 0)
               , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
@@ -98,7 +98,7 @@ game = do
             }
           , Character
             { actor = Actor
-              { position = P (V3 250000 0 0)
+              { position = P (V3 2500000 0 0)
               , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
@@ -107,7 +107,7 @@ game = do
             }
           , Character
             { actor = Actor
-              { position = P (V3 250000 0 0)
+              { position = P (V3 2500000 0 0)
               , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
