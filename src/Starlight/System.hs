@@ -6,7 +6,6 @@ module Starlight.System
 , scale_
 , bodies_
 , identifiers
-, lookup
 , (!?)
 ) where
 
@@ -38,10 +37,7 @@ bodies_ = lens bodies (\ s bodies -> s { bodies })
 identifiers :: System a -> [Identifier]
 identifiers = map B . Map.keys . bodies
 
-lookup :: Identifier -> System a -> Maybe (Either a Actor)
-lookup = \case
-  B i -> fmap Left  . Map.lookup i . bodies
-  S i -> fmap Right . Map.lookup i . actors
-
 (!?) :: System a -> Identifier -> Maybe (Either a Actor)
-(!?) = flip lookup
+(!?) System{ bodies, actors } = \case
+  B i -> Left  <$> Map.lookup i bodies
+  S i -> Right <$> Map.lookup i actors
