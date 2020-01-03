@@ -90,14 +90,14 @@ transformAt orbit@Orbit{ orientation } t = mkTransformation
   (unP (positionAt orbit t))
 
 orientationAt :: Body -> Seconds Float -> Quaternion Float
-orientationAt Body { orientation, period, orbit = Orbit { orientation = orbit } } t
+orientationAt Body{ orientation, period, orbit = Orbit{ orientation = orbit } } t
   = orbit
   * orientation
   * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / period))
 
 
 positionAt :: Orbit -> Seconds Float -> Point V3 Float
-positionAt Orbit { eccentricity, semimajor, period, timeOfPeriapsis } t = P (ext (cartesian2 (Radians trueAnomaly) r) 0) where
+positionAt Orbit{ eccentricity, semimajor, period, timeOfPeriapsis } t = P (ext (cartesian2 (Radians trueAnomaly) r) 0) where
   t' = timeOfPeriapsis + t * orbitTimeScale
   meanAnomaly = getSeconds (meanMotion * t')
   meanMotion = (2 * pi) / period
