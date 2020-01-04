@@ -6,6 +6,7 @@ module Control.Effect.Lens.Exts
 , (~>)
 , (<~>)
 , (<--)
+, (-->)
 , (<->)
 , module Control.Effect.Lens
 ) where
@@ -48,6 +49,11 @@ infixr 2 <~>
 (lens <-- act) s = ($ s) . set lens <$> act s
 
 infixr 2 <--
+
+(-->) :: Getting a s a -> (a -> m b) -> (s -> m b)
+(lens --> act) s = act (s^.lens)
+
+infixr 2 -->
 
 (<->) :: Functor m => Lens' s a -> (a -> m a) -> (s -> m s)
 (lens <-> act) s = ($ s) . set lens <$> act (s^.lens)
