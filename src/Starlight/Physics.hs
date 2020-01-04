@@ -25,6 +25,8 @@ import Starlight.Actor as Actor
 import Starlight.Body as Body
 import Starlight.Character as Character
 import Starlight.System as System
+import Starlight.Weapon.Laser as Laser
+import UI.Colour
 import Unit.Angle
 import Unit.Mass
 import Unit.Time
@@ -53,6 +55,7 @@ runActions
   :: ( Effect sig
      , Has (Lift IO) sig m
      , Has (Reader (System StateVectors)) sig m
+     , Has (State (System Body)) sig m
      )
   => Delta Seconds Float
   -> Character
@@ -79,7 +82,10 @@ runActions (Delta (Seconds dt)) c = do
       L -> angular
       R -> -angular))
 
-    Fire Main -> firing_ .= True
+    Fire Main -> do
+      position <- use (actor_.position_)
+      rotation <- use (actor_.rotation_)
+      beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position }:)
 
     ChangeTarget change -> target_ %= maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
       elimChange prev next = \case { Prev -> prev ; Next -> next }
