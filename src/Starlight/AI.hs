@@ -38,4 +38,4 @@ ai c@Character{ actor = Actor{ position = P here, rotation }, target } = asks go
     -- FIXME: pick a new target
     _ -> mempty
     where
-    isFacing epsilon there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo (here ^. _xy) (there ^. _xy))) < epsilon
+    isFacing epsilon there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo (here^._xy) (there^._xy))) < epsilon
