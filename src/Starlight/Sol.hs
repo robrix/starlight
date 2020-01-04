@@ -228,7 +228,7 @@ system = do
       , target  = Nothing
       , actions = mempty
       }
-    , characters = mempty
+    , npcs   = mempty
     }
   where
   solI = Star (10, "Sol")

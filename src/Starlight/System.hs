@@ -9,7 +9,7 @@ module Starlight.System
 , scale_
 , bodies_
 , player_
-, characters_
+, npcs_
 , identifiers
 , (!?)
 ) where
@@ -25,10 +25,10 @@ import           Starlight.Character
 import           Starlight.Identifier
 
 data System a = System
-  { scale      :: !Float
-  , bodies     :: !(Map.Map BodyIdentifier a)
-  , player     :: !Character
-  , characters :: ![Character]
+  { scale  :: !Float
+  , bodies :: !(Map.Map BodyIdentifier a)
+  , player :: !Character
+  , npcs   :: ![Character]
   }
   deriving (Generic, Show)
 
@@ -44,14 +44,14 @@ bodies_ = field @"bodies"
 player_ :: Lens' (System a) Character
 player_ = field @"player"
 
-characters_ :: Lens' (System a) [Character]
-characters_ = field @"characters"
+npcs_ :: Lens' (System a) [Character]
+npcs_ = field @"npcs"
 
 identifiers :: System a -> [Identifier]
-identifiers System{ bodies, characters } = Player : map S [0..pred (length characters)] <> map B (Map.keys bodies)
+identifiers System{ bodies, npcs } = Player : map S [0..pred (length npcs)] <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
-(!?) System{ bodies, player, characters } = \case
+(!?) System{ bodies, player, npcs } = \case
   B i    -> Left  <$> Map.lookup i bodies
-  S i    -> Right <$> characters ^? ix i
+  S i    -> Right <$> npcs ^? ix i
   Player -> Just (Right player)

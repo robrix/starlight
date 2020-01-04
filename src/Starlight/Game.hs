@@ -81,7 +81,7 @@ game = do
           , target   = Nothing
           , actions  = mempty
           }
-        , characters =
+        , npcs =
           [ Character
             { actor = Actor
               { position = P (V3 2500000 0 0)
@@ -139,7 +139,7 @@ game = do
             put =<< now
             measure "controls" $ system_ . player_ . actions_ <~ controls
             system <- ask
-            measure "ai" (zoomEach npcs_ ai)
+            measure "ai" (zoomEach (system_.npcs_) ai)
             measure "physics" (zoomEach State.characters_ (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character %= physics dt system))
             withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap

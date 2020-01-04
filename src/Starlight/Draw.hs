@@ -66,7 +66,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   drawStarfield
 
-  system@System{ scale, characters = npcs } <- ask @(System StateVectors)
+  system@System{ scale, npcs } <- ask @(System StateVectors)
 
   forOf_ (traversed . actor_) (player : npcs) (drawShip white)
 

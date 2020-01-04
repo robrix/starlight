@@ -4,7 +4,6 @@
 -- | Game state.
 module Starlight.State
 ( Game(..)
-, npcs_
 , Starlight.State.characters_
 , system_
 ) where
@@ -22,13 +21,10 @@ data Game = Game
   }
   deriving (Generic, Show)
 
-npcs_ :: Lens' Game [Character]
-npcs_ = system_ . System.characters_
-
 characters_ :: Lens' Game (NonEmpty Character)
 characters_ = lens get set where
-  get s = s^.system_.player_ :| s ^. npcs_
-  set s (a:|o) = s & system_.player_ .~ a & npcs_ .~ o
+  get s = s^.system_.player_ :| s ^. system_.npcs_
+  set s (a:|o) = s & system_.player_ .~ a & system_.npcs_ .~ o
 
 system_ :: Lens' Game (System Body)
 system_ = field @"system"
