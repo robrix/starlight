@@ -10,12 +10,14 @@ module Starlight.System
 , bodies_
 , player_
 , npcs_
+, characters_
 , identifiers
 , (!?)
 ) where
 
-import           Control.Lens (Lens, Lens', ix, (^?))
+import           Control.Lens (Lens, Lens', ix, lens, (&), (.~), (^.), (^?))
 import           Data.Generics.Product.Fields
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
 import           GHC.Generics (Generic)
 import           Linear.Matrix
@@ -46,6 +48,11 @@ player_ = field @"player"
 
 npcs_ :: Lens' (System a) [Character]
 npcs_ = field @"npcs"
+
+characters_ :: Lens' (System a) (NonEmpty Character)
+characters_ = lens get set where
+  get s = s^.player_ :| s ^. npcs_
+  set s (a:|o) = s & player_ .~ a & npcs_ .~ o
 
 
 identifiers :: System a -> [Identifier]
