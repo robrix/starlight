@@ -73,7 +73,7 @@ runAction (Delta (Seconds dt)) = \case
     R -> -angular))
   Fire Main -> pure ()
   ChangeTarget change -> do
-    identifiers <- view @(System StateVectors) (to identifiers)
+    identifiers <- asks @(System StateVectors) identifiers
     target_ %= case change of
       Nothing -> const Nothing
       Just dir -> \ target -> case target >>= (`elemIndex` identifiers) of
