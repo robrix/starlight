@@ -71,41 +71,41 @@ game = do
     . evalState @Input mempty
     . evalState system
         { player = Character
-          { actor    = Actor
+          { actor   = Actor
             { position = P (V3 2500000 0 0)
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
-          , target   = Nothing
-          , actions  = mempty
+          , target  = Nothing
+          , actions = mempty
           }
         , npcs =
           [ Character
-            { actor = Actor
+            { actor   = Actor
               { position = P (V3 2500000 0 0)
               , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
-            , target   = Nothing
-            , actions  = mempty
+            , target  = Nothing
+            , actions = mempty
             }
           , Character
-            { actor = Actor
+            { actor   = Actor
               { position = P (V3 2500000 0 0)
               , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
-            , target   = Just $ B (Star (10, "Sol"))
-            , actions  = mempty
+            , target  = Just $ B (Star (10, "Sol"))
+            , actions = mempty
             }
           , Character
-            { actor = Actor
+            { actor   = Actor
               { position = P (V3 2500000 0 0)
               , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
-            , target   = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
-            , actions  = mempty
+            , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
+            , actions = mempty
             }
           ]
         }
