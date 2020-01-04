@@ -43,7 +43,7 @@ characters_ :: Lens' (System a) [Character]
 characters_ = field @"characters"
 
 identifiers :: System a -> [Identifier]
-identifiers System{ bodies, characters } = Player:map S [0..pred (length characters)] <> map B (Map.keys bodies)
+identifiers System{ bodies, characters } = Player : map S [0..pred (length characters)] <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
 (!?) System{ bodies, characters } = \case
