@@ -25,12 +25,12 @@ data Character = Character
   }
   deriving (Generic, Show)
 
+instance HasActor Character where
+  actor_ = field @"actor"
+
+
 target_ :: Lens' Character (Maybe Identifier)
 target_ = field @"target"
 
 actions_ :: Lens' Character (Set Action)
 actions_ = field @"actions"
-
-
-instance HasActor Character where
-  actor_ = field @"actor"
