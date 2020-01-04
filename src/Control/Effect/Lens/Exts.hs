@@ -66,6 +66,10 @@ infixr 2 <--
 infixr 2 -->
 
 -- | Compose a lens onto either side of a Kleisli arrow.
+--
+-- By analogy with '<~>':
+--
+-- > lens '<~>' act = 'get' '>>=' lens '<->' act '>>=' 'put'
 (<->) :: Functor m => Lens' s a -> (a -> m a) -> (s -> m s)
 lens <-> act = lens <-- lens --> act
 
