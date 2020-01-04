@@ -135,7 +135,7 @@ game = do
             dt <- fmap realToFrac . since =<< get
             put =<< now
             measure "controls" $ player_ @Body .actions_ <~ controls
-            measure "ai" $ npcs_ @Body `zoomEach` ai
+            measure "ai" $ npcs_ @Body `zoomEach` id <~> ai
             measure "physics" $
               characters_ @Body `zoomEach` do
                 id <~> runActions dt

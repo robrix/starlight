@@ -4,10 +4,8 @@ module Starlight.AI
 ( ai
 ) where
 
-import           Control.Effect.Lens.Exts
 import           Control.Effect.Reader
-import           Control.Effect.State
-import           Control.Lens ((^.))
+import           Control.Lens (set, (^.))
 import           Data.Functor.Interval
 import qualified Data.Set as Set
 import           Linear.Exts
@@ -18,12 +16,11 @@ import           Starlight.Character
 import           Starlight.System as System
 
 ai
-  :: ( Has (Reader (System StateVectors)) sig m
-     , Has (State Character) sig m
-     )
-  => m ()
-ai = actions_ <~ go <$> ask <*> get where
-  go system Character{ actor = Actor{ position = P here, rotation }, target } = case target >>= (system !?) of
+  :: Has (Reader (System StateVectors)) sig m
+  => Character
+  -> m Character
+ai c@Character{ actor = Actor{ position = P here, rotation }, target } = asks (flip (set actions_) c . go) where
+  go system = case target >>= (system !?) of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
     -- FIXME: factor in the target’s velocity & distance
