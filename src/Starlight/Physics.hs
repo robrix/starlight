@@ -59,6 +59,7 @@ runActions (Delta (Seconds dt)) c = do
   where
   go system c@Character{ actor = Actor{ position, velocity, rotation }, target } = (c &) . \case
     Thrust -> actor_.velocity_ +~ rotate rotation (unit _x ^* thrust)
+
     Face dir ->
       let target' = either Body.actor Character.actor <$> target^._Just.to (system !?)
           direction = case dir of
@@ -66,11 +67,14 @@ runActions (Delta (Seconds dt)) c = do
             Backwards -> target'^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
             Target    -> target'^?_Just.position_.to (unP . flip L.direction position)
       in maybe id (over (actor_.rotation_) . face angular . angleOf . (^._xy)) direction
+
     Turn t -> actor_.rotation_ *~ axisAngle (unit _z) (getRadians (case t of
       L -> angular
       R -> -angular))
+
     -- FIXME: add the fire to the system
     Fire Main -> id
+
     ChangeTarget change -> target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers))
     where
     elimChange prev next = \case { Prev -> prev ; Next -> next }
@@ -79,5 +83,6 @@ runActions (Delta (Seconds dt)) c = do
         i' = elimChange (i - 1) (i + 1)  dir
       Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
     identifiers = System.identifiers system
+
   thrust  = dt * 20
   angular = dt *^ Radians 5
