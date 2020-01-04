@@ -57,7 +57,7 @@ drawLaser
 drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   matrix_ .= Just
-    (  scaleToViewZoomed vs
+    (   scaleToViewZoomed vs
     !*! translated3 (ext (negated (unP focus)) 0)
     !*! translated3 (unP position))
   angle_  .= Just angle
