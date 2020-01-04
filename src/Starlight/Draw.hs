@@ -13,6 +13,7 @@ import Control.Effect.Reader
 import Control.Lens (forOf_, traversed, (^.))
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
+import Data.Foldable (for_)
 import Data.Functor.Interval
 import GL.Framebuffer
 import GL.Viewport
@@ -55,7 +56,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   v@View{ size, zoom } <- ask
-  player@Character{ actor = Actor{ position, rotation }, target } <- view (player_ @StateVectors)
+  player@Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
 
   let dsize = deviceSize v
 
@@ -68,9 +69,9 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   system@System{ scale, npcs } <- ask @(System StateVectors)
 
-  forOf_ (traversed . actor_) (player : npcs) (\ actor -> drawShip (Ship white actor 100))
-
-  when (player^.firing_) $ drawLaser Beam{ colour = green, angle = snd (toAxisAngle rotation), position }
+  for_ (player : npcs) $ \ c -> do
+    drawShip (Ship white (c^.actor_) 100)
+    when (c^.firing_) $ drawLaser Beam{ colour = green, angle = snd (toAxisAngle (c^.actor_.rotation_)), position = c^.actor_.position_ }
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
       onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = distance pos position - scale * getMetres radius < maxDim * 0.5
