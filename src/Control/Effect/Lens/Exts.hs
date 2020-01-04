@@ -34,6 +34,7 @@ zoomEach lens action = lens <~> traverse (`Strict.execState` action)
 infixr 2 `zoomEach`
 
 
+-- | Compose a getter onto the input of a Kleisli arrow and run it on the 'State'.
 (~>) :: Has (State s) sig m => Getting a s a -> (a -> m b) -> m b
 lens ~> act = use lens >>= act
 
