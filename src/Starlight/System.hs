@@ -25,12 +25,14 @@ import           Linear.V4
 import           Linear.Vector
 import           Starlight.Character
 import           Starlight.Identifier
+import           Starlight.Weapon.Laser
 
 data System a = System
   { scale  :: !Float
   , bodies :: !(Map.Map BodyIdentifier a)
   , player :: !Character
   , npcs   :: ![Character]
+  , beams  :: ![Beam]
   }
   deriving (Generic, Show)
 

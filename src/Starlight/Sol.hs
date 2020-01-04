@@ -229,6 +229,7 @@ system = do
       , actions = mempty
       }
     , npcs   = mempty
+    , beams  = mempty
     }
   where
   solI = Star (10, "Sol")
