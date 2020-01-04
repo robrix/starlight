@@ -74,14 +74,13 @@ runActions (Delta (Seconds dt)) c = do
     -- FIXME: add the fire to the system
     Fire Main -> id
 
-    ChangeTarget change -> target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers))
-    where
-    elimChange prev next = \case { Prev -> prev ; Next -> next }
-    switchTarget dir = \case
-      Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
-        i' = elimChange (i - 1) (i + 1)  dir
-      Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
-    identifiers = System.identifiers system
+    ChangeTarget change -> target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
+      elimChange prev next = \case { Prev -> prev ; Next -> next }
+      switchTarget dir = \case
+        Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
+          i' = elimChange (i - 1) (i + 1)  dir
+        Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
+      identifiers = System.identifiers system
 
   thrust  = dt * 20
   angular = dt *^ Radians 5
