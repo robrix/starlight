@@ -25,9 +25,8 @@ import Unit.Angle
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ r } None -> do
-    rot <- let' "rot1" $ mat2 (vec2 (cos (coerce (angle u))) (sin (coerce (angle u)))) (vec2 (-(sin (coerce (angle u)))) (cos (coerce (angle u))))
-    gl_Position .= ext4 (ext3 (rot !* vec2 r 0) 0) 1)
+  ->  vertex (\ V{ r } None ->
+    gl_Position .= matrix u !* vec4 r 0 0 1)
   >>> fragment (\ None O{ fragColour } -> do
     fragColour .= colour u)
 
