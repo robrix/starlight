@@ -19,8 +19,9 @@ ai
   :: Has (Reader (System StateVectors)) sig m
   => Character
   -> m Character
-ai c@Character{ actor = Actor{ position = P here, rotation }, target } = asks go where
-  go system = c & actions_ .~ case target >>= (system !?) of
+ai c@Character{ actor = Actor{ position = P here, rotation }, target } = do
+  system <- ask
+  pure $! c & actions_ .~ case target >>= (system !?) of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
     -- FIXME: factor in the target’s velocity & distance
