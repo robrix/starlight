@@ -139,8 +139,7 @@ game = do
             measure "ai" $ npcs_ @Body `zoomEach` ai
             measure "physics" $
               characters_ @Body `zoomEach` do
-                actions <- use actions_
-                traverse_ (runAction dt) actions
+                actions_ ~> traverse_ (runAction dt)
                 actor_ @Character `Lens.zoom` physics dt
             withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
