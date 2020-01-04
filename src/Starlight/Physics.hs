@@ -26,13 +26,14 @@ import Unit.Mass
 import Unit.Time
 
 physics
-  :: Has (Reader (System StateVectors)) sig m
+  :: ( Has (Reader (System StateVectors)) sig m
+     , Has (State Actor) sig m
+     )
   => Delta Seconds Float
-  -> Actor
-  -> m Actor
-physics dt a = do
+  -> m ()
+physics dt = do
   System{ scale, bodies } <- ask
-  pure $ updatePosition $ foldr (applyGravity dt (1/scale)) a bodies
+  modify (updatePosition . flip (foldr (applyGravity dt (1/scale))) bodies)
 
 updatePosition :: Actor -> Actor
 updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
