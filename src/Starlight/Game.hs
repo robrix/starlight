@@ -143,6 +143,7 @@ game = do
             characters_ @Body <~> traverse
               (   measure "runActions" . runActions dt
               >=> measure "physics" . (actor_ @Character <-> physics dt))
+            -- FIXME: this is so gross
             beams <- use (beams_ @Body)
             beams_ @Body .= []
             local (set (beams_ @StateVectors) beams) $ withView (draw dt fpsLabel targetLabel (Font face 18))
