@@ -48,10 +48,9 @@ drawShip
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
-  => Colour Float
-  -> Actor
+  => Ship
   -> m ()
-drawShip colour Actor{ position, rotation } = measure "ship" . UI.using getDrawable $ do
+drawShip Ship{ colour, actor = Actor{ position, rotation } } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   let matrix = scaleToViewZoomed vs
   matrix_ .= Just

@@ -68,7 +68,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   system@System{ scale, npcs } <- ask @(System StateVectors)
 
-  forOf_ (traversed . actor_) (player : npcs) (drawShip white)
+  forOf_ (traversed . actor_) (player : npcs) (\ actor -> drawShip (Ship white actor 100))
 
   when False $ drawLaser Beam { colour = green, angle = snd (toAxisAngle rotation), position }
 
