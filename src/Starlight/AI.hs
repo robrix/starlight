@@ -30,11 +30,11 @@ ai = actions_ <~ go <$> ask <*> get where
     -- FIXME: allow other behaviours relating to targets, e.g. following
     Just (Left StateVectors{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust | isFacing (pi/2) there ]
+      , [ Thrust | isFacing (pi/4) there ]
       ]
     Just (Right Character{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust | isFacing (pi/2) there ]
+      , [ Thrust | isFacing (pi/4) there ]
       ]
     -- FIXME: wander
     -- FIXME: pick a new target
