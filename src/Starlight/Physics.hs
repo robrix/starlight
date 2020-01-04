@@ -60,13 +60,12 @@ runActions (Delta (Seconds dt)) c = do
   go system c@Character{ actor = Actor{ position, velocity, rotation }, target } = (c &) . \case
     Thrust -> actor_.velocity_ +~ rotate rotation (unit _x ^* thrust)
 
-    Face dir ->
-      let target' = either Body.actor Character.actor <$> target^._Just.to (system !?)
-          direction = case dir of
-            Forwards  -> Just velocity
-            Backwards -> target'^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
-            Target    -> target'^?_Just.position_.to (unP . flip L.direction position)
-      in maybe id (over (actor_.rotation_) . face angular . angleOf . (^._xy)) direction
+    Face dir -> maybe id (over (actor_.rotation_) . face angular . angleOf . (^._xy)) direction where
+      target' = either Body.actor Character.actor <$> target^._Just.to (system !?)
+      direction = case dir of
+        Forwards  -> Just velocity
+        Backwards -> target'^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
+        Target    -> target'^?_Just.position_.to (unP . flip L.direction position)
 
     Turn t -> actor_.rotation_ *~ axisAngle (unit _z) (getRadians (case t of
       L -> angular
