@@ -8,12 +8,15 @@ module Starlight.Physics
 , runActions
 ) where
 
+import Control.Algebra (Effect)
 import Control.Applicative ((<|>))
+import Control.Carrier.State.Strict
+import Control.Effect.Lens
 import Control.Effect.Lift
 import Control.Effect.Reader
-import Control.Lens
+import Control.Lens hiding (modifying, use, (%=), (*=), (+=), (.=))
 import Control.Monad (guard)
-import Data.Foldable (foldl')
+import Data.Foldable (for_, traverse_)
 import Data.Ix (inRange)
 import Data.List (elemIndex)
 import Linear.Exts as L
@@ -47,7 +50,8 @@ applyGravity (Delta (Seconds dt)) scale StateVectors{ actor = b, body = Body{ ma
 
 
 runActions
-  :: ( Has (Lift IO) sig m
+  :: ( Effect sig
+     , Has (Lift IO) sig m
      , Has (Reader (System StateVectors)) sig m
      )
   => Delta Seconds Float
@@ -55,25 +59,29 @@ runActions
   -> m Character
 runActions (Delta (Seconds dt)) c = do
   system <- ask @(System StateVectors)
-  pure (foldl' (go system) (c & firing_ .~ False) (actions c))
-  where
-  go system c@Character{ actor = Actor{ position, velocity, rotation }, target } = \case
-    Thrust -> c & actor_.velocity_ +~ rotate rotation (unit _x ^* thrust)
+  execState c (traverse_ (go system) (actions c)) where
+  go system = \case
+    Thrust -> do
+      rotation <- use (actor_.rotation_)
+      actor_.velocity_ += rotate rotation (unit _x ^* thrust)
 
-    Face dir -> c & maybe id (over (actor_.rotation_) . face angular . angleOf . (^._xy)) direction where
-      target' = either Body.actor Character.actor <$> target^._Just.to (system !?)
-      direction = case dir of
+    Face dir -> do
+      actor <- use actor_
+      target <- fmap (either Body.actor Character.actor) <$> use (target_._Just.to (system !?))
+      for_ (direction actor target) $
+        modifying (actor_.rotation_) . face angular . angleOf . (^._xy) where
+      direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
-        Backwards -> target'^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
-        Target    -> target'^?_Just.position_.to (unP . flip L.direction position)
+        Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
+        Target    -> t^?_Just.position_.to (unP . flip L.direction position)
 
-    Turn t -> c & actor_.rotation_ *~ axisAngle (unit _z) (getRadians (case t of
+    Turn t -> actor_.rotation_ *= axisAngle (unit _z) (getRadians (case t of
       L -> angular
       R -> -angular))
 
-    Fire Main -> c & firing_ .~ True
+    Fire Main -> firing_ .= True
 
-    ChangeTarget change -> c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
+    ChangeTarget change -> target_ %= maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
       elimChange prev next = \case { Prev -> prev ; Next -> next }
       switchTarget dir = \case
         Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
@@ -83,3 +91,5 @@ runActions (Delta (Seconds dt)) c = do
 
   thrust  = dt * 20
   angular = dt *^ Radians 5
+  actor_ :: Lens' Character Actor
+  actor_ = Actor.actor_
