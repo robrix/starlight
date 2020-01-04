@@ -34,7 +34,8 @@ ai = actions_ <~ go <$> ask <*> get where
       ]
     Just (Right Character{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust | isFacing (pi/4) there ]
+      , [ Thrust    | isFacing (pi/4)   there ]
+      , [ Fire Main | isFacing (pi/128) there ]
       ]
     -- FIXME: wander
     -- FIXME: pick a new target
