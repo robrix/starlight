@@ -55,7 +55,7 @@ runActions
   -> m Character
 runActions (Delta (Seconds dt)) c = do
   system <- ask @(System StateVectors)
-  pure (foldl' (go system) c (actions c))
+  pure (foldl' (go system) (c & firing_ .~ False) (actions c))
   where
   go system c@Character{ actor = Actor{ position, velocity, rotation }, target } = (c &) . \case
     Thrust -> actor_.velocity_ +~ rotate rotation (unit _x ^* thrust)
