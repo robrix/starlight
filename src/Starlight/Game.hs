@@ -21,7 +21,7 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Lens (to)
-import           Control.Monad (when)
+import           Control.Monad (when, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
@@ -136,9 +136,9 @@ game = do
             put =<< now
             measure "controls" $ player_ @Body .actions_ <~ controls
             measure "ai" $ npcs_ @Body <~> traverse ai
-            characters_ @Body `zoomEach` do
-              measure "runActions" $ id <~> runActions dt
-              measure "physics" $ actor_ @Character <~> physics dt
+            characters_ @Body <~> traverse
+              (   measure "runActions" . runActions dt
+              >=> measure "physics" . (actor_ @Character <-> physics dt))
             withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
         when continue loop
