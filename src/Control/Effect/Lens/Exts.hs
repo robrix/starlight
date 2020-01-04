@@ -3,7 +3,6 @@ module Control.Effect.Lens.Exts
 ( (&~)
 , zoom
 , zoomEach
-, (<~)
 , (~>)
 , (<~>)
 , module Control.Effect.Lens
@@ -12,7 +11,7 @@ module Control.Effect.Lens.Exts
 import Control.Carrier.State.ST.Strict as ST
 import Control.Carrier.State.Strict as Strict
 import Control.Effect.Lens
-import Control.Lens (ASetter, Getting, Lens')
+import Control.Lens (Getting, Lens')
 
 (&~) :: s -> ST.StateC s a -> s
 (&~) = ST.execState
@@ -31,11 +30,6 @@ zoomEach lens action = lens <~> traverse (`Strict.execState` action)
 
 infixr 2 `zoomEach`
 
-
-(<~) :: Has (State s) sig m => ASetter s s a b -> m b -> m ()
-lens <~ act = act >>= assign lens
-
-infixr 2 <~
 
 (~>) :: Has (State s) sig m => Getting a s a -> (a -> m b) -> m b
 lens ~> act = use lens >>= act
