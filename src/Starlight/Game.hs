@@ -46,7 +46,6 @@ import           Starlight.Radar
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol
 import           Starlight.Starfield
-import           Starlight.State as State
 import           Starlight.System as System
 import           Starlight.View
 import           Starlight.Weapon.Laser
@@ -70,8 +69,7 @@ game = do
     . runGLC
     . runFinally
     . evalState @Input mempty
-    . evalState Game
-      { system = system
+    . evalState system
         { player = Character
           { actor    = Actor
             { position = P (V3 2500000 0 0)
@@ -111,7 +109,7 @@ game = do
             }
           ]
         }
-      } $ do
+       $ do
       trace "loading typeface"
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
@@ -132,15 +130,15 @@ game = do
       evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since epoch
-          system <- use system_
+          system <- get
           continue <- evalEmpty . runReader (systemAt system (getDelta t)) $ do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ system_ . player_ . actions_ <~ controls
+            measure "controls" $ player_ @Body .actions_ <~ controls
             system <- ask
-            measure "ai" (zoomEach (system_.npcs_) ai)
-            measure "physics" (zoomEach (system_.characters_) (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character %= physics dt system))
+            measure "ai" (zoomEach (npcs_ @Body) ai)
+            measure "physics" (zoomEach (characters_ @Body) (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character %= physics dt system))
             withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
         when continue loop
