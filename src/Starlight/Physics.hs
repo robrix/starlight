@@ -1,26 +1,27 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Physics
 ( physics
-, runAction
+, runActions
 ) where
 
-import Control.Effect.Lens
+import Control.Applicative ((<|>))
 import Control.Effect.Lift
 import Control.Effect.Reader
-import Control.Effect.State
-import Control.Lens (Lens', to, (&), (+~), (^.), (^?), _Just)
+import Control.Lens
 import Control.Monad (guard)
+import Data.Foldable (foldl')
 import Data.Ix (inRange)
 import Data.List (elemIndex)
-import Linear.Exts
+import Linear.Exts as L
 import Starlight.Action
 import Starlight.Actor as Actor
 import Starlight.Body as Body
 import Starlight.Character as Character
-import Starlight.System
+import Starlight.System as System
 import Unit.Angle
 import Unit.Mass
 import Unit.Time
@@ -45,45 +46,40 @@ applyGravity (Delta (Seconds dt)) scale StateVectors{ actor = b, body = Body{ ma
   bigG = 6.67430e-11 -- gravitational constant
 
 
-runAction
+runActions
   :: ( Has (Lift IO) sig m
      , Has (Reader (System StateVectors)) sig m
-     , Has (State Character) sig m
      )
   => Delta Seconds Float
-  -> Action
-  -> m ()
-runAction (Delta (Seconds dt)) = \case
-  Thrust -> do
-    rotation <- use (actor_ . rotation_)
-    actor_ . velocity_ += rotate rotation (unit _x ^* thrust)
-  Face dir -> do
-    velocity <- use (actor_ . velocity_)
-    system <- ask @(System StateVectors)
-    target <- uses (target_ . _Just . to (system !?)) (fmap (either Body.actor Character.actor))
-    direction <- case dir of
-      Forwards  -> pure (Just velocity)
-      Backwards -> pure (Just (maybe (-velocity) (\ t -> t^.velocity_ - velocity) target))
-      Target    -> do
-        position <- use (actor_ . position_)
-        pure (target ^? _Just . position_ . to (unP . flip direction position))
-    maybe (pure ()) (modifying (actor_ . rotation_) . face angular . angleOf . (^. _xy)) direction
-  Turn t -> actor_ . rotation_ *= axisAngle (unit _z) (getRadians (case t of
-    L -> angular
-    R -> -angular))
-  Fire Main -> pure ()
-  ChangeTarget change -> do
-    identifiers <- asks @(System StateVectors) identifiers
-    target_ %= case change of
-      Nothing -> const Nothing
-      Just dir -> \ target -> case target >>= (`elemIndex` identifiers) of
-          Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
-            i' = case dir of
-              Prev -> i - 1
-              Next -> i + 1
-          Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
+  -> Character
+  -> m Character
+runActions (Delta (Seconds dt)) c = do
+  system <- ask @(System StateVectors)
+  pure (foldl' (go system) c (actions c))
   where
+  go system c@Character{ actor = Actor{ position, velocity, rotation }, target } = (c &) . \case
+    Thrust -> actor_.velocity_ +~ rotate rotation (unit _x ^* thrust)
+    Face dir ->
+      let target' = either Body.actor Character.actor <$> target^._Just.to (system !?)
+          direction = case dir of
+            Forwards  -> Just velocity
+            Backwards -> target'^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
+            Target    -> target'^?_Just.position_.to (unP . flip L.direction position)
+      in maybe id (over (actor_.rotation_) . face angular . angleOf . (^._xy)) direction
+    Turn t -> actor_.rotation_ *~ axisAngle (unit _z) (getRadians (case t of
+      L -> angular
+      R -> -angular))
+    -- FIXME: add the fire to the system
+    Fire Main -> id
+    ChangeTarget change ->
+      let identifiers = System.identifiers system
+      in target_ %~ case change of
+        Nothing -> const Nothing
+        Just dir -> \ target -> case target >>= (`elemIndex` identifiers) of
+            Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
+              i' = case dir of
+                Prev -> i - 1
+                Next -> i + 1
+            Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
   thrust  = dt * 20
   angular = dt *^ Radians 5
-  actor_ :: Lens' Character Actor
-  actor_ = Character.actor_ @Character

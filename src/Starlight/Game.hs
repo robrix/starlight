@@ -24,7 +24,6 @@ import           Control.Lens (to)
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
-import           Data.Foldable (traverse_)
 import           Data.Function (fix)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -139,7 +138,7 @@ game = do
             measure "ai" $ npcs_ @Body `zoomEach` ai
             measure "physics" $
               characters_ @Body `zoomEach` do
-                actions_ ~> traverse_ (runAction dt)
+                id <~> runActions dt
                 actor_ @Character <~> physics dt
             withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
