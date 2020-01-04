@@ -55,26 +55,25 @@ runActions
   -> m Character
 runActions (Delta (Seconds dt)) c = do
   system <- ask @(System StateVectors)
-  let (c', _) = foldl' (go system) (c, []) (actions c)
-  pure c'
+  pure (foldl' (go system) (c & firing_ .~ False) (actions c))
   where
-  go system (c@Character{ actor = Actor{ position, velocity, rotation }, target }, bs) = \case
-    Thrust -> (c & actor_.velocity_ +~ rotate rotation (unit _x ^* thrust), bs)
+  go system c@Character{ actor = Actor{ position, velocity, rotation }, target } = \case
+    Thrust -> c & actor_.velocity_ +~ rotate rotation (unit _x ^* thrust)
 
-    Face dir -> (c & maybe id (over (actor_.rotation_) . face angular . angleOf . (^._xy)) direction, bs) where
+    Face dir -> c & maybe id (over (actor_.rotation_) . face angular . angleOf . (^._xy)) direction where
       target' = either Body.actor Character.actor <$> target^._Just.to (system !?)
       direction = case dir of
         Forwards  -> Just velocity
         Backwards -> target'^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
         Target    -> target'^?_Just.position_.to (unP . flip L.direction position)
 
-    Turn t -> (c & actor_.rotation_ *~ axisAngle (unit _z) (getRadians (case t of
+    Turn t -> c & actor_.rotation_ *~ axisAngle (unit _z) (getRadians (case t of
       L -> angular
-      R -> -angular)), bs)
+      R -> -angular))
 
-    Fire Main -> (c & firing_ .~ True, bs)
+    Fire Main -> c & firing_ .~ True
 
-    ChangeTarget change -> (c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)), bs) where
+    ChangeTarget change -> c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
       elimChange prev next = \case { Prev -> prev ; Next -> next }
       switchTarget dir = \case
         Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
