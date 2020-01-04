@@ -109,7 +109,7 @@ game = do
             }
           ]
         }
-       $ do
+    $ do
       trace "loading typeface"
       face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
       measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
