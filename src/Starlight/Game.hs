@@ -136,9 +136,8 @@ game = do
             dt <- fmap realToFrac . since =<< get
             put =<< now
             measure "controls" $ player_ @Body .actions_ <~ controls
-            system <- ask
             measure "ai" (zoomEach (npcs_ @Body) ai)
-            measure "physics" (zoomEach (characters_ @Body) (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character %= physics dt system))
+            measure "physics" (zoomEach (characters_ @Body) (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character `Lens.zoom` (get >>= physics dt >>= put)))
             withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
         when continue loop
