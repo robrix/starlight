@@ -62,7 +62,6 @@ drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawab
     !*! translated3 (unP position)
     !*! mkTransformation (axisAngle (unit _z) (getRadians angle)) 0
     !*! scaled (V4 1000 1000 1000 1)
-  angle_  ?= angle
   colour_ ?= colour
 
   drawArrays Lines range

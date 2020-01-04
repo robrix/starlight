@@ -9,7 +9,6 @@ module Starlight.Weapon.Laser.Shader
 ( shader
 , U(..)
 , matrix_
-, angle_
 , colour_
 , V(..)
 , O(..)
@@ -21,7 +20,6 @@ import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
 import GL.Shader.DSL
-import Unit.Angle
 
 shader :: Shader U V O
 shader = program $ \ u
@@ -33,7 +31,6 @@ shader = program $ \ u
 
 data U v = U
   { matrix :: v (M44 Float)
-  , angle  :: v (Radians Float)
   , colour :: v (Colour Float)
   }
   deriving (Generic)
@@ -42,9 +39,6 @@ instance Vars U
 
 matrix_ :: Lens' (U v) (v (M44 Float))
 matrix_ = field @"matrix"
-
-angle_ :: Lens' (U v) (v (Radians Float))
-angle_ = field @"angle"
 
 colour_ :: Lens' (U v) (v (Colour Float))
 colour_ = field @"colour"
