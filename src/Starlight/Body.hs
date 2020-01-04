@@ -156,13 +156,13 @@ drawBody
   -> m ()
 drawBody StateVectors{ body = Body{ radius = Metres r, colour }, transform, actor = Actor{ rotation } } = measure "bodies" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
-  matrix_ .= Just
-    (   scaleToViewZoomed vs
+  matrix_ ?=
+        scaleToViewZoomed vs
     !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
     !*! transform
     !*! scaled (V4 r r r 1)
-    !*! mkTransformation rotation 0)
-  colour_ .= Just colour
+    !*! mkTransformation rotation 0
+  colour_ ?= colour
 
   drawArraysInstanced LineLoop range 3
 

@@ -10,7 +10,7 @@ module UI.Graph
 ) where
 
 import           Control.Carrier.Finally
-import           Control.Effect.Lens ((.=))
+import           Control.Effect.Lens ((?=))
 import           Control.Lens ((^.))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -57,11 +57,11 @@ drawGraph :: (Has Finally sig m, Has (Lift IO) sig m) => Graph -> m ()
 drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = bindArray array $ do
   runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
   use points $ do
-    Points.matrix_    .= Just matrix
-    Points.pointSize_ .= Just pointSize
-    Points.colour_    .= Just colour
+    Points.matrix_    ?= matrix
+    Points.pointSize_ ?= pointSize
+    Points.colour_    ?= colour
     drawArrays Points    (Interval 0 (Identity count))
   use lines $ do
-    Lines.matrix_    .= Just matrix
-    Lines.colour_    .= Just colour
+    Lines.matrix_ ?= matrix
+    Lines.colour_ ?= colour
     drawArrays LineStrip (Interval 0 (Identity count))

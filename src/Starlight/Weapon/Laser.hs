@@ -11,7 +11,7 @@ module Starlight.Weapon.Laser
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
-import           Control.Effect.Lens ((.=))
+import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Data.Coerce (coerce)
@@ -56,12 +56,12 @@ drawLaser
   -> m ()
 drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
-  matrix_ .= Just
-    (   scaleToViewZoomed vs
+  matrix_ ?=
+        scaleToViewZoomed vs
     !*! translated3 (ext (negated (unP focus)) 0)
-    !*! translated3 (unP position))
-  angle_  .= Just angle
-  colour_ .= Just colour
+    !*! translated3 (unP position)
+  angle_  ?= angle
+  colour_ ?= colour
 
   drawArrays Lines range
 

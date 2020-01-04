@@ -14,7 +14,7 @@ module UI.Label
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
-import           Control.Effect.Lens ((.=))
+import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Lens ((^.))
 import           Control.Monad (when)
@@ -121,14 +121,14 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
 
         let V2 sx sy = fromIntegral scale / fmap fromIntegral size
         runReader face . using glyphs $ do
-          Glyph.scale_     .= Just (1 / fromIntegral scale)
-          Glyph.fontScale_ .= Just (fontScale font)
-          Glyph.matrix_    .= Just
+          Glyph.scale_     ?= 1 / fromIntegral scale
+          Glyph.fontScale_ ?= fontScale font
+          Glyph.matrix_    ?=
             (   translated (-1)
             !*! scaled     (V3 sx sy 1)
             !*! translated (fromIntegral <$> negated (min_ b')))
           for_ instances $ \ Instance{ offset, range } -> do
-            Glyph.offset_ .= Just offset
+            Glyph.offset_ ?= offset
             drawArraysInstanced Triangles range 6
 
         sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline }))
@@ -167,14 +167,14 @@ drawLabel label@Label{ texture, scale, ref } offset colour bcolour = runReader l
         setActiveTexture textureUnit
         bind (Just texture)
 
-        Text.sampler_ .= Just textureUnit
-        Text.colour_  .= Just transparent
+        Text.sampler_ ?= textureUnit
+        Text.colour_  ?= transparent
 
         let range = Interval 0 4
         drawArrays TriangleStrip range
 
         when (opaque colour /= black) $ do
           glBlendFunc GL_ONE GL_ONE
-          Text.colour_ .= Just colour
+          Text.colour_ ?= colour
           drawArrays TriangleStrip range
     _ -> pure ()

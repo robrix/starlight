@@ -12,7 +12,7 @@ module Starlight.Radar
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
-import           Control.Effect.Lens ((.=))
+import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.State
@@ -51,8 +51,8 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
   vs <- ask
 
   let radius = 100
-  matrix_ .= Just (scaleToView vs)
-  radius_ .= Just radius
+  matrix_ ?= scaleToView vs
+  radius_ ?= radius
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -62,13 +62,13 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
       drawArrays LineStrip range
 
   measure "npcs" $ do
-    sweep_  .= Just 0
+    sweep_  ?= 0
     -- FIXME: fade colour with distance
     -- FIXME: IFF
-    colour_ .= Just white
+    colour_ ?= white
 
     forOf_ (traversed . actor_) npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy) in when (r > zoom vs * radius) $ do
-      angle_ .= Just angle
+      angle_ ?= angle
       drawArrays Points medianRange
 
   measure "targets" $ do
@@ -80,8 +80,8 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
             -- FIXME: apply easing so this works more like a spring
             step = max 1 (min 50 ((1/zoom vs) * d blip / fromIntegral n))
 
-        radius_ .= Just radius
-        colour_ .= Just ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
+        radius_ ?= radius
+        colour_ ?= ((colour + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
 
         drawArrays LineStrip range
   where
@@ -106,9 +106,9 @@ setBlip
   => Blip
   -> m ()
 setBlip Blip{ angle, direction, d, r, colour } = do
-  angle_  .= Just angle
-  sweep_  .= Just sweep
-  colour_ .= Just colour
+  angle_  ?= angle
+  sweep_  ?= sweep
+  colour_ ?= colour
   where
   edge = perp direction ^* r + direction ^* d
   sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))

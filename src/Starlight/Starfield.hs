@@ -11,7 +11,7 @@ module Starlight.Starfield
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
-import           Control.Effect.Lens ((.=))
+import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Data.Coerce (coerce)
@@ -36,9 +36,9 @@ drawStarfield
 drawStarfield = measure "starfield" . UI.using getDrawable $ do
   View{ scale, size, zoom, focus } <- ask
 
-  resolution_ .= Just (fromIntegral <$> size ^* scale)
-  origin_     .= Just (focus / P (fromIntegral <$> size))
-  zoom_       .= Just zoom
+  resolution_ ?= (fromIntegral <$> size ^* scale)
+  origin_     ?= focus / P (fromIntegral <$> size)
+  zoom_       ?= zoom
 
   drawArrays TriangleStrip range
 
