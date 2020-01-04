@@ -56,6 +56,6 @@ infixr 2 <--
 infixr 2 -->
 
 (<->) :: Functor m => Lens' s a -> (a -> m a) -> (s -> m s)
-(lens <-> act) s = ($ s) . set lens <$> act (s^.lens)
+lens <-> act = lens <-- lens --> act
 
 infixr 2 <->
