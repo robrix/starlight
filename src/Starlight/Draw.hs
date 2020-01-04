@@ -70,7 +70,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   forOf_ (traversed . actor_) (player : npcs) (\ actor -> drawShip (Ship white actor 100))
 
-  when False $ drawLaser Beam { colour = green, angle = snd (toAxisAngle rotation), position }
+  when (player^.firing_) $ drawLaser Beam { colour = green, angle = snd (toAxisAngle rotation), position }
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
       onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = distance pos position - scale * getMetres radius < maxDim * 0.5
