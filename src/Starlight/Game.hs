@@ -170,7 +170,7 @@ withView m = do
   velocity <- view (player_ @StateVectors .actor_.velocity_)
   focus    <- view (player_ @StateVectors .actor_.position_._xy.to P)
 
-  let zoom     = zoomForSpeed size (norm velocity)
+  let zoom = zoomForSpeed size (norm velocity)
   runReader View{ scale, size, zoom, focus } m
 
 
