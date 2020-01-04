@@ -5,13 +5,13 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.System
 ( System(..)
-, systemTrans
 , scale_
 , bodies_
 , player_
 , npcs_
 , characters_
 , beams_
+, systemTrans
 , identifiers
 , (!?)
 ) where
@@ -37,9 +37,6 @@ data System a = System
   }
   deriving (Generic, Show)
 
-systemTrans :: System a -> M44 Float
-systemTrans System{ scale } = scaled (V4 scale scale scale 1)
-
 scale_ :: Lens' (System a) Float
 scale_ = field @"scale"
 
@@ -60,6 +57,9 @@ characters_ = lens get set where
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
 
+
+systemTrans :: System a -> M44 Float
+systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
 identifiers :: System a -> [Identifier]
 identifiers System{ bodies, npcs } = Player : map S [0..pred (length npcs)] <> map B (Map.keys bodies)
