@@ -4,6 +4,7 @@ module Geometry.Circle
 
 import Linear.Exts
 
+-- | Construct vertices for a circle.
 circle
   :: Float      -- ^ The radius.
   -> Int        -- ^ The number of vertices to produce.
