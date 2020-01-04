@@ -56,6 +56,10 @@ infixr 2 <~>
 infixr 2 <--
 
 -- | Compose a getter onto the input of a Kleisli arrow.
+--
+-- By analogy with '~>':
+--
+-- > lens '~>' act = 'get' '>>=' lens '-->' act
 (-->) :: Getting a s a -> (a -> m b) -> (s -> m b)
 (lens --> act) s = act (s^.lens)
 
