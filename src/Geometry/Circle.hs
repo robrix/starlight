@@ -5,12 +5,9 @@ module Geometry.Circle
 import Linear.Exts
 
 circle
-  -- ^ The radius.
-  :: Float
-  -- ^ The number of vertices to produce.
-  -> Int
-  -- ^ The vertices for the circle.
-  -> [V2 Float]
+  :: Float      -- ^ The radius.
+  -> Int        -- ^ The number of vertices to produce.
+  -> [V2 Float] -- ^ The vertices for the circle.
 circle radius n =
   [ cartesian2 theta radius
   | i <- [0..pred n]
