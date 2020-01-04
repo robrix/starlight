@@ -6,10 +6,11 @@ module Starlight.Draw
 ( draw
 ) where
 
+import Control.Effect.Lens
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
-import Control.Lens
+import Control.Lens (forOf_, traversed, (^.))
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
 import Data.Functor.Interval
@@ -49,12 +50,12 @@ draw
   -> Label
   -> Label
   -> Font
-  -> Character
   -> m ()
-draw dt fpsLabel targetLabel font player@Character{ actor = Actor{ position, rotation }, target } = measure "draw" . runLiftIO $ do
+draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   v@View{ size, zoom } <- ask
+  player@Character{ actor = Actor{ position, rotation }, target } <- view (player_ @StateVectors)
 
   let dsize = deviceSize v
 

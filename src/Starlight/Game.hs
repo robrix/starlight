@@ -20,7 +20,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (to, (^.))
+import           Control.Lens (to)
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -71,18 +71,18 @@ game = do
     . runFinally
     . evalState @Input mempty
     . evalState Game
-      { player = Character
-        { actor    = Actor
-          { position = P (V3 2500000 0 0)
-          , velocity = V3 0 150 0
-          , rotation = axisAngle (unit _z) (pi/2)
-          }
-        , target   = Nothing
-        , actions  = mempty
-        }
-      , beams  = []
+      { beams  = []
       , system = system
-        { characters =
+        { player = Character
+          { actor    = Actor
+            { position = P (V3 2500000 0 0)
+            , velocity = V3 0 150 0
+            , rotation = axisAngle (unit _z) (pi/2)
+            }
+          , target   = Nothing
+          , actions  = mempty
+          }
+        , characters =
           [ Character
             { actor = Actor
               { position = P (V3 2500000 0 0)
@@ -138,12 +138,11 @@ game = do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
-            measure "controls" $ player_ . actions_ <~ controls
+            measure "controls" $ system_ . player_ . actions_ <~ controls
             system <- ask
             measure "ai" (zoomEach npcs_ ai)
             measure "physics" (zoomEach State.characters_ (use actions_ >>= traverse_ (runAction dt) >> actor_ @Character %= physics dt system))
-            game <- get
-            withView game (draw dt fpsLabel targetLabel (Font face 18) (player game))
+            withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
         when continue loop
 
@@ -162,17 +161,19 @@ zoomForSpeed size x = runIdentity go where
 
 withView
   :: ( Has (Lift IO) sig m
+     , Has (Reader (System StateVectors)) sig m
      , Has (Reader Window.Window) sig m
      )
-  => Game
-  -> ReaderC View m a
+  => ReaderC View m a
   -> m a
-withView game m = do
+withView m = do
   scale <- Window.scale
   size  <- Window.size
-  let velocity = game ^. player_ . actor_ . velocity_
-      zoom     = zoomForSpeed size (norm velocity)
-      focus    = game ^. player_ . actor_ . position_ . _xy . to P
+
+  velocity <- view (player_ @StateVectors .actor_.velocity_)
+  focus    <- view (player_ @StateVectors .actor_.position_._xy.to P)
+
+  let zoom     = zoomForSpeed size (norm velocity)
   runReader View{ scale, size, zoom, focus } m
 
 

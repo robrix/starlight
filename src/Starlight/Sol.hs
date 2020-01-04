@@ -16,7 +16,9 @@ import qualified Data.Map as Map
 import           Linear.Quaternion
 import           Linear.V4
 import           Linear.Vector
+import           Starlight.Actor
 import           Starlight.Body
+import           Starlight.Character
 import           Starlight.Ephemeris
 import           Starlight.Identifier as Identifier
 import           Starlight.System
@@ -221,6 +223,11 @@ system = do
       [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
       | (identifier, orbit) <- Map.toList orbits
       ]
+    , player = Character
+      { actor   = Actor{ position = 0, velocity = 0, rotation = 0 }
+      , target  = Nothing
+      , actions = mempty
+      }
     , characters = mempty
     }
   where

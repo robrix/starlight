@@ -8,6 +8,7 @@ module Starlight.System
 , systemTrans
 , scale_
 , bodies_
+, player_
 , characters_
 , identifiers
 , (!?)
@@ -26,6 +27,7 @@ import           Starlight.Identifier
 data System a = System
   { scale      :: !Float
   , bodies     :: !(Map.Map BodyIdentifier a)
+  , player     :: !Character
   , characters :: ![Character]
   }
   deriving (Generic, Show)
@@ -39,6 +41,9 @@ scale_ = field @"scale"
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = field @"bodies"
 
+player_ :: Lens' (System a) Character
+player_ = field @"player"
+
 characters_ :: Lens' (System a) [Character]
 characters_ = field @"characters"
 
@@ -46,7 +51,7 @@ identifiers :: System a -> [Identifier]
 identifiers System{ bodies, characters } = Player : map S [0..pred (length characters)] <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
-(!?) System{ bodies, characters } = \case
+(!?) System{ bodies, player, characters } = \case
   B i    -> Left  <$> Map.lookup i bodies
   S i    -> Right <$> characters ^? ix i
-  Player -> Nothing
+  Player -> Just (Right player)
