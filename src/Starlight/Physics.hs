@@ -71,8 +71,7 @@ runActions (Delta (Seconds dt)) c = do
       L -> angular
       R -> -angular))
 
-    -- FIXME: add the fire to the system
-    Fire Main -> id
+    Fire Main -> firing_ .~ True
 
     ChangeTarget change -> target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
       elimChange prev next = \case { Prev -> prev ; Next -> next }
