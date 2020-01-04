@@ -45,16 +45,19 @@ lens <~> act = lens <~ lens ~> act
 infixr 2 <~>
 
 
+-- | Compose a setter onto the output of a Kleisli arrow.
 (<--) :: Functor m => ASetter s s a b -> (s -> m b) -> (s -> m s)
 (lens <-- act) s = ($ s) . set lens <$> act s
 
 infixr 2 <--
 
+-- | Compose a getter onto the input of a Kleisli arrow.
 (-->) :: Getting a s a -> (a -> m b) -> (s -> m b)
 (lens --> act) s = act (s^.lens)
 
 infixr 2 -->
 
+-- | Compose a lens onto either side of a Kleisli arrow.
 (<->) :: Functor m => Lens' s a -> (a -> m a) -> (s -> m s)
 lens <-> act = lens <-- lens --> act
 
