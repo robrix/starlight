@@ -130,7 +130,7 @@ game = do
         continue <- measure "frame" $ do
           t <- realToFrac <$> since epoch
           system <- get
-          continue <- evalEmpty . runReader (systemAt system (getDelta t)) $ do
+          continue <- execEmpty . runReader (systemAt system (getDelta t)) $ do
             measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
@@ -181,5 +181,5 @@ since :: Has (Lift IO) sig m => UTCTime -> m NominalDiffTime
 since t = flip diffUTCTime t <$> now
 
 
-evalEmpty :: Functor m => EmptyC m a -> m Bool
-evalEmpty = fmap isJust . runEmpty
+execEmpty :: Functor m => EmptyC m a -> m Bool
+execEmpty = fmap isJust . runEmpty
