@@ -67,11 +67,11 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   drawStarfield
 
-  system@System{ scale, npcs } <- ask @(System StateVectors)
+  system@System{ scale, npcs, beams } <- ask @(System StateVectors)
 
-  for_ (player : npcs) $ \ c -> do
-    drawShip Ship{ colour = white, actor = c^.actor_, health = 100 }
-    when (c^.firing_) $ drawLaser Beam{ colour = green, angle = snd (toAxisAngle (c^.actor_.rotation_)), position = c^.actor_.position_ }
+  for_ (player : npcs) $ \ c -> drawShip Ship{ colour = white, actor = c^.actor_, health = 100 }
+
+  for_ beams drawLaser
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
       onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = distance pos position - scale * getMetres radius < maxDim * 0.5
