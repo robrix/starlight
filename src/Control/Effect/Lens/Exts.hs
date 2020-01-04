@@ -44,8 +44,8 @@ lens <~> act = lens <~ lens ~> act
 infixr 2 <~>
 
 
-(<--) :: Functor m => ASetter s s a b -> m b -> (s -> m s)
-(lens <-- act) s = ($ s) . set lens <$> act
+(<--) :: Functor m => ASetter s s a b -> (s -> m b) -> (s -> m s)
+(lens <-- act) s = ($ s) . set lens <$> act s
 
 infixr 2 <--
 
