@@ -136,10 +136,9 @@ game = do
             put =<< now
             measure "controls" $ player_ @Body .actions_ <~ controls
             measure "ai" $ npcs_ @Body `zoomEach` id <~> ai
-            measure "physics" $
-              characters_ @Body `zoomEach` do
-                id <~> runActions dt
-                actor_ @Character <~> physics dt
+            characters_ @Body `zoomEach` do
+              measure "runActions" $ id <~> runActions dt
+              measure "physics" $ actor_ @Character <~> physics dt
             withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
         when continue loop
