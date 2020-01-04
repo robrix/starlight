@@ -11,6 +11,7 @@ module Starlight.System
 , player_
 , npcs_
 , characters_
+, beams_
 , identifiers
 , (!?)
 ) where
@@ -55,6 +56,9 @@ characters_ :: Lens' (System a) (NonEmpty Character)
 characters_ = lens get set where
   get s = s^.player_ :| s^.npcs_
   set s (a:|o) = s & player_ .~ a & npcs_ .~ o
+
+beams_ :: Lens' (System a) [Beam]
+beams_ = field @"beams"
 
 
 identifiers :: System a -> [Identifier]
