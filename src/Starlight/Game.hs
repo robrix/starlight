@@ -140,7 +140,7 @@ game = do
             measure "physics" $
               characters_ @Body `zoomEach` do
                 actions_ ~> traverse_ (runAction dt)
-                actor_ @Character `Lens.zoom` physics dt
+                actor_ @Character <~> physics dt
             withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
         when continue loop
