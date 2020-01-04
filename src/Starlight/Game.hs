@@ -77,6 +77,7 @@ game = do
             }
           , target  = Nothing
           , actions = mempty
+          , firing  = False
           }
         , npcs =
           [ Character
@@ -87,6 +88,7 @@ game = do
               }
             , target  = Nothing
             , actions = mempty
+            , firing  = False
             }
           , Character
             { actor   = Actor
@@ -96,6 +98,7 @@ game = do
               }
             , target  = Just $ B (Star (10, "Sol"))
             , actions = mempty
+            , firing  = False
             }
           , Character
             { actor   = Actor
@@ -105,6 +108,7 @@ game = do
               }
             , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
             , actions = mempty
+            , firing  = False
             }
           ]
         }

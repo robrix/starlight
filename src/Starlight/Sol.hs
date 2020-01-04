@@ -227,6 +227,7 @@ system = do
       { actor   = Actor{ position = 0, velocity = 0, rotation = 0 }
       , target  = Nothing
       , actions = mempty
+      , firing  = False
       }
     , npcs   = mempty
     , beams  = mempty
