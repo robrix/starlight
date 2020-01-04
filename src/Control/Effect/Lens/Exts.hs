@@ -46,6 +46,10 @@ infixr 2 <~>
 
 
 -- | Compose a setter onto the output of a Kleisli arrow.
+--
+-- By analogy with '<~':
+--
+-- > lens '<~' act = 'get' >>= lens '<--' 'const' act '>>=' 'put'
 (<--) :: Functor m => ASetter s s a b -> (s -> m b) -> (s -> m s)
 (lens <-- act) s = ($ s) . set lens <$> act s
 
