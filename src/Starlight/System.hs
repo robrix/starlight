@@ -51,7 +51,7 @@ npcs_ = field @"npcs"
 
 characters_ :: Lens' (System a) (NonEmpty Character)
 characters_ = lens get set where
-  get s = s^.player_ :| s ^. npcs_
+  get s = s^.player_ :| s^.npcs_
   set s (a:|o) = s & player_ .~ a & npcs_ .~ o
 
 
