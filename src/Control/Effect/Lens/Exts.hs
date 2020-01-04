@@ -32,12 +32,12 @@ zoomEach lens action = lens <~> traverse (`Strict.execState` action)
 infixr 2 `zoomEach`
 
 
-(<~) :: (Has (State s) sig m) => ASetter s s a b -> m b -> m ()
+(<~) :: Has (State s) sig m => ASetter s s a b -> m b -> m ()
 lens <~ act = act >>= assign lens
 
 infixr 2 <~
 
-(~>) :: (Has (State s) sig m) => Getting a s a -> (a -> m b) -> m b
+(~>) :: Has (State s) sig m => Getting a s a -> (a -> m b) -> m b
 lens ~> act = use lens >>= act
 
 infixr 2 ~>
