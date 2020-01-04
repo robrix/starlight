@@ -71,8 +71,7 @@ game = do
     . runFinally
     . evalState @Input mempty
     . evalState Game
-      { beams  = []
-      , system = system
+      { system = system
         { player = Character
           { actor    = Actor
             { position = P (V3 2500000 0 0)

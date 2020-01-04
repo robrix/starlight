@@ -16,11 +16,9 @@ import GHC.Generics (Generic)
 import Starlight.Body
 import Starlight.Character
 import Starlight.System as System
-import Starlight.Weapon.Laser
 
 data Game = Game
-  { beams  :: ![Beam]
-  , system :: !(System Body)
+  { system :: !(System Body)
   }
   deriving (Generic, Show)
 
