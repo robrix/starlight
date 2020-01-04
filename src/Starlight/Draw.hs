@@ -70,7 +70,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
   system@System{ scale, npcs } <- ask @(System StateVectors)
 
   for_ (player : npcs) $ \ c -> do
-    drawShip (Ship white (c^.actor_) 100)
+    drawShip Ship{ colour = white, actor = c^.actor_, health = 100 }
     when (c^.firing_) $ drawLaser Beam{ colour = green, angle = snd (toAxisAngle (c^.actor_.rotation_)), position = c^.actor_.position_ }
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
