@@ -60,6 +60,7 @@ drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawab
         scaleToViewZoomed vs
     !*! translated3 (ext (negated (unP focus)) 0)
     !*! translated3 (unP position)
+    !*! scaled (V4 1000 1000 1000 1)
   angle_  ?= angle
   colour_ ?= colour
 
