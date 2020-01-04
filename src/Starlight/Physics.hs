@@ -11,7 +11,7 @@ import Control.Effect.Lens
 import Control.Effect.Lift
 import Control.Effect.Reader
 import Control.Effect.State
-import Control.Lens (Lens', to, (^.), (^?), _Just)
+import Control.Lens (Lens', to, (&), (+~), (^.), (^?), _Just)
 import Control.Monad (guard)
 import Data.Ix (inRange)
 import Data.List (elemIndex)
@@ -36,10 +36,10 @@ updatePosition :: Actor -> Actor
 updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
 
 applyGravity :: Delta Seconds Float -> Float -> StateVectors -> Actor -> Actor
-applyGravity (Delta (Seconds dt)) distanceScale StateVectors{ actor = Actor{ position = pos }, body = Body{ mass } } a@Actor{ position, velocity }
-  = a { velocity = velocity + unP (dt * force *^ direction pos position) } where
+applyGravity (Delta (Seconds dt)) scale StateVectors{ actor = b, body = Body{ mass } } a
+  = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
   force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
-  r = qd (pos ^* distanceScale) (position ^* distanceScale) -- “quadrance” (square of distance between actor & body)
+  r = (b^.position_ ^* scale) `qd` (a^.position_ ^* scale) -- “quadrance” (square of distance between actor & body)
   bigG = 6.67430e-11 -- gravitational constant
 
 
