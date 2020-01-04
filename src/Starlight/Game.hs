@@ -20,7 +20,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (to)
+import           Control.Lens (set, to)
 import           Control.Monad (when, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -143,7 +143,9 @@ game = do
             characters_ @Body <~> traverse
               (   measure "runActions" . runActions dt
               >=> measure "physics" . (actor_ @Character <-> physics dt))
-            withView (draw dt fpsLabel targetLabel (Font face 18))
+            beams <- use (beams_ @Body)
+            beams_ @Body .= []
+            local (set (beams_ @StateVectors) beams) $ withView (draw dt fpsLabel targetLabel (Font face 18))
           continue <$ measure "swap" Window.swap
         when continue loop
 
