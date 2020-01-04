@@ -30,14 +30,14 @@ ai = actions_ <~ go <$> ask <*> get where
     -- FIXME: allow other behaviours relating to targets, e.g. following
     Just (Left StateVectors{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust | isFacing there ]
+      , [ Thrust | isFacing (pi/2) there ]
       ]
     Just (Right Character{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust | isFacing there ]
+      , [ Thrust | isFacing (pi/2) there ]
       ]
     -- FIXME: wander
     -- FIXME: pick a new target
     _ -> mempty
     where
-    isFacing there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo (here ^. _xy) (there ^. _xy))) < pi/2
+    isFacing epsilon there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo (here ^. _xy) (there ^. _xy))) < epsilon
