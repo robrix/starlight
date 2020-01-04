@@ -40,6 +40,7 @@ lens ~> act = use lens >>= act
 
 infixr 2 ~>
 
+-- | Compose a lens onto either side of a Kleisli arrow and run it on the 'State'.
 (<~>) :: Has (State s) sig m => Lens' s a -> (a -> m a) -> m ()
 lens <~> act = lens <~ lens ~> act
 
