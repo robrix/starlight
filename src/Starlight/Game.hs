@@ -86,7 +86,7 @@ game = do
               , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
-            , target  = Nothing
+            , target  = Just Player
             , actions = mempty
             , firing  = False
             }
