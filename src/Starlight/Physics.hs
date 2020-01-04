@@ -76,10 +76,10 @@ runActions (Delta (Seconds dt)) c = do
       in target_ %~ case change of
         Nothing -> const Nothing
         Just dir -> \ target -> case target >>= (`elemIndex` identifiers) of
-            Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
-              i' = case dir of
-                Prev -> i - 1
-                Next -> i + 1
-            Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
+          Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
+            i' = case dir of
+              Prev -> i - 1
+              Next -> i + 1
+          Nothing -> Just $ case dir of { Prev -> last identifiers ; Next -> head identifiers }
   thrust  = dt * 20
   angular = dt *^ Radians 5
