@@ -147,8 +147,8 @@ game = do
 --
 -- Higher values correlate to more of the scene being visible.
 zoomForSpeed :: V2 Int -> Float -> Float
-zoomForSpeed size x = runIdentity go where
-  go
+zoomForSpeed size x = go where
+  Identity go
     | Identity x < min_ speed = min_ zoom
     | Identity x > max_ speed = max_ zoom
     | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
