@@ -12,7 +12,6 @@ import Control.Effect.State
 import Control.Effect.Lens
 import Control.Lens (ASetter, Getting, Lens', set, (^.))
 
-
 -- | Compose a getter onto the input of a Kleisli arrow and run it on the 'State'.
 (~>) :: Has (State s) sig m => Getting a s a -> (a -> m b) -> m b
 lens ~> act = use lens >>= act
