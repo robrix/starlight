@@ -47,6 +47,7 @@ player_ = field @"player"
 npcs_ :: Lens' (System a) [Character]
 npcs_ = field @"npcs"
 
+
 identifiers :: System a -> [Identifier]
 identifiers System{ bodies, npcs } = Player : map S [0..pred (length npcs)] <> map B (Map.keys bodies)
 
