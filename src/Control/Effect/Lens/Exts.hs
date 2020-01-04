@@ -5,6 +5,7 @@ module Control.Effect.Lens.Exts
 , zoomEach
 , (<~)
 , (~>)
+, (<~>)
 , module Control.Effect.Lens
 ) where
 
@@ -20,13 +21,13 @@ infixl 1 &~
 
 
 zoom :: Has (State s) sig m => Lens' s a -> Strict.StateC a m () -> m ()
-zoom lens action = lens <~ (lens ~> (`Strict.execState` action))
+zoom lens action = lens <~> (`Strict.execState` action)
 
 infixr 2 `zoom`
 
 
 zoomEach :: (Has (State s) sig m, Traversable t) => Lens' s (t a) -> Strict.StateC a m () -> m ()
-zoomEach lens action = lens <~ (lens ~> traverse (`Strict.execState` action))
+zoomEach lens action = lens <~> traverse (`Strict.execState` action)
 
 infixr 2 `zoomEach`
 
@@ -40,3 +41,8 @@ infixr 2 <~
 lens ~> act = use lens >>= act
 
 infixr 2 ~>
+
+(<~>) :: Has (State s) sig m => Lens' s a -> (a -> m a) -> m ()
+lens <~> act = lens <~ lens ~> act
+
+infixr 2 <~>
