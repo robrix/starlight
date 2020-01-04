@@ -5,13 +5,14 @@ module Control.Effect.Lens.Exts
 , zoomEach
 , (~>)
 , (<~>)
+, (<->)
 , module Control.Effect.Lens
 ) where
 
 import Control.Carrier.State.ST.Strict as ST
 import Control.Carrier.State.Strict as Strict
 import Control.Effect.Lens
-import Control.Lens (Getting, Lens')
+import Control.Lens (Getting, Lens', set, (^.))
 
 (&~) :: s -> ST.StateC s a -> s
 (&~) = ST.execState
@@ -40,3 +41,8 @@ infixr 2 ~>
 lens <~> act = lens <~ lens ~> act
 
 infixr 2 <~>
+
+(<->) :: Functor m => Lens' s a -> (a -> m a) -> (s -> m s)
+(lens <-> act) s = ($ s) . set lens <$> act (s^.lens)
+
+infixr 2 <->
