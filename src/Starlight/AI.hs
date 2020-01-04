@@ -19,7 +19,7 @@ ai
   :: Has (Reader (System StateVectors)) sig m
   => Character
   -> m Character
-ai c@Character{ actor = Actor{ position = P here, rotation }, target } = asks (flip (set actions_) c . go) where
+ai c@Character{ actor = Actor{ position = P here, rotation }, target } = asks (($ c) . set actions_ . go) where
   go system = case target >>= (system !?) of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
