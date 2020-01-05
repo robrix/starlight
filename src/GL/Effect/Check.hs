@@ -4,6 +4,11 @@ module GL.Effect.Check
 ( -- * Check effect
   check
 , Check(..)
+  -- * Re-export
+, Algebra
+, Effect
+, Has
+, run
 ) where
 
 import Control.Algebra
