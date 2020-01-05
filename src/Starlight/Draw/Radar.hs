@@ -16,7 +16,7 @@ import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.State
-import           Control.Lens (forOf_, traversed, (.~), (^.))
+import           Control.Lens (forOf_, to, traversed, (.~), (^.))
 import           Control.Monad (when)
 import           Data.Coerce (coerce)
 import           Data.Foldable (for_)
@@ -69,8 +69,8 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
     sweep_  ?= 0
     -- FIXME: fade colour with distance
     -- FIXME: IFF
-    forOf_ traversed npcs $ \ Character{ actor = Actor{ position = there }, ship = Ship { colour } } -> let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy) in when (r > zoom vs * radius) $ do
-      colour_ ?= colour
+    forOf_ traversed npcs $ \ Character{ actor = Actor{ position = there }, ship = Ship { colour, armour } } -> let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy) in when (r > zoom vs * radius) $ do
+      colour_ ?= (colour & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
       angle_  ?= angle
       drawArrays Points medianRange
 
