@@ -689,10 +689,10 @@ instance GLSLType TextureUnit where
 
 
 data Field v a = Field
-  { name     :: String
-  , location :: Int
-  , offset   :: Offset
-  , value    :: v a
+  { name     :: !String
+  , location :: !Int
+  , offset   :: !Offset
+  , value    :: !(v a)
   }
   deriving (Eq, Ord, Show)
 
