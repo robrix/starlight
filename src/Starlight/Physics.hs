@@ -14,7 +14,6 @@ import Control.Algebra (Effect)
 import Control.Applicative ((<|>))
 import Control.Carrier.State.Strict
 import Control.Effect.Lens
-import Control.Effect.Lift
 import Control.Effect.Reader
 import Control.Lens hiding (modifying, use, view, (%=), (*=), (+=), (.=))
 import Control.Monad (foldM, guard)
@@ -62,7 +61,6 @@ hit (Delta (Seconds dt)) c = view (beams_ @StateVectors) >>= foldM go c where
 
 runActions
   :: ( Effect sig
-     , Has (Lift IO) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (State (System Body)) sig m
      )
