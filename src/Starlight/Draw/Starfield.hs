@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
-module Starlight.Starfield
+module Starlight.Draw.Starfield
 ( drawStarfield
 , runStarfield
 , Drawable
@@ -23,7 +23,7 @@ import           GL.Program
 import           Linear.Affine
 import           Linear.V2
 import           Linear.Vector
-import           Starlight.Starfield.Shader
+import           Starlight.Draw.Starfield.Shader
 import           Starlight.View
 import qualified UI.Drawable as UI
 

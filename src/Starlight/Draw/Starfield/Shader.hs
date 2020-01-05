@@ -5,7 +5,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Starlight.Starfield.Shader
+module Starlight.Draw.Starfield.Shader
 ( shader
 , U(..)
 , resolution_
