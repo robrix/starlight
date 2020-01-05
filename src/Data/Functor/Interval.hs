@@ -9,8 +9,8 @@ module Data.Functor.Interval
 , toUnit
 , fromUnit
 , wrap
-, _min
-, _max
+, min_
+, max_
 , Bounding(..)
 ) where
 
@@ -21,8 +21,8 @@ import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
 
 data Interval f a = Interval
-  { min_ :: !(f a)
-  , max_ :: !(f a)
+  { min' :: !(f a)
+  , max' :: !(f a)
   }
   deriving (Eq, Foldable, Functor, Generic, Show, Traversable)
 
@@ -100,19 +100,19 @@ size :: Num (f a) => Interval f a -> f a
 size (Interval min max) = max - min
 
 toUnit, fromUnit :: Fractional (f a) => Interval f a -> f a -> f a
-toUnit   i x = (x - min_ i) / size i
-fromUnit i x =  x * size i  + min_ i
+toUnit   i x = (x - min' i) / size i
+fromUnit i x =  x * size i  + min' i
 
 
 wrap :: Real (f a) => Interval f a -> f a -> f a
-wrap i x = ((x + max_ i) `mod'` size i) + min_ i
+wrap i x = ((x + max' i) `mod'` size i) + min' i
 
 
-_min :: Lens' (Interval f a) (f a)
-_min = field @"min_"
+min_ :: Lens' (Interval f a) (f a)
+min_ = field @"min'"
 
-_max :: Lens' (Interval f a) (f a)
-_max = field @"max_"
+max_ :: Lens' (Interval f a) (f a)
+max_ = field @"max'"
 
 
 newtype Bounding f a = Bounding { getBounding :: Interval f a }

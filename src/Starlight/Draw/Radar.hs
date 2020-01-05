@@ -145,4 +145,4 @@ range = Interval 0 (Identity (length vertices))
 
 medianRange :: Interval Identity Int
 medianRange = Interval n (n + 1) where
-  n = max_ range `div` 2
+  n = max' range `div` 2

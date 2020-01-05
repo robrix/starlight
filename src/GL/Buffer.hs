@@ -45,7 +45,7 @@ realloc :: (KnownType ty, S.Storable v, Has (Lift IO) sig m) => Buffer ty v -> I
 realloc b n update usage = runLiftIO (glBufferData (glEnum (typeOf b)) (fromIntegral (n * sizeOfElem b)) nullPtr (glEnum (Hint update usage)))
 
 copyPtr :: (KnownType ty, Has Check sig m, Has (Lift IO) sig m) => Buffer ty a -> Interval Identity Int -> Ptr a -> m ()
-copyPtr b i = checking . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min_ i)) (fromIntegral (size i)) . castPtr
+copyPtr b i = checking . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr
 
 copy :: (KnownType ty, S.Storable v, Has Check sig m, Has (Lift IO) sig m) => Buffer ty v -> Int -> [v] -> m ()
 copy b offset vertices = A.withArray vertices $ copyPtr b ((Interval 0 (Identity (length vertices)) + pure offset) ^* sizeOfElem b)

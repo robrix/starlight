@@ -104,7 +104,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
 
         let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ b
             size = Interval.size b'
-            baseline = b' ^. _min . _y
+            baseline = b'^.min_._y
 
         bind (Just texture)
         setParameter Texture2D MagFilter Nearest
@@ -129,7 +129,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
           Glyph.matrix_    ?=
                 translated (-1)
             !*! scaled     (V3 sx sy 1)
-            !*! translated (fromIntegral <$> negated (min_ b'))
+            !*! translated (fromIntegral <$> negated (min' b'))
           for_ instances $ \ Instance{ offset, range } -> do
             Glyph.offset_ ?= offset
             drawArraysInstanced Triangles range 6

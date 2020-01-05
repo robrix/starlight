@@ -164,8 +164,8 @@ game = do
 zoomForSpeed :: V2 Int -> Float -> Float
 zoomForSpeed size x = go where
   Identity go
-    | Identity x < min_ speed = min_ zoom
-    | Identity x > max_ speed = max_ zoom
+    | Identity x < min' speed = min' zoom
+    | Identity x > max' speed = max' zoom
     | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
   zoom = Interval 1 5
   speed = speedAt <$> zoom
