@@ -101,7 +101,7 @@ runRadar m = do
 toBlip :: Point V3 Float -> Float -> Either StateVectors Character -> Blip
 toBlip here scale = either fromL fromR where
   fromL StateVectors{ body = Body{ radius = Metres r, colour }, actor = Actor{ position = there } } = makeBlip (there ^-^ here) (r * scale) colour
-  fromR Character{ actor = Actor{ position = there } } = makeBlip (there ^-^ here) 15 white
+  fromR Character{ actor = Actor{ position = there }, ship = Ship { scale } } = makeBlip (there ^-^ here) scale white
 
 setBlip
   :: ( Has (Lift IO) sig m
