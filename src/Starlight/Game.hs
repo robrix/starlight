@@ -82,7 +82,7 @@ game = do
             }
           , target  = Nothing
           , actions = mempty
-          , ship    = Ship{ colour = white, health = 1000 }
+          , ship    = Ship{ colour = white, armour = 1000 }
           }
         , npcs =
           [ Character
@@ -93,7 +93,7 @@ game = do
               }
             , target  = Just Player
             , actions = mempty
-            , ship    = Ship{ colour = red, health = 1000 }
+            , ship    = Ship{ colour = red, armour = 1000 }
             }
           , Character
             { actor   = Actor
@@ -103,7 +103,7 @@ game = do
               }
             , target  = Just $ B (Star (10, "Sol"))
             , actions = mempty
-            , ship    = Ship{ colour = white, health = 1000 }
+            , ship    = Ship{ colour = white, armour = 1000 }
             }
           , Character
             { actor   = Actor
@@ -113,7 +113,7 @@ game = do
               }
             , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
             , actions = mempty
-            , ship    = Ship{ colour = white, health = 1000 }
+            , ship    = Ship{ colour = white, armour = 1000 }
             }
           ]
         }

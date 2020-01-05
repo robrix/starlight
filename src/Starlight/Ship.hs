@@ -4,7 +4,7 @@
 module Starlight.Ship
 ( Ship(..)
 , colour_
-, health_
+, armour_
 ) where
 
 import Control.Lens (Lens')
@@ -14,12 +14,12 @@ import UI.Colour
 
 data Ship = Ship
   { colour :: Colour Float
-  , health :: Float
+  , armour :: Float
   }
   deriving (Generic, Show)
 
 colour_ :: Lens' Ship (Colour Float)
 colour_ = field @"colour"
 
-health_ :: Lens' Ship Float
-health_ = field @"health"
+armour_ :: Lens' Ship Float
+armour_ = field @"armour"

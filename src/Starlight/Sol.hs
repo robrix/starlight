@@ -228,7 +228,7 @@ system = do
       { actor   = Actor{ position = 0, velocity = 0, rotation = 0 }
       , target  = Nothing
       , actions = mempty
-      , ship    = Ship{ colour = white, health = 100 }
+      , ship    = Ship{ colour = white, armour = 100 }
       }
     , npcs   = mempty
     , beams  = mempty
