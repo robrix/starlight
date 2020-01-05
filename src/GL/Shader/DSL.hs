@@ -90,7 +90,6 @@ module GL.Shader.DSL
 , Offset(..)
 , foldVars
 , foldVarsM
-, forVars
 , defaultVars
   -- * Re-exports
 , Type(..)
@@ -721,10 +720,6 @@ foldVars f t = getConst $ traverseVars (Const . f) t
 foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field v a -> m b) -> t v -> m b
 foldVarsM f t = getAp $ foldVars (Ap . f) t
 {-# INLINABLE foldVarsM #-}
-
-forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => Field v a -> m (v' a)) -> m (t v')
-forVars t f = traverseVars f t
-{-# INLINABLE forVars #-}
 
 defaultVars :: Vars t => t Maybe
 defaultVars = makeVars value
