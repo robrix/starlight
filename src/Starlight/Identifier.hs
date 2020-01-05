@@ -4,6 +4,7 @@ module Starlight.Identifier
 , Name
 , Identifier(..)
 , describeIdentifier
+, CharacterIdentifier(..)
 , BodyIdentifier(..)
 , parent
 , rootLeaf
@@ -21,17 +22,20 @@ type Name = Text
 
 data Identifier
   = B BodyIdentifier
-  | S Int
-  | Player
+  | C CharacterIdentifier
   deriving (Eq, Ord, Show)
 
 describeIdentifier :: Identifier -> String
 describeIdentifier = \case
-  B i -> showLeaf (getLeaf i) where
+  B      i  -> showLeaf (getLeaf i) where
     showLeaf (code, name) = show code <> " " <> unpack name
-  S i -> show i
-  Player -> "player"
+  C (NPC i) -> show i
+  C Player  -> "player"
 
+data CharacterIdentifier
+  = Player
+  | NPC Int
+  deriving (Eq, Ord, Show)
 
 data BodyIdentifier
   = Star (Code, Name)

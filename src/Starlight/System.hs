@@ -62,10 +62,10 @@ systemTrans :: System a -> M44 Float
 systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
 identifiers :: System a -> [Identifier]
-identifiers System{ bodies, npcs } = Player : map S [0..pred (length npcs)] <> map B (Map.keys bodies)
+identifiers System{ bodies, npcs } = C Player : map (C . NPC) [0..pred (length npcs)] <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
 (!?) System{ bodies, player, npcs } = \case
-  B i    -> Left  <$> Map.lookup i bodies
-  S i    -> Right <$> npcs ^? ix i
-  Player -> Just (Right player)
+  B      i  -> Left  <$> Map.lookup i bodies
+  C (NPC i) -> Right <$> npcs ^? ix i
+  C Player  -> Just (Right player)

@@ -91,7 +91,7 @@ game = do
               , velocity = V3 0 150 0
               , rotation = axisAngle (unit _z) (pi/2)
               }
-            , target  = Just Player
+            , target  = Just (C Player)
             , actions = mempty
             , ship    = Ship{ colour = red, armour = Interval 50 100, scale = 30 }
             }
