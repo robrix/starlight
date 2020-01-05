@@ -53,9 +53,9 @@ import           Unit.Mass
 import           Unit.Time
 
 data StateVectors = StateVectors
-  { body      :: Body
-  , transform :: M44 Float
-  , actor     :: Actor
+  { body      :: !Body
+  , transform :: !(M44 Float)
+  , actor     :: !Actor
   }
   deriving (Generic, Show)
 
@@ -63,21 +63,21 @@ instance HasActor StateVectors where
   actor_ = field @"actor"
 
 data Body = Body
-  { radius      :: Metres Float
-  , mass        :: Kilo Grams Float
-  , orientation :: Quaternion Float -- relative to orbit
-  , period      :: Seconds Float    -- sidereal rotation period
-  , colour      :: Colour Float
-  , orbit       :: Orbit
+  { radius      :: !(Metres Float)
+  , mass        :: !(Kilo Grams Float)
+  , orientation :: !(Quaternion Float) -- relative to orbit
+  , period      :: !(Seconds Float)    -- sidereal rotation period
+  , colour      :: !(Colour Float)
+  , orbit       :: !Orbit
   }
   deriving (Read, Show)
 
 data Orbit = Orbit
-  { eccentricity    :: Float
-  , semimajor       :: Metres Float
-  , orientation     :: Quaternion Float -- relative to ecliptic
-  , period          :: Seconds Float
-  , timeOfPeriapsis :: Seconds Float    -- relative to epoch
+  { eccentricity    :: !Float
+  , semimajor       :: !(Metres Float)
+  , orientation     :: !(Quaternion Float) -- relative to ecliptic
+  , period          :: !(Seconds Float)
+  , timeOfPeriapsis :: !(Seconds Float)    -- relative to epoch
   }
   deriving (Read, Show)
 
