@@ -90,7 +90,6 @@ module GL.Shader.DSL
 , Offset(..)
 , foldVars
 , foldVarsM
-, mapVars
 , forVars
 , defaultVars
   -- * Re-exports
@@ -114,7 +113,6 @@ import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
 import           Data.Function (fix)
 import           Data.Functor.Const
-import           Data.Functor.Identity
 import           Data.Monoid (Ap(..))
 import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
@@ -723,10 +721,6 @@ foldVars f t = getConst $ traverseVars (Const . f) t
 foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field v a -> m b) -> t v -> m b
 foldVarsM f t = getAp $ foldVars (Ap . f) t
 {-# INLINABLE foldVarsM #-}
-
-mapVars :: Vars t => (forall a . GLSLType a => Field v a -> v' a) -> t v -> t v'
-mapVars f t = runIdentity $ traverseVars (Identity . f) t
-{-# INLINABLE mapVars #-}
 
 forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => Field v a -> m (v' a)) -> m (t v')
 forVars t f = traverseVars f t
