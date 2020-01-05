@@ -19,10 +19,11 @@ circle radius n =
 
 
 intersects
-  :: Point V2 Float -- ^ Centre.
-  -> Float          -- ^ Radius.
-  -> Point V2 Float -- ^ Ray origin.
-  -> Radians Float  -- ^ Ray angle
+  :: (Floating a, Ord a)
+  => Point V2 a -- ^ Centre.
+  -> a          -- ^ Radius.
+  -> Point V2 a -- ^ Ray origin.
+  -> Radians a  -- ^ Ray angle
   -> Bool
 intersects c r o theta = discriminant >= 0 && (d1 >= 0 && d1 <= 1 || d2 >= 0 && d2 <= 1) where
   l = cartesian2 theta 1
