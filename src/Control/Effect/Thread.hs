@@ -15,3 +15,6 @@ deriving instance Functor m => Functor (Thread m)
 
 instance HFunctor Thread where
   hmap f (Fork m k) = Fork (f m) (f k)
+
+instance Effect Thread where
+  thread ctx hdl (Fork m k) = Fork (hdl (m <$ ctx)) (hdl (k <$ ctx))
