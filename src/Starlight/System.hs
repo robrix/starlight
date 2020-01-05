@@ -18,7 +18,6 @@ module Starlight.System
 
 import           Control.Lens (Lens, Lens', ix, lens, (&), (.~), (^.), (^?))
 import           Data.Generics.Product.Fields
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map.Strict as Map
 import           GHC.Generics (Generic)
 import           Linear.Matrix
@@ -49,10 +48,10 @@ player_ = field @"player"
 npcs_ :: Lens' (System a) [Character]
 npcs_ = field @"npcs"
 
-characters_ :: Lens' (System a) (NonEmpty Character)
+characters_ :: Lens' (System a) (Map.Map CharacterIdentifier Character)
 characters_ = lens get set where
-  get s = s^.player_ :| s^.npcs_
-  set s (a:|o) = s & player_ .~ a & npcs_ .~ o
+  get s = Map.fromList ((Player, s^.player_) : zipWith ((,) . NPC) [0..] (s^.npcs_))
+  set s m = s & player_ .~ (m Map.! Player) & npcs_ .~ Map.elems (Map.delete Player m)
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
