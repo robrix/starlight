@@ -56,6 +56,7 @@ hit (Delta (Seconds dt)) c = do
   beams <- view (beams_ @StateVectors)
   foldM (go scale) c beams where
   go scale char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o }
+    -- FIXME: ships should not be able to shoot themselves
     | intersects (P (c^._xy)) (r * scale) (P (o^._xy)) (cartesian2 theta 1) = do
       pure $ char & ship_.armour_.min_.coerced -~ damage
     | otherwise                                                             = pure char
