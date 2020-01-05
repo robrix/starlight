@@ -93,7 +93,7 @@ game = do
               }
             , target  = Just Player
             , actions = mempty
-            , ship    = Ship{ colour = red, armour = Interval 500 1000 }
+            , ship    = Ship{ colour = red, armour = Interval 50 100 }
             }
           , Character
             { actor   = Actor
