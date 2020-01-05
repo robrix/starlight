@@ -154,6 +154,7 @@ game = do
             beams_ @Body .= []
             characters_ @Body <~> traverse
               (   measure "gravity" . (actor_ @Character <-> gravity dt)
+              >=> measure "hit" . hit dt
               >=> measure "runActions" . runActions dt)
           continue <$ measure "swap" Window.swap
         when continue loop
