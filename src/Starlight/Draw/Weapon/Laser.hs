@@ -22,6 +22,7 @@ import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts
 import           Starlight.Draw.Weapon.Laser.Shader
+import           Starlight.Identifier
 import           Starlight.View
 import           UI.Colour
 import qualified UI.Drawable as UI
@@ -31,6 +32,7 @@ data Beam = Beam
   { position :: Point V3 Float
   , angle    :: Radians Float
   , colour   :: Colour Float
+  , firedBy  :: CharacterIdentifier
   }
   deriving (Show)
 

@@ -73,7 +73,7 @@ runActions
   -> CharacterIdentifier
   -> Character
   -> m Character
-runActions (Delta (Seconds dt)) _ c = do
+runActions (Delta (Seconds dt)) i c = do
   system <- ask @(System StateVectors)
   execState c (traverse_ (go system) (actions c)) where
   go system = \case
@@ -98,7 +98,7 @@ runActions (Delta (Seconds dt)) _ c = do
     Fire Main -> do
       position <- use (actor_.position_)
       rotation <- use (actor_.rotation_)
-      beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position }:)
+      beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position, firedBy = i }:)
 
     ChangeTarget change -> target_ %= maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
       elimChange prev next = \case { Prev -> prev ; Next -> next }
