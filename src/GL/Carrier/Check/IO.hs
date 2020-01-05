@@ -23,7 +23,7 @@ import GL.Error
 import Graphics.GL.Core41
 
 newtype CheckC m a = CheckC { runCheck :: m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Check :+: sig) (CheckC m) where
   alg = \case

@@ -17,7 +17,7 @@ import Control.Monad.IO.Class
 import GL.Effect.Check
 
 newtype CheckC m a = CheckC { runCheck :: m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Algebra sig m => Algebra (Check :+: sig) (CheckC m) where
   alg = \case

@@ -19,7 +19,7 @@ import Control.Monad.IO.Class
 import System.IO
 
 newtype TraceC m a = TraceC { runTrace :: m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Trace :+: sig) (TraceC m) where
   alg = \case
