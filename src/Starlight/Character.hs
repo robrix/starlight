@@ -7,6 +7,7 @@ module Starlight.Character
 ( Character(..)
 , target_
 , actions_
+, ship_
 , HasActor(..)
 ) where
 
@@ -36,3 +37,6 @@ target_ = field @"target"
 
 actions_ :: Lens' Character (Set Action)
 actions_ = field @"actions"
+
+ship_ :: Lens' Character Ship
+ship_ = field @"ship"
