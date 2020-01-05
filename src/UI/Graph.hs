@@ -17,6 +17,7 @@ import           Data.Coerce
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
+import           GL.Effect.Check
 import           GL.Program
 import           Graphics.GL.Core41
 import           Linear.Exts
@@ -35,7 +36,7 @@ data Graph = Graph
   , count     :: !Int
   }
 
-mkGraph :: (Has Finally sig m, Has (Lift IO) sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
+mkGraph :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
 mkGraph f n from to = do
   let vertex = V2 <*> f
       count = max n 0 + 2
@@ -53,7 +54,7 @@ mkGraph f n from to = do
 
   pure $! Graph { matrix, colour, array, points, lines, pointSize = 9, count }
 
-drawGraph :: (Has Finally sig m, Has (Lift IO) sig m) => Graph -> m ()
+drawGraph :: (Has Check sig m, Has (Lift IO) sig m) => Graph -> m ()
 drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = bindArray array $ do
   runLiftIO (glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA)
   use points $ do
