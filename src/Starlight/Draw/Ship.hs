@@ -6,8 +6,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Draw.Ship
-( Ship(..)
-, drawShip
+( drawShip
 , runShip
 , Drawable
 ) where
@@ -20,28 +19,15 @@ import           Control.Effect.Profile
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
-import           Data.Generics.Product.Fields
-import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Draw.Ship.Shader
+import           Starlight.Ship
 import           Starlight.View
-import           UI.Colour
 import qualified UI.Drawable as UI
-
-data Ship = Ship
-  { colour :: Colour Float
-  , actor  :: Actor
-  , health :: Float
-  }
-  deriving (Generic, Show)
-
-instance HasActor Ship where
-  actor_ = field @"actor"
-
 
 drawShip
   :: ( Has Check sig m

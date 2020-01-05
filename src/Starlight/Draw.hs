@@ -30,6 +30,7 @@ import Starlight.Draw.Ship as Ship
 import Starlight.Draw.Starfield as Starfield
 import Starlight.Draw.Weapon.Laser as Laser
 import Starlight.Identifier
+import Starlight.Ship
 import Starlight.System
 import Starlight.View
 import UI.Colour
