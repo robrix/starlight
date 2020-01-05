@@ -93,7 +93,7 @@ game = do
               }
             , target  = Just Player
             , actions = mempty
-            , ship    = Ship{ colour = white, health = 1000 }
+            , ship    = Ship{ colour = red, health = 1000 }
             }
           , Character
             { actor   = Actor
