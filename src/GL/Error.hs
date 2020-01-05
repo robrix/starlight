@@ -3,7 +3,6 @@ module GL.Error
 ( GLError(..)
 , GLException(..)
 , checkStatus
-, checkingGLError
 , throwGLError
 ) where
 
@@ -73,15 +72,6 @@ checkStatus get getLog error status object = withFrozenCallStack $ do
       getLog object l nullPtr bytes
       sendM (C.peekCString bytes)
     E.throwIO $ GLException (error log) callStack
-
-checkGLError :: (Has (Lift IO) sig m, HasCallStack) => m ()
-checkGLError = runLiftIO . withFrozenCallStack $ glGetError >>= throwGLError
-
-checkingGLError :: (Has (Lift IO) sig m, HasCallStack) => m a -> m a
-checkingGLError action = withFrozenCallStack $ do
-  result <- action
-  checkGLError
-  pure result
 
 throwGLError :: (Has (Lift IO) sig m, HasCallStack) => GLenum -> m ()
 throwGLError = \case
