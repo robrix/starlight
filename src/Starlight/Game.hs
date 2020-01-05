@@ -137,9 +137,9 @@ game = do
           t <- realToFrac <$> since epoch
           system <- get
           continue <- execEmpty . runReader (systemAt system (getDelta t)) $ do
-            measure "input" input
             dt <- fmap realToFrac . since =<< get
             put =<< now
+            measure "input" input
             measure "controls" $ player_ @Body .actions_ <~ controls
             measure "ai" $ npcs_ @Body <~> traverse ai
             characters_ @Body <~> traverse
