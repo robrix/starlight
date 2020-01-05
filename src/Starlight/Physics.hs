@@ -16,8 +16,8 @@ import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Effect.Lift
 import Control.Effect.Reader
-import Control.Lens hiding (modifying, use, (%=), (*=), (+=), (.=))
-import Control.Monad (guard)
+import Control.Lens hiding (modifying, use, view, (%=), (*=), (+=), (.=))
+import Control.Monad (foldM, guard)
 import Data.Foldable (foldl', for_, traverse_)
 import Data.Functor.Interval
 import Data.Ix (inRange)
@@ -50,12 +50,13 @@ gravity (Delta (Seconds dt)) a = do
   bigG = 6.67430e-11 -- gravitational constant
 
 
-hit :: Delta Seconds Float -> Beam -> Character -> Character
-hit (Delta (Seconds dt)) Beam{ angle = theta, position = o } char@Character{ actor = Actor{ position = c } }
-  -- FIXME: don’t just assume size
-  -- FIXME: factor in system scale
-  | intersects (P (c^._xy)) 15 (P (o^._xy)) (cartesian2 theta 1) = char & ship_.armour_.min_.coerced -~ damage -- FIXME: reduce the armour
-  | otherwise                                                    = char where
+hit :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> Character -> m Character
+hit (Delta (Seconds dt)) c = view (beams_ @StateVectors) >>= foldM go c where
+  go char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o }
+    -- FIXME: don’t just assume size
+    -- FIXME: factor in system scale
+    | intersects (P (c^._xy)) 15 (P (o^._xy)) (cartesian2 theta 1) = pure $ char & ship_.armour_.min_.coerced -~ damage
+    | otherwise                                                    = pure char
   damage = 100 * dt
 
 
