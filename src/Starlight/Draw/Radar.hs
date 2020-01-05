@@ -31,6 +31,7 @@ import           Starlight.Actor
 import           Starlight.Body
 import           Starlight.Character
 import           Starlight.Draw.Radar.Shader
+import           Starlight.Ship hiding (colour_)
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour
@@ -68,10 +69,9 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
     sweep_  ?= 0
     -- FIXME: fade colour with distance
     -- FIXME: IFF
-    colour_ ?= white
-
-    forOf_ (traversed . actor_) npcs $ \ Actor{ position = there } -> let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy) in when (r > zoom vs * radius) $ do
-      angle_ ?= angle
+    forOf_ traversed npcs $ \ Character{ actor = Actor{ position = there }, ship = Ship { colour } } -> let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy) in when (r > zoom vs * radius) $ do
+      colour_ ?= colour
+      angle_  ?= angle
       drawArrays Points medianRange
 
   measure "targets" $ do
