@@ -1,6 +1,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 module Control.Effect.Thread
-( Thread(..)
+( -- * Thread effect
+  Thread(..)
 ) where
 
 data Thread m k
