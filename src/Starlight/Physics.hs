@@ -38,13 +38,13 @@ physics
   -> m Actor
 physics dt a = do
   System{ scale, bodies } <- ask
-  pure (inertia (foldr (applyGravity dt (1/scale)) a bodies))
+  pure (inertia (foldr (gravity dt (1/scale)) a bodies))
 
 inertia :: Actor -> Actor
 inertia a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
 
-applyGravity :: Delta Seconds Float -> Float -> StateVectors -> Actor -> Actor
-applyGravity (Delta (Seconds dt)) scale StateVectors{ actor = b, body = Body{ mass } } a
+gravity :: Delta Seconds Float -> Float -> StateVectors -> Actor -> Actor
+gravity (Delta (Seconds dt)) scale StateVectors{ actor = b, body = Body{ mass } } a
   = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
   force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
   r = (b^.position_ ^* scale) `qd` (a^.position_ ^* scale) -- “quadrance” (square of distance between actor & body)
