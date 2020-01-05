@@ -140,6 +140,7 @@ library
     , text
     , time ^>= 1.9
     , transformers ^>= 0.5
+    , unordered-containers
     , vector ^>= 0.12
 
 executable starlight
