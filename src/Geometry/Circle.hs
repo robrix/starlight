@@ -29,7 +29,7 @@ intersects
   -> Bool
 intersects c r o l = isJust $ do
   (d1, d2) <- intersections c r o l
-  guard (d1 >= 0 && d1 <= 1 || d2 >= 0 && d2 <= 1)
+  guard (d1 >= 0 || d2 >= 0)
 
 intersections
   :: (Floating a, Metric v, Ord a)
