@@ -1,9 +1,13 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Main
 ( main
+, Lifts
 ) where
 
 import           Control.Algebra
@@ -18,6 +22,7 @@ import           Control.Effect.Trace
 import qualified Control.Exception.Lift as E
 import           Control.Monad.IO.Class.Lift
 import           Data.Bool (bool)
+import           Data.Kind (Constraint)
 import qualified GL.Carrier.Check.Identity as NoCheck
 import qualified GL.Carrier.Check.IO as Check
 import           GL.Effect.Check
@@ -64,3 +69,5 @@ runCheck
   => (forall t . Algebra (Check :+: sig) (t m) => t m a)
   -> m a
 runCheck m = view CLI.trace_ >>= bool (NoCheck.runCheck m) (Check.runCheck m)
+
+type Lifts (c :: (* -> *) -> Constraint) t = (forall m' . c m' => c (t m')) :: Constraint
