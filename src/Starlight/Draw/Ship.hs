@@ -16,6 +16,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
+import           Control.Lens (to, (&), (.~), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -27,6 +28,7 @@ import           Starlight.Actor
 import           Starlight.Draw.Ship.Shader
 import           Starlight.Ship hiding (colour_)
 import           Starlight.View
+import           UI.Colour (_a)
 import qualified UI.Drawable as UI
 
 drawShip
@@ -39,7 +41,7 @@ drawShip
   => Actor
   -> Ship
   -> m ()
-drawShip Actor{ position, rotation } Ship{ colour } = measure "ship" . UI.using getDrawable $ do
+drawShip Actor{ position, rotation } Ship{ colour, armour } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   let matrix = scaleToViewZoomed vs
   matrix_ ?=
@@ -48,7 +50,7 @@ drawShip Actor{ position, rotation } Ship{ colour } = measure "ship" . UI.using 
     !*! translated3 (unP position)
     !*! scaled (V4 15 15 15 1)
     !*! mkTransformation rotation 0
-  colour_ ?= colour
+  colour_ ?= (colour & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
   drawArrays LineLoop range
 
 
