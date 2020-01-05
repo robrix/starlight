@@ -49,6 +49,7 @@ gravity (Delta (Seconds dt)) a = do
   bigG = 6.67430e-11 -- gravitational constant
 
 
+-- FIXME: do something smarter than ray-sphere intersection.
 hit :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> Character -> m Character
 hit (Delta (Seconds dt)) c = view (beams_ @StateVectors) >>= foldM go c where
   go char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o }
