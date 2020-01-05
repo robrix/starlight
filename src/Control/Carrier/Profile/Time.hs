@@ -28,8 +28,8 @@ import           Control.Carrier.Lift
 import           Control.Carrier.Writer.Strict
 import           Control.Effect.Profile
 import           Control.Monad.IO.Class
+import qualified Data.HashMap.Strict as HashMap
 import           Data.List (sortOn)
-import qualified Data.Map as Map
 import           Data.Ord (Down(..))
 import           Data.Text (Text)
 import           Data.Text.Prettyprint.Doc
@@ -64,7 +64,7 @@ instance (Has (Lift IO) sig m, Effect sig) => Algebra (Profile :+: sig) (Profile
       k a
     R other -> ProfileC (send (handleCoercible other))
     where
-    timing ls t = Timings . Map.singleton ls . Timing t t t 1
+    timing ls t = Timings . HashMap.singleton ls . Timing t t t 1
 
 
 data Timing = Timing
@@ -97,16 +97,16 @@ mean :: Timing -> NominalDiffTime
 mean Timing{ sum, count } = sum / fromIntegral count
 
 
-newtype Timings = Timings { unTimings :: Map.Map Text Timing }
+newtype Timings = Timings { unTimings :: HashMap.HashMap Text Timing }
 
 instance Semigroup Timings where
-  Timings t1 <> Timings t2 = Timings (Map.unionWith (<>) t1 t2)
+  Timings t1 <> Timings t2 = Timings (HashMap.unionWith (<>) t1 t2)
 
 instance Monoid Timings where
   mempty = Timings mempty
 
 renderTimings :: Timings -> Doc AnsiStyle
-renderTimings (Timings ts) = vsep (map go (sortOn (Down . mean . snd) (Map.toList ts))) where
+renderTimings (Timings ts) = vsep (map go (sortOn (Down . mean . snd) (HashMap.toList ts))) where
   go (k, v) = annotate (color Green) (pretty k) <> pretty ':' <> softline <> renderTiming v
 
 reportTimings :: Has (Lift IO) sig m => Timings -> m ()
