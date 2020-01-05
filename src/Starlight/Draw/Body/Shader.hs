@@ -5,7 +5,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Starlight.Body.Shader
+module Starlight.Draw.Body.Shader
 ( shader
 , U(..)
 , matrix_

@@ -81,11 +81,12 @@ library
     Starlight.Actor
     Starlight.AI
     Starlight.Body
-    Starlight.Body.Shader
     Starlight.Character
     Starlight.CLI
     Starlight.Controls
     Starlight.Draw
+    Starlight.Draw.Body
+    Starlight.Draw.Body.Shader
     Starlight.Draw.Radar
     Starlight.Draw.Radar.Shader
     Starlight.Draw.Ship

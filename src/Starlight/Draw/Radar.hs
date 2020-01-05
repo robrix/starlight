@@ -28,7 +28,7 @@ import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts as Linear
 import           Starlight.Actor
-import           Starlight.Body as Body hiding (Drawable)
+import           Starlight.Body
 import           Starlight.Character
 import           Starlight.Draw.Radar.Shader
 import           Starlight.System

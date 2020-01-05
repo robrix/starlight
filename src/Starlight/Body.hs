@@ -18,36 +18,17 @@ module Starlight.Body
 , rotationTimeScale
 , actorAt
 , systemAt
-  -- * Drawing
-, runBody
-, Drawable
-, drawBody
 ) where
 
-import           Control.Carrier.Reader
-import           Control.Effect.Finally
-import           Control.Effect.Lens
-import           Control.Effect.Lift
-import           Control.Effect.Profile
 import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
-import           Data.Coerce (coerce)
-import           Data.Functor.Identity
-import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
-import           Geometry.Circle
 import           GHC.Generics
-import           GL.Array
-import           GL.Effect.Check
-import           GL.Program
 import           Linear.Exts
 import           Starlight.Actor
-import           Starlight.Body.Shader as Shader
 import           Starlight.Identifier
 import           Starlight.System
-import           Starlight.View
 import           UI.Colour
-import qualified UI.Drawable as UI
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
@@ -134,48 +115,3 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
 -- | Subject to the invariant that w=1.
 extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)
 extended a = iso (`ext` a) (^. _xyz)
-
-
-runBody
-  :: ( Has Check sig m
-     , Has Finally sig m
-     , Has (Lift IO) sig m
-     , Effect sig
-     )
-  => ReaderC Drawable m a
-  -> m a
-runBody m = do
-  program <- build Shader.shader
-  array   <- load vertices
-  runReader (Drawable UI.Drawable{ program, array }) m
-
-drawBody
-  :: ( Has Check sig m
-     , Has (Lift IO) sig m
-     , Has Profile sig m
-     , Has (Reader Drawable) sig m
-     , Has (Reader View) sig m
-     )
-  => StateVectors
-  -> m ()
-drawBody StateVectors{ body = Body{ radius = Metres r, colour }, transform, actor = Actor{ rotation } } = measure "bodies" . UI.using getDrawable $ do
-  vs@View{ focus } <- ask
-  matrix_ ?=
-        scaleToViewZoomed vs
-    !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
-    !*! transform
-    !*! scaled (V4 r r r 1)
-    !*! mkTransformation rotation 0
-  colour_ ?= colour
-
-  drawArraysInstanced LineLoop range 3
-
-
-newtype Drawable = Drawable { getDrawable :: UI.Drawable Shader.U Shader.V Shader.O }
-
-
-vertices :: [Shader.V Identity]
-vertices = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
-
-range :: Interval Identity Int
-range = Interval 0 (Identity (length vertices))

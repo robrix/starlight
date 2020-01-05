@@ -39,6 +39,7 @@ import           Starlight.Body
 import           Starlight.Character
 import           Starlight.Controls
 import           Starlight.Draw
+import           Starlight.Draw.Body
 import           Starlight.Draw.Radar
 import           Starlight.Draw.Ship
 import           Starlight.Draw.Starfield
