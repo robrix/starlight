@@ -90,6 +90,8 @@ library
     Starlight.Draw.Radar.Shader
     Starlight.Draw.Ship
     Starlight.Draw.Ship.Shader
+    Starlight.Draw.Starfield
+    Starlight.Draw.Starfield.Shader
     Starlight.Draw.Weapon.Laser
     Starlight.Draw.Weapon.Laser.Shader
     Starlight.Ephemeris
@@ -100,8 +102,6 @@ library
     Starlight.Neighbourhood
     Starlight.Physics
     Starlight.Sol
-    Starlight.Starfield
-    Starlight.Starfield.Shader
     Starlight.System
     Starlight.View
     UI.Colour
