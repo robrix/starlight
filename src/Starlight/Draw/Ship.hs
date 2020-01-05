@@ -25,7 +25,7 @@ import           GL.Program
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Draw.Ship.Shader
-import           Starlight.Ship
+import           Starlight.Ship hiding (colour_)
 import           Starlight.View
 import qualified UI.Drawable as UI
 
