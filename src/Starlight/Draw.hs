@@ -6,7 +6,6 @@ module Starlight.Draw
 ( draw
 ) where
 
-import Control.Effect.Lens
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
@@ -59,7 +58,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   v@View{ size, zoom } <- ask
-  player@Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
+  system@System{ scale, beams, player = Character{ actor = Actor{ position }, target } } <- ask @(System StateVectors)
 
   let dsize = deviceSize v
 
@@ -70,9 +69,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   drawStarfield
 
-  system@System{ scale, npcs, beams } <- ask @(System StateVectors)
-
-  for_ (player : npcs) $ \ Character{ actor, ship } -> drawShip actor ship
+  for_ (system^.characters_) $ \ Character{ actor, ship } -> drawShip actor ship
 
   for_ beams drawLaser
 
@@ -81,7 +78,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
 
-  drawRadar player
+  drawRadar
 
   let rscale = 1/scale
       describeTarget target = case target >>= fmap . (,) <*> (system !?) of
