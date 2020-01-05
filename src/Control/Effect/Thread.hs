@@ -3,10 +3,14 @@
 {-# LANGUAGE StandaloneDeriving #-}
 module Control.Effect.Thread
 ( -- * Thread effect
-  Thread(..)
+  fork
+, Thread(..)
 ) where
 
 import Control.Algebra
+
+fork :: Has Thread sig m => m () -> m ()
+fork m = send (Fork m (pure ()))
 
 data Thread m k
   = forall a . Fork (m a) (m k)
