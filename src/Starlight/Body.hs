@@ -119,7 +119,7 @@ actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, sem
 systemAt :: System Body -> Seconds Float -> System StateVectors
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
-  go identifier body@Body{ orbit = Orbit{ orientation }} = StateVectors
+  go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
     { body
     , transform = rel !*! translated3 (unP (position actor))
     , actor = actor
