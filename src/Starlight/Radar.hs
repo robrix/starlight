@@ -58,8 +58,8 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
   -- FIXME: blips should shadow more distant blips
   measure "bodies" $
     forOf_ (bodies_ . traversed) system $ \ StateVectors{ body = Body{ radius = Metres r, colour }, actor = Actor{ position = there } } -> do
-      setBlip (makeBlip (there ^-^ here) (r * scale) colour)
-      drawArrays LineStrip range
+      measure "setBlip" $ setBlip (makeBlip (there ^-^ here) (r * scale) colour)
+      measure "drawArrays" $ drawArrays LineStrip range
 
   measure "npcs" $ do
     sweep_  ?= 0
