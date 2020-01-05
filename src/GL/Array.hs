@@ -22,6 +22,7 @@ module GL.Array
 
 import           Control.Algebra
 import           Control.Carrier.Reader
+import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
@@ -52,10 +53,14 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
-configureArray _ a = DSL.foldVarsM (\ f@DSL.Field { DSL.location, DSL.offset } -> runLiftIO $ do
+configureArray :: (Effect sig, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
+configureArray _ a = evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
+  o <- get
+  let size = S.sizeOf (elemA a)
+      offset = o <> DSL.Offset size
+  put offset
   checking $ glEnableVertexAttribArray (fromIntegral location)
-  checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral (S.sizeOf (elemA a))) (nullPtr `plusPtr` DSL.getOffset offset)) (DSL.defaultVars `like` a) where
+  checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral size) (nullPtr `plusPtr` DSL.getOffset o)) (DSL.defaultVars `like` a) where
   like :: a Maybe -> Array (a Identity) -> a Maybe
   like = const
   elemA :: Array (i Identity) -> i Identity
@@ -107,7 +112,7 @@ drawArraysInstanced
 drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (min_ i)) (fromIntegral (size i)) (fromIntegral n)))
 
 
-load :: (DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
+load :: (Effect sig, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
 load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1

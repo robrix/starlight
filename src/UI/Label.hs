@@ -64,6 +64,7 @@ label
      , Has (Lift IO) sig m
      , Has (Reader Window.Window) sig m
      , HasCallStack
+     , Effect sig
      )
   => m Label
 label = do

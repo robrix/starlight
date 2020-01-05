@@ -104,7 +104,6 @@ module GL.Shader.DSL
 ) where
 
 import           Control.Carrier.Fresh.Strict
-import qualified Control.Carrier.State.Strict as S
 import qualified Control.Category as Cat
 import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
@@ -114,7 +113,6 @@ import           Data.Monoid (Ap(..))
 import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
-import           Foreign.Storable
 import           GHC.Generics
 import           GL.Shader (Type(..))
 import           GL.TextureUnit
@@ -686,7 +684,6 @@ instance GLSLType TextureUnit where
 data Field v a = Field
   { name     :: !String
   , location :: !Int
-  , offset   :: !Offset
   , value    :: !(v a)
   }
   deriving (Eq, Ord, Show)
@@ -703,12 +700,12 @@ instance Monoid Offset where
 class Vars t where
   makeVars :: (forall a . GLSLType a => Field Maybe a -> v a) -> t v
   default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GLSLType a => Field Maybe a -> v a) -> t v
-  makeVars f = to (run (evalFresh 0 (S.evalState (Offset 0) (gmakeVars @t f))))
+  makeVars f = to (run (evalFresh 0 (gmakeVars @t f)))
   {-# INLINABLE makeVars #-}
 
   foldVars :: Monoid b => (forall a . GLSLType a => Field v a -> b) -> t v -> b
   default foldVars :: (Generic (t v), GFoldVars t v (Rep (t v)), Monoid b) => (forall a . GLSLType a => Field v a -> b) -> t v -> b
-  foldVars f = run . evalFresh 0 . S.evalState (Offset 0) . gfoldVars @t f . from
+  foldVars f = run . evalFresh 0 . gfoldVars @t f . from
   {-# INLINABLE foldVars #-}
 
 foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field v a -> m b) -> t v -> m b
@@ -721,7 +718,7 @@ defaultVars = makeVars value
 
 
 class GMakeVars t v f where
-  gmakeVars :: (Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field Maybe a -> v a) -> m (f (t v))
+  gmakeVars :: Has Fresh sig m => (forall a . GLSLType a => Field Maybe a -> v a) -> m (f (t v))
 
 instance GMakeVars t v f => GMakeVars t v (M1 D d f) where
   gmakeVars f = M1 <$> gmakeVars f
@@ -739,12 +736,10 @@ instance (GMakeVars t v fl, GMakeVars t v fr) => GMakeVars t v (fl :*: fr) where
   gmakeVars f = (:*:) <$> gmakeVars f <*> gmakeVars f
   {-# INLINABLE gmakeVars #-}
 
-instance (Storable a, GMakeVar t a v f, Selector s) => GMakeVars t v (M1 S s f) where
+instance (GMakeVar t a v f, Selector s) => GMakeVars t v (M1 S s f) where
   gmakeVars f = do
     i <- fresh
-    o <- S.get
-    S.put (o <> Offset (sizeOf @a undefined))
-    pure (fix $ \ x -> M1 (gmakeVar f (Field (selName x) i o Nothing)))
+    pure (fix $ \ x -> M1 (gmakeVar f (Field (selName x) i Nothing)))
   {-# INLINABLE gmakeVars #-}
 
 class GMakeVar t a v f | f -> a v where
@@ -756,7 +751,7 @@ instance GLSLType a => GMakeVar t a v (K1 R (v a)) where
 
 
 class GFoldVars t v f where
-  gfoldVars :: (Has Fresh sig m, Has (S.State Offset) sig m, Monoid b) => (forall a . GLSLType a => Field v a -> b) -> f (t v) -> m b
+  gfoldVars :: (Has Fresh sig m, Monoid b) => (forall a . GLSLType a => Field v a -> b) -> f (t v) -> m b
 
 instance GFoldVars t v f => GFoldVars t v (M1 D d f) where
   gfoldVars f = gfoldVars f . unM1
@@ -774,12 +769,10 @@ instance (GFoldVars t v fl, GFoldVars t v fr) => GFoldVars t v (fl :*: fr) where
   gfoldVars f (l :*: r) = (<>) <$> gfoldVars f l <*> gfoldVars f r
   {-# INLINABLE gfoldVars #-}
 
-instance (Storable a, GFoldVar t a v f, Selector s) => GFoldVars t v (M1 S s f) where
+instance (GFoldVar t a v f, Selector s) => GFoldVars t v (M1 S s f) where
   gfoldVars f x@(M1 m) = do
     i <- fresh
-    o <- S.get
-    S.put (o <> Offset (sizeOf @a undefined))
-    pure (gfoldVar f (Field (selName x) i o) m)
+    pure (gfoldVar f (Field (selName x) i) m)
   {-# INLINABLE gfoldVars #-}
 
 class GFoldVar t a v f | f -> a v where

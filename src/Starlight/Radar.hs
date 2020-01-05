@@ -89,7 +89,7 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
   where
   n = 10 :: Int
 
-runRadar :: (Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
+runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
 runRadar m = do
   program <- build shader
   array   <- load vertices

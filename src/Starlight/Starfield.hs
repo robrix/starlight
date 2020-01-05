@@ -49,6 +49,7 @@ runStarfield
   :: ( Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
+     , Effect sig
      )
   => ReaderC Drawable m a
   -> m a
