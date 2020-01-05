@@ -20,7 +20,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (to, (%~))
+import           Control.Lens (to, (%~), (^.))
 import           Control.Monad (when, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -152,6 +152,7 @@ game = do
 
             -- FIXME: this is so gross
             beams_ @Body .= []
+            npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
             characters_ @Body <~> traverse
               (   measure "gravity" . (actor_ @Character <-> gravity dt)
               >=> measure "hit" . hit dt
