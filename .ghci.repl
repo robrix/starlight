@@ -26,4 +26,7 @@
 :seti -Wno-star-is-type
 :seti -Wno-missing-deriving-strategies
 
+-- We have this one on in the project but not in the REPL to reduce noise
+:seti -Wno-type-defaults
+
 :load Main
