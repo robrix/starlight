@@ -4,6 +4,7 @@
 module Starlight.Ship
 ( Ship(..)
 , colour_
+, health_
 ) where
 
 import Control.Lens (Lens')
@@ -25,3 +26,6 @@ instance HasActor Ship where
 
 colour_ :: Lens' Ship (Colour Float)
 colour_ = field @"colour"
+
+health_ :: Lens' Ship Float
+health_ = field @"health"
