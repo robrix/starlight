@@ -13,3 +13,4 @@ data Check m k
   deriving (Functor, Generic1)
 
 instance HFunctor Check
+instance Effect Check
