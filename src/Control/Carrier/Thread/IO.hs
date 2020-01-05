@@ -1,2 +1,5 @@
 module Control.Carrier.Thread.IO
-() where
+( ThreadC(..)
+) where
+
+newtype ThreadC m a = ThreadC (m a)
