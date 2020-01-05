@@ -78,8 +78,7 @@ build p = runLiftIO $ do
 use :: Has (Lift IO) sig m => Program u i o -> ProgramC u i o m a -> m a
 use (Program ls p) (ProgramC m) = do
   sendIO (glUseProgram p)
-  a <- runReader (Program ls p) m
-  a <$ sendIO (glUseProgram 0)
+  runReader (Program ls p) m
 
 
 class Monad m => HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u i o where
