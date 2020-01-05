@@ -69,10 +69,12 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
     sweep_  ?= 0
     -- FIXME: fade colour with distance
     -- FIXME: IFF
-    forOf_ traversed npcs $ \ Character{ actor = Actor{ position = there }, ship = Ship { colour, armour } } -> let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy) in when (r > zoom vs * radius) $ do
-      colour_ ?= (colour & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
-      angle_  ?= angle
-      drawArrays Points medianRange
+    forOf_ traversed npcs $ \ Character{ actor = Actor{ position = there }, ship = Ship { colour, armour } } -> do
+      let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy)
+      when (r > zoom vs * radius && armour^.min_ > 0) $ do
+        colour_ ?= (colour & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
+        angle_  ?= angle
+        drawArrays Points medianRange
 
   measure "targets" $ do
     let targetVectors = target >>= fmap (toBlip here scale) . (system !?)
