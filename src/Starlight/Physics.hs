@@ -5,6 +5,8 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Physics
 ( physics
+, inertia
+, gravity
 , runActions
 ) where
 
