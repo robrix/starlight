@@ -61,6 +61,7 @@ library
     GL.Buffer
     GL.Carrier.Bind
     GL.Effect.Bind
+    GL.Effect.Check
     GL.Enum
     GL.Error
     GL.Framebuffer
