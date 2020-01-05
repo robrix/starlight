@@ -60,6 +60,7 @@ library
     GL.Array
     GL.Buffer
     GL.Carrier.Bind
+    GL.Carrier.Check.Identity
     GL.Carrier.Check.IO
     GL.Effect.Bind
     GL.Effect.Check
