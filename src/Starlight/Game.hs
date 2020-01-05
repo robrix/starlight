@@ -31,6 +31,7 @@ import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           Data.Time.Format.ISO8601
 import           GL
+import           GL.Effect.Check
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.AI
@@ -56,6 +57,7 @@ import           Unit.Length
 
 game
   :: ( Effect sig
+     , Has Check sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
      , Has Trace sig m

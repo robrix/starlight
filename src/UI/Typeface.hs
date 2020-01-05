@@ -32,6 +32,7 @@ import           Geometry.Triangle
 import           GHC.Stack
 import           GL.Array
 import           GL.Buffer as B
+import           GL.Effect.Check
 import           GL.Framebuffer
 import           GL.Object
 import           GL.Program
@@ -70,6 +71,7 @@ metrics font = (ascent, descent) where
 
 readTypeface
   :: ( HasCallStack
+     , Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
      )
@@ -79,6 +81,7 @@ readTypeface = fromOpentypeFont <=< sendM . O.readOTFile
 
 fromOpentypeFont
   :: ( HasCallStack
+     , Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
      )
@@ -117,6 +120,7 @@ fromOpentypeFont opentypeFont = do
 
 readFontOfSize
   :: ( HasCallStack
+     , Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
      )
@@ -126,7 +130,7 @@ readFontOfSize
 readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 
-cacheCharactersForDrawing :: (HasCallStack, Has (Lift IO) sig m) => Typeface -> String -> m ()
+cacheCharactersForDrawing :: (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Typeface -> String -> m ()
 cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { array }, glyphB, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + Identity (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')

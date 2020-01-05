@@ -15,6 +15,7 @@ import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Functor.Interval
+import GL.Effect.Check
 import GL.Framebuffer
 import GL.Viewport
 import Graphics.GL.Core41
@@ -37,7 +38,8 @@ import Unit.Length
 import Unit.Time
 
 draw
-  :: ( Has (Lift IO) sig m
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Body.Drawable) sig m
      , Has (Reader Laser.Drawable) sig m

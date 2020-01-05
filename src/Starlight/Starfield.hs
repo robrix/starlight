@@ -18,6 +18,7 @@ import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
+import           GL.Effect.Check
 import           GL.Program
 import           Linear.Affine
 import           Linear.V2
@@ -27,7 +28,8 @@ import           Starlight.View
 import qualified UI.Drawable as UI
 
 drawStarfield
-  :: ( Has (Lift IO) sig m
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
@@ -44,7 +46,8 @@ drawStarfield = measure "starfield" . UI.using getDrawable $ do
 
 
 runStarfield
-  :: ( Has Finally sig m
+  :: ( Has Check sig m
+     , Has Finally sig m
      , Has (Lift IO) sig m
      )
   => ReaderC Drawable m a

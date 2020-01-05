@@ -12,6 +12,7 @@ import qualified Foreign.Marshal.Array.Lift as A
 import           Foreign.Ptr
 import           Foreign.Storable
 import           GHC.Stack
+import           GL.Effect.Check
 import           Graphics.GL.Types
 
 class Storable t => Object t where
@@ -19,7 +20,7 @@ class Storable t => Object t where
   delete :: (Has (Lift IO) sig m, HasCallStack) => GLsizei -> Ptr t -> m ()
 
 class Bind t where
-  bind :: (Has (Lift IO) sig m, HasCallStack) => Maybe t -> m ()
+  bind :: (Has Check sig m, Has (Lift IO) sig m, HasCallStack) => Maybe t -> m ()
 
 genN :: (Object t, Has Finally sig m, Has (Lift IO) sig m) => Int -> m [t]
 genN n = do

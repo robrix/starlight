@@ -38,6 +38,7 @@ import qualified Data.Map as Map
 import           Geometry.Circle
 import           GHC.Generics
 import           GL.Array
+import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts
 import           Starlight.Actor
@@ -136,7 +137,8 @@ extended a = iso (`ext` a) (^. _xyz)
 
 
 runBody
-  :: ( Has Finally sig m
+  :: ( Has Check sig m
+     , Has Finally sig m
      , Has (Lift IO) sig m
      )
   => ReaderC Drawable m a
@@ -147,7 +149,8 @@ runBody m = do
   runReader (Drawable UI.Drawable{ program, array }) m
 
 drawBody
-  :: ( Has (Lift IO) sig m
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m

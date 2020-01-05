@@ -8,6 +8,7 @@ import Control.Effect.Lift
 import Control.Effect.Reader
 import Data.Functor.Identity
 import GL.Array
+import GL.Effect.Check
 import GL.Program
 import GL.Shader.DSL (Vars)
 
@@ -17,7 +18,8 @@ data Drawable u v o = Drawable
   }
 
 using
-  :: ( Has (Lift IO) sig m
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
      , Has (Reader a) sig m
      , Vars u
      )

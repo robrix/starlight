@@ -24,8 +24,8 @@ import           Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
 import           Foreign.Ptr (Ptr, castPtr, nullPtr)
 import           Foreign.Storable as S
+import           GL.Effect.Check
 import           GL.Enum as GL
-import           GL.Error
 import           GL.Object
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
@@ -39,15 +39,15 @@ instance Object (Buffer ty v) where
   delete n = runLiftIO . glDeleteBuffers n . coerce
 
 instance KnownType ty => Bind (Buffer ty v) where
-  bind = checkingGLError . runLiftIO . glBindBuffer (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unBuffer
+  bind = checking . runLiftIO . glBindBuffer (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unBuffer
 
 realloc :: (KnownType ty, S.Storable v, Has (Lift IO) sig m) => Buffer ty v -> Int -> Update -> Usage -> m ()
 realloc b n update usage = runLiftIO (glBufferData (glEnum (typeOf b)) (fromIntegral (n * sizeOfElem b)) nullPtr (glEnum (Hint update usage)))
 
-copyPtr :: (KnownType ty, Has (Lift IO) sig m) => Buffer ty a -> Interval Identity Int -> Ptr a -> m ()
-copyPtr b i = checkingGLError . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min_ i)) (fromIntegral (size i)) . castPtr
+copyPtr :: (KnownType ty, Has Check sig m, Has (Lift IO) sig m) => Buffer ty a -> Interval Identity Int -> Ptr a -> m ()
+copyPtr b i = checking . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min_ i)) (fromIntegral (size i)) . castPtr
 
-copy :: (KnownType ty, S.Storable v, Has (Lift IO) sig m) => Buffer ty v -> Int -> [v] -> m ()
+copy :: (KnownType ty, S.Storable v, Has Check sig m, Has (Lift IO) sig m) => Buffer ty v -> Int -> [v] -> m ()
 copy b offset vertices = A.withArray vertices $ copyPtr b ((Interval 0 (Identity (length vertices)) + pure offset) ^* sizeOfElem b)
 
 typeOf :: KnownType ty => Buffer ty a -> Type

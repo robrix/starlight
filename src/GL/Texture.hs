@@ -27,7 +27,7 @@ import Foreign.Ptr (nullPtr)
 import Foreign.Storable
 import GHC.Stack
 import GL.Enum as GL
-import GL.Error
+import GL.Effect.Check
 import GL.Object
 import Graphics.GL.Core41
 import Graphics.GL.Types
@@ -41,7 +41,7 @@ instance Object (Texture ty) where
   delete n = runLiftIO . glDeleteTextures n . coerce
 
 instance KnownType ty => Bind (Texture ty) where
-  bind = checkingGLError . runLiftIO . glBindTexture (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unTexture
+  bind = checking . runLiftIO . glBindTexture (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unTexture
 
 
 data Type
@@ -81,8 +81,8 @@ instance GL.Enum PixelType where
     Packed8888 False -> GL_UNSIGNED_INT_8_8_8_8
     Packed8888 True  -> GL_UNSIGNED_INT_8_8_8_8_REV
 
-setImageFormat :: (HasCallStack, Has (Lift IO) sig m) => Type -> InternalFormat -> V2 Int -> PixelFormat -> PixelType -> m ()
-setImageFormat target internalFormat (V2 width height) pixelFormat pixelType = checkingGLError . runLiftIO $ glTexImage2D (glEnum target) 0 (fromIntegral (glEnum internalFormat)) (fromIntegral width) (fromIntegral height) 0 (glEnum pixelFormat) (glEnum pixelType) nullPtr
+setImageFormat :: (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Type -> InternalFormat -> V2 Int -> PixelFormat -> PixelType -> m ()
+setImageFormat target internalFormat (V2 width height) pixelFormat pixelType = checking . runLiftIO $ glTexImage2D (glEnum target) 0 (fromIntegral (glEnum internalFormat)) (fromIntegral width) (fromIntegral height) 0 (glEnum pixelFormat) (glEnum pixelType) nullPtr
 
 
 data FilterType = MinFilter | MagFilter
@@ -124,8 +124,8 @@ instance GL.Enum Wrap where
     ClampToBorder  -> GL_CLAMP_TO_BORDER
 
 
-setParameter :: (Parameter val param, Has (Lift IO) sig m) => Type -> param -> val -> m ()
-setParameter target param = checkingGLError . runLiftIO . glTexParameteri (glEnum target) (glEnum param) . fromIntegral . glEnum
+setParameter :: (Parameter val param, Has Check sig m, Has (Lift IO) sig m) => Type -> param -> val -> m ()
+setParameter target param = checking . runLiftIO . glTexParameteri (glEnum target) (glEnum param) . fromIntegral . glEnum
 
 class (GL.Enum param, GL.Enum val) => Parameter val param | param -> val
 

@@ -18,6 +18,7 @@ import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
+import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts
 import           Starlight.View
@@ -35,7 +36,8 @@ data Beam = Beam
 
 
 runLaser
-  :: ( Has Finally sig m
+  :: ( Has Check sig m
+     , Has Finally sig m
      , Has (Lift IO) sig m
      )
   => ReaderC Drawable m a
@@ -47,7 +49,8 @@ runLaser m = do
 
 
 drawLaser
-  :: ( Has (Lift IO) sig m
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m

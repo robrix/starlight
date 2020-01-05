@@ -14,6 +14,7 @@ import           Data.Coerce
 import           Data.Proxy
 import           Foreign.Storable
 import           GHC.Stack
+import           GL.Effect.Check
 import           GL.Enum as GL
 import           GL.Error
 import           GL.Object
@@ -29,7 +30,7 @@ instance Object Framebuffer where
   delete n = runLiftIO . glDeleteFramebuffers n . coerce
 
 instance Bind Framebuffer where
-  bind = checkingGLError . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
+  bind = checking . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
 
 
 data Attachment
@@ -40,8 +41,8 @@ instance GL.Enum Attachment where
     Colour n -> GL_COLOR_ATTACHMENT0 + fromIntegral n
 
 
-attachTexture :: forall ty sig m . (HasCallStack, Has (Lift IO) sig m) => GL.KnownType ty => Attachment -> GL.Texture ty -> m ()
+attachTexture :: forall ty sig m . (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => GL.KnownType ty => Attachment -> GL.Texture ty -> m ()
 attachTexture attachment (GL.Texture texture) = runLiftIO $ do
-  checkingGLError $ glFramebufferTexture2D GL_FRAMEBUFFER (glEnum attachment) (glEnum (GL.typeVal (Proxy :: Proxy ty))) texture 0
+  checking $ glFramebufferTexture2D GL_FRAMEBUFFER (glEnum attachment) (glEnum (GL.typeVal (Proxy :: Proxy ty))) texture 0
   status <- glCheckFramebufferStatus GL_FRAMEBUFFER
   unless (status == GL_FRAMEBUFFER_COMPLETE) (throwGLError status)

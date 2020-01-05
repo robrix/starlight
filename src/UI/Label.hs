@@ -26,6 +26,7 @@ import           Data.Functor.Interval as Interval
 import           Data.IORef
 import           GHC.Stack
 import           GL.Array
+import           GL.Effect.Check
 import           GL.Framebuffer as GL
 import           GL.Object
 import           GL.Program
@@ -58,7 +59,8 @@ data LabelState = LabelState
 
 
 label
-  :: ( Has Finally sig m
+  :: ( Has Check sig m
+     , Has Finally sig m
      , Has (Lift IO) sig m
      , Has (Reader Window.Window) sig m
      , HasCallStack
@@ -87,7 +89,7 @@ labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
 
 
 -- | Set the label’s text.
-setLabel :: (HasCallStack, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
+setLabel :: (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
 setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
   | null string = sendM (writeIORef ref Nothing)
   | otherwise   = runLiftIO $ do
@@ -136,6 +138,7 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
 
 drawLabel
   :: ( HasCallStack
+     , Has Check sig m
      , Has (Lift IO) sig m
      )
   => Label

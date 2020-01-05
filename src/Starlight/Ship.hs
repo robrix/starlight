@@ -23,6 +23,7 @@ import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
 import           GHC.Generics (Generic)
 import           GL.Array
+import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts
 import           Starlight.Actor
@@ -43,7 +44,8 @@ instance HasActor Ship where
 
 
 drawShip
-  :: ( Has (Lift IO) sig m
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
@@ -64,7 +66,8 @@ drawShip Ship{ colour, actor = Actor{ position, rotation } } = measure "ship" . 
 
 
 runShip
-  :: ( Has Finally sig m
+  :: ( Has Check sig m
+     , Has Finally sig m
      , Has (Lift IO) sig m
      )
   => ReaderC Drawable m a

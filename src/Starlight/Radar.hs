@@ -24,6 +24,7 @@ import           Data.Function ((&))
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           GL.Array
+import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts as Linear
 import           Starlight.Actor
@@ -38,7 +39,8 @@ import           Unit.Angle
 import           Unit.Length
 
 drawRadar
-  :: ( Has (Lift IO) sig m
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader (System StateVectors)) sig m
@@ -87,7 +89,7 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
   where
   n = 10 :: Int
 
-runRadar :: (Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
+runRadar :: (Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
 runRadar m = do
   program <- build shader
   array   <- load vertices

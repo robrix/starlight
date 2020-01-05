@@ -17,6 +17,7 @@ import           Control.Effect.Profile
 import           Control.Effect.Trace
 import qualified Control.Exception.Lift as E
 import           Control.Monad.IO.Class.Lift
+import qualified GL.Carrier.Check.IO as Check
 import           Data.Bool (bool)
 import qualified Starlight.CLI as CLI
 import           Starlight.Game
@@ -24,7 +25,7 @@ import           System.Environment
 import           System.Exit
 
 main :: IO ()
-main = handling $ CLI.execParser CLI.argumentsParser >>= (`runReader` (runProfile (runTrace game)))
+main = handling $ CLI.execParser CLI.argumentsParser >>= (`runReader` (Check.runCheck (runProfile (runTrace game))))
   where
   handling m = do
     name <- getProgName
