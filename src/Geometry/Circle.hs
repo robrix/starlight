@@ -19,8 +19,8 @@ circle radius n =
 
 intersects
   :: (Floating a, Metric v, Ord a)
-  => Point v a -- ^ Centre.
-  -> a         -- ^ Radius.
+  => Point v a -- ^ Sphere centre.
+  -> a         -- ^ Sphere radius.
   -> Point v a -- ^ Ray origin.
   -> v a       -- ^ Ray direction (unit vector).
   -> Bool
