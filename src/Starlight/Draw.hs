@@ -27,10 +27,10 @@ import Starlight.Character as Character
 import Starlight.Draw.Radar as Radar
 import Starlight.Draw.Ship as Ship
 import Starlight.Draw.Starfield as Starfield
+import Starlight.Draw.Weapon.Laser as Laser
 import Starlight.Identifier
 import Starlight.System
 import Starlight.View
-import Starlight.Weapon.Laser as Laser
 import UI.Colour
 import UI.Label
 import UI.Typeface

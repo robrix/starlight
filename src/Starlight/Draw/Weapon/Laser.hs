@@ -2,7 +2,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
-module Starlight.Weapon.Laser
+module Starlight.Draw.Weapon.Laser
 ( Beam(..)
 , runLaser
 , drawLaser
@@ -21,8 +21,8 @@ import           GL.Array
 import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts
+import           Starlight.Draw.Weapon.Laser.Shader
 import           Starlight.View
-import           Starlight.Weapon.Laser.Shader
 import           UI.Colour
 import qualified UI.Drawable as UI
 import           Unit.Angle

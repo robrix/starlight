@@ -25,8 +25,8 @@ import Starlight.Action
 import Starlight.Actor as Actor
 import Starlight.Body as Body
 import Starlight.Character as Character
+import Starlight.Draw.Weapon.Laser as Laser
 import Starlight.System as System
-import Starlight.Weapon.Laser as Laser
 import UI.Colour
 import Unit.Angle
 import Unit.Mass

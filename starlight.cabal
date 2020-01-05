@@ -90,6 +90,8 @@ library
     Starlight.Draw.Radar.Shader
     Starlight.Draw.Ship
     Starlight.Draw.Ship.Shader
+    Starlight.Draw.Weapon.Laser
+    Starlight.Draw.Weapon.Laser.Shader
     Starlight.Ephemeris
     Starlight.Game
     Starlight.Identifier
@@ -102,8 +104,6 @@ library
     Starlight.Starfield.Shader
     Starlight.System
     Starlight.View
-    Starlight.Weapon.Laser
-    Starlight.Weapon.Laser.Shader
     UI.Colour
     UI.Drawable
     UI.Glyph

@@ -5,7 +5,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TypeApplications #-}
-module Starlight.Weapon.Laser.Shader
+module Starlight.Draw.Weapon.Laser.Shader
 ( shader
 , U(..)
 , matrix_

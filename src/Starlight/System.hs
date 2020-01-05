@@ -25,8 +25,8 @@ import           Linear.Matrix
 import           Linear.V4
 import           Linear.Vector
 import           Starlight.Character
+import           Starlight.Draw.Weapon.Laser
 import           Starlight.Identifier
-import           Starlight.Weapon.Laser
 
 data System a = System
   { scale  :: !Float

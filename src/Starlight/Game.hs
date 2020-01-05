@@ -42,13 +42,13 @@ import           Starlight.Draw
 import           Starlight.Draw.Radar
 import           Starlight.Draw.Ship
 import           Starlight.Draw.Starfield
+import           Starlight.Draw.Weapon.Laser
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
 import qualified Starlight.Sol as Sol
 import           Starlight.System as System
 import           Starlight.View
-import           Starlight.Weapon.Laser
 import           System.FilePath
 import           UI.Label as Label
 import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypeface)
