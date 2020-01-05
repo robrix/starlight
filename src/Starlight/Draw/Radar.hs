@@ -4,7 +4,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
-module Starlight.Radar
+module Starlight.Draw.Radar
 ( drawRadar
 , runRadar
 , Drawable
@@ -30,7 +30,7 @@ import           Linear.Exts as Linear
 import           Starlight.Actor
 import           Starlight.Body as Body hiding (Drawable)
 import           Starlight.Character
-import           Starlight.Radar.Shader
+import           Starlight.Draw.Radar.Shader
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour

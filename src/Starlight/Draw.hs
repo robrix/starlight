@@ -24,9 +24,9 @@ import Numeric
 import Starlight.Actor
 import Starlight.Body as Body
 import Starlight.Character as Character
+import Starlight.Draw.Radar as Radar
 import Starlight.Draw.Ship as Ship
 import Starlight.Identifier
-import Starlight.Radar as Radar
 import Starlight.Starfield as Starfield
 import Starlight.System
 import Starlight.View

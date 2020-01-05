@@ -39,11 +39,11 @@ import           Starlight.Body
 import           Starlight.Character
 import           Starlight.Controls
 import           Starlight.Draw
+import           Starlight.Draw.Radar
 import           Starlight.Draw.Ship
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
-import           Starlight.Radar
 import qualified Starlight.Sol as Sol
 import           Starlight.Starfield
 import           Starlight.System as System

@@ -5,7 +5,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Starlight.Radar.Shader
+module Starlight.Draw.Radar.Shader
 ( shader
 , U(..)
 , matrix_
