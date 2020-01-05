@@ -7,6 +7,7 @@ module Starlight.CLI
 , defaultOptions
 , profile_
 , trace_
+, check_
 , argumentsParser
   -- * Re-exports
 , execParser
@@ -23,6 +24,7 @@ import qualified Paths_starlight as Library (version)
 data Options = Options
   { profile :: Bool
   , trace   :: Bool
+  , check   :: Bool
   }
   deriving (Generic, Show)
 
@@ -30,6 +32,7 @@ defaultOptions :: Options
 defaultOptions = Options
   { profile = False
   , trace   = False
+  , check   = False
   }
 
 profile_ :: Lens' Options Bool
@@ -37,6 +40,9 @@ profile_ = field @"profile"
 
 trace_ :: Lens' Options Bool
 trace_ = field @"trace"
+
+check_ :: Lens' Options Bool
+check_ = field @"check"
 
 
 argumentsParser :: ParserInfo Options
@@ -50,6 +56,7 @@ options :: Parser Options
 options = foldl' (&) defaultOptions <$> sequenceA
   [ flag id (profile_ .~ True) (long "profile" <> help "run with profiling enabled")
   , flag id (trace_   .~ True) (long "trace"   <> help "run with tracing enabled")
+  , flag id (check_   .~ True) (long "check"   <> help "run with error checking enabled")
   ]
 
 
