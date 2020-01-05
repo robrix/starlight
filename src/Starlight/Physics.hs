@@ -4,8 +4,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Physics
-( physics
-, inertia
+( inertia
 , gravity
 , runActions
 ) where
@@ -32,13 +31,6 @@ import UI.Colour
 import Unit.Angle
 import Unit.Mass
 import Unit.Time
-
-physics
-  :: Has (Reader (System StateVectors)) sig m
-  => Delta Seconds Float
-  -> Actor
-  -> m Actor
-physics dt a = inertia <$> gravity dt a
 
 inertia :: Actor -> Actor
 inertia a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }

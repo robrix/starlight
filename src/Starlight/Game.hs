@@ -20,7 +20,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (set, to)
+import           Control.Lens (to, (%~))
 import           Control.Monad (when, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -139,16 +139,19 @@ game = do
           continue <- execEmpty . runReader (systemAt system (getDelta t)) $ do
             dt <- fmap realToFrac . since =<< get
             put =<< now
+
+            withView (draw dt fpsLabel targetLabel (Font face 18)) -- draw with current readonly positions & beams
+            characters_ @Body <~> traverse (pure . (actor_%~inertia)) -- update positions
+
             measure "input" input
             measure "controls" $ player_ @Body .actions_ <~ controls
             measure "ai" $ npcs_ @Body <~> traverse ai
-            characters_ @Body <~> traverse
-              (   measure "runActions" . runActions dt
-              >=> measure "physics" . (actor_ @Character <-> physics dt))
+
             -- FIXME: this is so gross
-            beams <- use (beams_ @Body)
             beams_ @Body .= []
-            local (set (beams_ @StateVectors) beams) $ withView (draw dt fpsLabel targetLabel (Font face 18))
+            characters_ @Body <~> traverse
+              (   measure "gravity" . (actor_ @Character <-> gravity dt)
+              >=> measure "runActions" . runActions dt)
           continue <$ measure "swap" Window.swap
         when continue loop
 
