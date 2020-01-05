@@ -15,7 +15,7 @@ import Control.Applicative ((<|>))
 import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Effect.Reader
-import Control.Lens hiding (modifying, use, view, (%=), (*=), (+=), (.=))
+import Control.Lens hiding (modifying, use, view, views, (%=), (*=), (+=), (.=))
 import Control.Monad (foldM, guard)
 import Data.Foldable (foldl', for_, traverse_)
 import Data.Functor.Interval
@@ -51,11 +51,13 @@ gravity (Delta (Seconds dt)) a = do
 
 -- FIXME: do something smarter than ray-sphere intersection.
 hit :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> Character -> m Character
-hit (Delta (Seconds dt)) c = view (beams_ @StateVectors) >>= foldM go c where
-  go char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o }
-    -- FIXME: factor in system scale
-    | intersects (P (c^._xy)) r (P (o^._xy)) (cartesian2 theta 1) = pure $ char & ship_.armour_.min_.coerced -~ damage
-    | otherwise                                                    = pure char
+hit (Delta (Seconds dt)) c = do
+  scale <- views (System.scale_ @StateVectors) (1/)
+  beams <- view (beams_ @StateVectors)
+  foldM (go scale) c beams where
+  go scale char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o }
+    | intersects (P (c^._xy)) (r * scale) (P (o^._xy)) (cartesian2 theta 1) = pure $ char & ship_.armour_.min_.coerced -~ damage
+    | otherwise                                                             = pure char
   damage = 100 * dt
 
 
