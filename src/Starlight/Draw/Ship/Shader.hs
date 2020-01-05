@@ -5,7 +5,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Starlight.Ship.Shader
+module Starlight.Draw.Ship.Shader
 ( shader
 , U(..)
 , matrix_

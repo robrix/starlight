@@ -86,6 +86,8 @@ library
     Starlight.CLI
     Starlight.Controls
     Starlight.Draw
+    Starlight.Draw.Ship
+    Starlight.Draw.Ship.Shader
     Starlight.Ephemeris
     Starlight.Game
     Starlight.Identifier
@@ -95,8 +97,6 @@ library
     Starlight.Physics
     Starlight.Radar
     Starlight.Radar.Shader
-    Starlight.Ship
-    Starlight.Ship.Shader
     Starlight.Sol
     Starlight.Starfield
     Starlight.Starfield.Shader

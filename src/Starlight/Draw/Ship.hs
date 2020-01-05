@@ -5,7 +5,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
-module Starlight.Ship
+module Starlight.Draw.Ship
 ( Ship(..)
 , drawShip
 , runShip
@@ -27,7 +27,7 @@ import           GL.Effect.Check
 import           GL.Program
 import           Linear.Exts
 import           Starlight.Actor
-import           Starlight.Ship.Shader
+import           Starlight.Draw.Ship.Shader
 import           Starlight.View
 import           UI.Colour
 import qualified UI.Drawable as UI
