@@ -1,7 +1,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
-module Control.Effect.Fork
-( Fork(..)
+module Control.Effect.Thread
+( Thread(..)
 ) where
 
-data Fork m k
+data Thread m k
   = forall a . Fork (m a) (a -> m k)
