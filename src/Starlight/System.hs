@@ -19,7 +19,7 @@ module Starlight.System
 import           Control.Lens (Lens, Lens', ix, lens, (&), (.~), (^.), (^?))
 import           Data.Generics.Product.Fields
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import           GHC.Generics (Generic)
 import           Linear.Matrix
 import           Linear.V4
