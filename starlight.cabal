@@ -101,6 +101,7 @@ library
     Starlight.Main
     Starlight.Neighbourhood
     Starlight.Physics
+    Starlight.Ship
     Starlight.Sol
     Starlight.System
     Starlight.View
