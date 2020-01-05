@@ -6,6 +6,7 @@
 module Starlight.Physics
 ( inertia
 , gravity
+, hit
 , runActions
 ) where
 
@@ -18,14 +19,17 @@ import Control.Effect.Reader
 import Control.Lens hiding (modifying, use, (%=), (*=), (+=), (.=))
 import Control.Monad (guard)
 import Data.Foldable (foldl', for_, traverse_)
+import Data.Functor.Interval
 import Data.Ix (inRange)
 import Data.List (elemIndex)
+import Geometry.Circle (intersects)
 import Linear.Exts as L
 import Starlight.Action
 import Starlight.Actor as Actor
 import Starlight.Body as Body
 import Starlight.Character as Character
 import Starlight.Draw.Weapon.Laser as Laser
+import Starlight.Ship
 import Starlight.System as System
 import UI.Colour
 import Unit.Angle
@@ -44,6 +48,15 @@ gravity (Delta (Seconds dt)) a = do
     force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
     r = (b^.position_ ^* scale) `qd` (a^.position_ ^* scale) -- “quadrance” (square of distance between actor & body)
   bigG = 6.67430e-11 -- gravitational constant
+
+
+hit :: Delta Seconds Float -> Beam -> Character -> Character
+hit (Delta (Seconds dt)) Beam{ angle = theta, position = o } char@Character{ actor = Actor{ position = c } }
+  -- FIXME: don’t just assume size
+  -- FIXME: factor in system scale
+  | intersects (P (c^._xy)) 15 (P (o^._xy)) (cartesian2 theta 1) = char & ship_.armour_.min_.coerced -~ damage -- FIXME: reduce the armour
+  | otherwise                                                    = char where
+  damage = 100 * dt
 
 
 runActions
