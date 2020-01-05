@@ -7,7 +7,6 @@ module Starlight.Character
 ( Character(..)
 , target_
 , actions_
-, firing_
 , HasActor(..)
 ) where
 
@@ -23,7 +22,6 @@ data Character = Character
   { actor   :: !Actor
   , target  :: !(Maybe Identifier)
   , actions :: !(Set Action)
-  , firing  :: !Bool
   }
   deriving (Generic, Show)
 
@@ -36,6 +34,3 @@ target_ = field @"target"
 
 actions_ :: Lens' Character (Set Action)
 actions_ = field @"actions"
-
-firing_ :: Lens' Character Bool
-firing_ = field @"firing"
