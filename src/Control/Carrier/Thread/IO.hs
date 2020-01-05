@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Control.Carrier.Thread.IO
-( ThreadC(..)
+( runThread
+, ThreadC(ThreadC)
   -- * Thread effect
 , module Control.Effect.Thread
 ) where
@@ -8,5 +9,5 @@ module Control.Carrier.Thread.IO
 import Control.Monad.IO.Class
 import Control.Effect.Thread
 
-newtype ThreadC m a = ThreadC (m a)
+newtype ThreadC m a = ThreadC { runThread :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
