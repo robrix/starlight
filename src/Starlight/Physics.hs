@@ -52,15 +52,16 @@ gravity (Delta (Seconds dt)) a = do
 
 -- FIXME: do something smarter than ray-sphere intersection.
 hit :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> CharacterIdentifier -> Character -> m Character
-hit (Delta (Seconds dt)) _ c = do
+hit (Delta (Seconds dt)) i c = do
   scale <- views (System.scale_ @StateVectors) (1/)
   beams <- view (beams_ @StateVectors)
   foldM (go scale) c beams where
-  go scale char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o }
-    -- FIXME: ships should not be able to shoot themselves
-    | intersects (P (c^._xy)) (r * scale) (P (o^._xy)) (cartesian2 theta 1) = do
-      pure $ char & ship_.armour_.min_.coerced -~ damage
-    | otherwise                                                             = pure char
+  go scale char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o, firedBy = i' }
+    | i /= i'
+    , intersects (P (c^._xy)) (r * scale) (P (o^._xy)) (cartesian2 theta 1)
+    = pure $ char & ship_.armour_.min_.coerced -~ damage
+    | otherwise
+    = pure char
   damage = 100 * dt
 
 
