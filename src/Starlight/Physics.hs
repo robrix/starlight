@@ -28,6 +28,7 @@ import Starlight.Actor as Actor
 import Starlight.Body as Body
 import Starlight.Character as Character
 import Starlight.Draw.Weapon.Laser as Laser
+import Starlight.Identifier
 import Starlight.Ship
 import Starlight.System as System
 import UI.Colour
@@ -50,8 +51,8 @@ gravity (Delta (Seconds dt)) a = do
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
-hit :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> Character -> m Character
-hit (Delta (Seconds dt)) c = do
+hit :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> CharacterIdentifier -> Character -> m Character
+hit (Delta (Seconds dt)) _ c = do
   scale <- views (System.scale_ @StateVectors) (1/)
   beams <- view (beams_ @StateVectors)
   foldM (go scale) c beams where
@@ -69,9 +70,10 @@ runActions
      , Has (State (System Body)) sig m
      )
   => Delta Seconds Float
+  -> CharacterIdentifier
   -> Character
   -> m Character
-runActions (Delta (Seconds dt)) c = do
+runActions (Delta (Seconds dt)) _ c = do
   system <- ask @(System StateVectors)
   execState c (traverse_ (go system) (actions c)) where
   go system = \case
