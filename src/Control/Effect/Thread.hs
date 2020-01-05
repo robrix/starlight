@@ -9,9 +9,9 @@ module Control.Effect.Thread
 import Control.Algebra
 
 data Thread m k
-  = forall a . Fork (m a) (a -> m k)
+  = forall a . Fork (m a) (m k)
 
 deriving instance Functor m => Functor (Thread m)
 
 instance HFunctor Thread where
-  hmap f (Fork m k) = Fork (f m) (f . k)
+  hmap f (Fork m k) = Fork (f m) (f k)
