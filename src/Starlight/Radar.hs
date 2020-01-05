@@ -58,6 +58,7 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
+  -- FIXME: store the position, radius, & colour of each body at t and compute the blips in the (instanced?) shader rather than setting uniforms
   measure "bodies" $
     for_ bodies $ \ StateVectors{ body = Body{ radius = Metres r, colour }, actor = Actor{ position = there } } -> do
       measure "setBlip" $ setBlip (makeBlip (there ^-^ here) (r * scale) colour)
