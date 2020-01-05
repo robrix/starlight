@@ -47,10 +47,12 @@ import           Starlight.Draw.Weapon.Laser
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
+import           Starlight.Ship
 import qualified Starlight.Sol as Sol
 import           Starlight.System as System
 import           Starlight.View
 import           System.FilePath
+import           UI.Colour
 import           UI.Label as Label
 import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
@@ -80,6 +82,7 @@ game = do
             }
           , target  = Nothing
           , actions = mempty
+          , ship    = Ship{ colour = white, health = 1000 }
           }
         , npcs =
           [ Character
@@ -90,6 +93,7 @@ game = do
               }
             , target  = Just Player
             , actions = mempty
+            , ship    = Ship{ colour = white, health = 1000 }
             }
           , Character
             { actor   = Actor
@@ -99,6 +103,7 @@ game = do
               }
             , target  = Just $ B (Star (10, "Sol"))
             , actions = mempty
+            , ship    = Ship{ colour = white, health = 1000 }
             }
           , Character
             { actor   = Actor
@@ -108,6 +113,7 @@ game = do
               }
             , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
             , actions = mempty
+            , ship    = Ship{ colour = white, health = 1000 }
             }
           ]
         }

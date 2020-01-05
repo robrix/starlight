@@ -17,11 +17,13 @@ import GHC.Generics (Generic)
 import Starlight.Action
 import Starlight.Actor (Actor, HasActor(..))
 import Starlight.Identifier
+import Starlight.Ship
 
 data Character = Character
   { actor   :: !Actor
   , target  :: !(Maybe Identifier)
   , actions :: !(Set Action)
+  , ship    :: !Ship
   }
   deriving (Generic, Show)
 

@@ -30,7 +30,6 @@ import Starlight.Draw.Ship as Ship
 import Starlight.Draw.Starfield as Starfield
 import Starlight.Draw.Weapon.Laser as Laser
 import Starlight.Identifier
-import Starlight.Ship
 import Starlight.System
 import Starlight.View
 import UI.Colour
@@ -73,7 +72,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   system@System{ scale, npcs, beams } <- ask @(System StateVectors)
 
-  for_ (player : npcs) $ \ c -> drawShip Ship{ colour = white, actor = c^.actor_, health = 100 }
+  for_ (player : npcs) $ \ Character{ actor, ship } -> drawShip actor ship
 
   for_ beams drawLaser
 

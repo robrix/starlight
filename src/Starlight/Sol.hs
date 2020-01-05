@@ -21,6 +21,7 @@ import           Starlight.Body
 import           Starlight.Character
 import           Starlight.Ephemeris
 import           Starlight.Identifier as Identifier
+import           Starlight.Ship
 import           Starlight.System
 import           UI.Colour
 import           Unit.Angle
@@ -227,6 +228,7 @@ system = do
       { actor   = Actor{ position = 0, velocity = 0, rotation = 0 }
       , target  = Nothing
       , actions = mempty
+      , ship    = Ship{ colour = white, health = 100 }
       }
     , npcs   = mempty
     , beams  = mempty
