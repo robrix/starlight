@@ -11,8 +11,8 @@ module Starlight.Sol
 ) where
 
 import           Control.Effect.Lift
-import           Data.Maybe (fromMaybe)
 import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe)
 import           Linear.Quaternion
 import           Linear.V4
 import           Linear.Vector
