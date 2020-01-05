@@ -92,9 +92,7 @@ module GL.Shader.DSL
 , foldVarsM
 , mapVars
 , forVars
-, sequenceVars
 , defaultVars
-, ApVars(..)
   -- * Re-exports
 , Type(..)
 , Colour
@@ -108,7 +106,7 @@ module GL.Shader.DSL
 , V4
 ) where
 
-import           Control.Applicative (Alternative(..), liftA, liftA2)
+import           Control.Applicative (liftA2)
 import           Control.Carrier.Fresh.Strict
 import qualified Control.Carrier.State.Strict as S
 import qualified Control.Category as Cat
@@ -715,10 +713,6 @@ class Vars t where
   default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => Field a -> v a -> m (v' a)) -> t v -> m (t v')
   traverseVars f = fmap to . run . evalFresh 0 . S.evalState (Offset 0) . gtraverseVars @t f . from
 
-  mapVars2 :: (forall a . GLSLType a => Field a -> u a -> v a -> w a) -> t u -> t v -> t w
-  default mapVars2 :: (Generic (t u), Generic (t v), Generic (t w), GMapVars2 t u v w (Rep (t u)) (Rep (t v)) (Rep (t w))) => (forall a . GLSLType a => Field a -> u a -> v a -> w a) -> t u -> t v -> t w
-  mapVars2 f a b = to (run (evalFresh 0 (S.evalState (Offset 0) (gmapVars2 @t f (from a) (from b)))))
-
 foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => Field a -> v a -> b) -> t v -> b
 foldVars f t = getConst $ traverseVars (fmap Const . f) t
 
@@ -731,21 +725,8 @@ mapVars f t = runIdentity $ traverseVars (fmap Identity . f) t
 forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => Field a -> v a -> m (v' a)) -> m (t v')
 forVars t f = traverseVars f t
 
-sequenceVars :: (Alternative f, Traversable f, Vars i) => f (i f) -> i f
-sequenceVars = getApVars . traverse (ApVars . mapVars (flip const))
-
 defaultVars :: Vars t => t Maybe
 defaultVars = makeVars (const Nothing)
-
-
-newtype ApVars i (f :: * -> *) a = ApVars { getApVars :: i f }
-
-instance (Alternative f, Vars i) => Functor (ApVars i f) where
-  fmap = liftA
-
-instance (Alternative f, Vars i) => Applicative (ApVars i f) where
-  pure _ = ApVars (makeVars (\ _ -> empty))
-  ApVars f <*> ApVars a = ApVars (mapVars2 (const (<|>)) f a)
 
 
 class GMakeVars t v f where
@@ -804,32 +785,3 @@ class GTraverseVar t a v1 v2 f1 f2 | f1 -> a v1, f2 -> a v2 where
 
 instance GLSLType a => GTraverseVar t a v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
   gtraverseVar f s = fmap K1 . f (C.coerce s) . unK1
-
-
-class GMapVars2 t v1 v2 v3 f1 f2 f3 where
-  gmapVars2 :: (Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field a -> v1 a -> v2 a -> v3 a) -> f1 (t v1) -> f2 (t v2) -> m (f3 (t v3))
-
-instance GMapVars2 t v1 v2 v3 f1 f2 f3 => GMapVars2 t v1 v2 v3 (M1 D d f1) (M1 D d f2) (M1 D d f3) where
-  gmapVars2 f (M1 a) (M1 b) = M1 <$> gmapVars2 f a b
-
-instance GMapVars2 t v1 v2 v3 f1 f2 f3 => GMapVars2 t v1 v2 v3 (M1 C c f1) (M1 C c f2) (M1 C c f3) where
-  gmapVars2 f (M1 a) (M1 b) = M1 <$> gmapVars2 f a b
-
-instance GMapVars2 t v1 v2 v3 U1 U1 U1 where
-  gmapVars2 _ _ _ = pure U1
-
-instance (GMapVars2 t v1 v2 v3 f1l f2l f3l, GMapVars2 t v1 v2 v3 f1r f2r f3r) => GMapVars2 t v1 v2 v3 (f1l :*: f1r) (f2l :*: f2r) (f3l :*: f3r) where
-  gmapVars2 f (l1 :*: r1) (l2 :*: r2) = (:*:) <$> gmapVars2 f l1 l2 <*> gmapVars2 f r1 r2
-
-instance (Storable a, GMapVar2 t a v1 v2 v3 f1 f2 f3, Selector s) => GMapVars2 t v1 v2 v3 (M1 S s f1) (M1 S s f2) (M1 S s f3) where
-  gmapVars2 f m@(M1 a) (M1 b) = do
-    i <- fresh
-    o <- S.get
-    S.put (o <> Offset (sizeOf @a undefined))
-    pure . M1 $ gmapVar2 f (Field (selName m) i o) a b
-
-class GMapVar2 t a v1 v2 v3 f1 f2 f3 | f1 -> a v1, f2 -> a v2, f3 -> a v3 where
-  gmapVar2 :: (forall a . GLSLType a => Field a -> v1 a -> v2 a -> v3 a) -> Field a -> f1 (t v1) -> f2 (t v2) -> f3 (t v3)
-
-instance GLSLType a => GMapVar2 t a v1 v2 v3 (K1 R (v1 a)) (K1 R (v2 a)) (K1 R (v3 a)) where
-  gmapVar2 f s (K1 a) (K1 b) = K1 (f (C.coerce s) a b)
