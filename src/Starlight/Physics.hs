@@ -38,10 +38,10 @@ physics
   -> m Actor
 physics dt a = do
   System{ scale, bodies } <- ask
-  pure (updatePosition (foldr (applyGravity dt (1/scale)) a bodies))
+  pure (inertia (foldr (applyGravity dt (1/scale)) a bodies))
 
-updatePosition :: Actor -> Actor
-updatePosition a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
+inertia :: Actor -> Actor
+inertia a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
 
 applyGravity :: Delta Seconds Float -> Float -> StateVectors -> Actor -> Actor
 applyGravity (Delta (Seconds dt)) scale StateVectors{ actor = b, body = Body{ mass } } a
