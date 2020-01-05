@@ -47,7 +47,7 @@ drawRadar
   => Character
   -> m ()
 drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar" . UI.using getDrawable $ do
-  system@System{ scale, npcs } <- ask @(System StateVectors)
+  system@System{ scale, npcs, bodies } <- ask @(System StateVectors)
   vs <- ask
 
   let radius = 100
@@ -57,7 +57,7 @@ drawRadar Character{ actor = Actor{ position = here }, target } = measure "radar
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
   measure "bodies" $
-    forOf_ (bodies_ . traversed) system $ \ StateVectors{ body = Body{ radius = Metres r, colour }, actor = Actor{ position = there } } -> do
+    for_ bodies $ \ StateVectors{ body = Body{ radius = Metres r, colour }, actor = Actor{ position = there } } -> do
       measure "setBlip" $ setBlip (makeBlip (there ^-^ here) (r * scale) colour)
       measure "drawArrays" $ drawArrays LineStrip range
 
