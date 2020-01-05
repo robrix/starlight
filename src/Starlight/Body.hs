@@ -112,7 +112,7 @@ actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, sem
   -- extremely dubious
   mu = 398600.5
   p = getMetres semimajor * (1 - eccentricity ** 2)
-  h = ((1 - (eccentricity ** 2)) * (getMetres semimajor * mu)) ** 0.5
+  h = ((1 - (eccentricity ** 2)) * getMetres semimajor * mu) ** 0.5
   -- hr = h/r
 
 
