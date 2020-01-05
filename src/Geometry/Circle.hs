@@ -1,8 +1,10 @@
 module Geometry.Circle
 ( circle
+, intersects
 ) where
 
 import Linear.Exts
+import Unit.Angle
 
 -- | Construct vertices for a circle.
 circle
@@ -14,3 +16,19 @@ circle radius n =
   | i <- [0..pred n]
   , let theta = 2 * pi * fromIntegral i / fromIntegral n
   ]
+
+
+intersects
+  :: Point V2 Float -- ^ Centre.
+  -> Float          -- ^ Radius.
+  -> Point V2 Float -- ^ Ray origin.
+  -> Radians Float  -- ^ Ray angle
+  -> Bool
+intersects c r o theta = discriminant >= 0 && (d1 >= 0 && d1 <= 1 || d2 >= 0 && d2 <= 1) where
+  l = cartesian2 theta 1
+  o_c = o - c
+  discriminant = b ** 2 - (quadrance o_c - r ** 2)
+  b = (l `dot` unP o_c)
+  root = sqrt discriminant
+  (d1, d2) = (-b) ± root
+  a ± b = (a + b, a - b)
