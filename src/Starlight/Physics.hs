@@ -52,9 +52,9 @@ gravity (Delta (Seconds dt)) a = do
 -- FIXME: do something smarter than ray-sphere intersection.
 hit :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> Character -> m Character
 hit (Delta (Seconds dt)) c = view (beams_ @StateVectors) >>= foldM go c where
-  go char@Character{ actor = Actor{ position = c }, ship = Ship{ scale } } Beam{ angle = theta, position = o }
+  go char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o }
     -- FIXME: factor in system scale
-    | intersects (P (c^._xy)) scale (P (o^._xy)) (cartesian2 theta 1) = pure $ char & ship_.armour_.min_.coerced -~ damage
+    | intersects (P (c^._xy)) r (P (o^._xy)) (cartesian2 theta 1) = pure $ char & ship_.armour_.min_.coerced -~ damage
     | otherwise                                                    = pure char
   damage = 100 * dt
 
