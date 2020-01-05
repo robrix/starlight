@@ -1,8 +1,11 @@
 module Geometry.Circle
 ( circle
 , intersects
+, intersections
 ) where
 
+import Control.Monad (guard)
+import Data.Maybe (isJust)
 import Linear.Exts
 
 -- | Construct vertices for a circle.
@@ -24,7 +27,18 @@ intersects
   -> Point v a -- ^ Ray origin.
   -> v a       -- ^ Ray direction (unit vector).
   -> Bool
-intersects c r o l = discriminant >= 0 && (d1 >= 0 && d1 <= 1 || d2 >= 0 && d2 <= 1) where
+intersects c r o l = isJust $ do
+  (d1, d2) <- intersections c r o l
+  guard (d1 >= 0 && d1 <= 1 || d2 >= 0 && d2 <= 1)
+
+intersections
+  :: (Floating a, Metric v, Ord a)
+  => Point v a -- ^ Sphere centre.
+  -> a         -- ^ Sphere radius.
+  -> Point v a -- ^ Ray origin.
+  -> v a       -- ^ Ray direction (unit vector).
+  -> Maybe (a, a)
+intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
   o_c = o ^-^ c
   discriminant = b ** 2 - (quadrance o_c - r ** 2)
   b = (l `dot` unP o_c)
