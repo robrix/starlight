@@ -1,2 +1,9 @@
 module GL.Effect.Check
-() where
+( -- * Check effect
+  Check(..)
+) where
+
+import GHC.Stack
+
+data Check m k
+  = Check (Maybe (String, SrcLoc)) (m k)
