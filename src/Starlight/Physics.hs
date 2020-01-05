@@ -16,7 +16,7 @@ import Control.Effect.Lift
 import Control.Effect.Reader
 import Control.Lens hiding (modifying, use, (%=), (*=), (+=), (.=))
 import Control.Monad (guard)
-import Data.Foldable (for_, traverse_)
+import Data.Foldable (foldl', for_, traverse_)
 import Data.Ix (inRange)
 import Data.List (elemIndex)
 import Linear.Exts as L
@@ -36,18 +36,19 @@ physics
   => Delta Seconds Float
   -> Actor
   -> m Actor
-physics dt a = do
-  System{ scale, bodies } <- ask
-  pure (inertia (foldr (gravity dt (1/scale)) a bodies))
+physics dt a = inertia <$> gravity dt a
 
 inertia :: Actor -> Actor
 inertia a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
 
-gravity :: Delta Seconds Float -> Float -> StateVectors -> Actor -> Actor
-gravity (Delta (Seconds dt)) scale StateVectors{ actor = b, body = Body{ mass } } a
-  = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
-  force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
-  r = (b^.position_ ^* scale) `qd` (a^.position_ ^* scale) -- “quadrance” (square of distance between actor & body)
+gravity :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> Actor -> m Actor
+gravity (Delta (Seconds dt)) a = do
+  System{ scale, bodies } <- ask
+  pure $! foldl' (go (1/scale)) a bodies where
+  go scale a StateVectors{ actor = b, body = Body{ mass } }
+    = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
+    force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
+    r = (b^.position_ ^* scale) `qd` (a^.position_ ^* scale) -- “quadrance” (square of distance between actor & body)
   bigG = 6.67430e-11 -- gravitational constant
 
 
