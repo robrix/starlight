@@ -55,8 +55,8 @@ instance Bind (Array n) where
 configureArray :: (DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
 configureArray _ a = DSL.foldVarsM (\ f@DSL.Field { DSL.location, DSL.offset } -> runLiftIO $ do
   checking $ glEnableVertexAttribArray (fromIntegral location)
-  checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral (S.sizeOf (elemA a))) (nullPtr `plusPtr` DSL.getOffset offset)) (DSL.makeVars id `like` a) where
-  like :: a (DSL.Field v) -> Array (a c) -> a (DSL.Field v)
+  checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral (S.sizeOf (elemA a))) (nullPtr `plusPtr` DSL.getOffset offset)) (DSL.defaultVars `like` a) where
+  like :: a Maybe -> Array (a Identity) -> a Maybe
   like = const
   elemA :: Array (i Identity) -> i Identity
   elemA _ = undefined
