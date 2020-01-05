@@ -57,7 +57,7 @@ build :: forall u i o m sig . (HasCallStack, Has Check sig m, Has Finally sig m,
 build p = runLiftIO $ do
   program <- glCreateProgram
   onExit (glDeleteProgram program)
-  DSL.foldVarsM @i (\ DSL.Field { DSL.name, DSL.location } _ -> checking $
+  DSL.foldVarsM @i (\ DSL.Field { DSL.name, DSL.location } -> checking $
     C.withCString name (glBindAttribLocation program (fromIntegral location))) (DSL.makeVars id)
   shaders <- for (DSL.shaderSources p) $ \ (type', source) -> do
     shader <- createShader type'
@@ -69,7 +69,7 @@ build p = runLiftIO $ do
 
   checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS program
 
-  ls <- DSL.foldVarsM @u (\ DSL.Field{ DSL.name, DSL.location } _ -> do
+  ls <- DSL.foldVarsM @u (\ DSL.Field{ DSL.name, DSL.location } -> do
     loc <- checking $ C.withCString name (glGetUniformLocation program)
     pure (IntMap.singleton location loc)) DSL.defaultVars
 
@@ -97,8 +97,8 @@ instance (Has Check sig m, Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u
     L (Get   k) -> k DSL.defaultVars
     L (Put s k) -> do
       Program ls prog <- askProgram
-      DSL.foldVarsM (\ DSL.Field { DSL.location } ->
-        maybe (pure ()) (checking . uniform prog (ls IntMap.! location))) s
+      DSL.foldVarsM (\ DSL.Field { DSL.location, DSL.value } ->
+        maybe (pure ()) (checking . uniform prog (ls IntMap.! location)) value) s
       k
     R other     -> ProgramC (send (handleCoercible other))
 

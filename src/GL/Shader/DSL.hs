@@ -165,7 +165,7 @@ instance Vars None
 shaderSources :: Shader u i o -> [(Type, String)]
 shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> stageSources u' (f u) where
   u = makeVars (Var . name)
-  u' = foldVars (const getConst) (makeVars (pvar "uniform" . name) `like` u)
+  u' = foldVars (getConst . value) (makeVars (pvar "uniform" . name) `like` u)
 
 stageSources :: Doc () -> Stage i o -> [(Type, Doc ())]
 stageSources u = \case
@@ -178,8 +178,8 @@ stageSources u = \case
   renderStage f
     =  pretty "#version 410" <> hardline
     <> u
-    <> foldVars (const getConst) (makeVars (pvar "in"      . name) `like` i)
-    <> foldVars (const getConst) (makeVars (pvar "out"     . name) `like` o)
+    <> foldVars (getConst . value) (makeVars (pvar "in"      . name) `like` i)
+    <> foldVars (getConst . value) (makeVars (pvar "out"     . name) `like` o)
     <> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt (f i o) <> line)) where
     i = makeVars (Var . name)
     o = makeVars (Ref . name)
@@ -688,10 +688,11 @@ instance GLSLType TextureUnit where
   renderTypeOf _ = pretty "sampler2D"
 
 
-data Field a = Field
+data Field v a = Field
   { name     :: String
   , location :: Int
   , offset   :: Offset
+  , value    :: v a
   }
   deriving (Eq, Ord, Show)
 
@@ -705,32 +706,32 @@ instance Monoid Offset where
   mempty = 0
 
 class Vars t where
-  makeVars :: (forall a . GLSLType a => Field a -> v a) -> t v
-  default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GLSLType a => Field a -> v a) -> t v
+  makeVars :: (forall a . GLSLType a => Field Maybe a -> v a) -> t v
+  default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GLSLType a => Field Maybe a -> v a) -> t v
   makeVars f = to (run (evalFresh 0 (S.evalState (Offset 0) (gmakeVars @t f))))
 
-  traverseVars :: Applicative m => (forall a . GLSLType a => Field a -> v a -> m (v' a)) -> t v -> m (t v')
-  default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => Field a -> v a -> m (v' a)) -> t v -> m (t v')
+  traverseVars :: Applicative m => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
+  default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
   traverseVars f = fmap to . run . evalFresh 0 . S.evalState (Offset 0) . gtraverseVars @t f . from
 
-foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => Field a -> v a -> b) -> t v -> b
-foldVars f t = getConst $ traverseVars (fmap Const . f) t
+foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => Field v a -> b) -> t v -> b
+foldVars f t = getConst $ traverseVars (Const . f) t
 
-foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field a -> v a -> m b) -> t v -> m b
-foldVarsM f t = getAp $ foldVars (fmap Ap . f) t
+foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field v a -> m b) -> t v -> m b
+foldVarsM f t = getAp $ foldVars (Ap . f) t
 
-mapVars :: Vars t => (forall a . GLSLType a => Field a -> v a -> v' a) -> t v -> t v'
-mapVars f t = runIdentity $ traverseVars (fmap Identity . f) t
+mapVars :: Vars t => (forall a . GLSLType a => Field v a -> v' a) -> t v -> t v'
+mapVars f t = runIdentity $ traverseVars (Identity . f) t
 
-forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => Field a -> v a -> m (v' a)) -> m (t v')
+forVars :: (Vars t, Applicative m) => t v -> (forall a . GLSLType a => Field v a -> m (v' a)) -> m (t v')
 forVars t f = traverseVars f t
 
 defaultVars :: Vars t => t Maybe
-defaultVars = makeVars (const Nothing)
+defaultVars = makeVars value
 
 
 class GMakeVars t v f where
-  gmakeVars :: (Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field a -> v a) -> m (f (t v))
+  gmakeVars :: (Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field Maybe a -> v a) -> m (f (t v))
 
 instance GMakeVars t v f => GMakeVars t v (M1 D d f) where
   gmakeVars f = M1 <$> gmakeVars f
@@ -749,17 +750,17 @@ instance (Storable a, GMakeVar t a v f, Selector s) => GMakeVars t v (M1 S s f) 
     i <- fresh
     o <- S.get
     S.put (o <> Offset (sizeOf @a undefined))
-    pure (fix $ \ x -> M1 (gmakeVar f (Field (selName x) i o)))
+    pure (fix $ \ x -> M1 (gmakeVar f (Field (selName x) i o Nothing)))
 
 class GMakeVar t a v f | f -> a v where
-  gmakeVar :: (forall a . GLSLType a => Field a -> v a) -> Field a -> f (t v)
+  gmakeVar :: (forall a . GLSLType a => Field Maybe a -> v a) -> (forall a . Field Maybe a) -> f (t v)
 
 instance GLSLType a => GMakeVar t a v (K1 R (v a)) where
-  gmakeVar f s = K1 (f (C.coerce s))
+  gmakeVar f s = K1 (f s)
 
 
 class GTraverseVars t v1 v2 f1 f2 where
-  gtraverseVars :: (Applicative f, Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field a -> v1 a -> f (v2 a)) -> f1 (t v1) -> m (f (f2 (t v2)))
+  gtraverseVars :: (Applicative f, Has Fresh sig m, Has (S.State Offset) sig m) => (forall a . GLSLType a => Field v1 a -> f (v2 a)) -> f1 (t v1) -> m (f (f2 (t v2)))
 
 instance GTraverseVars t v1 v2 f1 f2 => GTraverseVars t v1 v2 (M1 D d f1) (M1 D d f2) where
   gtraverseVars f a = fmap M1 <$> gtraverseVars @t @v1 @v2 @f1 @f2 f (unM1 a)
@@ -781,7 +782,7 @@ instance (Storable a, GTraverseVar t a v1 v2 f1 f2, Selector s) => GTraverseVars
     pure (M1 <$> gtraverseVar f (Field (selName m) i o) (unM1 m))
 
 class GTraverseVar t a v1 v2 f1 f2 | f1 -> a v1, f2 -> a v2 where
-  gtraverseVar :: Applicative f => (forall a . GLSLType a => Field a -> v1 a -> f (v2 a)) -> Field a -> f1 (t v1) -> f (f2 (t v2))
+  gtraverseVar :: Applicative f => (forall a . GLSLType a => Field v1 a -> f (v2 a)) -> (forall a . v1 a -> Field v1 a) -> f1 (t v1) -> f (f2 (t v2))
 
 instance GLSLType a => GTraverseVar t a v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
-  gtraverseVar f s = fmap K1 . f (C.coerce s) . unK1
+  gtraverseVar f s = fmap K1 . f . s . unK1
