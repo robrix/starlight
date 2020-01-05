@@ -18,11 +18,11 @@ circle radius n =
 
 
 intersects
-  :: (Floating a, Ord a)
-  => Point V2 a -- ^ Centre.
-  -> a          -- ^ Radius.
-  -> Point V2 a -- ^ Ray origin.
-  -> V2 a       -- ^ Ray direction (unit vector).
+  :: (Floating a, Metric v, Ord a)
+  => Point v a -- ^ Centre.
+  -> a         -- ^ Radius.
+  -> Point v a -- ^ Ray origin.
+  -> v a       -- ^ Ray direction (unit vector).
   -> Bool
 intersects c r o l = discriminant >= 0 && (d1 >= 0 && d1 <= 1 || d2 >= 0 && d2 <= 1) where
   o_c = o ^-^ c
