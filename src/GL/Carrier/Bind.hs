@@ -12,11 +12,12 @@ module GL.Carrier.Bind
 , module GL.Effect.Bind
 ) where
 
-import Control.Algebra
-import Control.Effect.Lift
-import Control.Carrier.Reader
-import Control.Monad.IO.Class
-import GL.Effect.Bind
+import           Control.Algebra
+import           Control.Carrier.Reader
+import           Control.Effect.Lift
+import           Control.Monad.IO.Class
+import           GL.Effect.Bind
+import           GL.Effect.Check
 import qualified GL.Object as GL
 
 runBind :: BindC t m a -> m a
@@ -25,7 +26,7 @@ runBind = runReader Nothing . runBindC
 newtype BindC t m a = BindC { runBindC :: ReaderC (Maybe t) m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance (Has (Lift IO) sig m, GL.Bind t) => Algebra (Bind t :+: sig) (BindC t m) where
+instance (Has Check sig m, Has (Lift IO) sig m, GL.Bind t) => Algebra (Bind t :+: sig) (BindC t m) where
   alg = \case
     L (Bind t m k) -> do
       prev <- BindC ask
