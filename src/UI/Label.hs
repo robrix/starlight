@@ -124,9 +124,9 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
           Glyph.scale_     ?= 1 / fromIntegral scale
           Glyph.fontScale_ ?= fontScale font
           Glyph.matrix_    ?=
-            (   translated (-1)
+                translated (-1)
             !*! scaled     (V3 sx sy 1)
-            !*! translated (fromIntegral <$> negated (min_ b')))
+            !*! translated (fromIntegral <$> negated (min_ b'))
           for_ instances $ \ Instance{ offset, range } -> do
             Glyph.offset_ ?= offset
             drawArraysInstanced Triangles range 6
