@@ -7,6 +7,11 @@ module Control.Effect.Thread
   fork
 , yield
 , Thread(..)
+  -- * Re-exports
+, Algebra
+, Effect
+, Has
+, run
 ) where
 
 import Control.Algebra
