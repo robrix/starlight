@@ -6,8 +6,8 @@ module Control.Carrier.Thread.IO
 , module Control.Effect.Thread
 ) where
 
-import Control.Monad.IO.Class
 import Control.Effect.Thread
+import Control.Monad.IO.Class
 
 newtype ThreadC m a = ThreadC { runThread :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
