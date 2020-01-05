@@ -144,7 +144,7 @@ game = do
             put =<< now
 
             withView (draw dt fpsLabel targetLabel (Font face 18)) -- draw with current readonly positions & beams
-            characters_ @Body <~> traverse (pure . (actor_%~inertia)) -- update positions
+            characters_ @Body %= fmap (actor_%~inertia) -- update positions
 
             measure "input" input
             measure "controls" $ player_ @Body .actions_ <~ controls
