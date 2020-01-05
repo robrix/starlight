@@ -41,14 +41,14 @@ drawShip
   => Actor
   -> Ship
   -> m ()
-drawShip Actor{ position, rotation } Ship{ colour, armour } = measure "ship" . UI.using getDrawable $ do
+drawShip Actor{ position, rotation } Ship{ colour, armour, scale } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   let matrix = scaleToViewZoomed vs
   matrix_ ?=
         matrix
     !*! translated3 (ext (negated (unP focus)) 0)
     !*! translated3 (unP position)
-    !*! scaled (V4 15 15 15 1)
+    !*! scaled (V4 scale scale scale 1)
     !*! mkTransformation rotation 0
   colour_ ?= (colour & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
   drawArrays LineLoop range
