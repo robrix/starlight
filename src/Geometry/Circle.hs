@@ -4,7 +4,6 @@ module Geometry.Circle
 ) where
 
 import Linear.Exts
-import Unit.Angle
 
 -- | Construct vertices for a circle.
 circle
@@ -23,11 +22,10 @@ intersects
   => Point V2 a -- ^ Centre.
   -> a          -- ^ Radius.
   -> Point V2 a -- ^ Ray origin.
-  -> Radians a  -- ^ Ray angle
+  -> V2 a       -- ^ Ray direction (unit vector).
   -> Bool
-intersects c r o theta = discriminant >= 0 && (d1 >= 0 && d1 <= 1 || d2 >= 0 && d2 <= 1) where
-  l = cartesian2 theta 1
-  o_c = o - c
+intersects c r o l = discriminant >= 0 && (d1 >= 0 && d1 <= 1 || d2 >= 0 && d2 <= 1) where
+  o_c = o ^-^ c
   discriminant = b ** 2 - (quadrance o_c - r ** 2)
   b = (l `dot` unP o_c)
   root = sqrt discriminant
