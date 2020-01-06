@@ -292,7 +292,7 @@ data Expr (k :: Type) a where
   Lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Lerp2 :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Dfdx :: Expr k Float -> Expr k Float
-  Mod :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
+  Mod :: Expr k a -> Expr k a -> Expr k a
   Min :: Expr k a -> Expr k a -> Expr k a
   Max :: Expr k a -> Expr k a -> Expr k a
   Atan2 :: Expr k a -> Expr k a -> Expr k a
@@ -403,7 +403,7 @@ lerp2 = Lerp2
 dFdx :: Expr k Float -> Expr k Float
 dFdx = Dfdx
 
-mod' :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
+mod' :: Expr k v -> Expr k v -> Expr k v
 mod' = Mod
 
 min' :: Expr k a -> Expr k a -> Expr k a
