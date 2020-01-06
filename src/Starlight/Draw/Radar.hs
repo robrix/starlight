@@ -17,7 +17,7 @@ module Starlight.Draw.Radar
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
-import           Control.Effect.Lens ((?=))
+import           Control.Effect.Lens (view, (?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.State
@@ -59,7 +59,9 @@ drawRadar
      )
   => m ()
 drawRadar = measure "radar" . UI.using getDrawable $ do
-  system@System{ scale, npcs, player = Character{ actor = Actor{ position = here }, target }, bodies } <- ask @(System B.StateVectors)
+  system@System{ scale, bodies } <- ask @(System B.StateVectors)
+  Character{ actor = Actor{ position = here }, target } <- view (player_ @B.StateVectors)
+  npcs <- view (npcs_ @B.StateVectors)
   vs <- ask
 
   let radius = 100

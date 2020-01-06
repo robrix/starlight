@@ -27,6 +27,7 @@ import           Data.Coerce
 import           Data.Function (fix)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
+import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
 import           Data.Time.Format.ISO8601
@@ -74,18 +75,18 @@ game = do
     . runFinally
     . evalState @Input mempty
     . evalState system
-        { player = Character
-          { actor   = Actor
-            { position = P (V3 2500000 0 0)
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            }
-          , target  = Nothing
-          , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
-          }
-        , npcs =
+        { characters = Map.fromList $ zip (Player : map NPC [0..])
           [ Character
+            { actor   = Actor
+              { position = P (V3 2500000 0 0)
+              , velocity = V3 0 150 0
+              , rotation = axisAngle (unit _z) (pi/2)
+              }
+            , target  = Nothing
+            , actions = mempty
+            , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
+            }
+          , Character
             { actor   = Actor
               { position = P (V3 2500000 0 0)
               , velocity = V3 0 150 0

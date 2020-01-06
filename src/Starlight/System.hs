@@ -16,7 +16,7 @@ module Starlight.System
 , (!?)
 ) where
 
-import           Control.Lens (Lens, Lens', ix, lens, (&), (.~), (^.), (^?))
+import           Control.Lens (Lens, Lens', ix, lens, (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
 import           GHC.Generics (Generic)
@@ -28,11 +28,10 @@ import           Starlight.Identifier
 import           Starlight.Weapon.Laser
 
 data System a = System
-  { scale  :: !Float
-  , bodies :: !(Map.Map BodyIdentifier a)
-  , player :: !Character
-  , npcs   :: ![Character]
-  , beams  :: ![Beam]
+  { scale      :: !Float
+  , bodies     :: !(Map.Map BodyIdentifier a)
+  , characters :: !(Map.Map CharacterIdentifier Character)
+  , beams      :: ![Beam]
   }
   deriving (Generic, Show)
 
@@ -43,15 +42,13 @@ bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyId
 bodies_ = field @"bodies"
 
 player_ :: Lens' (System a) Character
-player_ = field @"player"
+player_ = characters_.lens (Map.! Player) (flip (Map.insert Player))
 
 npcs_ :: Lens' (System a) [Character]
-npcs_ = field @"npcs"
+npcs_ = characters_.lens (Map.elems . Map.delete Player) (\ m cs -> Map.fromList ((Player, m Map.! Player) : zipWith ((,) . NPC) [0..] cs))
 
 characters_ :: Lens' (System a) (Map.Map CharacterIdentifier Character)
-characters_ = lens get set where
-  get s = Map.fromList ((Player, s^.player_) : zipWith ((,) . NPC) [0..] (s^.npcs_))
-  set s m = s & player_ .~ (m Map.! Player) & npcs_ .~ Map.elems (Map.delete Player m)
+characters_ = field @"characters"
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
@@ -61,10 +58,9 @@ systemTrans :: System a -> M44 Float
 systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
 identifiers :: System a -> [Identifier]
-identifiers System{ bodies, npcs } = C Player : map (C . NPC) [0..pred (length npcs)] <> map B (Map.keys bodies)
+identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
-(!?) System{ bodies, player, npcs } = \case
-  B      i  -> Left  <$> Map.lookup i bodies
-  C (NPC i) -> Right <$> npcs ^? ix i
-  C Player  -> Just (Right player)
+(!?) s = \case
+  B i -> Left  <$> s^?bodies_    .ix i
+  C i -> Right <$> s^?characters_.ix i

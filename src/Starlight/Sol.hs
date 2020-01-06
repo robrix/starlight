@@ -220,18 +220,12 @@ system = do
 
   pure System
     { scale
-    , bodies = Map.fromList
+    , bodies     = Map.fromList
       [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
       | (identifier, orbit) <- Map.toList orbits
       ]
-    , player = Character
-      { actor   = Actor{ position = 0, velocity = 0, rotation = 0 }
-      , target  = Nothing
-      , actions = mempty
-      , ship    = Ship{ colour = white, armour = 100, scale = 1 }
-      }
-    , npcs   = mempty
-    , beams  = mempty
+    , characters = mempty
+    , beams      = mempty
     }
   where
   solI = Star (10, "Sol")

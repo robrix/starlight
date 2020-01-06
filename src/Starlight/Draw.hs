@@ -6,6 +6,7 @@ module Starlight.Draw
 ( draw
 ) where
 
+import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
@@ -58,7 +59,8 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   v@View{ size, zoom } <- ask
-  system@System{ scale, beams, player = Character{ actor = Actor{ position }, target } } <- ask @(System StateVectors)
+  system@System{ scale, beams } <- ask @(System StateVectors)
+  Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
 
   let dsize = deviceSize v
 
