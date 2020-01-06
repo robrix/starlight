@@ -93,7 +93,7 @@ game = do
               }
             , target  = Just (C Player)
             , actions = mempty
-            , ship    = Ship{ colour = red, armour = Interval 50 100, scale = 30 }
+            , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30 }
             }
           , Character
             { actor   = Actor
