@@ -18,6 +18,7 @@ module GL.Shader.Stmt
 , (+=)
 , (*=)
 , (*!=)
+  -- * Geometry shaders
 , emitVertex
 , emitPrimitive
   -- * Pretty-printing
