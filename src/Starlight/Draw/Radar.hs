@@ -119,15 +119,30 @@ verticesForShips cs =
   ]
 
 
+instanceCount :: Int
+instanceCount = 1
+
+
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ there, colour } IF{ colour2 = out } -> do
-    pos   <- let' "pos"   ((there - here u) D.^* (1/D.norm (there - here u)))
+  ->  vertex (\ V{ there, r, colour } IF{ colour2 = out } -> do
+    there <- let' "there" (there - here u)
+    d     <- let' "d"     (D.norm there)
+    dir   <- let' "dir"   (there D.^* (1/D.norm there))
+    let perp v = vec2 (negate (v D.^.D._y)) (v D.^.D._x)
+        angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
+        wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
+    edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
+    angle <- let' "angle" (angleOf there)
+    sweep <- let' "sweep" (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
+    theta <- let' "theta" (angle + (float gl_InstanceID / fromIntegral instanceCount) * sweep)
+    pos   <- let' "pos"   (vec2 (cos theta) (sin theta))
     gl_PointSize .= 3
     out .= colour
     gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) D.^. D._xy) 0) 1)
 
-  >>> fragment (\ IF{ colour2 } O{ fragColour } -> fragColour .= colour2)
+  >>> fragment (\ IF{ colour2 } O{ fragColour } -> fragColour .= colour2) where
+  minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
 
 
 data U v = U
