@@ -21,6 +21,7 @@ module GL.Shader.Stmt
 , (*=)
 , (*!=)
   -- * Geometry shaders
+, Primitive.Type(..)
 , emitVertex
 , emitPrimitive
   -- * Fragment shaders
@@ -33,6 +34,7 @@ module GL.Shader.Stmt
 import           Control.Monad (ap, liftM, (<=<))
 import           Data.Functor.Const
 import           Data.Text.Prettyprint.Doc hiding (dot)
+import qualified GL.Primitive as Primitive
 import           GL.Shader (Type(..))
 import           GL.Shader.Expr
 import qualified GL.Uniform as GL

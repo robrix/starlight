@@ -46,7 +46,7 @@ import           Data.Functor.Const
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
 import           GHC.Generics
-import           GL.Shader (Type(..))
+import qualified GL.Shader as Shader
 import           GL.Shader.Expr
 import           GL.Shader.Stmt
 import           GL.Shader.Vars
@@ -70,17 +70,17 @@ program = Shader
 data Stage i o where
   Id :: Stage i i
   (:>>>) :: Stage i x -> Stage x o -> Stage i o
-  V :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
-  G :: (Vars i, Vars o) => (i (Expr 'Geometry) -> o (Ref 'Geometry) -> Stmt 'Geometry ()) -> Stage i o
-  F :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
+  V :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Stmt 'Shader.Vertex   ()) -> Stage i o
+  G :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry) -> o (Ref 'Shader.Geometry) -> Stmt 'Shader.Geometry ()) -> Stage i o
+  F :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Stmt 'Shader.Fragment ()) -> Stage i o
 
-vertex   :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
+vertex   :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Stmt 'Shader.Vertex   ()) -> Stage i o
 vertex = V
 
-geometry :: (Vars i, Vars o) => (i (Expr 'Geometry) -> o (Ref 'Geometry) -> Stmt 'Geometry ()) -> Stage i o
+geometry :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry) -> o (Ref 'Shader.Geometry) -> Stmt 'Shader.Geometry ()) -> Stage i o
 geometry = G
 
-fragment :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
+fragment :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Stmt 'Shader.Fragment ()) -> Stage i o
 fragment = F
 
 instance Cat.Category Stage where
@@ -93,17 +93,17 @@ data None (v :: * -> *) = None
 
 instance Vars None
 
-shaderSources :: Shader u i o -> [(Type, String)]
+shaderSources :: Shader u i o -> [(Shader.Type, String)]
 shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> stageSources u' (f u) where
   u = makeVars (Var . name)
   u' = foldVars (getConst . value) (makeVars (pvar "uniform" . name) `like` u)
 
-stageSources :: Doc () -> Stage i o -> [(Type, Doc ())]
+stageSources :: Doc () -> Stage i o -> [(Shader.Type, Doc ())]
 stageSources u = \case
   Id  -> []
-  V s -> [(Vertex,   renderStage s)]
-  G s -> [(Geometry, renderStage s)]
-  F s -> [(Fragment, renderStage s)]
+  V s -> [(Shader.Vertex,   renderStage s)]
+  G s -> [(Shader.Geometry, renderStage s)]
+  F s -> [(Shader.Fragment, renderStage s)]
   l :>>> r -> stageSources u l <> stageSources u r
   where
   renderStage :: (Vars i, Vars o) => (i (Expr k) -> o (Ref k) -> Stmt k ()) -> Doc ()
