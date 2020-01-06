@@ -54,14 +54,16 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (Effect sig, B.HasBuffer 'B.Array i m, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => Array (i Identity) -> m ()
-configureArray a = evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
-  o <- get
-  let size = S.sizeOf (elemA a)
-      offset = o <> DSL.Offset size
-  put offset
-  checking $ glEnableVertexAttribArray (fromIntegral location)
-  checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral size) (nullPtr `plusPtr` DSL.getOffset o)) (DSL.defaultVars `like` a) where
+configureArray :: (Effect sig, HasArray i m, B.HasBuffer 'B.Array i m, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => m ()
+configureArray = do
+  a <- askArray <* B.askBuffer
+  evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
+    o <- get
+    let size = S.sizeOf (elemA a)
+        offset = o <> DSL.Offset size
+    put offset
+    checking $ glEnableVertexAttribArray (fromIntegral location)
+    checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral size) (nullPtr `plusPtr` DSL.getOffset o)) (DSL.defaultVars `like` a) where
   like :: a Maybe -> Array (a Identity) -> a Maybe
   like = const
   elemA :: Array (i Identity) -> i Identity
@@ -121,7 +123,7 @@ load is = do
     B.realloc b (length is) B.Static B.Draw
     B.copy b 0 is
 
-    a <$ configureArray a
+    a <$ configureArray
 
 
 bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (i Identity) -> ArrayC i m a -> m a
