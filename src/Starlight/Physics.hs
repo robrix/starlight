@@ -16,7 +16,7 @@ import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Effect.Reader
 import Control.Lens hiding (modifying, use, view, views, (%=), (*=), (+=), (.=))
-import Control.Monad (foldM, guard)
+import Control.Monad (guard)
 import Data.Foldable (foldl', for_, traverse_)
 import Data.Functor.Interval
 import Data.Ix (inRange)
@@ -51,13 +51,13 @@ gravity (Delta (Seconds dt)) a = do
 
 -- FIXME: do something smarter than ray-sphere intersection.
 hit :: Has (Reader (System StateVectors)) sig m => Delta Seconds Float -> CharacterIdentifier -> Character -> m Character
-hit (Delta (Seconds dt)) i c = view (beams_ @StateVectors) >>= foldM go c where
+hit (Delta (Seconds dt)) i c = foldl' go c <$> view (beams_ @StateVectors) where
   go char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
     , intersects (P (c^._xy)) r (P (o^._xy)) (cartesian2 theta 1)
-    = pure $ char & ship_.armour_.min_.coerced -~ damage
+    = char & ship_.armour_.min_.coerced -~ damage
     | otherwise
-    = pure char
+    = char
   damage = 100 * dt
 
 
