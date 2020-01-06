@@ -54,6 +54,7 @@ data Stmt (k :: Type) a where
   (:*!=) :: Ref k (v b) -> Expr k (v (v b)) -> Stmt k a -> Stmt k a
   EmitVertex :: Stmt 'Geometry () -> Stmt 'Geometry a -> Stmt 'Geometry a
   EmitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry a -> Stmt 'Geometry a
+  Raw :: Doc () -> Stmt k a -> Stmt k a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
 infixr 4 :.=
@@ -82,6 +83,7 @@ instance Monad (Stmt k) where
   (:*!=) r v      k >>= f = (r :*!= v) (k >>= f)
   EmitVertex    m k >>= f = EmitVertex m (k >>= f)
   EmitPrimitive m k >>= f = EmitPrimitive m (k >>= f)
+  Raw d           k >>= f = Raw d (k >>= f)
   Stmt a          k >>= f = Stmt a (f <=< k)
 
 
@@ -177,6 +179,9 @@ renderStmt = \case
   EmitPrimitive m k
     -> renderStmt m <> hardline
     <> pretty "EndPrimitive();" <> hardline
+    <> renderStmt k
+  Raw d k
+    -> d
     <> renderStmt k
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
