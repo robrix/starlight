@@ -20,6 +20,7 @@ module GL.Buffer
 , BufferC(BufferC)
 ) where
 
+import           Control.Carrier.Reader
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Functor.Identity
@@ -111,4 +112,4 @@ class Monad m => HasBuffer ty v m | m -> ty v where
   askBuffer :: m (Buffer ty v)
 
 
-newtype BufferC (ty :: Type) v m a = BufferC { runBuffer :: m a }
+newtype BufferC ty v m a = BufferC { runBuffer :: ReaderC (Buffer ty (v Identity)) m a }
