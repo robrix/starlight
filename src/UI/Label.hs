@@ -71,9 +71,9 @@ label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
 
-  program  <- build Text.shader
+  program <- build Text.shader
 
-  (_, array) <- load $ coerce @[V2 Float]
+  (buffer, array) <- load $ coerce @[V2 Float]
     [ V2 (-1) (-1)
     , V2   1  (-1)
     , V2 (-1)   1
@@ -83,7 +83,7 @@ label = do
   scale <- Window.scale
 
   ref <- sendIO (newIORef Nothing)
-  pure Label{ text = Drawable{ program, array }, texture, fbuffer, ref, scale }
+  pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, scale }
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 Int)
 labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref

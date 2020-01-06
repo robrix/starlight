@@ -105,9 +105,9 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
 runRadar m = do
-  program    <- build shader
-  (_, array) <- load vertices
-  runReader (Drawable UI.Drawable{ program, array }) m
+  program         <- build shader
+  (buffer, array) <- load vertices
+  runReader (Drawable UI.Drawable{ program, array, buffer }) m
 
 
 toBlip :: Point V3 Float -> Float -> Either B.StateVectors Character -> Blip

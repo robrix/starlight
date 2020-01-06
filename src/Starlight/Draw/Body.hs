@@ -49,9 +49,9 @@ runBody
   => ReaderC Drawable m a
   -> m a
 runBody m = do
-  program    <- build shader
-  (_, array) <- load vertices
-  runReader (Drawable UI.Drawable{ program, array }) m
+  program         <- build shader
+  (buffer, array) <- load vertices
+  runReader (Drawable UI.Drawable{ program, array, buffer }) m
 
 drawBody
   :: ( Has Check sig m

@@ -47,7 +47,6 @@ data Typeface = Typeface
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
   , glyphs       :: Drawable Glyph.U Glyph.V Glyph.O
-  , glyphB       :: Buffer 'B.Array (Glyph.V Identity)
   , rangesRef    :: IORef (Map.Map Char (Interval Identity Int))
   }
 
@@ -88,8 +87,8 @@ fromOpentypeFont
   -> m Typeface
 fromOpentypeFont opentypeFont = do
   program <- build Glyph.shader
-  array  <- gen1
-  glyphB <- gen1
+  array   <- gen1
+  buffer  <- gen1
 
   rangesRef <- sendM (newIORef Map.empty)
 
@@ -97,8 +96,7 @@ fromOpentypeFont opentypeFont = do
     { name
     , allGlyphs
     , opentypeFont
-    , glyphs = Drawable{ program, array }
-    , glyphB
+    , glyphs = Drawable{ program, array, buffer }
     , rangesRef
     } where
   name = T.unpack . T.decodeUtf16BE . O.nameString <$> find ((== Just FullName) . nameID) (O.nameRecords (O.nameTable opentypeFont))
@@ -130,14 +128,14 @@ readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 
 cacheCharactersForDrawing :: (Effect sig, Has Check sig m, Has (Lift IO) sig m) => Typeface -> String -> m ()
-cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { array }, glyphB, rangesRef } string = do
+cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { buffer, array }, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + Identity (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
-  bindArray array . bindBuffer glyphB $ do
-    realloc glyphB (length vertices) Static Draw
-    copy glyphB 0 (coerce vertices)
+  bindArray array . bindBuffer buffer $ do
+    realloc buffer (length vertices) Static Draw
+    copy buffer 0 (coerce vertices)
 
     configureArray
 

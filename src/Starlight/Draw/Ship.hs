@@ -71,9 +71,9 @@ runShip
   => ReaderC Drawable m a
   -> m a
 runShip m = do
-  program    <- build shader
-  (_, array) <- load vertices
-  runReader (Drawable UI.Drawable{ program, array }) m
+  program         <- build shader
+  (buffer, array) <- load vertices
+  runReader (Drawable UI.Drawable{ program, array, buffer }) m
 
 
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
