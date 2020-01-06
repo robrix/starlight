@@ -73,6 +73,7 @@ library
     GL.Program
     GL.Shader
     GL.Shader.DSL
+    GL.Shader.Expr
     GL.Shader.Stmt
     GL.Shader.Vars
     GL.Texture
