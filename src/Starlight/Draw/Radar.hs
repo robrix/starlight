@@ -34,7 +34,6 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Object
-import           GL.Program
 import           GL.Shader.DSL hiding (coerce, norm, (^*), (^.), _a, _xy)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts as Linear hiding (angle, (!*))
@@ -104,10 +103,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   n = 10 :: Int
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
-runRadar m = do
-  program         <- build shader
-  (buffer, array) <- load vertices
-  runReader (Drawable UI.Drawable{ program, array, buffer }) m
+runRadar = UI.loadingDrawable Drawable shader vertices
 
 
 toBlip :: Point V3 Float -> Float -> Either B.StateVectors Character -> Blip

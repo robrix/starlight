@@ -28,7 +28,6 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Object
-import           GL.Program
 import           GL.Shader.DSL hiding (coerce, (!*), (!*!), _z)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
@@ -45,10 +44,7 @@ runLaser
      )
   => ReaderC Drawable m a
   -> m a
-runLaser m = do
-  program         <- build shader
-  (buffer, array) <- load vertices
-  runReader (Drawable UI.Drawable{ program, array, buffer }) m
+runLaser = UI.loadingDrawable Drawable shader vertices
 
 
 drawLaser

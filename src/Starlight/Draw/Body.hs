@@ -29,7 +29,6 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Object
-import           GL.Program
 import           GL.Shader.DSL hiding (coerce, (!*!), (!*))
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
@@ -48,10 +47,8 @@ runBody
      )
   => ReaderC Drawable m a
   -> m a
-runBody m = do
-  program         <- build shader
-  (buffer, array) <- load vertices
-  runReader (Drawable UI.Drawable{ program, array, buffer }) m
+runBody = UI.loadingDrawable Drawable shader vertices
+
 
 drawBody
   :: ( Has Check sig m

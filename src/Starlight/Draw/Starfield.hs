@@ -29,7 +29,6 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Object
-import           GL.Program
 import           GL.Shader.DSL hiding (coerce, (!*!), (^*))
 import qualified GL.Shader.DSL as D
 import           Linear.V2 hiding (R1(..), R2(..))
@@ -63,10 +62,7 @@ runStarfield
      )
   => ReaderC Drawable m a
   -> m a
-runStarfield m = do
-  program         <- build shader
-  (buffer, array) <- load vertices
-  runReader (Drawable UI.Drawable{ program, array, buffer }) m
+runStarfield = UI.loadingDrawable Drawable shader vertices
 
 
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }

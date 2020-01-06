@@ -29,7 +29,6 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Object
-import           GL.Program
 import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
@@ -70,10 +69,7 @@ runShip
      )
   => ReaderC Drawable m a
   -> m a
-runShip m = do
-  program         <- build shader
-  (buffer, array) <- load vertices
-  runReader (Drawable UI.Drawable{ program, array, buffer }) m
+runShip = UI.loadingDrawable Drawable shader vertices
 
 
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
