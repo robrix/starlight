@@ -1,7 +1,12 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Weapon.Laser
 ( runLaser
 , drawLaser
@@ -13,16 +18,22 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
+import           Control.Lens (Lens')
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
+import           Data.Generics.Product.Fields
+import           Foreign.Storable (Storable)
+import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
+import           GL.Object
 import           GL.Program
+import           GL.Shader.DSL hiding (coerce, (!*), (!*!), _z)
+import qualified GL.Shader.DSL as D
 import           Linear.Exts
-import           Starlight.Draw.Weapon.Laser.Shader
 import           Starlight.View
-import           Starlight.Weapon.Laser
+import qualified Starlight.Weapon.Laser as S
 import qualified UI.Drawable as UI
 import           Unit.Angle
 
@@ -47,9 +58,9 @@ drawLaser
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
-  => Beam
+  => S.Beam
   -> m ()
-drawLaser Beam{ colour, angle, position } = measure "laser" . UI.using getDrawable $ do
+drawLaser S.Beam{ colour, angle, position } = measure "laser" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   matrix_ ?=
         scaleToViewZoomed vs
@@ -70,3 +81,40 @@ vertices = coerce @[Float] [0, 1]
 
 range :: Interval Identity Int
 range = Interval 0 (Identity (length vertices))
+
+
+shader :: Shader U V O
+shader = program $ \ u
+  ->  vertex (\ V{ r } None ->
+    gl_Position .= matrix u D.!* vec4 r 0 0 1)
+  >>> fragment (\ None O{ fragColour } -> do
+    fragColour .= colour u)
+
+
+data U v = U
+  { matrix :: v (M44 Float)
+  , colour :: v (Colour Float)
+  }
+  deriving (Generic)
+
+instance Vars U
+
+matrix_ :: Lens' (U v) (v (M44 Float))
+matrix_ = field @"matrix"
+
+colour_ :: Lens' (U v) (v (Colour Float))
+colour_ = field @"colour"
+
+
+newtype V v = V { r :: v Float }
+  deriving (Generic)
+
+instance Vars V
+
+deriving instance Bind     (v Float) => Bind     (V v)
+deriving instance Storable (v Float) => Storable (V v)
+
+newtype O v = O { fragColour :: v (Colour Float) }
+  deriving (Generic)
+
+instance Vars O

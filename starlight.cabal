@@ -94,7 +94,6 @@ library
     Starlight.Draw.Starfield
     Starlight.Draw.Starfield.Shader
     Starlight.Draw.Weapon.Laser
-    Starlight.Draw.Weapon.Laser.Shader
     Starlight.Ephemeris
     Starlight.Game
     Starlight.Identifier
