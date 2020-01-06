@@ -58,12 +58,11 @@ configureArray :: (Effect sig, HasArray i m, B.HasBuffer 'B.Array i m, DSL.Vars 
 configureArray = do
   a <- askArray <* B.askBuffer
   evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
-    o <- get
+    offset <- get
     let size = S.sizeOf (elemA a)
-        offset = o <> DSL.Offset size
-    put offset
+    put (offset <> DSL.Offset size)
     checking $ glEnableVertexAttribArray (fromIntegral location)
-    checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral size) (nullPtr `plusPtr` DSL.getOffset o)) (DSL.defaultVars `like` a) where
+    checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral size) (nullPtr `plusPtr` DSL.getOffset offset)) (DSL.defaultVars `like` a) where
   like :: a Maybe -> Array (a Identity) -> a Maybe
   like = const
   elemA :: Array (i Identity) -> i Identity
