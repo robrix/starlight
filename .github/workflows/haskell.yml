@@ -49,7 +49,7 @@ jobs:
 
     - name: Install sdl2
       run: |
-        apt-get install libsdl2
+        sudo apt-get install libsdl2
 
     - name: Install dependencies
       run: |
