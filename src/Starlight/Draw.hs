@@ -90,5 +90,5 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
   measure "setLabel" $ setLabel targetLabel font (describeTarget target)
 
   fpsSize <- labelSize fpsLabel
-  measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size ^. _y - fpsSize ^. _y - 10)) white Nothing
-  measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                                white Nothing
+  measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size^._y - fpsSize^._y - 10)) white Nothing
+  measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                            white Nothing
