@@ -34,7 +34,7 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Object
-import           GL.Shader.DSL hiding (coerce, norm, (^*), (^.), _a, _xy)
+import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts as Linear hiding (angle, (!*))
 import           Starlight.Actor
@@ -64,8 +64,8 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   vs <- ask
 
   let radius = 100
-  matrix_ ?= scaleToView vs
-  radius_ ?= radius
+      matrix = scaleToView vs
+  matrix_ ?= matrix !*! scaled (V3 radius radius 1)
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -95,7 +95,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
             -- FIXME: apply easing so this works more like a spring
             step = max 1 (min 50 ((1/zoom vs) * d blip / fromIntegral n))
 
-        radius_ ?= radius
+        matrix_ ?= matrix !*! scaled (V3 radius radius 1)
         colour_ ?= ((colour' + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
 
         drawArrays LineStrip range
@@ -161,7 +161,7 @@ shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ n } None -> do
     angle <- let' "angle" (D.coerce (angle u) + n * D.coerce (sweep u))
-    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* radius u)
+    pos   <- let' "pos"   (vec2 (cos angle) (sin angle))
     gl_PointSize .= 3
     gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) D.^. D._xy) 0) 1)
 
@@ -170,7 +170,6 @@ shader = program $ \ u
 
 data U v = U
   { matrix :: v (M33 Float)
-  , radius :: v Float
   , angle  :: v (Radians Float)
   , sweep  :: v (Radians Float)
   , colour :: v (Colour Float)
@@ -181,9 +180,6 @@ instance Vars U
 
 matrix_ :: Lens' (U v) (v (M33 Float))
 matrix_ = field @"matrix"
-
-radius_ :: Lens' (U v) (v Float)
-radius_ = field @"radius"
 
 angle_ :: Lens' (U v) (v (Radians Float))
 angle_ = field @"angle"
