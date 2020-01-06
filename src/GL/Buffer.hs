@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
@@ -14,6 +15,7 @@ module GL.Buffer
 , KnownType(..)
 , Update(..)
 , Usage(..)
+, HasBuffer(..)
 , runBuffer
 , BufferC(BufferC)
 ) where
@@ -103,6 +105,10 @@ instance GL.Enum Hint where
     Hint Stream  Draw -> GL_STREAM_DRAW
     Hint Stream  Read -> GL_STREAM_READ
     Hint Stream  Copy -> GL_STREAM_COPY
+
+
+class Monad m => HasBuffer ty v m | m -> ty v where
+  askBuffer :: m (Buffer ty v)
 
 
 newtype BufferC (ty :: Type) v m a = BufferC { runBuffer :: m a }
