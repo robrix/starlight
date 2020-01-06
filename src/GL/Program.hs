@@ -37,6 +37,7 @@ import qualified Foreign.C.String.Lift as C
 import           GHC.Records
 import           GHC.Stack
 import           GHC.TypeLits
+import qualified GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Error
 import           GL.Shader
@@ -103,3 +104,5 @@ instance (Has Check sig m, Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u
 
 instance Algebra sig m => HasProgram u i o (ProgramC u i o m) where
   askProgram = ProgramC ask
+
+deriving instance B.HasBuffer 'B.Array i m => B.HasBuffer 'B.Array i (ProgramC u i o m)
