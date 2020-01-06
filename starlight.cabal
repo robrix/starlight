@@ -70,6 +70,7 @@ library
     GL.Error
     GL.Framebuffer
     GL.Object
+    GL.Primitive
     GL.Program
     GL.Shader
     GL.Shader.DSL
