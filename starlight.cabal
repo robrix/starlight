@@ -89,7 +89,6 @@ library
     Starlight.Draw
     Starlight.Draw.Body
     Starlight.Draw.Radar
-    Starlight.Draw.Radar.Shader
     Starlight.Draw.Ship
     Starlight.Draw.Starfield
     Starlight.Draw.Weapon.Laser
