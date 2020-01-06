@@ -46,6 +46,7 @@ module GL.Shader.DSL
 , mod'
 , min'
 , max'
+, atan2'
 , texture
 , coerce
 , gl_Position
@@ -294,6 +295,7 @@ data Expr (k :: Type) a where
   Mod :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
   Min :: Expr k a -> Expr k a -> Expr k a
   Max :: Expr k a -> Expr k a -> Expr k a
+  Atan2 :: Expr k a -> Expr k a -> Expr k a
   Texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 
   Coerce :: C.Coercible a b => Expr k a -> Expr k b
@@ -409,6 +411,9 @@ min' = Min
 
 max' :: Expr k a -> Expr k a -> Expr k a
 max' = Max
+
+atan2' :: Expr k a -> Expr k a -> Expr k a
+atan2' = Atan2
 
 texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 texture = Texture
@@ -645,6 +650,7 @@ renderExpr = parens . \case
   Mod a b -> fn "mod" [renderExpr a, renderExpr b]
   Min a b -> fn "min" [renderExpr a, renderExpr b]
   Max a b -> fn "max" [renderExpr a, renderExpr b]
+  Atan2 a b -> fn "atan" [renderExpr a, renderExpr b]
   Texture a b -> fn "texture" [renderExpr a, renderExpr b]
   Coerce a -> renderExpr a
   where
