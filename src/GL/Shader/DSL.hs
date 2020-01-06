@@ -89,6 +89,7 @@ module GL.Shader.DSL
 , Vars(..)
 , Field(..)
 , Offset(..)
+, Fields(..)
 , makeVarsM
 , foldVars
 , foldVarsM
@@ -113,6 +114,7 @@ import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
 import           Data.Function (fix)
 import           Data.Functor.Const
+import           Data.Functor.Identity
 import           Data.Monoid (Ap(..))
 import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
@@ -705,6 +707,10 @@ instance Semigroup Offset where
 
 instance Monoid Offset where
   mempty = 0
+
+
+newtype Fields v = Fields (v Identity)
+
 
 class Vars t where
   makeVars :: (forall a . GLSLType a => Field Maybe a -> v a) -> t v
