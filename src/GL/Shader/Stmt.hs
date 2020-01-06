@@ -14,6 +14,7 @@ module GL.Shader.Stmt
 , switch
 , break
 , while
+  -- * Assignment
 , (.=)
 , (+=)
 , (*=)
