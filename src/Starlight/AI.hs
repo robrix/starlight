@@ -9,7 +9,6 @@ import           Control.Lens ((&), (.~), (^.))
 import           Data.Functor.Interval
 import qualified Data.Set as Set
 import           Linear.Exts
-import           Starlight.Action
 import           Starlight.Actor as Actor
 import           Starlight.Body as Body
 import           Starlight.Character

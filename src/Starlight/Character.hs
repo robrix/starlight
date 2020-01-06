@@ -9,13 +9,17 @@ module Starlight.Character
 , actions_
 , ship_
 , HasActor(..)
+, Action(..)
+, Turn(..)
+, Face(..)
+, Change(..)
+, Weapon(..)
 ) where
 
 import Control.Lens (Lens')
 import Data.Generics.Product.Fields
 import Data.Set (Set)
 import GHC.Generics (Generic)
-import Starlight.Action
 import Starlight.Actor (Actor, HasActor(..))
 import Starlight.Identifier
 import Starlight.Ship
@@ -40,3 +44,32 @@ actions_ = field @"actions"
 
 ship_ :: Lens' Character Ship
 ship_ = field @"ship"
+
+
+data Action
+  = Thrust
+  | Turn Turn
+  | Face Face
+  | Fire Weapon
+  | ChangeTarget (Maybe Change)
+  deriving (Eq, Ord, Show)
+
+data Turn
+  = L
+  | R
+  deriving (Eq, Ord, Show)
+
+data Face
+  = Backwards
+  | Forwards
+  | Target
+  deriving (Eq, Ord, Show)
+
+data Change
+  = Prev
+  | Next
+  deriving (Eq, Ord, Show)
+
+data Weapon
+  = Main
+  deriving (Eq, Ord, Show)

@@ -79,7 +79,6 @@ library
     GL.Viewport
     GL.Uniform
     Linear.Exts
-    Starlight.Action
     Starlight.Actor
     Starlight.AI
     Starlight.Body

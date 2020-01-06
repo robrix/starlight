@@ -23,7 +23,6 @@ import Data.Ix (inRange)
 import Data.List (elemIndex)
 import Geometry.Circle (intersects)
 import Linear.Exts as L
-import Starlight.Action
 import Starlight.Actor as Actor
 import Starlight.Body as Body
 import Starlight.Character as Character

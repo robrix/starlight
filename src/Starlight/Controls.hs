@@ -16,7 +16,7 @@ import           Data.Maybe (catMaybes)
 import qualified Data.Set as Set
 import           Data.Traversable (for)
 import qualified SDL
-import           Starlight.Action
+import           Starlight.Character
 import           Starlight.Input
 
 controls
