@@ -86,7 +86,6 @@ module GL.Shader.DSL
 , (!*!)
 , renderStmt
 , renderExpr
-, GL.Uniform(..)
 , Vars(..)
 , Field(..)
 , Offset(..)
