@@ -1,7 +1,9 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -13,6 +15,7 @@ module Starlight.Draw.Radar
 ( drawRadar
 , runRadar
 , Drawable
+, V(..)
 ) where
 
 import           Control.Carrier.Reader
@@ -20,21 +23,18 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens (view, (?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
-import           Control.Effect.State
 import           Control.Effect.Trace
-import           Control.Lens (Lens', forOf_, to, traversed, (.~), (^.))
-import           Control.Monad (when)
-import           Data.Coerce (coerce)
-import           Data.Foldable (for_)
-import           Data.Function ((&))
+import           Control.Lens (Lens', (^.))
+import           Data.Foldable (for_, toList)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
-import           Foreign.Storable (Storable)
+import           Data.List (elemIndex)
+import           Foreign.Storable (Storable(..))
 import           GHC.Generics (Generic)
 import           GL.Array
+import           GL.Buffer as B
 import           GL.Effect.Check
-import           GL.Object
 import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts as Linear hiding (angle, (!*))
@@ -44,7 +44,6 @@ import           Starlight.Character
 import qualified Starlight.Ship as S
 import           Starlight.System
 import           Starlight.View
-import           UI.Colour
 import qualified UI.Drawable as UI
 import           Unit.Angle (Radians(..))
 import           Unit.Length
@@ -64,6 +63,15 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   npcs <- view (npcs_ @B.StateVectors)
   vs <- ask
 
+  let shipVertices = verticesForShips here npcs
+      bodyVertices = verticesForBodies here scale bodies
+      vertices = shipVertices <> bodyVertices
+
+  measure "realloc/copy" $ do
+    b <- askBuffer
+    B.realloc b (length vertices) B.Static B.Draw
+    B.copy b 0 vertices
+
   let radius = 100
       matrix = scaleToView vs
   matrix_ ?= matrix !*! scaled (V3 radius radius 1)
@@ -72,109 +80,68 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   -- FIXME: blips should shadow more distant blips
   -- FIXME: store the position, radius, & colour of each body at t and compute the blips in the (instanced?) shader rather than setting uniforms
   measure "bodies" $
-    for_ bodies $ \ B.StateVectors{ body = B.Body{ radius = Metres r, colour }, actor = Actor{ position = there } } -> do
-      measure "setBlip" $ setBlip (makeBlip (there ^-^ here) (r * scale) colour)
-      measure "drawArrays" $ drawArrays LineStrip range
+    drawArrays Points (Interval (Identity (length shipVertices)) (Identity (length shipVertices + length bodyVertices)))
 
   measure "npcs" $ do
-    sweep_  ?= 0
     -- FIXME: fade colour with distance
     -- FIXME: IFF
-    forOf_ traversed npcs $ \ Character{ actor = Actor{ position = there }, ship = S.Ship { colour, armour } } -> do
-      let (angle, r) = polar2 (unP (there ^-^ here) ^. _xy)
-      when (r > zoom vs * radius && armour^.min_ > 0) $ do
-        colour_ ?= (colour & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
-        angle_  ?= angle
-        drawArrays Points medianRange
+    drawArrays Points (Interval 0 (Identity (length shipVertices)))
 
   measure "targets" $ do
-    let targetVectors = target >>= fmap (toBlip here scale) . (system !?)
-    for_ targetVectors $ \ blip@Blip{ colour' } -> do
-      setBlip blip
-      for_ [1..n] $ \ i -> do
-        let radius = step * fromIntegral i
-            -- FIXME: apply easing so this works more like a spring
-            step = max 1 (min 50 ((1/zoom vs) * d blip / fromIntegral n))
-
+    for_ (target >>= (`elemIndex` identifiers system)) $ \ index ->
+      for_ [1..n] $ \ _ -> do
         matrix_ ?= matrix !*! scaled (V3 radius radius 1)
-        colour_ ?= ((colour' + 0.5 * fromIntegral i / fromIntegral n) ** 2 & _a .~ fromIntegral i / fromIntegral n)
 
-        drawArrays LineStrip range
+        drawArrays Points (Interval (Identity index) (Identity index + 1))
   where
   n = 10 :: Int
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
-runRadar = UI.loadingDrawable Drawable shader vertices
-
-
-toBlip :: Point V3 Float -> Float -> Either B.StateVectors Character -> Blip
-toBlip here scale = either fromL fromR where
-  fromL B.StateVectors{ body = B.Body{ radius = Metres r, colour }, actor = Actor{ position = there } } = makeBlip (there ^-^ here) (r * scale) colour
-  fromR Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale } } = makeBlip (there ^-^ here) scale colour
-
-setBlip
-  :: ( Has (Lift IO) sig m
-     , Has (State (U Maybe)) sig m
-     )
-  => Blip
-  -> m ()
-setBlip Blip{ angle', direction, d, r, colour' } = do
-  angle_  ?= angle'
-  sweep_  ?= sweep
-  colour_ ?= colour'
-  where
-  edge = perp direction ^* r + direction ^* d
-  sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleOf edge - angle')))
-  minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
-
-data Blip = Blip
-  { angle'    :: !(Radians Float) -- ^ angle to the object
-  , d         :: !Float           -- ^ distance to the object
-  , direction :: !(V2 Float)      -- ^ unit vector in the direction of the object
-  , r         :: !Float           -- ^ magnitude of the object
-  , colour'   :: !(Colour Float)  -- ^ colour of the object
-  }
-
-makeBlip :: Point V3 Float -> Float -> Colour Float -> Blip
-makeBlip (P there) r colour' = Blip{ angle', d, direction, r, colour' } where
-  there' = there ^. _xy
-  angle' = angleOf there'
-  d = norm there
-  direction = normalize there'
+runRadar = UI.loadingDrawable Drawable shader []
 
 
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [V Identity]
-vertices = coerce @[Float] [ fromIntegral t / fromIntegral n | t <- [-n..n] ] where
-  n = 16 :: Int
+makeVertex :: Point V3 Float -> Float -> Colour Float -> V Identity
+makeVertex (P there) r colour = V{ angle = Identity angle, sweep = Identity sweep, colour = Identity colour } where
+  there' = there ^. _xy
+  angle = angleOf there'
+  d = norm there
+  direction = normalize there'
+  edge = perp direction ^* r + direction ^* d
+  sweep = max minSweep (abs (wrap (Interval (-pi) pi) (angleOf edge - angle)))
+  minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
 
-range :: Interval Identity Int
-range = Interval 0 (Identity (length vertices))
 
-medianRange :: Interval Identity Int
-medianRange = Interval n (n + 1) where
-  n = range^.max_ `div` 2
+verticesForBodies :: Foldable t => Point V3 Float -> Float -> t B.StateVectors -> [V Identity]
+verticesForBodies here scale vs =
+  [ vertex
+  | B.StateVectors{ body = B.Body{ radius = Metres r, colour }, actor = Actor{ position = there } } <- toList vs
+  , let vertex = makeVertex (there ^-^ here) (r * scale) colour
+  ]
+
+verticesForShips :: Foldable t => Point V3 Float -> t Character -> [V Identity]
+verticesForShips here cs =
+  [ vertex
+  | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale } } <- toList cs
+  , let vertex = makeVertex (there ^-^ here) scale colour
+  ]
 
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ n } None -> do
-    angle <- let' "angle" (D.coerce (angle u) + n * D.coerce (sweep u))
+  ->  vertex (\ V{ angle, sweep, colour } IF{ colour2 = out } -> do
+    angle <- let' "angle" (D.coerce angle + float gl_InstanceID * D.coerce sweep)
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle))
     gl_PointSize .= 3
+    out .= colour
     gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) D.^. D._xy) 0) 1)
 
-  >>> fragment (\ None O{ fragColour } -> fragColour .= colour u)
+  >>> fragment (\ IF{ colour2 } O{ fragColour } -> fragColour .= colour2)
 
 
-data U v = U
-  { matrix :: v (M33 Float)
-  , angle  :: v (Radians Float)
-  , sweep  :: v (Radians Float)
-  , colour :: v (Colour Float)
-  }
+newtype U v = U { matrix :: v (M33 Float) }
   deriving (Generic)
 
 instance Vars U
@@ -182,23 +149,23 @@ instance Vars U
 matrix_ :: Lens' (U v) (v (M33 Float))
 matrix_ = field @"matrix"
 
-angle_ :: Lens' (U v) (v (Radians Float))
-angle_ = field @"angle"
 
-sweep_ :: Lens' (U v) (v (Radians Float))
-sweep_ = field @"sweep"
+newtype IF v = IF { colour2 :: v (Colour Float) }
+  deriving (Generic)
 
-colour_ :: Lens' (U v) (v (Colour Float))
-colour_ = field @"colour"
+instance Vars IF
 
 
-newtype V v = V { n :: v Float }
+data V v = V
+  { angle  :: v (Radians Float)
+  , sweep  :: v (Radians Float)
+  , colour :: v (Colour Float)
+  }
   deriving (Generic)
 
 instance Vars V
+deriving via Fields V instance Storable (V Identity)
 
-deriving instance Bind     (v Float) => Bind     (V v)
-deriving instance Storable (v Float) => Storable (V v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)
