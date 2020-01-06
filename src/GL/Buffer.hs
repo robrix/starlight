@@ -23,6 +23,7 @@ module GL.Buffer
 , BufferC(BufferC)
 ) where
 
+import           Control.Algebra
 import           Control.Carrier.Reader
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
@@ -130,3 +131,6 @@ newtype BufferC ty v m a = BufferC { runBuffer :: ReaderC (Buffer ty (v Identity
 
 instance Algebra sig m => HasBuffer ty i (BufferC ty i m) where
   askBuffer = BufferC ask
+
+instance Algebra sig m => Algebra sig (BufferC ty i m) where
+  alg = BufferC . send . handleCoercible
