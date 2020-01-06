@@ -3,10 +3,11 @@
 module UI.Drawable
 ( Drawable(..)
 , using
+, runDrawable
 ) where
 
+import           Control.Carrier.Reader
 import           Control.Effect.Lift
-import           Control.Effect.Reader
 import           Data.Functor.Identity
 import           GL.Array
 import qualified GL.Buffer as B
@@ -32,3 +33,7 @@ using
 using getDrawable m = do
   Drawable { program, array, buffer } <- asks getDrawable
   use program $ bindArray array $ B.bindBuffer buffer m
+
+
+runDrawable :: (Drawable u v o -> b) -> Drawable u v o -> ReaderC b m a -> m a
+runDrawable makeDrawable = runReader . makeDrawable
