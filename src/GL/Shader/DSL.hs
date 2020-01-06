@@ -109,16 +109,20 @@ module GL.Shader.DSL
 
 import           Control.Applicative (liftA2)
 import           Control.Carrier.Fresh.Strict
+import qualified Control.Carrier.State.Strict as S
 import qualified Control.Category as Cat
+import           Control.Effect.Lift
 import           Control.Monad (ap, liftM, (<=<))
 import qualified Data.Coerce as C
 import           Data.Function (fix)
 import           Data.Functor.Const
 import           Data.Functor.Identity
-import           Data.Monoid (Ap(..))
+import           Data.Maybe (fromMaybe)
+import           Data.Monoid (Ap(..), First(..), Sum(..))
 import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
+import qualified Foreign as F
 import           GHC.Generics
 import           GL.Shader (Type(..))
 import           GL.TextureUnit
@@ -710,6 +714,21 @@ instance Monoid Offset where
 
 
 newtype Fields v = Fields (v Identity)
+
+instance Vars v => F.Storable (Fields v) where
+  alignment _ = fromMaybe 0 (getFirst (foldVars @v (First . Just . F.alignment . undefinedAtFieldType) defaultVars))
+  sizeOf _ = getSum (foldVars @v (Sum . F.sizeOf . undefinedAtFieldType) defaultVars)
+  peek ptr = Fields <$> S.evalState (Offset 0) (makeVarsM @v (\ field -> do
+    offset <- S.get
+    S.put (offset <> Offset (F.sizeOf (undefinedAtFieldType field)))
+    sendM (F.peek (ptr `F.plusPtr` getOffset offset))))
+  poke ptr (Fields fields) = S.evalState (Offset 0) (foldVarsM @v (\ field -> do
+    offset <- S.get
+    S.put (offset <> Offset (F.sizeOf (undefinedAtFieldType field)))
+    sendM (F.poke (ptr `F.plusPtr` getOffset offset) (value field))) fields)
+
+undefinedAtFieldType :: Field v a -> a
+undefinedAtFieldType _ = undefined
 
 
 class Vars t where
