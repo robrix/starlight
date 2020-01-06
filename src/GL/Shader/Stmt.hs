@@ -19,6 +19,7 @@ module GL.Shader.Stmt
 , (*=)
 , (*!=)
 , emitVertex
+, emitPrimitive
   -- * Pretty-printing
 , renderStmt
 , renderTypeOf
@@ -45,6 +46,7 @@ data Stmt (k :: Type) a where
   (:*=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
   (:*!=) :: Ref k (v b) -> Expr k (v (v b)) -> Stmt k a -> Stmt k a
   EmitVertex :: Stmt 'Geometry () -> Stmt 'Geometry a -> Stmt 'Geometry a
+  EmitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry a -> Stmt 'Geometry a
   Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
 
 infixr 4 :.=
@@ -60,19 +62,20 @@ instance Applicative (Stmt k) where
   (<*>) = ap
 
 instance Monad (Stmt k) where
-  Pure a         >>= f = f a
-  Let n v      k >>= f = Let n v (f <=< k)
-  Discard      k >>= f = Discard (k >>= f)
-  If c t e     k >>= f = If c t e (k >>= f)
-  Switch s c   k >>= f = Switch s c (k >>= f)
-  Break        k >>= f = Break (k >>= f)
-  While c t    k >>= f = While c t (k >>= f)
-  (:.=) r v    k >>= f = (r :.= v) (k >>= f)
-  (:+=) r v    k >>= f = (r :+= v) (k >>= f)
-  (:*=) r v    k >>= f = (r :*= v) (k >>= f)
-  (:*!=) r v   k >>= f = (r :*!= v) (k >>= f)
-  EmitVertex m k >>= f = EmitVertex m (k >>= f)
-  Stmt a       k >>= f = Stmt a (f <=< k)
+  Pure a            >>= f = f a
+  Let n v         k >>= f = Let n v (f <=< k)
+  Discard         k >>= f = Discard (k >>= f)
+  If c t e        k >>= f = If c t e (k >>= f)
+  Switch s c      k >>= f = Switch s c (k >>= f)
+  Break           k >>= f = Break (k >>= f)
+  While c t       k >>= f = While c t (k >>= f)
+  (:.=) r v       k >>= f = (r :.= v) (k >>= f)
+  (:+=) r v       k >>= f = (r :+= v) (k >>= f)
+  (:*=) r v       k >>= f = (r :*= v) (k >>= f)
+  (:*!=) r v      k >>= f = (r :*!= v) (k >>= f)
+  EmitVertex    m k >>= f = EmitVertex m (k >>= f)
+  EmitPrimitive m k >>= f = EmitPrimitive m (k >>= f)
+  Stmt a          k >>= f = Stmt a (f <=< k)
 
 
 let' :: GL.Uniform a => String -> Expr k a -> Stmt k (Expr k a)
@@ -124,6 +127,9 @@ infixr 4 *!=
 emitVertex :: Stmt 'Geometry () -> Stmt 'Geometry ()
 emitVertex m = EmitVertex m (pure ())
 
+emitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry ()
+emitPrimitive m = EmitPrimitive m (pure ())
+
 
 renderStmt :: Stmt k a -> Doc ()
 renderStmt = \case
@@ -161,6 +167,10 @@ renderStmt = \case
   EmitVertex m k
     -> renderStmt m <> hardline
     <> pretty "EmitVertex();" <> hardline
+    <> renderStmt k
+  EmitPrimitive m k
+    -> renderStmt m <> hardline
+    <> pretty "EndPrimitive();" <> hardline
     <> renderStmt k
   Stmt b k
     -> pretty b <> pretty ';' <> hardline
