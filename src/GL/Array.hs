@@ -16,8 +16,8 @@ module GL.Array
 , drawArraysInstanced
 , load
 , bindArray
-, ArrayC(..)
 , HasArray(..)
+, ArrayC(..)
 ) where
 
 import           Control.Algebra
