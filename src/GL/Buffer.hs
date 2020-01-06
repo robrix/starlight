@@ -14,6 +14,8 @@ module GL.Buffer
 , KnownType(..)
 , Update(..)
 , Usage(..)
+, runBuffer
+, BufferC(BufferC)
 ) where
 
 import           Control.Monad.IO.Class.Lift
@@ -101,3 +103,6 @@ instance GL.Enum Hint where
     Hint Stream  Draw -> GL_STREAM_DRAW
     Hint Stream  Read -> GL_STREAM_READ
     Hint Stream  Copy -> GL_STREAM_COPY
+
+
+newtype BufferC (ty :: Type) v m a = BufferC { runBuffer :: m a }
