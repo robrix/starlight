@@ -105,4 +105,5 @@ instance (Has Check sig m, Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u
 instance Algebra sig m => HasProgram u i o (ProgramC u i o m) where
   askProgram = ProgramC ask
 
-deriving instance B.HasBuffer 'B.Array i m => B.HasBuffer 'B.Array i (ProgramC u i o m)
+deriving instance B.HasBuffer 'B.Array i   m => B.HasBuffer 'B.Array i   (ProgramC u   i o m)
+deriving instance HasProgram u         i o m => HasProgram u         i o (B.BufferC ty i   m)
