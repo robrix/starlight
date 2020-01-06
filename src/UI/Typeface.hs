@@ -33,7 +33,6 @@ import           GHC.Stack
 import           GL.Array
 import           GL.Buffer as B
 import           GL.Effect.Check
-import           GL.Framebuffer
 import           GL.Object
 import           GL.Program
 import           Linear.V2
@@ -130,17 +129,17 @@ readFontOfSize
 readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 
-cacheCharactersForDrawing :: (HasCallStack, Effect sig, Has Check sig m, Has (Lift IO) sig m) => Typeface -> String -> m ()
+cacheCharactersForDrawing :: (Effect sig, Has Check sig m, Has (Lift IO) sig m) => Typeface -> String -> m ()
 cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { array }, glyphB, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + Identity (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
-  bind (Just glyphB)
-  realloc glyphB (length vertices) Static Draw
-  copy glyphB 0 (coerce vertices)
+  bindArray array . bindBuffer glyphB $ do
+    realloc glyphB (length vertices) Static Draw
+    copy glyphB 0 (coerce vertices)
 
-  bindArray array . bindBuffer glyphB $ configureArray
+    configureArray
 
   sendM (writeIORef rangesRef ranges)
 
