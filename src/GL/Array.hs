@@ -59,14 +59,17 @@ configureArray = do
   a <- askArray <* B.askBuffer
   evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
     offset <- get
-    let size = S.sizeOf (elemA a)
+    let size = S.sizeOf (undefinedAtFieldType f)
+        stride = S.sizeOf (elemA a)
     put (offset <> DSL.Offset size)
     checking $ glEnableVertexAttribArray (fromIntegral location)
-    checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral size) (nullPtr `plusPtr` DSL.getOffset offset)) (DSL.defaultVars `like` a) where
+    checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` DSL.getOffset offset)) (DSL.defaultVars `like` a) where
   like :: a Maybe -> Array (a Identity) -> a Maybe
   like = const
   elemA :: Array (i Identity) -> i Identity
   elemA _ = undefined
+  undefinedAtFieldType :: DSL.Field v a -> a
+  undefinedAtFieldType _ = undefined
 
 
 data Mode
