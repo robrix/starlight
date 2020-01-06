@@ -22,6 +22,7 @@ module GL.Shader.Stmt
 , (*!=)
   -- * Geometry shaders
 , Primitive.Type(..)
+, primitiveIn
 , emitVertex
 , emitPrimitive
   -- * Fragment shaders
@@ -126,6 +127,17 @@ infixr 4 *=
 r *!= v = (r :*!= v) (pure ())
 
 infixr 4 *!=
+
+
+primitiveIn :: Primitive.Type -> Stmt 'Geometry ()
+primitiveIn ty = Raw (render ty) (pure ()) where
+  render = (pretty "layout" <+>) . (<+> pretty "in;" <> hardline) . parens . \case
+    Primitive.Points -> pretty "points"
+    Primitive.Lines -> pretty "lines"
+    Primitive.LineStrip -> pretty "lines"
+    Primitive.LineLoop -> pretty "lines"
+    Primitive.TriangleStrip -> pretty "triangles"
+    Primitive.Triangles -> pretty "triangles"
 
 
 emitVertex :: Stmt 'Geometry () -> Stmt 'Geometry ()
