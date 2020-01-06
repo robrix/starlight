@@ -140,7 +140,7 @@ cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { array }, glyp
   realloc glyphB (length vertices) Static Draw
   copy glyphB 0 (coerce vertices)
 
-  bindArray array . bindBuffer glyphB $ configureArray glyphB array
+  bindArray array . bindBuffer glyphB $ configureArray array
 
   sendM (writeIORef rangesRef ranges)
 

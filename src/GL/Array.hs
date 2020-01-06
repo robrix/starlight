@@ -54,8 +54,8 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (Effect sig, B.HasBuffer 'B.Array i m, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
-configureArray _ a = evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
+configureArray :: (Effect sig, B.HasBuffer 'B.Array i m, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => Array (i Identity) -> m ()
+configureArray a = evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
   o <- get
   let size = S.sizeOf (elemA a)
       offset = o <> DSL.Offset size
@@ -123,7 +123,7 @@ load is = do
     B.realloc b (length is) B.Static B.Draw
     B.copy b 0 is
 
-    a <$ configureArray b a
+    a <$ configureArray a
 
 
 bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (i Identity) -> ArrayC i m a -> m a
