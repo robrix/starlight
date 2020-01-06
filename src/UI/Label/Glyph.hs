@@ -21,7 +21,7 @@ import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Object
-import GL.Shader.DSL hiding (Field(..))
+import GL.Shader.DSL
 import Prelude hiding (break)
 
 shader :: Shader U V O

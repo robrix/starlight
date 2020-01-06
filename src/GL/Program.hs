@@ -42,6 +42,7 @@ import           GL.Effect.Check
 import           GL.Error
 import           GL.Shader
 import qualified GL.Shader.DSL as DSL
+import           GL.Shader.Vars
 import           GL.Uniform
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
@@ -54,12 +55,12 @@ data Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Pr
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
 
 
-build :: forall u i o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, DSL.Vars u, DSL.Vars i) => DSL.Shader u i o -> m (Program u i o)
+build :: forall u i o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars i) => DSL.Shader u i o -> m (Program u i o)
 build p = runLiftIO $ do
   program <- glCreateProgram
   onExit (glDeleteProgram program)
-  DSL.foldVarsM @i (\ DSL.Field { DSL.name, DSL.location } -> checking $
-    C.withCString name (glBindAttribLocation program (fromIntegral location))) DSL.defaultVars
+  foldVarsM @i (\ Field { name, location } -> checking $
+    C.withCString name (glBindAttribLocation program (fromIntegral location))) defaultVars
   shaders <- for (DSL.shaderSources p) $ \ (type', source) -> do
     shader <- createShader type'
     shader <$ compile source shader
@@ -70,9 +71,9 @@ build p = runLiftIO $ do
 
   checkStatus glGetProgramiv glGetProgramInfoLog Other GL_LINK_STATUS program
 
-  ls <- DSL.foldVarsM @u (\ DSL.Field{ DSL.name, DSL.location } -> do
+  ls <- foldVarsM @u (\ Field{ name, location } -> do
     loc <- checking $ C.withCString name (glGetUniformLocation program)
-    pure (IntMap.singleton location loc)) DSL.defaultVars
+    pure (IntMap.singleton location loc)) defaultVars
 
   pure (Program ls program)
 
@@ -92,12 +93,12 @@ newtype ProgramC (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) 
 instance HasProgram u i o m => HasProgram u i o (ReaderC r m) where
   askProgram = lift askProgram
 
-instance (Has Check sig m, Has (Lift IO) sig m, DSL.Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramC u i o m) where
+instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramC u i o m) where
   alg = \case
-    L (Get   k) -> k DSL.defaultVars
+    L (Get   k) -> k defaultVars
     L (Put s k) -> do
       Program ls prog <- askProgram
-      DSL.foldVarsM (\ DSL.Field { DSL.location, DSL.value } ->
+      foldVarsM (\ Field { location, value } ->
         maybe (pure ()) (checking . uniform prog (ls IntMap.! location)) value) s
       k
     R other     -> ProgramC (send (handleCoercible other))
