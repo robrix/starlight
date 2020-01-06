@@ -5,7 +5,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module GL.Shader.Stmt
-( Stmt
+( -- * Statements
+  Stmt
 , let'
 , var
 , discard
@@ -17,6 +18,7 @@ module GL.Shader.Stmt
 , (+=)
 , (*=)
 , (*!=)
+  -- * Pretty-printing
 , renderStmt
 , renderTypeOf
 ) where
