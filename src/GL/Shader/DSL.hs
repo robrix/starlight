@@ -86,7 +86,7 @@ module GL.Shader.DSL
 , (!*!)
 , renderStmt
 , renderExpr
-, GLSLType(..)
+, GL.Uniform(..)
 , Vars(..)
 , Field(..)
 , Offset(..)
@@ -120,7 +120,6 @@ import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Maybe (fromMaybe)
 import           Data.Monoid (Ap(..), First(..), Sum(..))
-import           Data.Proxy
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
 import qualified Foreign as F
@@ -135,7 +134,6 @@ import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
 import           Prelude hiding (break)
 import           UI.Colour (Colour)
-import           Unit.Angle
 
 data Shader (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) where
   Shader :: Vars u => ((forall k . u (Expr k)) -> Stage i o) -> Shader u i o
@@ -191,13 +189,16 @@ stageSources u = \case
 like :: t (Const a) -> t b -> t (Const a)
 like = const
 
-pvar :: GLSLType a => String -> String -> Const (Doc ()) a
+pvar :: GL.Uniform a => String -> String -> Const (Doc ()) a
 pvar qual n = fix $ \ c -> Const $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline
+
+renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
+renderTypeOf _ = pretty (GL.glslType @a)
 
 
 data Stmt (k :: Type) a where
   Pure :: a -> Stmt k a
-  Let :: GLSLType b => String -> Expr k b -> (Const String b -> Stmt k a) -> Stmt k a
+  Let :: GL.Uniform b => String -> Expr k b -> (Const String b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
   Switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k a -> Stmt k a
@@ -350,10 +351,10 @@ data Ref (k :: Type) t
 newtype Prj s t = Prj String
 
 
-let' :: GLSLType a => String -> Expr k a -> Stmt k (Expr k a)
+let' :: GL.Uniform a => String -> Expr k a -> Stmt k (Expr k a)
 let' n v = Let n v (pure . Var . getConst)
 
-var :: GLSLType a => String -> Expr k a -> Stmt k (Ref k a)
+var :: GL.Uniform a => String -> Expr k a -> Stmt k (Ref k a)
 var n v = Let n v (pure . Ref . getConst)
 
 
@@ -662,46 +663,6 @@ renderRef = \case
   r :^^. Prj p -> renderRef r <> pretty '.' <> pretty p
 
 
-class GL.Uniform a => GLSLType a where
-  renderTypeOf :: expr a -> Doc ()
-
-instance GLSLType Bool where
-  renderTypeOf _ = pretty "bool"
-
-instance GLSLType a => GLSLType (Radians a) where
-  renderTypeOf _ = renderTypeOf (Proxy @a)
-
-instance GLSLType (f a) => GLSLType (Point f a) where
-  renderTypeOf _ = renderTypeOf (Proxy @(f a))
-
-instance GLSLType Int where
-  renderTypeOf _ = pretty "int"
-
-instance GLSLType Float where
-  renderTypeOf _ = pretty "float"
-
-instance GLSLType (V2 Float) where
-  renderTypeOf _ = pretty "vec2"
-
-instance GLSLType (V3 Float) where
-  renderTypeOf _ = pretty "vec3"
-
-instance GLSLType (V2 (V2 Float)) where
-  renderTypeOf _ = pretty "mat2"
-
-instance GLSLType (V3 (V3 Float)) where
-  renderTypeOf _ = pretty "mat3"
-
-instance GLSLType (V4 (V4 Float)) where
-  renderTypeOf _ = pretty "mat4"
-
-instance GLSLType (V4 Float) where
-  renderTypeOf _ = pretty "vec4"
-
-instance GLSLType TextureUnit where
-  renderTypeOf _ = pretty "sampler2D"
-
-
 data Field v a = Field
   { name     :: !String
   , location :: !Int
@@ -738,24 +699,24 @@ undefinedAtFieldType _ = undefined
 
 
 class Vars t where
-  makeVars :: (forall a . GLSLType a => Field Maybe a -> v a) -> t v
-  default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GLSLType a => Field Maybe a -> v a) -> t v
+  makeVars :: (forall a . GL.Uniform a => Field Maybe a -> v a) -> t v
+  default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GL.Uniform a => Field Maybe a -> v a) -> t v
   makeVars f = to (run (evalFresh 0 (gmakeVars @t f)))
   {-# INLINABLE makeVars #-}
 
-  traverseVars :: Applicative m => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
-  default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
+  traverseVars :: Applicative m => (forall a . GL.Uniform a => Field v a -> m (v' a)) -> t v -> m (t v')
+  default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GL.Uniform a => Field v a -> m (v' a)) -> t v -> m (t v')
   traverseVars f = fmap to . run . evalFresh 0 . gtraverseVars @t f . from
   {-# INLINABLE traverseVars #-}
 
-makeVarsM :: (Vars t, Applicative m) => (forall a . GLSLType a => Field Maybe a -> m (v a)) -> m (t v)
+makeVarsM :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field Maybe a -> m (v a)) -> m (t v)
 makeVarsM f = traverseVars (unComp1 . value) (makeVars (Comp1 . f))
 
-foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => Field v a -> b) -> t v -> b
+foldVars :: (Vars t, Monoid b) => (forall a . GL.Uniform a => Field v a -> b) -> t v -> b
 foldVars f t = getConst $ traverseVars (Const . f) t
 {-# INLINABLE foldVars #-}
 
-foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field v a -> m b) -> t v -> m b
+foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GL.Uniform a => Field v a -> m b) -> t v -> m b
 foldVarsM f t = getAp $ foldVars (Ap . f) t
 {-# INLINABLE foldVarsM #-}
 
@@ -765,7 +726,7 @@ defaultVars = makeVars value
 
 
 class GMakeVars t v f where
-  gmakeVars :: Has Fresh sig m => (forall a . GLSLType a => Field Maybe a -> v a) -> m (f (t v))
+  gmakeVars :: Has Fresh sig m => (forall a . GL.Uniform a => Field Maybe a -> v a) -> m (f (t v))
 
 instance GMakeVars t v f => GMakeVars t v (M1 D d f) where
   gmakeVars f = M1 <$> gmakeVars f
@@ -790,15 +751,15 @@ instance (GMakeVar t a v f, Selector s) => GMakeVars t v (M1 S s f) where
   {-# INLINABLE gmakeVars #-}
 
 class GMakeVar t a v f | f -> a v where
-  gmakeVar :: (forall a . GLSLType a => Field Maybe a -> v a) -> (forall a . Field Maybe a) -> f (t v)
+  gmakeVar :: (forall a . GL.Uniform a => Field Maybe a -> v a) -> (forall a . Field Maybe a) -> f (t v)
 
-instance GLSLType a => GMakeVar t a v (K1 R (v a)) where
+instance GL.Uniform a => GMakeVar t a v (K1 R (v a)) where
   gmakeVar f s = K1 (f s)
   {-# INLINABLE gmakeVar #-}
 
 
 class GTraverseVars t v1 v2 f1 f2 where
-  gtraverseVars :: (Applicative f, Has Fresh sig m) => (forall a . GLSLType a => Field v1 a -> f (v2 a)) -> f1 (t v1) -> m (f (f2 (t v2)))
+  gtraverseVars :: (Applicative f, Has Fresh sig m) => (forall a . GL.Uniform a => Field v1 a -> f (v2 a)) -> f1 (t v1) -> m (f (f2 (t v2)))
 
 instance GTraverseVars t v1 v2 f1 f2 => GTraverseVars t v1 v2 (M1 D d f1) (M1 D d f2) where
   gtraverseVars f a = fmap M1 <$> gtraverseVars @t @v1 @v2 @f1 @f2 f (unM1 a)
@@ -823,8 +784,8 @@ instance (GTraverseVar t a v1 v2 f1 f2, Selector s) => GTraverseVars t v1 v2 (M1
   {-# INLINABLE gtraverseVars #-}
 
 class GTraverseVar t a v1 v2 f1 f2 | f1 -> a v1, f2 -> a v2 where
-  gtraverseVar :: Applicative f => (forall a . GLSLType a => Field v1 a -> f (v2 a)) -> (forall a . v1 a -> Field v1 a) -> f1 (t v1) -> f (f2 (t v2))
+  gtraverseVar :: Applicative f => (forall a . GL.Uniform a => Field v1 a -> f (v2 a)) -> (forall a . v1 a -> Field v1 a) -> f1 (t v1) -> f (f2 (t v2))
 
-instance GLSLType a => GTraverseVar t a v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
+instance GL.Uniform a => GTraverseVar t a v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
   gtraverseVar f s = fmap K1 . f . s . unK1
   {-# INLINABLE gtraverseVar #-}

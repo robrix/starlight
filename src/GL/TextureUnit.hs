@@ -18,6 +18,7 @@ instance GL.Type TextureUnit where
   glType _ = GL_INT
 
 instance Uniform TextureUnit where
+  glslType = "sampler2D"
   uniform prog loc = runLiftIO . glProgramUniform1i prog loc . unTextureUnit
 
 
