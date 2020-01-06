@@ -116,7 +116,7 @@ bindBuffer buffer (BufferC m) = do
   a <$ bind (Nothing `asTypeOf` Just buffer)
 
 class Monad m => HasBuffer ty v m | m -> ty v where
-  askBuffer :: m (Buffer ty v)
+  askBuffer :: m (Buffer ty (v Identity))
 
 
 newtype BufferC ty v m a = BufferC { runBuffer :: ReaderC (Buffer ty (v Identity)) m a }
