@@ -86,7 +86,7 @@ runActions (Delta (Seconds dt)) i c = do
       direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
-        Target    -> t^?_Just.position_.to (unP . (`L.direction` position))
+        Target    -> t^?_Just.to projected.to (unP . (`L.direction` position))
 
     Turn t -> actor_.rotation_ *= axisAngle (unit _z) (getRadians (case t of
       L -> angular
@@ -109,3 +109,5 @@ runActions (Delta (Seconds dt)) i c = do
   angular = dt *^ Radians 5
   actor_ :: Lens' Character Actor
   actor_ = Actor.actor_
+
+  projected a = a^.position_ .+^ a^.velocity_
