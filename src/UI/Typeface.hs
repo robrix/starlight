@@ -14,6 +14,7 @@ module UI.Typeface
 ) where
 
 import           Control.Effect.Finally
+import           Control.Effect.Trace
 import           Control.Lens
 import           Control.Monad (guard, join, (<=<))
 import           Control.Monad.IO.Class.Lift
@@ -127,7 +128,7 @@ readFontOfSize
 readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 
-cacheCharactersForDrawing :: (Effect sig, Has Check sig m, Has (Lift IO) sig m) => Typeface -> String -> m ()
+cacheCharactersForDrawing :: (Effect sig, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => Typeface -> String -> m ()
 cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { buffer, array }, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + Identity (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')

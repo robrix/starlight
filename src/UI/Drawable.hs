@@ -10,6 +10,7 @@ module UI.Drawable
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lift
+import           Control.Effect.Trace
 import           Data.Functor.Identity
 import           Foreign.Storable (Storable)
 import           GL.Array
@@ -41,7 +42,7 @@ using getDrawable m = do
 runDrawable :: (Drawable u v o -> b) -> Drawable u v o -> ReaderC b m a -> m a
 runDrawable makeDrawable = runReader . makeDrawable
 
-loadingDrawable :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Storable (v Identity), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v Identity] -> ReaderC b m a -> m a
+loadingDrawable :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m, Storable (v Identity), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v Identity] -> ReaderC b m a -> m a
 loadingDrawable drawable shader vertices m = do
   program <- build shader
   (buffer, array) <- load vertices

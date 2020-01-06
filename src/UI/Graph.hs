@@ -11,6 +11,7 @@ module UI.Graph
 
 import           Control.Carrier.Finally
 import           Control.Effect.Lens ((?=))
+import           Control.Effect.Trace (Trace)
 import           Control.Lens ((^.))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -36,7 +37,7 @@ data Graph = Graph
   , count     :: !Int
   }
 
-mkGraph :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
+mkGraph :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
 mkGraph f n from to = do
   let vertex = V2 <*> f
       count = max n 0 + 2

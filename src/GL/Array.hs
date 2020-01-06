@@ -25,6 +25,7 @@ import           Control.Algebra
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
+import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Coerce
@@ -54,14 +55,17 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (Effect sig, HasArray i m, B.HasBuffer 'B.Array i m, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => m ()
+configureArray :: (Effect sig, HasArray i m, B.HasBuffer 'B.Array i m, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureArray = do
   a <- askArray <* B.askBuffer
-  evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
+  evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location, DSL.name } -> runLiftIO $ do
     offset <- get
     let size = S.sizeOf (undefinedAtFieldType f)
         stride = S.sizeOf (elemA a)
     put (offset <> DSL.Offset size)
+
+    trace $ "configuring field " <> name <> " attrib " <> show location <> " at offset " <> show offset <> " stride " <> show stride <> " dims " <> show (GL.glDims f) <> " type " <> show (GL.glType f)
+
     checking $ glEnableVertexAttribArray (fromIntegral location)
     checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` DSL.getOffset offset)) (DSL.defaultVars `like` a) where
   like :: a Maybe -> Array (a Identity) -> a Maybe
@@ -117,7 +121,7 @@ drawArraysInstanced
 drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i)) (fromIntegral n)))
 
 
-load :: (Effect sig, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (B.Buffer 'B.Array (i Identity), Array (i Identity))
+load :: (Effect sig, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [i Identity] -> m (B.Buffer 'B.Array (i Identity), Array (i Identity))
 load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1

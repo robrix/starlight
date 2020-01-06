@@ -16,6 +16,7 @@ import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
+import           Control.Effect.Trace
 import           Control.Lens ((^.))
 import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
@@ -63,6 +64,7 @@ label
      , Has Finally sig m
      , Has (Lift IO) sig m
      , Has (Reader Window.Window) sig m
+     , Has Trace sig m
      , HasCallStack
      , Effect sig
      )

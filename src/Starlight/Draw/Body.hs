@@ -18,6 +18,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
+import           Control.Effect.Trace
 import           Control.Lens (Lens')
 import           Data.Coerce
 import           Data.Functor.Identity
@@ -43,6 +44,7 @@ runBody
   :: ( Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
+     , Has Trace sig m
      , Effect sig
      )
   => ReaderC Drawable m a

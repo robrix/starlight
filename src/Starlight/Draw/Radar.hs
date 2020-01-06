@@ -21,6 +21,7 @@ import           Control.Effect.Lens (view, (?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.State
+import           Control.Effect.Trace
 import           Control.Lens (Lens', forOf_, to, traversed, (.~), (^.))
 import           Control.Monad (when)
 import           Data.Coerce (coerce)
@@ -102,7 +103,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   where
   n = 10 :: Int
 
-runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
+runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
 runRadar = UI.loadingDrawable Drawable shader vertices
 
 
