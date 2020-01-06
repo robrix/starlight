@@ -90,6 +90,7 @@ module GL.Shader.DSL
 , Field(..)
 , Offset(..)
 , makeVarsM
+, foldVars
 , foldVarsM
 , defaultVars
   -- * Re-exports
@@ -711,11 +712,6 @@ class Vars t where
   makeVars f = to (run (evalFresh 0 (gmakeVars @t f)))
   {-# INLINABLE makeVars #-}
 
-  foldVars :: Monoid b => (forall a . GLSLType a => Field v a -> b) -> t v -> b
-  default foldVars :: (Generic (t v), GFoldVars t v (Rep (t v)), Monoid b) => (forall a . GLSLType a => Field v a -> b) -> t v -> b
-  foldVars f = run . evalFresh 0 . gfoldVars @t f . from
-  {-# INLINABLE foldVars #-}
-
   traverseVars :: Applicative m => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
   default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
   traverseVars f = fmap to . run . evalFresh 0 . gtraverseVars @t f . from
@@ -723,6 +719,10 @@ class Vars t where
 
 makeVarsM :: (Vars t, Applicative m) => (forall a . GLSLType a => Field Maybe a -> m (v a)) -> m (t v)
 makeVarsM f = traverseVars (unComp1 . value) (makeVars (Comp1 . f))
+
+foldVars :: (Vars t, Monoid b) => (forall a . GLSLType a => Field v a -> b) -> t v -> b
+foldVars f t = getConst $ traverseVars (Const . f) t
+{-# INLINABLE foldVars #-}
 
 foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field v a -> m b) -> t v -> m b
 foldVarsM f t = getAp $ foldVars (Ap . f) t
@@ -764,39 +764,6 @@ class GMakeVar t a v f | f -> a v where
 instance GLSLType a => GMakeVar t a v (K1 R (v a)) where
   gmakeVar f s = K1 (f s)
   {-# INLINABLE gmakeVar #-}
-
-
-class GFoldVars t v f where
-  gfoldVars :: (Has Fresh sig m, Monoid b) => (forall a . GLSLType a => Field v a -> b) -> f (t v) -> m b
-
-instance GFoldVars t v f => GFoldVars t v (M1 D d f) where
-  gfoldVars f = gfoldVars f . unM1
-  {-# INLINABLE gfoldVars #-}
-
-instance GFoldVars t v f => GFoldVars t v (M1 C c f) where
-  gfoldVars f = gfoldVars f . unM1
-  {-# INLINABLE gfoldVars #-}
-
-instance GFoldVars t v U1 where
-  gfoldVars _ _ = pure mempty
-  {-# INLINABLE gfoldVars #-}
-
-instance (GFoldVars t v fl, GFoldVars t v fr) => GFoldVars t v (fl :*: fr) where
-  gfoldVars f (l :*: r) = (<>) <$> gfoldVars f l <*> gfoldVars f r
-  {-# INLINABLE gfoldVars #-}
-
-instance (GFoldVar t a v f, Selector s) => GFoldVars t v (M1 S s f) where
-  gfoldVars f x@(M1 m) = do
-    i <- fresh
-    pure (gfoldVar f (Field (selName x) i) m)
-  {-# INLINABLE gfoldVars #-}
-
-class GFoldVar t a v f | f -> a v where
-  gfoldVar :: Monoid b => (forall a . GLSLType a => Field v a -> b) -> (forall a . v a -> Field v a) -> f (t v) -> b
-
-instance GLSLType a => GFoldVar t a v (K1 R (v a)) where
-  gfoldVar f s = f . s . unK1
-  {-# INLINABLE gfoldVar #-}
 
 
 class GTraverseVars t v1 v2 f1 f2 where
