@@ -23,6 +23,7 @@ module GL.Shader.Stmt
   -- * Geometry shaders
 , Primitive.Type(..)
 , primitiveIn
+, primitiveOut
 , emitVertex
 , emitPrimitive
   -- * Fragment shaders
@@ -138,6 +139,16 @@ primitiveIn ty = Raw (render ty) (pure ()) where
     Primitive.LineLoop -> pretty "lines"
     Primitive.TriangleStrip -> pretty "triangles"
     Primitive.Triangles -> pretty "triangles"
+
+primitiveOut :: Primitive.Type -> Stmt 'Geometry ()
+primitiveOut ty = Raw (render ty) (pure ()) where
+  render = (pretty "layout" <+>) . (<+> pretty "out;" <> hardline) . parens . (<> comma <+> pretty "max_vertices = 256") . \case
+    Primitive.Points -> pretty "points"
+    Primitive.Lines -> pretty "line_strip"
+    Primitive.LineStrip -> pretty "line_strip"
+    Primitive.LineLoop -> pretty "line_strip"
+    Primitive.TriangleStrip -> pretty "triangle_strip"
+    Primitive.Triangles -> pretty "triangle_strip"
 
 
 emitVertex :: Stmt 'Geometry () -> Stmt 'Geometry ()
