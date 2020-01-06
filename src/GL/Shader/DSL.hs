@@ -29,6 +29,7 @@ module GL.Shader.DSL
 , let'
 , var
 , get
+, float
 , vec2
 , vec3
 , vec4
@@ -267,6 +268,7 @@ data Expr (k :: Type) a where
 
   Get :: Ref k a -> Expr k a
 
+  Float :: Expr k a -> Expr k Float
   Vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
   Vec3 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V3 Float)
   Vec4 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V4 Float)
@@ -347,6 +349,9 @@ var n v = Let n v (pure . Ref . getConst)
 get :: Ref k a -> Expr k a
 get = Get
 
+
+float :: Expr k a -> Expr k Float
+float = Float
 
 vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
 vec2 = Vec2
@@ -614,6 +619,7 @@ renderExpr = parens . \case
   Lt a b -> renderExpr a <+> pretty '<' <+> renderExpr b
   Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
   Get r -> renderRef r
+  Float a -> fn "float" [renderExpr a]
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
   Vec3 a b c -> fn "vec3" [renderExpr a, renderExpr b, renderExpr c]
   Vec4 a b c d -> fn "vec4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
