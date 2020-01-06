@@ -26,12 +26,14 @@ newtype Shader = Shader { unShader :: GLuint }
 
 data Type
   = Vertex
+  | Geometry
   | Fragment
   deriving (Eq, Ord, Show)
 
 instance GL.Enum Type where
   glEnum = \case
     Vertex   -> GL_VERTEX_SHADER
+    Geometry -> GL_GEOMETRY_SHADER
     Fragment -> GL_FRAGMENT_SHADER
 
 
