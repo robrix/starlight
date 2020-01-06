@@ -1,10 +1,13 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Ship
 ( drawShip
 , runShip
@@ -16,17 +19,22 @@ import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
-import           Control.Lens (to, (&), (.~), (^.))
+import           Control.Lens (Lens', to, (&), (.~), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
+import           Data.Generics.Product.Fields
+import           Foreign.Storable (Storable)
+import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
+import           GL.Object
 import           GL.Program
+import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _a)
+import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
-import           Starlight.Draw.Ship.Shader
-import           Starlight.Ship hiding (colour_)
+import qualified Starlight.Ship as S
 import           Starlight.View
 import           UI.Colour (_a)
 import qualified UI.Drawable as UI
@@ -39,9 +47,9 @@ drawShip
      , Has (Reader View) sig m
      )
   => Actor
-  -> Ship
+  -> S.Ship
   -> m ()
-drawShip Actor{ position, rotation } Ship{ colour, armour, scale } = measure "ship" . UI.using getDrawable $ do
+drawShip Actor{ position, rotation } S.Ship{ colour, armour, scale } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   let matrix = scaleToViewZoomed vs
   matrix_
@@ -81,3 +89,41 @@ vertices = coerce @[V2 Float]
 
 range :: Interval Identity Int
 range = Interval 0 4
+
+
+shader :: D.Shader U V O
+shader = program $ \ u
+  ->  vertex (\ V{ pos } None ->
+    gl_Position .= matrix u D.!* ext4 (ext3 pos 1) 1)
+
+  >>> fragment (\ None O { fragColour } ->
+    fragColour .= colour u)
+
+
+data U v = U
+  { matrix :: v (M44 Float)
+  , colour :: v (Colour Float)
+  }
+  deriving (Generic)
+
+instance D.Vars U
+
+matrix_ :: Lens' (U v) (v (M44 Float))
+matrix_ = field @"matrix"
+
+colour_ :: Lens' (U v) (v (Colour Float))
+colour_ = field @"colour"
+
+
+newtype V v = V { pos :: v (V2 Float) }
+  deriving (Generic)
+
+instance D.Vars V
+
+deriving instance Bind     (v (V2 Float)) => Bind     (V v)
+deriving instance Storable (v (V2 Float)) => Storable (V v)
+
+newtype O v = O { fragColour :: v (Colour Float) }
+  deriving (Generic)
+
+instance D.Vars O

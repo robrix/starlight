@@ -91,7 +91,6 @@ library
     Starlight.Draw.Radar
     Starlight.Draw.Radar.Shader
     Starlight.Draw.Ship
-    Starlight.Draw.Ship.Shader
     Starlight.Draw.Starfield
     Starlight.Draw.Starfield.Shader
     Starlight.Draw.Weapon.Laser
