@@ -89,6 +89,7 @@ module GL.Shader.DSL
 , Vars(..)
 , Field(..)
 , Offset(..)
+, makeVarsM
 , foldVarsM
 , defaultVars
   -- * Re-exports
@@ -719,6 +720,9 @@ class Vars t where
   default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
   traverseVars f = fmap to . run . evalFresh 0 . gtraverseVars @t f . from
   {-# INLINABLE traverseVars #-}
+
+makeVarsM :: (Vars t, Applicative m) => (forall a . GLSLType a => Field Maybe a -> m (v a)) -> m (t v)
+makeVarsM f = traverseVars (unComp1 . value) (makeVars (Comp1 . f))
 
 foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field v a -> m b) -> t v -> m b
 foldVarsM f t = getAp $ foldVars (Ap . f) t
