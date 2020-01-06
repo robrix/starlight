@@ -18,6 +18,7 @@ module GL.Shader.DSL
 , program
 , Stage
 , vertex
+, geometry
 , fragment
 , (Cat.>>>)
 , None(..)
@@ -132,10 +133,14 @@ data Stage i o where
   Id :: Stage i i
   (:>>>) :: Stage i x -> Stage x o -> Stage i o
   V :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
+  G :: (Vars i, Vars o) => (i (Expr 'Geometry) -> o (Ref 'Geometry) -> Stmt 'Geometry ()) -> Stage i o
   F :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
 
 vertex   :: (Vars i, Vars o) => (i (Expr 'Vertex)   -> o (Ref 'Vertex)   -> Stmt 'Vertex   ()) -> Stage i o
 vertex = V
+
+geometry :: (Vars i, Vars o) => (i (Expr 'Geometry) -> o (Ref 'Geometry) -> Stmt 'Geometry ()) -> Stage i o
+geometry = G
 
 fragment :: (Vars i, Vars o) => (i (Expr 'Fragment) -> o (Ref 'Fragment) -> Stmt 'Fragment ()) -> Stage i o
 fragment = F
@@ -159,6 +164,7 @@ stageSources :: Doc () -> Stage i o -> [(Type, Doc ())]
 stageSources u = \case
   Id  -> []
   V s -> [(Vertex,   renderStage s)]
+  G s -> [(Geometry, renderStage s)]
   F s -> [(Fragment, renderStage s)]
   l :>>> r -> stageSources u l <> stageSources u r
   where
