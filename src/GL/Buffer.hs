@@ -126,3 +126,4 @@ instance HasBuffer ty i m => HasBuffer ty i (ReaderC r m) where
 
 
 newtype BufferC ty v m a = BufferC { runBuffer :: ReaderC (Buffer ty (v Identity)) m a }
+  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
