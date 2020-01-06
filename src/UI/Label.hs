@@ -73,7 +73,7 @@ label = do
 
   program  <- build Text.shader
 
-  array <- load $ coerce @[V2 Float]
+  (_, array) <- load $ coerce @[V2 Float]
     [ V2 (-1) (-1)
     , V2   1  (-1)
     , V2 (-1)   1

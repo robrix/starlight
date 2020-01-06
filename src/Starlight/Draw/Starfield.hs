@@ -64,8 +64,8 @@ runStarfield
   => ReaderC Drawable m a
   -> m a
 runStarfield m = do
-  program <- build shader
-  array   <- load vertices
+  program    <- build shader
+  (_, array) <- load vertices
   runReader (Drawable UI.Drawable{ program, array }) m
 
 

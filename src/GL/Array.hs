@@ -115,7 +115,7 @@ drawArraysInstanced
 drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i)) (fromIntegral n)))
 
 
-load :: (Effect sig, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (Array (i Identity))
+load :: (Effect sig, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => [i Identity] -> m (B.Buffer 'B.Array (i Identity), Array (i Identity))
 load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
@@ -123,7 +123,7 @@ load is = do
     B.realloc b (length is) B.Static B.Draw
     B.copy b 0 is
 
-    a <$ configureArray
+    (b, a) <$ configureArray
 
 
 bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (i Identity) -> ArrayC i m a -> m a

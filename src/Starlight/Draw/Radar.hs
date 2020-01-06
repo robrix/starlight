@@ -105,8 +105,8 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m) => ReaderC Drawable m a -> m a
 runRadar m = do
-  program <- build shader
-  array   <- load vertices
+  program    <- build shader
+  (_, array) <- load vertices
   runReader (Drawable UI.Drawable{ program, array }) m
 
 
