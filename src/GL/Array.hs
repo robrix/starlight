@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -53,7 +54,7 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (Effect sig, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
+configureArray :: (Effect sig, B.HasBuffer 'B.Array i m, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m) => B.Buffer 'B.Array (i Identity) -> Array (i Identity) -> m ()
 configureArray _ a = evalState (DSL.Offset 0) $ DSL.foldVarsM (\ f@DSL.Field { DSL.location } -> runLiftIO $ do
   o <- get
   let size = S.sizeOf (elemA a)
@@ -118,10 +119,11 @@ load is = do
   a <- gen1
   bind (Just b)
   bind (Just a)
-  B.realloc b (length is) B.Static B.Draw
-  B.copy b 0 is
+  B.bindBuffer b $ do
+    B.realloc b (length is) B.Static B.Draw
+    B.copy b 0 is
 
-  a <$ configureArray b a
+    a <$ configureArray b a
 
 
 bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (i Identity) -> ArrayC i m a -> m a
