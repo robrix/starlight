@@ -15,6 +15,7 @@ module GL.Buffer
 , KnownType(..)
 , Update(..)
 , Usage(..)
+, bindBuffer
 , HasBuffer(..)
 , runBuffer
 , BufferC(BufferC)
@@ -107,6 +108,12 @@ instance GL.Enum Hint where
     Hint Stream  Read -> GL_STREAM_READ
     Hint Stream  Copy -> GL_STREAM_COPY
 
+
+bindBuffer :: (KnownType ty, Has Check sig m, Has (Lift IO) sig m) => Buffer ty (v Identity) -> BufferC ty v m a -> m a
+bindBuffer buffer (BufferC m) = do
+  bind (Just buffer)
+  a <- runReader buffer m
+  a <$ bind (Nothing `asTypeOf` Just buffer)
 
 class Monad m => HasBuffer ty v m | m -> ty v where
   askBuffer :: m (Buffer ty v)
