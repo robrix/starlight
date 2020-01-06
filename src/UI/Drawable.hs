@@ -4,16 +4,19 @@ module UI.Drawable
 ( Drawable(..)
 , using
 , runDrawable
+, loadingDrawable
 ) where
 
 import           Control.Carrier.Reader
+import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Data.Functor.Identity
+import           Foreign.Storable (Storable)
 import           GL.Array
 import qualified GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
-import           GL.Shader.DSL (Vars)
+import           GL.Shader.DSL (Shader, Vars)
 
 data Drawable u v o = Drawable
   { program :: Program u v o
@@ -37,3 +40,9 @@ using getDrawable m = do
 
 runDrawable :: (Drawable u v o -> b) -> Drawable u v o -> ReaderC b m a -> m a
 runDrawable makeDrawable = runReader . makeDrawable
+
+loadingDrawable :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Storable (v Identity), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v Identity] -> ReaderC b m a -> m a
+loadingDrawable drawable shader vertices m = do
+  program <- build shader
+  (buffer, array) <- load vertices
+  runDrawable drawable Drawable{ program, array, buffer } m
