@@ -117,9 +117,7 @@ load :: (Effect sig, DSL.Vars i, S.Storable (i Identity), Has Check sig m, Has F
 load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
-  bind (Just b)
-  bind (Just a)
-  B.bindBuffer b $ do
+  bindArray a . B.bindBuffer b $ do
     B.realloc b (length is) B.Static B.Draw
     B.copy b 0 is
 
