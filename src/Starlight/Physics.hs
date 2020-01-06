@@ -86,7 +86,7 @@ runActions (Delta (Seconds dt)) i c = do
       direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
-        Target    -> t^?_Just.position_.to (unP . flip L.direction position)
+        Target    -> t^?_Just.position_.to (unP . (`L.direction` position))
 
     Turn t -> actor_.rotation_ *= axisAngle (unit _z) (getRadians (case t of
       L -> angular
