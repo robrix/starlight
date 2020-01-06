@@ -16,12 +16,9 @@ import           Data.Maybe (fromMaybe)
 import           Linear.Quaternion
 import           Linear.V4
 import           Linear.Vector
-import           Starlight.Actor
 import           Starlight.Body
-import           Starlight.Character
 import           Starlight.Ephemeris
 import           Starlight.Identifier as Identifier
-import           Starlight.Ship
 import           Starlight.System
 import           UI.Colour
 import           Unit.Angle
