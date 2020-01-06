@@ -1,11 +1,13 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 module GL.Buffer
 ( Buffer(..)
 , realloc
@@ -23,6 +25,7 @@ module GL.Buffer
 
 import           Control.Carrier.Reader
 import           Control.Monad.IO.Class.Lift
+import           Control.Monad.Trans.Class
 import           Data.Coerce
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -117,6 +120,9 @@ bindBuffer buffer (BufferC m) = do
 
 class Monad m => HasBuffer ty v m | m -> ty v where
   askBuffer :: m (Buffer ty (v Identity))
+
+instance HasBuffer ty i m => HasBuffer ty i (ReaderC r m) where
+  askBuffer = lift askBuffer
 
 
 newtype BufferC ty v m a = BufferC { runBuffer :: ReaderC (Buffer ty (v Identity)) m a }
