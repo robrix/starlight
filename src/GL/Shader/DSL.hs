@@ -104,6 +104,7 @@ module GL.Shader.DSL
 , V4
 ) where
 
+import           Control.Applicative (liftA2)
 import           Control.Carrier.Fresh.Strict
 import qualified Control.Category as Cat
 import           Control.Monad (ap, liftM, (<=<))
@@ -714,6 +715,11 @@ class Vars t where
   foldVars f = run . evalFresh 0 . gfoldVars @t f . from
   {-# INLINABLE foldVars #-}
 
+  traverseVars :: Applicative m => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
+  default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GLSLType a => Field v a -> m (v' a)) -> t v -> m (t v')
+  traverseVars f = fmap to . run . evalFresh 0 . gtraverseVars @t f . from
+  {-# INLINABLE traverseVars #-}
+
 foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GLSLType a => Field v a -> m b) -> t v -> m b
 foldVarsM f t = getAp $ foldVars (Ap . f) t
 {-# INLINABLE foldVarsM #-}
@@ -787,3 +793,36 @@ class GFoldVar t a v f | f -> a v where
 instance GLSLType a => GFoldVar t a v (K1 R (v a)) where
   gfoldVar f s = f . s . unK1
   {-# INLINABLE gfoldVar #-}
+
+
+class GTraverseVars t v1 v2 f1 f2 where
+  gtraverseVars :: (Applicative f, Has Fresh sig m) => (forall a . GLSLType a => Field v1 a -> f (v2 a)) -> f1 (t v1) -> m (f (f2 (t v2)))
+
+instance GTraverseVars t v1 v2 f1 f2 => GTraverseVars t v1 v2 (M1 D d f1) (M1 D d f2) where
+  gtraverseVars f a = fmap M1 <$> gtraverseVars @t @v1 @v2 @f1 @f2 f (unM1 a)
+  {-# INLINABLE gtraverseVars #-}
+
+instance GTraverseVars t v1 v2 f1 f2 => GTraverseVars t v1 v2 (M1 C c f1) (M1 C c f2) where
+  gtraverseVars f a = fmap M1 <$> gtraverseVars @t @v1 @v2 @f1 @f2 f (unM1 a)
+  {-# INLINABLE gtraverseVars #-}
+
+instance GTraverseVars t v1 v2 U1 U1 where
+  gtraverseVars _ _ = pure (pure U1)
+  {-# INLINABLE gtraverseVars #-}
+
+instance (GTraverseVars t v1 v2 f1l f2l, GTraverseVars t v1 v2 f1r f2r) => GTraverseVars t v1 v2 (f1l :*: f1r) (f2l :*: f2r) where
+  gtraverseVars f (l :*: r) = liftA2 (:*:) <$> gtraverseVars @t @v1 @v2 @f1l @f2l f l <*> gtraverseVars @t @v1 @v2 @f1r @f2r f r
+  {-# INLINABLE gtraverseVars #-}
+
+instance (GTraverseVar t a v1 v2 f1 f2, Selector s) => GTraverseVars t v1 v2 (M1 S s f1) (M1 S s f2) where
+  gtraverseVars f m = do
+    i <- fresh
+    pure (M1 <$> gtraverseVar f (Field (selName m) i) (unM1 m))
+  {-# INLINABLE gtraverseVars #-}
+
+class GTraverseVar t a v1 v2 f1 f2 | f1 -> a v1, f2 -> a v2 where
+  gtraverseVar :: Applicative f => (forall a . GLSLType a => Field v1 a -> f (v2 a)) -> (forall a . v1 a -> Field v1 a) -> f1 (t v1) -> f (f2 (t v2))
+
+instance GLSLType a => GTraverseVar t a v1 v2 (K1 R (v1 a)) (K1 R (v2 a)) where
+  gtraverseVar f s = fmap K1 . f . s . unK1
+  {-# INLINABLE gtraverseVar #-}
