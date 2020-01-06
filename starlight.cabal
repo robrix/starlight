@@ -106,6 +106,7 @@ library
     Starlight.Sol
     Starlight.System
     Starlight.View
+    Starlight.Weapon.Laser
     UI.Colour
     UI.Drawable
     UI.Glyph
