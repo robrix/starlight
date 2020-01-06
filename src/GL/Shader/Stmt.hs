@@ -7,9 +7,10 @@
 module GL.Shader.Stmt
 ( -- * Statements
   Stmt
+  -- * Variables
 , let'
 , var
-, discard
+  -- * Control flow
 , iff
 , switch
 , break
@@ -22,6 +23,8 @@ module GL.Shader.Stmt
   -- * Geometry shaders
 , emitVertex
 , emitPrimitive
+  -- * Fragment shaders
+, discard
   -- * Pretty-printing
 , renderStmt
 , renderTypeOf
@@ -87,11 +90,6 @@ var :: GL.Uniform a => String -> Expr k a -> Stmt k (Ref k a)
 var n v = Let n v (pure . Ref . getConst)
 
 
-
-discard :: Stmt 'Fragment ()
-discard = Discard (pure ())
-
-
 iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
 iff c t e = If c t e (pure ())
 
@@ -131,6 +129,10 @@ emitVertex m = EmitVertex m (pure ())
 
 emitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry ()
 emitPrimitive m = EmitPrimitive m (pure ())
+
+
+discard :: Stmt 'Fragment ()
+discard = Discard (pure ())
 
 
 renderStmt :: Stmt k a -> Doc ()
