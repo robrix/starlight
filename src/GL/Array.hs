@@ -12,7 +12,7 @@
 module GL.Array
 ( Array(..)
 , configureArray
-, Mode(..)
+, Type(..)
 , drawArrays
 , drawArraysInstanced
 , load
@@ -38,6 +38,7 @@ import qualified GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Enum as GL
 import           GL.Object
+import           GL.Primitive
 import           GL.Program (HasProgram(..), ProgramC(..))
 import           GL.Shader.Vars
 import qualified GL.Type as GL
@@ -76,25 +77,6 @@ configureArray = do
   undefinedAtFieldType _ = undefined
 
 
-data Mode
-  = Points
-  | Lines
-  | LineStrip
-  | LineLoop
-  | TriangleStrip
-  | Triangles
-  deriving (Eq, Show)
-
-instance GL.Enum Mode where
-  glEnum = \case
-    Points        -> GL_POINTS
-    Lines         -> GL_LINES
-    LineStrip     -> GL_LINE_STRIP
-    LineLoop      -> GL_LINE_LOOP
-    TriangleStrip -> GL_TRIANGLE_STRIP
-    Triangles     -> GL_TRIANGLES
-
-
 drawArrays
   :: ( Has Check sig m
      , Has (Lift IO) sig m
@@ -102,7 +84,7 @@ drawArrays
      , HasCallStack
      , HasProgram u i o m
      )
-  => Mode
+  => Type
   -> Interval Identity Int
   -> m ()
 drawArrays mode i = askProgram >> askArray >> checking (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i))))
@@ -114,7 +96,7 @@ drawArraysInstanced
      , HasCallStack
      , HasProgram u i o m
      )
-  => Mode
+  => Type
   -> Interval Identity Int
   -> Int
   -> m ()
