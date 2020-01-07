@@ -48,15 +48,11 @@ scale = runLiftIO $ do
   pure $! (drawableSize^._y) `div'` (windowSize^._y)
 
 
-runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Context (ReaderC Window m) a -> m a
-runWindow name size = runSDL . withSDLWindow name size . runContext
-
-
 runSDL :: Has (Lift IO) sig m => m a -> m a
 runSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO quit)
 
-withSDLWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Window m a -> m a
-withSDLWindow name size = E.bracket
+runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Window m a -> m a
+runWindow name size = E.bracket
   (runLiftIO (createWindow name windowConfig))
   (runLiftIO . destroyWindow)
   . flip runReader where

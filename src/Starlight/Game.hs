@@ -67,10 +67,10 @@ game
      , Has Trace sig m
      )
   => m ()
-game = do
+game = Window.runSDL $ do
   system <- Sol.system
 
-  Window.runWindow "Starlight" (V2 1024 768)
+  Window.runWindow "Starlight" (V2 1024 768) . Window.runContext
     . runGLC
     . runFinally
     . evalState @Input mempty
