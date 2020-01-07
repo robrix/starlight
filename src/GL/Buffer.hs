@@ -11,7 +11,6 @@
 module GL.Buffer
 ( Buffer(..)
 , realloc
-, copyPtr
 , copy
 , Type(..)
 , KnownType(..)
