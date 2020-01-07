@@ -12,8 +12,10 @@ import           Control.Carrier.Lift
 import           Control.Carrier.Reader
 import qualified Control.Concurrent.Lift as CC
 import qualified Control.Exception.Lift as E
+import           Control.Lens
 import           Control.Monad ((<=<))
 import           Control.Monad.IO.Class.Lift
+import           Data.Fixed (div')
 import           Data.Text (Text)
 import           Graphics.GL.Core41
 import           Linear.V2 as Linear
@@ -35,10 +37,12 @@ size = do
   size <- ask >>= runLiftIO . get . windowSize
   pure (fromIntegral <$> size)
 
-scale :: (Num a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m a
-scale = do
-  config <- ask >>= runLiftIO . getWindowConfig
-  pure $! if windowHighDPI config then 2 else 1
+scale :: (Integral a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m a
+scale = runLiftIO $ do
+  window <- ask
+  drawableSize <- glGetDrawableSize window
+  windowSize <- get (windowSize window)
+  pure $! (drawableSize^._y) `div'` (windowSize^._y)
 
 
 runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Window m a -> m a
