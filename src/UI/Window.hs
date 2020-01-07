@@ -47,7 +47,7 @@ scale = runLiftIO $ do
 
 
 runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Context (ReaderC Window m) a -> m a
-runWindow name size = withSDL . withSDLWindow name size . withGLContext
+runWindow name size = withSDL . withSDLWindow name size . runContext
 
 
 withSDL :: Has (Lift IO) sig m => m a -> m a
@@ -70,8 +70,8 @@ withSDLWindow name size = E.bracket
     , glColorPrecision = V4 8 8 8 8
     }
 
-withGLContext :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => ReaderC Context m a -> m a
-withGLContext = E.bracket
+runContext :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => ReaderC Context m a -> m a
+runContext = E.bracket
   (ask >>= runLiftIO . glCreateContext)
   (\ c -> runLiftIO (glFinish >> glDeleteContext c))
   . flip runReader
