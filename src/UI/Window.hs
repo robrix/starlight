@@ -6,7 +6,6 @@ module UI.Window
 , scale
 , runSDL
 , runWindow
-, runContext
 , Window
 ) where
 
@@ -19,11 +18,9 @@ import           Control.Monad ((<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Fixed (div')
 import           Data.Text (Text)
-import           Graphics.GL.Core41
 import           Linear.V2 as Linear
 import           Linear.V4 as Linear
 import           SDL
-import           UI.Context
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
 swap = ask >>= runLiftIO . glSwapWindow
@@ -67,9 +64,3 @@ runWindow name size = E.bracket
     { glProfile        = Core Normal 4 1
     , glColorPrecision = V4 8 8 8 8
     }
-
-runContext :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => ReaderC Context m a -> m a
-runContext = E.bracket
-  (ask >>= runLiftIO . glCreateContext)
-  (\ c -> runLiftIO (glFinish >> glDeleteContext c))
-  . flip runReader

@@ -54,6 +54,7 @@ import           Starlight.System as System
 import           Starlight.View
 import           System.FilePath
 import           UI.Colour
+import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
@@ -70,7 +71,7 @@ game
 game = Window.runSDL $ do
   system <- Sol.system
 
-  Window.runWindow "Starlight" (V2 1024 768) . Window.runContext
+  Window.runWindow "Starlight" (V2 1024 768) . runContext
     . runGLC
     . runFinally
     . evalState @Input mempty
