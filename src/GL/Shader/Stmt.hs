@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeApplications #-}
 module GL.Shader.Stmt
 ( -- * Statements
-  Stmt
+  Stmt(Raw)
   -- * Variables
 , let'
 , var
@@ -21,9 +21,6 @@ module GL.Shader.Stmt
 , (*=)
 , (*!=)
   -- * Geometry shaders
-, Primitive.Type(..)
-, primitiveIn
-, primitiveOut
 , emitVertex
 , emitPrimitive
   -- * Fragment shaders
@@ -36,7 +33,6 @@ module GL.Shader.Stmt
 import           Control.Monad (ap, liftM, (<=<))
 import           Data.Functor.Const
 import           Data.Text.Prettyprint.Doc hiding (dot)
-import qualified GL.Primitive as Primitive
 import           GL.Shader (Type(..))
 import           GL.Shader.Expr
 import qualified GL.Uniform as GL
@@ -128,27 +124,6 @@ infixr 4 *=
 r *!= v = (r :*!= v) (pure ())
 
 infixr 4 *!=
-
-
-primitiveIn :: Primitive.Type -> Stmt 'Geometry ()
-primitiveIn ty = Raw (render ty) (pure ()) where
-  render = (pretty "layout" <+>) . (<+> pretty "in;" <> hardline) . parens . \case
-    Primitive.Points -> pretty "points"
-    Primitive.Lines -> pretty "lines"
-    Primitive.LineStrip -> pretty "lines"
-    Primitive.LineLoop -> pretty "lines"
-    Primitive.TriangleStrip -> pretty "triangles"
-    Primitive.Triangles -> pretty "triangles"
-
-primitiveOut :: Primitive.Type -> Stmt 'Geometry ()
-primitiveOut ty = Raw (render ty) (pure ()) where
-  render = (pretty "layout" <+>) . (<+> pretty "out;" <> hardline) . parens . (<> comma <+> pretty "max_vertices = 256") . \case
-    Primitive.Points -> pretty "points"
-    Primitive.Lines -> pretty "line_strip"
-    Primitive.LineStrip -> pretty "line_strip"
-    Primitive.LineLoop -> pretty "line_strip"
-    Primitive.TriangleStrip -> pretty "triangle_strip"
-    Primitive.Triangles -> pretty "triangle_strip"
 
 
 emitVertex :: Stmt 'Geometry () -> Stmt 'Geometry ()
