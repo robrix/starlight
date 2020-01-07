@@ -4,7 +4,9 @@ module UI.Window
 , input
 , size
 , scale
+, runSDL
 , runWindow
+, runContext
 , Window
 ) where
 
