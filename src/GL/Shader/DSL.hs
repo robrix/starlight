@@ -23,6 +23,7 @@ module GL.Shader.DSL
 , (Cat.>>>)
 , None(..)
 , shaderSources
+, module GL.Shader.Decl
 , module GL.Shader.Expr
 , module GL.Shader.Stmt
   -- * Re-exports
