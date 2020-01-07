@@ -1,2 +1,7 @@
 module UI.Context
-() where
+( Context
+) where
+
+import SDL
+
+type Context = GLContext
