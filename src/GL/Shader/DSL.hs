@@ -112,7 +112,9 @@ stageSources u = \case
   renderStage t f = (,) t
     $  pretty "#version 410" <> hardline
     <> u
-    <> foldVars (getConst . value) (makeVars (pvar "in"      . name) `like` i)
+    <> case t of
+      Shader.Geometry -> foldVars (getConst . value) (makeVars (pvar "in" . (<> "[]") . name) `like` i)
+      _               -> foldVars (getConst . value) (makeVars (pvar "in"      . name) `like` i)
     <> foldVars (getConst . value) (makeVars (pvar "out"     . name) `like` o)
     <> renderDecl (f i o) where
     i = makeVars (Var . name)
