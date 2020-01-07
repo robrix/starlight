@@ -31,6 +31,7 @@ import Starlight.Draw.Starfield as Starfield
 import Starlight.Draw.Weapon.Laser as Laser
 import Starlight.Identifier
 import Starlight.System
+import Starlight.UI
 import Starlight.View
 import UI.Colour
 import UI.Label
@@ -48,14 +49,14 @@ draw
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
      , Has (Reader (System StateVectors)) sig m
+     , Has (Reader UI) sig m
      , Has (Reader View) sig m
      )
   => Delta Seconds Float
-  -> Label
-  -> Label
-  -> Font
   -> m ()
-draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
+draw dt = measure "draw" . runLiftIO $ do
+  UI{ fps = fpsLabel, target = targetLabel, face } <- ask
+  let font = Font face 18
   bind @Framebuffer Nothing
 
   v@View{ size, zoom } <- ask

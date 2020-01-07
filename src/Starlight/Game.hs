@@ -51,12 +51,13 @@ import           Starlight.Physics
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol
 import           Starlight.System as System
+import           Starlight.UI
 import           Starlight.View
 import           System.FilePath
 import           UI.Colour
 import           UI.Context
 import           UI.Label as Label
-import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypeface)
+import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
 import           Unit.Length
 
@@ -155,7 +156,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   -- J2000
   epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
 
-  runFrame . fix $ \ loop -> do
+  runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     continue <- measure "frame" $ do
       t <- realToFrac <$> since epoch
       system <- get
@@ -163,7 +164,7 @@ game = Sol.system >>= \ system -> runGame system $ do
         dt <- fmap realToFrac . since =<< get
         put =<< now
 
-        withView (draw dt fpsLabel targetLabel (Font face 18)) -- draw with current readonly positions & beams
+        withView (draw dt) -- draw with current readonly positions & beams
         measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
 
         measure "input" input
