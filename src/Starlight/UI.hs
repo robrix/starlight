@@ -1,2 +1,5 @@
 module Starlight.UI
-() where
+( UI(..)
+) where
+
+data UI = UI
