@@ -30,6 +30,7 @@ module GL.Shader.Expr
 , _xyz
 , _xywz
 , _a
+, ix
 
   -- * Expressions
 , Expr(Var)
@@ -151,6 +152,9 @@ _xywz = Prj ".xywz"
 
 _a :: Prj (v a) a
 _a = Prj ".a"
+
+ix :: Int -> Prj [a] a
+ix i = Prj ("[" <> show i <> "]")
 
 
 data Expr (k :: Type) a where
