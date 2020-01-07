@@ -20,6 +20,7 @@ module Starlight.Body
 , actorAt
 , systemAt
 , j2000
+, runJ2000
 , Epoch(..)
 , runSystem
 ) where
@@ -129,6 +130,9 @@ extended a = iso (`ext` a) (^. _xyz)
 
 j2000 :: MonadFail m => m Epoch
 j2000 = iso8601ParseM "2000-01-01T12:00:00.000Z"
+
+runJ2000 :: MonadFail m => ReaderC Epoch m a -> m a
+runJ2000 m = j2000 >>= flip runReader m
 
 newtype Epoch = Epoch { getEpoch :: UTCTime }
   deriving (ISO8601)
