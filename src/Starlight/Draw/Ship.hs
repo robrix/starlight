@@ -60,8 +60,7 @@ drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, 
     !*! scaled (V4 scale scale scale 1)
     !*! mkTransformation rotation 0
   colour_ ?= (colour
-    & (if Thrust `Set.member` actions then _r +~ 0.5 else id)
-    & (if Thrust `Set.member` actions then _g +~ 0.5 else id)
+    & (if Thrust `Set.member` actions then (_r +~ 0.5) . (_g +~ 0.5) else id)
     & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
   drawArrays LineLoop range
 
