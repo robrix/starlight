@@ -117,40 +117,40 @@ renderRef = \case
 newtype Prj s t = Prj String
 
 _x :: Prj (v a) a
-_x = Prj "x"
+_x = Prj ".x"
 
 _y :: Prj (v a) a
-_y = Prj "y"
+_y = Prj ".y"
 
 _z :: Prj (v a) a
-_z = Prj "z"
+_z = Prj ".z"
 
 _w :: Prj (v a) a
-_w = Prj "w"
+_w = Prj ".w"
 
 _xy :: Prj (v a) (V2 a)
-_xy = Prj "xy"
+_xy = Prj ".xy"
 
 _yz :: Prj (v a) (V2 a)
-_yz = Prj "yz"
+_yz = Prj ".yz"
 
 _xz :: Prj (v a) (V2 a)
-_xz = Prj "xz"
+_xz = Prj ".xz"
 
 _xw :: Prj (v a) (V2 a)
-_xw = Prj "xw"
+_xw = Prj ".xw"
 
 _zw :: Prj (v a) (V2 a)
-_zw = Prj "zw"
+_zw = Prj ".zw"
 
 _xyz :: Prj (v a) (V3 a)
-_xyz = Prj "xyz"
+_xyz = Prj ".xyz"
 
 _xywz :: Prj (v a) (V4 a)
-_xywz = Prj "xywz"
+_xywz = Prj ".xywz"
 
 _a :: Prj (v a) a
-_a = Prj "a"
+_a = Prj ".a"
 
 
 data Expr (k :: Type) a where
@@ -397,7 +397,7 @@ renderExpr = parens . \case
   ASinH a -> fn "asinh" [renderExpr a]
   ACosH a -> fn "acosh" [renderExpr a]
   ATanH a -> fn "atanh" [renderExpr a]
-  a :^. Prj s -> renderExpr a <> pretty '.' <> pretty s
+  a :^. Prj s -> renderExpr a <> pretty s
   a :^* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   a :!* b -> renderExpr a <+> pretty '*' <+> renderExpr b
   a :!*! b -> renderExpr a <+> pretty '*' <+> renderExpr b
