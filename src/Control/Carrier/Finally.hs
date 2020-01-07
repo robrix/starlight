@@ -27,7 +27,7 @@ runFinally (FinallyC m) = do
   runStateRef ref m `E.finally` (sendM (readIORef ref) >>= traverse_ runFinally)
 
 newtype FinallyC m a = FinallyC (StateC [FinallyC m ()] m a)
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Finally :+: sig) (FinallyC m) where
   alg = \case
