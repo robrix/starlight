@@ -1,2 +1,7 @@
 module GL.Shader.Decl
-() where
+( Decl
+) where
+
+import GL.Shader.Stmt
+
+type Decl = Stmt
