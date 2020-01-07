@@ -246,16 +246,19 @@ timed m = do
   runReader dt m
 
 
+newtype Epoch = Epoch { getEpoch :: UTCTime }
+  deriving (ISO8601)
+
 -- | Run an action in an ephemeral system derived from the persistent system.
 runSystem
   :: ( Has (Lift IO) sig m
      , Has (State (System Body)) sig m
      )
-  => UTCTime
+  => Epoch
   -> ReaderC (System StateVectors) m a
   -> m a
 runSystem epoch m = do
-  t <- realToFrac <$> since epoch
+  t <- realToFrac <$> since (getEpoch epoch)
   system <- get
   runReader (systemAt system (getDelta t)) m
 
