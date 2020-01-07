@@ -14,6 +14,7 @@ module GL.Array
 , configureArray
 , Type(..)
 , drawArrays
+, multiDrawArrays
 , drawArraysInstanced
 , load
 , bindArray
@@ -31,6 +32,7 @@ import           Control.Monad.Trans.Class
 import           Data.Coerce
 import           Data.Functor.Identity
 import           Data.Functor.Interval
+import           Foreign.Marshal.Array.Lift
 import           Foreign.Ptr
 import qualified Foreign.Storable as S
 import           GHC.Stack
@@ -88,6 +90,24 @@ drawArrays
   -> Interval Identity Int
   -> m ()
 drawArrays mode i = askProgram >> askArray >> checking (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i))))
+
+multiDrawArrays
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
+     , HasArray i m
+     , HasCallStack
+     , HasProgram u i o m
+     )
+  => Type
+  -> [Interval Identity Int]
+  -> m ()
+multiDrawArrays mode is
+  | null is   = pure ()
+  | otherwise = do
+    _ <- askProgram
+    _ <- askArray
+    withArray (map (fromIntegral . min') is) $ \ firsts -> withArray (map (fromIntegral . size) is) $ \ counts ->
+      checking (runLiftIO (glMultiDrawArrays (glEnum mode) firsts counts (fromIntegral (length is))))
 
 drawArraysInstanced
   :: ( Has Check sig m
