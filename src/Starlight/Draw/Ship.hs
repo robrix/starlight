@@ -20,11 +20,12 @@ import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (Lens', to, (&), (.~), (^.))
+import           Control.Lens (Lens', to, (&), (+~), (.~), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
+import qualified Data.Set as Set
 import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
@@ -37,7 +38,7 @@ import           Starlight.Actor
 import           Starlight.Character
 import qualified Starlight.Ship as S
 import           Starlight.View
-import           UI.Colour (_a)
+import           UI.Colour
 import qualified UI.Drawable as UI
 
 drawShip
@@ -49,7 +50,7 @@ drawShip
      )
   => Character
   -> m ()
-drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, armour, scale } } = measure "ship" . UI.using getDrawable $ do
+drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, armour, scale }, actions } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   let matrix = scaleToViewZoomed vs
   matrix_
@@ -58,7 +59,10 @@ drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, 
     !*! translated3 (unP position)
     !*! scaled (V4 scale scale scale 1)
     !*! mkTransformation rotation 0
-  colour_ ?= (colour & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
+  colour_ ?= (colour
+    & (if Thrust `Set.member` actions then _r +~ 0.5 else id)
+    & (if Thrust `Set.member` actions then _g +~ 0.5 else id)
+    & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
   drawArrays LineLoop range
 
 
