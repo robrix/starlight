@@ -112,7 +112,7 @@ gl_PointCoord = Var "gl_PointCoord"
 renderRef :: Ref k a -> Doc ()
 renderRef = \case
   Ref n        -> pretty n
-  r :^^. Prj p -> renderRef r <> pretty '.' <> pretty p
+  r :^^. Prj p -> renderRef r <> pretty p
 
 
 newtype Prj s t = Prj String
