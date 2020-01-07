@@ -63,9 +63,8 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   npcs <- view (npcs_ @B.StateVectors)
   vs <- ask
 
-  let count = 8
-      shipVertices = verticesForShips 0 npcs
-      bodyVertices = verticesForBodies count scale bodies
+  let shipVertices = verticesForShips npcs
+      bodyVertices = verticesForBodies scale bodies
       vertices = shipVertices <> bodyVertices
 
   measure "realloc/copy" $ do
@@ -81,11 +80,8 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
   -- FIXME: store the position, radius, & colour of each body at t and compute the blips in the (instanced?) shader rather than setting uniforms
-  measure "bodies" $ do
-    let start = length shipVertices
-        n = length bodies
-        stride = 2 * count + 1
-    multiDrawArrays LineStrip [ interval (start + i * stride) (start + (i + 1) * stride) | i <- [0..n-1] ]
+  measure "bodies" $
+    drawArrays Points (Interval (Identity (length shipVertices)) (Identity (length shipVertices + length bodyVertices)))
 
   measure "npcs" $ do
     -- FIXME: fade colour with distance
@@ -108,24 +104,28 @@ runRadar = UI.loadingDrawable Drawable shader []
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-verticesForBodies :: Foldable t => Int -> Float -> t B.StateVectors -> [V Identity]
-verticesForBodies count scale vs =
-  [ V{ there = Identity (there^._xy), r = Identity (r * scale), n, colour = Identity colour }
+verticesForBodies :: Foldable t => Float -> t B.StateVectors -> [V Identity]
+verticesForBodies scale vs =
+  [ vertex
   | B.StateVectors{ body = B.Body{ radius = Metres r, colour }, actor = Actor{ position = there } } <- toList vs
-  , n <- [ fromIntegral t / fromIntegral count | t <- [-count..count] ]
+  , let vertex = V{ there = Identity (there^._xy), r = Identity (r * scale), colour = Identity colour }
   ]
 
-verticesForShips :: Foldable t => Int -> t Character -> [V Identity]
-verticesForShips count cs =
-  [ V{ there = Identity (there^._xy), r = Identity scale, n, colour = Identity colour }
+verticesForShips :: Foldable t => t Character -> [V Identity]
+verticesForShips cs =
+  [ vertex
   | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale } } <- toList cs
-  , n <- [ fromIntegral t / fromIntegral count | t <- [-count..count] ]
+  , let vertex = V{ there = Identity (there^._xy), r = Identity scale, colour = Identity colour }
   ]
+
+
+instanceCount :: Int
+instanceCount = 1
 
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ there, r, n, colour } IF{ colour2 = out } -> do
+  ->  vertex (\ V{ there, r, colour } IF{ colour2 = out } -> do
     there <- let' "there" (there - here u)
     d     <- let' "d"     (D.norm there)
     dir   <- let' "dir"   (there D.^* (1/D.norm there))
@@ -135,7 +135,7 @@ shader = program $ \ u
     edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
     angle <- let' "angle" (angleOf there)
     sweep <- let' "sweep" (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
-    theta <- let' "theta" (angle + n * sweep)
+    theta <- let' "theta" (angle + (float gl_InstanceID / fromIntegral instanceCount) * sweep)
     pos   <- let' "pos"   (vec2 (cos theta) (sin theta))
     gl_PointSize .= 3
     out .= colour
@@ -169,7 +169,6 @@ instance Vars IF
 data V v = V
   { there  :: v (V2 Float) -- location of object
   , r      :: v Float      -- radius of object
-  , n      :: v Float      -- position along the sweep in the interval [-1,1]
   , colour :: v (Colour Float)
   }
   deriving (Generic)
