@@ -176,8 +176,8 @@ frame
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
      , Has (Reader (System StateVectors)) sig m
-     , Has (Reader Window.Window) sig m
      , Has (Reader UI) sig m
+     , Has (Reader Window.Window) sig m
      , Has (State Input) sig m
      , Has (State (System Body)) sig m
      )
