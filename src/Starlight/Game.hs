@@ -40,11 +40,11 @@ import           Starlight.Body
 import           Starlight.Character
 import           Starlight.Controls
 import           Starlight.Draw
-import           Starlight.Draw.Body
-import           Starlight.Draw.Radar
-import           Starlight.Draw.Ship
-import           Starlight.Draw.Starfield
-import           Starlight.Draw.Weapon.Laser
+import           Starlight.Draw.Body as Body
+import           Starlight.Draw.Radar as Radar
+import           Starlight.Draw.Ship as Ship
+import           Starlight.Draw.Starfield as Starfield
+import           Starlight.Draw.Weapon.Laser as Laser
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
@@ -117,6 +117,17 @@ runGame system
         ]
       }
 
+runDraw
+  :: ( Effect sig
+     , Has Check sig m
+     , Has Finally sig m
+     , Has (Lift IO) sig m
+     , Has Trace sig m
+     )
+  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable m)))) a
+  -> m a
+runDraw = runStarfield . runShip . runRadar . runLaser . runBody
+
 game
   :: ( Effect sig
      , Has Check sig m
@@ -143,7 +154,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
 
   start <- now
-  evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
+  evalState start . runDraw . fix $ \ loop -> do
     continue <- measure "frame" $ do
       t <- realToFrac <$> since epoch
       system <- get
