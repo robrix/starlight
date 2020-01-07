@@ -88,7 +88,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
   measure "targets" $ do
     for_ (target >>= (`elemIndex` identifiers system)) $ \ index ->
-      drawArraysInstanced Points (Interval (Identity index) (Identity index + 1)) 10
+      drawArraysInstanced Points (Interval (Identity index) (Identity index + 1)) targetBlipCount
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
 runRadar = UI.loadingDrawable Drawable shader []
@@ -112,6 +112,9 @@ verticesForShips cs =
   ]
 
 
+targetBlipCount :: Int
+targetBlipCount = 10
+
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
@@ -124,7 +127,12 @@ shader = program $ \ u
     edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
     angle <- let' "angle" (angleOf there)
     sweep .= (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
-    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* (radius + 50 * float gl_InstanceID))
+    radius <- var "radius" radius
+    let step = D.max' 1 (D.min' (get radius/float (fromIntegral targetBlipCount)) (d / 50))
+    iff (gl_InstanceID `gt` 0)
+      (radius .= step * float gl_InstanceID)
+      (pure ())
+    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* get radius)
     gl_PointSize .= 3
     colour2 .= colour
     gl_Position .= ext4 (ext3 pos 0) 1)
