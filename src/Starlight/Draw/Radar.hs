@@ -125,12 +125,13 @@ shader = program $ \ u
         wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
     edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
     angle <- let' "angle" (angleOf there)
-    sweep .= (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
     radius <- var "radius" radius
     let step = D.max' 1 (D.min' (get radius/float (fromIntegral targetBlipCount)) (d / 50))
     iff (gl_InstanceID `gt` 0)
       (radius .= step * float gl_InstanceID)
       (pure ())
+    minSweep <- let' "minSweep" (minBlipSize / (2 * pi * get radius))
+    sweep .= (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* get radius)
     gl_PointSize .= 3
     colour2 .= colour
@@ -154,7 +155,7 @@ shader = program $ \ u
             i += 1)
 
   >>> fragment (\ IF{ colour3 } O{ fragColour } -> main $ fragColour .= colour3) where
-  minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
+  minBlipSize = 4
   count = 16
   radius = 300
 
