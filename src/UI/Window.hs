@@ -12,7 +12,7 @@ import           Control.Carrier.Lift
 import           Control.Carrier.Reader
 import qualified Control.Concurrent.Lift as CC
 import qualified Control.Exception.Lift as E
-import           Control.Lens
+import           Control.Lens ((^.))
 import           Control.Monad ((<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Fixed (div')
@@ -21,6 +21,7 @@ import           Graphics.GL.Core41
 import           Linear.V2 as Linear
 import           Linear.V4 as Linear
 import           SDL
+import           UI.Context
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
 swap = ask >>= runLiftIO . glSwapWindow
@@ -45,7 +46,7 @@ scale = runLiftIO $ do
   pure $! (drawableSize^._y) `div'` (windowSize^._y)
 
 
-runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC GLContext (ReaderC Window m) a -> m a
+runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Context (ReaderC Window m) a -> m a
 runWindow name size = withSDL . withSDLWindow name size . withGLContext
 
 
@@ -69,7 +70,7 @@ withSDLWindow name size = E.bracket
     , glColorPrecision = V4 8 8 8 8
     }
 
-withGLContext :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => ReaderC GLContext m a -> m a
+withGLContext :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => ReaderC Context m a -> m a
 withGLContext = E.bracket
   (ask >>= runLiftIO . glCreateContext)
   (\ c -> runLiftIO (glFinish >> glDeleteContext c))
