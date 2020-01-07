@@ -47,11 +47,11 @@ scale = runLiftIO $ do
 
 
 runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Context (ReaderC Window m) a -> m a
-runWindow name size = withSDL . withSDLWindow name size . runContext
+runWindow name size = runSDL . withSDLWindow name size . runContext
 
 
-withSDL :: Has (Lift IO) sig m => m a -> m a
-withSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO quit)
+runSDL :: Has (Lift IO) sig m => m a -> m a
+runSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO quit)
 
 withSDLWindow :: Has (Lift IO) sig m => Text -> Linear.V2 Int -> ReaderC Window m a -> m a
 withSDLWindow name size = E.bracket
