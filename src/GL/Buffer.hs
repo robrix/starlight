@@ -31,7 +31,7 @@ import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
-import           Foreign.Ptr (Ptr, castPtr, nullPtr)
+import           Foreign.Ptr (castPtr, nullPtr)
 import           Foreign.Storable as S
 import           GL.Effect.Check
 import           GL.Enum as GL
@@ -55,13 +55,12 @@ realloc n update usage = do
   b <- askBuffer
   runLiftIO (glBufferData (glEnum (typeOf b)) (fromIntegral (n * sizeOfElem b)) nullPtr (glEnum (Hint update usage)))
 
-copyPtr :: (KnownType ty, Has Check sig m, Has (Lift IO) sig m) => Buffer ty a -> Interval Identity Int -> Ptr a -> m ()
-copyPtr b i = checking . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr
-
 copy :: (HasBuffer ty v m, KnownType ty, S.Storable (v Identity), Has Check sig m, Has (Lift IO) sig m) => Int -> [v Identity] -> m ()
 copy offset vertices = do
   b <- askBuffer
-  A.withArray vertices $ copyPtr b ((Interval 0 (Identity (length vertices)) + pure offset) ^* sizeOfElem b)
+  let i = (Interval 0 (Identity (length vertices)) + pure offset) ^* sizeOfElem b
+  A.withArray vertices $
+    checking . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr
 
 typeOf :: KnownType ty => Buffer ty a -> Type
 typeOf b = typeVal (typeProxy b)
