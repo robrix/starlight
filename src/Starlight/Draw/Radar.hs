@@ -76,13 +76,10 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
-  measure "bodies" $
-    drawArrays Points (Interval (Identity (length shipVertices)) (Identity (length shipVertices + length bodyVertices)))
-
-  measure "npcs" $ do
-    -- FIXME: fade colour with distance
-    -- FIXME: IFF
-    drawArrays Points (Interval 0 (Identity (length shipVertices)))
+  -- FIXME: fade colour with distance
+  -- FIXME: IFF
+  measure "bodies & npcs" $ do
+    drawArrays Points (Interval 0 (Identity (length vertices)))
 
   measure "targets" $ do
     for_ (target >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
