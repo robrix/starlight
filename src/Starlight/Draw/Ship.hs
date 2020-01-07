@@ -20,7 +20,7 @@ import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (Lens', to, (&), (+~), (.~), (^.), (-~))
+import           Control.Lens (Lens', to, (&), (+~), (-~), (.~), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
