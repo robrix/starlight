@@ -4,6 +4,7 @@
 {-# LANGUAGE TypeApplications #-}
 module Data.Functor.Interval
 ( Interval(..)
+, interval
 , point
 , size
 , toUnit
@@ -92,6 +93,9 @@ instance (Applicative f, Floating a) => Floating (Interval f a) where
   acosh = fmap acosh
   {-# INLINE acosh #-}
 
+
+interval :: Applicative f => a -> a -> Interval f a
+interval mn mx = Interval (pure mn) (pure mx)
 
 point :: f a -> Interval f a
 point fa = Interval fa fa
