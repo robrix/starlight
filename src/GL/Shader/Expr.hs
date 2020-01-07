@@ -9,6 +9,7 @@ module GL.Shader.Expr
 , gl_Position
 , gl_PointSize
 , gl_InstanceID
+, gl_Positions
 , gl_FragCoord
 , gl_FrontFacing
 , gl_PointCoord
@@ -91,6 +92,10 @@ gl_PointSize = Ref "gl_PointSize"
 
 gl_InstanceID :: Expr 'Vertex Int
 gl_InstanceID = Var "gl_InstanceID"
+
+
+gl_Positions :: Expr 'Geometry [V4 Float]
+gl_Positions = Var "gl_Position"
 
 
 gl_FragCoord :: Expr 'Fragment (V2 Float)
