@@ -68,9 +68,8 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
       vertices = shipVertices <> bodyVertices
 
   measure "realloc/copy" $ do
-    b <- askBuffer
-    B.realloc b (length vertices) B.Static B.Draw
-    B.copy b 0 vertices
+    B.realloc (length vertices) B.Static B.Draw
+    B.copy 0 vertices
 
   matrix_ ?= scaleToView vs
   here_   ?= here^._xy

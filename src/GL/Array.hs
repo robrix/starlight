@@ -128,8 +128,8 @@ load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
   bindArray a . B.bindBuffer b $ do
-    B.realloc b (length is) B.Static B.Draw
-    B.copy b 0 is
+    B.realloc (length is) B.Static B.Draw
+    B.copy 0 is
 
     (b, a) <$ configureArray
 
