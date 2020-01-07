@@ -19,7 +19,7 @@ import           Control.Monad (void)
 import           Control.Monad.IO.Class
 
 newtype ThreadC m a = ThreadC { runThread :: m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Thread :+: sig) (ThreadC m) where
   alg = \case
