@@ -29,7 +29,7 @@ import           Data.Functor.Identity
 import           Data.Functor.Interval
 import qualified Data.Map as Map
 import           Data.Maybe (isJust)
-import           Data.Time.Clock (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime)
+import           Data.Time.Clock (UTCTime)
 import           Data.Time.Format.ISO8601
 import           GL
 import           GL.Effect.Check
@@ -51,6 +51,7 @@ import           Starlight.Physics
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol
 import           Starlight.System as System
+import           Starlight.Time
 import           Starlight.UI
 import           Starlight.View
 import           System.FilePath
@@ -226,24 +227,6 @@ withView m = do
 
   let zoom = zoomForSpeed size (norm velocity)
   runReader View{ scale, size, zoom, focus } m
-
-
-now :: Has (Lift IO) sig m => m UTCTime
-now = sendM getCurrentTime
-
-since :: Has (Lift IO) sig m => UTCTime -> m NominalDiffTime
-since t = flip diffUTCTime t <$> now
-
-timed
-  :: ( Has (Lift IO) sig m
-     , Has (State UTCTime) sig m
-     )
-  => ReaderC (Delta Seconds Float) m a
-  -> m a
-timed m = do
-  dt <- fmap realToFrac . since =<< get
-  put =<< now
-  runReader dt m
 
 
 newtype Epoch = Epoch { getEpoch :: UTCTime }
