@@ -60,6 +60,7 @@ import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
 import           Unit.Length
+import           Unit.Time
 
 runGame
   :: Has (Lift IO) sig m
@@ -157,14 +158,11 @@ game = Sol.system >>= \ system -> runGame system $ do
   epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
-    continue <- measure "frame" $ do
+    continue <- measure "frame" . timed $ do
       t <- realToFrac <$> since epoch
       system <- get
       continue <- execEmpty . runReader (systemAt system (getDelta t)) $ do
-        dt <- fmap realToFrac . since =<< get
-        put =<< now
-
-        withView (draw dt) -- draw with current readonly positions & beams
+        withView draw -- draw with current readonly positions & beams
         measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
 
         measure "input" input
@@ -176,9 +174,9 @@ game = Sol.system >>= \ system -> runGame system $ do
         npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
         characters_ @Body <~> itraverse
           (\ i
-          ->  measure "gravity" . (actor_ @Character <-> gravity dt)
-          >=> measure "hit" . hit dt i
-          >=> measure "runActions" . runActions dt i)
+          ->  measure "gravity" . (actor_ @Character <-> gravity)
+          >=> measure "hit" . hit i
+          >=> measure "runActions" . runActions i)
       continue <$ measure "swap" Window.swap
     when continue loop
 
@@ -218,6 +216,17 @@ now = sendM getCurrentTime
 
 since :: Has (Lift IO) sig m => UTCTime -> m NominalDiffTime
 since t = flip diffUTCTime t <$> now
+
+timed
+  :: ( Has (Lift IO) sig m
+     , Has (State UTCTime) sig m
+     )
+  => ReaderC (Delta Seconds Float) m a
+  -> m a
+timed m = do
+  dt <- fmap realToFrac . since =<< get
+  put =<< now
+  runReader dt m
 
 
 execEmpty :: Functor m => EmptyC m a -> m Bool
