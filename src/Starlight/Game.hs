@@ -29,7 +29,6 @@ import           Data.Functor.Interval
 import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           Data.Time.Clock (UTCTime)
-import           Data.Time.Format.ISO8601
 import           GL
 import           GL.Effect.Check
 import           Linear.Exts
@@ -156,7 +155,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   enabled_ ScissorTest      .= True
 
   -- J2000
-  epoch <- iso8601ParseM "2000-01-01T12:00:00.000Z"
+  epoch <- j2000
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     continue <- measure "frame" (runSystem epoch (timed (execEmpty frame)))

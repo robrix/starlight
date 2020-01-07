@@ -19,6 +19,7 @@ module Starlight.Body
 , rotationTimeScale
 , actorAt
 , systemAt
+, j2000
 , Epoch(..)
 , runSystem
 ) where
@@ -125,6 +126,9 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
 extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)
 extended a = iso (`ext` a) (^. _xyz)
 
+
+j2000 :: MonadFail m => m Epoch
+j2000 = iso8601ParseM "2000-01-01T12:00:00.000Z"
 
 newtype Epoch = Epoch { getEpoch :: UTCTime }
   deriving (ISO8601)
