@@ -57,8 +57,6 @@ import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
-import           Unit.Length
-import           Unit.Time
 
 runGame
   :: Has (Lift IO) sig m
@@ -155,7 +153,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   enabled_ ScissorTest      .= True
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
-    measure "frame" (runSystem (timed frame))
+    measure "frame" frame
     measure "swap" Window.swap *> loop
 
 frame
@@ -164,20 +162,20 @@ frame
      , Has Empty sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
-     , Has (Reader (Delta Seconds Float)) sig m
      , Has (Reader Body.Drawable) sig m
      , Has (Reader Laser.Drawable) sig m
      , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader (System StateVectors)) sig m
+     , Has (Reader Epoch) sig m
      , Has (Reader UI) sig m
      , Has (Reader Window.Window) sig m
      , Has (State Input) sig m
      , Has (State (System Body)) sig m
+     , Has (State UTCTime) sig m
      )
   => m ()
-frame = do
+frame = runSystem . timed $ do
   withView draw -- draw with current readonly positions & beams
   measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
 
