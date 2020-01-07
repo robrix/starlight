@@ -134,23 +134,22 @@ shader = program $ \ u
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle))
     gl_PointSize .= 3
     colour2 .= colour
-    gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) D.^. D._xy) 0) 1)
+    gl_Position .= ext4 (ext3 pos 0) 1)
 
   >>> geometry (\ IG{} IF{ colour3 } -> do
     primitiveIn Points
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
-      let rot theta = mat4
-            (vec4 (cos theta) (-(sin theta)) 0 0)
-            (vec4 (sin theta) (cos   theta)  0 0)
-            (vec4 0           0              1 0)
-            (vec4 0           0              0 1)
+      let rot theta = mat3
+            (vec3 (cos theta) (-(sin theta)) 0)
+            (vec3 (sin theta) (cos   theta)  0)
+            (vec3 0           0              1)
       emitPrimitive $ do
         i <- var @Int "i" (-(fromIntegral count))
         while (get i `lt` (fromIntegral count + 1)) $
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
-            gl_Position .= rot theta !* Var "gl_in[0].gl_Position"
+            gl_Position .= ext4 (matrix u D.!*! rot theta !* Var "gl_in[0].gl_Position.xyz") 1
             colour3 .= Var "colour2[0]"
             i += 1)
 
