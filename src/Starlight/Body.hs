@@ -140,12 +140,12 @@ newtype Epoch = Epoch { getEpoch :: UTCTime }
 -- | Run an action in an ephemeral system derived from the persistent system.
 runSystem
   :: ( Has (Lift IO) sig m
+     , Has (Reader Epoch) sig m
      , Has (State (System Body)) sig m
      )
-  => Epoch
-  -> ReaderC (System StateVectors) m a
+  => ReaderC (System StateVectors) m a
   -> m a
-runSystem epoch m = do
-  t <- realToFrac <$> since (getEpoch epoch)
+runSystem m = do
+  t <- realToFrac <$> (since =<< asks getEpoch)
   system <- get
   runReader (systemAt system (getDelta t)) m
