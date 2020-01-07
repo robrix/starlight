@@ -125,7 +125,7 @@ instanceCount = 1
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ there, r, colour } IF{ colour2 = out } -> do
+  ->  vertex (\ V{ there, r, colour } IF{ colour2 = out } -> main $ do
     there <- let' "there" (there - here u)
     d     <- let' "d"     (D.norm there)
     dir   <- let' "dir"   (there D.^* (1/D.norm there))
@@ -141,7 +141,7 @@ shader = program $ \ u
     out .= colour
     gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) D.^. D._xy) 0) 1)
 
-  >>> fragment (\ IF{ colour2 } O{ fragColour } -> fragColour .= colour2) where
+  >>> fragment (\ IF{ colour2 } O{ fragColour } -> main $ fragColour .= colour2) where
   minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
 
 

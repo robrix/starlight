@@ -108,13 +108,13 @@ stageSources u = \case
   F s -> [(Shader.Fragment, renderStage s)]
   l :>>> r -> stageSources u l <> stageSources u r
   where
-  renderStage :: (Vars i, Vars o) => (i (Expr k) -> o (Ref k) -> Stmt k ()) -> Doc ()
+  renderStage :: (Vars i, Vars o) => (i (Expr k) -> o (Ref k) -> Decl k ()) -> Doc ()
   renderStage f
     =  pretty "#version 410" <> hardline
     <> u
     <> foldVars (getConst . value) (makeVars (pvar "in"      . name) `like` i)
     <> foldVars (getConst . value) (makeVars (pvar "out"     . name) `like` o)
-    <> pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt (f i o) <> line)) where
+    <> renderDecl (f i o) where
     i = makeVars (Var . name)
     o = makeVars (Ref . name)
 

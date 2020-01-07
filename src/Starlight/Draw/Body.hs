@@ -86,7 +86,7 @@ range = Interval 0 (Identity (length vertices))
 
 shader :: D.Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ pos } D.None -> do
+  ->  vertex (\ V{ pos } D.None -> main $ do
     let cos90 = 6.123233995736766e-17
     m <- var "m" (matrix u)
     switch gl_InstanceID
@@ -95,7 +95,7 @@ shader = program $ \ u
       ]
     gl_Position .= get m D.!* pos)
 
-  >>> fragment (\ D.None O { fragColour } ->
+  >>> fragment (\ D.None O { fragColour } -> main $
     fragColour .= colour u)
 
 

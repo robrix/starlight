@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeApplications #-}
 module GL.Shader.Stmt
 ( -- * Statements
-  Stmt(Raw)
+  Stmt
   -- * Variables
 , let'
 , var

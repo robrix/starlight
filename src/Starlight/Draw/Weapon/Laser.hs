@@ -83,9 +83,9 @@ range = Interval 0 (Identity (length vertices))
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ r } None ->
+  ->  vertex (\ V{ r } None -> main $
     gl_Position .= matrix u D.!* vec4 r 0 0 1)
-  >>> fragment (\ None O{ fragColour } -> do
+  >>> fragment (\ None O{ fragColour } -> main $
     fragColour .= colour u)
 
 

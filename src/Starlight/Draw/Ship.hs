@@ -91,10 +91,10 @@ range = Interval 0 4
 
 shader :: D.Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ pos } None ->
+  ->  vertex (\ V{ pos } None -> main $
     gl_Position .= matrix u D.!* ext4 (ext3 pos 1) 1)
 
-  >>> fragment (\ None O { fragColour } ->
+  >>> fragment (\ None O { fragColour } -> main $
     fragColour .= colour u)
 
 

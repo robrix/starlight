@@ -19,10 +19,10 @@ import UI.Graph.Vertex
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ pos } None ->
+  ->  vertex (\ V{ pos } None -> main $
     gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) ^. _xy) 0) 1)
 
-  >>> fragment (\ None O{ fragColour } ->
+  >>> fragment (\ None O{ fragColour } -> main $
     fragColour .= colour u)
 
 

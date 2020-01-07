@@ -23,11 +23,11 @@ import GL.Shader.DSL
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ pos} IF{ uv } -> do
+  ->  vertex (\ V{ pos} IF{ uv } -> main $ do
     uv .= (pos * vec2 1 (-1)) * 0.5 + 0.5
     gl_Position .= ext4 (ext3 (pos * vec2 1 (-1)) 0) 1)
 
-  >>> fragment (\ IF{ uv } O{ fragColour } -> do
+  >>> fragment (\ IF{ uv } O{ fragColour } -> main $ do
     -- Get samples for -2/3 and -1/3
     valueL <- let' "valueL" $ texture (sampler u) (vec2 (uv ^. _x + dFdx (uv ^. _x)) (uv ^. _y)) ^. _yz * 255
     lowerL <- let' "lowerL" $ mod' valueL 16

@@ -86,9 +86,9 @@ range = Interval 0 (Identity (length vertices))
 
 shader :: Shader U V O
 shader = program $ \ U{ resolution, origin, zoom }
-  ->  vertex (\ V{ pos } None ->
+  ->  vertex (\ V{ pos } None -> main $
     gl_Position .= ext4 (ext3 pos 0) 1)
-  >>> fragment (\ None O{ fragColour } -> do
+  >>> fragment (\ None O{ fragColour } -> main $ do
     uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     origin <- var "origin" $ ext3 (D.coerce origin / (resolution D.^* 0.1)) 1

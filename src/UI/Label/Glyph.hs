@@ -26,7 +26,7 @@ import Prelude hiding (break)
 
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ pos } IF{ _coord2, colour } -> do
+  ->  vertex (\ V{ pos } IF{ _coord2, colour } -> main $ do
     _coord2 .= pos ^. _zw
     t <- var "t" (vec2 0 0)
     switch gl_InstanceID
@@ -63,7 +63,7 @@ shader = program $ \ u
           !*! trans2 (vec2 (offset u) 0)
     gl_Position .= ext4 (m !* ext3 (pos ^. _xy) 1) 0 ^. _xywz)
 
-  >>> fragment (\ IF{ _coord2, colour } O{ fragColour } -> do
+  >>> fragment (\ IF{ _coord2, colour } O{ fragColour } -> main $ do
     iff (_coord2 ^. _x * _coord2 ^. _x - _coord2 ^. _y `gt` 0)
       discard
       (iff gl_FrontFacing
