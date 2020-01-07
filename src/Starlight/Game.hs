@@ -60,6 +60,63 @@ import           UI.Typeface (Font(Font), cacheCharactersForDrawing, readTypefac
 import qualified UI.Window as Window
 import           Unit.Length
 
+runGame
+  :: Has (Lift IO) sig m
+  => System Body
+  -> StateC (System Body) (StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))) a
+  -> m a
+runGame system
+  = Window.runSDL
+  . Window.runWindow "Starlight" (V2 1024 768)
+  . runContext
+  . runGLC
+  . runFinally
+  . evalState @Input mempty
+  . evalState system
+      { characters = Map.fromList $ zip (Player : map NPC [0..])
+        [ Character
+          { actor   = Actor
+            { position = P (V3 2500000 0 0)
+            , velocity = V3 0 150 0
+            , rotation = axisAngle (unit _z) (pi/2)
+            }
+          , target  = Nothing
+          , actions = mempty
+          , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
+          }
+        , Character
+          { actor   = Actor
+            { position = P (V3 2500000 0 0)
+            , velocity = V3 0 150 0
+            , rotation = axisAngle (unit _z) (pi/2)
+            }
+          , target  = Just (C Player)
+          , actions = mempty
+          , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30 }
+          }
+        , Character
+          { actor   = Actor
+            { position = P (V3 2500000 0 0)
+            , velocity = V3 0 150 0
+            , rotation = axisAngle (unit _z) (pi/2)
+            }
+          , target  = Just $ B (Star (10, "Sol"))
+          , actions = mempty
+          , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
+          }
+        , Character
+          { actor   = Actor
+            { position = P (V3 2500000 0 0)
+            , velocity = V3 0 150 0
+            , rotation = axisAngle (unit _z) (pi/2)
+            }
+          , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
+          , actions = mempty
+          , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
+          }
+        ]
+      }
+
 game
   :: ( Effect sig
      , Has Check sig m
@@ -68,101 +125,49 @@ game
      , Has Trace sig m
      )
   => m ()
-game = Window.runSDL $ do
-  system <- Sol.system
+game = Sol.system >>= \ system -> runGame system $ do
+  trace "loading typeface"
+  face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
+  measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
 
-  Window.runWindow "Starlight" (V2 1024 768)
-    . runContext
-    . runGLC
-    . runFinally
-    . evalState @Input mempty
-    . evalState system
-        { characters = Map.fromList $ zip (Player : map NPC [0..])
-          [ Character
-            { actor   = Actor
-              { position = P (V3 2500000 0 0)
-              , velocity = V3 0 150 0
-              , rotation = axisAngle (unit _z) (pi/2)
-              }
-            , target  = Nothing
-            , actions = mempty
-            , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
-            }
-          , Character
-            { actor   = Actor
-              { position = P (V3 2500000 0 0)
-              , velocity = V3 0 150 0
-              , rotation = axisAngle (unit _z) (pi/2)
-              }
-            , target  = Just (C Player)
-            , actions = mempty
-            , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30 }
-            }
-          , Character
-            { actor   = Actor
-              { position = P (V3 2500000 0 0)
-              , velocity = V3 0 150 0
-              , rotation = axisAngle (unit _z) (pi/2)
-              }
-            , target  = Just $ B (Star (10, "Sol"))
-            , actions = mempty
-            , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
-            }
-          , Character
-            { actor   = Actor
-              { position = P (V3 2500000 0 0)
-              , velocity = V3 0 150 0
-              , rotation = axisAngle (unit _z) (pi/2)
-              }
-            , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
-            , actions = mempty
-            , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
-            }
-          ]
-        }
-    $ do
-      trace "loading typeface"
-      face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
-      measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
+  fpsLabel    <- measure "label" Label.label
+  targetLabel <- measure "label" Label.label
 
-      fpsLabel    <- measure "label" Label.label
-      targetLabel <- measure "label" Label.label
+  enabled_ Blend            .= True
+  enabled_ DepthClamp       .= True
+  enabled_ LineSmooth       .= True
+  enabled_ ProgramPointSize .= True
+  enabled_ ScissorTest      .= True
 
-      enabled_ Blend            .= True
-      enabled_ DepthClamp       .= True
-      enabled_ LineSmooth       .= True
-      enabled_ ProgramPointSize .= True
-      enabled_ ScissorTest      .= True
+  -- J2000
+  epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
 
-      -- J2000
-      epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
+  start <- now
+  evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
+    continue <- measure "frame" $ do
+      t <- realToFrac <$> since epoch
+      system <- get
+      continue <- execEmpty . runReader (systemAt system (getDelta t)) $ do
+        dt <- fmap realToFrac . since =<< get
+        put =<< now
 
-      start <- now
-      evalState start . runStarfield . runShip . runRadar . runLaser . runBody . fix $ \ loop -> do
-        continue <- measure "frame" $ do
-          t <- realToFrac <$> since epoch
-          system <- get
-          continue <- execEmpty . runReader (systemAt system (getDelta t)) $ do
-            dt <- fmap realToFrac . since =<< get
-            put =<< now
+        withView (draw dt fpsLabel targetLabel (Font face 18)) -- draw with current readonly positions & beams
+        measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
 
-            withView (draw dt fpsLabel targetLabel (Font face 18)) -- draw with current readonly positions & beams
-            measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
+        measure "input" input
+        measure "controls" $ player_ @Body .actions_ <~ controls
+        measure "ai" $ npcs_ @Body <~> traverse ai
 
-            measure "input" input
-            measure "controls" $ player_ @Body .actions_ <~ controls
-            measure "ai" $ npcs_ @Body <~> traverse ai
-
-            -- FIXME: this is so gross
-            beams_ @Body .= []
-            npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
-            characters_ @Body <~> itraverse
-              (\ i
-              ->  measure "gravity" . (actor_ @Character <-> gravity dt)
-              >=> measure "hit" . hit dt i
-              >=> measure "runActions" . runActions dt i)
-          continue <$ measure "swap" Window.swap
-        when continue loop
+        -- FIXME: this is so gross
+        beams_ @Body .= []
+        npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
+        characters_ @Body <~> itraverse
+          (\ i
+          ->  measure "gravity" . (actor_ @Character <-> gravity dt)
+          >=> measure "hit" . hit dt i
+          >=> measure "runActions" . runActions dt i)
+      continue <$ measure "swap" Window.swap
+    when continue loop
 
 -- | Compute the zoom factor for the given velocity.
 --
