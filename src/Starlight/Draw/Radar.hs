@@ -76,7 +76,6 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
-  -- FIXME: store the position, radius, & colour of each body at t and compute the blips in the (instanced?) shader rather than setting uniforms
   measure "bodies" $
     drawArrays Points (Interval (Identity (length shipVertices)) (Identity (length shipVertices + length bodyVertices)))
 
