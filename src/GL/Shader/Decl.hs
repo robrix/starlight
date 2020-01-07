@@ -41,8 +41,9 @@ main body = Raw (pretty "void" <+> pretty "main" <> parens mempty <+> braces (ne
 
 
 primitiveIn :: P.Type -> Decl 'Geometry ()
-primitiveIn ty = Raw (render ty) (pure ()) where
-  render = (pretty "layout" <+>) . (<+> pretty "in;" <> hardline) . parens . \case
+primitiveIn ty = Raw doc (pure ()) where
+  doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
+  render = \case
     P.Points -> pretty "points"
     P.Lines -> pretty "lines"
     P.LineStrip -> pretty "lines"
@@ -51,8 +52,9 @@ primitiveIn ty = Raw (render ty) (pure ()) where
     P.Triangles -> pretty "triangles"
 
 primitiveOut :: P.Type -> Int -> Decl 'Geometry ()
-primitiveOut ty mx = Raw (render ty) (pure ()) where
-  render = (pretty "layout" <+>) . (<+> pretty "out;" <> hardline) . parens . (<> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) . \case
+primitiveOut ty mx = Raw doc (pure ()) where
+  doc = pretty "layout" <+> parens (render ty <> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) <+> pretty "out;" <> hardline
+  render = \case
     P.Points -> pretty "points"
     P.Lines -> pretty "line_strip"
     P.LineStrip -> pretty "line_strip"
