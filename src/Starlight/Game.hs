@@ -13,7 +13,6 @@ module Starlight.Game
 
 import           Control.Algebra
 import           Control.Carrier.Empty.Maybe
-import           Control.Carrier.Fail.Either
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
@@ -139,6 +138,7 @@ game
      , Has (Lift IO) sig m
      , Has Profile sig m
      , Has Trace sig m
+     , MonadFail m
      )
   => m ()
 game = Sol.system >>= \ system -> runGame system $ do
@@ -156,7 +156,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   enabled_ ScissorTest      .= True
 
   -- J2000
-  epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
+  epoch <- iso8601ParseM "2000-01-01T12:00:00.000Z"
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     continue <- measure "frame" (runSystem epoch (timed (execEmpty frame)))
