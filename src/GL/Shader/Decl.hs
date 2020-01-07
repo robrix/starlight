@@ -5,7 +5,7 @@
 module GL.Shader.Decl
 ( Decl
 , main
-, Primitive.Type(..)
+, P.Type(..)
 , primitiveIn
 , primitiveOut
   -- * Pretty-printing
@@ -14,7 +14,7 @@ module GL.Shader.Decl
 
 import           Control.Monad (ap, liftM, (<=<))
 import           Data.Text.Prettyprint.Doc hiding (dot)
-import qualified GL.Primitive as Primitive
+import qualified GL.Primitive as P
 import           GL.Shader (Type(..))
 import           GL.Shader.Stmt
 
@@ -40,25 +40,25 @@ main :: Stmt k () -> Decl k ()
 main body = Raw (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line))) (pure ())
 
 
-primitiveIn :: Primitive.Type -> Decl 'Geometry ()
+primitiveIn :: P.Type -> Decl 'Geometry ()
 primitiveIn ty = Raw (render ty) (pure ()) where
   render = (pretty "layout" <+>) . (<+> pretty "in;" <> hardline) . parens . \case
-    Primitive.Points -> pretty "points"
-    Primitive.Lines -> pretty "lines"
-    Primitive.LineStrip -> pretty "lines"
-    Primitive.LineLoop -> pretty "lines"
-    Primitive.TriangleStrip -> pretty "triangles"
-    Primitive.Triangles -> pretty "triangles"
+    P.Points -> pretty "points"
+    P.Lines -> pretty "lines"
+    P.LineStrip -> pretty "lines"
+    P.LineLoop -> pretty "lines"
+    P.TriangleStrip -> pretty "triangles"
+    P.Triangles -> pretty "triangles"
 
-primitiveOut :: Primitive.Type -> Int -> Decl 'Geometry ()
+primitiveOut :: P.Type -> Int -> Decl 'Geometry ()
 primitiveOut ty mx = Raw (render ty) (pure ()) where
   render = (pretty "layout" <+>) . (<+> pretty "out;" <> hardline) . parens . (<> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) . \case
-    Primitive.Points -> pretty "points"
-    Primitive.Lines -> pretty "line_strip"
-    Primitive.LineStrip -> pretty "line_strip"
-    Primitive.LineLoop -> pretty "line_strip"
-    Primitive.TriangleStrip -> pretty "triangle_strip"
-    Primitive.Triangles -> pretty "triangle_strip"
+    P.Points -> pretty "points"
+    P.Lines -> pretty "line_strip"
+    P.LineStrip -> pretty "line_strip"
+    P.LineLoop -> pretty "line_strip"
+    P.TriangleStrip -> pretty "triangle_strip"
+    P.Triangles -> pretty "triangle_strip"
 
 
 renderDecl :: Decl k a -> Doc ()
