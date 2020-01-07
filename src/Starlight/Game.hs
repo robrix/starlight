@@ -229,22 +229,5 @@ withView m = do
   runReader View{ scale, size, zoom, focus } m
 
 
-newtype Epoch = Epoch { getEpoch :: UTCTime }
-  deriving (ISO8601)
-
--- | Run an action in an ephemeral system derived from the persistent system.
-runSystem
-  :: ( Has (Lift IO) sig m
-     , Has (State (System Body)) sig m
-     )
-  => Epoch
-  -> ReaderC (System StateVectors) m a
-  -> m a
-runSystem epoch m = do
-  t <- realToFrac <$> since (getEpoch epoch)
-  system <- get
-  runReader (systemAt system (getDelta t)) m
-
-
 execEmpty :: Functor m => EmptyC m a -> m Bool
 execEmpty = fmap isJust . runEmpty

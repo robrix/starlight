@@ -3,6 +3,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -18,16 +19,24 @@ module Starlight.Body
 , rotationTimeScale
 , actorAt
 , systemAt
+, Epoch(..)
+, runSystem
 ) where
 
+import           Control.Carrier.Reader
+import           Control.Effect.Lift
+import           Control.Effect.State
 import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
 import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
+import           Data.Time.Clock (UTCTime)
+import           Data.Time.Format.ISO8601
 import           GHC.Generics
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
 import           Starlight.System
+import           Starlight.Time
 import           UI.Colour
 import           Unit.Angle
 import           Unit.Length
@@ -115,3 +124,20 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
 -- | Subject to the invariant that w=1.
 extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)
 extended a = iso (`ext` a) (^. _xyz)
+
+
+newtype Epoch = Epoch { getEpoch :: UTCTime }
+  deriving (ISO8601)
+
+-- | Run an action in an ephemeral system derived from the persistent system.
+runSystem
+  :: ( Has (Lift IO) sig m
+     , Has (State (System Body)) sig m
+     )
+  => Epoch
+  -> ReaderC (System StateVectors) m a
+  -> m a
+runSystem epoch m = do
+  t <- realToFrac <$> since (getEpoch epoch)
+  system <- get
+  runReader (systemAt system (getDelta t)) m
