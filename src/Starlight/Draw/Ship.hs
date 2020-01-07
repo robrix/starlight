@@ -34,6 +34,7 @@ import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
+import           Starlight.Character
 import qualified Starlight.Ship as S
 import           Starlight.View
 import           UI.Colour (_a)
@@ -46,10 +47,9 @@ drawShip
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
-  => Actor
-  -> S.Ship
+  => Character
   -> m ()
-drawShip Actor{ position, rotation } S.Ship{ colour, armour, scale } = measure "ship" . UI.using getDrawable $ do
+drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, armour, scale } } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   let matrix = scaleToViewZoomed vs
   matrix_

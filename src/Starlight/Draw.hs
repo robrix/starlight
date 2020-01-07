@@ -71,7 +71,7 @@ draw dt fpsLabel targetLabel font = measure "draw" . runLiftIO $ do
 
   drawStarfield
 
-  for_ (system^.characters_) $ \ Character{ actor, ship } -> drawShip actor ship
+  for_ (system^.characters_) drawShip
 
   for_ beams drawLaser
 
