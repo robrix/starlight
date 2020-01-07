@@ -124,9 +124,9 @@ runFrame
      , Has (Lift IO) sig m
      , Has Trace sig m
      )
-  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime m))))) a
-  -> m a
-runFrame m = do
+  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
+  -> m ()
+runFrame m = evalEmpty $ do
   start <- now
   evalState start . runStarfield . runShip . runRadar . runLaser . runBody $ m
 
@@ -156,7 +156,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   -- J2000
   epoch <- j2000
 
-  runFrame . evalEmpty . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
+  runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     measure "frame" (runSystem epoch (timed frame))
     measure "swap" Window.swap *> loop
 
