@@ -58,21 +58,17 @@ drawRadar
   => m ()
 drawRadar = measure "radar" . UI.using getDrawable $ do
   system@System{ scale, bodies } <- ask @(System B.StateVectors)
-  let target = system^.player_.target_
-      here   = system^.player_.actor_.position_
-      npcs   = system^.npcs_
-
-  vs <- ask
-
-  let shipVertices = verticesForShips npcs
-      bodyVertices = verticesForBodies scale bodies
-      vertices = shipVertices <> bodyVertices
+  let target   = system^.player_.target_
+      here     = system^.player_.actor_.position_
+      npcs     = system^.npcs_
+      vertices = verticesForShips npcs <> verticesForBodies scale bodies
 
   measure "realloc/copy" $ do
     B.realloc (length vertices) B.Static B.Draw
     B.copy 0 vertices
 
-  matrix_ ?= scaleToView vs
+  matrix <- asks scaleToView
+  matrix_ ?= matrix
   here_   ?= here^._xy
 
   -- FIXME: skip blips for extremely distant objects
