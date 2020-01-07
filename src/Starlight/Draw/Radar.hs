@@ -155,7 +155,7 @@ shader = program $ \ u
             i += 1)
 
   >>> fragment (\ IF{ colour3 } O{ fragColour } -> main $ fragColour .= colour3) where
-  minBlipSize = 4
+  minBlipSize = 16
   count = 16
   radius = 300
 
