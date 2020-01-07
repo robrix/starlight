@@ -50,9 +50,9 @@ primitiveIn ty = Raw (render ty) (pure ()) where
     Primitive.TriangleStrip -> pretty "triangles"
     Primitive.Triangles -> pretty "triangles"
 
-primitiveOut :: Primitive.Type -> Decl 'Geometry ()
-primitiveOut ty = Raw (render ty) (pure ()) where
-  render = (pretty "layout" <+>) . (<+> pretty "out;" <> hardline) . parens . (<> comma <+> pretty "max_vertices = 256") . \case
+primitiveOut :: Primitive.Type -> Int -> Decl 'Geometry ()
+primitiveOut ty mx = Raw (render ty) (pure ()) where
+  render = (pretty "layout" <+>) . (<+> pretty "out;" <> hardline) . parens . (<> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) . \case
     Primitive.Points -> pretty "points"
     Primitive.Lines -> pretty "line_strip"
     Primitive.LineStrip -> pretty "line_strip"
