@@ -45,20 +45,18 @@ scale = runLiftIO $ do
   pure $! (drawableSize^._y) `div'` (windowSize^._y)
 
 
-runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Window m a -> m a
-runWindow name size m = withSDL $
-  withSDLWindow name size $ \ window ->
-    withGLContext window $ \ _ ->
-      runReader window m
+runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC GLContext (ReaderC Window m) a -> m a
+runWindow name size = withSDL . withSDLWindow name size . withGLContext
 
 
 withSDL :: Has (Lift IO) sig m => m a -> m a
 withSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO quit)
 
-withSDLWindow :: Has (Lift IO) sig m => Text -> Linear.V2 Int -> (Window -> m a) -> m a
+withSDLWindow :: Has (Lift IO) sig m => Text -> Linear.V2 Int -> ReaderC Window m a -> m a
 withSDLWindow name size = E.bracket
   (runLiftIO (createWindow name windowConfig))
-  (runLiftIO . destroyWindow) where
+  (runLiftIO . destroyWindow)
+  . flip runReader where
   windowConfig = defaultWindow
     { windowInitialSize     = fromIntegral <$> size
     , windowResizable       = True
@@ -71,5 +69,8 @@ withSDLWindow name size = E.bracket
     , glColorPrecision = V4 8 8 8 8
     }
 
-withGLContext :: Has (Lift IO) sig m => Window -> (GLContext -> m a) -> m a
-withGLContext window = E.bracket (runLiftIO (glCreateContext window)) (\ c -> runLiftIO (glFinish >> glDeleteContext c))
+withGLContext :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => ReaderC GLContext m a -> m a
+withGLContext = E.bracket
+  (ask >>= runLiftIO . glCreateContext)
+  (\ c -> runLiftIO (glFinish >> glDeleteContext c))
+  . flip runReader
