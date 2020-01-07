@@ -47,6 +47,7 @@ import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
 import           GHC.Generics
 import qualified GL.Shader as Shader
+import           GL.Shader.Decl
 import           GL.Shader.Expr
 import           GL.Shader.Stmt
 import           GL.Shader.Vars
@@ -70,17 +71,17 @@ program = Shader
 data Stage i o where
   Id :: Stage i i
   (:>>>) :: Stage i x -> Stage x o -> Stage i o
-  V :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Stmt 'Shader.Vertex   ()) -> Stage i o
-  G :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry) -> o (Ref 'Shader.Geometry) -> Stmt 'Shader.Geometry ()) -> Stage i o
-  F :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Stmt 'Shader.Fragment ()) -> Stage i o
+  V :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Decl 'Shader.Vertex   ()) -> Stage i o
+  G :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry) -> o (Ref 'Shader.Geometry) -> Decl 'Shader.Geometry ()) -> Stage i o
+  F :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Decl 'Shader.Fragment ()) -> Stage i o
 
-vertex   :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Stmt 'Shader.Vertex   ()) -> Stage i o
+vertex   :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Decl 'Shader.Vertex   ()) -> Stage i o
 vertex = V
 
-geometry :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry) -> o (Ref 'Shader.Geometry) -> Stmt 'Shader.Geometry ()) -> Stage i o
+geometry :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry) -> o (Ref 'Shader.Geometry) -> Decl 'Shader.Geometry ()) -> Stage i o
 geometry = G
 
-fragment :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Stmt 'Shader.Fragment ()) -> Stage i o
+fragment :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Decl 'Shader.Fragment ()) -> Stage i o
 fragment = F
 
 instance Cat.Category Stage where
