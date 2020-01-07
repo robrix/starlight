@@ -158,10 +158,8 @@ game = Sol.system >>= \ system -> runGame system $ do
   epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
-    continue <- measure "frame" . timed $ do
-      t <- realToFrac <$> since epoch
-      system <- get
-      continue <- execEmpty . runReader (systemAt system (getDelta t)) $ do
+    continue <- measure "frame" . runSystem epoch . timed $ do
+      continue <- execEmpty $ do
         withView draw -- draw with current readonly positions & beams
         measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
 
@@ -227,6 +225,20 @@ timed m = do
   dt <- fmap realToFrac . since =<< get
   put =<< now
   runReader dt m
+
+
+-- | Run an action in an ephemeral system derived from the persistent system.
+runSystem
+  :: ( Has (Lift IO) sig m
+     , Has (State (System Body)) sig m
+     )
+  => UTCTime
+  -> ReaderC (System StateVectors) m a
+  -> m a
+runSystem epoch m = do
+  t <- realToFrac <$> since epoch
+  system <- get
+  runReader (systemAt system (getDelta t)) m
 
 
 execEmpty :: Functor m => EmptyC m a -> m Bool
