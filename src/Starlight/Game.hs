@@ -159,24 +159,45 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     continue <- measure "frame" . runSystem epoch . timed $ do
-      continue <- execEmpty $ do
-        withView draw -- draw with current readonly positions & beams
-        measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
-
-        measure "input" input
-        measure "controls" $ player_ @Body .actions_ <~ controls
-        measure "ai" $ npcs_ @Body <~> traverse ai
-
-        -- FIXME: this is so gross
-        beams_ @Body .= []
-        npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
-        characters_ @Body <~> itraverse
-          (\ i
-          ->  measure "gravity" . (actor_ @Character <-> gravity)
-          >=> measure "hit" . hit i
-          >=> measure "runActions" . runActions i)
+      continue <- execEmpty frame
       continue <$ measure "swap" Window.swap
     when continue loop
+
+frame
+  :: ( Effect sig
+     , Has Check sig m
+     , Has Empty sig m
+     , Has (Lift IO) sig m
+     , Has Profile sig m
+     , Has (Reader (Delta Seconds Float)) sig m
+     , Has (Reader Body.Drawable) sig m
+     , Has (Reader Laser.Drawable) sig m
+     , Has (Reader Radar.Drawable) sig m
+     , Has (Reader Ship.Drawable) sig m
+     , Has (Reader Starfield.Drawable) sig m
+     , Has (Reader (System StateVectors)) sig m
+     , Has (Reader Window.Window) sig m
+     , Has (Reader UI) sig m
+     , Has (State Input) sig m
+     , Has (State (System Body)) sig m
+     )
+  => m ()
+frame = do
+  withView draw -- draw with current readonly positions & beams
+  measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
+
+  measure "input" input
+  measure "controls" $ player_ @Body .actions_ <~ controls
+  measure "ai" $ npcs_ @Body <~> traverse ai
+
+  -- FIXME: this is so gross
+  beams_ @Body .= []
+  npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
+  characters_ @Body <~> itraverse
+    (\ i
+    ->  measure "gravity" . (actor_ @Character <-> gravity)
+    >=> measure "hit" . hit i
+    >=> measure "runActions" . runActions i)
 
 -- | Compute the zoom factor for the given velocity.
 --
