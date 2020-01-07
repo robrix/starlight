@@ -71,7 +71,8 @@ game
 game = Window.runSDL $ do
   system <- Sol.system
 
-  Window.runWindow "Starlight" (V2 1024 768) . runContext
+  Window.runWindow "Starlight" (V2 1024 768)
+    . runContext
     . runGLC
     . runFinally
     . evalState @Input mempty
