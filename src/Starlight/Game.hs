@@ -156,7 +156,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   -- J2000
   epoch <- j2000
 
-  void . runFrame . runEmpty . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
+  runFrame . evalEmpty . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     measure "frame" (runSystem epoch (timed frame))
     measure "swap" Window.swap *> loop
 
@@ -225,3 +225,7 @@ withView m = do
 
   let zoom = zoomForSpeed size (norm velocity)
   runReader View{ scale, size, zoom, focus } m
+
+
+evalEmpty :: Functor m => EmptyC m a -> m ()
+evalEmpty = void . runEmpty
