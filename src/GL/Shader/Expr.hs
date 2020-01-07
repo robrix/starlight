@@ -374,15 +374,15 @@ infixl 8 ^^.
 
 
 renderExpr :: Expr k a -> Doc ()
-renderExpr = parens . \case
+renderExpr = \case
   Var n -> pretty n
   Lit d -> pretty d
-  a :+ b -> renderExpr a <+> pretty '+' <+> renderExpr b
-  a :* b -> renderExpr a <+> pretty '*' <+> renderExpr b
-  a :- b -> renderExpr a <+> pretty '-' <+> renderExpr b
-  a :/ b -> renderExpr a <+> pretty '/' <+> renderExpr b
+  a :+ b -> parens $ renderExpr a <+> pretty '+' <+> renderExpr b
+  a :* b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a :- b -> parens $ renderExpr a <+> pretty '-' <+> renderExpr b
+  a :/ b -> parens $ renderExpr a <+> pretty '/' <+> renderExpr b
   Signum a -> fn "signum" [renderExpr a] -- log
-  Negate a -> pretty "-" <> renderExpr a
+  Negate a -> parens $ pretty "-" <> renderExpr a
   Abs a -> fn "abs" [renderExpr a]
   FromInteger i -> pretty i
   Exp a -> fn "exp" [renderExpr a]
@@ -402,12 +402,12 @@ renderExpr = parens . \case
   ACosH a -> fn "acosh" [renderExpr a]
   ATanH a -> fn "atanh" [renderExpr a]
   a :^. Prj s -> renderExpr a <> pretty s
-  a :^* b -> renderExpr a <+> pretty '*' <+> renderExpr b
-  a :!* b -> renderExpr a <+> pretty '*' <+> renderExpr b
-  a :!*! b -> renderExpr a <+> pretty '*' <+> renderExpr b
-  Eq a b -> renderExpr a <+> pretty "==" <+> renderExpr b
-  Lt a b -> renderExpr a <+> pretty '<' <+> renderExpr b
-  Gt a b -> renderExpr a <+> pretty '>' <+> renderExpr b
+  a :^*  b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a :!*  b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a :!*! b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  Eq a b -> parens $ renderExpr a <+> pretty "==" <+> renderExpr b
+  Lt a b -> parens $ renderExpr a <+> pretty '<' <+> renderExpr b
+  Gt a b -> parens $ renderExpr a <+> pretty '>' <+> renderExpr b
   Get r -> renderRef r
   Float a -> fn "float" [renderExpr a]
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
