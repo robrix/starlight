@@ -103,14 +103,14 @@ shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOption
 stageSources :: Doc () -> Stage i o -> [(Shader.Type, Doc ())]
 stageSources u = \case
   Id  -> []
-  V s -> [(Shader.Vertex,   renderStage s)]
-  G s -> [(Shader.Geometry, renderStage s)]
-  F s -> [(Shader.Fragment, renderStage s)]
+  V s -> [renderStage Shader.Vertex   s]
+  G s -> [renderStage Shader.Geometry s]
+  F s -> [renderStage Shader.Fragment s]
   l :>>> r -> stageSources u l <> stageSources u r
   where
-  renderStage :: (Vars i, Vars o) => (i (Expr k) -> o (Ref k) -> Decl k ()) -> Doc ()
-  renderStage f
-    =  pretty "#version 410" <> hardline
+  renderStage :: (Vars i, Vars o) => Shader.Type -> (i (Expr k) -> o (Ref k) -> Decl k ()) -> (Shader.Type, Doc ())
+  renderStage t f = (,) t
+    $  pretty "#version 410" <> hardline
     <> u
     <> foldVars (getConst . value) (makeVars (pvar "in"      . name) `like` i)
     <> foldVars (getConst . value) (makeVars (pvar "out"     . name) `like` o)
