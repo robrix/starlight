@@ -31,9 +31,9 @@ instance Applicative (Decl k) where
   (<*>) = ap
 
 instance Monad (Decl k) where
-  Pure a            >>= f = f a
-  Raw d           k >>= f = Raw d (k >>= f)
-  Decl a          k >>= f = Decl a (f <=< k)
+  Pure a   >>= f = f a
+  Raw  d k >>= f = Raw  d (f =<< k)
+  Decl a k >>= f = Decl a (f <=< k)
 
 
 main :: Stmt k () -> Decl k ()
