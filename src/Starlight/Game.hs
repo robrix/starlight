@@ -20,14 +20,13 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, to, (%~), (^.))
-import           Control.Monad (when, (>=>))
+import           Control.Monad (void, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import qualified Data.Map as Map
-import           Data.Maybe (isJust)
 import           Data.Time.Clock (UTCTime)
 import           GL
 import           GL.Effect.Check
@@ -157,9 +156,9 @@ game = Sol.system >>= \ system -> runGame system $ do
   -- J2000
   epoch <- j2000
 
-  runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
-    continue <- measure "frame" (runSystem epoch (timed (execEmpty frame)))
-    when continue (measure "swap" Window.swap *> loop)
+  void . runFrame . runEmpty . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
+    measure "frame" (runSystem epoch (timed frame))
+    measure "swap" Window.swap *> loop
 
 frame
   :: ( Effect sig
@@ -226,7 +225,3 @@ withView m = do
 
   let zoom = zoomForSpeed size (norm velocity)
   runReader View{ scale, size, zoom, focus } m
-
-
-execEmpty :: Functor m => EmptyC m a -> m Bool
-execEmpty = fmap isJust . runEmpty
