@@ -49,7 +49,7 @@ runWindow name size m = withSDL $
 
 
 withSDL :: Has (Lift IO) sig m => m a -> m a
-withSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO (glFinish >> quit))
+withSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO quit)
 
 withSDLWindow :: Has (Lift IO) sig m => Text -> Linear.V2 Int -> (Window -> m a) -> m a
 withSDLWindow name size = E.bracket
@@ -68,4 +68,4 @@ withSDLWindow name size = E.bracket
     }
 
 withGLContext :: Has (Lift IO) sig m => Window -> (GLContext -> m a) -> m a
-withGLContext window = E.bracket (runLiftIO (glCreateContext window)) (runLiftIO . glDeleteContext)
+withGLContext window = E.bracket (runLiftIO (glCreateContext window)) (\ c -> runLiftIO (glFinish >> glDeleteContext c))
