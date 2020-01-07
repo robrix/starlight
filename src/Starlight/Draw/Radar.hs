@@ -157,7 +157,7 @@ shader = program $ \ u
   >>> fragment (\ IF{ colour3 } O{ fragColour } -> main $ fragColour .= colour3) where
   minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
   count = 16
-  radius = 200
+  radius = 300
 
 
 data U v = U
