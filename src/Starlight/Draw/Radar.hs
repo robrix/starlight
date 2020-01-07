@@ -87,7 +87,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
     drawArrays Points (Interval 0 (Identity (length shipVertices)))
 
   measure "targets" $ do
-    for_ (target >>= (`elemIndex` identifiers system)) $ \ index ->
+    for_ (target >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
       drawArraysInstanced Points (Interval (Identity index) (Identity index + 1)) targetBlipCount
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
