@@ -158,10 +158,8 @@ game = Sol.system >>= \ system -> runGame system $ do
   epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
-    continue <- measure "frame" . runSystem epoch . timed $ do
-      continue <- execEmpty frame
-      continue <$ measure "swap" Window.swap
-    when continue loop
+    continue <- measure "frame" (runSystem epoch (timed (execEmpty frame)))
+    when continue (measure "swap" Window.swap *> loop)
 
 frame
   :: ( Effect sig
