@@ -124,10 +124,11 @@ runFrame
      , Has (Lift IO) sig m
      , Has Trace sig m
      )
-  => UTCTime
-  -> ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime m))))) a
+  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime m))))) a
   -> m a
-runFrame start = evalState start . runStarfield . runShip . runRadar . runLaser . runBody
+runFrame m = do
+  start <- now
+  evalState start . runStarfield . runShip . runRadar . runLaser . runBody $ m
 
 game
   :: ( Effect sig
@@ -154,8 +155,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   -- J2000
   epoch <- either (pure . error) pure =<< runFail (iso8601ParseM "2000-01-01T12:00:00.000Z")
 
-  start <- now
-  runFrame start . fix $ \ loop -> do
+  runFrame . fix $ \ loop -> do
     continue <- measure "frame" $ do
       t <- realToFrac <$> since epoch
       system <- get
