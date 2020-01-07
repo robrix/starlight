@@ -90,7 +90,7 @@ runGLC :: GLC m a -> m a
 runGLC (GLC m) = m
 
 newtype GLC m a = GLC (m a)
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (State Capabilities :+: sig) (GLC m) where
   alg = \case
