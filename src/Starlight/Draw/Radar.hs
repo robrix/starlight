@@ -119,13 +119,9 @@ verticesForShips cs =
   ]
 
 
-instanceCount :: Int
-instanceCount = 1
-
-
 shader :: Shader U V O
 shader = program $ \ u
-  ->  vertex (\ V{ there, r, colour } IF{ colour2 = out } -> main $ do
+  ->  vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
     there <- let' "there" (there - here u)
     d     <- let' "d"     (D.norm there)
     dir   <- let' "dir"   (there D.^* (1/D.norm there))
@@ -134,15 +130,33 @@ shader = program $ \ u
         wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
     edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
     angle <- let' "angle" (angleOf there)
-    sweep <- let' "sweep" (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
-    theta <- let' "theta" (angle + (float gl_InstanceID / fromIntegral instanceCount) * sweep)
-    pos   <- let' "pos"   (vec2 (cos theta) (sin theta))
+    sweep .= (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
+    pos   <- let' "pos"   (vec2 (cos angle) (sin angle))
     gl_PointSize .= 3
-    out .= colour
+    colour2 .= colour
     gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) D.^. D._xy) 0) 1)
 
-  >>> fragment (\ IF{ colour2 } O{ fragColour } -> main $ fragColour .= colour2) where
+  >>> geometry (\ IG{} IF{ colour3 } -> do
+    primitiveIn Points
+    primitiveOut LineStrip (count * 2 + 1)
+    main $ do
+      let rot theta = mat4
+            (vec4 (cos theta) (-(sin theta)) 0 0)
+            (vec4 (sin theta) (cos   theta)  0 0)
+            (vec4 0           0              1 0)
+            (vec4 0           0              0 1)
+      emitPrimitive $ do
+        i <- var @Int "i" (-(fromIntegral count))
+        while (get i `lt` (fromIntegral count + 1)) $
+          emitVertex $ do
+            theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
+            gl_Position .= rot theta !* Var "gl_in[0].gl_Position"
+            colour3 .= Var "colour2[0]"
+            i += 1)
+
+  >>> fragment (\ IF{ colour3 } O{ fragColour } -> main $ fragColour .= colour3) where
   minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
+  count = 16
 
 
 data U v = U
@@ -160,7 +174,15 @@ here_ :: Lens' (U v) (v (V2 Float))
 here_ = field @"here"
 
 
-newtype IF v = IF { colour2 :: v (Colour Float) }
+data IG v = IG
+  { colour2 :: v (Colour Float)
+  , sweep   :: v Float
+  }
+  deriving (Generic)
+
+instance Vars IG
+
+newtype IF v = IF { colour3 :: v (Colour Float) }
   deriving (Generic)
 
 instance Vars IF
