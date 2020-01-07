@@ -72,9 +72,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
     B.realloc b (length vertices) B.Static B.Draw
     B.copy b 0 vertices
 
-  let radius = 100
-      matrix = scaleToView vs
-  matrix_ ?= matrix !*! scaled (V3 radius radius 1)
+  matrix_ ?= scaleToView vs
   here_   ?= here^._xy
 
   -- FIXME: skip blips for extremely distant objects
@@ -90,12 +88,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
   measure "targets" $ do
     for_ (target >>= (`elemIndex` identifiers system)) $ \ index ->
-      for_ [1..n] $ \ _ -> do
-        matrix_ ?= matrix !*! scaled (V3 radius radius 1)
-
-        drawArrays Points (Interval (Identity index) (Identity index + 1))
-  where
-  n = 10 :: Int
+      drawArraysInstanced Points (Interval (Identity index) (Identity index + 1)) 10
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
 runRadar = UI.loadingDrawable Drawable shader []
@@ -131,7 +124,7 @@ shader = program $ \ u
     edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
     angle <- let' "angle" (angleOf there)
     sweep .= (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
-    pos   <- let' "pos"   (vec2 (cos angle) (sin angle))
+    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) * radius)
     gl_PointSize .= 3
     colour2 .= colour
     gl_Position .= ext4 (ext3 pos 0) 1)
@@ -156,6 +149,7 @@ shader = program $ \ u
   >>> fragment (\ IF{ colour3 } O{ fragColour } -> main $ fragColour .= colour3) where
   minSweep = 0.0133 -- at radius'=150, makes approx. 4px blips
   count = 16
+  radius = 100
 
 
 data U v = U
