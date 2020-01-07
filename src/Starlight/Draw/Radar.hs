@@ -124,7 +124,7 @@ shader = program $ \ u
     edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
     angle <- let' "angle" (angleOf there)
     sweep .= (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
-    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) * radius)
+    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* (radius + 50 * float gl_InstanceID))
     gl_PointSize .= 3
     colour2 .= colour
     gl_Position .= ext4 (ext3 pos 0) 1)
