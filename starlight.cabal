@@ -106,6 +106,7 @@ library
     Starlight.Ship
     Starlight.Sol
     Starlight.System
+    Starlight.Time
     Starlight.UI
     Starlight.View
     Starlight.Weapon.Laser
