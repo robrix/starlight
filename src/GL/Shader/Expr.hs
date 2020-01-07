@@ -84,7 +84,7 @@ data Ref (k :: Type) t
   = Ref String
   | forall s . Ref k s :^^. Prj s t
 
-gl_Position :: Ref 'Vertex (V4 Float)
+gl_Position :: Ref k (V4 Float)
 gl_Position = Ref "gl_Position"
 
 gl_PointSize :: Ref 'Vertex Float
