@@ -34,5 +34,8 @@ instance Applicative (EmptyC m) where
 instance Monad (EmptyC m) where
   EmptyC m >>= f = EmptyC (\ just nothing -> m (\ a -> runEmptyC (f a) just nothing) nothing)
 
+instance MonadFail m => MonadFail (EmptyC m) where
+  fail = lift . fail
+
 instance MonadTrans EmptyC where
   lift m = EmptyC (\ just _ -> m >>= just)
