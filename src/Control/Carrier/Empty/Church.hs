@@ -4,6 +4,7 @@ module Control.Carrier.Empty.Church
 ( -- * Empty carrier
   runEmpty
 , evalEmpty
+, execEmpty
 , EmptyC(EmptyC)
   -- * Empty effect
 , module Control.Effect.Empty
@@ -11,12 +12,16 @@ module Control.Carrier.Empty.Church
 
 import Control.Effect.Empty
 import Control.Monad (ap, void)
+import Data.Maybe (isJust)
 
 runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
 runEmpty (EmptyC m) = m (pure . Just) (pure Nothing)
 
 evalEmpty :: Applicative m => EmptyC m a -> m ()
 evalEmpty = void . runEmpty
+
+execEmpty :: Applicative m => EmptyC m a -> m Bool
+execEmpty = fmap isJust . runEmpty
 
 newtype EmptyC m a = EmptyC { runEmptyC :: forall r . (a -> m r) -> m r -> m r }
   deriving (Functor)
