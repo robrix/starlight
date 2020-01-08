@@ -1,13 +1,18 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.Empty.Church
-( EmptyC(EmptyC)
+( -- * Empty carrier
+  runEmpty
+, EmptyC(EmptyC)
   -- * Empty effect
 , module Control.Effect.Empty
 ) where
 
 import Control.Effect.Empty
 import Control.Monad (ap)
+
+runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
+runEmpty (EmptyC m) = m (pure . Just) (pure Nothing)
 
 newtype EmptyC m a = EmptyC { runEmptyC :: forall r . (a -> m r) -> m r -> m r }
   deriving (Functor)
