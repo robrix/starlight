@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Empty.CPS
 ( -- * Empty carrier
   runEmpty
@@ -8,6 +13,7 @@ module Control.Carrier.Empty.CPS
 , module Control.Effect.Empty
 ) where
 
+import Control.Algebra
 import Control.Effect.Empty
 import Control.Monad (ap)
 import Control.Monad.IO.Class
@@ -41,3 +47,8 @@ instance MonadIO m => MonadIO (EmptyC m) where
 instance MonadTrans EmptyC where
   lift m = EmptyC (m >>=)
   {-# INLINABLE lift #-}
+
+instance (Algebra sig m, Effect sig) => Algebra (Empty :+: sig) (EmptyC m) where
+  alg = \case
+    L Empty -> EmptyC (const (pure Nothing))
+    R other -> EmptyC (\ k -> alg (thread (Just ()) (maybe (pure Nothing) runEmpty) other) >>= maybe (pure Nothing) k)
