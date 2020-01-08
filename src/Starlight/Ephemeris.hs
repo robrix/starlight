@@ -9,7 +9,6 @@ module Starlight.Ephemeris
 , fromCSV
 , fromFile
 , fromDirectory
-, Per(..)
 ) where
 
 import Control.Effect.Lift
