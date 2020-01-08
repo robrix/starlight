@@ -2,6 +2,8 @@ module Starlight.Radar
 ( Radar(..)
 ) where
 
+import Unit.Power
+
 data Radar = Radar
-  { power :: Float
+  { power :: Watts Float
   }
