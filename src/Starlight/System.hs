@@ -14,18 +14,19 @@ module Starlight.System
 , systemTrans
 , identifiers
 , (!?)
+, neighbourhoodOf
 ) where
 
-import           Control.Lens (Lens, Lens', ix, lens, (^?))
+import           Control.Lens (Lens, Lens', ix, lens, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
 import           GHC.Generics (Generic)
-import           Linear.Matrix
-import           Linear.V4
-import           Linear.Vector
+import           Linear.Exts
+import           Starlight.Actor
 import           Starlight.Character
 import           Starlight.Identifier
 import           Starlight.Weapon.Laser
+import           Unit.Length
 
 data System a = System
   { scale      :: !Float
@@ -64,3 +65,9 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
 (!?) s = \case
   B i -> Left  <$> s^?bodies_    .ix i
   C i -> Right <$> s^?characters_.ix i
+
+
+neighbourhoodOf :: HasActor a => Point V3 Float -> Kilo Metres Float -> System a -> System a
+neighbourhoodOf here (Kilo (Metres r)) sys@System{ bodies, characters, beams } = sys{ bodies = Map.filter nearby bodies, characters = Map.filter nearby characters, beams = filter nearby beams } where
+  nearby :: HasActor a => a -> Bool
+  nearby a = distance (a^.actor_.position_) here < r
