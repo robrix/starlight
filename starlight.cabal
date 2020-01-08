@@ -103,7 +103,6 @@ library
     Starlight.Identifier
     Starlight.Input
     Starlight.Main
-    Starlight.Neighbourhood
     Starlight.Physics
     Starlight.Ship
     Starlight.Sol
