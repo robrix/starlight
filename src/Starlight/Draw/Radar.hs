@@ -59,7 +59,7 @@ drawRadar
 drawRadar = measure "radar" . UI.using getDrawable $ do
   system@System{ scale, bodies } <- ask @(System B.StateVectors)
   let target   = system^.player_.target_
-      here     = system^.player_.actor_.position_
+      here     = system^.player_.actor_.position_._xy
       npcs     = system^.npcs_
       vertices = verticesForShips npcs <> verticesForBodies scale bodies
 
@@ -69,7 +69,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
   matrix <- asks scaleToView
   matrix_ ?= matrix
-  here_   ?= here^._xy
+  here_   ?= here
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
