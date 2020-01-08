@@ -104,6 +104,7 @@ library
     Starlight.Input
     Starlight.Main
     Starlight.Physics
+    Starlight.Radar
     Starlight.Ship
     Starlight.Sol
     Starlight.System
