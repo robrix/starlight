@@ -3,16 +3,20 @@
 module Control.Carrier.Empty.Church
 ( -- * Empty carrier
   runEmpty
+, evalEmpty
 , EmptyC(EmptyC)
   -- * Empty effect
 , module Control.Effect.Empty
 ) where
 
 import Control.Effect.Empty
-import Control.Monad (ap)
+import Control.Monad (ap, void)
 
 runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
 runEmpty (EmptyC m) = m (pure . Just) (pure Nothing)
+
+evalEmpty :: Applicative m => EmptyC m a -> m ()
+evalEmpty = void . runEmpty
 
 newtype EmptyC m a = EmptyC { runEmptyC :: forall r . (a -> m r) -> m r -> m r }
   deriving (Functor)
