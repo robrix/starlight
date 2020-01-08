@@ -56,6 +56,9 @@ data StateVectors = StateVectors
 instance HasActor StateVectors where
   actor_ = field @"actor"
 
+instance HasMagnitude StateVectors where
+  magnitude_ = field @"body".magnitude_
+
 data Body = Body
   { radius      :: !(Kilo Metres Float)
   , mass        :: !(Kilo Grams Float)
