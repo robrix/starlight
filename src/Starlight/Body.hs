@@ -56,7 +56,7 @@ instance HasActor StateVectors where
   actor_ = field @"actor"
 
 data Body = Body
-  { radius      :: !(Metres Float)
+  { radius      :: !(Kilo Metres Float)
   , mass        :: !(Kilo Grams Float)
   , orientation :: !(Quaternion Float) -- relative to orbit
   , period      :: !(Seconds Float)    -- sidereal rotation period
@@ -67,7 +67,7 @@ data Body = Body
 
 data Orbit = Orbit
   { eccentricity    :: !Float
-  , semimajor       :: !(Metres Float)
+  , semimajor       :: !(Kilo Metres Float)
   , orientation     :: !(Quaternion Float) -- relative to ecliptic
   , period          :: !(Seconds Float)
   , timeOfPeriapsis :: !(Seconds Float)    -- relative to epoch
@@ -101,11 +101,11 @@ actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, sem
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = getMetres semimajor * (1 - eccentricity * cos eccentricAnomaly)
+  r = getMetres (unKilo semimajor) * (1 - eccentricity * cos eccentricAnomaly)
   -- extremely dubious
   mu = 398600.5
-  p = getMetres semimajor * (1 - eccentricity ** 2)
-  h = ((1 - (eccentricity ** 2)) * getMetres semimajor * mu) ** 0.5
+  p = getMetres (unKilo semimajor) * (1 - eccentricity ** 2)
+  h = ((1 - (eccentricity ** 2)) * getMetres (unKilo semimajor) * mu) ** 0.5
   -- hr = h/r
 
 

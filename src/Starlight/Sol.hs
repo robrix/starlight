@@ -30,7 +30,7 @@ bodies orbits = bodies where
   solI = Star (10, "Sol")
   bodies = Map.fromList $
     [ let identifier = solI in (identifier,) Body
-      { radius      = unKilo 695_500.0
+      { radius      = 695_500.0
       , mass        = 1.988_5e30
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 7.25))
       , period      = fromDays 25.05
@@ -39,7 +39,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (199, "Mercury") in (identifier,) Body
-      { radius      = unKilo 2_439.7
+      { radius      = 2_439.7
       , mass        = 3.302e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.034))
       , period      = fromDays 58.646
@@ -48,7 +48,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (299, "Venus") in (identifier,) Body
-      { radius      = unKilo 6_051.9
+      { radius      = 6_051.9
       , mass        = 48.685e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 177.3))
       , period      = fromDays 243.025
@@ -57,7 +57,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (399, "Terra") in (identifier,) Body
-      { radius      = unKilo 6_378.14
+      { radius      = 6_378.14
       , mass        = 5.972_19e24
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 23.4392911))
       , period      = fromDays 0.997_269_68
@@ -66,7 +66,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (399, "Terra") :/ (301, "Luna") in (identifier,) Body
-      { radius      = unKilo 1_737.5
+      { radius      = 1_737.5
       , mass        = 7.342e22
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 6.687))
       , period      = fromDays 27.321_661
@@ -75,7 +75,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (499, "Mars") in (identifier,) Body
-      { radius      = unKilo 3_397
+      { radius      = 3_397
       , mass        = 6.417_1e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 25.19))
       , period      = fromDays 1.025957
@@ -84,7 +84,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (499, "Mars") :/ (401, "Phobos") in (identifier,) Body
-      { radius      = unKilo 11.266_7
+      { radius      = 11.266_7
       , mass        = 1.065_9e16
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
@@ -93,7 +93,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (499, "Mars") :/ (402, "Deimos") in (identifier,) Body
-      { radius      = unKilo 6.2
+      { radius      = 6.2
       , mass        = 1.476_2e15
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0)) -- unknown
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
@@ -102,7 +102,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (599, "Jupiter") in (identifier,) Body
-      { radius      = unKilo 69_911
+      { radius      = 69_911
       , mass        = 1_898.13e24
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 3.13))
       , period      = fromHours 9.925
@@ -111,7 +111,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (501, "Io") in (identifier,) Body
-      { radius      = unKilo 1_821.3
+      { radius      = 1_821.3
       , mass        = 893.3e20
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 1)) -- unknown
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
@@ -120,7 +120,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (502, "Europa") in (identifier,) Body
-      { radius      = unKilo 1_560.8
+      { radius      = 1_560.8
       , mass        = 4.799_844e22
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.1))
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
@@ -129,7 +129,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (503, "Ganymede") in (identifier,) Body
-      { radius      = unKilo 2_634.1
+      { radius      = 2_634.1
       , mass        = 1.481_9e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0.33))
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
@@ -138,7 +138,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (504, "Callisto") in (identifier,) Body
-      { radius      = unKilo 2_410.3
+      { radius      = 2_410.3
       , mass        = 1.075_938e23
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
@@ -147,7 +147,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (505, "Amalthea") in (identifier,) Body
-      { radius      = unKilo 83.5
+      { radius      = 83.5
       , mass        = 2.08e18
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
       , period      = (\ Orbit{period} -> period) (orbits Map.! identifier) -- synchronous
@@ -156,7 +156,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (599, "Jupiter") :/ (506, "Himalia") in (identifier,) Body
-      { radius      = unKilo 85 -- ground estimate
+      { radius      = 85 -- ground estimate
       , mass        = 4.2e18
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 0))
       , period      = fromHours 7.782 -- !
@@ -165,7 +165,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (699, "Saturn") in (identifier,) Body
-      { radius      = unKilo 58_232
+      { radius      = 58_232
       , mass        = 5.683_4e26
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 26.73))
       , period      = fromHours 10 + fromMinutes 33 + Seconds 38
@@ -174,7 +174,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (799, "Uranus") in (identifier,) Body
-      { radius      = unKilo 25_362
+      { radius      = 25_362
       , mass        = 86.813e24
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 97.77))
       , period      = fromDays 0.71833
@@ -183,7 +183,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (899, "Neptune") in (identifier,) Body
-      { radius      = unKilo 24_624
+      { radius      = 24_624
       , mass        = 102.413e24
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 28.32))
       , period      = fromDays 0.6713
@@ -192,7 +192,7 @@ bodies orbits = bodies where
       }
 
     , let identifier = solI :/ (999, "Pluto") in (identifier,) Body
-      { radius      = unKilo 1_188.3
+      { radius      = 1_188.3
       , mass        = 1.303e22
       , orientation = axisAngle (unit _x) (getRadians (fromDegrees 122.53))
       , period      = fromDays 6.387_230
@@ -206,14 +206,14 @@ system = do
   orbits <- Map.fromList <$> fromDirectory "ephemerides"
   let bodies = Starlight.Sol.bodies orbits
       placeholder orbit = Body
-        { radius      = unKilo 1_000
+        { radius      = 1_000
         , mass        = 1.307e22
         , orientation = axisAngle (unit _x) (getRadians (fromDegrees 5))
         , period      = fromDays 1
         , colour      = white
         , orbit
         }
-      scale = 100_000 / getMetres (radius (bodies Map.! solI))
+      scale = getMetres (getKilo (100 / radius (bodies Map.! solI)))
 
   pure System
     { scale

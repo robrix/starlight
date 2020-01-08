@@ -49,7 +49,7 @@ fromEphemeris :: Ephemeris -> Orbit
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
   = Orbit
     { eccentricity    = realToFrac eccentricity
-    , semimajor       = realToFrac <$> unKilo semimajor
+    , semimajor       = realToFrac <$> semimajor
     , orientation     = orient
       (realToFrac <$> fromDegrees longitudeOfAscendingNode)
       (realToFrac <$> fromDegrees inclination)
