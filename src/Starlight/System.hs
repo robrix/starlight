@@ -70,7 +70,6 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
 
 neighbourhoodOf :: HasActor a => Character -> Kilo Metres Float -> System a -> System a
 neighbourhoodOf here (Kilo (Metres r)) sys@System{ bodies, characters, beams } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters, beams = filter visible beams } where
-  visible :: HasActor a => a -> Bool
   visible a = distance (a^.actor_.position_) (here^.actor_.position_) < r
 
 neighbourhoodOfPlayer :: HasActor a => Kilo Metres Float -> System a -> System a
