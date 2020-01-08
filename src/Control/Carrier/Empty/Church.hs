@@ -2,8 +2,11 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.Empty.Church
 ( EmptyC(EmptyC)
+  -- * Empty effect
+, module Control.Effect.Empty
 ) where
 
+import Control.Effect.Empty
 import Control.Monad (ap)
 
 newtype EmptyC m a = EmptyC { runEmptyC :: forall r . (a -> m r) -> m r -> m r }
