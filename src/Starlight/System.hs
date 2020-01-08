@@ -71,7 +71,7 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
 
 
 neighbourhoodOf :: HasActor a => Character -> System a -> System a
-neighbourhoodOf c sys@System{ bodies, characters, scale } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters } where
+neighbourhoodOf c sys@System{ bodies, characters, scale } = sys{ bodies = Map.filterWithKey (visible . B) bodies, characters = Map.filterWithKey (visible . C) characters } where
   -- FIXME: occlusion
   -- FIXME: jamming
   -- FIXME: ghosts
@@ -81,7 +81,10 @@ neighbourhoodOf c sys@System{ bodies, characters, scale } = sys{ bodies = Map.fi
   -- FIXME: laser power, not radar power, determines laser range
   -- FIXME: radar reflections
   -- FIXME: sharing radar with allies
-  visible a = received > threshold where
+  visible i a = case i of
+    B (Star _) -> True
+    _          -> received > threshold
+    where
     r = distance (a^.actor_.position_ ^* scale) (c^.actor_.position_ ^* scale)
     received = Watts ((c^.ship_.Ship.radar_.power_.to getWatts * gain * aperture * c^.ship_.Ship.scale_ * patternPropagationFactor) / ((4 * pi) ** 2 * r ** 4))
   patternPropagationFactor = 1
