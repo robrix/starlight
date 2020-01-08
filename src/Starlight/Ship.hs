@@ -36,3 +36,6 @@ scale_ = field @"scale"
 
 radar_ :: Lens' Ship Radar
 radar_ = field @"radar"
+
+instance HasMagnitude Ship where
+  magnitude_ = scale_
