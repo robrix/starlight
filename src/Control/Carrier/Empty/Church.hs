@@ -12,6 +12,7 @@ module Control.Carrier.Empty.Church
 
 import Control.Effect.Empty
 import Control.Monad (ap, void)
+import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (isJust)
 
@@ -36,6 +37,9 @@ instance Monad (EmptyC m) where
 
 instance MonadFail m => MonadFail (EmptyC m) where
   fail = lift . fail
+
+instance MonadIO m => MonadIO (EmptyC m) where
+  liftIO = lift . liftIO
 
 instance MonadTrans EmptyC where
   lift m = EmptyC (\ just _ -> m >>= just)
