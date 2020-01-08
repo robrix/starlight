@@ -91,16 +91,14 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 verticesForBodies :: Foldable t => Float -> t B.StateVectors -> [V Identity]
 verticesForBodies scale vs =
-  [ vertex
+  [ V{ there = Identity (there^._xy), r = Identity (r * scale), colour = Identity colour }
   | B.StateVectors{ body = B.Body{ radius = Metres r, colour }, actor = Actor{ position = there } } <- toList vs
-  , let vertex = V{ there = Identity (there^._xy), r = Identity (r * scale), colour = Identity colour }
   ]
 
 verticesForShips :: Foldable t => t Character -> [V Identity]
 verticesForShips cs =
-  [ vertex
+  [ V{ there = Identity (there^._xy), r = Identity scale, colour = Identity colour }
   | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale } } <- toList cs
-  , let vertex = V{ there = Identity (there^._xy), r = Identity scale, colour = Identity colour }
   ]
 
 
