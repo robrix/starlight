@@ -1,2 +1,5 @@
 module Starlight.Radar
-() where
+( Radar(..)
+) where
+
+data Radar = Radar
