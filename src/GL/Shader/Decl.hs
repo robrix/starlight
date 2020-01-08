@@ -17,7 +17,10 @@ import qualified GL.Primitive as P
 import           GL.Shader (Type(..))
 import           GL.Shader.Stmt
 
-newtype Decl (k :: Type) a = Decl { runDecl :: (a -> Doc ()) -> Doc () }
+runDecl :: (a -> Doc ()) -> Decl k a -> Doc ()
+runDecl k (Decl run) = run k
+
+newtype Decl (k :: Type) a = Decl ((a -> Doc ()) -> Doc ())
 
 instance Functor (Decl k) where
   fmap = liftM
@@ -27,7 +30,7 @@ instance Applicative (Decl k) where
   (<*>) = ap
 
 instance Monad (Decl k) where
-  Decl m >>= f = Decl (\ k -> m (\ a -> runDecl (f a) k))
+  Decl m >>= f = Decl (\ k -> m (runDecl k . f))
 
 raw :: Doc () -> Decl k ()
 raw d = Decl (\ k -> d <> k ())
@@ -60,4 +63,4 @@ primitiveOut ty mx = raw doc where
 
 
 renderDecl :: Decl k a -> Doc ()
-renderDecl = (`runDecl` const mempty)
+renderDecl = runDecl (const mempty)
