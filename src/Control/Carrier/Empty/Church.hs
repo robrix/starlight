@@ -1,2 +1,6 @@
+{-# LANGUAGE RankNTypes #-}
 module Control.Carrier.Empty.Church
-() where
+( EmptyC(EmptyC)
+) where
+
+newtype EmptyC m a = EmptyC (forall r . (a -> m r) -> m r -> m r)
