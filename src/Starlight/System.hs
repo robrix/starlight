@@ -18,7 +18,7 @@ module Starlight.System
 , neighbourhoodOfPlayer
 ) where
 
-import           Control.Lens (Lens, Lens', ix, lens, (^.), (^?))
+import           Control.Lens (Lens, Lens', ix, lens, to, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
 import           GHC.Generics (Generic)
@@ -26,8 +26,10 @@ import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
 import           Starlight.Identifier
+import           Starlight.Radar
+import qualified Starlight.Ship as Ship
 import           Starlight.Weapon.Laser
-import           Unit.Length
+import           Unit.Power
 
 data System a = System
   { scale      :: !Float
@@ -68,20 +70,24 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
   C i -> Right <$> s^?characters_.ix i
 
 
-neighbourhoodOf :: HasActor a => Character -> Kilo Metres Float -> System a -> System a
-neighbourhoodOf c (Kilo (Metres r)) sys@System{ bodies, characters } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters } where
+neighbourhoodOf :: HasActor a => Character -> System a -> System a
+neighbourhoodOf c sys@System{ bodies, characters, scale } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters } where
   -- FIXME: occlusion
   -- FIXME: jamming
   -- FIXME: ghosts
   -- FIXME: doppler effect
   -- FIXME: always include first- and second-order bodies
-  -- FIXME: compute received radar power
-  -- FIXME: larger objects are more observable
   -- FIXME: radar cross-section, rather than just size
   -- FIXME: laser power, not radar power, determines laser range
   -- FIXME: radar reflections
   -- FIXME: sharing radar with allies
-  visible a = distance (a^.actor_.position_) (c^.actor_.position_) < r
+  visible a = received > threshold where
+    r = distance (a^.actor_.position_ ^* scale) (c^.actor_.position_ ^* scale)
+    received = Watts ((c^.ship_.Ship.radar_.power_.to getWatts * gain * aperture * c^.ship_.Ship.scale_ * patternPropagationFactor) / ((4 * pi) ** 2 * r ** 4))
+  patternPropagationFactor = 1
+  gain = 1
+  aperture = 1
+  threshold = Watts (1.0e-12) -- 1 picowatt
 
-neighbourhoodOfPlayer :: HasActor a => Kilo Metres Float -> System a -> System a
-neighbourhoodOfPlayer r sys = neighbourhoodOf (sys^.player_) r sys
+neighbourhoodOfPlayer :: HasActor a => System a -> System a
+neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys
