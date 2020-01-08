@@ -4,6 +4,7 @@
 module Starlight.Radar
 ( Radar(..)
 , power_
+, HasMagnitude(..)
 ) where
 
 import Control.Lens
@@ -20,3 +21,8 @@ data Radar = Radar
 
 power_ :: Lens' Radar (Watts Float)
 power_ = field @"power"
+
+
+-- FIXME: this should live somewhere else
+class HasMagnitude t where
+  magnitude_ :: Lens' t Float
