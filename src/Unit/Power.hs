@@ -1,2 +1,5 @@
 module Unit.Power
-() where
+( module Unit
+) where
+
+import Unit
