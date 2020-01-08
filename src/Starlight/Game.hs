@@ -12,7 +12,7 @@ module Starlight.Game
 ) where
 
 import           Control.Algebra
-import           Control.Carrier.Empty.Maybe
+import           Control.Carrier.Empty.CPS
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
@@ -20,7 +20,7 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, to, (%~), (^.))
-import           Control.Monad (void, (>=>))
+import           Control.Monad ((>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
@@ -221,7 +221,3 @@ withView m = do
 
   let zoom = zoomForSpeed size (norm velocity)
   runReader View{ scale, size, zoom, focus } m
-
-
-evalEmpty :: Functor m => EmptyC m a -> m ()
-evalEmpty = void . runEmpty
