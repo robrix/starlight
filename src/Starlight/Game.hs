@@ -20,8 +20,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (itraverse, to, (%~), (^.))
-import           Control.Monad ((>=>))
+import           Control.Lens (itraverse, to, (%~), (&), (^.))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
@@ -177,7 +176,8 @@ frame
      )
   => m ()
 frame = runSystem . timed $ do
-  withView draw -- draw with current readonly positions & beams
+  let radarRange = 100_000_000
+  withView (local (neighbourhoodOfPlayer @StateVectors radarRange) draw) -- draw with current readonly positions & beams
   measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
 
   measure "input" input
@@ -188,10 +188,11 @@ frame = runSystem . timed $ do
   beams_ @Body .= []
   npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
   characters_ @Body <~> itraverse
-    (\ i
-    ->  measure "gravity" . (actor_ @Character <-> gravity)
-    >=> measure "hit" . hit i
-    >=> measure "runActions" . runActions i)
+    (\ i c
+    -> local (neighbourhoodOf @StateVectors (c^.actor_.position_) radarRange)
+    (   measure "gravity" (c & (actor_ @Character <-> gravity))
+    >>= measure "hit" . hit i
+    >>= measure "runActions" . runActions i))
 
 -- | Compute the zoom factor for the given velocity.
 --
