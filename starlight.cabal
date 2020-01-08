@@ -130,6 +130,7 @@ library
     Unit.Angle
     Unit.Length
     Unit.Mass
+    Unit.Power
     Unit.Time
   other-modules:
     Paths_starlight
