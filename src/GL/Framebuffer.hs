@@ -10,9 +10,7 @@ module GL.Framebuffer
 
 import           Control.Monad (unless)
 import           Control.Monad.IO.Class.Lift
-import           Data.Coerce
 import           Data.Proxy
-import           Foreign.Storable
 import           GHC.Stack
 import           GL.Effect.Check
 import           GL.Enum as GL
@@ -23,11 +21,10 @@ import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
 newtype Framebuffer = Framebuffer { unFramebuffer :: GLuint }
-  deriving (Storable)
 
 instance Object Framebuffer where
-  gen n = runLiftIO . glGenFramebuffers n . coerce
-  delete n = runLiftIO . glDeleteFramebuffers n . coerce
+  gen = defaultGenWith glGenFramebuffers Framebuffer
+  delete = defaultDeleteWith glDeleteFramebuffers unFramebuffer
 
 instance Bind Framebuffer where
   bind = checking . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer

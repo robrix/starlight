@@ -26,7 +26,6 @@ import           Control.Algebra
 import           Control.Carrier.Reader
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
-import           Data.Coerce
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Data.Proxy
@@ -41,11 +40,10 @@ import           Graphics.GL.Types
 import           Linear.Vector
 
 newtype Buffer (ty :: Type) v = Buffer { unBuffer :: GLuint }
-  deriving (Storable)
 
 instance Object (Buffer ty v) where
-  gen n = runLiftIO . glGenBuffers n . coerce
-  delete n = runLiftIO . glDeleteBuffers n . coerce
+  gen = defaultGenWith glGenBuffers Buffer
+  delete = defaultDeleteWith glDeleteBuffers unBuffer
 
 instance KnownType ty => Bind (Buffer ty v) where
   bind = checking . runLiftIO . glBindBuffer (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unBuffer

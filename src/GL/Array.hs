@@ -29,7 +29,6 @@ import           Control.Effect.Finally
 import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
-import           Data.Coerce
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Foreign.Marshal.Array.Lift
@@ -48,11 +47,10 @@ import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
 newtype Array n = Array { unArray :: GLuint }
-  deriving (S.Storable)
 
 instance Object (Array n) where
-  gen n = runLiftIO . glGenVertexArrays n . coerce
-  delete n = runLiftIO . glDeleteVertexArrays n . coerce
+  gen = defaultGenWith glGenVertexArrays Array
+  delete = defaultDeleteWith glDeleteVertexArrays unArray
 
 instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray

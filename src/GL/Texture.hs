@@ -21,10 +21,8 @@ module GL.Texture
 ) where
 
 import Control.Monad.IO.Class.Lift
-import Data.Coerce
 import Data.Proxy
 import Foreign.Ptr (nullPtr)
-import Foreign.Storable
 import GHC.Stack
 import GL.Enum as GL
 import GL.Effect.Check
@@ -34,11 +32,10 @@ import Graphics.GL.Types
 import Linear.V2
 
 newtype Texture (ty :: Type) = Texture { unTexture :: GLuint }
-  deriving (Storable)
 
 instance Object (Texture ty) where
-  gen n = runLiftIO . glGenTextures n . coerce
-  delete n = runLiftIO . glDeleteTextures n . coerce
+  gen = defaultGenWith glGenTextures Texture
+  delete = defaultDeleteWith glDeleteTextures unTexture
 
 instance KnownType ty => Bind (Texture ty) where
   bind = checking . runLiftIO . glBindTexture (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unTexture
