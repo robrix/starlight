@@ -14,7 +14,7 @@ import Control.Carrier.Lift
 import Control.Monad.IO.Class
 
 newtype LiftIO m a = LiftIO { runLiftIO :: m a }
-  deriving (Applicative, Functor, Monad)
+  deriving (Applicative, Functor, Monad, MonadFail)
 
 instance Has (Lift IO) sig m => MonadIO (LiftIO m) where
   liftIO = sendM
