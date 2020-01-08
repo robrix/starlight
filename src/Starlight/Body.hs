@@ -28,7 +28,7 @@ module Starlight.Body
 import           Control.Carrier.Reader
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
+import           Control.Lens (Iso, coerced, iso, lens, (%~), (&), (^.))
 import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
@@ -37,6 +37,7 @@ import           GHC.Generics
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
+import           Starlight.Radar
 import           Starlight.System
 import           Starlight.Time
 import           UI.Colour
@@ -64,6 +65,11 @@ data Body = Body
   , orbit       :: !Orbit
   }
   deriving (Read, Show)
+
+instance HasMagnitude Body where
+  magnitude_ = lens get set where
+    get = getMetres . unKilo . radius
+    set b r = b{ radius = kilo (Metres r) }
 
 data Orbit = Orbit
   { eccentricity    :: !Float
