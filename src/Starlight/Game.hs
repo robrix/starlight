@@ -12,7 +12,7 @@ module Starlight.Game
 ) where
 
 import           Control.Algebra
-import           Control.Carrier.Empty.CPS
+import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
