@@ -69,7 +69,7 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
 
 
 neighbourhoodOf :: HasActor a => Character -> Kilo Metres Float -> System a -> System a
-neighbourhoodOf here (Kilo (Metres r)) sys@System{ bodies, characters, beams } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters, beams = filter visible beams } where
+neighbourhoodOf here (Kilo (Metres r)) sys@System{ bodies, characters } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters } where
   -- FIXME: occlusion
   -- FIXME: always include first- and second-order bodies
   -- FIXME: compute received radar power
