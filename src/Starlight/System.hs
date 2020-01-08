@@ -72,6 +72,7 @@ neighbourhoodOf :: HasActor a => Character -> Kilo Metres Float -> System a -> S
 neighbourhoodOf c (Kilo (Metres r)) sys@System{ bodies, characters } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters } where
   -- FIXME: occlusion
   -- FIXME: jamming
+  -- FIXME: ghosts
   -- FIXME: always include first- and second-order bodies
   -- FIXME: compute received radar power
   -- FIXME: larger objects are more observable
