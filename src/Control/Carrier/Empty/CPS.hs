@@ -8,6 +8,7 @@
 module Control.Carrier.Empty.CPS
 ( -- * Empty carrier
   runEmpty
+, evalEmpty
 , EmptyC(EmptyC)
   -- * Empty effect
 , module Control.Effect.Empty
@@ -15,13 +16,17 @@ module Control.Carrier.Empty.CPS
 
 import Control.Algebra
 import Control.Effect.Empty
-import Control.Monad (ap)
+import Control.Monad (ap, void)
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
 runEmpty (EmptyC run) = run (pure . Just)
 {-# INLINABLE runEmpty #-}
+
+evalEmpty :: Applicative m => EmptyC m a -> m ()
+evalEmpty = void . runEmpty
+{-# INLINABLE evalEmpty #-}
 
 newtype EmptyC m a = EmptyC { runEmptyC :: forall r . (a -> m (Maybe r)) -> m (Maybe r) }
   deriving (Functor)
