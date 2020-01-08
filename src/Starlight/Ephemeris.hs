@@ -35,7 +35,7 @@ data Ephemeris = Ephemeris
   , longitudeOfAscendingNode                :: Degrees Double
   , argumentOfPerifocus                     :: Degrees Double
   , timeOfPeriapsisRelativeToEpoch          :: Seconds Double
-  , meanMotion                              :: (Degrees `Per` Seconds) Double
+  , meanMotion                              :: (Degrees :/: Seconds) Double
   , meanAnomaly                             :: Degrees Double
   , trueAnomaly                             :: Degrees Double
   , semimajor                               :: Kilo Metres Double
@@ -112,5 +112,5 @@ fromDirectory = go Nothing
     c:cs -> toUpper c : cs
 
 
-newtype Per (f :: * -> *) (g :: * -> *) a = Per { getPer :: a }
+newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Ord, Show)
