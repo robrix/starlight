@@ -69,7 +69,7 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
 
 
 neighbourhoodOf :: HasActor a => Character -> Kilo Metres Float -> System a -> System a
-neighbourhoodOf here (Kilo (Metres r)) sys@System{ bodies, characters } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters } where
+neighbourhoodOf c (Kilo (Metres r)) sys@System{ bodies, characters } = sys{ bodies = Map.filter visible bodies, characters = Map.filter visible characters } where
   -- FIXME: occlusion
   -- FIXME: always include first- and second-order bodies
   -- FIXME: compute received radar power
@@ -78,7 +78,7 @@ neighbourhoodOf here (Kilo (Metres r)) sys@System{ bodies, characters } = sys{ b
   -- FIXME: laser power, not radar power, determines laser range
   -- FIXME: radar reflections
   -- FIXME: sharing radar with allies
-  visible a = distance (a^.actor_.position_) (here^.actor_.position_) < r
+  visible a = distance (a^.actor_.position_) (c^.actor_.position_) < r
 
 neighbourhoodOfPlayer :: HasActor a => Kilo Metres Float -> System a -> System a
 neighbourhoodOfPlayer r sys = neighbourhoodOf (sys^.player_) r sys
