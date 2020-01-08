@@ -12,36 +12,33 @@ module GL.Shader.Decl
 , renderDecl
 ) where
 
-import           Control.Monad (ap, liftM, (<=<))
+import           Control.Monad (ap, liftM)
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import qualified GL.Primitive as P
 import           GL.Shader (Type(..))
 import           GL.Shader.Stmt
 
-data Decl (k :: Type) a where
-  Pure :: a -> Decl k a
-  Raw :: Doc () -> Decl k a -> Decl k a
-  Decl :: Pretty b => b -> (b -> Decl k a) -> Decl k a
+newtype Decl (k :: Type) a = Decl { runDecl :: (a -> Doc ()) -> Doc () }
 
 instance Functor (Decl k) where
   fmap = liftM
 
 instance Applicative (Decl k) where
-  pure = Pure
+  pure a = Decl (\ k -> k a)
   (<*>) = ap
 
 instance Monad (Decl k) where
-  Pure a   >>= f = f a
-  Raw  d k >>= f = Raw  d (f =<< k)
-  Decl a k >>= f = Decl a (f <=< k)
+  Decl m >>= f = Decl (\ k -> m (\ a -> runDecl (f a) k))
 
+raw :: Doc () -> Decl k ()
+raw d = Decl (\ k -> d <> k ())
 
 main :: Stmt k () -> Decl k ()
-main body = Raw (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line))) (pure ())
+main body = raw (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
 
 primitiveIn :: P.Type -> Decl 'Geometry ()
-primitiveIn ty = Raw doc (pure ()) where
+primitiveIn ty = raw doc where
   doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
   render = \case
     P.Points -> pretty "points"
@@ -52,7 +49,7 @@ primitiveIn ty = Raw doc (pure ()) where
     P.Triangles -> pretty "triangles"
 
 primitiveOut :: P.Type -> Int -> Decl 'Geometry ()
-primitiveOut ty mx = Raw doc (pure ()) where
+primitiveOut ty mx = raw doc where
   doc = pretty "layout" <+> parens (render ty <> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) <+> pretty "out;" <> hardline
   render = \case
     P.Points -> pretty "points"
@@ -64,11 +61,4 @@ primitiveOut ty mx = Raw doc (pure ()) where
 
 
 renderDecl :: Decl k a -> Doc ()
-renderDecl = \case
-  Pure _ -> mempty
-  Raw d k
-    -> d
-    <> renderDecl k
-  Decl b k
-    -> pretty b <> pretty ';' <> hardline
-    <> renderDecl (k b)
+renderDecl = (`runDecl` const mempty)
