@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Empty.Church
 ( -- * Empty carrier
   runEmpty
@@ -10,6 +15,7 @@ module Control.Carrier.Empty.Church
 , module Control.Effect.Empty
 ) where
 
+import Control.Algebra
 import Control.Effect.Empty
 import Control.Monad (ap, void)
 import Control.Monad.IO.Class
@@ -43,3 +49,8 @@ instance MonadIO m => MonadIO (EmptyC m) where
 
 instance MonadTrans EmptyC where
   lift m = EmptyC (\ just _ -> m >>= just)
+
+instance (Algebra sig m, Effect sig) => Algebra (Empty :+: sig) (EmptyC m) where
+  alg = \case
+    L Empty -> EmptyC (const id)
+    R other -> EmptyC (\ just nothing -> alg (thread (Just ()) (maybe (pure Nothing) runEmpty) other) >>= maybe nothing just)
