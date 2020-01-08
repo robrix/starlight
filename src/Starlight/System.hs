@@ -15,6 +15,7 @@ module Starlight.System
 , identifiers
 , (!?)
 , neighbourhoodOf
+, neighbourhoodOfPlayer
 ) where
 
 import           Control.Lens (Lens, Lens', ix, lens, (^.), (^?))
@@ -71,3 +72,6 @@ neighbourhoodOf :: HasActor a => Point V3 Float -> Kilo Metres Float -> System a
 neighbourhoodOf here (Kilo (Metres r)) sys@System{ bodies, characters, beams } = sys{ bodies = Map.filter nearby bodies, characters = Map.filter nearby characters, beams = filter nearby beams } where
   nearby :: HasActor a => a -> Bool
   nearby a = distance (a^.actor_.position_) here < r
+
+neighbourhoodOfPlayer :: HasActor a => Kilo Metres Float -> System a -> System a
+neighbourhoodOfPlayer r sys = neighbourhoodOf (sys^.player_.actor_.position_) r sys
