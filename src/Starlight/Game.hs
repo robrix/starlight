@@ -45,6 +45,7 @@ import           Starlight.Draw.Weapon.Laser as Laser
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
+import           Starlight.Radar
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol
 import           Starlight.System as System
@@ -80,7 +81,7 @@ runGame system
             }
           , target  = Nothing
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15 }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
           }
         , Character
           { actor   = Actor
@@ -90,7 +91,7 @@ runGame system
             }
           , target  = Just (C Player)
           , actions = mempty
-          , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30 }
+          , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30, radar }
           }
         , Character
           { actor   = Actor
@@ -100,7 +101,7 @@ runGame system
             }
           , target  = Just $ B (Star (10, "Sol"))
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15 }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
           }
         , Character
           { actor   = Actor
@@ -110,10 +111,11 @@ runGame system
             }
           , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15 }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
           }
         ]
-      }
+      } where
+  radar = Radar 1_000_000 -- MW radar
 
 runFrame
   :: ( Effect sig
