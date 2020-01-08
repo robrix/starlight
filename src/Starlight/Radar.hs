@@ -3,3 +3,5 @@ module Starlight.Radar
 ) where
 
 data Radar = Radar
+  { power :: Float
+  }
