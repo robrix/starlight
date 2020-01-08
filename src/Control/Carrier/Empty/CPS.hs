@@ -10,6 +10,7 @@ module Control.Carrier.Empty.CPS
 
 import Control.Effect.Empty
 import Control.Monad (ap)
+import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
@@ -27,6 +28,9 @@ instance Monad (EmptyC m) where
 
 instance MonadFail m => MonadFail (EmptyC m) where
   fail = lift . fail
+
+instance MonadIO m => MonadIO (EmptyC m) where
+  liftIO = lift . liftIO
 
 instance MonadTrans EmptyC where
   lift m = EmptyC (m >>=)
