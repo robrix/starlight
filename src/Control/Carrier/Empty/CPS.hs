@@ -9,6 +9,7 @@ module Control.Carrier.Empty.CPS
 ( -- * Empty carrier
   runEmpty
 , evalEmpty
+, execEmpty
 , EmptyC(EmptyC)
   -- * Empty effect
 , module Control.Effect.Empty
@@ -19,6 +20,7 @@ import Control.Effect.Empty
 import Control.Monad (ap, void)
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Maybe (isJust)
 
 runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
 runEmpty (EmptyC run) = run (pure . Just)
@@ -27,6 +29,10 @@ runEmpty (EmptyC run) = run (pure . Just)
 evalEmpty :: Applicative m => EmptyC m a -> m ()
 evalEmpty = void . runEmpty
 {-# INLINABLE evalEmpty #-}
+
+execEmpty :: Applicative m => EmptyC m a -> m Bool
+execEmpty = fmap isJust . runEmpty
+{-# INLINABLE execEmpty #-}
 
 newtype EmptyC m a = EmptyC { runEmptyC :: forall r . (a -> m (Maybe r)) -> m (Maybe r) }
   deriving (Functor)
