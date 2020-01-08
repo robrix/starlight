@@ -4,6 +4,8 @@ module Starlight.Radar
 
 import Unit.Power
 
+-- FIXME: transmitter gain
+-- FIXME: effective aperture
 data Radar = Radar
   { power :: Watts Float
   }
