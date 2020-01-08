@@ -189,7 +189,7 @@ frame = runSystem . timed $ do
   npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
   characters_ @Body <~> itraverse
     (\ i c
-    -> local (neighbourhoodOf @StateVectors (c^.actor_.position_) radarRange)
+    -> local (neighbourhoodOf @StateVectors c radarRange)
     (   measure "gravity" (c & (actor_ @Character <-> gravity))
     >>= measure "hit" . hit i
     >>= measure "runActions" . runActions i))

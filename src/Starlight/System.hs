@@ -68,10 +68,10 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
   C i -> Right <$> s^?characters_.ix i
 
 
-neighbourhoodOf :: HasActor a => Point V3 Float -> Kilo Metres Float -> System a -> System a
+neighbourhoodOf :: HasActor a => Character -> Kilo Metres Float -> System a -> System a
 neighbourhoodOf here (Kilo (Metres r)) sys@System{ bodies, characters, beams } = sys{ bodies = Map.filter nearby bodies, characters = Map.filter nearby characters, beams = filter nearby beams } where
   nearby :: HasActor a => a -> Bool
-  nearby a = distance (a^.actor_.position_) here < r
+  nearby a = distance (a^.actor_.position_) (here^.actor_.position_) < r
 
 neighbourhoodOfPlayer :: HasActor a => Kilo Metres Float -> System a -> System a
-neighbourhoodOfPlayer r sys = neighbourhoodOf (sys^.player_.actor_.position_) r sys
+neighbourhoodOfPlayer r sys = neighbourhoodOf (sys^.player_) r sys
