@@ -79,7 +79,6 @@ neighbourhoodOf c sys@System{ bodies, characters, scale } = sys
   -- FIXME: jamming
   -- FIXME: ghosts
   -- FIXME: doppler effect
-  -- FIXME: always include first- and second-order bodies
   -- FIXME: radar cross-section, rather than just size
   -- FIXME: laser power, not radar power, determines laser range
   -- FIXME: radar reflections
