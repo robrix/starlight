@@ -75,10 +75,10 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   -- FIXME: blips should shadow more distant blips
   -- FIXME: fade colour with distance
   -- FIXME: IFF
-  measure "bodies & npcs" $ do
+  measure "bodies & npcs" $
     drawArrays Points (Interval 0 (Identity (length vertices)))
 
-  measure "targets" $ do
+  measure "targets" $
     for_ (target >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
       drawArraysInstanced Points (Interval (Identity index) (Identity index + 1)) targetBlipCount
 
