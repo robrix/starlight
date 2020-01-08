@@ -9,9 +9,17 @@ module Control.Carrier.Empty.CPS
 ) where
 
 import Control.Effect.Empty
+import Control.Monad (ap)
 
 runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
 runEmpty (EmptyC run) = run (pure . Just)
 
-newtype EmptyC m a = EmptyC (forall r . (a -> m (Maybe r)) -> m (Maybe r))
+newtype EmptyC m a = EmptyC { runEmptyC :: forall r . (a -> m (Maybe r)) -> m (Maybe r) }
   deriving (Functor)
+
+instance Applicative (EmptyC m) where
+  pure a = EmptyC ($ a)
+  (<*>) = ap
+
+instance Monad (EmptyC m) where
+  EmptyC m >>= f = EmptyC (\ k -> m (($ k) . runEmptyC . f))
