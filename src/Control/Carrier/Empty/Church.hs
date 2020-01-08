@@ -12,6 +12,7 @@ module Control.Carrier.Empty.Church
 
 import Control.Effect.Empty
 import Control.Monad (ap, void)
+import Control.Monad.Trans.Class
 import Data.Maybe (isJust)
 
 runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
@@ -32,3 +33,6 @@ instance Applicative (EmptyC m) where
 
 instance Monad (EmptyC m) where
   EmptyC m >>= f = EmptyC (\ just nothing -> m (\ a -> runEmptyC (f a) just nothing) nothing)
+
+instance MonadTrans EmptyC where
+  lift m = EmptyC (\ just _ -> m >>= just)
