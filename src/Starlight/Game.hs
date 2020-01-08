@@ -3,6 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
@@ -74,17 +75,17 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position = P (V3 2500000 0 0)
+            { position = P (V3 2_500_000 0 0)
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
           , target  = Nothing
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15 }
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2500000 0 0)
+            { position = P (V3 2_500_000 0 0)
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
@@ -94,23 +95,23 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2500000 0 0)
+            { position = P (V3 2_500_000 0 0)
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
           , target  = Just $ B (Star (10, "Sol"))
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15 }
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2500000 0 0)
+            { position = P (V3 2_500_000 0 0)
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
           , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1000, scale = 15 }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15 }
           }
         ]
       }
