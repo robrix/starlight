@@ -84,10 +84,8 @@ neighbourhoodOf c sys@System{ bodies, characters, scale } = sys
   -- FIXME: radar reflections
   -- FIXME: sharing radar with allies
   visible i a = case i of
-    B (Star _)               -> True
-    B (Star _ :/ _)
-      | a^.magnitude_ > 1000 -> True
-    _                        -> received > threshold
+    B (Star _) -> True
+    _          -> received > threshold
     where
     r = distance (a^.actor_.position_ ^* scale) (c^.actor_.position_ ^* scale)
     received = Watts ((c^.ship_.radar_.power_.to getWatts * gain * aperture * (a^.magnitude_ * scale) * patternPropagationFactor) / ((4 * pi) ** 2 * r ** 4))
