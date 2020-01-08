@@ -73,6 +73,7 @@ neighbourhoodOf c (Kilo (Metres r)) sys@System{ bodies, characters } = sys{ bodi
   -- FIXME: occlusion
   -- FIXME: jamming
   -- FIXME: ghosts
+  -- FIXME: doppler effect
   -- FIXME: always include first- and second-order bodies
   -- FIXME: compute received radar power
   -- FIXME: larger objects are more observable
