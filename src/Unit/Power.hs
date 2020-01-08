@@ -1,5 +1,8 @@
 module Unit.Power
-( module Unit
+( Watts(..)
+, module Unit
 ) where
 
 import Unit
+
+newtype Watts a = Watts a
