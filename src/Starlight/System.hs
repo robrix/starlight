@@ -91,7 +91,7 @@ neighbourhoodOf c sys@System{ bodies, characters, scale } = sys
     _                        -> received > threshold
     where
     r = distance (a^.actor_.position_ ^* scale) (c^.actor_.position_ ^* scale)
-    received = Watts ((c^.ship_.radar_.power_.to getWatts * gain * aperture * a^.magnitude_ * patternPropagationFactor) / ((4 * pi) ** 2 * r ** 4))
+    received = Watts ((c^.ship_.radar_.power_.to getWatts * gain * aperture * (a^.magnitude_ * scale) * patternPropagationFactor) / ((4 * pi) ** 2 * r ** 4))
   patternPropagationFactor = 1
   gain = 1
   aperture = 1
