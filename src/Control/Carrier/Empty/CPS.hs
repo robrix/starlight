@@ -10,6 +10,7 @@ module Control.Carrier.Empty.CPS
 
 import Control.Effect.Empty
 import Control.Monad (ap)
+import Control.Monad.Trans.Class
 
 runEmpty :: Applicative m => EmptyC m a -> m (Maybe a)
 runEmpty (EmptyC run) = run (pure . Just)
@@ -23,3 +24,6 @@ instance Applicative (EmptyC m) where
 
 instance Monad (EmptyC m) where
   EmptyC m >>= f = EmptyC (\ k -> m (($ k) . runEmptyC . f))
+
+instance MonadTrans EmptyC where
+  lift m = EmptyC (m >>=)
