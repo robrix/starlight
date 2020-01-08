@@ -11,10 +11,11 @@ module Unit.Power
 import Data.Proxy
 import Foreign.Storable
 import GL.Type as GL
+import GL.Uniform
 import Unit
 
 newtype Watts a = Watts a
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
 
 instance GL.Type a => GL.Type (Watts a) where
   glType _ = glType (Proxy @a)
