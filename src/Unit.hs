@@ -34,6 +34,7 @@ module Unit
 , Delta(..)
 , (:/:)(..)
 , (:*:)(..)
+, (:^:)(..)
 ) where
 
 import Control.Lens.Iso
@@ -156,3 +157,15 @@ newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
 
 instance (Unit f, Unit g) => Unit (f :/: g) where
   suffix = Const (getConst (suffix @f) . ('/' :) . getConst (suffix @g))
+
+newtype (u :^: (n :: Nat)) a = Exp { getExp :: u a }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+instance (KnownNat n, Unit u) => Unit (u :^: n) where
+  un = un . getExp
+  nu = Exp . nu
+  suffix = Const (getConst (suffix @u) . (digits (fromIntegral (natVal (Proxy @n))) ++)) where
+    digits n = go "" n where
+      go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r):s) q
+             | otherwise = (sup !! n):s
+    sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
