@@ -56,7 +56,7 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) 
   un = un   . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
   nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
 
-  suffix = Const (symbolVal (Proxy @s) ++ getConst (suffix @u))
+  suffix = Const ((symbolVal (Proxy @s) ++) . getConst (suffix @u))
 
 
 -- ** Submultiples
@@ -97,7 +97,7 @@ newtype Square u a = Square { getSquare :: u a }
 instance Unit u => Unit (Square u) where
   un = un . getSquare
   nu = Square . nu
-  suffix = Const (getConst (suffix @u) ++ "²")
+  suffix = Const (getConst (suffix @u) . ('²':))
 
 newtype Cubic u a = Cubic { getCubic :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
@@ -105,7 +105,7 @@ newtype Cubic u a = Cubic { getCubic :: u a }
 instance Unit u => Unit (Cubic u) where
   un = un . getCubic
   nu = Cubic . nu
-  suffix = Const (getConst (suffix @u) ++ "³")
+  suffix = Const (getConst (suffix @u) . ('³':))
 
 
 -- * Units
@@ -118,7 +118,7 @@ class Functor u => Unit u where
   default nu :: Coercible a (u a) => a -> u a
   nu = coerce
 
-  suffix :: Const String (u a)
+  suffix :: Const ShowS (u a)
 
 unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
@@ -127,7 +127,7 @@ unitary = iso un nu
 -- ** Formatting
 
 formatWith :: Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
-formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const "")))
+formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const ('x':))) "")
 
 format :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat
@@ -148,4 +148,4 @@ newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 instance (Unit f, Unit g) => Unit (f :/: g) where
-  suffix = Const (getConst (suffix @f) ++ "/" ++ getConst (suffix @g))
+  suffix = Const (getConst (suffix @f) . ('/' :) . getConst (suffix @g))

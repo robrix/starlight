@@ -102,4 +102,4 @@ draw = measure "draw" . runLiftIO $ do
 newtype Frames a = Frames a
   deriving (Functor)
 
-instance Unit Frames where suffix = Const "f"
+instance Unit Frames where suffix = Const ('f':)

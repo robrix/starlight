@@ -17,7 +17,7 @@ import Unit
 newtype Seconds a = Seconds { getSeconds :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
-instance Unit Seconds where suffix = Const "s"
+instance Unit Seconds where suffix = Const ('s':)
 
 -- | Convert days to 'Seconds'. Note that this does not take e.g. leap seconds into account.
 fromDays :: Num a => a -> Seconds a

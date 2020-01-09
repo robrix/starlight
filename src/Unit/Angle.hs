@@ -16,7 +16,7 @@ import Unit
 newtype Radians a = Radians { getRadians :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
-instance Unit Radians where suffix = Const "rad"
+instance Unit Radians where suffix = Const ("rad"++)
 
 fromDegrees :: Floating a => Degrees a -> Radians a
 fromDegrees (Degrees d) = Radians (d * pi / 180)
@@ -25,4 +25,4 @@ fromDegrees (Degrees d) = Radians (d * pi / 180)
 newtype Degrees a = Degrees { getDegrees :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
-instance Unit Degrees where suffix = Const "°"
+instance Unit Degrees where suffix = Const ('°':)
