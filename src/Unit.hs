@@ -21,6 +21,7 @@ module Unit
 
 import Control.Lens.Iso
 import Data.Coerce
+import Data.Functor.Const
 import Data.Proxy
 import Foreign.Storable
 import GHC.TypeLits
@@ -53,6 +54,8 @@ class Functor u => Unit u where
   default nu :: Coercible a (u a) => a -> u a
   nu = coerce
 
+  suffix :: Const String (u a)
+
 unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
 
@@ -60,9 +63,11 @@ unitary = iso un nu
 newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
-instance (KnownNat n, KnownNat d, Unit u) => Unit (Mult n d s u) where
+instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) where
   un = un   . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
   nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
+
+  suffix = Const (symbolVal (Proxy @s) ++ getConst (suffix @u))
 
 
 newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
