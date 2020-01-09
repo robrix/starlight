@@ -33,11 +33,11 @@ instance GL.Type (f a) => GL.Type (Milli f a) where
 getMilli :: Milli f a -> f a
 getMilli (Milli fa) = fa
 
-milli :: Num (f a) => f a -> Milli f a
-milli fa = Milli (fa * 1000)
+milli :: (Num a, Functor f) => f a -> Milli f a
+milli fa = Milli (fa ^* 1000)
 
-unMilli :: Fractional (f a) => Milli f a -> f a
-unMilli (Milli fa) = fa / 1000
+unMilli :: (Fractional a, Functor f) => Milli f a -> f a
+unMilli (Milli fa) = fa ^/ 1000
 
 
 newtype Kilo f a = Kilo (f a)
@@ -51,11 +51,11 @@ instance GL.Type (f a) => GL.Type (Kilo f a) where
 getKilo :: Kilo f a -> f a
 getKilo (Kilo fa) = fa
 
-kilo :: Fractional (f a) => f a -> Kilo f a
-kilo fa = Kilo (fa / 1000)
+kilo :: (Fractional a, Functor f) => f a -> Kilo f a
+kilo fa = Kilo (fa ^/ 1000)
 
-unKilo :: Num (f a) => Kilo f a -> f a
-unKilo (Kilo fa) = fa * 1000
+unKilo :: (Num a, Functor f) => Kilo f a -> f a
+unKilo (Kilo fa) = fa ^* 1000
 
 
 newtype Delta f a = Delta { getDelta :: f a }
