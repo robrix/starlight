@@ -16,6 +16,7 @@ module Unit
 , Kilo(..)
 , Mega(..)
 , Delta(..)
+, Square(..)
 , Cubic(..)
 , Unit(..)
 , unitary
@@ -67,6 +68,14 @@ newtype Mega u a = Mega { getMega :: u a }
 newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
+
+newtype Square u a = Square { getSquare :: u a }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+instance Unit u => Unit (Square u) where
+  un = un . getSquare
+  nu = Square . nu
+  suffix = Const (getConst (suffix @u) ++ "²")
 
 newtype Cubic u a = Cubic { getCubic :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
