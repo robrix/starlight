@@ -33,6 +33,7 @@ module Unit
   -- * Change
 , Delta(..)
 , (:/:)(..)
+, (:*:)(..)
 ) where
 
 import Control.Lens.Iso
@@ -143,6 +144,12 @@ formatExp = formatWith showEFloat
 
 newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+instance (Unit f, Unit g) => Unit (f :*: g) where
+  suffix = Const (getConst (suffix @f) . ('·' :) . getConst (suffix @g))
 
 newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
