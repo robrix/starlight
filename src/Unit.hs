@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -20,6 +21,7 @@ module Unit
 , getMult
 ) where
 
+import Data.Coerce
 import Data.Proxy
 import Foreign.Storable
 import GHC.TypeLits
@@ -62,7 +64,11 @@ newtype Delta f a = Delta { getDelta :: f a }
 
 class Functor u => Unit u where
   un :: Fractional a => u a -> a
+  default un :: Coercible (u a) a => u a -> a
+  un = coerce
   nu :: Fractional a => a -> u a
+  default nu :: Coercible a (u a) => a -> u a
+  nu = coerce
 
 
 newtype Mult (n :: Nat) (d :: Nat) u a = Mult (u a)
