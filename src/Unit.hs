@@ -16,6 +16,7 @@ module Unit
 , Kilo(..)
 , Mega(..)
 , Delta(..)
+, Cubic(..)
 , Unit(..)
 , unitary
 , formatWith
@@ -65,6 +66,10 @@ newtype Mega u a = Mega { getMega :: u a }
 
 newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+
+newtype Cubic u a = Cubic { getCubic :: u a }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 
 class Functor u => Unit u where
