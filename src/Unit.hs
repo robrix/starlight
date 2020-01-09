@@ -71,6 +71,11 @@ newtype Delta u a = Delta { getDelta :: u a }
 newtype Cubic u a = Cubic { getCubic :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
+instance Unit u => Unit (Cubic u) where
+  un = un . getCubic
+  nu = Cubic . nu
+  suffix = Const (getConst (suffix @u) ++ "³")
+
 
 class Functor u => Unit u where
   un :: Fractional a => u a -> a
