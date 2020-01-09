@@ -7,6 +7,7 @@ module Unit.Length
 , getMetres
 , fromAUs
 , Len(..)
+, getLen
 , module Unit
 ) where
 
@@ -32,3 +33,6 @@ fromAUs a = Metres (149597870700 * a)
 
 
 newtype Len u a = Len (u a)
+
+getLen :: Len u a -> u a
+getLen (Len u) = u
