@@ -17,6 +17,8 @@ import Unit
 newtype Seconds a = Seconds a
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
+instance Unit Seconds
+
 getSeconds :: Seconds a -> a
 getSeconds (Seconds a) = a
 
