@@ -35,6 +35,10 @@ import Linear.Metric
 import Linear.Vector
 import Numeric
 
+newtype Pico u a = Pico { getPico :: u a }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving Unit via (Mult 1 1_000_000_000_000 "p" u)
+
 newtype Nano u a = Nano { getNano :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1 1_000_000_000 "n" u)
