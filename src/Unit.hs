@@ -12,6 +12,7 @@ module Unit
 , kilo
 , unKilo
 , Delta(..)
+, Unit(..)
 ) where
 
 import Data.Proxy
@@ -64,3 +65,7 @@ instance GL.Type (f a) => GL.Type (Delta f a) where
   glType _ = glType (Proxy @(f a))
 
   glDims _ = glDims (Proxy @(f a))
+
+
+class Unit u where
+  un :: u a -> a
