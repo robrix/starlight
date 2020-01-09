@@ -19,9 +19,6 @@ module Unit
   -- ** Multiples
 , Kilo(..)
 , Mega(..)
-  -- * Exponents
-, Square(..)
-, Cubic(..)
   -- * Units
 , Unit(..)
 , unitary
@@ -89,25 +86,6 @@ newtype Kilo u a = Kilo { getKilo :: u a }
 newtype Mega u a = Mega { getMega :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1_000_000 1 "M" u)
-
-
--- * Exponents
-
-newtype Square u a = Square { getSquare :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-
-instance Unit u => Unit (Square u) where
-  un = un . getSquare
-  nu = Square . nu
-  suffix = Const (getConst (suffix @u) . ('²':))
-
-newtype Cubic u a = Cubic { getCubic :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-
-instance Unit u => Unit (Cubic u) where
-  un = un . getCubic
-  nu = Cubic . nu
-  suffix = Const (getConst (suffix @u) . ('³':))
 
 
 -- * Units
