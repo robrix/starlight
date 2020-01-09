@@ -74,12 +74,15 @@ instance GL.Type (f a) => GL.Type (Delta f a) where
 
 class Functor u => Unit u where
   un :: Fractional a => u a -> a
+  nu :: Fractional a => a -> u a
 
 instance Unit u => Unit (Kilo u) where
   un = un . unKilo
+  nu = kilo . nu
 
 instance Unit u => Unit (Milli u) where
   un = un . unMilli
+  nu = milli . nu
 
 
 newtype Mult (n :: Nat) (d :: Nat) u a = Mult (u a)
@@ -92,6 +95,7 @@ instance GL.Type (f a) => GL.Type (Mult n d f a) where
 
 instance (KnownNat n, KnownNat d, Unit u) => Unit (Mult n d u) where
   un = un . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
+  nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
 
 getMult :: Mult n d u a -> u a
 getMult (Mult u) = u
