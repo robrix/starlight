@@ -83,3 +83,8 @@ instance Unit u => Unit (Milli u) where
 
 newtype Mult (n :: Nat) (d :: Nat) u a = Mult (u a)
  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable)
+
+instance GL.Type (f a) => GL.Type (Mult n d f a) where
+  glType _ = glType (Proxy @(f a))
+
+  glDims _ = glDims (Proxy @(f a))
