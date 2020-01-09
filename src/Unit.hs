@@ -67,13 +67,13 @@ unitary = iso un nu
 formatWith :: forall u a . Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
 formatWith with n u = with n u (getConst (suffix @u))
 
-format :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+format :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat
 
-formatDec :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatDec :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatDec = formatWith showFFloat
 
-formatExp :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
 
 
