@@ -68,13 +68,13 @@ formatWith :: forall u a . Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int ->
 formatWith with n u = with n u (getConst (suffix @u))
 
 format :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
-format n u = showGFloat n u (getConst (suffix @u))
+format = formatWith showGFloat
 
 formatDec :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
-formatDec n u = showFFloat n u (getConst (suffix @u))
+formatDec = formatWith showFFloat
 
 formatExp :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
-formatExp n u = showEFloat n u (getConst (suffix @u))
+formatExp = formatWith showEFloat
 
 
 newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
