@@ -13,10 +13,12 @@ module Unit
 , getKilo
 , Delta(..)
 , Unit(..)
+, unitary
 , Mult(..)
 , getMult
 ) where
 
+import Control.Lens.Iso
 import Data.Coerce
 import Data.Proxy
 import Foreign.Storable
@@ -53,6 +55,9 @@ class Functor u => Unit u where
   nu :: Fractional a => a -> u a
   default nu :: Coercible a (u a) => a -> u a
   nu = coerce
+
+unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
+unitary = iso un nu
 
 
 newtype Mult (n :: Nat) (d :: Nat) u a = Mult (u a)
