@@ -31,15 +31,15 @@ import Linear.Vector
 
 newtype Milli u a = Milli { getMilli :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1 1_000 u)
+  deriving Unit via (Mult 1 1_000 "m" u)
 
 newtype Kilo u a = Kilo { getKilo :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1_000 1 u)
+  deriving Unit via (Mult 1_000 1 "k" u)
 
 newtype Mega u a = Mega { getMega :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1_000_000 1 u)
+  deriving Unit via (Mult 1_000_000 1 "M" u)
 
 newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
@@ -57,10 +57,10 @@ unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
 
 
-newtype Mult (n :: Nat) (d :: Nat) u a = Mult { getMult :: u a }
+newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
-instance (KnownNat n, KnownNat d, Unit u) => Unit (Mult n d u) where
+instance (KnownNat n, KnownNat d, Unit u) => Unit (Mult n d s u) where
   un = un   . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
   nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
 
