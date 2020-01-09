@@ -18,7 +18,7 @@ module Starlight.System
 , neighbourhoodOfPlayer
 ) where
 
-import           Control.Lens (Lens, Lens', ix, lens, to, (^.), (^?))
+import           Control.Lens (Lens, Lens', ix, lens, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
 import           GHC.Generics (Generic)
@@ -88,7 +88,7 @@ neighbourhoodOf c sys@System{ bodies, characters, scale } = sys
     _          -> received > threshold
     where
     r = distance (a^.actor_.position_ ^* scale) (c^.actor_.position_ ^* scale)
-    received = Watts ((c^.ship_.radar_.power_.to getWatts * gain * aperture * (a^.magnitude_ * scale) * patternPropagationFactor) / ((4 * pi) ** 2 * r ** 4))
+    received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * (a^.magnitude_ * scale) * patternPropagationFactor) / ((4 * pi) ** 2 * r ** 4))
   patternPropagationFactor = 1
   gain = 1
   aperture = 1

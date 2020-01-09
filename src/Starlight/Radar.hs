@@ -15,11 +15,11 @@ import Unit.Power
 -- FIXME: transmitter gain
 -- FIXME: effective aperture
 data Radar = Radar
-  { power :: Watts Float
+  { power :: Mega Watts Float
   }
   deriving (Generic, Show)
 
-power_ :: Lens' Radar (Watts Float)
+power_ :: Lens' Radar (Mega Watts Float)
 power_ = field @"power"
 
 

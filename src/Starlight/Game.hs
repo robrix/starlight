@@ -115,7 +115,7 @@ runGame system
           }
         ]
       } where
-  radar = Radar 1_000_000 -- MW radar
+  radar = Radar 1 -- MW radar
 
 runFrame
   :: ( Effect sig
