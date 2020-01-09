@@ -14,5 +14,7 @@ import Unit
 newtype Watts a = Watts a
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
+instance Unit Watts
+
 getWatts :: Watts a -> a
 getWatts (Watts a) = a
