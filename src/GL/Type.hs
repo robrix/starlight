@@ -6,6 +6,7 @@ module GL.Type
 
 import           Data.Int
 import           Data.Functor.Const
+import           Data.Functor.Identity
 import           Data.Proxy
 import qualified Foreign.Storable as S
 import           Graphics.GL.Core41
@@ -63,6 +64,11 @@ instance Type (f a) => Type (Point f a) where
   glDims _ = glDims (Proxy @(f a))
 
 instance Type a => Type (Const a b) where
+  glType _ = glType (Proxy @a)
+
+  glDims _ = glDims (Proxy @a)
+
+instance Type a => Type (Identity a) where
   glType _ = glType (Proxy @a)
 
   glDims _ = glDims (Proxy @a)
