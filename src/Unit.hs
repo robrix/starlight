@@ -67,5 +67,5 @@ instance GL.Type (f a) => GL.Type (Delta f a) where
   glDims _ = glDims (Proxy @(f a))
 
 
-class Unit u where
+class Functor u => Unit u where
   un :: Fractional a => u a -> a
