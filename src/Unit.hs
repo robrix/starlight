@@ -104,3 +104,6 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) 
 
 newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+instance (Unit f, Unit g) => Unit (f :/: g) where
+  suffix = Const (getConst (suffix @f) ++ "/" ++ getConst (suffix @g))
