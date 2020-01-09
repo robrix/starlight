@@ -15,6 +15,7 @@ module Unit
 , Delta(..)
 , Unit(..)
 , unitary
+, format
 , Mult(..)
 , (:/:)(..)
 ) where
@@ -29,6 +30,7 @@ import GL.Type as GL
 import GL.Uniform
 import Linear.Metric
 import Linear.Vector
+import Numeric
 
 newtype Milli u a = Milli { getMilli :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
@@ -58,6 +60,9 @@ class Functor u => Unit u where
 
 unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
+
+format :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+format n u = showFFloat n u (getConst (suffix @u))
 
 
 newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
