@@ -35,6 +35,10 @@ import Linear.Metric
 import Linear.Vector
 import Numeric
 
+newtype Nano u a = Nano { getNano :: u a }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving Unit via (Mult 1 1_000_000_000 "n" u)
+
 newtype Micro u a = Micro { getMicro :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1 1_000_000 "μ" u)
