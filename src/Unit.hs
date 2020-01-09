@@ -16,6 +16,7 @@ module Unit
 , Delta(..)
 , Unit(..)
 , Mult(..)
+, getMult
 ) where
 
 import Data.Proxy
@@ -88,3 +89,6 @@ instance GL.Type (f a) => GL.Type (Mult n d f a) where
   glType _ = glType (Proxy @(f a))
 
   glDims _ = glDims (Proxy @(f a))
+
+getMult :: Mult n d u a -> u a
+getMult (Mult u) = u
