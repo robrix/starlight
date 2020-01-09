@@ -1,7 +1,5 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module Unit
@@ -15,13 +13,10 @@ module Unit
 , unKilo
 , Delta(..)
 , Unit(..)
-, Mult(..)
-, getMult
 ) where
 
 import Data.Proxy
 import Foreign.Storable
-import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Metric
@@ -83,19 +78,3 @@ instance Unit u => Unit (Kilo u) where
 instance Unit u => Unit (Milli u) where
   un = un . unMilli
   nu = milli . nu
-
-
-newtype Mult (n :: Nat) (d :: Nat) u a = Mult (u a)
- deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
-
-instance GL.Type (f a) => GL.Type (Mult n d f a) where
-  glType _ = glType (Proxy @(f a))
-
-  glDims _ = glDims (Proxy @(f a))
-
-instance (KnownNat n, KnownNat d, Unit u) => Unit (Mult n d u) where
-  un = un . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
-  nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
-
-getMult :: Mult n d u a -> u a
-getMult (Mult u) = u
