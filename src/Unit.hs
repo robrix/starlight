@@ -68,4 +68,4 @@ instance GL.Type (f a) => GL.Type (Delta f a) where
 
 
 class Unit u where
-  un :: Num a => u a -> a
+  un :: Fractional a => u a -> a
