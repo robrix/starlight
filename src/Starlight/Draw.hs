@@ -99,7 +99,7 @@ draw = measure "draw" . runLiftIO $ do
   measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size^._y - fpsSize^._y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                            white Nothing
 
-newtype Frames a = Frames { getFrames :: a }
+newtype Frames a = Frames a
   deriving (Functor)
 
 instance Unit Frames where suffix = Const "f"
