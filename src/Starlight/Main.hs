@@ -12,7 +12,7 @@ module Starlight.Main
 
 import           Control.Algebra
 import qualified Control.Carrier.Profile.Identity as NoProfile
-import qualified Control.Carrier.Profile.Time as Profile
+import qualified Control.Carrier.Profile.Tree as Profile
 import           Control.Carrier.Reader
 import           Control.Carrier.Thread.IO
 import qualified Control.Carrier.Trace.Ignoring as NoTrace
