@@ -1,7 +1,9 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.Draw
 ( draw
 ) where
@@ -14,13 +16,13 @@ import Control.Lens (forOf_, traversed, (^.))
 import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
+import Data.Functor.Const
 import Data.Functor.Interval
 import GL.Effect.Check
 import GL.Framebuffer
 import GL.Viewport
 import Graphics.GL.Core41
 import Linear.Exts
-import Numeric
 import Starlight.Actor
 import Starlight.Body as Body
 import Starlight.Character as Character
@@ -90,9 +92,14 @@ draw = measure "draw" . runLiftIO $ do
           | pos <- either Body.actor Character.actor t ^. position_ -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (nu @(Kilo Metres) (distance (pos ^* rscale) (position ^* rscale)))
         _ -> ""
 
-  measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (nu @(Milli Seconds) dt) <> "/" <> showFFloat (Just 1) (1/dt) "fps")
+  measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (nu @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (nu @(Frames :/: Seconds) (1/dt)))
   measure "setLabel" $ setLabel targetLabel font (describeTarget target)
 
   fpsSize <- labelSize fpsLabel
   measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size^._y - fpsSize^._y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                            white Nothing
+
+newtype Frames a = Frames { getFrames :: a }
+  deriving (Functor)
+
+instance Unit Frames where suffix = Const "f"
