@@ -69,3 +69,6 @@ instance GL.Type (f a) => GL.Type (Delta f a) where
 
 class Functor u => Unit u where
   un :: Fractional a => u a -> a
+
+instance Unit u => Unit (Kilo u) where
+  un = un . unKilo
