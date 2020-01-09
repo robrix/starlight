@@ -72,3 +72,6 @@ class Functor u => Unit u where
 
 instance Unit u => Unit (Kilo u) where
   un = un . unKilo
+
+instance Unit u => Unit (Milli u) where
+  un = un . unMilli
