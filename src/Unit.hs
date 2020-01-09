@@ -90,5 +90,8 @@ instance GL.Type (f a) => GL.Type (Mult n d f a) where
 
   glDims _ = glDims (Proxy @(f a))
 
+instance (KnownNat n, KnownNat d, Unit u) => Unit (Mult n d u) where
+  un = un . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
+
 getMult :: Mult n d u a -> u a
 getMult (Mult u) = u
