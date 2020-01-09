@@ -1,5 +1,7 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module Unit
@@ -13,10 +15,12 @@ module Unit
 , unKilo
 , Delta(..)
 , Unit(..)
+, Mult(..)
 ) where
 
 import Data.Proxy
 import Foreign.Storable
+import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Metric
@@ -75,3 +79,6 @@ instance Unit u => Unit (Kilo u) where
 
 instance Unit u => Unit (Milli u) where
   un = un . unMilli
+
+
+newtype Mult (n :: Nat) (d :: Nat) f a = Mult (f a)
