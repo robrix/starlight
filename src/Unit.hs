@@ -62,7 +62,7 @@ unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
 
 format :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
-format n u = showFFloat n u (getConst (suffix @u))
+format n u = showGFloat n u (getConst (suffix @u))
 
 
 newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
