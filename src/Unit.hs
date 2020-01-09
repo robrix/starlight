@@ -15,6 +15,7 @@ module Unit
 , Delta(..)
 , Unit(..)
 , unitary
+, formatWith
 , format
 , formatDec
 , formatExp
@@ -62,6 +63,9 @@ class Functor u => Unit u where
 
 unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
+
+formatWith :: forall u a . Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
+formatWith with n u = with n u (getConst (suffix @u))
 
 format :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 format n u = showGFloat n u (getConst (suffix @u))
