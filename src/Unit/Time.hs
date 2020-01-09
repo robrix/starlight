@@ -1,7 +1,5 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 module Unit.Time
 ( Seconds(..)
 , getSeconds
@@ -11,19 +9,13 @@ module Unit.Time
 , module Unit
 ) where
 
-import Data.Proxy
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
 import Unit
 
 newtype Seconds a = Seconds a
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
-
-instance GL.Type a => GL.Type (Seconds a) where
-  glType _ = glType (Proxy @a)
-
-  glDims _ = glDims (Proxy @a)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 getSeconds :: Seconds a -> a
 getSeconds (Seconds a) = a

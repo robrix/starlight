@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 module GL.Type
 ( Type(..)
 ) where
@@ -7,7 +5,6 @@ module GL.Type
 import           Data.Int
 import           Data.Functor.Const
 import           Data.Functor.Identity
-import           Data.Proxy
 import qualified Foreign.Storable as S
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
@@ -18,57 +15,57 @@ import           Linear.V3
 import           Linear.V4
 
 class S.Storable n => Type n where
-  glType :: proxy n -> GLenum
+  glType :: Const GLenum n
 
-  glDims :: proxy n -> GLint
-  glDims _ = 1
+  glDims :: Const GLint n
+  glDims = 1
 
 instance Type Bool where
-  glType _ = GL_BOOL
+  glType = GL_BOOL
 
 instance Type Float where
-  glType _ = GL_FLOAT
+  glType = GL_FLOAT
 
 instance Type Double where
-  glType _ = GL_DOUBLE
+  glType = GL_DOUBLE
 
 instance Type Int where
-  glType _ = GL_INT
+  glType = GL_INT
 
 instance Type Int32 where
-  glType _ = GL_INT
+  glType = GL_INT
 
 instance Type a => Type (V1 a) where
-  glType _ = glType (Proxy @a)
+  glType = pure <$> glType
 
-  glDims _ = glDims (Proxy @a)
+  glDims = pure <$> glDims
 
 instance Type a => Type (V2 a) where
-  glType _ = glType (Proxy @a)
+  glType = pure <$> glType
 
-  glDims _ = 2 * glDims (Proxy @a)
+  glDims = pure <$> 2 * glDims
 
 instance Type a => Type (V3 a) where
-  glType _ = glType (Proxy @a)
+  glType = pure <$> glType
 
-  glDims _ = 3 * glDims (Proxy @a)
+  glDims = pure <$> 3 * glDims
 
 instance Type a => Type (V4 a) where
-  glType _ = glType (Proxy @a)
+  glType = pure <$> glType
 
-  glDims _ = 4 * glDims (Proxy @a)
+  glDims = pure <$> 4 * glDims
 
 instance Type (f a) => Type (Point f a) where
-  glType _ = glType (Proxy @(f a))
+  glType = P <$> glType
 
-  glDims _ = glDims (Proxy @(f a))
+  glDims = P <$> glDims
 
 instance Type a => Type (Const a b) where
-  glType _ = glType (Proxy @a)
+  glType = Const <$> glType
 
-  glDims _ = glDims (Proxy @a)
+  glDims = Const <$> glDims
 
 instance Type a => Type (Identity a) where
-  glType _ = glType (Proxy @a)
+  glType = Identity <$> glType
 
-  glDims _ = glDims (Proxy @a)
+  glDims = Identity <$> glDims

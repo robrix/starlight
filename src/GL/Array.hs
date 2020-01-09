@@ -29,6 +29,7 @@ import           Control.Effect.Finally
 import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
+import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Functor.Interval
 import           Foreign.Marshal.Array.Lift
@@ -63,12 +64,18 @@ configureArray = do
     offset <- get
     let size = S.sizeOf (undefinedAtFieldType f)
         stride = S.sizeOf (elemA a)
+        Const ty = typeFor f
+        Const dims = dimsFor f
     put (offset <> Offset size)
 
-    trace $ "configuring field " <> name <> " attrib " <> show location <> " at offset " <> show offset <> " stride " <> show stride <> " dims " <> show (GL.glDims f) <> " type " <> show (GL.glType f)
+    trace $ "configuring field " <> name <> " attrib " <> show location <> " at offset " <> show offset <> " stride " <> show stride <> " dims " <> show dims <> " type " <> show ty
 
     checking $ glEnableVertexAttribArray (fromIntegral location)
-    checking $ glVertexAttribPointer     (fromIntegral location) (GL.glDims f) (GL.glType f) GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars `like` a) where
+    checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars `like` a) where
+  typeFor :: GL.Type a => Field v a -> Const GLenum a
+  typeFor _ = GL.glType
+  dimsFor :: GL.Type a => Field v a -> Const GLint a
+  dimsFor _ = GL.glDims
   like :: a Maybe -> Array (a Identity) -> a Maybe
   like = const
   elemA :: Array (i Identity) -> i Identity
