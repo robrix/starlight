@@ -81,4 +81,4 @@ instance Unit u => Unit (Milli u) where
   un = un . unMilli
 
 
-newtype Mult (n :: Nat) (d :: Nat) f a = Mult (f a)
+newtype Mult (n :: Nat) (d :: Nat) u a = Mult (u a)
