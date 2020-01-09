@@ -11,8 +11,6 @@ module Unit
 , getMilli
 , Kilo(..)
 , getKilo
-, kilo
-, unKilo
 , Delta(..)
 , Unit(..)
 , Mult(..)
@@ -42,12 +40,6 @@ newtype Kilo f a = Kilo (f a)
 
 getKilo :: Kilo f a -> f a
 getKilo (Kilo fa) = fa
-
-kilo :: (Fractional a, Functor f) => f a -> Kilo f a
-kilo fa = Kilo (fa ^/ 1000)
-
-unKilo :: (Num a, Functor f) => Kilo f a -> f a
-unKilo (Kilo fa) = fa ^* 1000
 
 
 newtype Delta f a = Delta { getDelta :: f a }

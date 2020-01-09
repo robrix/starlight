@@ -71,8 +71,8 @@ data Body = Body
 
 instance HasMagnitude Body where
   magnitude_ = lens get set where
-    get = getMetres . unKilo . radius
-    set b r = b{ radius = kilo (Metres r) }
+    get = un . radius
+    set b r = b{ radius = nu r }
 
 data Orbit = Orbit
   { eccentricity    :: !Float
@@ -110,11 +110,11 @@ actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, sem
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = getMetres (unKilo semimajor) * (1 - eccentricity * cos eccentricAnomaly)
+  r = un semimajor * (1 - eccentricity * cos eccentricAnomaly)
   -- extremely dubious
   mu = 398600.5
-  p = getMetres (unKilo semimajor) * (1 - eccentricity ** 2)
-  h = ((1 - (eccentricity ** 2)) * getMetres (unKilo semimajor) * mu) ** 0.5
+  p = un semimajor * (1 - eccentricity ** 2)
+  h = ((1 - (eccentricity ** 2)) * un semimajor * mu) ** 0.5
   -- hr = h/r
 
 
