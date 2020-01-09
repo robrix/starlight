@@ -17,6 +17,8 @@ import Unit
 newtype Metres a = Metres a
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
+instance Unit Metres
+
 getMetres :: Metres a -> a
 getMetres (Metres a) = a
 
