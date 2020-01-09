@@ -2,7 +2,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Unit.Power
 ( Watts(..)
-, getWatts
 , module Unit
 ) where
 
@@ -11,10 +10,7 @@ import GL.Type as GL
 import GL.Uniform
 import Unit
 
-newtype Watts a = Watts a
+newtype Watts a = Watts { getWatts :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 instance Unit Watts
-
-getWatts :: Watts a -> a
-getWatts (Watts a) = a

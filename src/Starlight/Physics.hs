@@ -45,7 +45,7 @@ gravity a = do
   pure $! foldl' (go dt (1/scale)) a bodies where
   go (Delta (Seconds dt)) scale a StateVectors{ actor = b, body = Body{ mass } }
     = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
-    force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
+    force = bigG * getGrams (getKilo mass) / r -- assume actors’ mass is negligible
     r = (b^.position_ ^* scale) `qd` (a^.position_ ^* scale) -- “quadrance” (square of distance between actor & body)
   bigG = 6.67430e-11 -- gravitational constant
 

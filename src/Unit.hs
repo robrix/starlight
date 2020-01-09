@@ -8,14 +8,11 @@
 {-# LANGUAGE TypeApplications #-}
 module Unit
 ( Milli(..)
-, getMilli
 , Kilo(..)
-, getKilo
 , Delta(..)
 , Unit(..)
 , unitary
 , Mult(..)
-, getMult
 ) where
 
 import Control.Lens.Iso
@@ -28,23 +25,15 @@ import GL.Uniform
 import Linear.Metric
 import Linear.Vector
 
-newtype Milli f a = Milli (f a)
+newtype Milli u a = Milli { getMilli :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1 1000 f)
+  deriving Unit via (Mult 1 1000 u)
 
-getMilli :: Milli f a -> f a
-getMilli (Milli fa) = fa
-
-
-newtype Kilo f a = Kilo (f a)
+newtype Kilo u a = Kilo { getKilo :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1000 1 f)
+  deriving Unit via (Mult 1000 1 u)
 
-getKilo :: Kilo f a -> f a
-getKilo (Kilo fa) = fa
-
-
-newtype Delta f a = Delta { getDelta :: f a }
+newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 
@@ -60,12 +49,9 @@ unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
 
 
-newtype Mult (n :: Nat) (d :: Nat) u a = Mult (u a)
+newtype Mult (n :: Nat) (d :: Nat) u a = Mult { getMult :: u a }
  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 instance (KnownNat n, KnownNat d, Unit u) => Unit (Mult n d u) where
   un = un . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
   nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
-
-getMult :: Mult n d u a -> u a
-getMult (Mult u) = u
