@@ -9,7 +9,10 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Unit
-( Milli(..)
+( Pico(..)
+, Nano(..)
+, Micro(..)
+, Milli(..)
 , Kilo(..)
 , Mega(..)
 , Delta(..)
