@@ -9,6 +9,7 @@
 module Unit
 ( Milli(..)
 , Kilo(..)
+, Mega(..)
 , Delta(..)
 , Unit(..)
 , unitary
@@ -32,6 +33,10 @@ newtype Milli u a = Milli { getMilli :: u a }
 newtype Kilo u a = Kilo { getKilo :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1000 1 u)
+
+newtype Mega u a = Mega { getMega :: u a }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving Unit via (Kilo (Kilo u))
 
 newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
