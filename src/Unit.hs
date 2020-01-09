@@ -17,6 +17,7 @@ module Unit
 , unitary
 , format
 , formatDec
+, formatExp
 , Mult(..)
 , (:/:)(..)
 ) where
@@ -67,6 +68,9 @@ format n u = showGFloat n u (getConst (suffix @u))
 
 formatDec :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatDec n u = showFFloat n u (getConst (suffix @u))
+
+formatExp :: forall u a . (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExp n u = showEFloat n u (getConst (suffix @u))
 
 
 newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
