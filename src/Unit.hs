@@ -9,8 +9,6 @@
 module Unit
 ( Milli(..)
 , getMilli
-, milli
-, unMilli
 , Kilo(..)
 , getKilo
 , kilo
@@ -36,12 +34,6 @@ newtype Milli f a = Milli (f a)
 
 getMilli :: Milli f a -> f a
 getMilli (Milli fa) = fa
-
-milli :: (Num a, Functor f) => f a -> Milli f a
-milli fa = Milli (fa ^* 1000)
-
-unMilli :: (Fractional a, Functor f) => Milli f a -> f a
-unMilli (Milli fa) = fa ^/ 1000
 
 
 newtype Kilo f a = Kilo (f a)
