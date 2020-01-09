@@ -62,6 +62,7 @@ newtype Mega u a = Mega { getMega :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1_000_000 1 "M" u)
 
+
 newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
