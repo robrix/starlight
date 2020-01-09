@@ -29,6 +29,7 @@ module Unit
 , formatExp
   -- * Change
 , Delta(..)
+  -- * Combinators
 , (:/:)(..)
 , (:*:)(..)
 , (:^:)(..)
@@ -123,6 +124,9 @@ formatExp = formatWith showEFloat
 
 newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+
+-- * Combinators
 
 newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
