@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -29,6 +30,7 @@ import Linear.Vector
 
 newtype Milli f a = Milli (f a)
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving Unit via (Mult 1 1000 f)
 
 getMilli :: Milli f a -> f a
 getMilli (Milli fa) = fa
@@ -42,6 +44,7 @@ unMilli (Milli fa) = fa ^/ 1000
 
 newtype Kilo f a = Kilo (f a)
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving Unit via (Mult 1000 1 f)
 
 getKilo :: Kilo f a -> f a
 getKilo (Kilo fa) = fa
@@ -60,14 +63,6 @@ newtype Delta f a = Delta { getDelta :: f a }
 class Functor u => Unit u where
   un :: Fractional a => u a -> a
   nu :: Fractional a => a -> u a
-
-instance Unit u => Unit (Kilo u) where
-  un = un . unKilo
-  nu = kilo . nu
-
-instance Unit u => Unit (Milli u) where
-  un = un . unMilli
-  nu = milli . nu
 
 
 newtype Mult (n :: Nat) (d :: Nat) u a = Mult (u a)
