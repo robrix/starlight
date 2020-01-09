@@ -7,6 +7,7 @@
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Unit
 ( Milli(..)
 , Kilo(..)
@@ -15,6 +16,7 @@ module Unit
 , Unit(..)
 , unitary
 , Mult(..)
+, (:/:)(..)
 ) where
 
 import Control.Lens.Iso
@@ -61,3 +63,7 @@ newtype Mult (n :: Nat) (d :: Nat) u a = Mult { getMult :: u a }
 instance (KnownNat n, KnownNat d, Unit u) => Unit (Mult n d u) where
   un = un   . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
   nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
+
+
+newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)

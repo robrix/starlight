@@ -110,7 +110,3 @@ fromDirectory = go Nothing
   initCap = \case
     ""   -> ""
     c:cs -> toUpper c : cs
-
-
-newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
-  deriving (Eq, Ord, Show)
