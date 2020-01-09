@@ -9,21 +9,28 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Unit
-( Pico(..)
+( -- * Prefixes
+  Mult(..)
+  -- ** Submultiples
+, Pico(..)
 , Nano(..)
 , Micro(..)
 , Milli(..)
+  -- ** Multiples
 , Kilo(..)
 , Mega(..)
+  -- * Exponents
 , Square(..)
 , Cubic(..)
+  -- * Units
 , Unit(..)
 , unitary
+  -- ** Formatting
 , formatWith
 , format
 , formatDec
 , formatExp
-, Mult(..)
+  -- * Change
 , Delta(..)
 , (:/:)(..)
 ) where
@@ -40,6 +47,20 @@ import Linear.Metric
 import Linear.Vector
 import Numeric
 
+-- * Prefixes
+
+newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
+ deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) where
+  un = un   . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
+  nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
+
+  suffix = Const (symbolVal (Proxy @s) ++ getConst (suffix @u))
+
+
+-- ** Submultiples
+
 newtype Pico u a = Pico { getPico :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1 1_000_000_000_000 "p" u)
@@ -51,6 +72,9 @@ newtype Nano u a = Nano { getNano :: u a }
 newtype Micro u a = Micro { getMicro :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1 1_000_000 "μ" u)
+
+
+-- ** Multiples
 
 newtype Milli u a = Milli { getMilli :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
@@ -64,6 +88,8 @@ newtype Mega u a = Mega { getMega :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1_000_000 1 "M" u)
 
+
+-- * Exponents
 
 newtype Square u a = Square { getSquare :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
@@ -82,6 +108,8 @@ instance Unit u => Unit (Cubic u) where
   suffix = Const (getConst (suffix @u) ++ "³")
 
 
+-- * Units
+
 class Functor u => Unit u where
   un :: Fractional a => u a -> a
   default un :: Coercible (u a) a => u a -> a
@@ -94,6 +122,9 @@ class Functor u => Unit u where
 
 unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
+
+
+-- ** Formatting
 
 formatWith :: Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
 formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const "")))
@@ -108,15 +139,7 @@ formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
 
 
-newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
- deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-
-instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) where
-  un = un   . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
-  nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
-
-  suffix = Const (symbolVal (Proxy @s) ++ getConst (suffix @u))
-
+-- * Change
 
 newtype Delta u a = Delta { getDelta :: u a }
   deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
