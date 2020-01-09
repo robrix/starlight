@@ -15,7 +15,6 @@ module Unit
 , Milli(..)
 , Kilo(..)
 , Mega(..)
-, Delta(..)
 , Square(..)
 , Cubic(..)
 , Unit(..)
@@ -25,6 +24,7 @@ module Unit
 , formatDec
 , formatExp
 , Mult(..)
+, Delta(..)
 , (:/:)(..)
 ) where
 
@@ -63,10 +63,6 @@ newtype Kilo u a = Kilo { getKilo :: u a }
 newtype Mega u a = Mega { getMega :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1_000_000 1 "M" u)
-
-
-newtype Delta u a = Delta { getDelta :: u a }
-  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 
 newtype Square u a = Square { getSquare :: u a }
@@ -121,6 +117,9 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) 
 
   suffix = Const (symbolVal (Proxy @s) ++ getConst (suffix @u))
 
+
+newtype Delta u a = Delta { getDelta :: u a }
+  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
