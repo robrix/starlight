@@ -171,6 +171,8 @@ newtype ((u :: * -> *) :# (v :: * -> *)) a = Dim { getDim :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Applicative via (u :.: v)
 
+infixl 4 :#
+
 instance (Applicative u, Additive v) => Additive (u :# v) where
   zero = Dim (pure zero)
   liftU2 f (Dim a) (Dim b) = Dim (liftA2 (liftU2 f) a b)
