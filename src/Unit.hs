@@ -96,30 +96,30 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) 
 -- ** Submultiples
 
 newtype Pico u a = Pico { getPico :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1 1_000_000_000_000 "p" u)
 
 newtype Nano u a = Nano { getNano :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1 1_000_000_000 "n" u)
 
 newtype Micro u a = Micro { getMicro :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1 1_000_000 "μ" u)
 
 
 -- ** Multiples
 
 newtype Milli u a = Milli { getMilli :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1 1_000 "m" u)
 
 newtype Kilo u a = Kilo { getKilo :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1_000 1 "k" u)
 
 newtype Mega u a = Mega { getMega :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1_000_000 1 "M" u)
 
 
