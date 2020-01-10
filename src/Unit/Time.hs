@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Unit.Time
 ( Seconds(..)
@@ -9,6 +10,7 @@ module Unit.Time
 ) where
 
 import Data.Functor.Const
+import Data.Functor.Identity
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
@@ -16,6 +18,7 @@ import Unit
 
 newtype Seconds a = Seconds { getSeconds :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Applicative, Monad) via Identity
 
 instance Unit Seconds where suffix = Const ('s':)
 
