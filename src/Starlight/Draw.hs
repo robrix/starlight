@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -17,6 +18,7 @@ import Control.Monad (when)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Functor.Const
+import Data.Functor.Identity
 import Data.Functor.Interval
 import GL.Effect.Check
 import GL.Framebuffer
@@ -101,5 +103,6 @@ draw = measure "draw" . runLiftIO $ do
 
 newtype Frames a = Frames a
   deriving (Functor)
+  deriving Applicative via Identity
 
 instance Unit Frames where suffix = Const ('f':)

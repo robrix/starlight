@@ -51,7 +51,7 @@ import Numeric
 
 -- * Units
 
-class Functor u => Unit u where
+class Applicative u => Unit u where
   un :: Fractional a => u a -> a
   default un :: Coercible (u a) a => u a -> a
   un = coerce
