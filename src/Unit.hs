@@ -34,6 +34,7 @@ module Unit
 , (:*:)(..)
 , (:^:)(..)
 , (:#)(..)
+, dim
 , unDim
 ) where
 
@@ -180,6 +181,9 @@ instance (Applicative u, Additive v) => Additive (u :# v) where
   liftI2 f (Dim a) (Dim b) = Dim (liftA2 (liftI2 f) a b)
 
 instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :# v)
+
+dim :: (Unit u, Fractional (v a)) => v a -> (u :# v) a
+dim = Dim . nu
 
 unDim :: (Unit u, Fractional (v a)) => (u :# v) a -> v a
 unDim = un . getDim
