@@ -42,6 +42,7 @@ import Data.Functor.Const
 import Data.Functor.Identity
 import Data.Proxy
 import Foreign.Storable
+import GHC.Generics ((:.:)(..))
 import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
@@ -167,3 +168,4 @@ instance (KnownNat n, Unit u) => Unit (u :^: n) where
 
 newtype ((u :: * -> *) :# (v :: * -> *)) a = Dim { getDim :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving Applicative via (u :.: v)
