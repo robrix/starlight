@@ -36,6 +36,7 @@ module Unit
 , (:#)(..)
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Lens.Iso
 import Data.Coerce
 import Data.Functor.Const
@@ -169,3 +170,8 @@ instance (KnownNat n, Unit u) => Unit (u :^: n) where
 newtype ((u :: * -> *) :# (v :: * -> *)) a = Dim { getDim :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Applicative via (u :.: v)
+
+instance (Applicative u, Additive v) => Additive (u :# v) where
+  zero = Dim (pure zero)
+  liftU2 f (Dim a) (Dim b) = Dim (liftA2 (liftU2 f) a b)
+  liftI2 f (Dim a) (Dim b) = Dim (liftA2 (liftI2 f) a b)
