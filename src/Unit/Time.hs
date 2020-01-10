@@ -15,7 +15,7 @@ import GL.Uniform
 import Unit
 
 newtype Seconds a = Seconds { getSeconds :: a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 instance Unit Seconds where suffix = Const ('s':)
 

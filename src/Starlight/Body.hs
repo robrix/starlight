@@ -67,7 +67,7 @@ data Body = Body
   , colour      :: !(Colour Float)
   , orbit       :: !Orbit
   }
-  deriving (Generic, Read, Show)
+  deriving (Generic, Show)
 
 instance HasMagnitude Body where
   magnitude_ = field @"radius".unitary
@@ -79,7 +79,7 @@ data Orbit = Orbit
   , period          :: !(Seconds Float)
   , timeOfPeriapsis :: !(Seconds Float)    -- relative to epoch
   }
-  deriving (Read, Show)
+  deriving (Show)
 
 
 rotationTimeScale :: Num a => Seconds a

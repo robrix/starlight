@@ -40,7 +40,7 @@ data CharacterIdentifier
 data BodyIdentifier
   = Star (Code, Name)
   | BodyIdentifier :/ (Code, Name)
-  deriving (Eq, Read, Show)
+  deriving (Eq, Show)
 
 infixl 5 :/
 

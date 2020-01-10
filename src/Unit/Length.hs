@@ -13,7 +13,7 @@ import GL.Uniform
 import Unit
 
 newtype Metres a = Metres { getMetres :: a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 instance Unit Metres where suffix = Const ('m':)
 
