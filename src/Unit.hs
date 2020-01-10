@@ -113,12 +113,12 @@ newtype Micro u a = Micro { getMicro :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via Mult 1 1_000_000 "μ" u
 
-
--- ** Multiples
-
 newtype Milli u a = Milli { getMilli :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via Mult 1 1_000 "m" u
+
+
+-- ** Multiples
 
 newtype Kilo u a = Kilo { getKilo :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
