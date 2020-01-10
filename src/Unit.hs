@@ -34,6 +34,7 @@ module Unit
 , (:*:)(..)
 , (:^:)(..)
 , (:#)(..)
+, unDim
 ) where
 
 import Control.Applicative (liftA2)
@@ -179,3 +180,6 @@ instance (Applicative u, Additive v) => Additive (u :# v) where
   liftI2 f (Dim a) (Dim b) = Dim (liftA2 (liftI2 f) a b)
 
 instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :# v)
+
+unDim :: (Unit u, Fractional (v a)) => (u :# v) a -> v a
+unDim = un . getDim
