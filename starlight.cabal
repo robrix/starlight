@@ -125,6 +125,7 @@ library
     UI.Window
     Unit
     Unit.Angle
+    Unit.Force
     Unit.Length
     Unit.Mass
     Unit.Power
