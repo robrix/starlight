@@ -9,8 +9,11 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Unit
-( -- * Prefixes
-  Mult(..)
+( -- * Units
+  Unit(..)
+, unitary
+  -- * Prefixes
+, Mult(..)
   -- ** Submultiples
 , Pico(..)
 , Nano(..)
@@ -19,9 +22,6 @@ module Unit
   -- ** Multiples
 , Kilo(..)
 , Mega(..)
-  -- * Units
-, Unit(..)
-, unitary
   -- ** Formatting
 , formatWith
 , format
@@ -46,6 +46,37 @@ import GL.Uniform
 import Linear.Metric
 import Linear.Vector
 import Numeric
+
+-- * Units
+
+class Functor u => Unit u where
+  un :: Fractional a => u a -> a
+  default un :: Coercible (u a) a => u a -> a
+  un = coerce
+  nu :: Fractional a => a -> u a
+  default nu :: Coercible a (u a) => a -> u a
+  nu = coerce
+
+  suffix :: Const ShowS (u a)
+
+unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
+unitary = iso un nu
+
+
+-- ** Formatting
+
+formatWith :: Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
+formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const ('x':))) "")
+
+format :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+format = formatWith showGFloat
+
+formatDec :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatDec = formatWith showFFloat
+
+formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExp = formatWith showEFloat
+
 
 -- * Prefixes
 
@@ -87,37 +118,6 @@ newtype Kilo u a = Kilo { getKilo :: u a }
 newtype Mega u a = Mega { getMega :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Unit via (Mult 1_000_000 1 "M" u)
-
-
--- * Units
-
-class Functor u => Unit u where
-  un :: Fractional a => u a -> a
-  default un :: Coercible (u a) a => u a -> a
-  un = coerce
-  nu :: Fractional a => a -> u a
-  default nu :: Coercible a (u a) => a -> u a
-  nu = coerce
-
-  suffix :: Const ShowS (u a)
-
-unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
-unitary = iso un nu
-
-
--- ** Formatting
-
-formatWith :: Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
-formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const ('x':))) "")
-
-format :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
-format = formatWith showGFloat
-
-formatDec :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
-formatDec = formatWith showFFloat
-
-formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
-formatExp = formatWith showEFloat
 
 
 -- * Change
