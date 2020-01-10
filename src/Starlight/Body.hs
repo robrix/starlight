@@ -92,7 +92,7 @@ orbitTimeScale = 1
 actorAt :: Body -> Seconds Float -> Actor
 actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
   { position = P position
-  , velocity = if r * p == 0 then 0 else position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly
+  , velocity = if r == 0 || p == 0 then 0 else position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly
   , rotation
     = orientation
     * axis
