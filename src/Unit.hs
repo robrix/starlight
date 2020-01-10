@@ -44,6 +44,7 @@ import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Metric
+import Linear.V1
 import Linear.Vector
 import Numeric
 
@@ -58,6 +59,8 @@ class Functor u => Unit u where
   nu = coerce
 
   suffix :: Const ShowS (u a)
+
+instance Unit V1 where suffix = Const id
 
 unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
 unitary = iso un nu
