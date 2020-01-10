@@ -143,17 +143,17 @@ newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
 
 infixl 7 :*:
 
-instance (Unit f, Unit g) => Unit (f :*: g) where
-  suffix = Const (getConst (suffix @f) . ('·' :) . getConst (suffix @g))
+instance (Unit u, Unit v) => Unit (u :*: v) where
+  suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
-newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
+newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
 infixl 7 :/:
 
-instance (Unit f, Unit g) => Unit (f :/: g) where
-  suffix = Const (getConst (suffix @f) . ('/' :) . getConst (suffix @g))
+instance (Unit u, Unit v) => Unit (u :/: v) where
+  suffix = Const (getConst (suffix @u) . ('/' :) . getConst (suffix @v))
 
 newtype (u :^: (n :: Nat)) a = Exp { getExp :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
