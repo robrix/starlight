@@ -101,30 +101,30 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) 
 
 newtype Pico u a = Pico { getPico :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1 1_000_000_000_000 "p" u)
+  deriving Unit via Mult 1 1_000_000_000_000 "p" u
 
 newtype Nano u a = Nano { getNano :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1 1_000_000_000 "n" u)
+  deriving Unit via Mult 1 1_000_000_000 "n" u
 
 newtype Micro u a = Micro { getMicro :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1 1_000_000 "μ" u)
+  deriving Unit via Mult 1 1_000_000 "μ" u
 
 
 -- ** Multiples
 
 newtype Milli u a = Milli { getMilli :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1 1_000 "m" u)
+  deriving Unit via Mult 1 1_000 "m" u
 
 newtype Kilo u a = Kilo { getKilo :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1_000 1 "k" u)
+  deriving Unit via Mult 1_000 1 "k" u
 
 newtype Mega u a = Mega { getMega :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Unit via (Mult 1_000_000 1 "M" u)
+  deriving Unit via Mult 1_000_000 1 "M" u
 
 
 -- * Change
@@ -169,7 +169,7 @@ instance (KnownNat n, Unit u) => Unit (u :^: n) where
 
 newtype ((u :: * -> *) :# (v :: * -> *)) a = Dim { getDim :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Applicative via (u :.: v)
+  deriving Applicative via u :.: v
 
 infixl 4 :#
 
