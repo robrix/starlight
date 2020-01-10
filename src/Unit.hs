@@ -148,7 +148,7 @@ instance (Unit f, Unit g) => Unit (f :/: g) where
   suffix = Const (getConst (suffix @f) . ('/' :) . getConst (suffix @g))
 
 newtype (u :^: (n :: Nat)) a = Exp { getExp :: u a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 infixr 8 :^:
 
