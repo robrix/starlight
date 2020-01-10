@@ -141,14 +141,14 @@ newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Applicative via u :.: v
 
+infixl 7 :*:
+
 instance (Applicative u, Additive v) => Additive (u :*: v) where
   zero = Prd (pure zero)
   liftU2 f (Prd a) (Prd b) = Prd (liftA2 (liftU2 f) a b)
   liftI2 f (Prd a) (Prd b) = Prd (liftA2 (liftI2 f) a b)
 
 instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :*: v)
-
-infixl 7 :*:
 
 instance (Unit u, Unit v) => Unit (u :*: v) where
   un = un . fmap un . getPrd
