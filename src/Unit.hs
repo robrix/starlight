@@ -134,7 +134,7 @@ newtype Delta u a = Delta { getDelta :: u a }
 
 newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Applicative, Monad) via Identity
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 infixl 7 :*:
 
@@ -143,7 +143,7 @@ instance (Unit f, Unit g) => Unit (f :*: g) where
 
 newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Applicative, Monad) via Identity
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 infixl 7 :/:
 
