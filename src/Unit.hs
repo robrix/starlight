@@ -33,6 +33,7 @@ module Unit
 , (:/:)(..)
 , (:*:)(..)
 , (:^:)(..)
+, (:#)(..)
 ) where
 
 import Control.Lens.Iso
@@ -163,3 +164,6 @@ instance (KnownNat n, Unit u) => Unit (u :^: n) where
       go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r):s) q
              | otherwise = (sup !! n):s
     sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
+
+newtype ((u :: * -> *) :# (v :: * -> *)) a = Dim { getDim :: u (v a) }
+  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
