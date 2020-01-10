@@ -131,17 +131,23 @@ newtype Delta u a = Delta { getDelta :: u a }
 newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
+infixl 7 :*:
+
 instance (Unit f, Unit g) => Unit (f :*: g) where
   suffix = Const (getConst (suffix @f) . ('·' :) . getConst (suffix @g))
 
 newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
+infixl 7 :/:
+
 instance (Unit f, Unit g) => Unit (f :/: g) where
   suffix = Const (getConst (suffix @f) . ('/' :) . getConst (suffix @g))
 
 newtype (u :^: (n :: Nat)) a = Exp { getExp :: u a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+infixr 8 :^:
 
 instance (KnownNat n, Unit u) => Unit (u :^: n) where
   un = un . getExp
