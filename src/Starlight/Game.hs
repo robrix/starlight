@@ -20,7 +20,8 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (itraverse, to, (%~), (&), (^.))
+import           Control.Lens (itraverse, to, (%~), (^.))
+import           Control.Monad ((>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
@@ -189,11 +190,11 @@ frame = runSystem . timed $ do
   beams_ @Body .= []
   npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
   characters_ @Body <~> itraverse
-    (\ i c
-    -> local (neighbourhoodOf @StateVectors c)
-    (   measure "gravity" (c & (actor_ @Character <-> gravity))
-    >>= measure "hit" . hit i
-    >>= measure "runActions" . runActions i))
+    (\ i
+    -> local . neighbourhoodOf @StateVectors
+    <*> (   measure "gravity" . (actor_ @Character <-> gravity)
+        >=> measure "hit" . hit i
+        >=> measure "runActions" . runActions i))
 
 -- | Compute the zoom factor for the given velocity.
 --
