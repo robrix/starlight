@@ -1,2 +1,11 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeOperators #-}
 module Unit.Force
-() where
+( Newton
+) where
+
+import Unit.Length
+import Unit.Mass
+import Unit.Time
+
+type Newton = Kilo Grams :*: Metres :/: Seconds :^: 2
