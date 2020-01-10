@@ -175,3 +175,5 @@ instance (Applicative u, Additive v) => Additive (u :# v) where
   zero = Dim (pure zero)
   liftU2 f (Dim a) (Dim b) = Dim (liftA2 (liftU2 f) a b)
   liftI2 f (Dim a) (Dim b) = Dim (liftA2 (liftI2 f) a b)
+
+instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :# v)
