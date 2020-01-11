@@ -7,6 +7,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Unit.Algebra
 (  -- * Algebra
   Mul(..)
@@ -43,6 +44,9 @@ infixl 7 ./.
 
 instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
   u .*. v = Prd ((*^ u) <$> v)
+
+instance {-# OVERLAPPABLE #-} (Mul u v w, Functor u') => Mul (u :*: u') v (w :*: u') where
+  Prd u .*. v = Prd ((.*. v) <$> u)
 
 -- instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Div u v (u :/: v) where
 --   u ./. v = Per ((u ^/) <$> v)
