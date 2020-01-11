@@ -71,7 +71,7 @@ fromCSV = toBody . splitOnCommas where
     <*> readEither' "longitudeOfAscendingNode"                Degrees         longitudeOfAscendingNode
     <*> readEither' "argumentOfPerifocus"                     Degrees         argumentOfPerifocus
     <*> readEither' "timeOfPeriapsisRelativeToEpoch"          Seconds         timeOfPeriapsisRelativeToEpoch
-    <*> readEither' "meanMotion"                              Per             meanMotion
+    <*> readEither' "meanMotion"                              nu              meanMotion
     <*> readEither' "meanAnomaly"                             Degrees         meanAnomaly
     <*> readEither' "trueAnomaly"                             Degrees         trueAnomaly
     <*> readEither' "semimajor"                               (Kilo . Metres) semimajor
