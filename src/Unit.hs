@@ -34,7 +34,6 @@ module Unit
   -- * Combinators
 , (:/:)(..)
 , (:*:)(..)
-, (:^:)(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -178,18 +177,3 @@ instance (Unit u, Unit v) => Unit (u :/: v) where
   prj = prj . prj . getPer
   factor = Const (getConst (factor @v) / getConst (factor @u))
   suffix = Const (getConst (suffix @u) . ('/' :) . getConst (suffix @v))
-
-
-newtype (u :^: (n :: Nat)) a = Exp { getExp :: u a }
-  deriving (Additive, Applicative, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-
-infixr 8 :^:
-
-instance (KnownNat n, Unit u) => Unit (u :^: n) where
-  prj = prj . getExp
-  factor = Const (getConst (factor @u) ^ natVal (Proxy @n))
-  suffix = Const (getConst (suffix @u) . (digits (fromIntegral (natVal (Proxy @n))) ++)) where
-    digits n = go "" n where
-      go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r):s) q
-             | otherwise = (sup !! n):s
-    sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
