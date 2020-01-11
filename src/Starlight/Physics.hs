@@ -32,7 +32,6 @@ import Starlight.System as System
 import Starlight.Weapon.Laser as Laser
 import UI.Colour
 import Unit.Angle
-import Unit.Mass
 import Unit.Time
 
 inertia :: Has (Reader (Delta Seconds Float)) sig m => Actor -> m Actor
@@ -42,12 +41,15 @@ inertia a@Actor{ position, velocity } =
 gravity :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
 gravity a = do
   dt <- ask
-  System{ scale, bodies } <- ask
-  pure $! foldl' (go dt (1/scale)) a bodies where
-  go (Delta (Seconds dt)) rscale a StateVectors{ actor = b, body = Body{ mass } }
+  System{ bodies } <- ask
+  pure $! foldl' (go dt) a bodies where
+  go (Delta (Seconds dt)) a StateVectors{ actor = b, body = Body{ mass } }
     = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
-    force = gravC * getGrams (getKilo mass) / r -- assume actors’ mass is negligible
-    r = (b^.position_ ^* rscale) `qd` (a^.position_ ^* rscale) -- “quadrance” (square of distance between actor & body)
+    -- FIXME: units should be N (i.e. kg·m/s²)
+    force = gravC * prj mass / r -- assume actors’ mass is 1kg
+    -- FIXME: figure out a better way of applying the units
+    -- NB: scaling to get distances in m
+    r = ((b^.position_ ^* 1000) `qd` (a^.position_ ^* 1000)) -- “quadrance” (square of distance between actor & body)
   gravC = 6.67430e-11 -- gravitational constant
 
 
