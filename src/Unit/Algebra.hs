@@ -12,7 +12,7 @@ module Unit.Algebra
 , Recip(..)
 , Div(..)
   -- * Combinators
-, (:/:)(..)
+, (:/:)
 , (:*:)(..)
 ) where
 
@@ -43,12 +43,12 @@ infixl 7 ./.
 instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
   u .*. v = Prd ((*^ v) <$> u)
 
-instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Div u v (u :/: v) where
-  u ./. v = Per ((u ^/) <$> v)
+-- instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Div u v (u :/: v) where
+--   u ./. v = Per ((u ^/) <$> v)
 
-instance {-# OVERLAPPABLE #-} (Functor u, Unit v) => Mul (u :/: v) v u where
-  -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain exactly 1 thing
-  Per vu .*. v = prj vu ^* prj v
+-- instance {-# OVERLAPPABLE #-} (Functor u, Unit v) => Mul (u :/: v) v u where
+--   -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain exactly 1 thing
+--   Per vu .*. v = prj vu ^* prj v
 
 instance {-# OVERLAPPABLE #-} (Unit u, Functor v) => Div (u :*: v) u v where
   -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain exactly 1 thing
@@ -89,20 +89,6 @@ instance Unit u => Unit (Recip u) where
   suffix = Const (getConst (suffix @u) . ('⁻' :) . ('¹' :))
 
 
-newtype (u :/: v) a = Per { getPer :: v (u a) }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Applicative via v :.: u
+type (u :/: v) = u :*: Recip v
 
 infixl 7 :/:
-
-instance (Applicative v, Additive u) => Additive (u :/: v) where
-  zero = Per (pure zero)
-  liftU2 f (Per a) (Per b) = Per (liftA2 (liftU2 f) a b)
-  liftI2 f (Per a) (Per b) = Per (liftA2 (liftI2 f) a b)
-
-instance (Applicative v, Foldable v, Additive u, Foldable u) => Metric (u :/: v)
-
-instance (Unit u, Unit v) => Unit (u :/: v) where
-  prj = prj . prj . getPer
-  factor = Const (getConst (factor @v) / getConst (factor @u))
-  suffix = Const (getConst (suffix @u) . ('/' :) . getConst (suffix @v))
