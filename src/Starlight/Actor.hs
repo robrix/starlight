@@ -19,8 +19,8 @@ import Linear.Quaternion
 import Linear.V3
 
 data Actor = Actor
-  { position :: !(Point V3 Float)
-  , velocity :: !(V3 Float)
+  { position :: !(Point V3 Float) -- FIXME: express in km
+  , velocity :: !(V3 Float)       -- FIXME: express in km/s
   , rotation :: !(Quaternion Float)
   }
   deriving (Generic, Show)
