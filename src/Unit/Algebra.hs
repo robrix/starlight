@@ -28,26 +28,26 @@ import Unit
 
 -- * Algebra
 
-class (Applicative u, Applicative v, Applicative w) => Mul u v w where
+class (Functor u, Functor v, Functor w) => Mul u v w where
   (.*.) :: Fractional a => u a -> v a -> w a
 
 infixl 7 .*.
 
-class (Applicative u, Applicative v, Applicative w) => Div u v w where
+class (Functor u, Functor v, Functor w) => Div u v w where
   (./.) :: Fractional a => u a -> v a -> w a
 
 infixl 7 ./.
 
-instance {-# OVERLAPPABLE #-} Applicative u => Mul Identity u u where
+instance {-# OVERLAPPABLE #-} Functor u => Mul Identity u u where
   Identity a .*. b = a *^ b
 
-instance {-# OVERLAPPABLE #-} Applicative u => Div u Identity u where
+instance {-# OVERLAPPABLE #-} Functor u => Div u Identity u where
   n ./. Identity d = n ^/ d
 
-instance {-# OVERLAPPABLE #-} (Applicative u, Applicative v) => Mul u v (u :*: v) where
+instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
   u .*. v = Prd ((*^ v) <$> u)
 
-instance {-# OVERLAPPABLE #-} (Applicative u, Applicative v) => Div u v (u :/: v) where
+instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Div u v (u :/: v) where
   u ./. v = Per ((u ^/) <$> v)
 
 
