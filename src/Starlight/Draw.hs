@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
@@ -102,7 +103,7 @@ draw = measure "draw" . runLiftIO $ do
   measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                            white Nothing
 
 newtype Frames a = Frames a
-  deriving (Functor)
+  deriving (Eq, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac)
   deriving Applicative via Identity
 
 instance Unit Frames where suffix = Const ('f':)
