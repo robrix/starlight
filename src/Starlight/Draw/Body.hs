@@ -67,7 +67,7 @@ drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor
     ?=  scaleToViewZoomed vs
     !*! translated3 (ext (negated (unP focus)) 0) -- transform to the origin
     !*! transform
-    !*! scaled (ext (pure @V3 (un radius)) 1)
+    !*! scaled (ext (pure @V3 (prj radius)) 1)
     !*! mkTransformation rotation 0
   colour_ ?= colour
 
