@@ -89,10 +89,9 @@ draw = measure "draw" . runLiftIO $ do
 
   drawRadar
 
-  let rscale = 1/scale
-      describeTarget target = case target >>= fmap . (,) <*> (system !?) of
+  let describeTarget target = case target >>= fmap . (,) <*> (system !?) of
         Just (identifier, t)
-          | pos <- either Body.actor Character.actor t ^. position_ -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (nu @(Kilo Metres) (distance (pos ^* rscale) (position ^* rscale)))
+          | pos <- either Body.actor Character.actor t ^. position_ -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (pure @(Kilo Metres) (distance pos position))
         _ -> ""
 
   measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (nu @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (nu @(Frames :/: Seconds) (1/dt)))
