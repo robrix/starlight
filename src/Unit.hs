@@ -12,6 +12,8 @@ module Unit
 ( -- * Units
   Unit(..)
 , unitary
+, un
+, nu
   -- * Prefixes
 , Mult(..)
   -- ** Submultiples
@@ -34,11 +36,11 @@ module Unit
 , (:*:)(..)
 , (:^:)(..)
 , (:#)(..)
-, dim
-, unDim
+, dimensional
 ) where
 
 import Control.Applicative (liftA2)
+import Control.Lens ((^.))
 import Control.Lens.Iso
 import Data.Coerce
 import Data.Functor.Const
@@ -56,17 +58,20 @@ import Numeric
 -- * Units
 
 class Applicative u => Unit u where
-  un :: Fractional a => u a -> a
-  default un :: Coercible (u a) a => u a -> a
-  un = coerce
-  nu :: Fractional a => a -> u a
-  default nu :: Coercible a (u a) => a -> u a
-  nu = coerce
+  unitary' :: (Fractional a, Fractional b) => AnIso (u a) (u b) a b
+  default unitary' :: (Coercible a (u a), Coercible b (u b)) => AnIso (u a) (u b) a b
+  unitary' = coerced
 
   suffix :: Const ShowS (u a)
 
 unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
-unitary = iso un nu
+unitary = cloneIso unitary
+
+un :: (Unit u, Fractional a) => u a -> a
+un = (^.unitary)
+
+nu :: (Unit u, Fractional a) => a -> u a
+nu = (^.from unitary)
 
 
 -- ** Formatting
@@ -90,8 +95,9 @@ newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
  deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) where
-  un = un   . (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d)))) . getMult
-  nu = Mult . (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n)))) . nu
+  unitary' = iso getMult Mult .iso from to.unitary' where
+    from = (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))))
+    to   = (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n))))
 
   suffix = Const ((symbolVal (Proxy @s) ++) . getConst (suffix @u))
 
@@ -148,8 +154,7 @@ instance (Applicative u, Additive v) => Additive (u :*: v) where
 instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :*: v)
 
 instance (Unit u, Unit v) => Unit (u :*: v) where
-  un = un . fmap un . getPrd
-  nu = Prd . fmap nu . nu
+  unitary' = iso getPrd Prd .iso (fmap (^.unitary)) (fmap (^.from unitary)) .unitary
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
 
@@ -169,8 +174,7 @@ newtype (u :^: (n :: Nat)) a = Exp { getExp :: u a }
 infixr 8 :^:
 
 instance (KnownNat n, Unit u) => Unit (u :^: n) where
-  un = un . getExp
-  nu = Exp . nu
+  unitary' = iso getExp Exp .unitary
   suffix = Const (getConst (suffix @u) . (digits (fromIntegral (natVal (Proxy @n))) ++)) where
     digits n = go "" n where
       go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r):s) q
@@ -191,8 +195,5 @@ instance (Applicative u, Additive v) => Additive (u :# v) where
 
 instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :# v)
 
-dim :: (Unit u, Fractional (v a)) => v a -> (u :# v) a
-dim = Dim . nu
-
-unDim :: (Unit u, Fractional (v a)) => (u :# v) a -> v a
-unDim = un . getDim
+dimensional :: (Unit u, Fractional (v a), Fractional (v b)) => Iso ((u :# v) a) ((u :# v) b) (v a) (v b)
+dimensional = iso getDim Dim .unitary
