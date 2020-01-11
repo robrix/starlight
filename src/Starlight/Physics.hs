@@ -45,9 +45,9 @@ gravity a = do
   pure $! foldl' (go dt (1/scale)) a bodies where
   go (Delta (Seconds dt)) rscale a StateVectors{ actor = b, body = Body{ mass } }
     = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
-    force = bigG * getGrams (getKilo mass) / r -- assume actors’ mass is negligible
+    force = gravC * getGrams (getKilo mass) / r -- assume actors’ mass is negligible
     r = (b^.position_ ^* rscale) `qd` (a^.position_ ^* rscale) -- “quadrance” (square of distance between actor & body)
-  bigG = 6.67430e-11 -- gravitational constant
+  gravC = 6.67430e-11 -- gravitational constant
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
