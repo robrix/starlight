@@ -9,6 +9,7 @@
 module Unit.Algebra
 (  -- * Algebra
   Mul(..)
+, Recip(..)
 , Div(..)
   -- * Combinators
 , (:/:)(..)
@@ -21,6 +22,8 @@ import Foreign.Storable
 import GHC.Generics ((:.:)(..))
 import GL.Type as GL
 import GL.Uniform
+import Linear.Conjugate
+import Linear.Epsilon
 import Linear.Metric
 import Linear.Vector
 import Unit
@@ -75,6 +78,15 @@ instance (Unit u, Unit v) => Unit (u :*: v) where
   prj = prj . prj . getPrd
   factor = Const (getConst (factor @u) * getConst (factor @v))
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
+
+
+newtype Recip u a = Recip { getRecip :: u a }
+  deriving (Additive, Applicative, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+
+instance Unit u => Unit (Recip u) where
+  prj = prj . getRecip
+  factor = Const (1/getConst (factor @u))
+  suffix = Const (getConst (suffix @u) . ('⁻' :) . ('¹' :))
 
 
 newtype (u :/: v) a = Per { getPer :: v (u a) }
