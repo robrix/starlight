@@ -215,6 +215,11 @@ instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :# v)
 instance (Unit u, R1 v) => R1 (u :# v) where
   _x = iso getDim Dim .iso prj pure._x
 
+-- | NB: does not perform conversion!
+instance (Unit u, R2 v) => R2 (u :# v) where
+  _y = iso getDim Dim .iso prj pure._y
+  _xy = iso getDim Dim .iso prj pure._xy
+
 dimensional :: (Unit u, Fractional (v a), Fractional (v b)) => Iso ((u :# v) a) ((u :# v) b) (v a) (v b)
 dimensional = iso getDim Dim .unitary
 
