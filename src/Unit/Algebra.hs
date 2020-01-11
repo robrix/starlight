@@ -42,7 +42,7 @@ u ./. v = u .*. Recip v -- FIXME: should this multiply by Recip’s factor?
 infixl 7 ./.
 
 instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
-  u .*. v = Prd ((*^ v) <$> u)
+  u .*. v = Prd ((*^ u) <$> v)
 
 -- instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Div u v (u :/: v) where
 --   u ./. v = Per ((u ^/) <$> v)
@@ -62,18 +62,18 @@ instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
 
 -- * Combinators
 
-newtype (u :*: v) a = Prd { getPrd :: u (v a) }
+newtype (u :*: v) a = Prd { getPrd :: v (u a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Applicative via u :.: v
+  deriving Applicative via v :.: u
 
 infixl 7 :*:
 
-instance (Applicative u, Additive v) => Additive (u :*: v) where
+instance (Applicative v, Additive u) => Additive (u :*: v) where
   zero = Prd (pure zero)
   liftU2 f (Prd a) (Prd b) = Prd (liftA2 (liftU2 f) a b)
   liftI2 f (Prd a) (Prd b) = Prd (liftA2 (liftI2 f) a b)
 
-instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :*: v)
+instance (Applicative v, Foldable v, Additive u, Foldable u) => Metric (u :*: v)
 
 instance (Unit u, Unit v) => Unit (u :*: v) where
   prj = prj . prj . getPrd
