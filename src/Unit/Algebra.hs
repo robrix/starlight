@@ -9,11 +9,11 @@
 module Unit.Algebra
 (  -- * Algebra
   Mul(..)
-, Recip(..)
 , Div(..)
   -- * Combinators
-, (:/:)
 , (:*:)(..)
+, Recip(..)
+, (:/:)
 ) where
 
 import Control.Applicative (liftA2)
