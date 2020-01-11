@@ -124,6 +124,7 @@ library
     UI.Typeface
     UI.Window
     Unit
+    Unit.Algebra
     Unit.Angle
     Unit.Force
     Unit.Length
