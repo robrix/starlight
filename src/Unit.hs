@@ -62,6 +62,9 @@ class Applicative u => Unit u where
   default unitary' :: (Coercible a (u a), Coercible b (u b)) => AnIso (u a) (u b) a b
   unitary' = coerced
 
+  factor :: Fractional a => Const a (u a)
+  factor = 1
+
   suffix :: Const ShowS (u a)
 
 unitary :: (Unit u, Fractional a, Fractional b) => Iso (u a) (u b) a b
