@@ -10,4 +10,4 @@ import Unit.Mass
 import Unit.Time
 import Unit
 
-type Newtons = Kilo Grams :*: Metres :/: (Seconds :*: Seconds)
+type Newtons = Kilo Grams :*: Metres :/: Seconds :/: Seconds
