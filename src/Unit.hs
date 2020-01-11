@@ -157,6 +157,7 @@ instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :*: v)
 
 instance (Unit u, Unit v) => Unit (u :*: v) where
   prj = prj . prj . getPrd
+  factor = Const (getConst (factor @u) * getConst (factor @v))
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
 
