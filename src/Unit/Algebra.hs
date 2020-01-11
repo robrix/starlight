@@ -1,8 +1,8 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
@@ -27,12 +27,12 @@ import Unit
 
 -- * Algebra
 
-class (Functor u, Functor v, Functor w) => Mul u v w where
+class (Functor u, Functor v, Functor w) => Mul u v w | u w -> v where
   (.*.) :: Fractional a => u a -> v a -> w a
 
 infixl 7 .*.
 
-class (Functor u, Functor v, Functor w) => Div u v w where
+class (Functor u, Functor v, Functor w) => Div u v w | u w -> v where
   (./.) :: Fractional a => u a -> v a -> w a
 
 infixl 7 ./.
