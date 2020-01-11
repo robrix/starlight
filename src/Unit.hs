@@ -99,8 +99,8 @@ newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
 
 instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) where
   unitary' = iso getMult Mult .iso from to.unitary where
-    from = (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))))
-    to   = (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n))))
+    from = (^* getConst (factor @(Mult n d s u)))
+    to   = (^/ getConst (factor @(Mult n d s u)))
 
   factor = fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))
 
