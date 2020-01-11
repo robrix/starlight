@@ -102,6 +102,8 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) 
     from = (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))))
     to   = (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n))))
 
+  factor = fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))
+
   suffix = Const ((symbolVal (Proxy @s) ++) . getConst (suffix @u))
 
 
