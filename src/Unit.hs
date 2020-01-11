@@ -225,6 +225,11 @@ instance (Unit u, R3 v) => R3 (u :# v) where
   _z = iso getDim Dim .iso prj pure._z
   _xyz = iso getDim Dim .iso prj pure._xyz
 
+-- | NB: does not perform conversion!
+instance (Unit u, R4 v) => R4 (u :# v) where
+  _w = iso getDim Dim .iso prj pure._w
+  _xyzw = iso getDim Dim .iso prj pure._xyzw
+
 dimensional :: (Unit u, Fractional (v a), Fractional (v b)) => Iso ((u :# v) a) ((u :# v) b) (v a) (v b)
 dimensional = iso getDim Dim .unitary
 
