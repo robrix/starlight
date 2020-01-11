@@ -10,6 +10,7 @@ module Unit.Time
 , Minutes
 , Hours
 , module Unit
+, module Unit.Multiple
 ) where
 
 import Data.Functor.Const
@@ -22,6 +23,7 @@ import Linear.Epsilon
 import Linear.Metric
 import Linear.Vector
 import Unit
+import Unit.Multiple
 
 newtype Seconds a = Seconds { getSeconds :: a }
   deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)

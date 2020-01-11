@@ -6,6 +6,7 @@ module Unit.Angle
 , fromDegrees
 , Degrees(..)
 , module Unit
+, module Unit.Multiple
 ) where
 
 import Data.Functor.Const
@@ -18,6 +19,7 @@ import Linear.Epsilon
 import Linear.Metric
 import Linear.Vector
 import Unit
+import Unit.Multiple
 
 newtype Radians a = Radians { getRadians :: a }
   deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
