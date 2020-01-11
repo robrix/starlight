@@ -140,7 +140,7 @@ newtype Delta u a = Delta { getDelta :: u a }
 
 -- * Combinators
 
-newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: u (v a) }
+newtype (u :*: v) a = Prd { getPrd :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Applicative via u :.: v
 
@@ -182,7 +182,7 @@ instance (KnownNat n, Unit u) => Unit (u :^: n) where
     sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
 
 
-newtype ((u :: * -> *) :# (v :: * -> *)) a = Dim { getDim :: u (v a) }
+newtype (u :# v) a = Dim { getDim :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving Applicative via u :.: v
 
