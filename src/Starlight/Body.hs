@@ -108,11 +108,11 @@ actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, sem
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = un semimajor * (1 - eccentricity * cos eccentricAnomaly)
+  r = prj semimajor * (1 - eccentricity * cos eccentricAnomaly)
   -- extremely dubious
   mu = 398600.5
-  p = un semimajor * (1 - eccentricity ** 2)
-  h = ((1 - (eccentricity ** 2)) * un semimajor * mu) ** 0.5
+  p = prj semimajor * (1 - eccentricity ** 2)
+  h = ((1 - (eccentricity ** 2)) * prj semimajor * mu) ** 0.5
   -- hr = h/r
 
 
