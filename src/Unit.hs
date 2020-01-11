@@ -154,7 +154,7 @@ instance (Applicative u, Additive v) => Additive (u :*: v) where
 instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :*: v)
 
 instance (Unit u, Unit v) => Unit (u :*: v) where
-  unitary' = iso getPrd Prd .iso (fmap (^.unitary)) (fmap (^.from unitary)) .unitary
+  unitary' = iso getPrd Prd .iso (fmap un) (fmap nu) .unitary
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
 
