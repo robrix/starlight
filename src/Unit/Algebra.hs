@@ -50,6 +50,10 @@ instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
 instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Div u v (u :/: v) where
   u ./. v = Per ((u ^/) <$> v)
 
+instance {-# OVERLAPPABLE #-} (Functor u, Unit v) => Mul (u :/: v) v u where
+  -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain at most 1 thing
+  Per vu .*. v = prj vu ^* prj v
+
 
 -- * Combinators
 
