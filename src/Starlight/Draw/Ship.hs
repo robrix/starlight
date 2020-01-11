@@ -52,9 +52,9 @@ drawShip
   -> m ()
 drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, armour, scale }, actions } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
-  let matrix = scaleToViewZoomed vs
+  sys@System{ scale } <- ask @(System StateVectors)
   matrix_
-    ?=  matrix
+    ?=  scaleToViewZoomed vs
     !*! translated3 (ext (negated (unP focus)) 0)
     !*! translated3 (unP position)
     !*! scaled (V4 scale scale scale 1)
