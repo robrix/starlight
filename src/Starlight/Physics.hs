@@ -49,7 +49,7 @@ gravity a = do
     force = gravC * prj mass / r -- assume actors’ mass is 1kg
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
-    r = (fmap un (b^.position_) `qd` fmap un (a^.position_)) -- “quadrance” (square of distance between actor & body)
+    r = fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   gravC = 6.67430e-11 -- gravitational constant
 
 
