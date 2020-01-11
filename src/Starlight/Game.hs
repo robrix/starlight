@@ -20,7 +20,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (itraverse, to, (%~), (^.))
+import           Control.Lens (itraverse, to, (^.))
 import           Control.Monad ((>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -180,7 +180,7 @@ frame
   => m ()
 frame = runSystem . timed $ do
   withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
-  measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
+  measure "inertia" $ characters_ @Body <~> traverse (actor_ <-> inertia) -- update positions
 
   measure "input" input
   measure "controls" $ player_ @Body .actions_ <~ controls
