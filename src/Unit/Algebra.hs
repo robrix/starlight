@@ -41,8 +41,8 @@ infixl 7 ./.
 instance Applicative u => Mul Identity u u where
   (.*.) = (*^) . runIdentity
 
-instance Div Identity Identity Identity where
-  (./.) = (/)
+instance Applicative u => Div u Identity u where
+  n ./. Identity d = n ^/ d
 
 
 -- * Combinators
