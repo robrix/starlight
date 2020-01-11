@@ -30,8 +30,12 @@ import Unit
 class (Applicative u, Applicative v, Applicative w) => Mul u v w | u v -> w, u w -> v, v w -> u where
   (.*.) :: Fractional a => u a -> v a -> w a
 
+infixl 7 .*.
+
 class (Applicative u, Applicative v, Applicative w) => Div u v w | u v -> w, u w -> v, v w -> u where
   (./.) :: Fractional a => u a -> v a -> w a
+
+infixl 7 ./.
 
 instance Mul Identity Identity Identity where
   (.*.) = (*)
