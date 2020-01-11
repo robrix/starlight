@@ -95,7 +95,7 @@ newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
  deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) where
-  unitary' = iso getMult Mult .iso from to.unitary' where
+  unitary' = iso getMult Mult .iso from to.unitary where
     from = (^* (fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))))
     to   = (^* (fromIntegral (natVal (Proxy @d)) / fromIntegral (natVal (Proxy @n))))
 
