@@ -61,7 +61,7 @@ drawBody
      )
   => Body.StateVectors
   -> m ()
-drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor = Actor{ rotation } } = measure "bodies" . UI.using getDrawable $ do
+drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor = Actor{ rotation } } = measure "body" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   matrix_
     ?=  scaleToViewZoomed vs
