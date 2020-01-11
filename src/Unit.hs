@@ -155,6 +155,7 @@ instance (Unit u, Unit v) => Unit (u :*: v) where
   nu = Prd . fmap nu . nu
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
+
 newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
@@ -163,6 +164,7 @@ infixl 7 :/:
 
 instance (Unit u, Unit v) => Unit (u :/: v) where
   suffix = Const (getConst (suffix @u) . ('/' :) . getConst (suffix @v))
+
 
 newtype (u :^: (n :: Nat)) a = Exp { getExp :: u a }
   deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
@@ -177,6 +179,7 @@ instance (KnownNat n, Unit u) => Unit (u :^: n) where
       go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r):s) q
              | otherwise = (sup !! n):s
     sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
+
 
 newtype ((u :: * -> *) :# (v :: * -> *)) a = Dim { getDim :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
