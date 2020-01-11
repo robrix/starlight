@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -37,8 +38,8 @@ class (Applicative u, Applicative v, Applicative w) => Div u v w | u v -> w, u w
 
 infixl 7 ./.
 
-instance Mul Identity Identity Identity where
-  (.*.) = (*)
+instance Applicative u => Mul Identity u u where
+  (.*.) = (*^) . runIdentity
 
 instance Div Identity Identity Identity where
   (./.) = (/)
