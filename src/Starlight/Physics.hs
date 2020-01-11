@@ -113,7 +113,7 @@ runActions i c = do
         Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
       identifiers = System.identifiers system
     where
-    thrust  = dt *^ 20
+    thrust  = dt *^ 20 * 60
     angular = dt *^ Radians 5
 
   actor_ :: Lens' Character Actor
