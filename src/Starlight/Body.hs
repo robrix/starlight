@@ -127,7 +127,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
       & velocity_.extended 0 %~ (rel !*)
     } where
     actor = actorAt body t
-    rel = maybe (systemTrans sys) transform (parent identifier >>= (bodies' Map.!?))
+    rel = maybe identity transform (parent identifier >>= (bodies' Map.!?))
       !*! mkTransformation orientation 0
 
 -- | Subject to the invariant that w=1.
