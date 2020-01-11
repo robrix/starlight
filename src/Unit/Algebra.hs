@@ -27,10 +27,10 @@ import Unit
 
 -- * Algebra
 
-class Mul u v w | u v -> w, u w -> v, v w -> u where
+class (Applicative u, Applicative v, Applicative w) => Mul u v w | u v -> w, u w -> v, v w -> u where
   (.*.) :: Fractional a => u a -> v a -> w a
 
-class Div u v w | u v -> w, u w -> v, v w -> u where
+class (Applicative u, Applicative v, Applicative w) => Div u v w | u v -> w, u w -> v, v w -> u where
   (./.) :: Fractional a => u a -> v a -> w a
 
 instance Mul Identity Identity Identity where
