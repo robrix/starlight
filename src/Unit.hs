@@ -44,7 +44,6 @@ import Control.Lens ((^.))
 import Control.Lens.Iso
 import Data.Coerce
 import Data.Functor.Const
-import Data.Functor.Identity
 import Data.Proxy
 import Foreign.Storable
 import GHC.Generics ((:.:)(..))
@@ -62,17 +61,13 @@ class Applicative u => Unit u where
   default prj :: Coercible (u a) a => u a -> a
   prj = coerce
 
-  unitary' :: (Fractional a, Fractional b) => AnIso (u a) (u b) a b
-  default unitary' :: (Coercible a (u a), Coercible b (u b)) => AnIso (u a) (u b) a b
-  unitary' = coerced
-
   factor :: Fractional a => Const a (u a)
   factor = 1
 
   suffix :: Const ShowS (u a)
 
-unitary :: (Unit u, Fractional a, Fractional b) => Iso (u a) (u b) a b
-unitary = cloneIso unitary'
+unitary :: forall u a b . (Unit u, Fractional a, Fractional b) => Iso (u a) (u b) a b
+unitary = iso ((* getConst (factor @u)) . prj) (pure . (/ getConst (factor @u)))
 
 un :: (Unit u, Fractional a) => u a -> a
 un = (^.unitary)
@@ -103,10 +98,6 @@ newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
 
 instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) where
   prj = prj . getMult
-
-  unitary' = iso getMult Mult .iso from to.unitary where
-    from = (^* getConst (factor @(Mult n d s u)))
-    to   = (^/ getConst (factor @(Mult n d s u)))
 
   factor = fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))
 
@@ -166,7 +157,6 @@ instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :*: v)
 
 instance (Unit u, Unit v) => Unit (u :*: v) where
   prj = prj . prj . getPrd
-  unitary' = iso getPrd Prd .iso (fmap un) (fmap nu) .unitary
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
 
@@ -187,7 +177,6 @@ infixr 8 :^:
 
 instance (KnownNat n, Unit u) => Unit (u :^: n) where
   prj = prj . getExp
-  unitary' = iso getExp Exp .unitary
   suffix = Const (getConst (suffix @u) . (digits (fromIntegral (natVal (Proxy @n))) ++)) where
     digits n = go "" n where
       go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r):s) q
