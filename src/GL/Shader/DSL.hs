@@ -34,7 +34,6 @@ module GL.Shader.DSL
 , M22
 , M33
 , M44
-, Point(..)
 , TextureUnit
 , V2
 , V3
@@ -54,7 +53,6 @@ import           GL.Shader.Stmt
 import           GL.Shader.Vars
 import           GL.TextureUnit
 import qualified GL.Uniform as GL
-import           Linear.Affine (Point(..))
 import           Linear.Matrix (M22, M33, M44)
 import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))

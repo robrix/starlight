@@ -14,19 +14,18 @@ module Starlight.Actor
 import Control.Lens (Lens')
 import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
-import Linear.Affine
 import Linear.Quaternion
 import Linear.V3
 import Unit.Length
 
 data Actor = Actor
-  { position :: !(Point V3 (Kilo Metres Float)) -- FIXME: lose the Point
+  { position :: !(V3 (Kilo Metres Float))
   , velocity :: !(V3 (Kilo Metres Float)) -- FIXME: express as km/s
   , rotation :: !(Quaternion Float)
   }
   deriving (Generic, Show)
 
-position_ :: Lens' Actor (Point V3 (Kilo Metres Float))
+position_ :: Lens' Actor (V3 (Kilo Metres Float))
 position_ = field @"position"
 
 velocity_ :: Lens' Actor (V3 (Kilo Metres Float))

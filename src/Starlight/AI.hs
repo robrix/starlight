@@ -19,18 +19,18 @@ ai
   :: Has (Reader (System StateVectors)) sig m
   => Character
   -> m Character
-ai c@Character{ actor = Actor{ position = P here, rotation }, target } = do
+ai c@Character{ actor = Actor{ position = here, rotation }, target } = do
   system <- ask
   pure $! c & actions_ .~ case target >>= (system !?) of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
     -- FIXME: factor in the target’s velocity & distance
     -- FIXME: allow other behaviours relating to targets, e.g. following
-    Just (Left StateVectors{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
+    Just (Left StateVectors{ actor = Actor{ position = there } }) -> Set.fromList $ concat
       [ [ Face Target ]
       , [ Thrust | isFacing (pi/4) there ]
       ]
-    Just (Right Character{ actor = Actor{ position = P there } }) -> Set.fromList $ concat
+    Just (Right Character{ actor = Actor{ position = there } }) -> Set.fromList $ concat
       [ [ Face Target ]
       , [ Thrust    | isFacing (pi/4)   there ]
       , [ Fire Main | isFacing (pi/128) there ]

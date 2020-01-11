@@ -91,8 +91,8 @@ orbitTimeScale = 1
 
 actorAt :: Body -> Seconds Float -> Actor
 actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
-  { position = P (pure <$> position)
-  , velocity = if r == 0 || p == 0 then 0 else pure <$> position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly
+  { position = pure <$> position
+  , velocity = if r == 0 || p == 0 then 0 else pure <$> (position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly)
   , rotation
     = orientation
     * axis
@@ -121,7 +121,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
   go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
     { body
-    , transform = rel !*! translated3 (prj <$> unP (position actor))
+    , transform = rel !*! translated3 (prj <$> position actor)
     , actor = actor
       & position_.coerced.extended 1 %~ (rel !*)
       & velocity_.coerced.extended 0 %~ (rel !*)

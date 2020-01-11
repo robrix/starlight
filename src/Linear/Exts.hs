@@ -15,7 +15,6 @@ module Linear.Exts
 , polar2
 , (^*^)
 , Ext(..)
-, module Linear.Affine
 , module Linear.Epsilon
 , module Linear.Matrix
 , module Linear.Metric
@@ -29,7 +28,6 @@ module Linear.Exts
 
 import Control.Applicative (liftA2)
 import Data.Functor.Interval
-import Linear.Affine
 import Linear.Epsilon
 import Linear.Matrix hiding (Trace(..))
 import Linear.Metric

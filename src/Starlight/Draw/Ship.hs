@@ -60,8 +60,8 @@ drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, 
   matrix_
     ?=  scaleToViewZoomed vs
     !*! systemTrans sys
-    !*! translated3 (ext (negated (prj <$> unP focus)) 0)
-    !*! translated3 (prj <$> unP position)
+    !*! translated3 (ext (negated (prj <$> focus)) 0)
+    !*! translated3 (prj <$> position)
     !*! scaled (ext (pure @V3 (r / scale)) 1)
     !*! mkTransformation rotation 0
   colour_ ?= (colour

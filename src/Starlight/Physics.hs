@@ -36,7 +36,7 @@ import Unit.Time
 
 inertia :: Has (Reader (Delta Seconds Float)) sig m => Actor -> m Actor
 inertia a@Actor{ position, velocity } =
-  pure a { Actor.position = position .+^ velocity }
+  pure a { Actor.position = position + velocity }
 
 gravity :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
 gravity a = do
@@ -44,7 +44,7 @@ gravity a = do
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
   go (Delta (Seconds dt)) a StateVectors{ actor = b, body = Body{ mass } }
-    = a & velocity_ +~ pure dt * pure force *^ unP ((b^.position_) `direction` (a^.position_)) where
+    = a & velocity_ +~ pure dt * pure force *^ ((b^.position_) `direction` (a^.position_)) where
     -- FIXME: units should be N (i.e. kg·m/s²)
     force = gravC * prj mass / r -- assume actors’ mass is 1kg
     -- FIXME: figure out a better way of applying the units
@@ -93,7 +93,7 @@ runActions i c = do
       direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
-        Target    -> t^?_Just.to projected.to (unP . (`L.direction` position))
+        Target    -> t^?_Just.to projected.to (`L.direction` position)
 
     Turn t -> actor_.rotation_ *= axisAngle (unit _z) (getRadians (case t of
       L -> angular
@@ -118,4 +118,4 @@ runActions i c = do
   actor_ :: Lens' Character Actor
   actor_ = Actor.actor_
 
-  projected a = a^.position_ .+^ a^.velocity_
+  projected a = a^.position_ + a^.velocity_

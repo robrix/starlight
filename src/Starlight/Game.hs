@@ -20,7 +20,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (itraverse, to, (^.))
+import           Control.Lens (itraverse, (^.))
 import           Control.Monad ((>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
@@ -77,7 +77,7 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position = P (V3 2_500_000 0 0)
+            { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
@@ -87,7 +87,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2_500_000 0 0)
+            { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
@@ -97,7 +97,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2_500_000 0 0)
+            { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
@@ -107,7 +107,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2_500_000 0 0)
+            { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
@@ -222,7 +222,7 @@ withView m = do
   size  <- Window.size
 
   velocity <- view (player_ @StateVectors .actor_.velocity_)
-  focus    <- view (player_ @StateVectors .actor_.position_._xy.to P)
+  focus    <- view (player_ @StateVectors .actor_.position_._xy)
 
   let zoom = zoomForSpeed size (prj (norm velocity))
   runReader View{ scale, size, zoom, focus } m
