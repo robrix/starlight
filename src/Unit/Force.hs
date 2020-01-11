@@ -10,6 +10,7 @@ import Unit.Length
 import Unit.Mass
 import Unit.Time
 import Unit
+import Unit.Algebra
 import Unit.Multiple
 
 type Newtons = Kilo Grams :*: Metres :/: Seconds :/: Seconds
