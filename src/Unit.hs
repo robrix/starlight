@@ -178,6 +178,7 @@ infixr 8 :^:
 
 instance (KnownNat n, Unit u) => Unit (u :^: n) where
   prj = prj . getExp
+  factor = Const (getConst (factor @u) ^ natVal (Proxy @n))
   suffix = Const (getConst (suffix @u) . (digits (fromIntegral (natVal (Proxy @n))) ++)) where
     digits n = go "" n where
       go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r):s) q
