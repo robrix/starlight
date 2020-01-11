@@ -13,6 +13,7 @@ import           Starlight.Actor as Actor
 import           Starlight.Body as Body
 import           Starlight.Character
 import           Starlight.System as System
+import           Unit
 
 ai
   :: Has (Reader (System StateVectors)) sig m
@@ -38,4 +39,4 @@ ai c@Character{ actor = Actor{ position = P here, rotation }, target } = do
     -- FIXME: pick a new target
     _ -> mempty
     where
-    isFacing epsilon there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angleTo (here^._xy) (there^._xy))) < epsilon
+    isFacing epsilon there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - (prj <$> angleTo (here^._xy) (there^._xy)))) < epsilon

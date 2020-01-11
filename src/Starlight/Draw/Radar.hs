@@ -69,7 +69,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
   matrix <- asks scaleToView
   matrix_ ?= matrix
-  here_   ?= here
+  here_   ?= (prj <$> here)
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -91,13 +91,13 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
 verticesForBodies vs =
-  [ V{ there = Identity (there^._xy), r = Identity (prj r), colour = Identity colour }
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj r), colour = Identity colour }
   | B.StateVectors{ body = B.Body{ radius = r, colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 verticesForShips :: Foldable t => t Character -> [V Identity]
 verticesForShips cs =
-  [ V{ there = Identity (there^._xy), r = Identity scale, colour = Identity colour }
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity scale, colour = Identity colour }
   | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale } } <- toList cs
   ]
 

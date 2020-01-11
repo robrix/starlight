@@ -17,18 +17,19 @@ import GHC.Generics (Generic)
 import Linear.Affine
 import Linear.Quaternion
 import Linear.V3
+import Unit.Length
 
 data Actor = Actor
-  { position :: !(Point V3 Float) -- FIXME: express in km
-  , velocity :: !(V3 Float)       -- FIXME: express in km/s
+  { position :: !(Point V3 (Kilo Metres Float)) -- FIXME: lose the Point
+  , velocity :: !(V3 (Kilo Metres Float)) -- FIXME: express as km/s
   , rotation :: !(Quaternion Float)
   }
   deriving (Generic, Show)
 
-position_ :: Lens' Actor (Point V3 Float)
+position_ :: Lens' Actor (Point V3 (Kilo Metres Float))
 position_ = field @"position"
 
-velocity_ :: Lens' Actor (V3 Float)
+velocity_ :: Lens' Actor (V3 (Kilo Metres Float))
 velocity_ = field @"velocity"
 
 rotation_ :: Lens' Actor (Quaternion Float)

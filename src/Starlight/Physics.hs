@@ -15,7 +15,7 @@ import Control.Applicative ((<|>))
 import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Effect.Reader
-import Control.Lens hiding (modifying, use, view, views, (%=), (*=), (+=), (.=))
+import Control.Lens hiding (modifying, un, use, view, views, (%=), (*=), (+=), (.=))
 import Control.Monad (guard)
 import Data.Foldable (foldl', for_, traverse_)
 import Data.Functor.Interval
@@ -44,12 +44,12 @@ gravity a = do
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
   go (Delta (Seconds dt)) a StateVectors{ actor = b, body = Body{ mass } }
-    = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
+    = a & velocity_ +~ pure dt * pure force *^ unP ((b^.position_) `direction` (a^.position_)) where
     -- FIXME: units should be N (i.e. kg·m/s²)
     force = gravC * prj mass / r -- assume actors’ mass is 1kg
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
-    r = ((b^.position_ ^* 1000) `qd` (a^.position_ ^* 1000)) -- “quadrance” (square of distance between actor & body)
+    r = (fmap un (b^.position_) `qd` fmap un (a^.position_)) -- “quadrance” (square of distance between actor & body)
   gravC = 6.67430e-11 -- gravitational constant
 
 
@@ -60,7 +60,7 @@ hit i c = do
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
   go (Delta (Seconds dt)) char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
-    , intersects (c^._xy) r (o^._xy) (cartesian2 theta 1)
+    , intersects (c^._xy) (pure r) (o^._xy) (cartesian2 (pure <$> theta) 1)
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
     | otherwise
     = char
@@ -83,13 +83,13 @@ runActions i c = do
   go (Delta (Seconds dt)) system = \case
     Thrust -> do
       rotation <- use (actor_.rotation_)
-      actor_.velocity_ += rotate rotation (unit _x ^* thrust)
+      actor_.velocity_ += (rotate (pure <$> rotation) (unit _x ^* thrust))
 
     Face dir -> do
       actor <- use actor_
       target <- fmap (either Body.actor Character.actor) <$> use (target_._Just.to (system !?))
       for_ (direction actor target) $
-        modifying (actor_.rotation_) . face angular . angleOf . (^._xy) where
+        modifying (actor_.rotation_) . face angular . fmap prj . angleOf . (^._xy) where
       direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
@@ -112,7 +112,7 @@ runActions i c = do
         Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
       identifiers = System.identifiers system
     where
-    thrust  = dt * 20
+    thrust  = dt *^ 20
     angular = dt *^ Radians 5
 
   actor_ :: Lens' Character Actor

@@ -59,6 +59,7 @@ import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
+import           Unit
 
 runGame
   :: Has (Lift IO) sig m
@@ -90,7 +91,7 @@ runGame system
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
             }
-          , target  = Just (C Player)
+          , target  = Nothing -- Just (C Player)
           , actions = mempty
           , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30, radar }
           }
@@ -223,5 +224,5 @@ withView m = do
   velocity <- view (player_ @StateVectors .actor_.velocity_)
   focus    <- view (player_ @StateVectors .actor_.position_._xy.to P)
 
-  let zoom = zoomForSpeed size (norm velocity)
+  let zoom = zoomForSpeed size (prj (norm velocity))
   runReader View{ scale, size, zoom, focus } m

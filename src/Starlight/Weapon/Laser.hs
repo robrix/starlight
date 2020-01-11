@@ -8,9 +8,10 @@ import Linear.Exts
 import Starlight.Identifier
 import UI.Colour
 import Unit.Angle
+import Unit.Length
 
 data Beam = Beam
-  { position :: Point V3 Float
+  { position :: Point V3 (Kilo Metres Float) -- FIXME: lose the Point
   , angle    :: Radians Float
   , colour   :: Colour Float
   , firedBy  :: CharacterIdentifier
