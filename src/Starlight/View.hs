@@ -18,7 +18,7 @@ data View = View
   { scale :: Int
   , size  :: V2 Int
   , zoom  :: Float
-  , focus :: Point V2 Float
+  , focus :: Point V2 Float -- FIXME: express in km
   }
 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to device coordinates.
