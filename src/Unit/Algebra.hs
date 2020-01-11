@@ -37,7 +37,7 @@ class (Functor u, Functor v, Functor w) => Mul u v w | u w -> v where
 infixl 7 .*.
 
 (./.) :: (Mul u (Recip v) w, Fractional a) => u a -> v a -> w a
-u ./. v = u .*. Recip v
+u ./. v = u .*. Recip v -- FIXME: should this multiply by Recip’s factor?
 
 infixl 7 ./.
 
