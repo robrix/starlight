@@ -58,6 +58,10 @@ import Numeric
 -- * Units
 
 class Applicative u => Unit u where
+  prj :: u a -> a
+  default prj :: Coercible (u a) a => u a -> a
+  prj = coerce
+
   unitary' :: (Fractional a, Fractional b) => AnIso (u a) (u b) a b
   default unitary' :: (Coercible a (u a), Coercible b (u b)) => AnIso (u a) (u b) a b
   unitary' = coerced
@@ -98,6 +102,8 @@ newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
  deriving (Additive, Applicative, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
 
 instance (KnownNat n, KnownNat d, KnownSymbol s, Unit u) => Unit (Mult n d s u) where
+  prj = prj . getMult
+
   unitary' = iso getMult Mult .iso from to.unitary where
     from = (^* getConst (factor @(Mult n d s u)))
     to   = (^/ getConst (factor @(Mult n d s u)))
@@ -159,6 +165,7 @@ instance (Applicative u, Additive v) => Additive (u :*: v) where
 instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :*: v)
 
 instance (Unit u, Unit v) => Unit (u :*: v) where
+  prj = prj . prj . getPrd
   unitary' = iso getPrd Prd .iso (fmap un) (fmap nu) .unitary
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
@@ -179,6 +186,7 @@ newtype (u :^: (n :: Nat)) a = Exp { getExp :: u a }
 infixr 8 :^:
 
 instance (KnownNat n, Unit u) => Unit (u :^: n) where
+  prj = prj . getExp
   unitary' = iso getExp Exp .unitary
   suffix = Const (getConst (suffix @u) . (digits (fromIntegral (natVal (Proxy @n))) ++)) where
     digits n = go "" n where
