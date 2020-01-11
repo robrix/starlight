@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -9,7 +10,7 @@
 module Unit.Algebra
 (  -- * Algebra
   Mul(..)
-, Div(..)
+, (./.)
   -- * Combinators
 , (:*:)(..)
 , Recip(..)
@@ -35,8 +36,8 @@ class (Functor u, Functor v, Functor w) => Mul u v w | u w -> v where
 
 infixl 7 .*.
 
-class (Functor u, Functor v, Functor w) => Div u v w | u w -> v where
-  (./.) :: Fractional a => u a -> v a -> w a
+(./.) :: (Mul u (Recip v) w, Fractional a) => u a -> v a -> w a
+u ./. v = u .*. Recip v
 
 infixl 7 ./.
 
@@ -50,13 +51,13 @@ instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
 --   -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain exactly 1 thing
 --   Per vu .*. v = prj vu ^* prj v
 
-instance {-# OVERLAPPABLE #-} (Unit u, Functor v) => Div (u :*: v) u v where
-  -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain exactly 1 thing
-  Prd uv ./. u = prj uv ^/ prj u
+-- instance {-# OVERLAPPABLE #-} (Unit u, Functor v) => Div (u :*: v) u v where
+--   -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain exactly 1 thing
+--   Prd uv ./. u = prj uv ^/ prj u
 
-instance {-# OVERLAPPABLE #-} (Functor u, Unit v) => Div (u :*: v) v u where
-  -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain exactly 1 thing
-  Prd uv ./. v = (prj <$> uv) ^/ prj v
+-- instance {-# OVERLAPPABLE #-} (Functor u, Unit v) => Div (u :*: v) v u where
+--   -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain exactly 1 thing
+--   Prd uv ./. v = (prj <$> uv) ^/ prj v
 
 
 -- * Combinators
