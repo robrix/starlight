@@ -64,7 +64,7 @@ class Applicative u => Unit u where
 
   suffix :: Const ShowS (u a)
 
-unitary :: (Fractional a, Fractional b, Unit u) => Iso (u a) (u b) a b
+unitary :: (Unit u, Fractional a, Fractional b) => Iso (u a) (u b) a b
 unitary = cloneIso unitary
 
 un :: (Unit u, Fractional a) => u a -> a
