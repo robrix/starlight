@@ -53,6 +53,7 @@ import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Metric
+import Linear.V4
 import Linear.Vector
 import Numeric
 
@@ -209,6 +210,10 @@ instance (Applicative u, Additive v) => Additive (u :# v) where
   liftI2 f (Dim a) (Dim b) = Dim (liftA2 (liftI2 f) a b)
 
 instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :# v)
+
+-- | NB: does not perform conversion!
+instance (Unit u, R1 v) => R1 (u :# v) where
+  _x = iso getDim Dim .iso prj pure._x
 
 dimensional :: (Unit u, Fractional (v a), Fractional (v b)) => Iso ((u :# v) a) ((u :# v) b) (v a) (v b)
 dimensional = iso getDim Dim .unitary
