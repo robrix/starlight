@@ -38,10 +38,10 @@ class (Applicative u, Applicative v, Applicative w) => Div u v w where
 
 infixl 7 ./.
 
-instance Applicative u => Mul Identity u u where
+instance {-# OVERLAPPABLE #-} Applicative u => Mul Identity u u where
   Identity a .*. b = a *^ b
 
-instance Applicative u => Div u Identity u where
+instance {-# OVERLAPPABLE #-} Applicative u => Div u Identity u where
   n ./. Identity d = n ^/ d
 
 
