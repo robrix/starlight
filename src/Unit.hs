@@ -161,13 +161,22 @@ instance (Unit u, Unit v) => Unit (u :*: v) where
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
 
-newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
+newtype (u :/: v) a = Per { getPer :: u (v a) }
   deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via Identity
+  deriving Applicative via u :.: v
 
 infixl 7 :/:
 
+instance (Applicative u, Additive v) => Additive (u :/: v) where
+  zero = Per (pure zero)
+  liftU2 f (Per a) (Per b) = Per (liftA2 (liftU2 f) a b)
+  liftI2 f (Per a) (Per b) = Per (liftA2 (liftI2 f) a b)
+
+instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :/: v)
+
 instance (Unit u, Unit v) => Unit (u :/: v) where
+  prj = prj . prj . getPer
+  factor = Const (getConst (factor @v) / getConst (factor @u))
   suffix = Const (getConst (suffix @u) . ('/' :) . getConst (suffix @v))
 
 
