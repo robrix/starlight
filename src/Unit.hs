@@ -37,6 +37,8 @@ module Unit
 , (:^:)(..)
 , (:#)(..)
 , dimensional
+, dim
+, unDim
 ) where
 
 import Control.Applicative (liftA2)
@@ -210,3 +212,9 @@ instance (Applicative u, Foldable u, Additive v, Foldable v) => Metric (u :# v)
 
 dimensional :: (Unit u, Fractional (v a), Fractional (v b)) => Iso ((u :# v) a) ((u :# v) b) (v a) (v b)
 dimensional = iso getDim Dim .unitary
+
+unDim :: (Unit u, Fractional (v a)) => (u :# v) a -> v a
+unDim = (^.dimensional)
+
+dim :: (Unit u, Fractional (v a)) => v a -> (u :# v) a
+dim = (^.from dimensional)
