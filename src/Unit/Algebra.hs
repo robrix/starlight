@@ -47,6 +47,9 @@ instance {-# OVERLAPPABLE #-} Applicative u => Div u Identity u where
 instance {-# OVERLAPPABLE #-} (Applicative u, Applicative v) => Mul u v (u :*: v) where
   u .*. v = Prd ((*^ v) <$> u)
 
+instance {-# OVERLAPPABLE #-} (Applicative u, Applicative v) => Div u v (u :/: v) where
+  u ./. v = Per ((u ^/) <$> v)
+
 
 -- * Combinators
 
