@@ -22,6 +22,7 @@ import Starlight.Identifier
 import System.Directory
 import System.FilePath
 import Text.Read
+import Unit.Algebra
 import Unit.Angle
 import Unit.Length
 import Unit.Time

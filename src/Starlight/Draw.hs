@@ -41,6 +41,7 @@ import Starlight.View
 import UI.Colour
 import UI.Label
 import UI.Typeface
+import Unit.Algebra
 import Unit.Length
 import Unit.Time
 
