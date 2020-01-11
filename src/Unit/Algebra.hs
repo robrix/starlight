@@ -54,6 +54,10 @@ instance {-# OVERLAPPABLE #-} (Functor u, Unit v) => Mul (u :/: v) v u where
   -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain at most 1 thing
   Per vu .*. v = prj vu ^* prj v
 
+instance {-# OVERLAPPABLE #-} (Unit u, Functor v) => Div (u :*: v) u v where
+  -- FIXME: there has got to be a better way to do this than assuming Unit & essentially that u & v each contain at most 1 thing
+  Prd uv ./. u = prj uv ^/ prj u
+
 
 -- * Combinators
 
