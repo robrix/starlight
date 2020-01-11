@@ -90,7 +90,6 @@ runActions i c = do
     Thrust -> do
       rotation <- use (actor_.rotation_)
       actor_.velocity_ += ((.*. dt) . (thrust ^*) <$> rotate rotation (unit _x))
-      -- actor_.velocity_ += (rotate rotation (unit _x ^* thrust))
 
     Face dir -> do
       actor <- use actor_
