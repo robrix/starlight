@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -6,6 +7,8 @@ module Unit.Time
 , fromDays
 , fromHours
 , fromMinutes
+, Minutes
+, Hours
 , module Unit
 ) where
 
@@ -33,3 +36,7 @@ fromHours h = fromMinutes (h * 60)
 
 fromMinutes :: Num a => a -> Seconds a
 fromMinutes m = Seconds (m * 60)
+
+type Minutes = Mult 60 1 "min" Seconds
+
+type Hours = Mult 3600 1 "h" Seconds
