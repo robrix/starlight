@@ -18,6 +18,7 @@ import Linear.Quaternion
 import Linear.V3
 import Unit.Length
 
+-- FIXME: mass
 data Actor = Actor
   { position :: !(V3 (Kilo Metres Float))
   , velocity :: !(V3 (Kilo Metres Float)) -- FIXME: express as km/s
