@@ -17,7 +17,6 @@ module Unit.Algebra
 
 import Control.Applicative (liftA2)
 import Data.Functor.Const
-import Data.Functor.Identity
 import Foreign.Storable
 import GHC.Generics ((:.:)(..))
 import GL.Type as GL
@@ -37,12 +36,6 @@ class (Functor u, Functor v, Functor w) => Div u v w where
   (./.) :: Fractional a => u a -> v a -> w a
 
 infixl 7 ./.
-
-instance {-# OVERLAPPABLE #-} Functor u => Mul Identity u u where
-  Identity a .*. b = a *^ b
-
-instance {-# OVERLAPPABLE #-} Functor u => Div u Identity u where
-  n ./. Identity d = n ^/ d
 
 instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
   u .*. v = Prd ((*^ v) <$> u)
