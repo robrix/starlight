@@ -15,6 +15,7 @@ module Unit.Algebra
 
 import Control.Applicative (liftA2)
 import Data.Functor.Const
+import Data.Functor.Identity
 import Foreign.Storable
 import GHC.Generics ((:.:)(..))
 import GL.Type as GL
@@ -28,6 +29,10 @@ import Unit
 class Group u v w | u v -> w, u w -> v, v w -> u where
   (.*.) :: Fractional a => u a -> v a -> w a
   (./.) :: Fractional a => u a -> v a -> w a
+
+instance Group Identity Identity Identity where
+  (.*.) = (*)
+  (./.) = (/)
 
 
 -- * Combinators
