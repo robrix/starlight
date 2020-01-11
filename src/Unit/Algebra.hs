@@ -26,8 +26,8 @@ import Unit
 -- * Algebra
 
 class Group u v w | u v -> w, u w -> v, v w -> u where
-  (.*.) :: u a -> v a -> w a
-  (./.) :: u a -> v a -> w a
+  (.*.) :: Fractional a => u a -> v a -> w a
+  (./.) :: Fractional a => u a -> v a -> w a
 
 
 -- * Combinators
