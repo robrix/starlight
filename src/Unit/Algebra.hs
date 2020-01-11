@@ -1,12 +1,15 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Unit.Algebra
-(  -- * Combinators
-  (:/:)(..)
+(  -- * Algebra
+  Group(..)
+  -- * Combinators
+, (:/:)(..)
 , (:*:)(..)
 ) where
 
@@ -19,6 +22,13 @@ import GL.Uniform
 import Linear.Metric
 import Linear.Vector
 import Unit
+
+-- * Algebra
+
+class Group u v w | u v -> w, u w -> v, v w -> u where
+  (.*.) :: u a -> v a -> w a
+  (./.) :: u a -> v a -> w a
+
 
 -- * Combinators
 
