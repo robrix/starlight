@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.Physics
 ( inertia
 , gravity
@@ -17,6 +18,7 @@ import Control.Effect.Lens
 import Control.Effect.Reader
 import Control.Lens hiding (modifying, un, use, view, views, (%=), (*=), (+=), (.=))
 import Control.Monad (guard)
+import Data.Coerce
 import Data.Foldable (foldl', for_, traverse_)
 import Data.Functor.Interval
 import Data.Ix (inRange)
@@ -31,27 +33,30 @@ import Starlight.Ship
 import Starlight.System as System
 import Starlight.Weapon.Laser as Laser
 import UI.Colour
+import Unit.Algebra
 import Unit.Angle
+import Unit.Length
 import Unit.Time
 
 inertia :: Has (Reader (Delta Seconds Float)) sig m => Actor -> m Actor
 inertia a@Actor{ position, velocity } = do
-  Delta (Seconds dt) <- ask
-  pure a { Actor.position = position + ((^* dt) <$> velocity) }
+  Delta dt <- ask
+  pure a { Actor.position = position + ((.*. dt) <$> velocity) }
 
 gravity :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
 gravity a = do
-  dt <- ask
+  Delta dt <- ask @(Delta Seconds Float)
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
-  go (Delta (Seconds dt)) a StateVectors{ actor = b, body = Body{ mass } }
-    = a & velocity_ +~ pure dt * pure force *^ ((b^.position_) `direction` (a^.position_)) where
-    -- FIXME: units should be N (i.e. kg·m/s²)
-    force = gravC * prj mass / r -- assume actors’ mass is 1kg
+  go dt a StateVectors{ actor = b, body = Body{ mass } }
+    = a & velocity_ +~ (force .*. dt *^ coerce ((b^.position_) `direction` (a^.position_))) where
+    -- FIXME: units should be N (i.e. kg·m/s/s)
+    force :: (Kilo Metres :/: Seconds :/: Seconds) Float
+    force = pure (gravC * prj mass / r) -- (m1·m2 : kg) / (r : m)² : kg/m²
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
     r = fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
-  gravC = 6.67430e-11 -- gravitational constant
+  gravC = 6.67430e-11 -- gravitational constant : m³/kg/s²
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
@@ -78,13 +83,14 @@ runActions
   -> Character
   -> m Character
 runActions i c = do
-  dt <- ask
+  dt <- ask @(Delta Seconds Float)
   system <- ask @(System StateVectors)
   execState c (traverse_ (go dt system) (actions c)) where
-  go (Delta (Seconds dt)) system = \case
+  go (Delta dt) system = \case
     Thrust -> do
       rotation <- use (actor_.rotation_)
-      actor_.velocity_ += (rotate (pure <$> rotation) (unit _x ^* thrust))
+      actor_.velocity_ += ((.*. dt) . (thrust ^*) <$> rotate rotation (unit _x))
+      -- actor_.velocity_ += (rotate rotation (unit _x ^* thrust))
 
     Face dir -> do
       actor <- use actor_
@@ -94,7 +100,7 @@ runActions i c = do
       direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
-        Target    -> t^?_Just.to projected.to (`L.direction` position)
+        Target    -> t^?_Just.to projected.to (`L.direction` position).coerced
 
     Turn t -> actor_.rotation_ *= axisAngle (unit _z) (getRadians (case t of
       L -> angular
@@ -113,10 +119,9 @@ runActions i c = do
         Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
       identifiers = System.identifiers system
     where
-    thrust  = dt *^ 20 * 60
-    angular = dt *^ Radians 5
+    thrust  = 20 * 60 :: (Kilo Metres :/: Seconds :/: Seconds) Float
+    angular = getSeconds dt *^ Radians 5
+    projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
 
   actor_ :: Lens' Character Actor
   actor_ = Actor.actor_
-
-  projected a = a^.position_ + a^.velocity_

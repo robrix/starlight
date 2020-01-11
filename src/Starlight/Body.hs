@@ -41,6 +41,7 @@ import           Starlight.Radar
 import           Starlight.System
 import           Starlight.Time
 import           UI.Colour
+import           Unit.Algebra
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
