@@ -35,8 +35,9 @@ import Unit.Angle
 import Unit.Time
 
 inertia :: Has (Reader (Delta Seconds Float)) sig m => Actor -> m Actor
-inertia a@Actor{ position, velocity } =
-  pure a { Actor.position = position + velocity }
+inertia a@Actor{ position, velocity } = do
+  Delta (Seconds dt) <- ask
+  pure a { Actor.position = position + ((^* dt) <$> velocity) }
 
 gravity :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
 gravity a = do
