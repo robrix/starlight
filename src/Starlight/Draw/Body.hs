@@ -30,7 +30,7 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Object
-import           GL.Shader.DSL hiding (coerce, (!*!), (!*))
+import           GL.Shader.DSL hiding (coerce, (!*), (!*!))
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Prelude hiding (break)
