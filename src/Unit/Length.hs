@@ -12,12 +12,14 @@ import Data.Functor.Identity
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
+import Linear.Conjugate
+import Linear.Epsilon
 import Linear.Metric
 import Linear.Vector
 import Unit
 
 newtype Metres a = Metres { getMetres :: a }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
 instance Unit Metres where suffix = Const ('m':)
