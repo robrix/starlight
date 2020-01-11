@@ -53,7 +53,8 @@ gravity a = do
     = a & velocity_ +~ (force .*. dt *^ coerce ((b^.position_) `direction` (a^.position_))) where
     -- FIXME: units should be N (i.e. kg·m/s/s)
     force :: (Kilo Metres :/: Seconds :/: Seconds) Float
-    force = pure (prj gravC * prj mass / r) -- (m1·m2 : kg) / (r : m)² : kg/m²
+    force = pure (prj gravC * prj mass / r)
+    -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
     r = fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
