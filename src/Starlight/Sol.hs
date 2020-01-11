@@ -5,6 +5,7 @@
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeApplications #-}
 -- | A familiar star system.
 module Starlight.Sol
 ( system
@@ -213,7 +214,7 @@ system = do
         , colour      = white
         , orbit
         }
-      scale = getMetres (getKilo (100 / radius (bodies Map.! solI)))
+      scale = un @(Kilo Metres) (100 / radius (bodies Map.! solI))
 
   pure System
     { scale
