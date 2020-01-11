@@ -7,7 +7,8 @@
 {-# LANGUAGE TypeOperators #-}
 module Unit.Algebra
 (  -- * Algebra
-  Group(..)
+  Mul(..)
+, Div(..)
   -- * Combinators
 , (:/:)(..)
 , (:*:)(..)
@@ -26,12 +27,16 @@ import Unit
 
 -- * Algebra
 
-class Group u v w | u v -> w, u w -> v, v w -> u where
+class Mul u v w | u v -> w, u w -> v, v w -> u where
   (.*.) :: Fractional a => u a -> v a -> w a
+
+class Div u v w | u v -> w, u w -> v, v w -> u where
   (./.) :: Fractional a => u a -> v a -> w a
 
-instance Group Identity Identity Identity where
+instance Mul Identity Identity Identity where
   (.*.) = (*)
+
+instance Div Identity Identity Identity where
   (./.) = (/)
 
 
