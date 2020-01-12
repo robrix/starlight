@@ -77,6 +77,10 @@ type family Step u v where
   Step (_ :*: _)     _       = 'Walk
   Step _             _       = 'Prepend
 
+type family InvOf u where
+  InvOf (Inv u) = u
+  InvOf u       = Inv u
+
 
 -- * Combinators
 
