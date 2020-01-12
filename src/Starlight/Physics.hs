@@ -73,7 +73,7 @@ hit i c = do
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
   go (Seconds dt) char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
-    , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (cartesian2 (pure <$> theta) 1)
+    , intersects (c^._xy) (char^.actor_.magnitude_ * 0.5) (o^._xy) (cartesian2 (pure <$> theta) 1)
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
     | otherwise
     = char

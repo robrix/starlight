@@ -80,7 +80,7 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
   C i -> Right <$> s^?characters_.ix i
 
 
-neighbourhoodOf :: (HasActor a, HasMagnitude a) => Character -> System a -> System a
+neighbourhoodOf :: HasActor a => Character -> System a -> System a
 neighbourhoodOf c sys@System{ bodies, characters } = sys
   { bodies     = Map.filterWithKey (visible . B) bodies
   , characters = Map.filterWithKey (visible . C) characters
@@ -98,11 +98,11 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     _          -> received > threshold
     where
     r = qd (a^.actor_.position_) (c^.actor_.position_)
-    received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * prj (a^.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 2)))
+    received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * prj (a^.actor_.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 2)))
   patternPropagationFactor = 1
   gain = 1000000
   aperture = 1000000
   threshold = Watts (1.0e-12) -- 1 picowatt
 
-neighbourhoodOfPlayer :: (HasActor a, HasMagnitude a) => System a -> System a
+neighbourhoodOfPlayer :: HasActor a => System a -> System a
 neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys
