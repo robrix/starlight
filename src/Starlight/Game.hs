@@ -17,13 +17,15 @@ import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
+import           Control.Concurrent.STM.TChan
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
-import           Control.Monad ((>=>))
+import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
+import           Control.Monad.STM
 import           Data.Coerce
 import           Data.Function (fix)
 import           Data.Functor.Identity
@@ -163,6 +165,10 @@ game = Sol.system >>= \ system -> runGame system $ do
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
 
+  hasQuit <- sendM . atomically $ do
+    hasQuit <- newTChan
+    hasQuit <$ writeTChan hasQuit False
+
   fork $ runReader (Seconds @Float (1/60)) . fix $ \ loop -> do
     runSystem $ do
       measure "controls" $ player_ @Body .actions_ <~ controls
@@ -179,7 +185,8 @@ game = Sol.system >>= \ system -> runGame system $ do
             >=> measure "runActions" . runActions i
             >=> measure "inertia" . (actor_ <-> inertia)))
     yield
-    loop
+    hasQuit <- sendM (atomically (readTChan hasQuit))
+    unless hasQuit loop
 
   enabled_ Blend            .= True
   enabled_ DepthClamp       .= True
@@ -191,6 +198,7 @@ game = Sol.system >>= \ system -> runGame system $ do
     measure "frame" frame
     measure "swap" Window.swap
     loop
+  sendM (atomically (writeTChan hasQuit True))
 
 frame
   :: ( Has Check sig m
