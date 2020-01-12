@@ -57,11 +57,7 @@ instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Prepend u v (u :*: v) w
   u `mul` v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Cancel (u :*: v) (Inv v) u where
-  u `mul` v = pure (prj u * prj v)
-
--- | Elimination of reciprocals.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Cancel (u :*: Inv v) v u where
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit v', v' ~ InvOf v) => MulBy 'Cancel (u :*: v) v' u where
   u `mul` v = pure (prj u * prj v)
 
 -- | Walk the chain.
@@ -72,10 +68,10 @@ instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => MulBy 'Walk (u :*: u') v (
 data Act = Prepend | Cancel | Walk
 
 type family Step u v where
-  Step (_ :*: v)     (Inv v) = 'Cancel
-  Step (_ :*: Inv v) v       = 'Cancel
-  Step (_ :*: _)     _       = 'Walk
-  Step _             _       = 'Prepend
+  Step (_     :*: v)     (Inv v) = 'Cancel
+  Step (_     :*: Inv v) v       = 'Cancel
+  Step (_     :*: _)     _       = 'Walk
+  Step _                 _       = 'Prepend
 
 type family InvOf u where
   InvOf (Inv u) = u
