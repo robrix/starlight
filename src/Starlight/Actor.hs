@@ -39,8 +39,8 @@ data Actor = Actor
 position_ :: HasCallStack => Lens' Actor (V3 (Kilo Metres Float))
 position_ = field @"position".asserting (none isNaN)
 
-velocity_ :: Lens' Actor (V3 ((Kilo Metres :/: Seconds) Float))
-velocity_ = field @"velocity"
+velocity_ :: HasCallStack => Lens' Actor (V3 ((Kilo Metres :/: Seconds) Float))
+velocity_ = field @"velocity".asserting (none isNaN)
 
 rotation_ :: Lens' Actor (Quaternion Float)
 rotation_ = field @"rotation"
