@@ -123,11 +123,13 @@ runActions i c = do
     Jump -> case target of
       Just target -> do
         let targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
-        c' <- foldM (go dt system) c (concat
-          [ [ Face Target ] -- FIXME: face *near* the target
-          , [ Thrust | isFacing pi rotation targetAngle ]
-          ])
-        pure c'
+        if isFacing (pi/128) rotation targetAngle then
+          pure c
+        else
+          foldM (go dt system) c (concat
+            [ [ Face Target ] -- FIXME: face *near* the target
+            , [ Thrust | isFacing pi rotation targetAngle ]
+            ])
       _ -> pure c
     where
     thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
