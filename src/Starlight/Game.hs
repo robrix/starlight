@@ -185,7 +185,7 @@ game = Sol.system >>= \ system -> runGame system $ do
             >=> measure "runActions" . runActions i
             >=> measure "inertia" . (actor_ <-> inertia)))
     yield
-    hasQuit <- sendM (atomically (readTVar hasQuit))
+    hasQuit <- sendM (readTVarIO hasQuit)
     unless hasQuit loop
 
   enabled_ Blend            .= True
