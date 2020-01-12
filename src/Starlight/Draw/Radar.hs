@@ -95,6 +95,7 @@ verticesForBodies vs =
   | B.StateVectors{ body = B.Body{ radius = r, colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
+-- FIXME: take ship profile into account
 verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
 verticesForShips scale cs =
   [ V{ there = Identity (prj <$> there^._xy), r = Identity (r / scale), colour = Identity colour }
