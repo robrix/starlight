@@ -98,7 +98,6 @@ runActions i c = do
 
     Face dir -> do
       let actor = c^.actor_
-          target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
       case direction actor target of
         Just t  -> pure $! c & actor_.rotation_ %~ face angular (prj <$> angleOf (t^._xy))
         Nothing -> pure c
@@ -132,3 +131,4 @@ runActions i c = do
     thrust  = 1000 * 20 * 60
     angular = getSeconds dt *^ Radians 5
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
+    target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
