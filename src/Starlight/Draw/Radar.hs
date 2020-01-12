@@ -123,7 +123,7 @@ shader = program $ \ u
       (radius .= step * float gl_InstanceID)
       (pure ())
     minSweep <- let' "minSweep" (minBlipSize / (2 * pi * get radius))
-    sweep .= (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
+    sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf edge - angle)))
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* get radius)
     gl_PointSize .= 3
     colour2 .= colour
