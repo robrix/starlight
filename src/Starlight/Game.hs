@@ -181,10 +181,10 @@ game = Sol.system >>= \ system -> runGame system $ do
       characters_ @Body <~> itraverse
         (\ i
         -> local . neighbourhoodOf @StateVectors
-        <*> (   measure "gravity" . (actor_ @Character <-> gravity)
-            >=> measure "hit" . hit i
-            >=> measure "runActions" . runActions i
-            >=> measure "inertia" . (actor_ <-> inertia)))))
+        <*> ( measure "gravity" . (actor_ @Character <-> gravity)
+          >=> measure "hit" . hit i
+          >=> measure "runActions" . runActions i
+          >=> measure "inertia" . (actor_ <-> inertia)))))
     yield
     hasQuit <- sendM (readTVarIO hasQuit)
     unless hasQuit loop
