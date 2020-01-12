@@ -25,7 +25,6 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
-import Control.Applicative (liftA2)
 import Data.Functor.Interval
 import Linear.Epsilon
 import Linear.Matrix hiding (Trace(..))
