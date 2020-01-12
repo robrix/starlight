@@ -92,9 +92,7 @@ runActions i c = do
   system <- ask @(System StateVectors)
   foldM (go dt system) c (actions c) where
   go dt system c = \case
-    Thrust -> do
-      let rotation = c^.actor_.rotation_
-      pure $ c & actor_ %~ applyForce ((thrust ^*) <$> rotate rotation (unit _x)) dt
+    Thrust -> pure $ c & actor_ %~ applyForce ((thrust ^*) <$> rotate rotation (unit _x)) dt
 
     Face dir -> do
       let actor = c^.actor_
@@ -113,7 +111,6 @@ runActions i c = do
 
     Fire Main -> do
       let position = c^.actor_.position_
-          rotation = c^.actor_.rotation_
       beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position, firedBy = i }:)
       pure c
 
@@ -127,8 +124,7 @@ runActions i c = do
 
     Jump -> case target of
       Just target -> do
-        let rotation = c^.actor_.rotation_
-            targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
+        let targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
         c' <- foldM (go dt system) c (concat
           [ [ Face Target ] -- FIXME: face *near* the target
           , [ Thrust | isFacing pi rotation targetAngle ]
@@ -140,4 +136,5 @@ runActions i c = do
     thrust  = 1000 * 20 * 60
     angular = getSeconds dt *^ Radians 5
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
+    rotation = c^.actor_.rotation_
     target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
