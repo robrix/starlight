@@ -1,3 +1,5 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -7,6 +9,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Unit.Algebra
@@ -32,7 +35,7 @@ import Unit
 
 -- * Algebra
 
-class (Unit u, Unit v, Unit w) => Mul u v w where
+class (Unit u, Unit v, Unit w) => Mul u v w | u v -> w where
   (.*.) :: Fractional a => u a -> v a -> w a
 
 infixl 7 .*.
@@ -42,21 +45,37 @@ u ./. v = u .*. Inv @v (negate (prj v))
 
 infixl 7 ./.
 
+instance (MulBy step u v w, Step u v ~ step, Unit u, Unit v, Unit w) => Mul u v w where
+  (.*.) = mul @step
+
+
+class (Unit u, Unit v, Unit w) => MulBy (step :: Act) u v w | step u v -> w where
+  mul :: Fractional a => u a -> v a -> w a
+
 -- | Append at the head of the chain.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul u v (u :*: v) where
-  u .*. v = Prd (prj u * prj v)
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Prepend u v (u :*: v) where
+  u `mul` v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul (u :*: v) (Inv v) u where
-  u .*. v = pure (prj u * prj v)
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Cancel (u :*: v) (Inv v) u where
+  u `mul` v = pure (prj u * prj v)
 
 -- | Elimination of reciprocals.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul (u :*: Inv v) v u where
-  u .*. v = pure (prj u * prj v)
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Cancel (u :*: Inv v) v u where
+  u `mul` v = pure (prj u * prj v)
 
 -- | Walk the chain.
-instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => Mul (u :*: u') v (w :*: u') where
-  Prd u .*. v = Prd (u * prj v)
+instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => MulBy 'Walk (u :*: u') v (w :*: u') where
+  Prd u `mul` v = Prd (u * prj v)
+
+
+data Act = Prepend | Cancel | Walk
+
+type family Step u v where
+  Step (_ :*: v)     (Inv v) = 'Cancel
+  Step (_ :*: Inv v) v       = 'Cancel
+  Step (_ :*: _)     _       = 'Walk
+  Step _             _       = 'Prepend
 
 
 -- * Combinators
