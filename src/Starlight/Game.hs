@@ -65,12 +65,11 @@ import qualified UI.Window as Window
 import           Unit.Time
 
 runGame
-  :: ( Effect sig
-     , Has (Lift IO) sig m
+  :: ( Has (Lift IO) sig m
      , MonadFail m
      )
   => System Body
-  -> ReaderC Epoch (TVar.StateC (System Body) (StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))) a
+  -> ReaderC Epoch (TVar.StateC (System Body) (TVar.StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))) a
   -> m a
 runGame system
   = Window.runSDL
@@ -78,7 +77,7 @@ runGame system
   . runContext
   . runGLC
   . runFinally
-  . evalState @Input mempty
+  . TVar.evalState @Input mempty
   . TVar.evalState system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
