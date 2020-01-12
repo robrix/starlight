@@ -18,6 +18,7 @@ module Starlight.System
 , neighbourhoodOfPlayer
 ) where
 
+import           Control.Exception
 import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
@@ -53,8 +54,8 @@ player_ = characters_.at Player .iso (fromMaybe (error "player missing")) Just
 npcs_ :: Lens' (System a) [Character]
 npcs_ = characters_.lens (Map.elems . Map.delete Player) (\ m cs -> Map.fromList ((Player, m Map.! Player) : zipWith ((,) . NPC) [0..] cs))
 
-characters_ :: Lens' (System a) (Map.Map CharacterIdentifier Character)
-characters_ = field @"characters"
+characters_ :: HasCallStack => Lens' (System a) (Map.Map CharacterIdentifier Character)
+characters_ = field @"characters".iso id (assert . Map.member Player <*> id)
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
