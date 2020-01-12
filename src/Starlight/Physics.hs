@@ -128,7 +128,9 @@ runActions i c = do
     Jump -> case target of
       Just target -> do
         let rotation = c^.actor_.rotation_
-        c' <- foldM (go dt system) c (Face Target : [ Thrust | isFacing pi rotation (prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)) ])
+        c' <- foldM (go dt system) c
+          ( Face Target
+          : [ Thrust | isFacing pi rotation (prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)) ])
         pure c'
       _ -> pure c
     where
