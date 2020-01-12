@@ -71,7 +71,7 @@ data Body = Body
   deriving (Generic, Show)
 
 instance HasMagnitude Body where
-  magnitude_ = field @"radius".unitary.iso (*2) (/2)
+  magnitude_ = field @"radius".iso (*2) (/2)
 
 data Orbit = Orbit
   { eccentricity    :: !Float
