@@ -61,7 +61,7 @@ actors_ :: HasActor a => Lens' (System a) (Map.Map Identifier Actor)
 actors_ = lens get set where
   get System{ bodies, characters } = (view actor_ <$> Map.mapKeys B bodies) <> (view actor_ <$> Map.mapKeys C characters)
   set system map = Map.foldlWithKey' (\ s k v -> s & case k of
-    B b -> bodies_.ix b.actor_ .~ v
+    B b -> bodies_    .ix b.actor_ .~ v
     C c -> characters_.ix c.actor_ .~ v) system map
 
 beams_ :: Lens' (System a) [Beam]
