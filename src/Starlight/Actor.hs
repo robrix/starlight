@@ -10,6 +10,7 @@ module Starlight.Actor
 , velocity_
 , rotation_
 , mass_
+, magnitude_
 , applyForce
 , HasActor(..)
 ) where
@@ -19,7 +20,6 @@ import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
 import Linear.Quaternion
 import Linear.V3
-import Starlight.Radar
 import Unit.Algebra
 import Unit.Length
 import Unit.Mass
@@ -46,6 +46,9 @@ rotation_ = field @"rotation"
 mass_ :: Lens' Actor (Kilo Grams Float)
 mass_ = field @"mass"
 
+magnitude_ :: Lens' Actor (Kilo Metres Float)
+magnitude_ = field @"magnitude"
+
 
 applyForce :: V3 ((Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float) -> Seconds Float -> Actor -> Actor
 applyForce force dt a = a & velocity_ +~ ((.*. dt) . (./. a^.mass_) <$> force)
@@ -56,6 +59,3 @@ class HasActor t where
 
 instance HasActor Actor where
   actor_ = id
-
-instance HasMagnitude Actor where
-  magnitude_ = field @"magnitude"

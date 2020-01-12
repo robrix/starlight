@@ -29,7 +29,6 @@ import Starlight.Actor as Actor
 import Starlight.Body
 import Starlight.Character
 import Starlight.Identifier
-import Starlight.Radar
 import Starlight.Ship
 import Starlight.System as System
 import Starlight.Weapon.Laser as Laser

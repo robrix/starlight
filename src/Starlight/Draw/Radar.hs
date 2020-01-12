@@ -41,7 +41,6 @@ import           Linear.Exts as Linear hiding (angle, (!*))
 import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
-import           Starlight.Radar
 import qualified Starlight.Ship as S
 import           Starlight.System
 import           Starlight.View
@@ -92,14 +91,14 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
 verticesForBodies vs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (b^.magnitude_)), colour = Identity colour }
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (b^.actor_.magnitude_)), colour = Identity colour }
   | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
 verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
 verticesForShips scale cs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (c^.magnitude_) / scale), colour = Identity colour }
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (c^.actor_.magnitude_) / scale), colour = Identity colour }
   | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 

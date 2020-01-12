@@ -4,13 +4,11 @@
 module Starlight.Radar
 ( Radar(..)
 , power_
-, HasMagnitude(..)
 ) where
 
 import Control.Lens
 import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
-import Unit.Length
 import Unit.Power
 
 -- FIXME: transmitter gain
@@ -22,8 +20,3 @@ data Radar = Radar
 
 power_ :: Lens' Radar (Mega Watts Float)
 power_ = field @"power"
-
-
--- FIXME: this should live somewhere else
-class HasMagnitude t where
-  magnitude_ :: Lens' t (Kilo Metres Float)

@@ -37,7 +37,6 @@ import           GHC.Generics
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
-import           Starlight.Radar
 import           Starlight.System
 import           Starlight.Time
 import           UI.Colour
@@ -57,9 +56,6 @@ data StateVectors = StateVectors
 instance HasActor StateVectors where
   actor_ = field @"actor"
 
-instance HasMagnitude StateVectors where
-  magnitude_ = field @"body".magnitude_
-
 data Body = Body
   { radius      :: !(Kilo Metres Float)
   , mass        :: !(Kilo Grams Float)
@@ -69,9 +65,6 @@ data Body = Body
   , orbit       :: !Orbit
   }
   deriving (Generic, Show)
-
-instance HasMagnitude Body where
-  magnitude_ = field @"radius".iso (*2) (/2)
 
 data Orbit = Orbit
   { eccentricity    :: !Float
