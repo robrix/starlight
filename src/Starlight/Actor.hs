@@ -10,10 +10,11 @@ module Starlight.Actor
 , velocity_
 , rotation_
 , mass_
+, applyForce
 , HasActor(..)
 ) where
 
-import Control.Lens (Lens')
+import Control.Lens (Lens', (&), (+~), (^.))
 import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
 import Linear.Quaternion
@@ -42,6 +43,10 @@ rotation_ = field @"rotation"
 
 mass_ :: Lens' Actor (Kilo Grams Float)
 mass_ = field @"mass"
+
+
+applyForce :: V3 ((Kilo Grams :*: Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float) -> Seconds Float -> Actor -> Actor
+applyForce force dt a = a & velocity_ +~ ((.*. dt) . (./. a^.mass_) <$> force)
 
 
 class HasActor t where
