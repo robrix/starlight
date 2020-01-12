@@ -52,14 +52,14 @@ gravity a = do
   go dt a StateVectors{ actor = b, body = Body{ mass } }
     = a & velocity_ +~ (force .*. dt *^ coerce ((b^.position_) `direction` (a^.position_))) where
     -- FIXME: units should be N (i.e. kg·m/s/s)
-    force :: (Kilo Metres :/: Seconds :/: Seconds) Float
+    force :: (Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float
     force = pure (prj gravC * prj mass / r)
     -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
     r = fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   -- gravitational constant : m³/kg/s²
-  gravC = 6.67430e-11 :: ((Kilo Metres :*: Kilo Metres :*: Kilo Metres) :/: Kilo Grams :/: Seconds :/: Seconds) Float
+  gravC = 6.67430e-11 :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :*: Inv (Kilo Grams) :*: Inv Seconds :*: Inv Seconds) Float
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
