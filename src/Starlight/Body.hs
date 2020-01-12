@@ -28,7 +28,7 @@ module Starlight.Body
 import           Control.Carrier.Reader
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Control.Lens (Iso, coerced, iso, lens, (%~), (&), (^.))
+import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
 import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
@@ -41,6 +41,7 @@ import           Starlight.Radar
 import           Starlight.System
 import           Starlight.Time
 import           UI.Colour
+import           Unit.Algebra
 import           Unit.Angle
 import           Unit.Length
 import           Unit.Mass
@@ -67,12 +68,10 @@ data Body = Body
   , colour      :: !(Colour Float)
   , orbit       :: !Orbit
   }
-  deriving (Read, Show)
+  deriving (Generic, Show)
 
 instance HasMagnitude Body where
-  magnitude_ = lens get set where
-    get = getMetres . unKilo . radius
-    set b r = b{ radius = kilo (Metres r) }
+  magnitude_ = field @"radius".unitary.iso (*2) (/2)
 
 data Orbit = Orbit
   { eccentricity    :: !Float
@@ -81,7 +80,7 @@ data Orbit = Orbit
   , period          :: !(Seconds Float)
   , timeOfPeriapsis :: !(Seconds Float)    -- relative to epoch
   }
-  deriving (Read, Show)
+  deriving (Show)
 
 
 rotationTimeScale :: Num a => Seconds a
@@ -92,13 +91,14 @@ orbitTimeScale = 1
 
 
 actorAt :: Body -> Seconds Float -> Actor
-actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
-  { position = P position
-  , velocity = if r * p == 0 then 0 else position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly
+actorAt Body{ orientation = axis, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
+  { position = pure <$> position
+  , velocity = if r == 0 || p == 0 then 0 else pure <$> (position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly)
   , rotation
     = orientation
     * axis
     * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
+  , mass
   } where
   position = ext (cartesian2 (Radians trueAnomaly) r) 0
   t' = timeOfPeriapsis + t * orbitTimeScale
@@ -110,11 +110,11 @@ actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, sem
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = getMetres (unKilo semimajor) * (1 - eccentricity * cos eccentricAnomaly)
+  r = prj semimajor * (1 - eccentricity * cos eccentricAnomaly)
   -- extremely dubious
   mu = 398600.5
-  p = getMetres (unKilo semimajor) * (1 - eccentricity ** 2)
-  h = ((1 - (eccentricity ** 2)) * getMetres (unKilo semimajor) * mu) ** 0.5
+  p = prj semimajor * (1 - eccentricity ** 2)
+  h = ((1 - (eccentricity ** 2)) * prj semimajor * mu) ** 0.5
   -- hr = h/r
 
 
@@ -123,13 +123,13 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
   go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
     { body
-    , transform = rel !*! translated3 (unP (position actor))
+    , transform = rel !*! translated3 (prj <$> position actor)
     , actor = actor
       & position_.coerced.extended 1 %~ (rel !*)
-      & velocity_.extended 0 %~ (rel !*)
+      & velocity_.coerced.extended 0 %~ (rel !*)
     } where
     actor = actorAt body t
-    rel = maybe (systemTrans sys) transform (parent identifier >>= (bodies' Map.!?))
+    rel = maybe identity transform (parent identifier >>= (bodies' Map.!?))
       !*! mkTransformation orientation 0
 
 -- | Subject to the invariant that w=1.
@@ -157,4 +157,4 @@ runSystem
 runSystem m = do
   t <- realToFrac <$> (since =<< asks getEpoch)
   system <- get
-  runReader (systemAt system (getDelta t)) m
+  runReader (systemAt system t) m

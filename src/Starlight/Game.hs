@@ -20,7 +20,8 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (itraverse, to, (%~), (&), (^.))
+import           Control.Lens (itraverse, (^.))
+import           Control.Monad ((>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
@@ -58,6 +59,7 @@ import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
+import           Unit
 
 runGame
   :: Has (Lift IO) sig m
@@ -75,9 +77,10 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position = P (V3 2_500_000 0 0)
+            { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
+            , mass     = 1000
             }
           , target  = Nothing
           , actions = mempty
@@ -85,19 +88,21 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2_500_000 0 0)
+            { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
+            , mass     = 1000
             }
-          , target  = Just (C Player)
+          , target  = Nothing -- Just (C Player)
           , actions = mempty
           , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30, radar }
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2_500_000 0 0)
+            { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
+            , mass     = 1000
             }
           , target  = Just $ B (Star (10, "Sol"))
           , actions = mempty
@@ -105,9 +110,10 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = P (V3 2_500_000 0 0)
+            { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
+            , mass     = 1000
             }
           , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
           , actions = mempty
@@ -115,7 +121,7 @@ runGame system
           }
         ]
       } where
-  radar = Radar 1_000_000 -- MW radar
+  radar = Radar 1000 -- GW radar
 
 runFrame
   :: ( Effect sig
@@ -143,7 +149,7 @@ game
 game = Sol.system >>= \ system -> runGame system $ do
   trace "loading typeface"
   face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
-  measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
+  measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-⁻¹·" -- characters to preload
 
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
@@ -179,7 +185,7 @@ frame
   => m ()
 frame = runSystem . timed $ do
   withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
-  measure "inertia" $ characters_ @Body %= fmap (actor_%~inertia) -- update positions
+  measure "inertia" $ characters_ @Body <~> traverse (actor_ <-> inertia) -- update positions
 
   measure "input" input
   measure "controls" $ player_ @Body .actions_ <~ controls
@@ -189,11 +195,11 @@ frame = runSystem . timed $ do
   beams_ @Body .= []
   npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
   characters_ @Body <~> itraverse
-    (\ i c
-    -> local (neighbourhoodOf @StateVectors c)
-    (   measure "gravity" (c & (actor_ @Character <-> gravity))
-    >>= measure "hit" . hit i
-    >>= measure "runActions" . runActions i))
+    (\ i
+    -> local . neighbourhoodOf @StateVectors
+    <*> (   measure "gravity" . (actor_ @Character <-> gravity)
+        >=> measure "hit" . hit i
+        >=> measure "runActions" . runActions i))
 
 -- | Compute the zoom factor for the given velocity.
 --
@@ -206,7 +212,7 @@ zoomForSpeed size x = go where
     | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
   zoom = Interval 1 5
   speed = speedAt <$> zoom
-  speedAt x = x / 25 * fromIntegral (maximum size)
+  speedAt x = x * fromIntegral (maximum size)
 
 withView
   :: ( Has (Lift IO) sig m
@@ -220,7 +226,7 @@ withView m = do
   size  <- Window.size
 
   velocity <- view (player_ @StateVectors .actor_.velocity_)
-  focus    <- view (player_ @StateVectors .actor_.position_._xy.to P)
+  focus    <- view (player_ @StateVectors .actor_.position_._xy)
 
-  let zoom = zoomForSpeed size (norm velocity)
+  let zoom = zoomForSpeed size (prj (norm velocity))
   runReader View{ scale, size, zoom, focus } m

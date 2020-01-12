@@ -3,6 +3,8 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.Physics
 ( inertia
 , gravity
@@ -15,8 +17,9 @@ import Control.Applicative ((<|>))
 import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Effect.Reader
-import Control.Lens hiding (modifying, use, view, views, (%=), (*=), (+=), (.=))
+import Control.Lens hiding (modifying, un, use, view, views, (%=), (*=), (+=), (.=))
 import Control.Monad (guard)
+import Data.Coerce
 import Data.Foldable (foldl', for_, traverse_)
 import Data.Functor.Interval
 import Data.Ix (inRange)
@@ -31,33 +34,46 @@ import Starlight.Ship
 import Starlight.System as System
 import Starlight.Weapon.Laser as Laser
 import UI.Colour
+import Unit.Algebra
 import Unit.Angle
+import Unit.Length
 import Unit.Mass
 import Unit.Time
 
-inertia :: Actor -> Actor
-inertia a@Actor{ position, velocity } = a { Actor.position = position .+^ velocity }
+inertia :: Has (Reader (Seconds Float)) sig m => Actor -> m Actor
+inertia a@Actor{ position, velocity } = do
+  dt <- ask @(Seconds _)
+  pure a { Actor.position = position + ((.*. dt) <$> velocity) }
 
-gravity :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
+gravity :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
 gravity a = do
-  dt <- ask
-  System{ scale, bodies } <- ask
-  pure $! foldl' (go dt (1/scale)) a bodies where
-  go (Delta (Seconds dt)) scale a StateVectors{ actor = b, body = Body{ mass } }
-    = a & velocity_ +~ dt * force *^ unP ((b^.position_) `direction` (a^.position_)) where
-    force = bigG * getKilograms mass / r -- assume actors’ mass is negligible
-    r = (b^.position_ ^* scale) `qd` (a^.position_ ^* scale) -- “quadrance” (square of distance between actor & body)
-  bigG = 6.67430e-11 -- gravitational constant
+  dt <- ask @(Seconds Float)
+  System{ bodies } <- ask
+  pure $! foldl' (go dt) a bodies where
+  go dt a StateVectors{ actor = b } = applyForce (force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
+    -- FIXME: units should be N (i.e. kg·m/s/s)
+    force :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
+    force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
+    -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
+    -- FIXME: figure out a better way of applying the units
+    -- NB: scaling to get distances in m
+    -- FIXME: this is converting km to m but then treating it as km, so this whole thing is off by a huge factor
+    -- FIXME: but if not for the above the sun just sucks you in to your death immediately
+    r :: (Kilo Metres :*: Kilo Metres) Float
+    r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
+  -- gravitational constant : m³/kg/s²
+  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :/: (Kilo Grams) :/: Seconds :/: Seconds) Float
+  gravC = 6.67430e-11
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
-hit :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => CharacterIdentifier -> Character -> m Character
+hit :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => CharacterIdentifier -> Character -> m Character
 hit i c = do
   dt <- ask
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
-  go (Delta (Seconds dt)) char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o, firedBy = i' }
+  go (Seconds dt) char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
-    , intersects (P (c^._xy)) r (P (o^._xy)) (cartesian2 theta 1)
+    , intersects (c^._xy) (pure r) (o^._xy) (cartesian2 (pure <$> theta) 1)
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
     | otherwise
     = char
@@ -66,7 +82,7 @@ hit i c = do
 
 runActions
   :: ( Effect sig
-     , Has (Reader (Delta Seconds Float)) sig m
+     , Has (Reader (Seconds Float)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (State (System Body)) sig m
      )
@@ -74,23 +90,23 @@ runActions
   -> Character
   -> m Character
 runActions i c = do
-  dt <- ask
+  dt <- ask @(Seconds Float)
   system <- ask @(System StateVectors)
   execState c (traverse_ (go dt system) (actions c)) where
-  go (Delta (Seconds dt)) system = \case
+  go dt system = \case
     Thrust -> do
       rotation <- use (actor_.rotation_)
-      actor_.velocity_ += rotate rotation (unit _x ^* thrust)
+      actor_ %= applyForce ((thrust ^*) <$> rotate rotation (unit _x)) dt
 
     Face dir -> do
       actor <- use actor_
       target <- fmap (either Body.actor Character.actor) <$> use (target_._Just.to (system !?))
       for_ (direction actor target) $
-        modifying (actor_.rotation_) . face angular . angleOf . (^._xy) where
+        modifying (actor_.rotation_) . face angular . fmap prj . angleOf . (^._xy) where
       direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
-        Target    -> t^?_Just.to projected.to (unP . (`L.direction` position))
+        Target    -> t^?_Just.to projected.to (`L.direction` position).coerced
 
     Turn t -> actor_.rotation_ *= axisAngle (unit _z) (getRadians (case t of
       L -> angular
@@ -109,10 +125,10 @@ runActions i c = do
         Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
       identifiers = System.identifiers system
     where
-    thrust  = dt * 20
-    angular = dt *^ Radians 5
+    thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
+    thrust  = 1000 * 20 * 60
+    angular = getSeconds dt *^ Radians 5
+    projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
 
   actor_ :: Lens' Character Actor
   actor_ = Actor.actor_
-
-  projected a = a^.position_ .+^ a^.velocity_

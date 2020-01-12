@@ -15,7 +15,7 @@ newtype TextureUnit = TextureUnit { unTextureUnit :: GLint }
   deriving (Storable)
 
 instance GL.Type TextureUnit where
-  glType _ = GL_INT
+  glType = GL_INT
 
 instance Uniform TextureUnit where
   glslType = "sampler2D"

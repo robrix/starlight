@@ -1,30 +1,26 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 module Unit.Mass
 ( Grams(..)
-, getGrams
-, getKilograms
 , module Unit
+, module Unit.Multiple
 ) where
 
-import Data.Proxy
+import Data.Functor.Const
+import Data.Functor.Identity
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
+import Linear.Conjugate
+import Linear.Epsilon
+import Linear.Metric
+import Linear.Vector
 import Unit
+import Unit.Multiple
 
-newtype Grams a = Grams a
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
+newtype Grams a = Grams { getGrams :: a }
+  deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
-instance GL.Type a => GL.Type (Grams a) where
-  glType _ = glType (Proxy @a)
-
-  glDims _ = glDims (Proxy @a)
-
-getGrams :: Grams a -> a
-getGrams (Grams a) = a
-
-getKilograms :: Kilo Grams a -> a
-getKilograms = getGrams . getKilo
+instance Unit Grams where suffix = Const ('g':)

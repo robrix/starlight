@@ -36,6 +36,7 @@ import           Linear.V2 hiding (R1(..), R2(..))
 import           Linear.Vector hiding (lerp)
 import           Starlight.View
 import qualified UI.Drawable as UI
+import           Unit.Length
 
 drawStarfield
   :: ( Has Check sig m
@@ -49,7 +50,7 @@ drawStarfield = measure "starfield" . UI.using getDrawable $ do
   View{ scale, size, zoom, focus } <- ask
 
   resolution_ ?= (fromIntegral <$> size ^* scale)
-  origin_     ?= focus / P (fromIntegral <$> size)
+  origin_     ?= (prj <$> (focus / (fromIntegral <$> size)))
   zoom_       ?= zoom
 
   drawArrays TriangleStrip range
@@ -142,8 +143,8 @@ shader = program $ \ U{ resolution, origin, zoom }
 
 
 data U v = U
-  { resolution :: v (V2 Float)
-  , origin     :: v (Point V2 Float)
+  { resolution :: v (V2 Float) -- FIXME: express in pixel units
+  , origin     :: v (V2 Float) -- FIXME: express in Kilo Metres
   , zoom       :: v Float
   }
   deriving (Generic)
@@ -153,7 +154,7 @@ instance Vars U
 resolution_ :: Lens' (U v) (v (V2 Float))
 resolution_ = field @"resolution"
 
-origin_ :: Lens' (U v) (v (Point V2 Float))
+origin_ :: Lens' (U v) (v (V2 Float))
 origin_ = field @"origin"
 
 zoom_ :: Lens' (U v) (v Float)

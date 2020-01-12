@@ -1,66 +1,63 @@
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Unit
-( Milli(..)
-, getMilli
-, milli
-, unMilli
-, Kilo(..)
-, getKilo
-, kilo
-, unKilo
-, Delta(..)
+( -- * Units
+  Unit(..)
+, unitary
+, un
+, nu
+  -- ** Formatting
+, formatWith
+, format
+, formatDec
+, formatExp
 ) where
 
-import Data.Proxy
-import Foreign.Storable
-import GL.Type as GL
-import GL.Uniform
-import Linear.Metric
-import Linear.Vector
+import Control.Lens ((^.))
+import Control.Lens.Iso
+import Data.Coerce
+import Data.Functor.Const
+import Numeric
 
-newtype Milli f a = Milli (f a)
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
+-- * Units
 
-instance GL.Type (f a) => GL.Type (Milli f a) where
-  glType _ = glType (Proxy @(f a))
+class Applicative u => Unit u where
+  prj :: u a -> a
+  default prj :: Coercible (u a) a => u a -> a
+  prj = coerce
 
-  glDims _ = glDims (Proxy @(f a))
+  factor :: Fractional a => Const a (u a)
+  factor = 1
 
-getMilli :: Milli f a -> f a
-getMilli (Milli fa) = fa
+  suffix :: Const ShowS (u a)
 
-milli :: Num (f a) => f a -> Milli f a
-milli fa = Milli (fa * 1000)
+unitary :: forall u a b . (Unit u, Fractional a, Fractional b) => Iso (u a) (u b) a b
+unitary = iso ((* getConst (factor @u)) . prj) (pure . (/ getConst (factor @u)))
 
-unMilli :: Fractional (f a) => Milli f a -> f a
-unMilli (Milli fa) = fa / 1000
+un :: (Unit u, Fractional a) => u a -> a
+un = (^.unitary)
 
-
-newtype Kilo f a = Kilo (f a)
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Read, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
-
-instance GL.Type (f a) => GL.Type (Kilo f a) where
-  glType _ = glType (Proxy @(f a))
-
-  glDims _ = glDims (Proxy @(f a))
-
-getKilo :: Kilo f a -> f a
-getKilo (Kilo fa) = fa
-
-kilo :: Fractional (f a) => f a -> Kilo f a
-kilo fa = Kilo (fa / 1000)
-
-unKilo :: Num (f a) => Kilo f a -> f a
-unKilo (Kilo fa) = fa * 1000
+nu :: (Unit u, Fractional a) => a -> u a
+nu = (^.from unitary)
 
 
-newtype Delta f a = Delta { getDelta :: f a }
-  deriving (Additive, Eq, Foldable, Floating, Fractional, Functor, Metric, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, Uniform)
+-- ** Formatting
 
-instance GL.Type (f a) => GL.Type (Delta f a) where
-  glType _ = glType (Proxy @(f a))
+formatWith :: Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
+formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const ('x':))) "")
 
-  glDims _ = glDims (Proxy @(f a))
+format :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+format = formatWith showGFloat
+
+formatDec :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatDec = formatWith showFFloat
+
+formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExp = formatWith showEFloat

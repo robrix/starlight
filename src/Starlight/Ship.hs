@@ -9,7 +9,7 @@ module Starlight.Ship
 , radar_
 ) where
 
-import Control.Lens (Lens')
+import Control.Lens (Lens', iso)
 import Data.Functor.Identity
 import Data.Functor.Interval
 import Data.Generics.Product.Fields
@@ -38,4 +38,4 @@ radar_ :: Lens' Ship Radar
 radar_ = field @"radar"
 
 instance HasMagnitude Ship where
-  magnitude_ = scale_
+  magnitude_ = scale_.iso (*2) (/2)

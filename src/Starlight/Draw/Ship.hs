@@ -35,29 +35,34 @@ import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
+import           Starlight.Body (StateVectors)
 import           Starlight.Character
 import qualified Starlight.Ship as S
+import           Starlight.System
 import           Starlight.View
 import           UI.Colour
 import qualified UI.Drawable as UI
+import           Unit
 
 drawShip
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Drawable) sig m
+     , Has (Reader (System StateVectors)) sig m
      , Has (Reader View) sig m
      )
   => Character
   -> m ()
-drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, armour, scale }, actions } = measure "ship" . UI.using getDrawable $ do
+drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, armour, scale = r }, actions } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
-  let matrix = scaleToViewZoomed vs
+  sys@System{ scale } <- ask @(System StateVectors)
   matrix_
-    ?=  matrix
-    !*! translated3 (ext (negated (unP focus)) 0)
-    !*! translated3 (unP position)
-    !*! scaled (V4 scale scale scale 1)
+    ?=  scaleToViewZoomed vs
+    !*! systemTrans sys
+    !*! translated3 (ext (negated (prj <$> focus)) 0)
+    !*! translated3 (prj <$> position)
+    !*! scaled (ext (pure @V3 (r / scale)) 1)
     !*! mkTransformation rotation 0
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v ^. _r) . (_r +~ 0.5) . (_b -~ 0.25) else id)

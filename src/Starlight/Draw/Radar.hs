@@ -61,7 +61,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
   let target   = system^.player_.target_
       here     = system^.player_.actor_.position_._xy
       npcs     = system^.npcs_
-      vertices = verticesForShips npcs <> verticesForBodies scale bodies
+      vertices = verticesForShips scale npcs <> verticesForBodies bodies
 
   measure "realloc/copy" $ do
     B.realloc (length vertices) B.Static B.Draw
@@ -69,7 +69,7 @@ drawRadar = measure "radar" . UI.using getDrawable $ do
 
   matrix <- asks scaleToView
   matrix_ ?= matrix
-  here_   ?= here
+  here_   ?= (prj <$> here)
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -89,16 +89,16 @@ runRadar = UI.loadingDrawable Drawable shader []
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-verticesForBodies :: Foldable t => Float -> t B.StateVectors -> [V Identity]
-verticesForBodies scale vs =
-  [ V{ there = Identity (there^._xy), r = Identity (r * scale), colour = Identity colour }
-  | B.StateVectors{ body = B.Body{ radius = Kilo (Metres r), colour }, actor = Actor{ position = there } } <- toList vs
+verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
+verticesForBodies vs =
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj r), colour = Identity colour }
+  | B.StateVectors{ body = B.Body{ radius = r, colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
-verticesForShips :: Foldable t => t Character -> [V Identity]
-verticesForShips cs =
-  [ V{ there = Identity (there^._xy), r = Identity scale, colour = Identity colour }
-  | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale } } <- toList cs
+verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
+verticesForShips scale cs =
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (r / scale), colour = Identity colour }
+  | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale = r } } <- toList cs
   ]
 
 

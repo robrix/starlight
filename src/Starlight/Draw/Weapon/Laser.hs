@@ -62,8 +62,8 @@ drawLaser S.Beam{ colour, angle, position } = measure "laser" . UI.using getDraw
   vs@View{ focus } <- ask
   matrix_ ?=
         scaleToViewZoomed vs
-    !*! translated3 (ext (negated (unP focus)) 0)
-    !*! translated3 (unP position)
+    !*! translated3 (ext (negated (prj <$> focus)) 0)
+    !*! translated3 (prj <$> position)
     !*! mkTransformation (axisAngle (unit _z) (getRadians angle)) 0
     !*! scaled (V4 1000 1000 1000 1)
   colour_ ?= colour

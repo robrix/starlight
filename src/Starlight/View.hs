@@ -9,16 +9,16 @@ module Starlight.View
 
 import Control.Lens ((.~), (^.))
 import Data.Function ((&))
-import Linear.Affine
 import Linear.Matrix
 import Linear.V2
 import Linear.Vector
+import Unit.Length
 
 data View = View
   { scale :: Int
   , size  :: V2 Int
   , zoom  :: Float
-  , focus :: Point V2 Float
+  , focus :: V2 (Kilo Metres Float)
   }
 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to device coordinates.

@@ -22,6 +22,7 @@ import Starlight.Identifier
 import System.Directory
 import System.FilePath
 import Text.Read
+import Unit.Algebra
 import Unit.Angle
 import Unit.Length
 import Unit.Time
@@ -71,7 +72,7 @@ fromCSV = toBody . splitOnCommas where
     <*> readEither' "longitudeOfAscendingNode"                Degrees         longitudeOfAscendingNode
     <*> readEither' "argumentOfPerifocus"                     Degrees         argumentOfPerifocus
     <*> readEither' "timeOfPeriapsisRelativeToEpoch"          Seconds         timeOfPeriapsisRelativeToEpoch
-    <*> readEither' "meanMotion"                              Per             meanMotion
+    <*> readEither' "meanMotion"                              nu              meanMotion
     <*> readEither' "meanAnomaly"                             Degrees         meanAnomaly
     <*> readEither' "trueAnomaly"                             Degrees         trueAnomaly
     <*> readEither' "semimajor"                               (Kilo . Metres) semimajor
@@ -110,7 +111,3 @@ fromDirectory = go Nothing
   initCap = \case
     ""   -> ""
     c:cs -> toUpper c : cs
-
-
-newtype ((f :: * -> *) :/: (g :: * -> *)) a = Per { getPer :: a }
-  deriving (Eq, Ord, Show)

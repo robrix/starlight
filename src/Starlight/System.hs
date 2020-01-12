@@ -18,10 +18,12 @@ module Starlight.System
 , neighbourhoodOfPlayer
 ) where
 
-import           Control.Lens (Lens, Lens', ix, lens, to, (^.), (^?))
+import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
+import           Data.Maybe (fromMaybe)
 import           GHC.Generics (Generic)
+import           GHC.Stack (HasCallStack)
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
@@ -45,8 +47,8 @@ scale_ = field @"scale"
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = field @"bodies"
 
-player_ :: Lens' (System a) Character
-player_ = characters_.lens (Map.! Player) (flip (Map.insert Player))
+player_ :: HasCallStack => Lens' (System a) Character
+player_ = characters_.at Player .iso (fromMaybe (error "player missing")) Just
 
 npcs_ :: Lens' (System a) [Character]
 npcs_ = characters_.lens (Map.elems . Map.delete Player) (\ m cs -> Map.fromList ((Player, m Map.! Player) : zipWith ((,) . NPC) [0..] cs))
@@ -71,7 +73,7 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
 
 
 neighbourhoodOf :: (HasActor a, HasMagnitude a) => Character -> System a -> System a
-neighbourhoodOf c sys@System{ bodies, characters, scale } = sys
+neighbourhoodOf c sys@System{ bodies, characters } = sys
   { bodies     = Map.filterWithKey (visible . B) bodies
   , characters = Map.filterWithKey (visible . C) characters
   } where
@@ -87,12 +89,12 @@ neighbourhoodOf c sys@System{ bodies, characters, scale } = sys
     B (Star _) -> True
     _          -> received > threshold
     where
-    r = distance (a^.actor_.position_ ^* scale) (c^.actor_.position_ ^* scale)
-    received = Watts ((c^.ship_.radar_.power_.to getWatts * gain * aperture * (a^.magnitude_ * scale) * patternPropagationFactor) / ((4 * pi) ** 2 * r ** 4))
+    r = distance (a^.actor_.position_) (c^.actor_.position_)
+    received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * (a^.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 4)))
   patternPropagationFactor = 1
-  gain = 1
-  aperture = 1
-  threshold = Watts (1.0e-9) -- 1 nanowatt
+  gain = 1000
+  aperture = 1000000
+  threshold = Watts (1.0e-12) -- 1 picowatt
 
 neighbourhoodOfPlayer :: (HasActor a, HasMagnitude a) => System a -> System a
 neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys
