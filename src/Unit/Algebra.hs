@@ -56,8 +56,12 @@ class (Unit u, Unit v, Unit w) => MulBy (step :: Act) u v w | step u v -> w wher
 instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Prepend u v (u :*: v) where
   u `mul` v = Prd (prj u * prj v)
 
--- | Elimination by reciprocals.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit v', v' ~ InvOf v) => MulBy 'Cancel (u :*: v) v' u where
+-- | Elimination by reciprocals at left.
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit u', u' ~ InvOf u) => MulBy 'CancelL (u :*: v) u' u where
+  u `mul` v = pure (prj u * prj v)
+
+-- | Elimination by reciprocals at right.
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit v', v' ~ InvOf v) => MulBy 'CancelR (u :*: v) v' u where
   u `mul` v = pure (prj u * prj v)
 
 -- | Walk the chain.
@@ -65,11 +69,13 @@ instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => MulBy 'Walk (u :*: u') v (
   Prd u `mul` v = Prd (u * prj v)
 
 
-data Act = Prepend | Cancel | Walk
+data Act = Prepend | CancelL | CancelR | Walk
 
 type family Step u v where
-  Step (_     :*: v)     (Inv v) = 'Cancel
-  Step (_     :*: Inv v) v       = 'Cancel
+  Step (v     :*: _)     (Inv v) = 'CancelL
+  Step (Inv v :*: _)     v       = 'CancelL
+  Step (_     :*: v)     (Inv v) = 'CancelR
+  Step (_     :*: Inv v) v       = 'CancelR
   Step (_     :*: _)     _       = 'Walk
   Step _                 _       = 'Prepend
 
