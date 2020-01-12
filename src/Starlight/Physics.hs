@@ -121,15 +121,14 @@ runActions i c = do
       identifiers = System.identifiers system
 
     Jump -> case target of
-      Just target -> do
-        let targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
-        if isFacing (pi/128) rotation targetAngle then
-          pure c
-        else
-          foldM (go dt system) c (concat
-            [ [ Face Target ] -- FIXME: face *near* the target
-            , [ Thrust | isFacing pi rotation targetAngle ]
-            ])
+      Just target
+        | isFacing (pi/128) rotation targetAngle -> pure c
+        | otherwise                              -> foldM (go dt system) c (concat
+          [ [ Face Target ] -- FIXME: face *near* the target
+          , [ Thrust | isFacing pi rotation targetAngle ]
+          ])
+        where
+        targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
       _ -> pure c
     where
     thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
