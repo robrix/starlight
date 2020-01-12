@@ -52,7 +52,7 @@ gravity a = do
   pure $! foldl' (go dt) a bodies where
   go dt a StateVectors{ actor = b } = applyForce (force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
     -- FIXME: units should be N (i.e. kg·m/s/s)
-    force :: (Kilo Grams :*: Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float
+    force :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
     -- FIXME: figure out a better way of applying the units
@@ -60,7 +60,7 @@ gravity a = do
     r :: (Kilo Metres :*: Kilo Metres) Float
     r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   -- gravitational constant : m³/kg/s²
-  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :*: Inv (Kilo Grams) :*: Inv Seconds :*: Inv Seconds) Float
+  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :/: (Kilo Grams) :/: Seconds :/: Seconds) Float
   gravC = 6.67430e-11
 
 
@@ -123,7 +123,7 @@ runActions i c = do
         Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
       identifiers = System.identifiers system
     where
-    thrust :: (Kilo Grams :*: Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float
+    thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
     thrust  = 1000 * 20 * 60
     angular = getSeconds dt *^ Radians 5
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)

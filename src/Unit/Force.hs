@@ -13,4 +13,4 @@ import Unit
 import Unit.Algebra
 import Unit.Multiple
 
-type Newtons = Kilo Grams :*: Metres :*: Inv Seconds :*: Inv Seconds
+type Newtons = Kilo Grams :*: Metres :/: Seconds :/: Seconds

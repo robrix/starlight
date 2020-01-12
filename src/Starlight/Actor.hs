@@ -45,7 +45,7 @@ mass_ :: Lens' Actor (Kilo Grams Float)
 mass_ = field @"mass"
 
 
-applyForce :: V3 ((Kilo Grams :*: Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float) -> Seconds Float -> Actor -> Actor
+applyForce :: V3 ((Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float) -> Seconds Float -> Actor -> Actor
 applyForce force dt a = a & velocity_ +~ ((.*. dt) . (./. a^.mass_) <$> force)
 
 
