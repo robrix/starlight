@@ -15,6 +15,7 @@ module Starlight.Game
 import           Control.Algebra
 import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
+import           Control.Carrier.Profile.Tree (reportProfile)
 import           Control.Carrier.Reader
 import qualified Control.Carrier.State.STM.TVar as TVar
 import           Control.Carrier.State.Strict
@@ -169,7 +170,7 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   hasQuit <- sendM (newTVarIO False)
 
-  fork $ runReader (Seconds @Float (1/60)) . fix $ \ loop -> do
+  fork $ reportProfile . runReader (Seconds @Float (1/60)) . fix $ \ loop -> do
     id <~> flip (execState @(System Body)) (runSystem (do
       measure "controls" $ player_ @Body .actions_ <~ controls
       measure "ai" $ npcs_ @Body <~> traverse ai
