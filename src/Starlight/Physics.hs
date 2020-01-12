@@ -94,11 +94,9 @@ runActions i c = do
   go dt system c = \case
     Thrust -> pure $ c & actor_ %~ applyForce ((thrust ^*) <$> rotate rotation (unit _x)) dt
 
-    Face dir -> do
-      let actor = c^.actor_
-      case direction actor target of
-        Just t  -> pure $! c & actor_.rotation_ %~ face angular (prj <$> angleOf (t^._xy))
-        Nothing -> pure c
+    Face dir -> case direction (c^.actor_) target of
+      Just t  -> pure $! c & actor_.rotation_ %~ face angular (prj <$> angleOf (t^._xy))
+      Nothing -> pure c
       where
       direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
