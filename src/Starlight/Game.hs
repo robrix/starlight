@@ -16,6 +16,7 @@ import           Control.Algebra
 import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
+import qualified Control.Carrier.State.STM.TVar as TVar
 import           Control.Carrier.State.Strict
 import           Control.Concurrent.STM.TVar
 import           Control.Effect.Lens.Exts as Lens
@@ -65,11 +66,12 @@ import qualified UI.Window as Window
 import           Unit.Time
 
 runGame
-  :: ( Has (Lift IO) sig m
+  :: ( Effect sig
+     , Has (Lift IO) sig m
      , MonadFail m
      )
   => System Body
-  -> ReaderC Epoch (StateC (System Body) (StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))) a
+  -> ReaderC Epoch (TVar.StateC (System Body) (StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))) a
   -> m a
 runGame system
   = Window.runSDL
@@ -78,7 +80,7 @@ runGame system
   . runGLC
   . runFinally
   . evalState @Input mempty
-  . evalState system
+  . TVar.evalState system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
