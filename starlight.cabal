@@ -151,6 +151,7 @@ library
     , prettyprinter
     , prettyprinter-ansi-terminal
     , sdl2 ^>= 2.5
+    , stm ^>= 2.5
     , text
     , time ^>= 1.9
     , transformers ^>= 0.5
