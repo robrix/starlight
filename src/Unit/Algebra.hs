@@ -42,7 +42,7 @@ class (Unit u, Unit v) => Mul u v where
 infixl 7 .*.
 
 (./.) :: forall u v a . (Mul u (Inv v), Unit v, Fractional a) => u a -> v a -> Res u (Inv v) a
-u ./. v = u .*. Inv @v (negate (prj v))
+u ./. v = u .*. Inv @v (1/prj v)
 
 infixl 7 ./.
 
