@@ -10,7 +10,6 @@ module Starlight.System
 , player_
 , npcs_
 , characters_
-, actors_
 , beams_
 , systemTrans
 , identifiers
@@ -19,7 +18,7 @@ module Starlight.System
 , neighbourhoodOfPlayer
 ) where
 
-import           Control.Lens (Lens, Lens', at, iso, ix, lens, view, (&), (.~), (^.), (^?))
+import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (fromMaybe)
@@ -56,13 +55,6 @@ npcs_ = characters_.lens (Map.elems . Map.delete Player) (\ m cs -> Map.fromList
 
 characters_ :: Lens' (System a) (Map.Map CharacterIdentifier Character)
 characters_ = field @"characters"
-
-actors_ :: HasActor a => Lens' (System a) (Map.Map Identifier Actor)
-actors_ = lens get set where
-  get System{ bodies, characters } = (view actor_ <$> Map.mapKeys B bodies) <> (view actor_ <$> Map.mapKeys C characters)
-  set system map = Map.foldlWithKey' (\ s k v -> s & case k of
-    B b -> bodies_    .ix b.actor_ .~ v
-    C c -> characters_.ix c.actor_ .~ v) system map
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
