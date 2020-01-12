@@ -4,6 +4,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
@@ -18,10 +19,9 @@ module Unit.Algebra
 , (:/:)
 ) where
 
-import Control.Applicative (liftA2)
 import Data.Functor.Const
+import Data.Functor.Identity
 import Foreign.Storable
-import GHC.Generics ((:.:)(..))
 import GL.Type as GL
 import GL.Uniform
 import Linear.Conjugate
@@ -32,21 +32,21 @@ import Unit
 
 -- * Algebra
 
-class (Functor u, Functor v, Functor w) => Mul u v w | u w -> v where
+class (Unit u, Unit v, Unit w) => Mul u v w | u w -> v where
   (.*.) :: Fractional a => u a -> v a -> w a
 
 infixl 7 .*.
 
-(./.) :: (Mul u (Recip v) w, Fractional a) => u a -> v a -> w a
-u ./. v = u .*. Recip v -- FIXME: should this multiply by Recip’s factor?
+(./.) :: (Mul u (Recip v) w, Unit v, Fractional a) => u a -> v a -> w a
+u ./. v = u .*. Recip (negate (prj v))
 
 infixl 7 ./.
 
-instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Mul u v (u :*: v) where
-  u .*. v = Prd ((*^ u) <$> v)
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul u v (u :*: v) where
+  u .*. v = Prd (prj u * prj v)
 
-instance {-# OVERLAPPABLE #-} (Mul u v w, Functor u') => Mul (u :*: u') v (w :*: u') where
-  Prd u .*. v = Prd ((.*. v) <$> u)
+instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => Mul (u :*: u') v (w :*: u') where
+  Prd u .*. v = Prd (u * prj v)
 
 -- instance {-# OVERLAPPABLE #-} (Functor u, Functor v) => Div u v (u :/: v) where
 --   u ./. v = Per ((u ^/) <$> v)
@@ -66,30 +66,23 @@ instance {-# OVERLAPPABLE #-} (Mul u v w, Functor u') => Mul (u :*: u') v (w :*:
 
 -- * Combinators
 
-newtype (u :*: v) a = Prd { getPrd :: v (u a) }
-  deriving (Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving Applicative via v :.: u
+newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
+  deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 infixl 7 :*:
 
-instance (Applicative v, Additive u) => Additive (u :*: v) where
-  zero = Prd (pure zero)
-  liftU2 f (Prd a) (Prd b) = Prd (liftA2 (liftU2 f) a b)
-  liftI2 f (Prd a) (Prd b) = Prd (liftA2 (liftI2 f) a b)
-
-instance (Applicative v, Foldable v, Additive u, Foldable u) => Metric (u :*: v)
-
 instance (Unit u, Unit v) => Unit (u :*: v) where
-  prj = prj . prj . getPrd
   factor = Const (getConst (factor @u) * getConst (factor @v))
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
 
-newtype Recip u a = Recip { getRecip :: u a }
-  deriving (Additive, Applicative, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+newtype Recip (u :: * -> *) a = Recip { getRecip :: a }
+  deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 instance Unit u => Unit (Recip u) where
-  prj = prj . getRecip
+  prj = getRecip
   factor = Const (1/getConst (factor @u))
   suffix = Const (getConst (suffix @u) . ('⁻' :) . ('¹' :))
 
