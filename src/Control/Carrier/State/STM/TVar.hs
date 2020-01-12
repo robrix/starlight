@@ -2,6 +2,7 @@
 module Control.Carrier.State.STM.TVar
 ( runStateVar
 , runState
+, evalState
 , StateC(..)
 ) where
 
@@ -21,6 +22,9 @@ runState s m = do
   a <- runStateVar var m
   s' <- sendM (atomically (readTVar var))
   pure (s', a)
+
+evalState :: Has (Lift IO) sig m => s -> StateC s m a -> m a
+evalState s = fmap snd . runState s
 
 newtype StateC s m a = StateC (ReaderC (TVar s) m a)
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
