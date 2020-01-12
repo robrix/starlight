@@ -1,3 +1,4 @@
+{-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
@@ -28,17 +29,17 @@ import Control.Monad.Trans.Class
 runStateVar :: TVar s -> StateC s m a -> m a
 runStateVar var (StateC m) = runReader var m
 
-runState :: Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
+runState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
 runState s m = do
   var <- sendM (newTVarIO s)
   a <- runStateVar var m
   s' <- sendM (readTVarIO var)
   pure (s', a)
 
-evalState :: Has (Lift IO) sig m => s -> StateC s m a -> m a
+evalState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m a
 evalState s = fmap snd . runState s
 
-execState :: Has (Lift IO) sig m => s -> StateC s m a -> m s
+execState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 
 newtype StateC s m a = StateC (ReaderC (TVar s) m a)
