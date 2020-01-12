@@ -169,7 +169,8 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     measure "frame" frame
-    measure "swap" Window.swap *> loop
+    measure "swap" Window.swap
+    loop
 
 frame
   :: ( Has Check sig m
