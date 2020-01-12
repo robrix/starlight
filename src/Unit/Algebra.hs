@@ -15,7 +15,7 @@ module Unit.Algebra
 , (./.)
   -- * Combinators
 , (:*:)(..)
-, Recip(..)
+, Inv(..)
 , (:/:)
 ) where
 
@@ -37,8 +37,8 @@ class (Unit u, Unit v, Unit w) => Mul u v w | u w -> v where
 
 infixl 7 .*.
 
-(./.) :: (Mul u (Recip v) w, Unit v, Fractional a) => u a -> v a -> w a
-u ./. v = u .*. Recip (negate (prj v))
+(./.) :: (Mul u (Inv v) w, Unit v, Fractional a) => u a -> v a -> w a
+u ./. v = u .*. Inv (negate (prj v))
 
 infixl 7 ./.
 
@@ -47,7 +47,7 @@ instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul u v (u :*: v) where
   u .*. v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul (u :*: v) (Recip v) u where
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul (u :*: v) (Inv v) u where
   u .*. v = pure (prj u * prj v)
 
 -- | Walk the chain.
@@ -83,16 +83,16 @@ instance (Unit u, Unit v) => Unit (u :*: v) where
   suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
 
 
-newtype Recip (u :: * -> *) a = Recip { getRecip :: a }
+newtype Inv (u :: * -> *) a = Inv { getInv :: a }
   deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
-instance Unit u => Unit (Recip u) where
-  prj = getRecip
+instance Unit u => Unit (Inv u) where
+  prj = getInv
   factor = Const (1/getConst (factor @u))
   suffix = Const (getConst (suffix @u) . ('⁻' :) . ('¹' :))
 
 
-type (u :/: v) = u :*: Recip v
+type (u :/: v) = u :*: Inv v
 
 infixl 7 :/:
