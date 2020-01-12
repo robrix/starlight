@@ -28,15 +28,15 @@ ai c@Character{ actor = Actor{ position = here, rotation }, target } = do
     -- FIXME: allow other behaviours relating to targets, e.g. following
     Just (Left StateVectors{ actor = Actor{ position = there } }) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust | isFacing (pi/4) there ]
+      , [ Thrust | isFacing (pi/4) here there ]
       ]
     Just (Right Character{ actor = Actor{ position = there } }) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust    | isFacing (pi/4)   there ]
-      , [ Fire Main | isFacing (pi/128) there ]
+      , [ Thrust    | isFacing (pi/4)   here there ]
+      , [ Fire Main | isFacing (pi/128) here there ]
       ]
     -- FIXME: wander
     -- FIXME: pick a new target
     _ -> mempty
     where
-    isFacing epsilon there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - (prj <$> angleTo (here^._xy) (there^._xy)))) < epsilon
+    isFacing epsilon here there = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - (prj <$> angleTo (here^._xy) (there^._xy)))) < epsilon
