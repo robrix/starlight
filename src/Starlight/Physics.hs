@@ -29,6 +29,7 @@ import Starlight.Actor as Actor
 import Starlight.Body
 import Starlight.Character
 import Starlight.Identifier
+import Starlight.Radar
 import Starlight.Ship
 import Starlight.System as System
 import Starlight.Weapon.Laser as Laser
@@ -70,9 +71,9 @@ hit :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) s
 hit i c = do
   dt <- ask
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
-  go (Seconds dt) char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o, firedBy = i' }
+  go (Seconds dt) char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
-    , intersects (c^._xy) (pure r) (o^._xy) (cartesian2 (pure <$> theta) 1)
+    , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (cartesian2 (pure <$> theta) 1)
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
     | otherwise
     = char
