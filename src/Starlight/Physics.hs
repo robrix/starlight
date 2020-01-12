@@ -50,8 +50,7 @@ gravity a = do
   Delta dt <- ask @(Delta Seconds Float)
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
-  go dt a StateVectors{ actor = b }
-    = a & velocity_ +~ (force ./. a^.mass_ .*. dt *^ coerce ((b^.position_) `direction` (a^.position_))) where
+  go dt a StateVectors{ actor = b } = applyForce (force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
     -- FIXME: units should be N (i.e. kg·m/s/s)
     force :: (Kilo Grams :*: Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
