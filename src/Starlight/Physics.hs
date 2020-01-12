@@ -94,7 +94,7 @@ runActions i c = do
   go (Delta dt) system = \case
     Thrust -> do
       rotation <- use (actor_.rotation_)
-      actor_.velocity_ += ((.*. dt) . (thrust ^*) <$> rotate rotation (unit _x))
+      actor_ %= applyForce ((thrust ^*) <$> rotate rotation (unit _x)) dt
 
     Face dir -> do
       actor <- use actor_
@@ -123,7 +123,8 @@ runActions i c = do
         Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
       identifiers = System.identifiers system
     where
-    thrust  = 20 * 60 :: (Kilo Metres :/: Seconds :/: Seconds) Float
+    thrust :: (Kilo Grams :*: Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float
+    thrust  = 1000 * 20 * 60
     angular = getSeconds dt *^ Radians 5
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
 
