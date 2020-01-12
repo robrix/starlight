@@ -19,6 +19,7 @@ import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
+import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
 import           Control.Monad ((>=>))
@@ -59,7 +60,7 @@ import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
-import           Unit
+import           Unit.Time
 
 runGame
   :: ( Has (Lift IO) sig m
@@ -149,6 +150,7 @@ game
      , Has Check sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
+     , Has Thread sig m
      , Has Trace sig m
      , MonadFail m
      )
@@ -160,6 +162,24 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
+
+  fork $ runReader (Seconds @Float (1/60)) . fix $ \ loop -> do
+    runSystem $ do
+      measure "controls" $ player_ @Body .actions_ <~ controls
+      measure "ai" $ npcs_ @Body <~> traverse ai
+
+      -- FIXME: this is so gross
+      beams_ @Body .= []
+      npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
+      characters_ @Body <~> itraverse
+        (\ i
+        -> local . neighbourhoodOf @StateVectors
+        <*> (   measure "gravity" . (actor_ @Character <-> gravity)
+            >=> measure "hit" . hit i
+            >=> measure "runActions" . runActions i
+            >=> measure "inertia" . (actor_ <-> inertia)))
+    yield
+    loop
 
   enabled_ Blend            .= True
   enabled_ DepthClamp       .= True
@@ -191,22 +211,8 @@ frame
      )
   => m ()
 frame = runSystem . timed $ do
-  withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
-  measure "inertia" $ characters_ @Body <~> traverse (actor_ <-> inertia) -- update positions
-
   measure "input" input
-  measure "controls" $ player_ @Body .actions_ <~ controls
-  measure "ai" $ npcs_ @Body <~> traverse ai
-
-  -- FIXME: this is so gross
-  beams_ @Body .= []
-  npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
-  characters_ @Body <~> itraverse
-    (\ i
-    -> local . neighbourhoodOf @StateVectors
-    <*> (   measure "gravity" . (actor_ @Character <-> gravity)
-        >=> measure "hit" . hit i
-        >=> measure "runActions" . runActions i))
+  withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
 
 -- | Compute the zoom factor for the given velocity.
 --
