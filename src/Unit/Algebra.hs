@@ -57,7 +57,7 @@ instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Prepend u v (u :*: v) w
   u `mulBy` v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals at left.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit u', u' ~ InvOf u) => MulBy 'CancelL (u :*: v) u' u where
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit u', u' ~ InvOf u) => MulBy 'CancelL (u :*: v) u' v where
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Elimination by reciprocals at right.
