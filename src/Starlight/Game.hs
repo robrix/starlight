@@ -62,9 +62,11 @@ import qualified UI.Window as Window
 import           Unit
 
 runGame
-  :: Has (Lift IO) sig m
+  :: ( Has (Lift IO) sig m
+     , MonadFail m
+     )
   => System Body
-  -> StateC (System Body) (StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))) a
+  -> ReaderC Epoch (StateC (System Body) (StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))) a
   -> m a
 runGame system
   = Window.runSDL
@@ -124,7 +126,9 @@ runGame system
           , ship    = Ship{ colour = white, armour = 1_000, radar }
           }
         ]
-      } where
+      }
+    . runJ2000
+    where
   radar = Radar 1000 -- GW radar
 
 runFrame
@@ -133,13 +137,12 @@ runFrame
      , Has Finally sig m
      , Has (Lift IO) sig m
      , Has Trace sig m
-     , MonadFail m
      )
-  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (ReaderC Epoch (EmptyC m))))))) a
+  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
   -> m ()
 runFrame m = evalEmpty $ do
   start <- now
-  runJ2000 . evalState start . runStarfield . runShip . runRadar . runLaser . runBody $ m
+  evalState start . runStarfield . runShip . runRadar . runLaser . runBody $ m
 
 game
   :: ( Effect sig
