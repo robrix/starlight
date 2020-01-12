@@ -10,6 +10,7 @@ module Linear.Exts
 , direction
 , angleOf
 , angleTo
+, isFacing
 , toAxisAngle
 , cartesian2
 , polar2
@@ -91,6 +92,10 @@ angleOf (V2 x y) = Radians (atan2 y x)
 -- | The angle from the first vector to the second.
 angleTo :: RealFloat a => V2 a -> V2 a -> Radians a
 angleTo v1 v2 = angleOf (v2 - v1)
+
+
+isFacing :: (Real a, Floating a) => Radians a -> Quaternion a -> Radians a -> Bool
+isFacing epsilon rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - target)) < epsilon
 
 
 -- | Compute the axis/angle of a rotation represented as a unit quaternion.
