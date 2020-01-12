@@ -46,27 +46,27 @@ u ./. v = u .*. Inv @v (negate (prj v))
 infixl 7 ./.
 
 instance (MulBy step u v w, Step u v ~ step, Unit u, Unit v, Unit w) => Mul u v w where
-  (.*.) = mul @step
+  (.*.) = mulBy @step
 
 
 class (Unit u, Unit v, Unit w) => MulBy (step :: Act) u v w | step u v -> w where
-  mul :: Fractional a => u a -> v a -> w a
+  mulBy :: Fractional a => u a -> v a -> w a
 
 -- | Append at the head of the chain.
 instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Prepend u v (u :*: v) where
-  u `mul` v = Prd (prj u * prj v)
+  u `mulBy` v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals at left.
 instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit u', u' ~ InvOf u) => MulBy 'CancelL (u :*: v) u' u where
-  u `mul` v = pure (prj u * prj v)
+  u `mulBy` v = pure (prj u * prj v)
 
 -- | Elimination by reciprocals at right.
 instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit v', v' ~ InvOf v) => MulBy 'CancelR (u :*: v) v' u where
-  u `mul` v = pure (prj u * prj v)
+  u `mulBy` v = pure (prj u * prj v)
 
 -- | Walk the chain.
 instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => MulBy 'Walk (u :*: u') v (w :*: u') where
-  Prd u `mul` v = Prd (u * prj v)
+  Prd u `mulBy` v = Prd (u * prj v)
 
 
 data Act = Prepend | CancelL | CancelR | Walk
