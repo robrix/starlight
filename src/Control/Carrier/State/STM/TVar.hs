@@ -32,7 +32,7 @@ runState :: Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
 runState s m = do
   var <- sendM (newTVarIO s)
   a <- runStateVar var m
-  s' <- sendM (atomically (readTVar var))
+  s' <- sendM (readTVarIO var)
   pure (s', a)
 
 evalState :: Has (Lift IO) sig m => s -> StateC s m a -> m a
