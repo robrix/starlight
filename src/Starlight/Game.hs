@@ -17,7 +17,7 @@ import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
-import           Control.Concurrent.STM.TChan
+import           Control.Concurrent.STM.TVar
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Thread
@@ -165,9 +165,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
 
-  hasQuit <- sendM . atomically $ do
-    hasQuit <- newTChan
-    hasQuit <$ writeTChan hasQuit False
+  hasQuit <- sendM (newTVarIO False)
 
   fork $ runReader (Seconds @Float (1/60)) . fix $ \ loop -> do
     runSystem $ do
@@ -185,7 +183,7 @@ game = Sol.system >>= \ system -> runGame system $ do
             >=> measure "runActions" . runActions i
             >=> measure "inertia" . (actor_ <-> inertia)))
     yield
-    hasQuit <- sendM (atomically (readTChan hasQuit))
+    hasQuit <- sendM (atomically (readTVar hasQuit))
     unless hasQuit loop
 
   enabled_ Blend            .= True
@@ -198,7 +196,7 @@ game = Sol.system >>= \ system -> runGame system $ do
     measure "frame" frame
     measure "swap" Window.swap
     loop
-  sendM (atomically (writeTChan hasQuit True))
+  sendM (atomically (writeTVar hasQuit True))
 
 frame
   :: ( Has Check sig m
