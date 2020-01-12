@@ -60,7 +60,8 @@ gravity a = do
     -- NB: scaling to get distances in m
     r = fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   -- gravitational constant : m³/kg/s²
-  gravC = 6.67430e-11 :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :*: Inv (Kilo Grams) :*: Inv Seconds :*: Inv Seconds) Float
+  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :*: Inv (Kilo Grams) :*: Inv Seconds :*: Inv Seconds) Float
+  gravC = 6.67430e-11
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
