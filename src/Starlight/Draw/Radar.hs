@@ -41,6 +41,7 @@ import           Linear.Exts as Linear hiding (angle, (!*))
 import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
+import           Starlight.Radar
 import qualified Starlight.Ship as S
 import           Starlight.System
 import           Starlight.View
@@ -91,15 +92,15 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
 verticesForBodies vs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj r), colour = Identity colour }
-  | B.StateVectors{ body = B.Body{ radius = r, colour }, actor = Actor{ position = there } } <- toList vs
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (b^.magnitude_)), colour = Identity colour }
+  | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
 verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
 verticesForShips scale cs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (r / scale), colour = Identity colour }
-  | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale = r } } <- toList cs
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (c^.magnitude_) / scale), colour = Identity colour }
+  | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 
 
@@ -115,7 +116,7 @@ shader = program $ \ u
     let perp v = vec2 (negate (v D.^.D._y)) (v D.^.D._x)
         angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
         wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-    edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
+    edge  <- let' "edge"  (perp dir D.^* r D.^* 0.5 + dir D.^* d)
     angle <- let' "angle" (angleOf there)
     radius <- var "radius" radius
     let step = D.max' 1 (D.min' (get radius/float (fromIntegral targetBlipCount)) (d / 50))
