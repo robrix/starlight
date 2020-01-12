@@ -50,11 +50,11 @@ gravity a = do
   Delta dt <- ask @(Delta Seconds Float)
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
-  go dt a StateVectors{ actor = b, body = Body{ mass } }
-    = a & velocity_ +~ (force ./. shipMass .*. dt *^ coerce ((b^.position_) `direction` (a^.position_))) where
+  go dt a StateVectors{ actor = b }
+    = a & velocity_ +~ (force ./. a^.mass_ .*. dt *^ coerce ((b^.position_) `direction` (a^.position_))) where
     -- FIXME: units should be N (i.e. kg·m/s/s)
     force :: (Kilo Grams :*: Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float
-    force = (mass .*. shipMass ./. r) .*. gravC
+    force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
@@ -63,8 +63,6 @@ gravity a = do
   -- gravitational constant : m³/kg/s²
   gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :*: Inv (Kilo Grams) :*: Inv Seconds :*: Inv Seconds) Float
   gravC = 6.67430e-11
-  shipMass :: Kilo Grams Float
-  shipMass = 1
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
