@@ -25,23 +25,24 @@ controls
 controls = do
   input <- get
   let actions = catMaybes (map (runRelation input) controlRelations)
-  Set.fromList <$> for actions (\ (input, action) ->
-    action <$ modify (\\ input))
+  Set.unions <$> for actions (\ (input, actions) ->
+    actions <$ modify (\\ input))
 
 -- FIXME: make this user-configurable
-controlRelations :: [Relation Input (Input, Action)]
+controlRelations :: [Relation Input (Input, Set.Set Action)]
 controlRelations =
-  [ expect (pressed_ SDL.KeycodeUp)    $> (mempty, Thrust)
-  , expect (pressed_ SDL.KeycodeDown)  $> (mempty, Face Backwards)
-  , expect (pressed_ SDL.KeycodeLeft)  $> (mempty, Turn L)
-  , expect (pressed_ SDL.KeycodeRight) $> (mempty, Turn R)
-  , expect (pressed_ SDL.KeycodeSpace) $> (mempty, Fire Main)
-  , expect (pressed_ SDL.KeycodeF)     $> (mempty, Face Forwards)
-  , expect (pressed_ SDL.KeycodeT)     $> (mempty, Face Target)
-  , (singleton SDL.KeycodeTab,) . ChangeTarget . Just
+  [ expect (pressed_ SDL.KeycodeUp)    $> (mempty, Set.singleton Thrust)
+  , expect (pressed_ SDL.KeycodeDown)  $> (mempty, Set.singleton (Face Backwards))
+  , expect (pressed_ SDL.KeycodeLeft)  $> (mempty, Set.singleton (Turn L))
+  , expect (pressed_ SDL.KeycodeRight) $> (mempty, Set.singleton (Turn R))
+  , expect (pressed_ SDL.KeycodeSpace) $> (mempty, Set.singleton (Fire Main))
+  , expect (pressed_ SDL.KeycodeF)     $> (mempty, Set.singleton (Face Forwards))
+  , expect (pressed_ SDL.KeycodeT)     $> (mempty, Set.singleton (Face Target))
+  , expect (pressed_ SDL.KeycodeJ)     $> (mempty, Set.singleton Jump)
+  , (singleton SDL.KeycodeTab,) . Set.singleton . ChangeTarget . Just
     <$  expect (pressed_ SDL.KeycodeTab)
     <*> (Prev <$ shift <|> pure Next)
-  <|> expect (pressed_ SDL.KeycodeEscape) $> (singleton SDL.KeycodeEscape, ChangeTarget Nothing)
+  <|> expect (pressed_ SDL.KeycodeEscape) $> (singleton SDL.KeycodeEscape, Set.singleton (ChangeTarget Nothing))
   ]
   where
   shift = expect (pressed_ SDL.KeycodeLShift) <|> expect (pressed_ SDL.KeycodeRShift)

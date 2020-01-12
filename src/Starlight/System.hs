@@ -18,6 +18,7 @@ module Starlight.System
 , neighbourhoodOfPlayer
 ) where
 
+import           Control.Effect.Lens.Exts (asserting)
 import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
@@ -53,8 +54,8 @@ player_ = characters_.at Player .iso (fromMaybe (error "player missing")) Just
 npcs_ :: Lens' (System a) [Character]
 npcs_ = characters_.lens (Map.elems . Map.delete Player) (\ m cs -> Map.fromList ((Player, m Map.! Player) : zipWith ((,) . NPC) [0..] cs))
 
-characters_ :: Lens' (System a) (Map.Map CharacterIdentifier Character)
-characters_ = field @"characters"
+characters_ :: HasCallStack => Lens' (System a) (Map.Map CharacterIdentifier Character)
+characters_ = field @"characters".asserting (Map.member Player)
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
@@ -72,7 +73,7 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
   C i -> Right <$> s^?characters_.ix i
 
 
-neighbourhoodOf :: (HasActor a, HasMagnitude a) => Character -> System a -> System a
+neighbourhoodOf :: HasActor a => Character -> System a -> System a
 neighbourhoodOf c sys@System{ bodies, characters } = sys
   { bodies     = Map.filterWithKey (visible . B) bodies
   , characters = Map.filterWithKey (visible . C) characters
@@ -89,12 +90,12 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     B (Star _) -> True
     _          -> received > threshold
     where
-    r = distance (a^.actor_.position_) (c^.actor_.position_)
-    received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * (a^.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 4)))
+    r = qd (a^.actor_.position_) (c^.actor_.position_)
+    received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * prj (a^.actor_.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 2)))
   patternPropagationFactor = 1
-  gain = 1000
+  gain = 1000000
   aperture = 1000000
   threshold = Watts (1.0e-12) -- 1 picowatt
 
-neighbourhoodOfPlayer :: (HasActor a, HasMagnitude a) => System a -> System a
+neighbourhoodOfPlayer :: HasActor a => System a -> System a
 neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys

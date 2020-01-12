@@ -91,14 +91,15 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
 verticesForBodies vs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj r), colour = Identity colour }
-  | B.StateVectors{ body = B.Body{ radius = r, colour }, actor = Actor{ position = there } } <- toList vs
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (b^.actor_.magnitude_)), colour = Identity colour }
+  | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
+-- FIXME: take ship profile into account
 verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
 verticesForShips scale cs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (r / scale), colour = Identity colour }
-  | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale = r } } <- toList cs
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (c^.actor_.magnitude_) / scale), colour = Identity colour }
+  | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 
 
@@ -114,7 +115,7 @@ shader = program $ \ u
     let perp v = vec2 (negate (v D.^.D._y)) (v D.^.D._x)
         angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
         wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-    edge  <- let' "edge"  (perp dir D.^* r + dir D.^* d)
+    edge  <- let' "edge"  (perp dir D.^* r D.^* 0.5 + dir D.^* d)
     angle <- let' "angle" (angleOf there)
     radius <- var "radius" radius
     let step = D.max' 1 (D.min' (get radius/float (fromIntegral targetBlipCount)) (d / 50))
@@ -122,7 +123,7 @@ shader = program $ \ u
       (radius .= step * float gl_InstanceID)
       (pure ())
     minSweep <- let' "minSweep" (minBlipSize / (2 * pi * get radius))
-    sweep .= (minSweep `D.max'` (abs (wrap (-pi) pi (angleOf edge - angle))))
+    sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf edge - angle)))
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* get radius)
     gl_PointSize .= 3
     colour2 .= colour

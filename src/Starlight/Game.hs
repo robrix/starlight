@@ -77,47 +77,51 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position = V3 2_500_000 0 0
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            , mass     = 1000
+            { position  = V3 2_500_000 0 0
+            , velocity  = V3 0 150 0
+            , rotation  = axisAngle (unit _z) (pi/2)
+            , mass      = 1000
+            , magnitude = 30
             }
           , target  = Nothing
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
+          , ship    = Ship{ colour = white, armour = 1_000, radar }
           }
         , Character
           { actor   = Actor
-            { position = V3 2_500_000 0 0
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            , mass     = 1000
+            { position  = V3 2_500_000 0 0
+            , velocity  = V3 0 150 0
+            , rotation  = axisAngle (unit _z) (pi/2)
+            , mass      = 1000
+            , magnitude = 60
             }
           , target  = Nothing -- Just (C Player)
           , actions = mempty
-          , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30, radar }
+          , ship    = Ship{ colour = red, armour = Interval 500 500, radar }
           }
         , Character
           { actor   = Actor
-            { position = V3 2_500_000 0 0
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            , mass     = 1000
+            { position  = V3 2_500_000 0 0
+            , velocity  = V3 0 150 0
+            , rotation  = axisAngle (unit _z) (pi/2)
+            , mass      = 1000
+            , magnitude = 30
             }
           , target  = Just $ B (Star (10, "Sol"))
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
+          , ship    = Ship{ colour = white, armour = 1_000, radar }
           }
         , Character
           { actor   = Actor
-            { position = V3 2_500_000 0 0
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            , mass     = 1000
+            { position  = V3 2_500_000 0 0
+            , velocity  = V3 0 150 0
+            , rotation  = axisAngle (unit _z) (pi/2)
+            , mass      = 1000
+            , magnitude = 30
             }
           , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
+          , ship    = Ship{ colour = white, armour = 1_000, radar }
           }
         ]
       } where
@@ -165,8 +169,7 @@ game = Sol.system >>= \ system -> runGame system $ do
     measure "swap" Window.swap *> loop
 
 frame
-  :: ( Effect sig
-     , Has Check sig m
+  :: ( Has Check sig m
      , Has Empty sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
@@ -212,7 +215,7 @@ zoomForSpeed size x = go where
     | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
   zoom = Interval 1 5
   speed = speedAt <$> zoom
-  speedAt x = x * fromIntegral (maximum size)
+  speedAt x = x * fromIntegral (maximum size) * 2
 
 withView
   :: ( Has (Lift IO) sig m
