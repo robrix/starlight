@@ -80,6 +80,7 @@ runGame system
             { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
+            , mass     = 1000
             }
           , target  = Nothing
           , actions = mempty
@@ -90,6 +91,7 @@ runGame system
             { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
+            , mass     = 1000
             }
           , target  = Nothing -- Just (C Player)
           , actions = mempty
@@ -100,6 +102,7 @@ runGame system
             { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
+            , mass     = 1000
             }
           , target  = Just $ B (Star (10, "Sol"))
           , actions = mempty
@@ -110,6 +113,7 @@ runGame system
             { position = V3 2_500_000 0 0
             , velocity = V3 0 150 0
             , rotation = axisAngle (unit _z) (pi/2)
+            , mass     = 1000
             }
           , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
           , actions = mempty

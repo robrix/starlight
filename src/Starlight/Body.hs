@@ -91,13 +91,14 @@ orbitTimeScale = 1
 
 
 actorAt :: Body -> Seconds Float -> Actor
-actorAt Body{ orientation = axis, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
+actorAt Body{ orientation = axis, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
   { position = pure <$> position
   , velocity = if r == 0 || p == 0 then 0 else pure <$> (position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly)
   , rotation
     = orientation
     * axis
     * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
+  , mass
   } where
   position = ext (cartesian2 (Radians trueAnomaly) r) 0
   t' = timeOfPeriapsis + t * orbitTimeScale

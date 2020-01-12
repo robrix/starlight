@@ -9,6 +9,7 @@ module Starlight.Actor
 , position_
 , velocity_
 , rotation_
+, mass_
 , HasActor(..)
 ) where
 
@@ -19,13 +20,14 @@ import Linear.Quaternion
 import Linear.V3
 import Unit.Algebra
 import Unit.Length
+import Unit.Mass
 import Unit.Time
 
--- FIXME: mass
 data Actor = Actor
   { position :: !(V3 (Kilo Metres Float))
   , velocity :: !(V3 ((Kilo Metres :/: Seconds) Float))
   , rotation :: !(Quaternion Float)
+  , mass     :: !(Kilo Grams Float)
   }
   deriving (Generic, Show)
 
@@ -37,6 +39,9 @@ velocity_ = field @"velocity"
 
 rotation_ :: Lens' Actor (Quaternion Float)
 rotation_ = field @"rotation"
+
+mass_ :: Lens' Actor (Kilo Grams Float)
+mass_ = field @"mass"
 
 
 class HasActor t where
