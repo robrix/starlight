@@ -19,6 +19,7 @@ import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
 import Linear.Quaternion
 import Linear.V3
+import Starlight.Radar
 import Unit.Algebra
 import Unit.Length
 import Unit.Mass
@@ -55,3 +56,6 @@ class HasActor t where
 
 instance HasActor Actor where
   actor_ = id
+
+instance HasMagnitude Actor where
+  magnitude_ = field @"magnitude"
