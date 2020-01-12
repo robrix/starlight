@@ -41,7 +41,7 @@ import Unit.Time
 
 inertia :: Has (Reader (Delta Seconds Float)) sig m => Actor -> m Actor
 inertia a@Actor{ position, velocity } = do
-  Delta dt <- ask
+  Delta dt <- ask @(Delta Seconds _)
   pure a { Actor.position = position + ((.*. dt) <$> velocity) }
 
 gravity :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
