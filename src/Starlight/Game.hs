@@ -167,8 +167,9 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   hasQuit <- sendM (newTVarIO False)
 
-  fork . reportProfile . runReader (Seconds @Float (1/120)) . fix $ \ loop -> do
-    id <~> flip (execState @(System Body)) (measure "integration" (runSystem (do
+  start <- now
+  fork . reportProfile . evalState start . fix $ \ loop -> do
+    id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
       measure "controls" $ player_ @Body .actions_ <~ controls
       measure "ai" $ npcs_ @Body <~> traverse ai
 
