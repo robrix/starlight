@@ -49,7 +49,7 @@ mass_ :: Lens' Actor (Kilo Grams Float)
 mass_ = field @"mass"
 
 magnitude_ :: HasCallStack => Lens' Actor (Kilo Metres Float)
-magnitude_ = field @"magnitude".asserting (not . isNaN)
+magnitude_ = field @"magnitude".asserting (not.isNaN)
 
 
 applyForce :: V3 ((Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float) -> Seconds Float -> Actor -> Actor
