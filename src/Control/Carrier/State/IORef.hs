@@ -1,3 +1,4 @@
+{-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
@@ -25,17 +26,17 @@ import Data.IORef
 runStateRef :: IORef s -> StateC s m a -> m a
 runStateRef ref (StateC m) = runReader ref m
 
-runState :: Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
+runState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
 runState s m = do
   ref <- sendM (newIORef s)
   a <- runStateRef ref m
   s' <- sendM (readIORef ref)
   pure (s', a)
 
-evalState :: Has (Lift IO) sig m => s -> StateC s m a -> m a
+evalState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m a
 evalState s = fmap snd . runState s
 
-execState :: Has (Lift IO) sig m => s -> StateC s m a -> m s
+execState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 
 newtype StateC s m a = StateC (ReaderC (IORef s) m a)
