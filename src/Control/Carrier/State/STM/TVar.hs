@@ -1,4 +1,9 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 -- | A 'Control.Concurrent.STM.TVar.TVar'-backed carrier for 'State'. Individual 'get's and 'put's are run 'atomically', but NB that 'modify' is /not/ atomic, so this is likely unsuitable for complex interleaving of concurrent reads and writes.
 module Control.Carrier.State.STM.TVar
 ( -- * State carrier
@@ -11,6 +16,7 @@ module Control.Carrier.State.STM.TVar
 , module Control.Effect.State
 ) where
 
+import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Concurrent.STM.TVar
@@ -37,3 +43,12 @@ execState s = fmap fst . runState s
 
 newtype StateC s m a = StateC (ReaderC (TVar s) m a)
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
+
+instance Has (Lift IO) sig m => Algebra (State s :+: sig) (StateC s m) where
+  alg = \case
+    L (Get   k) -> StateC ask >>= sendM . readTVarIO >>= k
+    L (Put s k) -> do
+      var <- StateC ask
+      StateC (sendM (atomically (writeTVar var s)))
+      k
+    R other     -> StateC (send (handleCoercible other))
