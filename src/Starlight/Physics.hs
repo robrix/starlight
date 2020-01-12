@@ -64,7 +64,7 @@ gravity a = do
     r :: (Kilo Metres :*: Kilo Metres) Float
     r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   -- gravitational constant : m³/kg/s²
-  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :/: (Kilo Grams) :/: Seconds :/: Seconds) Float
+  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :/: Kilo Grams :/: Seconds :/: Seconds) Float
   gravC = 6.67430e-11
 
 
