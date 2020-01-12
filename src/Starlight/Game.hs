@@ -77,10 +77,11 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position = V3 2_500_000 0 0
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            , mass     = 1000
+            { position  = V3 2_500_000 0 0
+            , velocity  = V3 0 150 0
+            , rotation  = axisAngle (unit _z) (pi/2)
+            , mass      = 1000
+            , magnitude = 30
             }
           , target  = Nothing
           , actions = mempty
@@ -88,10 +89,11 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = V3 2_500_000 0 0
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            , mass     = 1000
+            { position  = V3 2_500_000 0 0
+            , velocity  = V3 0 150 0
+            , rotation  = axisAngle (unit _z) (pi/2)
+            , mass      = 1000
+            , magnitude = 60
             }
           , target  = Nothing -- Just (C Player)
           , actions = mempty
@@ -99,10 +101,11 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = V3 2_500_000 0 0
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            , mass     = 1000
+            { position  = V3 2_500_000 0 0
+            , velocity  = V3 0 150 0
+            , rotation  = axisAngle (unit _z) (pi/2)
+            , mass      = 1000
+            , magnitude = 30
             }
           , target  = Just $ B (Star (10, "Sol"))
           , actions = mempty
@@ -110,10 +113,11 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position = V3 2_500_000 0 0
-            , velocity = V3 0 150 0
-            , rotation = axisAngle (unit _z) (pi/2)
-            , mass     = 1000
+            { position  = V3 2_500_000 0 0
+            , velocity  = V3 0 150 0
+            , rotation  = axisAngle (unit _z) (pi/2)
+            , mass      = 1000
+            , magnitude = 30
             }
           , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
           , actions = mempty

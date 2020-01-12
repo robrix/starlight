@@ -25,10 +25,11 @@ import Unit.Mass
 import Unit.Time
 
 data Actor = Actor
-  { position :: !(V3 (Kilo Metres Float))
-  , velocity :: !(V3 ((Kilo Metres :/: Seconds) Float))
-  , rotation :: !(Quaternion Float)
-  , mass     :: !(Kilo Grams Float)
+  { position  :: !(V3 (Kilo Metres Float))
+  , velocity  :: !(V3 ((Kilo Metres :/: Seconds) Float))
+  , rotation  :: !(Quaternion Float)
+  , mass      :: !(Kilo Grams Float)
+  , magnitude :: !(Kilo Metres Float) -- approx. equivalent to diameter; should bound the actor’s geometry
   }
   deriving (Generic, Show)
 
