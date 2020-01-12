@@ -51,11 +51,11 @@ ship_ = field @"ship"
 
 
 data Action
-  = Thrust
-  | Turn Turn
-  | Face Face
-  | Fire Weapon
-  | ChangeTarget (Maybe Change)
+  = Thrust                      -- ^ Fire thrusters at current heading.
+  | Turn Turn                   -- ^ Turn left or right.
+  | Face Face                   -- ^ Face toward/away from heading/target.
+  | Fire Weapon                 -- ^ Fire the indicated weapon.
+  | ChangeTarget (Maybe Change) -- ^ Change or cancel the target.
   deriving (Eq, Ord, Show)
 
 data Turn
