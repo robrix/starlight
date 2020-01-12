@@ -13,7 +13,7 @@ import Control.Effect.State
 import Control.Effect.Lens
 import Control.Exception (assert)
 import Control.Lens (ASetter, Getting, Iso', Lens', iso, set, (^.))
-import GHC.Stack (HasCallStack)
+import GHC.Stack (HasCallStack, withFrozenCallStack)
 
 -- | Compose a getter onto the input of a Kleisli arrow and run it on the 'State'.
 (~>) :: Has (State s) sig m => Getting a s a -> (a -> m b) -> m b
@@ -60,4 +60,4 @@ infixr 2 <->
 
 
 asserting :: HasCallStack => (a -> Bool) -> Iso' a a
-asserting pred = iso id (assert . pred <*> id)
+asserting pred = iso id (withFrozenCallStack . assert . pred <*> id)
