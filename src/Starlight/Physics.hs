@@ -123,7 +123,7 @@ runActions i c = do
     Jump -> case target of
       Just target
         | distance (projected (c^.actor_)) (projected target) < 10000 -> pure c
-        | isFacing (pi/128) rotation targetAngle -> pure $! c & actor_.position_ .~ projected target
+        | isFacing (pi/128) rotation targetAngle -> pure $! c & actor_.position_ .~ projected target -- FIXME: jump *near* the target
         | otherwise                              -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
         targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
