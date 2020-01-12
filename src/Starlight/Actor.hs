@@ -16,7 +16,7 @@ module Starlight.Actor
 ) where
 
 import Control.Effect.Lens.Exts (asserting)
-import Control.Lens (Lens', (&), (+~), (^.))
+import Control.Lens (Lens', none, (&), (+~), (^.))
 import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
@@ -36,8 +36,8 @@ data Actor = Actor
   }
   deriving (Generic, Show)
 
-position_ :: Lens' Actor (V3 (Kilo Metres Float))
-position_ = field @"position"
+position_ :: HasCallStack => Lens' Actor (V3 (Kilo Metres Float))
+position_ = field @"position".asserting (none isNaN)
 
 velocity_ :: Lens' Actor (V3 ((Kilo Metres :/: Seconds) Float))
 velocity_ = field @"velocity"
