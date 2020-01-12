@@ -18,10 +18,12 @@ module Starlight.System
 , neighbourhoodOfPlayer
 ) where
 
-import           Control.Lens (Lens, Lens', ix, lens, (^.), (^?))
+import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
+import           Data.Maybe (fromMaybe)
 import           GHC.Generics (Generic)
+import           GHC.Stack (HasCallStack)
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
@@ -45,8 +47,8 @@ scale_ = field @"scale"
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = field @"bodies"
 
-player_ :: Lens' (System a) Character
-player_ = characters_.lens (Map.! Player) (flip (Map.insert Player))
+player_ :: HasCallStack => Lens' (System a) Character
+player_ = characters_.at Player .iso (fromMaybe (error "player missing")) Just
 
 npcs_ :: Lens' (System a) [Character]
 npcs_ = characters_.lens (Map.elems . Map.delete Player) (\ m cs -> Map.fromList ((Player, m Map.! Player) : zipWith ((,) . NPC) [0..] cs))
