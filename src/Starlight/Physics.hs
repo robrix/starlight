@@ -123,7 +123,7 @@ runActions i c = do
     Jump -> case target of
       Just target
         | isFacing (pi/128) rotation targetAngle -> pure c
-        | otherwise                              -> foldM (go dt system) c [ Face Target ] -- FIXME: face *near* the target
+        | otherwise                              -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
         targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
       _ -> pure c
