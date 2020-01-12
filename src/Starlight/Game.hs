@@ -83,7 +83,7 @@ runGame system
             }
           , target  = Nothing
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, mass = 1000, radar }
           }
         , Character
           { actor   = Actor
@@ -93,7 +93,7 @@ runGame system
             }
           , target  = Nothing -- Just (C Player)
           , actions = mempty
-          , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30, radar }
+          , ship    = Ship{ colour = red, armour = Interval 500 500, scale = 30, mass = 1000, radar }
           }
         , Character
           { actor   = Actor
@@ -103,7 +103,7 @@ runGame system
             }
           , target  = Just $ B (Star (10, "Sol"))
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, mass = 1000, radar }
           }
         , Character
           { actor   = Actor
@@ -113,7 +113,7 @@ runGame system
             }
           , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
           , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, radar }
+          , ship    = Ship{ colour = white, armour = 1_000, scale = 15, mass = 1000, radar }
           }
         ]
       } where
