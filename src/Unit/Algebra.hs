@@ -4,9 +4,9 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -35,41 +35,49 @@ import Unit
 
 -- * Algebra
 
-class (Unit u, Unit v, Unit w) => Mul u v w | u v -> w where
-  (.*.) :: Fractional a => u a -> v a -> w a
+class (Unit u, Unit v) => Mul u v where
+  type Res u v :: * -> *
+  (.*.) :: Fractional a => u a -> v a -> Res u v a
 
 infixl 7 .*.
 
-(./.) :: forall u v w a . (Mul u (Inv v) w, Unit v, Fractional a) => u a -> v a -> w a
+(./.) :: forall u v a . (Mul u (Inv v), Unit v, Fractional a) => u a -> v a -> Res u (Inv v) a
 u ./. v = u .*. Inv @v (negate (prj v))
 
 infixl 7 ./.
 
-instance (MulBy step u v w, Step u v ~ step, Unit u, Unit v, Unit w) => Mul u v w where
+instance (MulBy step u v, Step u v ~ step, Unit u, Unit v) => Mul u v where
+  type Res u v = ResBy (Step u v) u v
   (.*.) = mulBy @step
 
 
-class (Unit u, Unit v, Unit w) => MulBy (step :: Act) u v w | step u v -> w where
-  mulBy :: Fractional a => u a -> v a -> w a
+class (Unit u, Unit v) => MulBy (step :: Act) u v where
+  type ResBy step u v :: * -> *
+  mulBy :: Fractional a => u a -> v a -> ResBy step u v a
 
 -- | Append at the head of the chain.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Prepend u v (u :*: v) where
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Prepend u v where
+  type ResBy 'Prepend u v = u :*: v
   u `mulBy` v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals at left.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit u', u' ~ InvOf u) => MulBy 'CancelL (u :*: v) u' v where
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit u', u' ~ InvOf u) => MulBy 'CancelL (u :*: v) u' where
+  type ResBy 'CancelL (u :*: v) u' = v
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Elimination by reciprocals at right.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit v', v' ~ InvOf v) => MulBy 'CancelR (u :*: v) v' u where
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit v', v' ~ InvOf v) => MulBy 'CancelR (u :*: v) v' where
+  type ResBy 'CancelR (u :*: v) v' = u
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Decompose products on the right.
-instance {-# OVERLAPPABLE #-} (Mul u v' uv', Mul uv' v w, Unit v', Unit uv') => MulBy 'Decompose u (v :*: v') uv' where
+instance {-# OVERLAPPABLE #-} (Mul u v', Mul (Res u v') v, Unit v', Unit (Res (Res u v') v)) => MulBy 'Decompose u (v :*: v') where
+  type ResBy 'Decompose u (v :*: v') = Res (Res u v') v
   u `mulBy` Prd v = pure (prj u * v)
 
 -- | Walk the chain.
-instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => MulBy 'Walk (u :*: u') v (w :*: u') where
+instance {-# OVERLAPPABLE #-} (Mul u v, Unit u') => MulBy 'Walk (u :*: u') v where
+  type ResBy 'Walk (u :*: u') v = Res u v :*: u'
   Prd u `mulBy` v = Prd (u * prj v)
 
 
