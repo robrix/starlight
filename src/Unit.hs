@@ -18,21 +18,12 @@ module Unit
 , format
 , formatDec
 , formatExp
-  -- * Change
-, Delta(..)
 ) where
 
 import Control.Lens ((^.))
 import Control.Lens.Iso
 import Data.Coerce
 import Data.Functor.Const
-import Foreign.Storable
-import GL.Type as GL
-import GL.Uniform
-import Linear.Conjugate
-import Linear.Epsilon
-import Linear.Metric
-import Linear.Vector
 import Numeric
 
 -- * Units
@@ -70,9 +61,3 @@ formatDec = formatWith showFFloat
 
 formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
-
-
--- * Change
-
-newtype Delta u a = Delta { getDelta :: u a }
-  deriving (Additive, Applicative, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)

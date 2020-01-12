@@ -157,4 +157,4 @@ runSystem
 runSystem m = do
   t <- realToFrac <$> (since =<< asks getEpoch)
   system <- get
-  runReader (systemAt system (getDelta t)) m
+  runReader (systemAt system t) m

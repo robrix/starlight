@@ -40,14 +40,14 @@ import Unit.Length
 import Unit.Mass
 import Unit.Time
 
-inertia :: Has (Reader (Delta Seconds Float)) sig m => Actor -> m Actor
+inertia :: Has (Reader (Seconds Float)) sig m => Actor -> m Actor
 inertia a@Actor{ position, velocity } = do
-  Delta dt <- ask @(Delta Seconds _)
+  dt <- ask @(Seconds _)
   pure a { Actor.position = position + ((.*. dt) <$> velocity) }
 
-gravity :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
+gravity :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
 gravity a = do
-  Delta dt <- ask @(Delta Seconds Float)
+  dt <- ask @(Seconds Float)
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
   go dt a StateVectors{ actor = b } = applyForce (force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
@@ -65,11 +65,11 @@ gravity a = do
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
-hit :: (Has (Reader (Delta Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => CharacterIdentifier -> Character -> m Character
+hit :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => CharacterIdentifier -> Character -> m Character
 hit i c = do
   dt <- ask
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
-  go (Delta (Seconds dt)) char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o, firedBy = i' }
+  go (Seconds dt) char@Character{ actor = Actor{ position = c }, ship = Ship{ scale = r } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
     , intersects (c^._xy) (pure r) (o^._xy) (cartesian2 (pure <$> theta) 1)
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
@@ -80,7 +80,7 @@ hit i c = do
 
 runActions
   :: ( Effect sig
-     , Has (Reader (Delta Seconds Float)) sig m
+     , Has (Reader (Seconds Float)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (State (System Body)) sig m
      )
@@ -88,10 +88,10 @@ runActions
   -> Character
   -> m Character
 runActions i c = do
-  dt <- ask @(Delta Seconds Float)
+  dt <- ask @(Seconds Float)
   system <- ask @(System StateVectors)
   execState c (traverse_ (go dt system) (actions c)) where
-  go (Delta dt) system = \case
+  go dt system = \case
     Thrust -> do
       rotation <- use (actor_.rotation_)
       actor_ %= applyForce ((thrust ^*) <$> rotate rotation (unit _x)) dt

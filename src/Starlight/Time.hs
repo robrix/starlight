@@ -20,7 +20,7 @@ timed
   :: ( Has (Lift IO) sig m
      , Has (State UTCTime) sig m
      )
-  => ReaderC (Delta Seconds Float) m a
+  => ReaderC (Seconds Float) m a
   -> m a
 timed m = do
   dt <- fmap realToFrac . since =<< get

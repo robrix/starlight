@@ -54,14 +54,14 @@ draw
      , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader (Delta Seconds Float)) sig m
+     , Has (Reader (Seconds Float)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (Reader UI) sig m
      , Has (Reader View) sig m
      )
   => m ()
 draw = measure "draw" . runLiftIO $ do
-  dt <- ask @(Delta Seconds Float)
+  dt <- ask @(Seconds Float)
   UI{ fps = fpsLabel, target = targetLabel, face } <- ask
   let font = Font face 18
   bind @Framebuffer Nothing
