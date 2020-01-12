@@ -45,8 +45,8 @@ velocity_ = field @"velocity"
 rotation_ :: Lens' Actor (Quaternion Float)
 rotation_ = field @"rotation"
 
-mass_ :: Lens' Actor (Kilo Grams Float)
-mass_ = field @"mass"
+mass_ :: HasCallStack => Lens' Actor (Kilo Grams Float)
+mass_ = field @"mass".asserting (not.isNaN)
 
 magnitude_ :: HasCallStack => Lens' Actor (Kilo Metres Float)
 magnitude_ = field @"magnitude".asserting (not.isNaN)
