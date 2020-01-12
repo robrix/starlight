@@ -53,8 +53,8 @@ gravity a = do
   go dt a StateVectors{ actor = b, body = Body{ mass } }
     = a & velocity_ +~ (force ./. shipMass .*. dt *^ coerce ((b^.position_) `direction` (a^.position_))) where
     -- FIXME: units should be N (i.e. kg·m/s/s)
-    force :: (Kilo Metres :*: Kilo Grams :*: Inv Seconds :*: Inv Seconds) Float
-    force = gravC .*. (mass .*. shipMass ./. r)
+    force :: (Kilo Grams :*: Kilo Metres :*: Inv Seconds :*: Inv Seconds) Float
+    force = (mass .*. shipMass ./. r) .*. gravC
     -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
