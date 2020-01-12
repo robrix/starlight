@@ -149,7 +149,7 @@ game
 game = Sol.system >>= \ system -> runGame system $ do
   trace "loading typeface"
   face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
-  measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-" -- characters to preload
+  measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-⁻¹·" -- characters to preload
 
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
