@@ -165,8 +165,7 @@ game = Sol.system >>= \ system -> runGame system $ do
     measure "swap" Window.swap *> loop
 
 frame
-  :: ( Effect sig
-     , Has Check sig m
+  :: ( Has Check sig m
      , Has Empty sig m
      , Has (Lift IO) sig m
      , Has Profile sig m

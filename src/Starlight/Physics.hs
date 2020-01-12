@@ -12,23 +12,22 @@ module Starlight.Physics
 , runActions
 ) where
 
-import Control.Algebra (Effect)
 import Control.Applicative ((<|>))
 import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Effect.Reader
-import Control.Lens hiding (modifying, un, use, view, views, (%=), (*=), (+=), (.=))
-import Control.Monad (guard)
+import Control.Lens hiding (un, view, (%=))
+import Control.Monad (foldM, guard)
 import Data.Coerce
-import Data.Foldable (foldl', for_, traverse_)
+import Data.Foldable (foldl')
 import Data.Functor.Interval
 import Data.Ix (inRange)
 import Data.List (elemIndex)
 import Geometry.Circle (intersects)
 import Linear.Exts as L
 import Starlight.Actor as Actor
-import Starlight.Body as Body
-import Starlight.Character as Character
+import Starlight.Body
+import Starlight.Character
 import Starlight.Identifier
 import Starlight.Ship
 import Starlight.System as System
@@ -81,8 +80,7 @@ hit i c = do
 
 
 runActions
-  :: ( Effect sig
-     , Has (Reader (Seconds Float)) sig m
+  :: ( Has (Reader (Seconds Float)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (State (System Body)) sig m
      )
@@ -92,32 +90,35 @@ runActions
 runActions i c = do
   dt <- ask @(Seconds Float)
   system <- ask @(System StateVectors)
-  execState c (traverse_ (go dt system) (actions c)) where
-  go dt system = \case
+  foldM (go dt system) c (actions c) where
+  go dt system c = \case
     Thrust -> do
-      rotation <- use (actor_.rotation_)
-      actor_ %= applyForce ((thrust ^*) <$> rotate rotation (unit _x)) dt
+      let rotation = c^.actor_.rotation_
+      pure $ c & actor_ %~ applyForce ((thrust ^*) <$> rotate rotation (unit _x)) dt
 
     Face dir -> do
-      actor <- use actor_
-      target <- fmap (either Body.actor Character.actor) <$> use (target_._Just.to (system !?))
-      for_ (direction actor target) $
-        modifying (actor_.rotation_) . face angular . fmap prj . angleOf . (^._xy) where
+      let actor = c^.actor_
+          target = c^.target_._Just.to (system !?)
+      case direction actor (either (^.actor_) (^.actor_) <$> target) of
+        Just t  -> pure $! c & actor_.rotation_ %~ face angular (prj <$> angleOf (t^._xy))
+        Nothing -> pure c
+      where
       direction Actor{ velocity, position } t = case dir of
         Forwards  -> Just velocity
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
         Target    -> t^?_Just.to projected.to (`L.direction` position).coerced
 
-    Turn t -> actor_.rotation_ *= axisAngle (unit _z) (getRadians (case t of
+    Turn t -> pure $! c & actor_.rotation_ *~ axisAngle (unit _z) (getRadians (case t of
       L -> angular
       R -> -angular))
 
     Fire Main -> do
-      position <- use (actor_.position_)
-      rotation <- use (actor_.rotation_)
+      let position = c^.actor_.position_
+          rotation = c^.actor_.rotation_
       beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position, firedBy = i }:)
+      pure c
 
-    ChangeTarget change -> target_ %= maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
+    ChangeTarget change -> pure $! c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
       elimChange prev next = \case { Prev -> prev ; Next -> next }
       switchTarget dir = \case
         Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
@@ -125,12 +126,9 @@ runActions i c = do
         Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
       identifiers = System.identifiers system
 
-    Jump -> pure ()
+    Jump -> pure c
     where
     thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
     thrust  = 1000 * 20 * 60
     angular = getSeconds dt *^ Radians 5
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
-
-  actor_ :: Lens' Character Actor
-  actor_ = Actor.actor_
