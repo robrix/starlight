@@ -42,12 +42,15 @@ u ./. v = u .*. Recip (negate (prj v))
 
 infixl 7 ./.
 
+-- | Append at the head of the chain.
 instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul u v (u :*: v) where
   u .*. v = Prd (prj u * prj v)
 
+-- | Elimination by reciprocals.
 instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul (u :*: v) (Recip v) u where
   u .*. v = pure (prj u * prj v)
 
+-- | Walk the chain.
 instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => Mul (u :*: u') v (w :*: u') where
   Prd u .*. v = Prd (u * prj v)
 
