@@ -15,9 +15,11 @@ module Starlight.Actor
 , HasActor(..)
 ) where
 
+import Control.Effect.Lens.Exts (asserting)
 import Control.Lens (Lens', (&), (+~), (^.))
 import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
+import GHC.Stack (HasCallStack)
 import Linear.Quaternion
 import Linear.V3
 import Unit.Algebra
@@ -46,8 +48,8 @@ rotation_ = field @"rotation"
 mass_ :: Lens' Actor (Kilo Grams Float)
 mass_ = field @"mass"
 
-magnitude_ :: Lens' Actor (Kilo Metres Float)
-magnitude_ = field @"magnitude"
+magnitude_ :: HasCallStack => Lens' Actor (Kilo Metres Float)
+magnitude_ = field @"magnitude".asserting (not . isNaN)
 
 
 applyForce :: V3 ((Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float) -> Seconds Float -> Actor -> Actor
