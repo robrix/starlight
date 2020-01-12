@@ -64,20 +64,25 @@ instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit u', u' ~ InvOf u) => MulBy '
 instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit v', v' ~ InvOf v) => MulBy 'CancelR (u :*: v) v' u where
   u `mulBy` v = pure (prj u * prj v)
 
+-- | Decompose products on the right.
+instance {-# OVERLAPPABLE #-} (Mul u v' uv', Mul uv' v w, Unit v', Unit uv') => MulBy 'Decompose u (v :*: v') uv' where
+  u `mulBy` Prd v = pure (prj u * v)
+
 -- | Walk the chain.
 instance {-# OVERLAPPABLE #-} (Mul u v w, Unit u') => MulBy 'Walk (u :*: u') v (w :*: u') where
   Prd u `mulBy` v = Prd (u * prj v)
 
 
-data Act = Prepend | CancelL | CancelR | Walk
+data Act = Prepend | CancelL | CancelR | Decompose | Walk
 
 type family Step u v where
-  Step (v     :*: _)     (Inv v) = 'CancelL
-  Step (Inv v :*: _)     v       = 'CancelL
-  Step (_     :*: v)     (Inv v) = 'CancelR
-  Step (_     :*: Inv v) v       = 'CancelR
-  Step (_     :*: _)     _       = 'Walk
-  Step _                 _       = 'Prepend
+  Step (v     :*: _)     (Inv v)   = 'CancelL
+  Step (Inv v :*: _)     v         = 'CancelL
+  Step (_     :*: v)     (Inv v)   = 'CancelR
+  Step (_     :*: Inv v) v         = 'CancelR
+  Step _                 (_ :*: _) = 'Decompose
+  Step (_     :*: _)     _         = 'Walk
+  Step _                 _         = 'Prepend
 
 type family InvOf u where
   InvOf (Inv u) = u
