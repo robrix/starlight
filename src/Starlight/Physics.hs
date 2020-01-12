@@ -57,6 +57,8 @@ gravity a = do
     -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
+    -- FIXME: this is converting km to m but then treating it as km, so this whole thing is off by a huge factor
+    -- FIXME: but if not for the above the sun just sucks you in to your death immediately
     r :: (Kilo Metres :*: Kilo Metres) Float
     r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   -- gravitational constant : m³/kg/s²
