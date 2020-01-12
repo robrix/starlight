@@ -54,7 +54,7 @@ drawShip
      )
   => Character
   -> m ()
-drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, armour, scale = r }, actions } = measure "ship" . UI.using getDrawable $ do
+drawShip Character{ actor = Actor{ position, rotation, magnitude }, ship = S.Ship{ colour, armour }, actions } = measure "ship" . UI.using getDrawable $ do
   vs@View{ focus } <- ask
   sys@System{ scale } <- ask @(System StateVectors)
   matrix_
@@ -62,7 +62,7 @@ drawShip Character{ actor = Actor{ position, rotation }, ship = S.Ship{ colour, 
     !*! systemTrans sys
     !*! translated3 (ext (negated (prj <$> focus)) 0)
     !*! translated3 (prj <$> position)
-    !*! scaled (ext (pure @V3 (r / scale)) 1)
+    !*! scaled (ext (pure @V3 (prj magnitude * 0.5 / scale)) 1)
     !*! mkTransformation rotation 0
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v ^. _r) . (_r +~ 0.5) . (_b -~ 0.25) else id)

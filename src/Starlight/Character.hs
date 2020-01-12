@@ -22,7 +22,6 @@ import Data.Set (Set)
 import GHC.Generics (Generic)
 import Starlight.Actor (Actor, HasActor(..))
 import Starlight.Identifier
-import Starlight.Radar
 import Starlight.Ship
 
 data Character = Character
@@ -36,10 +35,6 @@ data Character = Character
 instance HasActor Character where
   actor_ = field @"actor"
 
-instance HasMagnitude Character where
-  magnitude_ = ship_.magnitude_
-
-
 target_ :: Lens' Character (Maybe Identifier)
 target_ = field @"target"
 
@@ -51,11 +46,12 @@ ship_ = field @"ship"
 
 
 data Action
-  = Thrust
-  | Turn Turn
-  | Face Face
-  | Fire Weapon
-  | ChangeTarget (Maybe Change)
+  = Thrust                      -- ^ Fire thrusters at current heading.
+  | Turn Turn                   -- ^ Turn left or right.
+  | Face Face                   -- ^ Face toward/away from heading/target.
+  | Fire Weapon                 -- ^ Fire the indicated weapon.
+  | ChangeTarget (Maybe Change) -- ^ Change or cancel the target.
+  | Jump                        -- ^ Make a long-range jump to the target.
   deriving (Eq, Ord, Show)
 
 data Turn

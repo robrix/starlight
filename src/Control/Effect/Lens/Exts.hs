@@ -5,12 +5,15 @@ module Control.Effect.Lens.Exts
 , (<--)
 , (-->)
 , (<->)
+, asserting
 , module Control.Effect.Lens
 ) where
 
 import Control.Effect.State
 import Control.Effect.Lens
-import Control.Lens (ASetter, Getting, Lens', set, (^.))
+import Control.Exception (assert)
+import Control.Lens (ASetter, Getting, Iso', Lens', iso, set, (^.))
+import GHC.Stack (HasCallStack)
 
 -- | Compose a getter onto the input of a Kleisli arrow and run it on the 'State'.
 (~>) :: Has (State s) sig m => Getting a s a -> (a -> m b) -> m b
@@ -54,3 +57,7 @@ infixr 2 -->
 lens <-> act = lens <-- lens --> act
 
 infixr 2 <->
+
+
+asserting :: HasCallStack => (a -> Bool) -> Iso' a a
+asserting pred = iso id (assert . pred <*> id)

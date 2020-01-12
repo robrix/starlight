@@ -37,7 +37,6 @@ import           GHC.Generics
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
-import           Starlight.Radar
 import           Starlight.System
 import           Starlight.Time
 import           UI.Colour
@@ -57,9 +56,6 @@ data StateVectors = StateVectors
 instance HasActor StateVectors where
   actor_ = field @"actor"
 
-instance HasMagnitude StateVectors where
-  magnitude_ = field @"body".magnitude_
-
 data Body = Body
   { radius      :: !(Kilo Metres Float)
   , mass        :: !(Kilo Grams Float)
@@ -69,9 +65,6 @@ data Body = Body
   , orbit       :: !Orbit
   }
   deriving (Generic, Show)
-
-instance HasMagnitude Body where
-  magnitude_ = field @"radius".unitary.iso (*2) (/2)
 
 data Orbit = Orbit
   { eccentricity    :: !Float
@@ -91,7 +84,7 @@ orbitTimeScale = 1
 
 
 actorAt :: Body -> Seconds Float -> Actor
-actorAt Body{ orientation = axis, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
+actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
   { position = pure <$> position
   , velocity = if r == 0 || p == 0 then 0 else pure <$> (position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly)
   , rotation
@@ -99,6 +92,7 @@ actorAt Body{ orientation = axis, mass, period = rot, orbit = Orbit{ eccentricit
     * axis
     * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
   , mass
+  , magnitude = radius * 2
   } where
   position = ext (cartesian2 (Radians trueAnomaly) r) 0
   t' = timeOfPeriapsis + t * orbitTimeScale
