@@ -24,6 +24,7 @@ import Data.Functor.Interval
 import Data.Ix (inRange)
 import Data.List (elemIndex)
 import Geometry.Circle (intersects)
+import GHC.Stack (HasCallStack)
 import Linear.Exts as L
 import Starlight.Actor as Actor
 import Starlight.Body
@@ -39,12 +40,12 @@ import Unit.Length
 import Unit.Mass
 import Unit.Time
 
-inertia :: Has (Reader (Seconds Float)) sig m => Actor -> m Actor
-inertia a@Actor{ position, velocity } = do
+inertia :: (Has (Reader (Seconds Float)) sig m, HasCallStack) => Actor -> m Actor
+inertia a@Actor{ velocity } = do
   dt <- ask @(Seconds _)
-  pure a { Actor.position = position + ((.*. dt) <$> velocity) }
+  pure $! a & position_ +~ ((.*. dt) <$> velocity)
 
-gravity :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => Actor -> m Actor
+gravity :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m, HasCallStack) => Actor -> m Actor
 gravity a = do
   dt <- ask @(Seconds Float)
   System{ bodies } <- ask
@@ -84,6 +85,7 @@ runActions
   :: ( Has (Reader (Seconds Float)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (State (System Body)) sig m
+     , HasCallStack
      )
   => CharacterIdentifier
   -> Character
