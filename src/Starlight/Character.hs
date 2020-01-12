@@ -56,6 +56,7 @@ data Action
   | Face Face                   -- ^ Face toward/away from heading/target.
   | Fire Weapon                 -- ^ Fire the indicated weapon.
   | ChangeTarget (Maybe Change) -- ^ Change or cancel the target.
+  | Jump                        -- ^ Make a long-range jump to the target.
   deriving (Eq, Ord, Show)
 
 data Turn

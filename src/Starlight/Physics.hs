@@ -124,6 +124,8 @@ runActions i c = do
           i' = elimChange (i - 1) (i + 1)  dir
         Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
       identifiers = System.identifiers system
+
+    Jump -> pure ()
     where
     thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
     thrust  = 1000 * 20 * 60
