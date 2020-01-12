@@ -57,11 +57,11 @@ drawRadar
      )
   => m ()
 drawRadar = measure "radar" . UI.using getDrawable $ do
-  system@System{ bodies } <- ask @(System B.StateVectors)
+  system@System{ scale, bodies } <- ask @(System B.StateVectors)
   let target   = system^.player_.target_
       here     = system^.player_.actor_.position_._xy
       npcs     = system^.npcs_
-      vertices = verticesForShips npcs <> verticesForBodies bodies
+      vertices = verticesForShips scale npcs <> verticesForBodies bodies
 
   measure "realloc/copy" $ do
     B.realloc (length vertices) B.Static B.Draw
@@ -95,10 +95,10 @@ verticesForBodies vs =
   | B.StateVectors{ body = B.Body{ radius = r, colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
-verticesForShips :: Foldable t => t Character -> [V Identity]
-verticesForShips cs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity scale, colour = Identity colour }
-  | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale } } <- toList cs
+verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
+verticesForShips scale cs =
+  [ V{ there = Identity (prj <$> there^._xy), r = Identity (r / scale), colour = Identity colour }
+  | Character{ actor = Actor{ position = there }, ship = S.Ship { colour, scale = r } } <- toList cs
   ]
 
 
