@@ -50,7 +50,9 @@ gravity a = do
   dt <- ask @(Seconds Float)
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
-  go dt a StateVectors{ actor = b } = applyForce (force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
+  go dt a StateVectors{ actor = b }
+    | nearZero r = a
+    | otherwise  = applyForce (force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
     -- FIXME: shouldn’t compute this for colocated masses
     -- FIXME: units should be N (i.e. kg·m/s/s)
     force :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
