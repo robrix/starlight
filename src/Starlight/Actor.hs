@@ -42,8 +42,8 @@ position_ = field @"position".asserting (none isNaN)
 velocity_ :: HasCallStack => Lens' Actor (V3 ((Kilo Metres :/: Seconds) Float))
 velocity_ = field @"velocity".asserting (none isNaN)
 
-rotation_ :: Lens' Actor (Quaternion Float)
-rotation_ = field @"rotation"
+rotation_ :: HasCallStack => Lens' Actor (Quaternion Float)
+rotation_ = field @"rotation".asserting (none isNaN)
 
 mass_ :: HasCallStack => Lens' Actor (Kilo Grams Float)
 mass_ = field @"mass".asserting (not.isNaN)
