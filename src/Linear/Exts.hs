@@ -13,7 +13,6 @@ module Linear.Exts
 , toAxisAngle
 , cartesian2
 , polar2
-, (^*^)
 , Ext(..)
 , module Linear.Epsilon
 , module Linear.Matrix
@@ -111,12 +110,6 @@ cartesian2 (Radians phi) r = V2 (r * cos phi) (r * sin phi)
 
 polar2 :: RealFloat a => V2 a -> (Radians a, a)
 polar2 v = (angleOf v, norm v) where
-
-
-(^*^) :: (Applicative f, Num a) => f a -> f a -> f a
-(^*^) = liftA2 (*)
-
-infixl 7 ^*^
 
 
 -- | Extensions of a vector with an extra dimension.
