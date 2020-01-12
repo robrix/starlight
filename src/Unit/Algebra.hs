@@ -32,13 +32,13 @@ import Unit
 
 -- * Algebra
 
-class (Unit u, Unit v, Unit w) => Mul u v w | u w -> v where
+class (Unit u, Unit v, Unit w) => Mul u v w where
   (.*.) :: Fractional a => u a -> v a -> w a
 
 infixl 7 .*.
 
-(./.) :: (Mul u (Inv v) w, Unit v, Fractional a) => u a -> v a -> w a
-u ./. v = u .*. Inv (negate (prj v))
+(./.) :: forall u v w a . (Mul u (Inv v) w, Unit v, Fractional a) => u a -> v a -> w a
+u ./. v = u .*. Inv @v (negate (prj v))
 
 infixl 7 ./.
 
@@ -48,6 +48,10 @@ instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul u v (u :*: v) where
 
 -- | Elimination by reciprocals.
 instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul (u :*: v) (Inv v) u where
+  u .*. v = pure (prj u * prj v)
+
+-- | Elimination of reciprocals.
+instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => Mul (u :*: Inv v) v u where
   u .*. v = pure (prj u * prj v)
 
 -- | Walk the chain.
