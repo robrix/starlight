@@ -7,11 +7,14 @@ module Control.Carrier.State.STM.TVar
 , evalState
 , execState
 , StateC(..)
+  -- * State effect
+, module Control.Effect.State
 ) where
 
 import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Concurrent.STM.TVar
+import Control.Effect.State
 import Control.Monad.IO.Class
 import Control.Monad.STM
 import Control.Monad.Trans.Class
