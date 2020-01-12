@@ -6,7 +6,6 @@ module Starlight.Ship
 , colour_
 , armour_
 , scale_
-, mass_
 , radar_
 ) where
 
@@ -17,13 +16,11 @@ import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
 import Starlight.Radar
 import UI.Colour
-import Unit.Mass
 
 data Ship = Ship
   { colour :: Colour Float
   , armour :: Interval Identity Float
   , scale  :: Float
-  , mass   :: Kilo Grams Float
   , radar  :: Radar
   }
   deriving (Generic, Show)
@@ -36,9 +33,6 @@ armour_ = field @"armour"
 
 scale_ :: Lens' Ship Float
 scale_ = field @"scale"
-
-mass_ :: Lens' Ship (Kilo Grams Float)
-mass_ = field @"mass"
 
 radar_ :: Lens' Ship Radar
 radar_ = field @"radar"
