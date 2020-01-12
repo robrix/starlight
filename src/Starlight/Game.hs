@@ -171,7 +171,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   hasQuit <- sendM (newTVarIO False)
 
   fork $ reportProfile . runReader (Seconds @Float (1/60)) . fix $ \ loop -> do
-    id <~> flip (execState @(System Body)) (runSystem (do
+    id <~> flip (execState @(System Body)) (measure "integration" (runSystem (do
       measure "controls" $ player_ @Body .actions_ <~ controls
       measure "ai" $ npcs_ @Body <~> traverse ai
 
@@ -184,7 +184,7 @@ game = Sol.system >>= \ system -> runGame system $ do
         <*> ( measure "gravity" . (actor_ @Character <-> gravity)
           >=> measure "hit" . hit i
           >=> measure "runActions" . runActions i
-          >=> measure "inertia" . (actor_ <-> inertia)))))
+          >=> measure "inertia" . (actor_ <-> inertia))))))
     yield
     hasQuit <- sendM (readTVarIO hasQuit)
     unless hasQuit loop
