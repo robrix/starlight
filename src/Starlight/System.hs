@@ -18,7 +18,7 @@ module Starlight.System
 , neighbourhoodOfPlayer
 ) where
 
-import           Control.Exception
+import           Control.Effect.Lens.Exts (asserting)
 import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
@@ -55,7 +55,7 @@ npcs_ :: Lens' (System a) [Character]
 npcs_ = characters_.lens (Map.elems . Map.delete Player) (\ m cs -> Map.fromList ((Player, m Map.! Player) : zipWith ((,) . NPC) [0..] cs))
 
 characters_ :: HasCallStack => Lens' (System a) (Map.Map CharacterIdentifier Character)
-characters_ = field @"characters".iso id (assert . Map.member Player <*> id)
+characters_ = field @"characters".asserting (Map.member Player)
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
