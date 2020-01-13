@@ -214,7 +214,7 @@ system = do
         , colour      = white
         , orbit
         }
-      scale = un @_ @(Kilo Metres) (100 / radius (bodies Map.! solI))
+      scale = un @(Kilo Metres) (100 / radius (bodies Map.! solI))
 
   pure System
     { scale

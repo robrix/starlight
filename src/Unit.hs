@@ -36,13 +36,13 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
 
   suffix :: Const ShowS (u a)
 
-unitary :: forall dim u a b . (Unit dim u, Fractional a, Fractional b) => Iso (u a) (u b) a b
+unitary :: forall u a b dim . (Unit dim u, Fractional a, Fractional b) => Iso (u a) (u b) a b
 unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_ @u)))
 
-un :: (Unit dim u, Fractional a) => u a -> a
+un :: forall u a dim . (Unit dim u, Fractional a) => u a -> a
 un = (^.unitary)
 
-nu :: (Unit dim u, Fractional a) => a -> u a
+nu :: forall u a dim . (Unit dim u, Fractional a) => a -> u a
 nu = (^.from unitary)
 
 

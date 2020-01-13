@@ -96,7 +96,7 @@ draw = measure "draw" . runLiftIO $ do
           | pos <- either Body.actor Character.actor t ^. position_ -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (pure @(Kilo Metres) (distance pos position))
         _ -> ""
 
-  measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (nu @_ @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (nu @_ @(Frames :/: Seconds) (1/dt)))
+  measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (nu @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (nu @(Frames :/: Seconds) (1/dt)))
   measure "setLabel" $ setLabel targetLabel font (describeTarget target)
 
   fpsSize <- labelSize fpsLabel
