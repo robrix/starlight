@@ -11,6 +11,7 @@ module Starlight.Input
 , pressed_
 ) where
 
+import           Control.Effect.Empty
 import           Control.Effect.Lens ((.=))
 import           Control.Effect.Lift
 import           Control.Effect.State
@@ -20,14 +21,14 @@ import qualified SDL
 import qualified UI.Window as Window
 
 input
-  :: ( Has (Lift IO) sig m
-     , Has (State Bool) sig m
+  :: ( Has Empty sig m
+     , Has (Lift IO) sig m
      , Has (State Input) sig m
      )
   => m ()
 input = Window.input go where
   go (SDL.Event _ p) = case p of
-    SDL.QuitEvent                                      -> put True
+    SDL.QuitEvent                                      -> empty
     SDL.KeyboardEvent (SDL.KeyboardEventData _ p _ ks) -> key p ks
     _                                                  -> pure ()
 

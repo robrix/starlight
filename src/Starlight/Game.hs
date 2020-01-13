@@ -11,6 +11,7 @@ module Starlight.Game
 ) where
 
 import           Control.Algebra
+import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import qualified Control.Carrier.State.STM.TVar as TVar
@@ -138,9 +139,9 @@ runFrame
      , Has (Lift IO) sig m
      , Has Trace sig m
      )
-  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime m))))) a
-  -> m a
-runFrame = (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . runRadar . runLaser . runBody
+  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
+  -> m ()
+runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . runRadar . runLaser . runBody
 
 game
   :: ( Effect sig
@@ -189,12 +190,12 @@ game = Sol.system >>= \ system -> runGame system $ do
   void . runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     measure "frame" frame
     measure "swap" Window.swap
-    hasQuit <- get
-    unless hasQuit loop
+    loop
   put True
 
 frame
   :: ( Has Check sig m
+     , Has Empty sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Body.Drawable) sig m
@@ -205,7 +206,6 @@ frame
      , Has (Reader Epoch) sig m
      , Has (Reader UI) sig m
      , Has (Reader Window.Window) sig m
-     , Has (State Bool) sig m
      , Has (State Input) sig m
      , Has (State (System Body)) sig m
      , Has (State UTCTime) sig m
