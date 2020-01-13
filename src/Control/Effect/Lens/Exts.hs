@@ -60,4 +60,4 @@ infixr 2 <->
 
 
 asserting :: HasCallStack => (a -> Bool) -> Iso' a a
-asserting pred = iso id (withFrozenCallStack . assert . pred <*> id)
+asserting pred = withFrozenCallStack $ iso id (assert . pred <*> id)
