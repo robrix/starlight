@@ -18,7 +18,6 @@ import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
-import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Lens (Lens', to, (&), (+~), (-~), (.~), (^.))
 import           Data.Coerce (coerce)
@@ -47,14 +46,13 @@ import           Unit
 drawShip
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (Reader View) sig m
      )
   => Character
   -> m ()
-drawShip Character{ actor = Actor{ position, rotation, magnitude }, ship = S.Ship{ colour, armour }, actions } = measure "ship" . UI.using getDrawable $ do
+drawShip Character{ actor = Actor{ position, rotation, magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
   vs@View{ focus } <- ask
   sys@System{ scale } <- ask @(System StateVectors)
   matrix_

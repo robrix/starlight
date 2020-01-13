@@ -17,7 +17,6 @@ import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
-import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Lens (Lens')
 import           Data.Coerce (coerce)
@@ -52,13 +51,12 @@ runLaser = UI.loadingDrawable Drawable shader vertices
 drawLaser
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
   => S.Beam
   -> m ()
-drawLaser S.Beam{ colour, angle, position } = measure "laser" . UI.using getDrawable $ do
+drawLaser S.Beam{ colour, angle, position } = UI.using getDrawable $ do
   vs@View{ focus } <- ask
   matrix_ ?=
         scaleToViewZoomed vs
