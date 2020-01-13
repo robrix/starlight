@@ -36,6 +36,7 @@ import Starlight.Weapon.Laser as Laser
 import UI.Colour
 import Unit.Algebra
 import Unit.Angle
+import Unit.Force
 import Unit.Length
 import Unit.Mass
 import Unit.Time
@@ -53,8 +54,7 @@ gravity a = do
   go dt a StateVectors{ actor = b }
     | nearZero r = a
     | otherwise  = applyForce (convert force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
-    -- FIXME: units should be N (i.e. kg·m/s/s)
-    force :: (Kilo Grams :*: Metres :/: Seconds :/: Seconds) Float
+    force :: Newtons Float
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
     -- FIXME: figure out a better way of applying the units
