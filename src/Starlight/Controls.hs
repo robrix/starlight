@@ -9,7 +9,7 @@ import           Control.Carrier.Reader.Relation
 import           Control.Effect.Lift
 import           Control.Effect.State
 import           Data.Functor (($>))
-import           Data.Maybe (catMaybes)
+import           Data.Maybe (mapMaybe)
 import qualified Data.Set as Set
 import           Data.Traversable (for)
 import qualified SDL
@@ -21,7 +21,7 @@ controls
   => m (Set.Set Action)
 controls = do
   input <- get
-  let actions = catMaybes (map (runRelation input) controlRelations)
+  let actions = mapMaybe (runRelation input) controlRelations
   Set.unions <$> for actions (\ (input, actions) ->
     actions <$ modify (\\ input))
 
