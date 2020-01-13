@@ -168,8 +168,8 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   start <- now
   fork . evalState start . fix $ \ loop -> do
-    measure "controls" $ player_ @Body .actions_ <~ controls
     id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
+      measure "controls" $ player_ @Body .actions_ <~ controls
       measure "ai" $ npcs_ @Body <~> traverse ai
 
       -- FIXME: this is so gross
