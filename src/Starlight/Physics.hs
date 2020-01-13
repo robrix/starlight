@@ -64,7 +64,7 @@ gravity a = do
     r :: (Kilo Metres :*: Kilo Metres) Float
     r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   -- gravitational constant : m³/kg/s²
-  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :/: (Kilo Grams) :/: Seconds :/: Seconds) Float
+  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :/: Kilo Grams :/: Seconds :/: Seconds) Float
   gravC = 6.67430e-11
 
 
@@ -112,7 +112,7 @@ runActions i c = do
       R -> -angular))
 
     Fire Main -> do
-      let position = c^.actor_.position_
+      let position = projected (c^.actor_)
       beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position, firedBy = i }:)
       pure c
 

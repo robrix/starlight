@@ -1,7 +1,5 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -16,12 +14,14 @@ import           Control.Algebra
 import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
+import qualified Control.Carrier.State.STM.TVar as TVar
 import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
+import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
-import           Control.Monad ((>=>))
+import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
@@ -59,12 +59,14 @@ import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
-import           Unit
+import           Unit.Time
 
 runGame
-  :: Has (Lift IO) sig m
+  :: ( Has (Lift IO) sig m
+     , MonadFail m
+     )
   => System Body
-  -> StateC (System Body) (StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))) a
+  -> ReaderC Epoch (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))) a
   -> m a
 runGame system
   = Window.runSDL
@@ -72,8 +74,8 @@ runGame system
   . runContext
   . runGLC
   . runFinally
-  . evalState @Input mempty
-  . evalState system
+  . TVar.evalState @Input mempty
+  . TVar.evalState system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
@@ -124,7 +126,10 @@ runGame system
           , ship    = Ship{ colour = white, armour = 1_000, radar }
           }
         ]
-      } where
+      }
+    . TVar.evalState False
+    . runJ2000
+    where
   radar = Radar 1000 -- GW radar
 
 runFrame
@@ -133,19 +138,17 @@ runFrame
      , Has Finally sig m
      , Has (Lift IO) sig m
      , Has Trace sig m
-     , MonadFail m
      )
-  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (ReaderC Epoch (EmptyC m))))))) a
+  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
   -> m ()
-runFrame m = evalEmpty $ do
-  start <- now
-  runJ2000 . evalState start . runStarfield . runShip . runRadar . runLaser . runBody $ m
+runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . runRadar . runLaser . runBody
 
 game
   :: ( Effect sig
      , Has Check sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
+     , Has Thread sig m
      , Has Trace sig m
      , MonadFail m
      )
@@ -158,6 +161,26 @@ game = Sol.system >>= \ system -> runGame system $ do
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
 
+  start <- now
+  fork . evalState start . fix $ \ loop -> do
+    id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
+      measure "controls" $ player_ @Body .actions_ <~ controls
+      measure "ai" $ npcs_ @Body <~> traverse ai
+
+      -- FIXME: this is so gross
+      beams_ @Body .= []
+      npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
+      characters_ @Body <~> itraverse
+        (\ i
+        -> local . neighbourhoodOf @StateVectors
+        <*> ( measure "gravity" . (actor_ @Character <-> gravity)
+          >=> measure "hit" . hit i
+          >=> measure "runActions" . runActions i
+          >=> measure "inertia" . (actor_ <-> inertia))))))
+    yield
+    hasQuit <- get
+    unless hasQuit loop
+
   enabled_ Blend            .= True
   enabled_ DepthClamp       .= True
   enabled_ LineSmooth       .= True
@@ -166,7 +189,9 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     measure "frame" frame
-    measure "swap" Window.swap *> loop
+    measure "swap" Window.swap
+    loop
+  put True
 
 frame
   :: ( Has Check sig m
@@ -187,22 +212,8 @@ frame
      )
   => m ()
 frame = runSystem . timed $ do
-  withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
-  measure "inertia" $ characters_ @Body <~> traverse (actor_ <-> inertia) -- update positions
-
   measure "input" input
-  measure "controls" $ player_ @Body .actions_ <~ controls
-  measure "ai" $ npcs_ @Body <~> traverse ai
-
-  -- FIXME: this is so gross
-  beams_ @Body .= []
-  npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
-  characters_ @Body <~> itraverse
-    (\ i
-    -> local . neighbourhoodOf @StateVectors
-    <*> (   measure "gravity" . (actor_ @Character <-> gravity)
-        >=> measure "hit" . hit i
-        >=> measure "runActions" . runActions i))
+  withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
 
 -- | Compute the zoom factor for the given velocity.
 --

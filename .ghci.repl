@@ -6,8 +6,8 @@
 -- Basic verbosity
 :set -v1
 
--- Compile to object code
-:set -fwrite-interface -fobject-code
+-- Don’t compile to object code, -fexternal-interpreter can’t reload it properly
+:set -fno-write-interface -fbyte-code
 
 -- Bonus: silence “add these modules to your .cabal file” warnings for files we :load
 :set -Wno-missing-home-modules

@@ -5,9 +5,10 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Control.Carrier.State.IORef
+-- | A 'Control.Concurrent.STM.TVar.TVar'-backed carrier for 'State'. Individual 'get's and 'put's are run 'atomically', but NB that 'modify' is /not/ atomic, so this is likely unsuitable for complex interleaving of concurrent reads and writes.
+module Control.Carrier.State.STM.TVar
 ( -- * State carrier
-  runStateRef
+  runStateVar
 , runState
 , evalState
 , execState
@@ -17,20 +18,22 @@ module Control.Carrier.State.IORef
 ) where
 
 import Control.Algebra
+import Control.Carrier.Lift
 import Control.Carrier.Reader
+import Control.Concurrent.STM.TVar
 import Control.Effect.State
-import Control.Monad.IO.Class.Lift
+import Control.Monad.IO.Class
+import Control.Monad.STM
 import Control.Monad.Trans.Class
-import Data.IORef
 
-runStateRef :: IORef s -> StateC s m a -> m a
-runStateRef ref (StateC m) = runReader ref m
+runStateVar :: TVar s -> StateC s m a -> m a
+runStateVar var (StateC m) = runReader var m
 
 runState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m (s, a)
 runState s m = do
-  ref <- sendM (newIORef s)
-  a <- runStateRef ref m
-  s' <- sendM (readIORef ref)
+  var <- sendM (newTVarIO s)
+  a <- runStateVar var m
+  s' <- sendM (readTVarIO var)
   pure (s', a)
 
 evalState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m a
@@ -39,11 +42,14 @@ evalState s = fmap snd . runState s
 execState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 
-newtype StateC s m a = StateC (ReaderC (IORef s) m a)
+newtype StateC s m a = StateC (ReaderC (TVar s) m a)
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (State s :+: sig) (StateC s m) where
   alg = \case
-    L (Get   k) -> StateC ask >>= sendM . readIORef         >>= k
-    L (Put s k) -> StateC ask >>= sendM . flip writeIORef s >>  k
+    L (Get   k) -> StateC ask >>= sendM . readTVarIO >>= k
+    L (Put s k) -> do
+      var <- StateC ask
+      StateC (sendM (atomically (writeTVar var s)))
+      k
     R other     -> StateC (send (handleCoercible other))

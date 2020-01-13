@@ -4,8 +4,6 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -56,7 +54,7 @@ drawRadar
      , Has (Reader View) sig m
      )
   => m ()
-drawRadar = measure "radar" . UI.using getDrawable $ do
+drawRadar = UI.using getDrawable $ do
   system@System{ scale, bodies } <- ask @(System B.StateVectors)
   let target   = system^.player_.target_
       here     = system^.player_.actor_.position_._xy

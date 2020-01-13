@@ -77,18 +77,18 @@ draw = measure "draw" . runLiftIO $ do
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
-  drawStarfield
+  measure "starfield" drawStarfield
 
-  for_ (system^.characters_) drawShip
+  measure "ship" $ for_ (system^.characters_) drawShip
 
-  for_ beams drawLaser
+  measure "laser" $ for_ beams drawLaser
 
   let maxDim = maximum (fromIntegral <$> dsize) * zoom
       onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = scale * prj (distance pos position - radius) < maxDim * 0.5
 
-  forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
+  measure "body" $ forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
 
-  drawRadar
+  measure "radar" drawRadar
 
   let describeTarget target = case target >>= fmap . (,) <*> (system !?) of
         Just (identifier, t)

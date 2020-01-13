@@ -95,7 +95,7 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
   patternPropagationFactor = 1
   gain = 1000000
   aperture = 1000000
-  threshold = Watts (1.0e-12) -- 1 picowatt
+  threshold = Watts 1.0e-12 -- 1 picowatt
 
 neighbourhoodOfPlayer :: HasActor a => System a -> System a
 neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys

@@ -4,8 +4,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -108,7 +106,7 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
   -- extremely dubious
   mu = 398600.5
   p = prj semimajor * (1 - eccentricity ** 2)
-  h = ((1 - (eccentricity ** 2)) * prj semimajor * mu) ** 0.5
+  h = sqrt ((1 - (eccentricity ** 2)) * prj semimajor * mu)
   -- hr = h/r
 
 

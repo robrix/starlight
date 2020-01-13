@@ -17,7 +17,6 @@ import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
-import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Lens (Lens')
 import           Data.Coerce
@@ -56,14 +55,13 @@ runBody = UI.loadingDrawable Drawable shader vertices
 drawBody
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader (System Body.StateVectors)) sig m
      , Has (Reader View) sig m
      )
   => Body.StateVectors
   -> m ()
-drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor = Actor{ rotation } } = measure "body" . UI.using getDrawable $ do
+drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor = Actor{ rotation } } = UI.using getDrawable $ do
   vs@View{ focus } <- ask
   systemTrans <- asks (systemTrans @Body.StateVectors)
   matrix_

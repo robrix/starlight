@@ -18,7 +18,6 @@ import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
-import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Lens (Lens')
 import           Data.Coerce (coerce)
@@ -41,12 +40,11 @@ import           Unit.Length
 drawStarfield
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , Has Profile sig m
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
   => m ()
-drawStarfield = measure "starfield" . UI.using getDrawable $ do
+drawStarfield = UI.using getDrawable $ do
   View{ scale, size, zoom, focus } <- ask
 
   resolution_ ?= (fromIntegral <$> size ^* scale)
