@@ -13,7 +13,6 @@ module Starlight.Game
 import           Control.Algebra
 import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
-import           Control.Carrier.Profile.Tree (reportProfile)
 import           Control.Carrier.Reader
 import qualified Control.Carrier.State.STM.TVar as TVar
 import           Control.Carrier.State.Strict
@@ -168,7 +167,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   hasQuit <- sendM (newTVarIO False)
 
   start <- now
-  fork . reportProfile . evalState start . fix $ \ loop -> do
+  fork . evalState start . fix $ \ loop -> do
     measure "controls" $ player_ @Body .actions_ <~ controls
     id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
       measure "ai" $ npcs_ @Body <~> traverse ai
