@@ -29,7 +29,7 @@ import           Unit.Time
 bodies :: Map.Map BodyIdentifier Orbit -> Map.Map BodyIdentifier Body
 bodies orbits = bodies where
   solI = Star (10, "Sol")
-  bodies = Map.fromList $
+  bodies = Map.fromList
     [ let identifier = solI in (identifier,) Body
       { radius      = 695_500.0
       , mass        = 1.988_5e30
