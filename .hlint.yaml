@@ -2,3 +2,8 @@
 - fixity: "infixl 7 ./."
 - fixity: "infixl 7 :*:"
 - fixity: "infixl 7 :/:"
+- fixity: "infixr 2 ~>"
+- fixity: "infixr 2 <~>"
+- fixity: "infixr 2 <--"
+- fixity: "infixr 2 -->"
+- fixity: "infixr 2 <->"
