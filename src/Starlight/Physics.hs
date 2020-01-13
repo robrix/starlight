@@ -52,19 +52,19 @@ gravity a = do
   pure $! foldl' (go dt) a bodies where
   go dt a StateVectors{ actor = b }
     | nearZero r = a
-    | otherwise  = applyForce (force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
+    | otherwise  = applyForce (convert force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
     -- FIXME: units should be N (i.e. kg·m/s/s)
-    force :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
+    force :: (Kilo Grams :*: Metres :/: Seconds :/: Seconds) Float
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- (F : kg·m/s²) = (gravC : m³/kg/s²) · ((m1·m2 : kg) / (r : m)² : kg/m²)
     -- FIXME: figure out a better way of applying the units
     -- NB: scaling to get distances in m
     -- FIXME: this is converting km to m but then treating it as km, so this whole thing is off by a huge factor
     -- FIXME: but if not for the above the sun just sucks you in to your death immediately
-    r :: (Kilo Metres :*: Kilo Metres) Float
+    r :: (Metres :*: Metres) Float
     r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   -- gravitational constant : m³/kg/s²
-  gravC :: (Kilo Metres :*: Kilo Metres :*: Kilo Metres :/: Kilo Grams :/: Seconds :/: Seconds) Float
+  gravC :: (Metres :*: Metres :*: Metres :/: Kilo Grams :/: Seconds :/: Seconds) Float
   gravC = 6.67430e-11
 
 
