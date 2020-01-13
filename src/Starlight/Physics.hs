@@ -112,7 +112,7 @@ runActions i c = do
       R -> -angular))
 
     Fire Main -> do
-      let position = c^.actor_.position_
+      let position = projected (c^.actor_)
       beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position, firedBy = i }:)
       pure c
 
