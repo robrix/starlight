@@ -11,20 +11,17 @@ module Starlight.Game
 ) where
 
 import           Control.Algebra
-import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
 import           Control.Carrier.Reader
 import qualified Control.Carrier.State.STM.TVar as TVar
 import           Control.Carrier.State.Strict
-import           Control.Concurrent.STM.TVar
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
-import           Control.Monad (unless, (>=>))
+import           Control.Monad (unless, void, (>=>))
 import           Control.Monad.IO.Class.Lift
-import           Control.Monad.STM
 import           Data.Coerce
 import           Data.Function (fix)
 import           Data.Functor.Identity
@@ -68,7 +65,7 @@ runGame
      , MonadFail m
      )
   => System Body
-  -> ReaderC Epoch (TVar.StateC (System Body) (TVar.StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))) a
+  -> ReaderC Epoch (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))) a
   -> m a
 runGame system
   = Window.runSDL
@@ -129,6 +126,7 @@ runGame system
           }
         ]
       }
+    . TVar.evalState False
     . runJ2000
     where
   radar = Radar 1000 -- GW radar
@@ -140,9 +138,9 @@ runFrame
      , Has (Lift IO) sig m
      , Has Trace sig m
      )
-  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
-  -> m ()
-runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . runRadar . runLaser . runBody
+  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime m))))) a
+  -> m a
+runFrame = (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . runRadar . runLaser . runBody
 
 game
   :: ( Effect sig
@@ -162,8 +160,6 @@ game = Sol.system >>= \ system -> runGame system $ do
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
 
-  hasQuit <- sendM (newTVarIO False)
-
   start <- now
   fork . evalState start . fix $ \ loop -> do
     id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
@@ -181,7 +177,7 @@ game = Sol.system >>= \ system -> runGame system $ do
           >=> measure "runActions" . runActions i
           >=> measure "inertia" . (actor_ <-> inertia))))))
     yield
-    hasQuit <- sendM (readTVarIO hasQuit)
+    hasQuit <- get
     unless hasQuit loop
 
   enabled_ Blend            .= True
@@ -190,15 +186,14 @@ game = Sol.system >>= \ system -> runGame system $ do
   enabled_ ProgramPointSize .= True
   enabled_ ScissorTest      .= True
 
-  runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
+  void . runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     measure "frame" frame
     measure "swap" Window.swap
     loop
-  sendM (atomically (writeTVar hasQuit True))
+  put True
 
 frame
   :: ( Has Check sig m
-     , Has Empty sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
      , Has (Reader Body.Drawable) sig m
@@ -209,6 +204,7 @@ frame
      , Has (Reader Epoch) sig m
      , Has (Reader UI) sig m
      , Has (Reader Window.Window) sig m
+     , Has (State Bool) sig m
      , Has (State Input) sig m
      , Has (State (System Body)) sig m
      , Has (State UTCTime) sig m
