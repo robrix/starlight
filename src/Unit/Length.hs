@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Unit.Length
-( Metres(..)
+( Length
+, Metres(..)
 , fromAUs
 , module Unit
 , module Unit.Multiple
@@ -20,11 +22,13 @@ import Linear.Vector
 import Unit
 import Unit.Multiple
 
+data Length a
+
 newtype Metres a = Metres { getMetres :: a }
   deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
-instance Unit Metres where suffix = Const ('m':)
+instance Unit Length Metres where suffix = Const ('m':)
 
 fromAUs :: Num a => a -> Metres a
 fromAUs a = Metres (149597870700 * a)

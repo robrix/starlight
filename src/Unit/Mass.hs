@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Unit.Mass
-( Grams(..)
+( Mass
+, Grams(..)
 , module Unit
 , module Unit.Multiple
 ) where
@@ -19,8 +21,10 @@ import Linear.Vector
 import Unit
 import Unit.Multiple
 
+data Mass a
+
 newtype Grams a = Grams { getGrams :: a }
   deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
-instance Unit Grams where suffix = Const ('g':)
+instance Unit Mass Grams where suffix = Const ('g':)

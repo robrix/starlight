@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Unit.Angle
-( Radians(..)
+( Angle
+, Radians(..)
 , fromDegrees
 , Degrees(..)
 , module Unit
@@ -21,11 +23,13 @@ import Linear.Vector
 import Unit
 import Unit.Multiple
 
+data Angle a
+
 newtype Radians a = Radians { getRadians :: a }
   deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
-instance Unit Radians where suffix = Const ("rad"++)
+instance Unit Angle Radians where suffix = Const ("rad"++)
 
 fromDegrees :: Floating a => Degrees a -> Radians a
 fromDegrees (Degrees d) = Radians (d * pi / 180)
@@ -35,4 +39,4 @@ newtype Degrees a = Degrees { getDegrees :: a }
   deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
-instance Unit Degrees where suffix = Const ('°':)
+instance Unit Angle Degrees where suffix = Const ('°':)
