@@ -21,7 +21,7 @@ import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
-import           Control.Monad (unless, void, (>=>))
+import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
@@ -187,7 +187,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   enabled_ ProgramPointSize .= True
   enabled_ ScissorTest      .= True
 
-  void . runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
+  runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     measure "frame" frame
     measure "swap" Window.swap
     loop
