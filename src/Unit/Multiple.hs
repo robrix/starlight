@@ -12,6 +12,7 @@
 module Unit.Multiple
 ( -- * Prefixes
   Mult(..)
+, convert
   -- ** Submultiples
 , Pico(..)
 , Nano(..)
@@ -45,6 +46,9 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit dimu u) => Unit dimu (Mult
   factor = fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))
 
   suffix = Const ((symbolVal (Proxy @s) ++) . getConst (suffix @_ @u))
+
+convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
+convert = nu . un
 
 
 -- ** Submultiples
