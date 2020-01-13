@@ -189,7 +189,8 @@ game = Sol.system >>= \ system -> runGame system $ do
   void . runFrame . runReader UI{ fps = fpsLabel, target = targetLabel, face } . fix $ \ loop -> do
     measure "frame" frame
     measure "swap" Window.swap
-    loop
+    hasQuit <- get
+    unless hasQuit loop
   put True
 
 frame
