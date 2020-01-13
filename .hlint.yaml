@@ -1,0 +1,4 @@
+- fixity: "infixl 7 .*."
+- fixity: "infixl 7 ./."
+- fixity: "infixl 7 :*:"
+- fixity: "infixl 7 :/:"
