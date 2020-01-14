@@ -109,6 +109,7 @@ class GL.Type t => Scalar t where
   uniformFor :: N -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 data N = N1 | N2 | N3 | N4
+  deriving (Eq, Ord, Show)
 
 instance Scalar Float where
   glslTypeFor N1 = "float"
