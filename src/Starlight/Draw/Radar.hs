@@ -22,7 +22,7 @@ import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (Lens', to, (^.))
+import           Control.Lens (Lens', (^.))
 import           Data.Foldable (for_, toList)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -67,7 +67,7 @@ drawRadar = UI.using getDrawable $ do
     B.realloc (length vertices) B.Static B.Draw
     B.copy 0 vertices
 
-  matrix_ ?= getTransform (transformToWindow view)^._xyz.to (fmap (^._xyz))
+  matrix_ ?= getTransform (transformToWindow view)
   here_   ?= here
 
   -- FIXME: skip blips for extremely distant objects
@@ -132,16 +132,17 @@ shader = program $ \ u
     primitiveIn Points
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
-      let rot theta = mat3
-            (vec3 (cos theta) (-(sin theta)) 0)
-            (vec3 (sin theta) (cos   theta)  0)
-            (vec3 0           0              1)
+      let rot theta = mat4
+            (vec4 (cos theta) (-(sin theta)) 0 0)
+            (vec4 (sin theta) (cos   theta)  0 0)
+            (vec4 0           0              1 0)
+            (vec4 0           0              0 1)
       emitPrimitive $ do
         i <- var @Int "i" (-(fromIntegral count))
         while (get i `lt` (fromIntegral count + 1)) $
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
-            gl_Position .= ext4 (matrix u D.!*! rot theta !* Var "gl_in[0].gl_Position.xyz") 1
+            gl_Position .= matrix u D.!*! rot theta !* Var "gl_in[0].gl_Position"
             colour3 .= Var "colour2[0]"
             i += 1)
 
@@ -153,14 +154,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (M33 Float)
+  { matrix :: v (M44 Float)
   , here   :: v (V2 (Mega Metres Float))
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (M33 Float))
+matrix_ :: Lens' (U v) (v (M44 Float))
 matrix_ = field @"matrix"
 
 here_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
