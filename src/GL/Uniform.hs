@@ -9,9 +9,11 @@ module GL.Uniform
 ( Uniform(..)
 , Scalar(..)
 , Col(..)
+, replace1d
 ) where
 
 import           Control.Monad.IO.Class.Lift
+import           Data.Coerce
 import           Data.Int
 import qualified Foreign.Marshal.Utils.Lift as A
 import           Foreign.Ptr
@@ -20,7 +22,6 @@ import qualified GL.Type as GL
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 import           Linear.Affine
-import           Linear.Matrix
 import           Linear.V2
 import           Linear.V3
 import           Linear.V4
@@ -50,42 +51,22 @@ instance Uniform Double where
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
-  glslType = glslTypePrefix @t <> "vec2"
+  glslType = glslTypeFor @t C2x1
   uniform prog loc vec = A.with vec (sendM . uniformFor @t C2x1 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
-  glslType = glslTypePrefix @t <> "vec3"
+  glslType = glslTypeFor @t C3x1
   uniform prog loc vec = A.with vec (sendM . uniformFor @t C3x1 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
-  glslType = glslTypePrefix @t <> "vec4"
+  glslType = glslTypeFor @t C4x1
   uniform prog loc vec = A.with vec (sendM . uniformFor @t C4x1 prog loc 1 . castPtr)
-
-instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M22 t) where
-  glslType = glslTypePrefix @t <> "mat2"
-  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t C2x2 prog loc 1 . castPtr)
-
-instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M23 t) where
-  glslType = glslTypePrefix @t <> "mat2x3"
-  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t C2x3 prog loc 1 . castPtr)
-
-instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M33 t) where
-  glslType = glslTypePrefix @t <> "mat3"
-  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t C2x4 prog loc 1 . castPtr)
-
-instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M34 t) where
-  glslType = glslTypePrefix @t <> "mat3x4"
-  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t C3x4 prog loc 1 . castPtr)
-
-instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M44 t) where
-  glslType = glslTypePrefix @t <> "mat4"
-  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t C4x4 prog loc 1 . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Point f a)
 
 
 class GL.Type t => Scalar t where
-  glslTypePrefix :: String
+  glslTypeFor :: Col -> String
 
   uniformFor :: Col -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
@@ -124,8 +105,8 @@ transposing f prog loc n = f prog loc n GL_TRUE
 {-# INLINE transposing #-}
 
 instance Scalar Float where
-  glslTypePrefix = ""
-  {-# INLINE glslTypePrefix #-}
+  glslTypeFor = glslTypeForCol
+  {-# INLINE glslTypeFor #-}
 
   uniformFor = \case
     C2x1 -> glProgramUniform2fv
@@ -143,8 +124,8 @@ instance Scalar Float where
   {-# INLINE uniformFor #-}
 
 instance Scalar Double where
-  glslTypePrefix = "d"
-  {-# INLINE glslTypePrefix #-}
+  glslTypeFor = ('d':) . glslTypeForCol
+  {-# INLINE glslTypeFor #-}
 
   uniformFor = \case
     C2x1 -> glProgramUniform2dv
@@ -160,3 +141,20 @@ instance Scalar Double where
     C4x3 -> transposing glProgramUniformMatrix4x3dv
     C4x4 -> transposing glProgramUniformMatrix4dv
   {-# INLINE uniformFor #-}
+
+instance Scalar t => Scalar (V2 t) where
+  glslTypeFor = glslTypeFor @t . replace1d succ
+  uniformFor = coerce . uniformFor @t . replace1d succ
+
+instance Scalar t => Scalar (V3 t) where
+  glslTypeFor = glslTypeFor @t . replace1d (succ . succ)
+  uniformFor = coerce . uniformFor @t . replace1d (succ . succ)
+
+instance Scalar t => Scalar (V4 t) where
+  glslTypeFor = glslTypeFor @t . replace1d (succ . succ . succ)
+  uniformFor = coerce . uniformFor @t . replace1d (succ . succ . succ)
+
+replace1d :: (Col -> Col) -> Col -> Col
+replace1d f c
+  | c `elem` [C2x1, C3x1, C4x1] = f c
+  | otherwise                   = c
