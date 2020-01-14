@@ -53,8 +53,8 @@ drawShip Character{ actor = Actor{ position, rotation, magnitude }, ship = S.Shi
   matrix_ ?= getTransform
     (   transformToSystem view
     >>> mkTranslation (prj <$> position)
-    >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale))
-    >>> mkRotation rotation)
+    >>> mkRotation rotation
+    >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale)))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v ^. _r) . (_r +~ 0.5) . (_b -~ 0.25) else id)
     & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
