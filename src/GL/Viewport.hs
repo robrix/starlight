@@ -1,4 +1,3 @@
-{-# LANGUAGE NamedFieldPuns #-}
 module GL.Viewport
 ( min_
 , max_
