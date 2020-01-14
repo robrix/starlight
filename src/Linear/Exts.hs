@@ -57,7 +57,9 @@ face
   -> Radians Float    -- ^ Desired angle.
   -> Quaternion Float -- ^ Current rotation.
   -> Quaternion Float -- ^ Resulting rotation.
-face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
+face angular angle rotation
+  | nearZero delta = proposed
+  | otherwise      = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
   proposed = axisAngle (unit _z) (getRadians angle)
   delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
 
