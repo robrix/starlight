@@ -77,6 +77,7 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
   -- FIXME: laser power, not radar power, determines laser range
   -- FIXME: radar reflections
   -- FIXME: sharing radar with allies
+  -- FIXME: dimensional analysis
   visible i a = case i of
     B (Star _) -> True
     _          -> received > threshold
@@ -84,9 +85,10 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     r = qd (a^.actor_.position_) (c^.actor_.position_)
     received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * prj (a^.actor_.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 2)))
   patternPropagationFactor = 1
-  gain = 1000000
-  aperture = 1000000
-  threshold = Watts 1.0e-12 -- 1 picowatt
+  gain = 1
+  aperture = 1000
+  threshold :: Watts Float
+  threshold = 1.0e-12
 
 neighbourhoodOfPlayer :: HasActor a => System a -> System a
 neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys

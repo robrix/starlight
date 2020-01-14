@@ -79,8 +79,8 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position  = V3 2_500_000 0 0
-            , velocity  = V3 0 150 0
+            { position  = V3 2_500 0 0
+            , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
@@ -91,8 +91,8 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500_000 0 0
-            , velocity  = V3 0 150 0
+            { position  = V3 2_500 0 0
+            , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 60
@@ -103,8 +103,8 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500_000 0 0
-            , velocity  = V3 0 150 0
+            { position  = V3 2_500 0 0
+            , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
@@ -115,8 +115,8 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500_000 0 0
-            , velocity  = V3 0 150 0
+            { position  = V3 2_500 0 0
+            , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
@@ -245,5 +245,5 @@ withView m = do
 
   let zoom = zoomForSpeed size (prj (norm velocity))
       solI = Star (10, "Sol")
-      scale = un @(Kilo Metres) (100 / radius (body (bodies Map.! solI)))
+      scale = un @(Kilo Metres) (100_000 / radius (body (bodies Map.! solI))) -- FIXME: account for unit size without hard-coding conversion factor
   runReader View{ ratio, size, zoom, scale, focus } m

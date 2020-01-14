@@ -9,7 +9,7 @@ import Unit.Angle
 import Unit.Length
 
 data Beam = Beam
-  { position :: V3 (Kilo Metres Float)
+  { position :: V3 (Mega Metres Float)
   , angle    :: Radians Float
   , colour   :: Colour Float
   , firedBy  :: CharacterIdentifier

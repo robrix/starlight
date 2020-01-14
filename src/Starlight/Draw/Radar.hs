@@ -109,14 +109,14 @@ shader = program $ \ u
   ->  vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
     there <- let' "there" (there - here u)
     d     <- let' "d"     (D.norm there)
-    dir   <- let' "dir"   (there D.^* (1/D.norm there))
+    dir   <- let' "dir"   (there D.^* (1/d))
     let perp v = vec2 (negate (v D.^.D._y)) (v D.^.D._x)
         angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
         wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-    edge  <- let' "edge"  (perp dir D.^* r D.^* 0.5 + dir D.^* d)
+    edge  <- let' "edge"  (perp dir D.^* r D.^* 0.5 + there)
     angle <- let' "angle" (D.coerce @_ @Float (angleOf there))
     radius <- var "radius" radius
-    let step = D.max' 1 (D.min' (get radius/float (fromIntegral targetBlipCount)) (D.coerce d / 50))
+    let step = D.max' 1 (D.min' maxStep (D.coerce d / (50 / 1000))) -- FIXME: account for unit size without hard-coding conversion factor
     iff (gl_InstanceID `gt` 0)
       (radius .= step * float gl_InstanceID)
       (pure ())
@@ -148,11 +148,12 @@ shader = program $ \ u
   minBlipSize = 16
   count = 16
   radius = 300
+  maxStep = radius / fromIntegral targetBlipCount
 
 
 data U v = U
   { matrix :: v (M33 Float)
-  , here   :: v (V2 (Kilo Metres Float))
+  , here   :: v (V2 (Mega Metres Float))
   }
   deriving (Generic)
 
@@ -161,7 +162,7 @@ instance Vars U
 matrix_ :: Lens' (U v) (v (M33 Float))
 matrix_ = field @"matrix"
 
-here_ :: Lens' (U v) (v (V2 (Kilo Metres Float)))
+here_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
 here_ = field @"here"
 
 
@@ -180,8 +181,8 @@ instance Vars IF
 
 
 data V v = V
-  { there  :: v (V2 (Kilo Metres Float)) -- location of object
-  , r      :: v (Kilo Metres Float)      -- radius of object
+  { there  :: v (V2 (Mega Metres Float)) -- location of object
+  , r      :: v (Mega Metres Float)      -- radius of object
   , colour :: v (Colour Float)
   }
   deriving (Generic)

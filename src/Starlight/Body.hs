@@ -90,7 +90,7 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
     * axis
     * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
   , mass
-  , magnitude = radius * 2
+  , magnitude = convert radius * 2
   } where
   position = ext (cartesian2 (pure <$> trueAnomaly) r) 0
   t' = timeOfPeriapsis + t * orbitTimeScale
@@ -103,12 +103,12 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly :: Radians Float
   trueAnomaly = Radians (atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity))
-  r :: Kilo Metres Float
-  r = semimajor ^* (1 - eccentricity * cos eccentricAnomaly)
+  r :: Mega Metres Float
+  r = convert semimajor ^* (1 - eccentricity * cos eccentricAnomaly)
   -- extremely dubious
   mu = 398600.5
-  p = semimajor ^* (1 - eccentricity ** 2)
-  h = sqrt ((1 - (eccentricity ** 2)) *^ semimajor * mu)
+  p = convert semimajor ^* (1 - eccentricity ** 2)
+  h = sqrt ((1 - (eccentricity ** 2)) *^ convert semimajor * mu)
   -- hr = h/r
 
 

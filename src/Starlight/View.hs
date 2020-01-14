@@ -22,7 +22,7 @@ data View = View
   , size  :: V2 Int
   , zoom  :: Float
   , scale :: Float
-  , focus :: V2 (Kilo Metres Float)
+  , focus :: V2 (Mega Metres Float)
   }
 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to device coordinates.
