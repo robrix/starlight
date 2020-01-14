@@ -15,8 +15,7 @@ import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
-import Control.Lens (forOf_, traversed, (^.))
-import Control.Monad (when)
+import Control.Lens (filtered, traversed, (^.), (^?))
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Functor.Const
@@ -87,7 +86,7 @@ draw = measure "draw" . runLiftIO $ do
   let maxDim = maximum (fromIntegral <$> dsize) * zoom / scale
       onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = prj (distance pos position - radius) < maxDim * 0.5
 
-  measure "body" $ forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
+  measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) drawBody
 
   measure "radar" drawRadar
 
