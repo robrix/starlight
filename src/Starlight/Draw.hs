@@ -15,7 +15,7 @@ import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
-import Control.Lens (coerced, filtered, traversed, (^.), (^?))
+import Control.Lens (choosing, coerced, filtered, to, traversed, (^.), (^?), _Just)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Functor.Const
@@ -86,9 +86,9 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "radar" drawRadar
 
-  let describeTarget target = case target >>= fmap . (,) <*> (system !?) of
-        Just (identifier, t)
-          | pos <- either Body.actor Character.actor t ^. position_ -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
+  let describeTarget target = case target >>= fmap . (,) <*> (^?to (system !?)._Just.choosing actor_ actor_.position_) of
+        Just (identifier, pos)
+          -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
         _ -> ""
 
   measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (nu @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (nu @(Frames :/: Seconds) (1/dt)))
