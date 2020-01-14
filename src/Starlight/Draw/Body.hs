@@ -33,11 +33,9 @@ import           GL.Shader.DSL hiding (coerce, norm, (!*), (!*!))
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Prelude hiding (break)
-import           Starlight.Actor
 import qualified Starlight.Body as Body
 import           Starlight.View
 import qualified UI.Drawable as UI
-import           Unit.Length
 
 runBody
   :: ( Has Check sig m
@@ -59,12 +57,15 @@ drawBody
      )
   => Body.StateVectors
   -> m ()
-drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor = Actor{ rotation } } = UI.using getDrawable $ do
-  view@View{ focus } <- ask
-  matrix_
-    ?=  getTransform (toContext view >>> toWindow view >>> toZoomed view >>> toSystem view >>> transform)
-    !*! scaled (ext (pure @V3 (prj (convert radius `asTypeOf` norm focus))) 1)
-    !*! mkTransformation rotation 0
+drawBody v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ do
+  view <- ask
+  matrix_ ?=  getTransform
+    (   toContext view
+    >>> toWindow view
+    >>> toZoomed view
+    >>> toSystem view
+    >>> Body.transform v
+    >>> Body.toBodySpace v)
   colour_ ?= colour
 
   drawArraysInstanced LineLoop range 3
