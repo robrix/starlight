@@ -21,6 +21,7 @@ instance Category Transform where
 mkTranslation :: V3 Float -> Transform a b
 mkTranslation v = Transform (identity & translation .~ v)
 
+-- FIXME: scaling should introduce a change of units
 mkScale :: V3 Float -> Transform a b
 mkScale v = Transform (scaled (ext v 1))
 
