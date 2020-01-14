@@ -102,7 +102,7 @@ data Col
   | C4x2
   | C4x3
   | C4x4
-  deriving (Eq, Ord, Show)
+  deriving (Enum, Eq, Ord, Show)
 
 transposing :: (GLuint -> GLint -> GLsizei -> GLboolean -> Ptr t -> IO ()) -> (GLuint -> GLint -> GLsizei -> Ptr t -> IO ())
 transposing f prog loc n = f prog loc n GL_TRUE
