@@ -84,8 +84,8 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "laser" $ for_ beams drawLaser
 
-  let maxDim = maximum (fromIntegral <$> dsize) * zoom
-      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = scale * prj (distance pos position - radius) < maxDim * 0.5
+  let maxDim = maximum (fromIntegral <$> dsize) * zoom / scale
+      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = prj (distance pos position - radius) < maxDim * 0.5
 
   measure "body" $ forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
 
