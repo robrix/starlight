@@ -3,7 +3,6 @@ module Starlight.View
 ( View(..)
 , scaleToView
 , scaleToViewZoomed
-, scaleToViewSystem
 , aspectRatio
 , deviceSize
 , lengthToPixels
@@ -47,10 +46,6 @@ scaleToView View{ ratio, size } = scaled (pure 1 & _xy .~ 1 / (fromIntegral <$> 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to zoomed device coordinates.
 scaleToViewZoomed :: (Additive v, Applicative v, Traversable v, R2 v) => View -> v (v Float)
 scaleToViewZoomed vs@View{ zoom } = scaleToView vs !*! scaled (pure 1 & _xy .~ pure (1 / zoom))
-
--- | Return a matrix transforming the [[-1,1], [-1,1]] interval to zoomed, scaled device coordinates.
-scaleToViewSystem :: (Additive v, Applicative v, Traversable v, R3 v) => View -> v (v Float)
-scaleToViewSystem view@View{ scale } = scaleToViewZoomed view !*! scaled (pure 1 & _xyz .~ pure scale)
 
 aspectRatio :: View -> Float
 aspectRatio View{ size } = size'^._x / size'^._y where
