@@ -6,7 +6,7 @@ module Starlight.View
 , lengthToPixels
   -- * Transforms
 , ClipSpace
-, ContextSpace
+, ContextPixels(..)
 , Pixels(..)
 , ZoomedSpace
 , SystemSpace
@@ -49,16 +49,16 @@ lengthToPixels View{ zoom, scale } = 1/zoom * scale
 
 
 data ClipSpace a
-data ContextSpace a
+newtype ContextPixels a = ContextPixels { getContextPixels :: a }
 newtype Pixels a = Pixels { getPixels :: a }
 data ZoomedSpace a
 data PlayerSpace a
 
 
-toContext :: View -> Transform ClipSpace ContextSpace
+toContext :: View -> Transform ClipSpace ContextPixels
 toContext View{ size } = mkScale (pure 1 & _xy .~ 1 / (fromIntegral <$> size))
 
-toWindow :: View -> Transform ContextSpace Pixels
+toWindow :: View -> Transform ContextPixels Pixels
 toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 
 toZoomed :: View -> Transform Pixels ZoomedSpace
