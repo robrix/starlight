@@ -6,7 +6,7 @@ module Starlight.View
 , deviceSize
 , lengthToWindowPixels
   -- * Transforms
-, ClipUnits
+, ClipUnits(..)
 , Zoomed(..)
 , SystemSpace
 , toContext
@@ -52,7 +52,7 @@ lengthToWindowPixels :: View -> Float
 lengthToWindowPixels View{ zoom, scale } = 1/zoom * scale
 
 
-data ClipUnits a
+newtype ClipUnits a = ClipUnits { getClipUnits :: a }
 newtype Zoomed a = Zoomed { getZoomed :: a }
 
 
