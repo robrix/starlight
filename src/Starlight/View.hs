@@ -6,6 +6,7 @@ module Starlight.View
 , scaleToViewSystem
 , aspectRatio
 , deviceSize
+, lengthToPixels
 ) where
 
 import Control.Lens ((.~), (^.))
@@ -42,3 +43,6 @@ aspectRatio View{ size } = size' ^. _x / size' ^. _y where
 
 deviceSize :: View -> V2 Int
 deviceSize View{ ratio, size } = ratio *^ size
+
+lengthToPixels :: Functor f => View -> f Float -> f Float
+lengthToPixels View{ zoom, scale } length = length ^/ zoom ^* scale
