@@ -43,6 +43,7 @@ import qualified Starlight.Ship as S
 import           Starlight.System
 import           Starlight.View
 import qualified UI.Drawable as UI
+import qualified UI.Window as Window
 import           Unit.Angle
 import           Unit.Length
 
@@ -67,7 +68,7 @@ drawRadar = UI.using getDrawable $ do
     B.realloc (length vertices) B.Static B.Draw
     B.copy 0 vertices
 
-  matrix_ ?= getTransform (transformToWindow view)
+  matrix_ ?= transformToWindow view
   here_   ?= here
 
   -- FIXME: skip blips for extremely distant objects
@@ -142,7 +143,7 @@ shader = program $ \ u
         while (get i `lt` (fromIntegral count + 1)) $
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
-            gl_Position .= matrix u D.!*! rot theta !* Var "gl_in[0].gl_Position"
+            gl_Position .= D.coerce (matrix u) D.!*! rot theta !* Var "gl_in[0].gl_Position"
             colour3 .= Var "colour2[0]"
             i += 1)
 
@@ -154,14 +155,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (M44 Float)
+  { matrix :: v (Transform ClipUnits Window.Pixels)
   , here   :: v (V2 (Mega Metres Float))
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (M44 Float))
+matrix_ :: Lens' (U v) (v (Transform ClipUnits Window.Pixels))
 matrix_ = field @"matrix"
 
 here_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
