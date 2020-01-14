@@ -41,6 +41,7 @@ import GL.Viewport
 import Linear.Conjugate
 import Linear.Exts
 import Starlight.System
+import UI.Context
 import Unit.Length
 
 data View = View
@@ -63,10 +64,6 @@ lengthToWindowPixels View{ zoom, scale } = 1/zoom * scale
 
 
 data ClipSpace a
-
-newtype ContextPixels a = ContextPixels { getContextPixels :: a }
-  deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 newtype WindowPixels a = WindowPixels { getWindowPixels :: a }
   deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
