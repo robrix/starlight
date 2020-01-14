@@ -104,6 +104,21 @@ data Col
   | C4x4
   deriving (Enum, Eq, Ord, Show)
 
+glslTypeForCol :: Col -> String
+glslTypeForCol = \case
+  C2x1 -> "vec2"
+  C2x2 -> "mat2"
+  C2x3 -> "mat2x3"
+  C2x4 -> "mat2x4"
+  C3x1 -> "vec3"
+  C3x2 -> "mat3x2"
+  C3x3 -> "mat3"
+  C3x4 -> "mat3x4"
+  C4x1 -> "vec4"
+  C4x2 -> "mat4x2"
+  C4x3 -> "mat4x3"
+  C4x4 -> "mat4"
+
 transposing :: (GLuint -> GLint -> GLsizei -> GLboolean -> Ptr t -> IO ()) -> (GLuint -> GLint -> GLsizei -> Ptr t -> IO ())
 transposing f prog loc n = f prog loc n GL_TRUE
 {-# INLINE transposing #-}
