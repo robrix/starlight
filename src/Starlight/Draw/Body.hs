@@ -62,8 +62,7 @@ drawBody
 drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor = Actor{ rotation } } = UI.using getDrawable $ do
   view@View{ focus } <- ask
   matrix_
-    ?=  scaleToViewSystem view
-    !*! translated3 (ext (negated (prj <$> focus)) 0) -- transform to the origin
+    ?=  getTransform (toContext view >>> toWindow view >>> toZoomed view >>> toSystem view)
     !*! transform
     !*! scaled (ext (pure @V3 (prj (convert radius `asTypeOf` norm focus))) 1)
     !*! mkTransformation rotation 0
