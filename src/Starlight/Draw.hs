@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Draw
-( draw
+( Starlight.Draw.draw
 ) where
 
 import Control.Effect.Lens (view)
@@ -86,7 +86,7 @@ draw = measure "draw" . runLiftIO $ do
   let maxDim = maximum (fromIntegral <$> dsize) * 0.5
       onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = lengthToPixels v * prj (distance pos position - convert radius) < maxDim
 
-  measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) drawBody
+  measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) Body.draw
 
   measure "radar" drawRadar
 

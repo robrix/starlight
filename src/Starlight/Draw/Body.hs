@@ -10,7 +10,7 @@
 module Starlight.Draw.Body
 ( runBody
 , Drawable
-, drawBody
+, draw
 ) where
 
 import           Control.Carrier.Reader
@@ -49,7 +49,7 @@ runBody
 runBody = UI.loadingDrawable Drawable shader vertices
 
 
-drawBody
+draw
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has (Reader Drawable) sig m
@@ -57,7 +57,7 @@ drawBody
      )
   => Body.StateVectors
   -> m ()
-drawBody v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ do
+draw v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ do
   view <- ask
   matrix_ ?=  getTransform
     (   transformToSystem view
