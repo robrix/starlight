@@ -47,7 +47,7 @@ drawStarfield = UI.using getDrawable $ do
   View{ size, zoom, focus } <- ask
 
   resolution_ ?= (fromIntegral <$> size)
-  origin_     ?= (prj <$> (focus / (fromIntegral <$> size)))
+  origin_     ?= (prj <$> focus)
   zoom_       ?= zoom
 
   drawArrays TriangleStrip range
