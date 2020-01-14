@@ -65,6 +65,9 @@ instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
 deriving instance Uniform (f a) => Uniform (Point f a)
 
 
+-- | Types which can appear in vectors.
+--
+-- NB: The name is a bit misleading because matrices are vectors containing other vectors.
 class GL.Type t => Scalar t where
   glslTypeFor :: Col -> String
 
