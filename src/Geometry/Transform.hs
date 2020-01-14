@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 module Geometry.Transform
 ( Transform(..)
@@ -10,10 +11,13 @@ module Geometry.Transform
 
 import Control.Category
 import Control.Lens ((&), (.~))
+import Foreign.Storable
+import GL.Type as GL
+import GL.Uniform
 import Linear.Exts
 
 newtype Transform (a :: * -> *) (b :: * -> *) = Transform { getTransform :: M44 Float }
-  deriving (Show)
+  deriving (Show, Storable, GL.Type, Uniform)
 
 instance Category Transform where
   id = Transform identity
