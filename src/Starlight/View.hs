@@ -18,6 +18,7 @@ module Starlight.View
 , toContext
 , toWindow
 , toZoomed
+, toSystem
   -- * Re-exports
 , (>>>)
 ) where
@@ -84,3 +85,6 @@ toWindow View{ ratio } = Transform (scaled (pure 1 & _xy .~ fromIntegral ratio))
 
 toZoomed :: View -> Transform WindowSpace ZoomedSpace
 toZoomed View{ zoom } = Transform (scaled (pure 1 & _xy .~ pure (1/zoom)))
+
+toSystem :: View -> Transform ZoomedSpace SystemSpace
+toSystem View{ scale } = Transform (scaled (pure 1 & _xyz .~ pure scale))
