@@ -61,45 +61,25 @@ instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
   glslType = glslTypePrefix @t <> "vec4"
   uniform prog loc vec = A.with vec (sendM . uniformFor @t N4 Nothing prog loc 1 . castPtr)
 
-instance Uniform (M22 Float) where
-  glslType = "mat2"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix2fv prog loc 1 GL_TRUE . castPtr)
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M22 t) where
+  glslType = glslTypePrefix @t <> "mat2"
+  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t N2 (Just N2) prog loc 1 . castPtr)
 
-instance Uniform (M22 Double) where
-  glslType = "dmat2"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix2dv prog loc 1 GL_TRUE . castPtr)
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M23 t) where
+  glslType = glslTypePrefix @t <> "mat2x3"
+  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t N2 (Just N3) prog loc 1 . castPtr)
 
-instance Uniform (M23 Float) where
-  glslType = "mat2x3"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix2x3fv prog loc 1 GL_TRUE . castPtr)
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M33 t) where
+  glslType = glslTypePrefix @t <> "mat3"
+  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t N3 (Just N3) prog loc 1 . castPtr)
 
-instance Uniform (M23 Double) where
-  glslType = "dmat2x3"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix2x3dv prog loc 1 GL_TRUE . castPtr)
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M34 t) where
+  glslType = glslTypePrefix @t <> "mat3x4"
+  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t N3 (Just N4) prog loc 1 . castPtr)
 
-instance Uniform (M33 Float) where
-  glslType = "mat3"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix3fv prog loc 1 GL_TRUE . castPtr)
-
-instance Uniform (M33 Double) where
-  glslType = "dmat3"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix3dv prog loc 1 GL_TRUE . castPtr)
-
-instance Uniform (M34 Float) where
-  glslType = "mat3x4"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix3x4fv prog loc 1 GL_TRUE . castPtr)
-
-instance Uniform (M34 Double) where
-  glslType = "dmat3x4"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix3x4dv prog loc 1 GL_TRUE . castPtr)
-
-instance Uniform (M44 Float) where
-  glslType = "mat4"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix4fv prog loc 1 GL_TRUE . castPtr)
-
-instance Uniform (M44 Double) where
-  glslType = "dmat4"
-  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix4dv prog loc 1 GL_TRUE . castPtr)
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M44 t) where
+  glslType = glslTypePrefix @t <> "mat4"
+  uniform prog loc matrix = A.with matrix (sendM . uniformFor @t N4 (Just N4) prog loc 1 . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Point f a)
 
