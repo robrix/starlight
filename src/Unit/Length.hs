@@ -39,5 +39,9 @@ deriving via V2 Float instance Uniform (V2 (Kilo Metres Float))
 deriving via V3 Float instance Uniform (V3 (Kilo Metres Float))
 deriving via V4 Float instance Uniform (V4 (Kilo Metres Float))
 
+deriving via V2 Float instance Uniform (V2 (Mega Metres Float))
+deriving via V3 Float instance Uniform (V3 (Mega Metres Float))
+deriving via V4 Float instance Uniform (V4 (Mega Metres Float))
+
 fromAUs :: Num a => a -> Metres a
 fromAUs a = Metres (149597870700 * a)
