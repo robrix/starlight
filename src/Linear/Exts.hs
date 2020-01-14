@@ -37,7 +37,7 @@ import Linear.V4
 import Linear.Vector
 import Unit.Angle
 
-translated :: V2 Float -> M33 Float
+translated :: Num a => V2 a -> M33 a
 translated (V2 tx ty) = V3
   (V3 1 0 tx)
   (V3 0 1 ty)
