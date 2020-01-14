@@ -239,8 +239,9 @@ withView m = do
   ratio <- Window.ratio
   size  <- Window.size
 
+  scale    <- view (scale_ @StateVectors)
   velocity <- view (player_ @StateVectors .actor_.velocity_)
   focus    <- view (player_ @StateVectors .actor_.position_._xy)
 
   let zoom = zoomForSpeed size (prj (norm velocity))
-  runReader View{ ratio, size, zoom, focus } m
+  runReader View{ ratio, size, zoom, scale, focus } m

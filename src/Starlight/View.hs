@@ -18,6 +18,7 @@ data View = View
   { ratio :: Int    -- ^ Ratio of window pixels per context pixel.
   , size  :: V2 Int
   , zoom  :: Float
+  , scale :: Float
   , focus :: V2 (Kilo Metres Float)
   }
 
