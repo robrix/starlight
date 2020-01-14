@@ -26,6 +26,7 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
+import Control.Lens ((&), (.~))
 import Data.Functor.Interval
 import Linear.Epsilon
 import Linear.Matrix hiding (Trace(..))
@@ -45,11 +46,7 @@ translated (V2 tx ty) = V3
   (V3 0 0 1)
 
 translated3 :: V3 Float -> M44 Float
-translated3 (V3 tx ty tz) = V4
-  (V4 1 0 0 tx)
-  (V4 0 1 0 ty)
-  (V4 0 0 1 tz)
-  (V4 0 0 0 1)
+translated3 t = identity & translation .~ t
 
 
 orient :: (Epsilon a, RealFloat a) => Radians a -> Radians a -> Radians a -> Quaternion a
