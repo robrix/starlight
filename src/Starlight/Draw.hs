@@ -66,7 +66,7 @@ draw = measure "draw" . runLiftIO $ do
   let font = Font face 18
   bind @Framebuffer Nothing
 
-  v@View{ size, scale, zoom } <- ask
+  v@View{ size } <- ask
   system@System{ beams } <- ask @(System StateVectors)
   Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
 
@@ -83,8 +83,8 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "laser" $ for_ beams drawLaser
 
-  let maxDim = maximum (fromIntegral <$> dsize) * zoom / scale
-      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = prj (distance pos position - radius) < maxDim * 0.5
+  let maxDim = maximum (fromIntegral <$> dsize) * 0.5
+      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = lengthToPixels v * prj (distance pos position - radius) < maxDim
 
   measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) drawBody
 
