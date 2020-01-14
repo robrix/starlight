@@ -1,2 +1,9 @@
 module Data.Quadtree
-() where
+( Q(..)
+) where
+
+data Q a
+  = E
+  | L a
+  | Q (Q a) (Q a)
+      (Q a) (Q a)
