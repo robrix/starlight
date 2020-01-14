@@ -14,7 +14,7 @@ module Starlight.Body
 ( StateVectors(..)
 , Body(..)
 , Orbit(..)
-, BodySpace
+, OrbitSpace
 , rotationTimeScale
 , actorAt
 , systemAt
@@ -48,7 +48,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform SystemSpace BodySpace)
+  , transform :: !(Transform SystemSpace OrbitSpace)
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -75,7 +75,7 @@ data Orbit = Orbit
   }
   deriving (Show)
 
-data BodySpace
+data OrbitSpace
 
 
 rotationTimeScale :: Num a => Seconds a
