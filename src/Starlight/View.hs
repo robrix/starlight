@@ -21,6 +21,7 @@ module Starlight.View
 , toPlayer
 , transformToWindow
 , transformToZoomed
+, transformToSystem
   -- * Re-exports
 , module Geometry.Transform
 ) where
@@ -89,3 +90,6 @@ transformToWindow view = toContext view >>> toWindow view
 
 transformToZoomed :: View -> Transform ClipSpace ZoomedSpace
 transformToZoomed view = transformToWindow view >>> toZoomed view
+
+transformToSystem :: View -> Transform ClipSpace SystemSpace
+transformToSystem view = transformToZoomed view >>> toSystem view
