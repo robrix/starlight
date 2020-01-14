@@ -8,7 +8,6 @@ module Starlight.View
 , deviceSize
 , lengthToPixels
   -- * Transforms
-, Transform(..)
 , ClipSpace
 , ContextSpace
 , WindowSpace
@@ -21,12 +20,12 @@ module Starlight.View
 , toSystem
 , toPlayer
   -- * Re-exports
-, (>>>)
+, module Geometry.Transform
 ) where
 
-import Control.Category
 import Control.Lens ((.~), (^.))
 import Data.Function ((&))
+import Geometry.Transform
 import Linear.Exts
 import Unit.Length
 
@@ -60,12 +59,6 @@ deviceSize View{ ratio, size } = ratio *^ size
 lengthToPixels :: View -> Float
 lengthToPixels View{ zoom, scale } = 1/zoom * scale
 
-
-newtype Transform a b = Transform { getTransform :: M44 Float }
-
-instance Category Transform where
-  id = Transform identity
-  Transform a . Transform b = Transform (b !*! a)
 
 data ClipSpace
 data ContextSpace
