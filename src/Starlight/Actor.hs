@@ -1,15 +1,18 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 -- | An 'Actor' has 'position', 'velocity', and 'rotation', and can be acted on by the physics simulation.
 module Starlight.Actor
 ( Actor(..)
+, ActorSpace
 , position_
 , velocity_
 , rotation_
 , mass_
 , magnitude_
+, transformToActor
 , applyForce
 , HasActor(..)
 ) where
@@ -17,6 +20,7 @@ module Starlight.Actor
 import Control.Effect.Lens.Exts (asserting)
 import Control.Lens (Lens', none, (&), (+~), (^.))
 import Data.Generics.Product.Fields
+import Geometry.Transform
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import Linear.Quaternion
@@ -35,6 +39,8 @@ data Actor = Actor
   }
   deriving (Generic, Show)
 
+data ActorSpace
+
 position_ :: HasCallStack => Lens' Actor (V3 (Mega Metres Float))
 position_ = field @"position".asserting (none isNaN)
 
@@ -50,6 +56,9 @@ mass_ = field @"mass".asserting (not.isNaN)
 magnitude_ :: HasCallStack => Lens' Actor (Mega Metres Float)
 magnitude_ = field @"magnitude".asserting (not.isNaN)
 
+
+transformToActor :: Actor -> Transform space ActorSpace
+transformToActor Actor{ position, rotation } = mkTranslation (prj <$> position) >>> mkRotation rotation
 
 applyForce :: HasCallStack => V3 ((Kilo Grams :*: Mega Metres :/: Seconds :/: Seconds) Float) -> Seconds Float -> Actor -> Actor
 applyForce force dt a = a & velocity_ +~ ((.*. dt) . (./. a^.mass_) <$> force)
