@@ -32,7 +32,6 @@ import           GL.Object
 import           GL.Shader.DSL hiding (coerce, (!*!), (^*))
 import qualified GL.Shader.DSL as D
 import           Linear.V2 hiding (R1(..), R2(..))
-import           Linear.Vector hiding (lerp)
 import           Starlight.View
 import qualified UI.Drawable as UI
 import           Unit.Length
@@ -45,9 +44,9 @@ drawStarfield
      )
   => m ()
 drawStarfield = UI.using getDrawable $ do
-  View{ scale, size, zoom, focus } <- ask
+  view@View{ size, zoom, focus } <- ask
 
-  resolution_ ?= (fromIntegral <$> size ^* scale)
+  resolution_ ?= (fromIntegral <$> deviceSize view)
   origin_     ?= (prj <$> (focus / (fromIntegral <$> size)))
   zoom_       ?= zoom
 
