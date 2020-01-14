@@ -48,7 +48,7 @@ drawStarfield = UI.using getDrawable $ do
   View{ size, zoom, focus } <- ask
 
   resolution_ ?= (fromIntegral <$> size)
-  origin_     ?= focus
+  focus_      ?= focus
   zoom_       ?= zoom
 
   drawArrays TriangleStrip range
@@ -84,7 +84,7 @@ range = Interval 0 (Identity (length vertices))
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
 
 shader :: Shader U V O
-shader = program $ \ U{ resolution, origin, zoom }
+shader = program $ \ U{ resolution, focus, zoom }
   ->  vertex (\ V{ pos } None -> main $
     gl_Position .= ext4 (ext3 pos 0) 1)
 
@@ -92,21 +92,21 @@ shader = program $ \ U{ resolution, origin, zoom }
     resolution <- let' "resolution" (D.coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 1 (resolution^._y / resolution^._x)
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
-    origin <- var "origin" $ ext3 (D.coerce origin / (resolution D.^* 0.1)) 1
-    a1 <- let' "a1" $ 0.2 + norm (get origin) / resolution^._x * 2
-    a2 <- let' "a2" $ 0.2 + norm (get origin) / resolution^._y * 2
+    focus <- var "focus" $ ext3 (D.coerce focus / (resolution D.^* 0.1)) 1
+    a1 <- let' "a1" $ 0.2 + norm (get focus) / resolution^._x * 2
+    a2 <- let' "a2" $ 0.2 + norm (get focus) / resolution^._y * 2
     rot1 <- let' "rot1" $ mat2 (vec2 (cos a1) (sin a1)) (vec2 (-(sin a1)) (cos a1))
     rot2 <- let' "rot2" $ mat2 (vec2 (cos a2) (sin a2)) (vec2 (-(sin a2)) (cos a2))
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
-    origin^^._xz *!= rot1
-    origin^^._xy *!= rot2
+    focus^^._xz *!= rot1
+    focus^^._xy *!= rot2
     s <- var "s" 0.1
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 0 0 0
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
-      p <- var "p" $ get origin + get dir D.^* get s
+      p <- var "p" $ get focus + get dir D.^* get s
       p .= abs (tile - mod' (get p) (tile D.^* 2))
       pa <- var "pa" 0
       a <- var "a" 0
@@ -143,7 +143,7 @@ shader = program $ \ U{ resolution, origin, zoom }
 
 data U v = U
   { resolution :: v (V2 (Window.Pixels Float))
-  , origin     :: v (V2 (Mega Metres Float))
+  , focus      :: v (V2 (Mega Metres Float))
   , zoom       :: v Float
   }
   deriving (Generic)
@@ -153,8 +153,8 @@ instance Vars U
 resolution_ :: Lens' (U v) (v (V2 (Window.Pixels Float)))
 resolution_ = field @"resolution"
 
-origin_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
-origin_ = field @"origin"
+focus_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
+focus_ = field @"focus"
 
 zoom_ :: Lens' (U v) (v Float)
 zoom_ = field @"zoom"
