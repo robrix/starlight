@@ -46,27 +46,27 @@ instance Uniform Double where
 
 instance Uniform (V2 Float) where
   glslType = "vec2"
-  uniform prog loc (V2 x y) = runLiftIO $ glProgramUniform2f prog loc x y
+  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform2fv prog loc 1 . castPtr)
 
 instance Uniform (V2 Double) where
   glslType = "dvec2"
-  uniform prog loc (V2 x y) = runLiftIO $ glProgramUniform2d prog loc x y
+  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform2dv prog loc 1 . castPtr)
 
 instance Uniform (V3 Float) where
   glslType = "vec3"
-  uniform prog loc (V3 x y z) = runLiftIO $ glProgramUniform3f prog loc x y z
+  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform3fv prog loc 1 . castPtr)
 
 instance Uniform (V3 Double) where
   glslType = "dvec3"
-  uniform prog loc (V3 x y z) = runLiftIO $ glProgramUniform3d prog loc x y z
+  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform3dv prog loc 1 . castPtr)
 
 instance Uniform (V4 Float) where
   glslType = "vec4"
-  uniform prog loc (V4 x y z w) = runLiftIO $ glProgramUniform4f prog loc x y z w
+  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform4fv prog loc 1 . castPtr)
 
 instance Uniform (V4 Double) where
   glslType = "dvec4"
-  uniform prog loc (V4 x y z w) = runLiftIO $ glProgramUniform4d prog loc x y z w
+  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform4dv prog loc 1 . castPtr)
 
 instance Uniform (M22 Float) where
   glslType = "mat2"
