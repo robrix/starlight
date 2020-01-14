@@ -22,6 +22,7 @@ module Unit.Multiple
 , Kilo(..)
 , Mega(..)
 , Giga(..)
+, Tera(..)
 ) where
 
 import Data.Functor.Const
@@ -84,3 +85,7 @@ newtype Mega u a = Mega { getMega :: u a }
 newtype Giga u a = Giga { getGiga :: u a }
   deriving (Additive, Applicative, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Unit dim) via Mult 1_000_000_000 1 "G" u
+
+newtype Tera u a = Tera { getTera :: u a }
+  deriving (Additive, Applicative, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit dim) via Mult 1_000_000_000_000 1 "T" u
