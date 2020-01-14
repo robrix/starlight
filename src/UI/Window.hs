@@ -44,7 +44,7 @@ input :: Has (Lift IO) sig m => (Event -> m ()) -> m ()
 input h = go where
   go = poll >>= maybe (pure ()) (const go <=< h)
 
-size :: (Num a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m (V2 a)
+size :: (Num a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m (V2 (Pixels a))
 size = do
   size <- ask >>= runLiftIO . get . windowSize
   pure (fromIntegral <$> size)
