@@ -7,8 +7,6 @@ module Starlight.View
 , lengthToWindowPixels
   -- * Transforms
 , ClipSpace
-, ContextPixels(..)
-, WindowPixels(..)
 , ZoomedSpace
 , SystemSpace
 , PlayerSpace
