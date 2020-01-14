@@ -8,7 +8,6 @@ module Starlight.View
   -- * Transforms
 , ClipUnits(..)
 , Zoomed(..)
-, SystemSpace
 , toContext
 , toWindow
 , toZoomed
@@ -28,7 +27,6 @@ import Data.Functor.Interval
 import Geometry.Transform
 import GL.Viewport
 import Linear.Exts
-import Starlight.System
 import UI.Context as Context
 import UI.Window as Window
 import Unit.Length
@@ -65,7 +63,7 @@ toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 toZoomed :: View -> Transform Window.Pixels Zoomed
 toZoomed View{ zoom } = mkScale (pure 1 & _xy .~ pure (1/zoom))
 
-toSystem :: View -> Transform Zoomed SystemSpace
+toSystem :: View -> Transform Zoomed (Mega Metres)
 toSystem View{ scale, focus } = mkScale (pure scale) >>> mkTranslation (ext (prj <$> negated focus) 0)
 
 transformToWindow :: View -> Transform ClipUnits Window.Pixels
@@ -74,7 +72,7 @@ transformToWindow view = toContext view >>> toWindow view
 transformToZoomed :: View -> Transform ClipUnits Zoomed
 transformToZoomed view = transformToWindow view >>> toZoomed view
 
-transformToSystem :: View -> Transform ClipUnits SystemSpace
+transformToSystem :: View -> Transform ClipUnits (Mega Metres)
 transformToSystem view = transformToZoomed view >>> toSystem view
 
 

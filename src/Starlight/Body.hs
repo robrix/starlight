@@ -50,7 +50,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform SystemSpace OrbitSpace)
+  , transform :: !(Transform (Mega Metres) OrbitSpace)
   , actor     :: !Actor
   }
   deriving (Generic, Show)
