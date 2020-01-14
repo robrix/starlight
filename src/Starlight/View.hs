@@ -68,16 +68,16 @@ data PlayerSpace
 
 
 toContext :: View -> Transform ClipSpace ContextSpace
-toContext View{ size } = Transform (scaled (pure 1 & _xy .~ 1 / (fromIntegral <$> size)))
+toContext View{ size } = mkScale (pure 1 & _xy .~ 1 / (fromIntegral <$> size))
 
 toWindow :: View -> Transform ContextSpace WindowSpace
-toWindow View{ ratio } = Transform (scaled (pure 1 & _xy .~ fromIntegral ratio))
+toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 
 toZoomed :: View -> Transform WindowSpace ZoomedSpace
-toZoomed View{ zoom } = Transform (scaled (pure 1 & _xy .~ pure (1/zoom)))
+toZoomed View{ zoom } = mkScale (pure 1 & _xy .~ pure (1/zoom))
 
 toSystem :: View -> Transform ZoomedSpace SystemSpace
-toSystem View{ scale, focus } = Transform (scaled (pure 1 & _xyz .~ pure scale) !*! translated3 (ext (prj <$> negated focus) 0))
+toSystem View{ scale, focus } = mkScale (pure scale) >>> mkTranslation (ext (prj <$> negated focus) 0)
 
 toPlayer :: View -> Transform SystemSpace PlayerSpace
-toPlayer View{ focus } = Transform (translated3 (ext (prj <$> focus) 0))
+toPlayer View{ focus } = mkTranslation (ext (prj <$> focus) 0)
