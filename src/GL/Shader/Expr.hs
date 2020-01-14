@@ -3,6 +3,8 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
+{-# HLINT ignore "Use camelCase" #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 module GL.Shader.Expr
 ( -- * References (mutable variables)
   Ref(..)
@@ -200,19 +202,19 @@ data Expr (k :: Type) a where
   Get :: Ref k a -> Expr k a
 
   Float :: Expr k a -> Expr k Float
-  Vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
-  Vec3 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V3 Float)
-  Vec4 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V4 Float)
-  Mat2 :: Expr k (V2 Float) -> Expr k (V2 Float) -> Expr k (M22 Float)
-  Mat3 :: Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (M33 Float)
-  Mat4 :: Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (M44 Float)
-  Ext3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
-  Ext4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
-  Norm :: Expr k (v Float) -> Expr k Float
-  Dot :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
-  Lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
-  Lerp2 :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
-  Dfdx :: Expr k Float -> Expr k Float
+  Vec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
+  Vec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
+  Vec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
+  Mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
+  Mat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
+  Mat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
+  Ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
+  Ext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
+  Norm :: Expr k (v a) -> Expr k a
+  Dot :: Expr k (v a) -> Expr k (v a) -> Expr k (v a)
+  Lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
+  Lerp2 :: Expr k (v a) -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
+  Dfdx :: Expr k a -> Expr k a
   Mod :: Expr k a -> Expr k a -> Expr k a
   Min :: Expr k a -> Expr k a -> Expr k a
   Max :: Expr k a -> Expr k a -> Expr k a
@@ -270,35 +272,35 @@ get = Get
 float :: Expr k a -> Expr k Float
 float = Float
 
-vec2 :: Expr k Float -> Expr k Float -> Expr k (V2 Float)
+vec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
 vec2 = Vec2
 
-vec3 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V3 Float)
+vec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
 vec3 = Vec3
 
-vec4 :: Expr k Float -> Expr k Float -> Expr k Float -> Expr k Float -> Expr k (V4 Float)
+vec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
 vec4 = Vec4
 
-mat2 :: Expr k (V2 Float) -> Expr k (V2 Float) -> Expr k (M22 Float)
+mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
 mat2 = Mat2
 
-mat3 :: Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (V3 Float) -> Expr k (M33 Float)
+mat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
 mat3 = Mat3
 
-mat4 :: Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (V4 Float) -> Expr k (M44 Float)
+mat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
 mat4 = Mat4
 
 
-ext3 :: Expr k (V2 Float) -> Expr k Float -> Expr k (V3 Float)
+ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
 ext3 = Ext3
 
-ext4 :: Expr k (V3 Float) -> Expr k Float -> Expr k (V4 Float)
+ext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
 ext4 = Ext4
 
-norm :: Expr k (v Float) -> Expr k Float
+norm :: Expr k (v a) -> Expr k a
 norm = Norm
 
-dot :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
+dot :: Expr k (v a) -> Expr k (v a) -> Expr k (v a)
 dot = Dot
 
 (^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
@@ -317,13 +319,13 @@ infixl 7 !*
 infixl 7 !*!
 
 
-lerp :: Expr k Float -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
+lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
 lerp = Lerp
 
-lerp2 :: Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float) -> Expr k (v Float)
+lerp2 :: Expr k (v a) -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
 lerp2 = Lerp2
 
-dFdx :: Expr k Float -> Expr k Float
+dFdx :: Expr k a -> Expr k a
 dFdx = Dfdx
 
 mod' :: Expr k v -> Expr k v -> Expr k v
