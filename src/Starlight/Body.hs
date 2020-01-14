@@ -15,6 +15,7 @@ module Starlight.Body
 , Body(..)
 , Orbit(..)
 , OrbitSpace
+, BodySpace
 , rotationTimeScale
 , actorAt
 , systemAt
@@ -76,6 +77,7 @@ data Orbit = Orbit
   deriving (Show)
 
 data OrbitSpace
+data BodySpace
 
 
 rotationTimeScale :: Num a => Seconds a
