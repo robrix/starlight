@@ -51,15 +51,15 @@ instance Uniform Double where
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
   glslType = glslTypePrefix @t <> "vec2"
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t C1x2 prog loc 1 . castPtr)
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t C2x1 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
   glslType = glslTypePrefix @t <> "vec3"
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t C1x3 prog loc 1 . castPtr)
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t C3x1 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
   glslType = glslTypePrefix @t <> "vec4"
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t C1x4 prog loc 1 . castPtr)
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t C4x1 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (M22 t) where
   glslType = glslTypePrefix @t <> "mat2"
@@ -90,15 +90,15 @@ class GL.Type t => Scalar t where
   uniformFor :: Col -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 data Col
-  = C1x2
-  | C1x3
-  | C1x4
+  = C2x1
   | C2x2
   | C2x3
   | C2x4
+  | C3x1
   | C3x2
   | C3x3
   | C3x4
+  | C4x1
   | C4x2
   | C4x3
   | C4x4
@@ -113,15 +113,15 @@ instance Scalar Float where
   {-# INLINE glslTypePrefix #-}
 
   uniformFor = \case
-    C1x2 -> glProgramUniform2fv
-    C1x3 -> glProgramUniform3fv
-    C1x4 -> glProgramUniform4fv
+    C2x1 -> glProgramUniform2fv
     C2x2 -> transposing glProgramUniformMatrix2fv
     C2x3 -> transposing glProgramUniformMatrix2x3fv
     C2x4 -> transposing glProgramUniformMatrix2x4fv
+    C3x1 -> glProgramUniform3fv
     C3x2 -> transposing glProgramUniformMatrix3x2fv
     C3x3 -> transposing glProgramUniformMatrix3fv
     C3x4 -> transposing glProgramUniformMatrix3x4fv
+    C4x1 -> glProgramUniform4fv
     C4x2 -> transposing glProgramUniformMatrix4x2fv
     C4x3 -> transposing glProgramUniformMatrix4x3fv
     C4x4 -> transposing glProgramUniformMatrix4fv
@@ -132,15 +132,15 @@ instance Scalar Double where
   {-# INLINE glslTypePrefix #-}
 
   uniformFor = \case
-    C1x2 -> glProgramUniform2dv
-    C1x3 -> glProgramUniform3dv
-    C1x4 -> glProgramUniform4dv
+    C2x1 -> glProgramUniform2dv
     C2x2 -> transposing glProgramUniformMatrix2dv
     C2x3 -> transposing glProgramUniformMatrix2x3dv
     C2x4 -> transposing glProgramUniformMatrix2x4dv
+    C3x1 -> glProgramUniform3dv
     C3x2 -> transposing glProgramUniformMatrix3x2dv
     C3x3 -> transposing glProgramUniformMatrix3dv
     C3x4 -> transposing glProgramUniformMatrix3x4dv
+    C4x1 -> glProgramUniform4dv
     C4x2 -> transposing glProgramUniformMatrix4x2dv
     C4x3 -> transposing glProgramUniformMatrix4x3dv
     C4x4 -> transposing glProgramUniformMatrix4dv
