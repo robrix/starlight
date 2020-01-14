@@ -13,7 +13,7 @@ import Unit.Power
 
 -- FIXME: transmitter gain
 -- FIXME: effective aperture
-data Radar = Radar
+newtype Radar = Radar
   { power :: Mega Watts Float
   }
   deriving (Generic, Show)
