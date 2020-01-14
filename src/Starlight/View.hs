@@ -44,5 +44,5 @@ aspectRatio View{ size } = size' ^. _x / size' ^. _y where
 deviceSize :: View -> V2 Int
 deviceSize View{ ratio, size } = ratio *^ size
 
-lengthToPixels :: Functor f => View -> f Float -> f Float
-lengthToPixels View{ zoom, scale } length = length ^/ zoom ^* scale
+lengthToPixels :: View -> Float
+lengthToPixels View{ zoom, scale } = 1/zoom * scale
