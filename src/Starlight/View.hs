@@ -1,3 +1,4 @@
+{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module Starlight.View
 ( View(..)
@@ -19,12 +20,17 @@ module Starlight.View
 , transformToWindow
 , transformToZoomed
 , transformToSystem
+  -- * Viewport
+, clipTo
   -- * Re-exports
 , module Geometry.Transform
 ) where
 
+import Control.Effect.Lift
 import Control.Lens ((&), (.~), (^.))
+import Data.Functor.Interval
 import Geometry.Transform
+import GL.Viewport
 import Linear.Exts
 import Starlight.System
 import Unit.Length
@@ -78,3 +84,10 @@ transformToZoomed view = transformToWindow view >>> toZoomed view
 
 transformToSystem :: View -> Transform ClipSpace SystemSpace
 transformToSystem view = transformToZoomed view >>> toSystem view
+
+
+clipTo :: Has (Lift IO) sig m => View -> m ()
+clipTo view = do
+  viewport $ Interval 0 dsize
+  scissor  $ Interval 0 dsize where
+  dsize = deviceSize view

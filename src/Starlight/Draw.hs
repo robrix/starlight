@@ -20,10 +20,8 @@ import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Functor.Const
 import Data.Functor.Identity
-import Data.Functor.Interval
 import GL.Effect.Check
 import GL.Framebuffer
-import GL.Viewport
 import Graphics.GL.Core41
 import Linear.Exts
 import Starlight.Actor
@@ -70,10 +68,7 @@ draw = measure "draw" . runLiftIO $ do
   system@System{ beams } <- ask @(System StateVectors)
   Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
 
-  let dsize = deviceSize v
-
-  viewport $ Interval 0 dsize
-  scissor  $ Interval 0 dsize
+  clipTo v
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
