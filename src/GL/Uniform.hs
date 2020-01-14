@@ -50,15 +50,15 @@ instance Uniform Double where
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
-  glslType = glslTypeFor @t N2 Nothing
+  glslType = glslTypePrefix @t <> "vec2"
   uniform prog loc vec = A.with vec (sendM . uniformFor @t N2 Nothing prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
-  glslType = glslTypeFor @t N3 Nothing
+  glslType = glslTypePrefix @t <> "vec3"
   uniform prog loc vec = A.with vec (sendM . uniformFor @t N3 Nothing prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
-  glslType = glslTypeFor @t N4 Nothing
+  glslType = glslTypePrefix @t <> "vec4"
   uniform prog loc vec = A.with vec (sendM . uniformFor @t N4 Nothing prog loc 1 . castPtr)
 
 instance Uniform (M22 Float) where
@@ -105,28 +105,20 @@ deriving instance Uniform (f a) => Uniform (Point f a)
 
 
 class GL.Type t => Scalar t where
-  glslTypeFor :: N -> Maybe N -> String
+  glslTypePrefix :: String
 
   uniformFor :: N -> Maybe N -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 data N = N2 | N3 | N4
   deriving (Eq, Ord, Show)
 
-nToS :: N -> String
-nToS = \case
-  N2 -> "2"
-  N3 -> "3"
-  N4 -> "4"
-
 transposing :: (GLuint -> GLint -> GLsizei -> GLboolean -> Ptr t -> IO ()) -> (GLuint -> GLint -> GLsizei -> Ptr t -> IO ())
 transposing f prog loc n = f prog loc n GL_TRUE
 {-# INLINE transposing #-}
 
 instance Scalar Float where
-  glslTypeFor m = \case
-    Nothing -> "vec" <> nToS m
-    Just n  -> "mat" <> nToS m <> "x" <> nToS n
-  {-# INLINE glslTypeFor #-}
+  glslTypePrefix = ""
+  {-# INLINE glslTypePrefix #-}
 
   uniformFor m n = case (m, n) of
     (N2, Nothing) -> glProgramUniform2fv
@@ -144,10 +136,8 @@ instance Scalar Float where
   {-# INLINE uniformFor #-}
 
 instance Scalar Double where
-  glslTypeFor m = \case
-    Nothing -> "dvec" <> nToS m
-    Just n  -> "dmat" <> nToS m <> "x" <> nToS n
-  {-# INLINE glslTypeFor #-}
+  glslTypePrefix = "d"
+  {-# INLINE glslTypePrefix #-}
 
   uniformFor m n = case (m, n) of
     (N2, Nothing) -> glProgramUniform2dv
