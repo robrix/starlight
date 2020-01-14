@@ -5,6 +5,7 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.System
 ( System(..)
+, SystemSpace
 , bodies_
 , player_
 , npcs_
@@ -38,6 +39,9 @@ data System a = System
   , beams      :: ![Beam]
   }
   deriving (Generic, Show)
+
+-- | The coordinate space of the system’s origin.
+data SystemSpace
 
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = field @"bodies"

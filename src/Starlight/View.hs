@@ -26,6 +26,7 @@ module Starlight.View
 import Control.Lens ((&), (.~), (^.))
 import Geometry.Transform
 import Linear.Exts
+import Starlight.System
 import Unit.Length
 
 data View = View
@@ -63,7 +64,6 @@ data ClipSpace
 data ContextSpace
 data WindowSpace
 data ZoomedSpace
-data SystemSpace
 data PlayerSpace
 
 
