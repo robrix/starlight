@@ -1,5 +1,9 @@
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module UI.Window
-( swap
+( WindowPixels(..)
+, swap
 , poll
 , input
 , size
@@ -17,10 +21,18 @@ import           Control.Lens ((^.))
 import           Control.Monad ((<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Fixed (div')
+import           Data.Functor.Identity
 import           Data.Text (Text)
+import           Foreign.Storable
+import           GL.Type as GL
+import           GL.Uniform
 import           Linear.V2 as Linear
 import           Linear.V4 as Linear
 import           SDL
+
+newtype WindowPixels a = WindowPixels { getWindowPixels :: a }
+  deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
 swap = ask >>= runLiftIO . glSwapWindow
