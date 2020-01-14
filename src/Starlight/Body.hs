@@ -14,6 +14,7 @@ module Starlight.Body
 ( StateVectors(..)
 , Body(..)
 , Orbit(..)
+, BodySpace
 , rotationTimeScale
 , actorAt
 , systemAt
@@ -31,6 +32,7 @@ import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
 import           Data.Time.Format.ISO8601
+import           Geometry.Transform
 import           GHC.Generics
 import           Linear.Exts
 import           Starlight.Actor
@@ -46,7 +48,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(M44 Float)
+  , transform :: !(Transform SystemSpace BodySpace)
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -72,6 +74,8 @@ data Orbit = Orbit
   , timeOfPeriapsis :: !(Seconds Float)    -- relative to epoch
   }
   deriving (Show)
+
+data BodySpace
 
 
 rotationTimeScale :: Num a => Seconds a
@@ -117,14 +121,13 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
   go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
     { body
-    , transform = rel !*! translated3 (prj <$> position actor)
+    , transform = rel >>> mkTranslation (prj <$> position actor)
     , actor = actor
-      & position_.coerced.extended 1 %~ (rel !*)
-      & velocity_.coerced.extended 0 %~ (rel !*)
+      & position_.coerced.extended 1 %~ apply rel
+      & velocity_.coerced.extended 0 %~ apply rel
     } where
     actor = actorAt body t
-    rel = maybe identity transform (parent identifier >>= (bodies' Map.!?))
-      !*! mkTransformation orientation 0
+    rel = maybe (mkRotation orientation) ((>>> mkRotation orientation) . transform) (parent identifier >>= (bodies' Map.!?))
 
 -- | Subject to the invariant that w=1.
 extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)
