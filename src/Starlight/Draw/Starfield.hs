@@ -34,6 +34,7 @@ import qualified GL.Shader.DSL as D
 import           Linear.V2 hiding (R1(..), R2(..))
 import           Starlight.View
 import qualified UI.Drawable as UI
+import qualified UI.Window as Window
 import           Unit.Length
 
 drawStarfield
@@ -88,17 +89,18 @@ shader = program $ \ U{ resolution, origin, zoom }
     gl_Position .= ext4 (ext3 pos 0) 1)
 
   >>> fragment (\ None O{ fragColour } -> main $ do
-    uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
+    resolution <- let' "resolution" (D.coerce resolution)
+    uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 1 (resolution^._y / resolution^._x)
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     origin <- var "origin" $ ext3 (D.coerce origin / (resolution D.^* 0.1)) 1
-    a1 <- let' "a1" $ 0.2 + norm (get origin) / resolution ^. _x * 2
-    a2 <- let' "a2" $ 0.2 + norm (get origin) / resolution ^. _y * 2
+    a1 <- let' "a1" $ 0.2 + norm (get origin) / resolution^._x * 2
+    a2 <- let' "a2" $ 0.2 + norm (get origin) / resolution^._y * 2
     rot1 <- let' "rot1" $ mat2 (vec2 (cos a1) (sin a1)) (vec2 (-(sin a1)) (cos a1))
     rot2 <- let' "rot2" $ mat2 (vec2 (cos a2) (sin a2)) (vec2 (-(sin a2)) (cos a2))
-    dir ^^. _xz *!= rot1
-    dir ^^. _xy *!= rot2
-    origin ^^. _xz *!= rot1
-    origin ^^. _xy *!= rot2
+    dir^^._xz *!= rot1
+    dir^^._xy *!= rot2
+    origin^^._xz *!= rot1
+    origin^^._xy *!= rot2
     s <- var "s" 0.1
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 0 0 0
@@ -140,7 +142,7 @@ shader = program $ \ U{ resolution, origin, zoom }
 
 
 data U v = U
-  { resolution :: v (V2 Float) -- FIXME: express in pixel units
+  { resolution :: v (V2 (Window.Pixels Float))
   , origin     :: v (V2 Float) -- FIXME: express in Kilo Metres
   , zoom       :: v Float
   }
@@ -148,7 +150,7 @@ data U v = U
 
 instance Vars U
 
-resolution_ :: Lens' (U v) (v (V2 Float))
+resolution_ :: Lens' (U v) (v (V2 (Window.Pixels Float)))
 resolution_ = field @"resolution"
 
 origin_ :: Lens' (U v) (v (V2 Float))
