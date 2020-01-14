@@ -14,11 +14,11 @@ import           GHC.Stack
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
-import           Linear.Affine as Linear
-import           Linear.Matrix as Linear
-import           Linear.V2 as Linear
-import           Linear.V3 as Linear
-import           Linear.V4 as Linear
+import           Linear.Affine
+import           Linear.Matrix
+import           Linear.V2
+import           Linear.V3
+import           Linear.V4
 
 class GL.Type t => Uniform t where
   glslType :: String
