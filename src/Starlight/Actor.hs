@@ -6,7 +6,6 @@
 -- | An 'Actor' has 'position', 'velocity', and 'rotation', and can be acted on by the physics simulation.
 module Starlight.Actor
 ( Actor(..)
-, ActorSpace
 , position_
 , velocity_
 , rotation_
@@ -39,8 +38,6 @@ data Actor = Actor
   }
   deriving (Generic, Show)
 
-data ActorSpace a
-
 position_ :: HasCallStack => Lens' Actor (V3 (Mega Metres Float))
 position_ = field @"position".asserting (none isNaN)
 
@@ -57,7 +54,7 @@ magnitude_ :: HasCallStack => Lens' Actor (Mega Metres Float)
 magnitude_ = field @"magnitude".asserting (not.isNaN)
 
 
-transformToActor :: Actor -> Transform space ActorSpace
+transformToActor :: Actor -> Transform space (Mega Metres)
 transformToActor Actor{ position, rotation } = mkTranslation (prj <$> position) >>> mkRotation rotation
 
 applyForce :: HasCallStack => V3 ((Kilo Grams :*: Mega Metres :/: Seconds :/: Seconds) Float) -> Seconds Float -> Actor -> Actor
