@@ -31,7 +31,7 @@ import Geometry.Transform
 import GL.Viewport
 import Linear.Exts
 import Starlight.System
-import UI.Context
+import UI.Context as Context
 import UI.Window as Window
 import Unit.Length
 
@@ -59,10 +59,10 @@ data ZoomedSpace a
 data PlayerSpace a
 
 
-toContext :: View -> Transform ClipSpace ContextPixels
+toContext :: View -> Transform ClipSpace Context.Pixels
 toContext View{ size } = mkScale (pure 1 & _xy .~ 1 / (fromIntegral <$> size))
 
-toWindow :: View -> Transform ContextPixels Window.Pixels
+toWindow :: View -> Transform Context.Pixels Window.Pixels
 toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 
 toZoomed :: View -> Transform Window.Pixels ZoomedSpace

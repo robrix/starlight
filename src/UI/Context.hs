@@ -3,7 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module UI.Context
 ( Context
-, ContextPixels(..)
+, Pixels(..)
 , runContext
 ) where
 
@@ -20,7 +20,7 @@ import           SDL
 
 type Context = GLContext
 
-newtype ContextPixels a = ContextPixels { getContextPixels :: a }
+newtype Pixels a = Pixels { getPixels :: a }
   deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
