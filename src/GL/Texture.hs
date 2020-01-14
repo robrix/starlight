@@ -69,7 +69,7 @@ instance GL.Enum PixelFormat where
   glEnum = \case
     RGBA -> GL_RGBA
 
-data PixelType
+newtype PixelType
   = Packed8888 Bool
 
 instance GL.Enum PixelType where
