@@ -60,7 +60,7 @@ ratio = runLiftIO $ do
 runSDL :: Has (Lift IO) sig m => m a -> m a
 runSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO quit)
 
-runWindow :: Has (Lift IO) sig m => Text -> V2 Int -> ReaderC Window m a -> m a
+runWindow :: Has (Lift IO) sig m => Text -> V2 (Pixels Int) -> ReaderC Window m a -> m a
 runWindow name size = E.bracket
   (runLiftIO (createWindow name windowConfig))
   (runLiftIO . destroyWindow)
