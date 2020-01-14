@@ -4,6 +4,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 module GL.Uniform
 ( Uniform(..)
+, Scalar(..)
 ) where
 
 import           Control.Monad.IO.Class.Lift
@@ -109,3 +110,12 @@ instance Uniform (M44 Double) where
   uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix4dv prog loc 1 GL_TRUE . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Point f a)
+
+
+class GL.Type t => Scalar t where
+  glslTypeFor :: Int -> String
+
+  uniform1 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniform2 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniform3 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniform4 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
