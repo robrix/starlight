@@ -55,7 +55,8 @@ drawRadar
      )
   => m ()
 drawRadar = UI.using getDrawable $ do
-  system@System{ scale, bodies } <- ask @(System B.StateVectors)
+  view@View{ scale } <- ask
+  system@System{ bodies } <- ask @(System B.StateVectors)
   let target   = system^.player_.target_
       here     = system^.player_.actor_.position_._xy
       npcs     = system^.npcs_
@@ -65,8 +66,7 @@ drawRadar = UI.using getDrawable $ do
     B.realloc (length vertices) B.Static B.Draw
     B.copy 0 vertices
 
-  matrix <- asks scaleToView
-  matrix_ ?= matrix
+  matrix_ ?= scaleToView view
   here_   ?= here
 
   -- FIXME: skip blips for extremely distant objects

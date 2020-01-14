@@ -4,7 +4,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.System
-( System(..)
+( System(System, bodies, characters, beams)
 , scale_
 , bodies_
 , player_

@@ -52,8 +52,8 @@ drawShip
   => Character
   -> m ()
 drawShip Character{ actor = Actor{ position, rotation, magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
-  vs@View{ focus } <- ask
-  sys@System{ scale } <- ask @(System StateVectors)
+  vs@View{ scale, focus } <- ask
+  sys <- ask @(System StateVectors)
   matrix_
     ?=  scaleToViewZoomed vs
     !*! systemTrans sys

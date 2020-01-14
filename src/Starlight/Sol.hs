@@ -1,5 +1,4 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -215,9 +214,8 @@ system = do
         }
       scale = un @(Kilo Metres) (100 / radius (bodies Map.! solI))
 
-  pure System
-    { scale
-    , bodies     = Map.fromList
+  pure (System scale mempty mempty mempty)
+    { Starlight.System.bodies     = Map.fromList
       [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
       | (identifier, orbit) <- Map.toList orbits
       ]

@@ -67,8 +67,8 @@ draw = measure "draw" . runLiftIO $ do
   let font = Font face 18
   bind @Framebuffer Nothing
 
-  v@View{ size, zoom } <- ask
-  system@System{ scale, beams } <- ask @(System StateVectors)
+  v@View{ size, scale, zoom } <- ask
+  system@System{ beams } <- ask @(System StateVectors)
   Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
 
   let dsize = deviceSize v
