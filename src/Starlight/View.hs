@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -30,6 +31,7 @@ module Starlight.View
 
 import Control.Effect.Lift
 import Control.Lens ((&), (.~), (^.))
+import Data.Functor.Identity
 import Data.Functor.Interval
 import Foreign.Storable
 import Geometry.Transform
@@ -64,9 +66,11 @@ data ClipSpace a
 
 newtype ContextPixels a = ContextPixels { getContextPixels :: a }
   deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 newtype WindowPixels a = WindowPixels { getWindowPixels :: a }
   deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 data ZoomedSpace a
 data PlayerSpace a
