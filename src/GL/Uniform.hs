@@ -115,21 +115,26 @@ deriving instance Uniform (f a) => Uniform (Point f a)
 class GL.Type t => Scalar t where
   glslTypeFor :: Int -> String
 
-  uniform1 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
-  uniform2 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
-  uniform3 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
-  uniform4 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformFor :: Int -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 instance Scalar Float where
+  glslTypeFor 1 = "float"
   glslTypeFor n = "vec" <> show n
-  uniform1 = glProgramUniform1fv
-  uniform2 = glProgramUniform2fv
-  uniform3 = glProgramUniform3fv
-  uniform4 = glProgramUniform4fv
+  {-# INLINE glslTypeFor #-}
+
+  uniformFor 2 = glProgramUniform2fv
+  uniformFor 3 = glProgramUniform3fv
+  uniformFor 4 = glProgramUniform4fv
+  uniformFor _ = glProgramUniform1fv
+  {-# INLINE uniformFor #-}
 
 instance Scalar Double where
+  glslTypeFor 1 = "double"
   glslTypeFor n = "dvec" <> show n
-  uniform1 = glProgramUniform1dv
-  uniform2 = glProgramUniform2dv
-  uniform3 = glProgramUniform3dv
-  uniform4 = glProgramUniform4dv
+  {-# INLINE glslTypeFor #-}
+
+  uniformFor 2 = glProgramUniform2dv
+  uniformFor 3 = glProgramUniform3dv
+  uniformFor 4 = glProgramUniform4dv
+  uniformFor _ = glProgramUniform1dv
+  {-# INLINE uniformFor #-}
