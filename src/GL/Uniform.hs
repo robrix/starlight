@@ -51,15 +51,15 @@ instance Uniform Double where
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
   glslType = glslTypeFor @t N2 Nothing
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t N2 prog loc 1 . castPtr)
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t N2 Nothing prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
   glslType = glslTypeFor @t N3 Nothing
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t N3 prog loc 1 . castPtr)
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t N3 Nothing prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
   glslType = glslTypeFor @t N4 Nothing
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t N4 prog loc 1 . castPtr)
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t N4 Nothing prog loc 1 . castPtr)
 
 instance Uniform (M22 Float) where
   glslType = "mat2"
@@ -107,7 +107,7 @@ deriving instance Uniform (f a) => Uniform (Point f a)
 class GL.Type t => Scalar t where
   glslTypeFor :: N -> Maybe N -> String
 
-  uniformFor :: N -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformFor :: N -> Maybe N -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 data N = N2 | N3 | N4
   deriving (Eq, Ord, Show)
@@ -118,15 +118,29 @@ nToS = \case
   N3 -> "3"
   N4 -> "4"
 
+transposing :: (GLuint -> GLint -> GLsizei -> GLboolean -> Ptr t -> IO ()) -> (GLuint -> GLint -> GLsizei -> Ptr t -> IO ())
+transposing f prog loc n = f prog loc n GL_TRUE
+{-# INLINE transposing #-}
+
 instance Scalar Float where
   glslTypeFor m = \case
     Nothing -> "vec" <> nToS m
     Just n  -> "mat" <> nToS m <> "x" <> nToS n
   {-# INLINE glslTypeFor #-}
 
-  uniformFor N2 = glProgramUniform2fv
-  uniformFor N3 = glProgramUniform3fv
-  uniformFor N4 = glProgramUniform4fv
+  uniformFor m n = case (m, n) of
+    (N2, Nothing) -> glProgramUniform2fv
+    (N3, Nothing) -> glProgramUniform3fv
+    (N4, Nothing) -> glProgramUniform4fv
+    (N2, Just N2) -> transposing glProgramUniformMatrix2fv
+    (N2, Just N3) -> transposing glProgramUniformMatrix2x3fv
+    (N2, Just N4) -> transposing glProgramUniformMatrix2x4fv
+    (N3, Just N2) -> transposing glProgramUniformMatrix3x2fv
+    (N3, Just N3) -> transposing glProgramUniformMatrix3fv
+    (N3, Just N4) -> transposing glProgramUniformMatrix3x4fv
+    (N4, Just N2) -> transposing glProgramUniformMatrix4x2fv
+    (N4, Just N3) -> transposing glProgramUniformMatrix4x3fv
+    (N4, Just N4) -> transposing glProgramUniformMatrix4fv
   {-# INLINE uniformFor #-}
 
 instance Scalar Double where
@@ -135,7 +149,17 @@ instance Scalar Double where
     Just n  -> "dmat" <> nToS m <> "x" <> nToS n
   {-# INLINE glslTypeFor #-}
 
-  uniformFor N2 = glProgramUniform2dv
-  uniformFor N3 = glProgramUniform3dv
-  uniformFor N4 = glProgramUniform4dv
+  uniformFor m n = case (m, n) of
+    (N2, Nothing) -> glProgramUniform2dv
+    (N3, Nothing) -> glProgramUniform3dv
+    (N4, Nothing) -> glProgramUniform4dv
+    (N2, Just N2) -> transposing glProgramUniformMatrix2dv
+    (N2, Just N3) -> transposing glProgramUniformMatrix2x3dv
+    (N2, Just N4) -> transposing glProgramUniformMatrix2x4dv
+    (N3, Just N2) -> transposing glProgramUniformMatrix3x2dv
+    (N3, Just N3) -> transposing glProgramUniformMatrix3dv
+    (N3, Just N4) -> transposing glProgramUniformMatrix3x4dv
+    (N4, Just N2) -> transposing glProgramUniformMatrix4x2dv
+    (N4, Just N3) -> transposing glProgramUniformMatrix4x3dv
+    (N4, Just N4) -> transposing glProgramUniformMatrix4dv
   {-# INLINE uniformFor #-}
