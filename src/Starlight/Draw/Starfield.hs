@@ -48,7 +48,7 @@ drawStarfield = UI.using getDrawable $ do
   View{ size, zoom, focus } <- ask
 
   resolution_ ?= (fromIntegral <$> size)
-  origin_     ?= (prj <$> focus)
+  origin_     ?= focus
   zoom_       ?= zoom
 
   drawArrays TriangleStrip range
@@ -143,7 +143,7 @@ shader = program $ \ U{ resolution, origin, zoom }
 
 data U v = U
   { resolution :: v (V2 (Window.Pixels Float))
-  , origin     :: v (V2 Float) -- FIXME: express in Kilo Metres
+  , origin     :: v (V2 (Mega Metres Float))
   , zoom       :: v Float
   }
   deriving (Generic)
@@ -153,7 +153,7 @@ instance Vars U
 resolution_ :: Lens' (U v) (v (V2 (Window.Pixels Float)))
 resolution_ = field @"resolution"
 
-origin_ :: Lens' (U v) (v (V2 Float))
+origin_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
 origin_ = field @"origin"
 
 zoom_ :: Lens' (U v) (v Float)
