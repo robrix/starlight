@@ -8,6 +8,8 @@ module Starlight.View
 , deviceSize
 , lengthToPixels
 , Transform(..)
+-- * Re-exports
+, (>>>)
 ) where
 
 import Control.Category
