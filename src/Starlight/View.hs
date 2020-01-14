@@ -19,6 +19,7 @@ module Starlight.View
 , toWindow
 , toZoomed
 , toSystem
+, toPlayer
   -- * Re-exports
 , (>>>)
 ) where
@@ -26,10 +27,7 @@ module Starlight.View
 import Control.Category
 import Control.Lens ((.~), (^.))
 import Data.Function ((&))
-import Linear.Matrix
-import Linear.V2
-import Linear.V3
-import Linear.Vector
+import Linear.Exts
 import Unit.Length
 
 data View = View
@@ -88,3 +86,6 @@ toZoomed View{ zoom } = Transform (scaled (pure 1 & _xy .~ pure (1/zoom)))
 
 toSystem :: View -> Transform ZoomedSpace SystemSpace
 toSystem View{ scale } = Transform (scaled (pure 1 & _xyz .~ pure scale))
+
+toPlayer :: View -> Transform SystemSpace PlayerSpace
+toPlayer View{ focus } = Transform (translated3 (ext (prj <$> negated focus) 0))
