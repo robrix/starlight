@@ -1,5 +1,4 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE NamedFieldPuns #-}
 module Starlight.Weapon.Laser
 ( Beam(..)
 ) where
