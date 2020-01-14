@@ -1,6 +1,7 @@
 module Geometry.Transform
 ( Transform(..)
 , mkTranslation
+, mkScale
 , mkRotation
 , apply
 , (>>>)
@@ -19,6 +20,9 @@ instance Category Transform where
 
 mkTranslation :: V3 Float -> Transform a b
 mkTranslation v = Transform (identity & translation .~ v)
+
+mkScale :: V3 Float -> Transform a b
+mkScale v = Transform (scaled (ext v 1))
 
 mkRotation :: Quaternion Float -> Transform a b
 mkRotation q = Transform (identity !*! mkTransformation q 0)
