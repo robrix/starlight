@@ -16,6 +16,7 @@ module Starlight.View
 , SystemSpace
 , PlayerSpace
 , toContext
+, toWindow
   -- * Re-exports
 , (>>>)
 ) where
@@ -76,3 +77,6 @@ data PlayerSpace
 
 toContext :: View -> Transform ClipSpace ContextSpace
 toContext View{ size } = Transform (scaled (pure 1 & _xy .~ 1 / (fromIntegral <$> size)))
+
+toWindow :: View -> Transform ContextSpace WindowSpace
+toWindow View{ ratio } = Transform (scaled (pure 1 & _xy .~ fromIntegral ratio))
