@@ -83,8 +83,8 @@ orbitTimeScale = 1
 
 actorAt :: Body -> Seconds Float -> Actor
 actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
-  { position = pure <$> position
-  , velocity = if r == 0 || p == 0 then 0 else pure <$> (position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly)
+  { position
+  , velocity = if r == 0 || p == 0 then 0 else (./. Seconds 1) <$> position ^* h ^* pure eccentricity ^/ (r * p) ^* pure (prj (sin trueAnomaly))
   , rotation
     = orientation
     * axis
@@ -92,7 +92,7 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
   , mass
   , magnitude = radius * 2
   } where
-  position = ext (cartesian2 (Radians trueAnomaly) r) 0
+  position = ext (cartesian2 (pure <$> trueAnomaly) r) 0
   t' = timeOfPeriapsis + t * orbitTimeScale
   meanAnomaly = getSeconds (meanMotion * t')
   meanMotion = (2 * pi) / period
@@ -101,12 +101,14 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
       go n a
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
-  trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = prj semimajor * (1 - eccentricity * cos eccentricAnomaly)
+  trueAnomaly :: Radians Float
+  trueAnomaly = Radians (atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity))
+  r :: Kilo Metres Float
+  r = semimajor ^* (1 - eccentricity * cos eccentricAnomaly)
   -- extremely dubious
   mu = 398600.5
-  p = prj semimajor * (1 - eccentricity ** 2)
-  h = sqrt ((1 - (eccentricity ** 2)) * prj semimajor * mu)
+  p = semimajor ^* (1 - eccentricity ** 2)
+  h = sqrt ((1 - (eccentricity ** 2)) *^ semimajor * mu)
   -- hr = h/r
 
 
