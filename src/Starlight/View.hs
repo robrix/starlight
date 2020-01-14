@@ -8,7 +8,7 @@ module Starlight.View
 , deviceSize
 , lengthToPixels
 , Transform(..)
--- * Re-exports
+  -- * Re-exports
 , (>>>)
 ) where
 
