@@ -48,9 +48,10 @@ import           Unit.Mass
 import           Unit.Time
 
 data StateVectors = StateVectors
-  { body      :: !Body
-  , transform :: !(Transform SystemSpace OrbitSpace)
-  , actor     :: !Actor
+  { body        :: !Body
+  , transform   :: !(Transform SystemSpace OrbitSpace)
+  , toBodySpace :: !(Transform OrbitSpace BodySpace)
+  , actor       :: !Actor
   }
   deriving (Generic, Show)
 
@@ -121,9 +122,10 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
 systemAt :: System Body -> Seconds Float -> System StateVectors
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
-  go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
+  go identifier body@Body{ radius, orbit = Orbit{ orientation } } = StateVectors
     { body
     , transform = rel >>> mkTranslation (prj <$> position actor)
+    , toBodySpace = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) radius))) >>> mkRotation (rotation actor)
     , actor = actor
       & position_.coerced.extended 1 %~ apply rel
       & velocity_.coerced.extended 0 %~ apply rel
