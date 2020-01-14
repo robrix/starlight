@@ -48,12 +48,11 @@ drawShip
      )
   => Character
   -> m ()
-drawShip Character{ actor = Actor{ position, rotation, magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
+drawShip Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
   view@View{ scale } <- ask
   matrix_ ?= getTransform
     (   transformToSystem view
-    >>> mkTranslation (prj <$> position)
-    >>> mkRotation rotation
+    >>> transformToActor actor
     >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale)))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v ^. _r) . (_r +~ 0.5) . (_b -~ 0.25) else id)
