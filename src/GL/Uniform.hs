@@ -119,3 +119,10 @@ class GL.Type t => Scalar t where
   uniform2 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
   uniform3 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
   uniform4 :: GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+
+instance Scalar Float where
+  glslTypeFor n = "vec" <> show n
+  uniform1 = glProgramUniform1fv
+  uniform2 = glProgramUniform2fv
+  uniform3 = glProgramUniform3fv
+  uniform4 = glProgramUniform4fv
