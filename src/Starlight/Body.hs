@@ -14,9 +14,8 @@ module Starlight.Body
 ( StateVectors(..)
 , toBodySpace
 , Body(..)
+, BodyUnits(..)
 , Orbit(..)
-, OrbitSpace
-, BodySpace
 , rotationTimeScale
 , actorAt
 , systemAt
@@ -50,7 +49,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform (Mega Metres) OrbitSpace)
+  , transform :: !(Transform (Mega Metres) (Mega Metres))
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -58,7 +57,7 @@ data StateVectors = StateVectors
 instance HasActor StateVectors where
   actor_ = field @"actor"
 
-toBodySpace :: StateVectors -> Transform OrbitSpace BodySpace
+toBodySpace :: StateVectors -> Transform (Mega Metres) BodyUnits
 toBodySpace v = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) (radius (body v))))) >>> mkRotation (rotation (actor v))
 
 data Body = Body
@@ -71,6 +70,8 @@ data Body = Body
   }
   deriving (Generic, Show)
 
+newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
+
 data Orbit = Orbit
   { eccentricity    :: !Float
   , semimajor       :: !(Kilo Metres Float)
@@ -79,9 +80,6 @@ data Orbit = Orbit
   , timeOfPeriapsis :: !(Seconds Float)    -- relative to epoch
   }
   deriving (Show)
-
-data OrbitSpace a
-data BodySpace a
 
 
 rotationTimeScale :: Num a => Seconds a
