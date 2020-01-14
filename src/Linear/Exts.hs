@@ -2,7 +2,6 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Linear.Exts
 ( translated
-, translated3
 , orient
 , face
 , easeInOutCubic
@@ -26,7 +25,6 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
-import Control.Lens ((&), (.~))
 import Data.Functor.Interval
 import Linear.Epsilon
 import Linear.Matrix hiding (Trace(..))
@@ -44,9 +42,6 @@ translated (V2 tx ty) = V3
   (V3 1 0 tx)
   (V3 0 1 ty)
   (V3 0 0 1)
-
-translated3 :: V3 Float -> M44 Float
-translated3 t = identity & translation .~ t
 
 
 orient :: (Epsilon a, RealFloat a) => Radians a -> Radians a -> Radians a -> Quaternion a
