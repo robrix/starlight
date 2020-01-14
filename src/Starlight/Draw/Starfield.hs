@@ -44,9 +44,9 @@ drawStarfield
      )
   => m ()
 drawStarfield = UI.using getDrawable $ do
-  view@View{ size, zoom, focus } <- ask
+  View{ size, zoom, focus } <- ask
 
-  resolution_ ?= (fromIntegral <$> deviceSize view)
+  resolution_ ?= (fromIntegral <$> size)
   origin_     ?= (prj <$> (focus / (fromIntegral <$> size)))
   zoom_       ?= zoom
 
