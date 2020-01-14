@@ -19,6 +19,7 @@ module Starlight.View
 , toZoomed
 , toSystem
 , toPlayer
+, transformToWindow
   -- * Re-exports
 , module Geometry.Transform
 ) where
@@ -81,3 +82,6 @@ toSystem View{ scale, focus } = mkScale (pure scale) >>> mkTranslation (ext (prj
 
 toPlayer :: View -> Transform SystemSpace PlayerSpace
 toPlayer View{ focus } = mkTranslation (ext (prj <$> focus) 0)
+
+transformToWindow :: View -> Transform ClipSpace WindowSpace
+transformToWindow view = toContext view >>> toWindow view
