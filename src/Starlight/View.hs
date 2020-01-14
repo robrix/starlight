@@ -7,7 +7,7 @@ module Starlight.View
 , lengthToWindowPixels
   -- * Transforms
 , ClipSpace
-, ZoomedSpace
+, Zoomed
 , SystemSpace
 , toContext
 , toWindow
@@ -53,7 +53,7 @@ lengthToWindowPixels View{ zoom, scale } = 1/zoom * scale
 
 
 data ClipSpace a
-data ZoomedSpace a
+data Zoomed a
 
 
 toContext :: View -> Transform ClipSpace Context.Pixels
@@ -62,16 +62,16 @@ toContext View{ size } = mkScale (pure 1 & _xy .~ 1 / (fromIntegral <$> size))
 toWindow :: View -> Transform Context.Pixels Window.Pixels
 toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 
-toZoomed :: View -> Transform Window.Pixels ZoomedSpace
+toZoomed :: View -> Transform Window.Pixels Zoomed
 toZoomed View{ zoom } = mkScale (pure 1 & _xy .~ pure (1/zoom))
 
-toSystem :: View -> Transform ZoomedSpace SystemSpace
+toSystem :: View -> Transform Zoomed SystemSpace
 toSystem View{ scale, focus } = mkScale (pure scale) >>> mkTranslation (ext (prj <$> negated focus) 0)
 
 transformToWindow :: View -> Transform ClipSpace Window.Pixels
 transformToWindow view = toContext view >>> toWindow view
 
-transformToZoomed :: View -> Transform ClipSpace ZoomedSpace
+transformToZoomed :: View -> Transform ClipSpace Zoomed
 transformToZoomed view = transformToWindow view >>> toZoomed view
 
 transformToSystem :: View -> Transform ClipSpace SystemSpace
