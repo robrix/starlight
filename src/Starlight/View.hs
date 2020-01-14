@@ -32,7 +32,7 @@ import GL.Viewport
 import Linear.Exts
 import Starlight.System
 import UI.Context
-import UI.Window
+import UI.Window as Window
 import Unit.Length
 
 data View = View
@@ -62,10 +62,10 @@ data PlayerSpace a
 toContext :: View -> Transform ClipSpace ContextPixels
 toContext View{ size } = mkScale (pure 1 & _xy .~ 1 / (fromIntegral <$> size))
 
-toWindow :: View -> Transform ContextPixels WindowPixels
+toWindow :: View -> Transform ContextPixels Window.Pixels
 toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 
-toZoomed :: View -> Transform WindowPixels ZoomedSpace
+toZoomed :: View -> Transform Window.Pixels ZoomedSpace
 toZoomed View{ zoom } = mkScale (pure 1 & _xy .~ pure (1/zoom))
 
 toSystem :: View -> Transform ZoomedSpace SystemSpace
@@ -74,7 +74,7 @@ toSystem View{ scale, focus } = mkScale (pure scale) >>> mkTranslation (ext (prj
 toPlayer :: View -> Transform SystemSpace PlayerSpace
 toPlayer View{ focus } = mkTranslation (ext (prj <$> focus) 0)
 
-transformToWindow :: View -> Transform ClipSpace WindowPixels
+transformToWindow :: View -> Transform ClipSpace Window.Pixels
 transformToWindow view = toContext view >>> toWindow view
 
 transformToZoomed :: View -> Transform ClipSpace ZoomedSpace

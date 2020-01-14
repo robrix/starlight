@@ -2,7 +2,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module UI.Window
-( WindowPixels(..)
+( Pixels(..)
 , swap
 , poll
 , input
@@ -30,7 +30,7 @@ import           Linear.V2 as Linear
 import           Linear.V4 as Linear
 import           SDL
 
-newtype WindowPixels a = WindowPixels { getWindowPixels :: a }
+newtype Pixels a = Pixels { getPixels :: a }
   deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
