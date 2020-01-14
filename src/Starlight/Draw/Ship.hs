@@ -38,7 +38,7 @@ import qualified Starlight.Ship as S
 import           Starlight.View
 import           UI.Colour
 import qualified UI.Drawable as UI
-import           Unit
+import           Unit.Length
 
 drawShip
   :: ( Has Check sig m
@@ -50,7 +50,7 @@ drawShip
   -> m ()
 drawShip Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
   view@View{ scale } <- ask
-  matrix_ ?= getTransform
+  matrix_ ?=
     (   transformToSystem view
     >>> transformToActor actor
     >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale)))
@@ -90,21 +90,21 @@ range = Interval 0 4
 shader :: D.Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } None -> main $
-    gl_Position .= matrix u D.!* ext4 (ext3 pos 1) 1)
+    gl_Position .= D.coerce (matrix u) D.!* ext4 (ext3 pos 1) 1)
 
   >>> fragment (\ None O { fragColour } -> main $
     fragColour .= colour u)
 
 
 data U v = U
-  { matrix :: v (M44 Float)
+  { matrix :: v (Transform ClipUnits (Mega Metres))
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (M44 Float))
+matrix_ :: Lens' (U v) (v (Transform ClipUnits (Mega Metres)))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))
