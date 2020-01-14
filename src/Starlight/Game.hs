@@ -236,11 +236,11 @@ withView
   => ReaderC View m a
   -> m a
 withView m = do
-  scale <- Window.scale
+  ratio <- Window.ratio
   size  <- Window.size
 
   velocity <- view (player_ @StateVectors .actor_.velocity_)
   focus    <- view (player_ @StateVectors .actor_.position_._xy)
 
   let zoom = zoomForSpeed size (prj (norm velocity))
-  runReader View{ scale, size, zoom, focus } m
+  runReader View{ ratio, size, zoom, focus } m

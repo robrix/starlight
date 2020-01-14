@@ -3,7 +3,7 @@ module UI.Window
 , poll
 , input
 , size
-, scale
+, ratio
 , runSDL
 , runWindow
 , Window
@@ -37,8 +37,8 @@ size = do
   size <- ask >>= runLiftIO . get . windowSize
   pure (fromIntegral <$> size)
 
-scale :: (Integral a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m a
-scale = runLiftIO $ do
+ratio :: (Integral a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m a
+ratio = runLiftIO $ do
   window <- ask
   drawableSize <- glGetDrawableSize window
   windowSize <- get (windowSize window)

@@ -15,7 +15,7 @@ import Linear.Vector
 import Unit.Length
 
 data View = View
-  { scale :: Int
+  { ratio :: Int    -- ^ Ratio of window pixels per context pixel.
   , size  :: V2 Int
   , zoom  :: Float
   , focus :: V2 (Kilo Metres Float)
@@ -23,7 +23,7 @@ data View = View
 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to device coordinates.
 scaleToView :: (Applicative v, Traversable v, R2 v) => View -> v (v Float)
-scaleToView View{ scale, size } = scaled (pure 1 & _xy .~ 1 / (fromIntegral <$> size) ^* fromIntegral scale)
+scaleToView View{ ratio, size } = scaled (pure 1 & _xy .~ 1 / (fromIntegral <$> size) ^* fromIntegral ratio)
 
 -- | Return a matrix transforming the [[-1,1], [-1,1]] interval to zoomed device coordinates.
 scaleToViewZoomed :: (Additive v, Applicative v, Traversable v, R2 v) => View -> v (v Float)
@@ -34,4 +34,4 @@ aspectRatio View{ size } = size' ^. _x / size' ^. _y where
   size' = fromIntegral <$> size
 
 deviceSize :: View -> V2 Int
-deviceSize View{ scale, size } = scale *^ size
+deviceSize View{ ratio, size } = ratio *^ size
