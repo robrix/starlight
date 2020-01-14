@@ -67,7 +67,7 @@ drawRadar = UI.using getDrawable $ do
 
   matrix <- asks scaleToView
   matrix_ ?= matrix
-  here_   ?= (prj <$> here)
+  here_   ?= here
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -89,14 +89,14 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
 verticesForBodies vs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (b^.actor_.magnitude_)), colour = Identity colour }
+  [ V{ there = Identity (there^._xy), r = Identity (b^.actor_.magnitude_), colour = Identity colour }
   | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
 verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
 verticesForShips scale cs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (c^.actor_.magnitude_) / scale), colour = Identity colour }
+  [ V{ there = Identity (there^._xy), r = Identity (c^.actor_.magnitude_ ^/ scale), colour = Identity colour }
   | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 
@@ -114,14 +114,14 @@ shader = program $ \ u
         angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
         wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
     edge  <- let' "edge"  (perp dir D.^* r D.^* 0.5 + dir D.^* d)
-    angle <- let' "angle" (angleOf there)
+    angle <- let' "angle" (D.coerce @_ @Float (angleOf there))
     radius <- var "radius" radius
-    let step = D.max' 1 (D.min' (get radius/float (fromIntegral targetBlipCount)) (d / 50))
+    let step = D.max' 1 (D.min' (get radius/float (fromIntegral targetBlipCount)) (D.coerce d / 50))
     iff (gl_InstanceID `gt` 0)
       (radius .= step * float gl_InstanceID)
       (pure ())
     minSweep <- let' "minSweep" (minBlipSize / (2 * pi * get radius))
-    sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf edge - angle)))
+    sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (D.coerce (angleOf edge) - angle)))
     pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* get radius)
     gl_PointSize .= 3
     colour2 .= colour
@@ -152,7 +152,7 @@ shader = program $ \ u
 
 data U v = U
   { matrix :: v (M33 Float)
-  , here   :: v (V2 Float)
+  , here   :: v (V2 (Kilo Metres Float))
   }
   deriving (Generic)
 
@@ -161,7 +161,7 @@ instance Vars U
 matrix_ :: Lens' (U v) (v (M33 Float))
 matrix_ = field @"matrix"
 
-here_ :: Lens' (U v) (v (V2 Float))
+here_ :: Lens' (U v) (v (V2 (Kilo Metres Float)))
 here_ = field @"here"
 
 
@@ -180,8 +180,8 @@ instance Vars IF
 
 
 data V v = V
-  { there  :: v (V2 Float) -- location of object
-  , r      :: v Float      -- radius of object
+  { there  :: v (V2 (Kilo Metres Float)) -- location of object
+  , r      :: v (Kilo Metres Float)      -- radius of object
   , colour :: v (Colour Float)
   }
   deriving (Generic)
