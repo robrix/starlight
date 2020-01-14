@@ -80,4 +80,4 @@ clipTo :: Has (Lift IO) sig m => View -> m ()
 clipTo view = do
   viewport $ Interval 0 dsize
   scissor  $ Interval 0 dsize where
-  dsize = Context.getPixels <$> deviceSize view
+  dsize = deviceSize view
