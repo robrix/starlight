@@ -38,7 +38,7 @@ scaleToViewSystem :: (Additive v, Applicative v, Traversable v, R3 v) => View ->
 scaleToViewSystem view@View{ scale } = scaleToViewZoomed view !*! scaled (pure 1 & _xyz .~ pure scale)
 
 aspectRatio :: View -> Float
-aspectRatio View{ size } = size' ^. _x / size' ^. _y where
+aspectRatio View{ size } = size'^._x / size'^._y where
   size' = fromIntegral <$> size
 
 deviceSize :: View -> V2 Int
