@@ -22,7 +22,7 @@ import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import           Control.Lens (Lens', (^.))
+import           Control.Lens (Lens', to, (^.))
 import           Data.Foldable (for_, toList)
 import           Data.Functor.Identity
 import           Data.Functor.Interval
@@ -33,7 +33,7 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Buffer as B
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy)
+import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
@@ -66,7 +66,7 @@ drawRadar = UI.using getDrawable $ do
     B.realloc (length vertices) B.Static B.Draw
     B.copy 0 vertices
 
-  matrix_ ?= scaleToView view
+  matrix_ ?= getTransform (transformToWindow view)^._xyz.to (fmap (^._xyz))
   here_   ?= here
 
   -- FIXME: skip blips for extremely distant objects
