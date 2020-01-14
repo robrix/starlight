@@ -33,6 +33,7 @@ import           Starlight.Actor
 import           Starlight.View
 import qualified Starlight.Weapon.Laser as S
 import qualified UI.Drawable as UI
+import           Unit.Length
 
 runLaser
   :: ( Has Check sig m
@@ -56,7 +57,7 @@ drawLaser
   -> m ()
 drawLaser beam@S.Beam{ colour } = UI.using getDrawable $ do
   view <- ask
-  matrix_ ?= getTransform
+  matrix_ ?=
     (   transformToSystem view
     >>> transformToActor (beam^.actor_)
     >>> mkScale (pure 1000))
@@ -78,20 +79,20 @@ range = Interval 0 (Identity (length vertices))
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ r } None -> main $
-    gl_Position .= matrix u D.!* vec4 r 0 0 1)
+    gl_Position .= D.coerce (matrix u) D.!* vec4 r 0 0 1)
   >>> fragment (\ None O{ fragColour } -> main $
     fragColour .= colour u)
 
 
 data U v = U
-  { matrix :: v (M44 Float)
+  { matrix :: v (Transform ClipUnits (Mega Metres))
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (M44 Float))
+matrix_ :: Lens' (U v) (v (Transform ClipUnits (Mega Metres)))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))
