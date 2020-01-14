@@ -85,7 +85,7 @@ toZoomed :: View -> Transform WindowSpace ZoomedSpace
 toZoomed View{ zoom } = Transform (scaled (pure 1 & _xy .~ pure (1/zoom)))
 
 toSystem :: View -> Transform ZoomedSpace SystemSpace
-toSystem View{ scale } = Transform (scaled (pure 1 & _xyz .~ pure scale))
+toSystem View{ scale, focus } = Transform (scaled (pure 1 & _xyz .~ pure scale) !*! translated3 (ext (prj <$> negated focus) 0))
 
 toPlayer :: View -> Transform SystemSpace PlayerSpace
-toPlayer View{ focus } = Transform (translated3 (ext (prj <$> negated focus) 0))
+toPlayer View{ focus } = Transform (translated3 (ext (prj <$> focus) 0))
