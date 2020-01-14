@@ -35,7 +35,7 @@ import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy)
 import qualified GL.Shader.DSL as D
-import           Linear.Exts as Linear hiding (angle, (!*))
+import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
