@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
@@ -49,15 +50,15 @@ instance Uniform Double where
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
-  glslType = glslTypeFor @t N2
+  glslType = glslTypeFor @t N1 N2
   uniform prog loc vec = A.with vec (sendM . uniformFor @t N2 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
-  glslType = glslTypeFor @t N3
+  glslType = glslTypeFor @t N1 N3
   uniform prog loc vec = A.with vec (sendM . uniformFor @t N3 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
-  glslType = glslTypeFor @t N4
+  glslType = glslTypeFor @t N1 N4
   uniform prog loc vec = A.with vec (sendM . uniformFor @t N4 prog loc 1 . castPtr)
 
 instance Uniform (M22 Float) where
@@ -104,18 +105,27 @@ deriving instance Uniform (f a) => Uniform (Point f a)
 
 
 class GL.Type t => Scalar t where
-  glslTypeFor :: N -> String
+  glslTypeFor :: N -> N -> String
 
   uniformFor :: N -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 data N = N1 | N2 | N3 | N4
   deriving (Eq, Ord, Show)
 
+nToS :: N -> String
+nToS = \case
+  N1 -> "1"
+  N2 -> "2"
+  N3 -> "3"
+  N4 -> "4"
+
 instance Scalar Float where
-  glslTypeFor N1 = "float"
-  glslTypeFor N2 = "vec2"
-  glslTypeFor N3 = "vec3"
-  glslTypeFor N4 = "vec4"
+  glslTypeFor m n
+    | N1 <- m, N1 <- n = "float"
+    | N1 <- n          = "vec" <> nToS m
+    | N1 <- m          = "vec" <> nToS n
+    | m == n           = "mat" <> nToS m
+    | otherwise        = "mat" <> nToS m <> "x" <> nToS n
   {-# INLINE glslTypeFor #-}
 
   uniformFor N1 = glProgramUniform1fv
@@ -125,10 +135,12 @@ instance Scalar Float where
   {-# INLINE uniformFor #-}
 
 instance Scalar Double where
-  glslTypeFor N1 = "double"
-  glslTypeFor N2 = "dvec2"
-  glslTypeFor N3 = "dvec3"
-  glslTypeFor N4 = "dvec4"
+  glslTypeFor m n
+    | N1 <- m, N1 <- n = "double"
+    | N1 <- n          = "dvec" <> nToS m
+    | N1 <- m          = "dvec" <> nToS n
+    | m == n           = "dmat" <> nToS m
+    | otherwise        = "dmat" <> nToS m <> "x" <> nToS n
   {-# INLINE glslTypeFor #-}
 
   uniformFor N1 = glProgramUniform1dv
