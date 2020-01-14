@@ -7,6 +7,7 @@ module Starlight.View
 , aspectRatio
 , deviceSize
 , lengthToPixels
+, Transform(..)
 ) where
 
 import Control.Lens ((.~), (^.))
@@ -46,3 +47,6 @@ deviceSize View{ ratio, size } = ratio *^ size
 
 lengthToPixels :: View -> Float
 lengthToPixels View{ zoom, scale } = 1/zoom * scale
+
+
+newtype Transform a b = Transform { getTransform :: M44 Float }
