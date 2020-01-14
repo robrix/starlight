@@ -2,7 +2,6 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE StandaloneDeriving #-}
 module UI.Window
 ( Pixels(..)
 , swap
@@ -29,17 +28,12 @@ import           Foreign.Storable
 import           GL.Type as GL
 import           GL.Uniform
 import           Linear.V2 as Linear
-import           Linear.V3 as Linear
 import           Linear.V4 as Linear
 import           SDL
 
 newtype Pixels a = Pixels { getPixels :: a }
   deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
-
-deriving via V2 Float instance Uniform (V2 (Pixels Float))
-deriving via V3 Float instance Uniform (V3 (Pixels Float))
-deriving via V4 Float instance Uniform (V4 (Pixels Float))
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
 swap = ask >>= runLiftIO . glSwapWindow

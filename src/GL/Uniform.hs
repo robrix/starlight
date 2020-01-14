@@ -1,7 +1,9 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
 module GL.Uniform
 ( Uniform(..)
 , Scalar(..)
@@ -45,29 +47,17 @@ instance Uniform Double where
   glslType = "double"
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
-instance Uniform (V2 Float) where
-  glslType = "vec2"
-  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform2fv prog loc 1 . castPtr)
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
+  glslType = glslTypeFor @t 2
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t 2 prog loc 1 . castPtr)
 
-instance Uniform (V2 Double) where
-  glslType = "dvec2"
-  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform2dv prog loc 1 . castPtr)
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
+  glslType = glslTypeFor @t 3
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t 3 prog loc 1 . castPtr)
 
-instance Uniform (V3 Float) where
-  glslType = "vec3"
-  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform3fv prog loc 1 . castPtr)
-
-instance Uniform (V3 Double) where
-  glslType = "dvec3"
-  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform3dv prog loc 1 . castPtr)
-
-instance Uniform (V4 Float) where
-  glslType = "vec4"
-  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform4fv prog loc 1 . castPtr)
-
-instance Uniform (V4 Double) where
-  glslType = "dvec4"
-  uniform prog loc vec = A.with vec (runLiftIO . glProgramUniform4dv prog loc 1 . castPtr)
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
+  glslType = glslTypeFor @t 4
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t 4 prog loc 1 . castPtr)
 
 instance Uniform (M22 Float) where
   glslType = "mat2"

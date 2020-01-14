@@ -3,7 +3,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE StandaloneDeriving #-}
 module Unit.Length
 ( Length
 , Metres(..)
@@ -20,9 +19,6 @@ import GL.Uniform
 import Linear.Conjugate
 import Linear.Epsilon
 import Linear.Metric
-import Linear.V2
-import Linear.V3
-import Linear.V4
 import Linear.Vector
 import Unit
 import Unit.Multiple
@@ -35,21 +31,6 @@ newtype Metres a = Metres { getMetres :: a }
 
 instance Unit Length Metres where suffix = Const ('m':)
 
-deriving via V2 Float instance Uniform (V2 (Kilo Metres Float))
-deriving via V3 Float instance Uniform (V3 (Kilo Metres Float))
-deriving via V4 Float instance Uniform (V4 (Kilo Metres Float))
-
-deriving via V2 Double instance Uniform (V2 (Kilo Metres Double))
-deriving via V3 Double instance Uniform (V3 (Kilo Metres Double))
-deriving via V4 Double instance Uniform (V4 (Kilo Metres Double))
-
-deriving via V2 Float instance Uniform (V2 (Mega Metres Float))
-deriving via V3 Float instance Uniform (V3 (Mega Metres Float))
-deriving via V4 Float instance Uniform (V4 (Mega Metres Float))
-
-deriving via V2 Double instance Uniform (V2 (Mega Metres Double))
-deriving via V3 Double instance Uniform (V3 (Mega Metres Double))
-deriving via V4 Double instance Uniform (V4 (Mega Metres Double))
 
 fromAUs :: Num a => a -> Metres a
 fromAUs a = Metres (149597870700 * a)
