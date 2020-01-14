@@ -17,6 +17,7 @@ module Starlight.View
 , PlayerSpace
 , toContext
 , toWindow
+, toZoomed
   -- * Re-exports
 , (>>>)
 ) where
@@ -80,3 +81,6 @@ toContext View{ size } = Transform (scaled (pure 1 & _xy .~ 1 / (fromIntegral <$
 
 toWindow :: View -> Transform ContextSpace WindowSpace
 toWindow View{ ratio } = Transform (scaled (pure 1 & _xy .~ fromIntegral ratio))
+
+toZoomed :: View -> Transform WindowSpace ZoomedSpace
+toZoomed View{ zoom } = Transform (scaled (pure 1 & _xy .~ pure (1/zoom)))
