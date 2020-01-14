@@ -29,7 +29,7 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Object
-import           GL.Shader.DSL hiding (coerce, (!*), (!*!))
+import           GL.Shader.DSL hiding (coerce, norm, (!*), (!*!))
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Prelude hiding (break)
@@ -65,7 +65,7 @@ drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor
     ?=  scaleToViewSystem vs
     !*! translated3 (ext (negated (prj <$> focus)) 0) -- transform to the origin
     !*! transform
-    !*! scaled (ext (pure @V3 (prj radius)) 1)
+    !*! scaled (ext (pure @V3 (prj (convert radius `asTypeOf` norm focus))) 1)
     !*! mkTransformation rotation 0
   colour_ ?= colour
 
