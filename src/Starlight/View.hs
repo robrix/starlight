@@ -7,6 +7,7 @@ module Starlight.View
 , aspectRatio
 , deviceSize
 , lengthToPixels
+  -- * Transforms
 , Transform(..)
   -- * Re-exports
 , (>>>)
