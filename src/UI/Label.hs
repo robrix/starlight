@@ -48,14 +48,14 @@ data Label = Label
   { text    :: !(Drawable Text.U  Text.V  Text.O)
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
-  , ratio   :: !Int
+  , ratio   :: !(Window.Pixels Int)
   , ref     :: !(IORef (Maybe LabelState))
   }
 
 data LabelState = LabelState
-  { size     :: !(V2 Int)
+  { size     :: !(V2 (Window.Pixels Int))
   , string   :: !String
-  , baseline :: !Int
+  , baseline :: !(Window.Pixels Int)
   }
 
 
@@ -87,7 +87,7 @@ label = do
   ref <- sendIO (newIORef Nothing)
   pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, ratio }
 
-labelSize :: Has (Lift IO) sig m => Label -> m (V2 Int)
+labelSize :: Has (Lift IO) sig m => Label -> m (V2 (Window.Pixels Int))
 labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
 
 
@@ -145,7 +145,7 @@ drawLabel
      , Has (Lift IO) sig m
      )
   => Label
-  -> V2 Int
+  -> V2 (Window.Pixels Int)
   -> Colour Float
   -> Maybe (Colour Float)
   -> m ()
