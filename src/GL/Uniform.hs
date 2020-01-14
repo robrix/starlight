@@ -7,6 +7,7 @@
 module GL.Uniform
 ( Uniform(..)
 , Scalar(..)
+, N(..)
 ) where
 
 import           Control.Monad.IO.Class.Lift
@@ -48,16 +49,16 @@ instance Uniform Double where
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
-  glslType = glslTypeFor @t 2
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t 2 prog loc 1 . castPtr)
+  glslType = glslTypeFor @t N2
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t N2 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
-  glslType = glslTypeFor @t 3
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t 3 prog loc 1 . castPtr)
+  glslType = glslTypeFor @t N3
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t N3 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
-  glslType = glslTypeFor @t 4
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t 4 prog loc 1 . castPtr)
+  glslType = glslTypeFor @t N4
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t N4 prog loc 1 . castPtr)
 
 instance Uniform (M22 Float) where
   glslType = "mat2"
@@ -103,28 +104,34 @@ deriving instance Uniform (f a) => Uniform (Point f a)
 
 
 class GL.Type t => Scalar t where
-  glslTypeFor :: Int -> String
+  glslTypeFor :: N -> String
 
-  uniformFor :: Int -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformFor :: N -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+
+data N = N1 | N2 | N3 | N4
 
 instance Scalar Float where
-  glslTypeFor 1 = "float"
-  glslTypeFor n = "vec" <> show n
+  glslTypeFor N1 = "float"
+  glslTypeFor N2 = "vec2"
+  glslTypeFor N3 = "vec3"
+  glslTypeFor N4 = "vec4"
   {-# INLINE glslTypeFor #-}
 
-  uniformFor 2 = glProgramUniform2fv
-  uniformFor 3 = glProgramUniform3fv
-  uniformFor 4 = glProgramUniform4fv
-  uniformFor _ = glProgramUniform1fv
+  uniformFor N1 = glProgramUniform1fv
+  uniformFor N2 = glProgramUniform2fv
+  uniformFor N3 = glProgramUniform3fv
+  uniformFor N4 = glProgramUniform4fv
   {-# INLINE uniformFor #-}
 
 instance Scalar Double where
-  glslTypeFor 1 = "double"
-  glslTypeFor n = "dvec" <> show n
+  glslTypeFor N1 = "double"
+  glslTypeFor N2 = "dvec2"
+  glslTypeFor N3 = "dvec3"
+  glslTypeFor N4 = "dvec4"
   {-# INLINE glslTypeFor #-}
 
-  uniformFor 2 = glProgramUniform2dv
-  uniformFor 3 = glProgramUniform3dv
-  uniformFor 4 = glProgramUniform4dv
-  uniformFor _ = glProgramUniform1dv
+  uniformFor N1 = glProgramUniform1dv
+  uniformFor N2 = glProgramUniform2dv
+  uniformFor N3 = glProgramUniform3dv
+  uniformFor N4 = glProgramUniform4dv
   {-# INLINE uniformFor #-}
