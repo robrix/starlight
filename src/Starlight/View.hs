@@ -1,7 +1,6 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Starlight.View
 ( View(..)
-, scaleToView
 , aspectRatio
 , deviceSize
 , lengthToPixels
@@ -37,10 +36,6 @@ data View = View
   , scale :: Float
   , focus :: V2 (Mega Metres Float)
   }
-
--- | Return a matrix transforming the [[-1,1], [-1,1]] interval to device coordinates.
-scaleToView :: (Applicative v, Traversable v, R2 v) => View -> v (v Float)
-scaleToView View{ ratio, size } = scaled (pure 1 & _xy .~ 1 / (fromIntegral <$> size) ^* fromIntegral ratio)
 
 aspectRatio :: View -> Float
 aspectRatio View{ size } = size'^._x / size'^._y where
