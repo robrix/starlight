@@ -4,7 +4,7 @@ module Starlight.View
 ( View(..)
 , aspectRatio
 , deviceSize
-, lengthToPixels
+, lengthToWindowPixels
   -- * Transforms
 , ClipSpace
 , ContextPixels(..)
@@ -50,8 +50,8 @@ aspectRatio View{ size } = size'^._x / size'^._y where
 deviceSize :: View -> V2 Int
 deviceSize View{ ratio, size } = ratio *^ size
 
-lengthToPixels :: View -> Float
-lengthToPixels View{ zoom, scale } = 1/zoom * scale
+lengthToWindowPixels :: View -> Float
+lengthToWindowPixels View{ zoom, scale } = 1/zoom * scale
 
 
 data ClipSpace a
