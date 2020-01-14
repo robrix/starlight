@@ -10,6 +10,7 @@ module Starlight.View
 , Transform(..)
 ) where
 
+import Control.Category
 import Control.Lens ((.~), (^.))
 import Data.Function ((&))
 import Linear.Matrix
@@ -50,3 +51,7 @@ lengthToPixels View{ zoom, scale } = 1/zoom * scale
 
 
 newtype Transform a b = Transform { getTransform :: M44 Float }
+
+instance Category Transform where
+  id = Transform identity
+  Transform a . Transform b = Transform (b !*! a)
