@@ -9,6 +9,12 @@ module Starlight.View
 , lengthToPixels
   -- * Transforms
 , Transform(..)
+, ClipSpace
+, ContextSpace
+, WindowSpace
+, ZoomedSpace
+, SystemSpace
+, PlayerSpace
   -- * Re-exports
 , (>>>)
 ) where
@@ -58,3 +64,10 @@ newtype Transform a b = Transform { getTransform :: M44 Float }
 instance Category Transform where
   id = Transform identity
   Transform a . Transform b = Transform (b !*! a)
+
+data ClipSpace
+data ContextSpace
+data WindowSpace
+data ZoomedSpace
+data SystemSpace
+data PlayerSpace
