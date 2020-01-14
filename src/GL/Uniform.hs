@@ -126,3 +126,10 @@ instance Scalar Float where
   uniform2 = glProgramUniform2fv
   uniform3 = glProgramUniform3fv
   uniform4 = glProgramUniform4fv
+
+instance Scalar Double where
+  glslTypeFor n = "dvec" <> show n
+  uniform1 = glProgramUniform1dv
+  uniform2 = glProgramUniform2dv
+  uniform3 = glProgramUniform3dv
+  uniform4 = glProgramUniform4dv
