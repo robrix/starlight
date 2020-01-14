@@ -92,6 +92,14 @@ instance Uniform (Linear.M33 Double) where
   glslType = "dmat3"
   uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix3dv prog loc 1 GL_FALSE . castPtr)
 
+instance Uniform (Linear.M34 Float) where
+  glslType = "mat3x4"
+  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix3x4fv prog loc 1 GL_FALSE . castPtr)
+
+instance Uniform (Linear.M34 Double) where
+  glslType = "dmat3x4"
+  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix3x4dv prog loc 1 GL_FALSE . castPtr)
+
 instance Uniform (Linear.M44 Float) where
   glslType = "mat4"
   uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix4fv prog loc 1 GL_FALSE . castPtr)
