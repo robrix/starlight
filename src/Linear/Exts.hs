@@ -33,7 +33,7 @@ import Linear.Matrix hiding (Trace(..))
 import Linear.Metric
 import Linear.Quaternion
 import Linear.V1
-import Linear.V2
+import Linear.V2 hiding (angle)
 import Linear.V3
 import Linear.V4
 import Linear.Vector
