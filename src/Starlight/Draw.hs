@@ -15,7 +15,7 @@ import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
-import Control.Lens (filtered, traversed, (^.), (^?))
+import Control.Lens (coerced, filtered, traversed, (^.), (^?))
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Functor.Const
@@ -39,6 +39,7 @@ import Starlight.View
 import UI.Colour
 import UI.Label
 import UI.Typeface
+import UI.Window
 import Unit.Algebra
 import Unit.Length
 import Unit.Time
@@ -94,8 +95,8 @@ draw = measure "draw" . runLiftIO $ do
   measure "setLabel" $ setLabel targetLabel font (describeTarget target)
 
   fpsSize <- labelSize fpsLabel
-  measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size^._y - fpsSize^._y - 10)) white Nothing
-  measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                            white Nothing
+  measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size^._y.coerced - fpsSize^._y - 10)) white Nothing
+  measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                                    white Nothing
 
 newtype Frames a = Frames a
   deriving (Eq, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac)

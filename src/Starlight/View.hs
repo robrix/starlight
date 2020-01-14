@@ -37,7 +37,7 @@ import Unit.Length
 
 data View = View
   { ratio :: Int    -- ^ Ratio of window pixels per context pixel.
-  , size  :: V2 Int
+  , size  :: V2 (Window.Pixels Int)
   , zoom  :: Float
   , scale :: Float
   , focus :: V2 (Mega Metres Float)
@@ -47,8 +47,8 @@ aspectRatio :: View -> Float
 aspectRatio View{ size } = size'^._x / size'^._y where
   size' = fromIntegral <$> size
 
-deviceSize :: View -> V2 Int
-deviceSize View{ ratio, size } = ratio *^ size
+deviceSize :: View -> V2 (Context.Pixels Int)
+deviceSize View{ ratio, size } = fmap Context.Pixels (ratio *^ fmap Window.getPixels size)
 
 lengthToWindowPixels :: View -> Float
 lengthToWindowPixels View{ zoom, scale } = 1/zoom * scale
@@ -88,4 +88,4 @@ clipTo :: Has (Lift IO) sig m => View -> m ()
 clipTo view = do
   viewport $ Interval 0 dsize
   scissor  $ Interval 0 dsize where
-  dsize = deviceSize view
+  dsize = Context.getPixels <$> deviceSize view

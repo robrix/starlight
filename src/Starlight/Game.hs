@@ -218,7 +218,7 @@ frame = runSystem . timed $ do
 -- | Compute the zoom factor for the given velocity.
 --
 -- Higher values correlate to more of the scene being visible.
-zoomForSpeed :: V2 Int -> Float -> Float
+zoomForSpeed :: V2 (Window.Pixels Int) -> Float -> Float
 zoomForSpeed size x = go where
   Identity go
     | Identity x < min' speed = min' zoom
