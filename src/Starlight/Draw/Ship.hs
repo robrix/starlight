@@ -49,13 +49,12 @@ drawShip
   => Character
   -> m ()
 drawShip Character{ actor = Actor{ position, rotation, magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
-  vs@View{ scale, focus } <- ask
-  matrix_
-    ?=  scaleToViewSystem vs
-    !*! translated3 (ext (negated (prj <$> focus)) 0)
-    !*! translated3 (prj <$> position)
-    !*! scaled (ext (pure @V3 (prj magnitude * 0.5 / scale)) 1)
-    !*! mkTransformation rotation 0
+  view@View{ scale } <- ask
+  matrix_ ?= getTransform
+    (   transformToSystem view
+    >>> mkTranslation (prj <$> position)
+    >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale))
+    >>> mkRotation rotation)
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v ^. _r) . (_r +~ 0.5) . (_b -~ 0.25) else id)
     & _a .~ armour^.min_.to runIdentity / armour^.max_.to runIdentity)
