@@ -9,7 +9,6 @@ module GL.Uniform
 ( Uniform(..)
 , Scalar(..)
 , Col(..)
-, replace1d
 ) where
 
 import           Control.Monad.IO.Class.Lift
