@@ -70,42 +70,42 @@ instance Uniform (V4 Double) where
 
 instance Uniform (M22 Float) where
   glslType = "mat2"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix2fv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix2fv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M22 Double) where
   glslType = "dmat2"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix2dv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix2dv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M23 Float) where
   glslType = "mat2x3"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix2x3fv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix2x3fv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M23 Double) where
   glslType = "dmat2x3"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix2x3dv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix2x3dv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M33 Float) where
   glslType = "mat3"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix3fv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix3fv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M33 Double) where
   glslType = "dmat3"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix3dv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix3dv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M34 Float) where
   glslType = "mat3x4"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix3x4fv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix3x4fv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M34 Double) where
   glslType = "dmat3x4"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix3x4dv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix3x4dv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M44 Float) where
   glslType = "mat4"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix4fv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix4fv prog loc 1 GL_TRUE . castPtr)
 
 instance Uniform (M44 Double) where
   glslType = "dmat4"
-  uniform prog loc matrix = A.with (transpose matrix) (runLiftIO . glProgramUniformMatrix4dv prog loc 1 GL_FALSE . castPtr)
+  uniform prog loc matrix = A.with matrix (runLiftIO . glProgramUniformMatrix4dv prog loc 1 GL_TRUE . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Point f a)
