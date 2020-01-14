@@ -60,10 +60,7 @@ drawBody
 drawBody v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ do
   view <- ask
   matrix_ ?=  getTransform
-    (   toContext view
-    >>> toWindow view
-    >>> toZoomed view
-    >>> toSystem view
+    (   transformToSystem view
     >>> Body.transform v
     >>> Body.toBodySpace v)
   colour_ ?= colour
