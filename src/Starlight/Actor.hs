@@ -39,7 +39,7 @@ data Actor = Actor
   }
   deriving (Generic, Show)
 
-data ActorSpace
+data ActorSpace a
 
 position_ :: HasCallStack => Lens' Actor (V3 (Mega Metres Float))
 position_ = field @"position".asserting (none isNaN)

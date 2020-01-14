@@ -80,8 +80,8 @@ data Orbit = Orbit
   }
   deriving (Show)
 
-data OrbitSpace
-data BodySpace
+data OrbitSpace a
+data BodySpace a
 
 
 rotationTimeScale :: Num a => Seconds a

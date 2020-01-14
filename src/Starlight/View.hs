@@ -48,11 +48,11 @@ lengthToPixels :: View -> Float
 lengthToPixels View{ zoom, scale } = 1/zoom * scale
 
 
-data ClipSpace
-data ContextSpace
-data UISpace
-data ZoomedSpace
-data PlayerSpace
+data ClipSpace a
+data ContextSpace a
+data UISpace a
+data ZoomedSpace a
+data PlayerSpace a
 
 
 toContext :: View -> Transform ClipSpace ContextSpace

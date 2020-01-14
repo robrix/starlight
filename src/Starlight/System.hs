@@ -41,7 +41,7 @@ data System a = System
   deriving (Generic, Show)
 
 -- | The coordinate space of the system’s origin.
-data SystemSpace
+data SystemSpace a
 
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = field @"bodies"
