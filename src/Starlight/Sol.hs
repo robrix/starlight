@@ -21,7 +21,6 @@ import           Starlight.Identifier as Identifier
 import           Starlight.System
 import           UI.Colour
 import           Unit.Angle
-import           Unit.Length
 import           Unit.Time
 
 bodies :: Map.Map BodyIdentifier Orbit -> Map.Map BodyIdentifier Body
@@ -212,15 +211,12 @@ system = do
         , colour      = white
         , orbit
         }
-      scale = un @(Kilo Metres) (100 / radius (bodies Map.! solI))
 
-  pure (System scale mempty mempty mempty)
-    { Starlight.System.bodies     = Map.fromList
+  pure System
+    { bodies     = Map.fromList
       [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
       | (identifier, orbit) <- Map.toList orbits
       ]
     , characters = mempty
     , beams      = mempty
     }
-  where
-  solI = Star (10, "Sol")

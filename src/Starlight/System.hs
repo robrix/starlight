@@ -4,8 +4,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.System
-( System(System, bodies, characters, beams)
-, scale_
+( System(..)
 , bodies_
 , player_
 , npcs_
@@ -34,15 +33,11 @@ import           Starlight.Weapon.Laser
 import           Unit.Power
 
 data System a = System
-  { scale      :: !Float
-  , bodies     :: !(Map.Map BodyIdentifier a)
+  { bodies     :: !(Map.Map BodyIdentifier a)
   , characters :: !(Map.Map CharacterIdentifier Character)
   , beams      :: ![Beam]
   }
   deriving (Generic, Show)
-
-scale_ :: Lens' (System a) Float
-scale_ = field @"scale"
 
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = field @"bodies"

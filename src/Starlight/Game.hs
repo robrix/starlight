@@ -59,7 +59,7 @@ import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
-import           Unit.Time
+import           Unit.Length
 
 runGame
   :: ( Has (Lift IO) sig m
@@ -239,9 +239,11 @@ withView m = do
   ratio <- Window.ratio
   size  <- Window.size
 
-  scale    <- view (scale_ @StateVectors)
+  bodies   <- view (bodies_ @StateVectors)
   velocity <- view (player_ @StateVectors .actor_.velocity_)
   focus    <- view (player_ @StateVectors .actor_.position_._xy)
 
   let zoom = zoomForSpeed size (prj (norm velocity))
+      solI = Star (10, "Sol")
+      scale = un @(Kilo Metres) (100 / radius (body (bodies Map.! solI)))
   runReader View{ ratio, size, zoom, scale, focus } m
