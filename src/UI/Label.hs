@@ -121,7 +121,7 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
         viewport $ ratio *^ Interval 0 size
         scissor  $ ratio *^ Interval 0 size
 
-        setClearColour transparent
+        setClearColour (transparent :: Colour Double)
         glClear GL_COLOR_BUFFER_BIT
 
         let V2 sx sy = fromIntegral ratio / fmap fromIntegral size
