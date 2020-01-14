@@ -33,10 +33,8 @@ import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
-import           Starlight.Body (StateVectors)
 import           Starlight.Character
 import qualified Starlight.Ship as S
-import           Starlight.System
 import           Starlight.View
 import           UI.Colour
 import qualified UI.Drawable as UI
@@ -46,17 +44,14 @@ drawShip
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has (Reader Drawable) sig m
-     , Has (Reader (System StateVectors)) sig m
      , Has (Reader View) sig m
      )
   => Character
   -> m ()
 drawShip Character{ actor = Actor{ position, rotation, magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
   vs@View{ scale, focus } <- ask
-  sys <- ask @(System StateVectors)
   matrix_
-    ?=  scaleToViewZoomed vs
-    !*! systemTrans sys
+    ?=  scaleToViewSystem vs
     !*! translated3 (ext (negated (prj <$> focus)) 0)
     !*! translated3 (prj <$> position)
     !*! scaled (ext (pure @V3 (prj magnitude * 0.5 / scale)) 1)

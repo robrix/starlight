@@ -35,7 +35,6 @@ import           Linear.Exts
 import           Prelude hiding (break)
 import           Starlight.Actor
 import qualified Starlight.Body as Body
-import           Starlight.System
 import           Starlight.View
 import qualified UI.Drawable as UI
 import           Unit.Length
@@ -56,17 +55,14 @@ drawBody
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has (Reader Drawable) sig m
-     , Has (Reader (System Body.StateVectors)) sig m
      , Has (Reader View) sig m
      )
   => Body.StateVectors
   -> m ()
 drawBody Body.StateVectors{ body = Body.Body{ radius, colour }, transform, actor = Actor{ rotation } } = UI.using getDrawable $ do
   vs@View{ focus } <- ask
-  systemTrans <- asks (systemTrans @Body.StateVectors)
   matrix_
-    ?=  scaleToViewZoomed vs
-    !*! systemTrans
+    ?=  scaleToViewSystem vs
     !*! translated3 (ext (negated (prj <$> focus)) 0) -- transform to the origin
     !*! transform
     !*! scaled (ext (pure @V3 (prj radius)) 1)

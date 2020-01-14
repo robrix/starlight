@@ -11,7 +11,6 @@ module Starlight.System
 , npcs_
 , characters_
 , beams_
-, systemTrans
 , identifiers
 , (!?)
 , neighbourhoodOf
@@ -60,9 +59,6 @@ characters_ = field @"characters".asserting (Map.member Player)
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
 
-
-systemTrans :: System a -> M44 Float
-systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
 identifiers :: System a -> [Identifier]
 identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B (Map.keys bodies)
