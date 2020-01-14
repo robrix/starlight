@@ -23,8 +23,7 @@ module Starlight.View
 , module Geometry.Transform
 ) where
 
-import Control.Lens ((.~), (^.))
-import Data.Function ((&))
+import Control.Lens ((&), (.~), (^.))
 import Geometry.Transform
 import Linear.Exts
 import Unit.Length
