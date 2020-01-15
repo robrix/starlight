@@ -85,7 +85,7 @@ fromCSV = toBody . splitOnCommas where
 fromFile :: Has (Lift IO) sig m => FilePath -> m Orbit
 fromFile path = do
   lines <- lines <$> sendM (readFile path)
-  last <- maybe (pure (error ("no ephemerides found in file: " <> path))) (pure . pred) (elemIndex "$$EOE" lines)
+  let last = maybe (error ("no ephemerides found in file: " <> path)) pred (elemIndex "$$EOE" lines)
   either (pure . error) (pure . fromEphemeris) (fromCSV (lines !! last))
 
 fromDirectory :: Has (Lift IO) sig m => FilePath -> m [(BodyIdentifier, Orbit)]
