@@ -48,14 +48,14 @@ data Ephemeris = Ephemeris
 fromEphemeris :: Ephemeris -> Orbit
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
   = Orbit
-    { eccentricity    = realToFrac eccentricity
-    , semimajor       = realToFrac <$> semimajor
+    { eccentricity
+    , semimajor
     , orientation     = orient
-      (realToFrac <$> fromDegrees longitudeOfAscendingNode)
-      (realToFrac <$> fromDegrees inclination)
-      (realToFrac <$> fromDegrees argumentOfPerifocus)
-    , period          = realToFrac <$> siderealOrbitPeriod
-    , timeOfPeriapsis = realToFrac <$> timeOfPeriapsisRelativeToEpoch
+      (fromDegrees longitudeOfAscendingNode)
+      (fromDegrees inclination)
+      (fromDegrees argumentOfPerifocus)
+    , period          = siderealOrbitPeriod
+    , timeOfPeriapsis = timeOfPeriapsisRelativeToEpoch
     }
 
 fromCSV :: String -> Either String Ephemeris

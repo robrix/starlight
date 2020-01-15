@@ -245,5 +245,5 @@ withView m = do
 
   let zoom = zoomForSpeed size (prj (norm velocity))
       solI = Star (10, "Sol")
-      scale = un @(Kilo Metres) (100_000 / radius (body (bodies Map.! solI))) -- FIXME: account for unit size without hard-coding conversion factor
+      scale = realToFrac $ un @(Kilo Metres) (100_000 / radius (body (bodies Map.! solI))) -- FIXME: account for unit size without hard-coding conversion factor
   runReader View{ ratio, size, zoom, scale, focus } m
