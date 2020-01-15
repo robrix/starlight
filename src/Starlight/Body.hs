@@ -131,7 +131,8 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
       & velocity_.coerced.extended 0 %~ apply rel
     } where
     actor = actorAt body t
-    rel = maybe (mkRotation orientation) ((>>> mkRotation orientation) . transform) (parent identifier >>= (bodies' Map.!?))
+    rel = maybe rot ((>>> rot) . transform) (parent identifier >>= (bodies' Map.!?))
+    rot = mkRotation orientation
 
 -- | Subject to the invariant that w=1.
 extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)
