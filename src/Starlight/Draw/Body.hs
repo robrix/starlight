@@ -72,7 +72,7 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
 vertices :: [V Identity]
-vertices = coerce @[V4 Float] . map (`ext` V2 0 1) $ circle 1 128
+vertices = coerce @[V4 Float] . map (`ext` V2 0 (1 :: Float)) $ circle 1 128
 
 range :: Interval Identity Int
 range = Interval 0 (Identity (length vertices))

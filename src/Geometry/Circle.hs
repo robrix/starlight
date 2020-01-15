@@ -10,9 +10,10 @@ import Linear.Exts
 
 -- | Construct vertices for a circle.
 circle
-  :: Float      -- ^ The radius.
-  -> Int        -- ^ The number of vertices to produce.
-  -> [V2 Float] -- ^ The vertices for the circle.
+  :: Floating a
+  => a      -- ^ The radius.
+  -> Int    -- ^ The number of vertices to produce.
+  -> [V2 a] -- ^ The vertices for the circle.
 circle radius n =
   [ cartesian2 theta radius
   | i <- [0..pred n]
