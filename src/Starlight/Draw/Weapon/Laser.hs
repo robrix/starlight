@@ -85,14 +85,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform ClipUnits (Mega Metres))
+  { matrix :: v (Transform Float ClipUnits (Mega Metres))
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (Transform ClipUnits (Mega Metres)))
+matrix_ :: Lens' (U v) (v (Transform Float ClipUnits (Mega Metres)))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))

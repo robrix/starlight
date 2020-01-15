@@ -155,14 +155,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform ClipUnits Window.Pixels)
+  { matrix :: v (Transform Float ClipUnits Window.Pixels)
   , here   :: v (V2 (Mega Metres Float))
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (Transform ClipUnits Window.Pixels))
+matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Window.Pixels))
 matrix_ = field @"matrix"
 
 here_ :: Lens' (U v) (v (V2 (Mega Metres Float)))

@@ -54,7 +54,7 @@ magnitude_ :: HasCallStack => Lens' Actor (Mega Metres Float)
 magnitude_ = field @"magnitude".asserting (not.isNaN)
 
 
-transformToActor :: Actor -> Transform (Mega Metres) (Mega Metres)
+transformToActor :: Actor -> Transform Float (Mega Metres) (Mega Metres)
 transformToActor Actor{ position, rotation } = mkTranslation (prj <$> position) >>> mkRotation rotation
 
 applyForce :: HasCallStack => V3 ((Kilo Grams :*: Mega Metres :/: Seconds :/: Seconds) Float) -> Seconds Float -> Actor -> Actor

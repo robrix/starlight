@@ -49,7 +49,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform (Mega Metres) (Mega Metres))
+  , transform :: !(Transform Float (Mega Metres) (Mega Metres))
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -57,7 +57,7 @@ data StateVectors = StateVectors
 instance HasActor StateVectors where
   actor_ = field @"actor"
 
-toBodySpace :: StateVectors -> Transform (Mega Metres) BodyUnits
+toBodySpace :: StateVectors -> Transform Float (Mega Metres) BodyUnits
 toBodySpace v = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) (realToFrac <$> radius (body v))))) >>> mkRotation (rotation (actor v))
 
 data Body = Body

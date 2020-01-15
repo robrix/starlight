@@ -16,22 +16,22 @@ import GL.Type as GL
 import GL.Uniform
 import Linear.Exts
 
-newtype Transform (a :: * -> *) (b :: * -> *) = Transform { getTransform :: M44 Float }
+newtype Transform c (a :: * -> *) (b :: * -> *) = Transform { getTransform :: M44 c }
   deriving (Show, Storable, GL.Type, Uniform)
 
-instance Category Transform where
+instance Num c => Category (Transform c) where
   id = Transform identity
   Transform a . Transform b = Transform (b !*! a)
 
-mkTranslation :: V3 Float -> Transform a a
+mkTranslation :: Num c => V3 c -> Transform c a a
 mkTranslation v = Transform (identity & translation .~ v)
 
 -- FIXME: scaling should introduce a change of units
-mkScale :: V3 Float -> Transform a b
+mkScale :: Num c => V3 c -> Transform c a b
 mkScale v = Transform (scaled (ext v 1))
 
-mkRotation :: Quaternion Float -> Transform a a
+mkRotation :: Num c => Quaternion c -> Transform c a a
 mkRotation q = Transform (identity !*! mkTransformation q 0)
 
-apply :: Transform a b -> V4 Float -> V4 Float
+apply :: Num c => Transform c a b -> V4 c -> V4 c
 apply (Transform m) v = m !* v

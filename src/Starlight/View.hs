@@ -54,25 +54,25 @@ newtype ClipUnits a = ClipUnits { getClipUnits :: a }
 newtype Zoomed a = Zoomed { getZoomed :: a }
 
 
-toContext :: View -> Transform ClipUnits Context.Pixels
+toContext :: View -> Transform Float ClipUnits Context.Pixels
 toContext View{ size } = mkScale (pure 1 & _xy .~ 1 / (fromIntegral <$> size))
 
-toWindow :: View -> Transform Context.Pixels Window.Pixels
+toWindow :: View -> Transform Float Context.Pixels Window.Pixels
 toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 
-toZoomed :: View -> Transform Window.Pixels Zoomed
+toZoomed :: View -> Transform Float Window.Pixels Zoomed
 toZoomed View{ zoom } = mkScale (pure 1 & _xy .~ pure (1/zoom))
 
-toSystem :: View -> Transform Zoomed (Mega Metres)
+toSystem :: View -> Transform Float Zoomed (Mega Metres)
 toSystem View{ scale, focus } = mkScale (pure scale) >>> mkTranslation (ext (prj <$> negated focus) 0)
 
-transformToWindow :: View -> Transform ClipUnits Window.Pixels
+transformToWindow :: View -> Transform Float ClipUnits Window.Pixels
 transformToWindow view = toContext view >>> toWindow view
 
-transformToZoomed :: View -> Transform ClipUnits Zoomed
+transformToZoomed :: View -> Transform Float ClipUnits Zoomed
 transformToZoomed view = transformToWindow view >>> toZoomed view
 
-transformToSystem :: View -> Transform ClipUnits (Mega Metres)
+transformToSystem :: View -> Transform Float ClipUnits (Mega Metres)
 transformToSystem view = transformToZoomed view >>> toSystem view
 
 
