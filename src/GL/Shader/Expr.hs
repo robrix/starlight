@@ -214,9 +214,6 @@ data Expr (k :: Type) a where
   Float :: Expr k a -> Expr k Float
   Double :: Expr k a -> Expr k Double
   Vec :: String -> Int -> [Expr k a] -> Expr k (v a)
-  Vec2 :: String -> Expr k a -> Expr k a -> Expr k (V2 a)
-  Vec3 :: String -> Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
-  Vec4 :: String -> Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
   Mat2 :: String -> Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
   Mat3 :: String -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
   Mat4 :: String -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
@@ -288,13 +285,13 @@ double :: Expr k a -> Expr k Double
 double = Double
 
 vec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
-vec2 = Vec2 ""
+vec2 a b = Vec "" 2 [a, b]
 
 vec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
-vec3 = Vec3 ""
+vec3 a b c = Vec "" 3 [a, b, c]
 
 vec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
-vec4 = Vec4 ""
+vec4 a b c d = Vec "" 4 [a, b, c, d]
 
 class DVec2 t where
   dvec2 :: t
@@ -303,13 +300,13 @@ instance DVec2 (Expr k a -> Expr k (V2 a)) where
   dvec2 = Vec "d" 2 . (:[])
 
 instance DVec2 (Expr k a -> Expr k a -> Expr k (V2 a)) where
-  dvec2 = Vec2 "d"
+  dvec2 a b = Vec "d" 2 [a, b]
 
 dvec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
-dvec3 = Vec3 "d"
+dvec3 a b c = Vec "d" 3 [a, b, c]
 
 dvec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
-dvec4 = Vec4 "d"
+dvec4 a b c d = Vec "d" 4 [a, b, c, d]
 
 mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
 mat2 = Mat2 ""
@@ -459,9 +456,6 @@ renderExpr = \case
   Float a -> fn "float" [renderExpr a]
   Double a -> fn "double" [renderExpr a]
   Vec p n as -> fn (p <> "vec" <> show n) (map renderExpr as)
-  Vec2 p a b -> fn (p <> "vec2") [renderExpr a, renderExpr b]
-  Vec3 p a b c -> fn (p <> "vec3") [renderExpr a, renderExpr b, renderExpr c]
-  Vec4 p a b c d -> fn (p <> "vec4") [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
   Mat2 p a b -> fn (p <> "mat2") [renderExpr a, renderExpr b]
   Mat3 p a b c -> fn (p <> "mat3") [renderExpr a, renderExpr b, renderExpr c]
   Mat4 p a b c d -> fn (p <> "mat4") [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
