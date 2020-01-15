@@ -95,8 +95,8 @@ shader = program $ \ U{ resolution, focus, zoom }
     focus <- var "focus" $ ext3 (D.coerce focus / (resolution D.^* 0.1)) 1
     a1 <- let' "a1" $ 0.2 + norm (get focus) / 1000 / resolution^._x * 2
     a2 <- let' "a2" $ 0.2 + norm (get focus) / 1000 / resolution^._y * 2
-    rot1 <- let' "rot1" $ mat2 (vec2 [cos a1, sin a1]) (vec2 [-(sin a1), cos a1])
-    rot2 <- let' "rot2" $ mat2 (vec2 [cos a2, sin a2]) (vec2 [-(sin a2), cos a2])
+    rot1 <- let' "rot1" $ mat2 (vec2 [cos a1, sin a1]) (vec2 [-sin a1, cos a1])
+    rot2 <- let' "rot2" $ mat2 (vec2 [cos a2, sin a2]) (vec2 [-sin a2, cos a2])
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
     focus^^._xz *!= rot1
