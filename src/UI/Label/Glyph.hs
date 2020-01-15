@@ -28,39 +28,39 @@ shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } IF{ _coord2, colour } -> main $ do
     _coord2 .= pos ^. _zw
-    t <- var "t" (vec2 0 0)
+    t <- var "t" (vec2 [0, 0])
     switch gl_InstanceID
       [ (Just 0, do
-        colour .= vec4 1 0 0 1
-        t .= vec2 (-1/12.0) (-5/12.0)
+        colour .= vec4 [1, 0, 0, 1]
+        t .= vec2 [-1/12.0, -5/12.0]
         break)
       , (Just 1, do
-        colour .= vec4 1 0 0 1
-        t .= vec2 ( 1/12.0) ( 1/12.0)
+        colour .= vec4 [1, 0, 0, 1]
+        t .= vec2 [ 1/12.0,  1/12.0]
         break)
       , (Just 2, do
-        colour .= vec4 0 1 0 1
-        t .= vec2 ( 3/12.0) (-1/12.0)
+        colour .= vec4 [0, 1, 0, 1]
+        t .= vec2 [ 3/12.0, -1/12.0]
         break)
       , (Just 3, do
-        colour .= vec4 0 1 0 1
-        t .= vec2 ( 5/12.0) ( 5/12.0)
+        colour .= vec4 [0, 1, 0, 1]
+        t .= vec2 [ 5/12.0,  5/12.0]
         break)
       , (Just 4, do
-        colour .= vec4 0 0 1 1
-        t .= vec2 ( 7/12.0) (-3/12.0)
+        colour .= vec4 [0, 0, 1, 1]
+        t .= vec2 [ 7/12.0, -3/12.0]
         break)
       , (Just 5, do
-        colour .= vec4 0 0 1 1
-        t .= vec2 ( 9/12.0) ( 3/12.0)
+        colour .= vec4 [0, 0, 1, 1]
+        t .= vec2 [ 9/12.0,  3/12.0]
         break)
       ]
-    let trans2 t = mat3 (vec3 1 0 0) (vec3 0 1 0) (vec3 (t ^. _x) (t ^. _y) 1)
-        scale2 s = mat3 (vec3 s 0 0) (vec3 0 s 0) (vec3 0 0 1)
+    let trans2 t = mat3 (vec3 [1, 0, 0]) (vec3 [0, 1, 0]) (vec3 [t^._x, t^._y, 1])
+        scale2 s = mat3 (vec3 [s, 0, 0]) (vec3 [0, s, 0]) (vec3 [0, 0, 1])
         m =   matrix u
           !*! trans2 (get t ^* scale u)
           !*! scale2 (fontScale u)
-          !*! trans2 (vec2 (offset u) 0)
+          !*! trans2 (vec2 [offset u, 0])
     gl_Position .= ext4 (m !* ext3 (pos ^. _xy) 1) 0 ^. _xywz)
 
   >>> fragment (\ IF{ _coord2, colour } O{ fragColour } -> main $

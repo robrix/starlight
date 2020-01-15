@@ -112,7 +112,7 @@ shader = program $ \ u
     there <- let' "there" (there - here u)
     d     <- let' "d"     (D.norm there)
     dir   <- let' "dir"   (there D.^* (1/d))
-    let perp v = vec2 (negate (v D.^.D._y)) (v D.^.D._x)
+    let perp v = vec2 [negate (v D.^.D._y), v D.^.D._x]
         angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
         wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
     edge  <- let' "edge"  (perp dir D.^* r D.^* 0.5 + there)
@@ -124,7 +124,7 @@ shader = program $ \ u
       (pure ())
     minSweep <- let' "minSweep" (D.coerce (minBlipSize / (2 * pi * get radius)))
     sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (D.coerce (angleOf edge) - angle)))
-    pos   <- let' "pos"   (D.coerce (vec2 (cos angle) (sin angle) D.^* D.coerce (get radius)))
+    pos   <- let' "pos"   (D.coerce (vec2 [cos angle, sin angle] D.^* D.coerce (get radius)))
     gl_PointSize .= 3
     colour2 .= colour
     gl_Position .= ext4 (ext3 pos 0) 1)
@@ -134,10 +134,10 @@ shader = program $ \ u
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
       let rot theta = mat4
-            (vec4 (cos theta) (-(sin theta)) 0 0)
-            (vec4 (sin theta) (cos   theta)  0 0)
-            (vec4 0           0              1 0)
-            (vec4 0           0              0 1)
+            (vec4 [cos theta, -(sin theta), 0, 0])
+            (vec4 [sin theta,  cos  theta , 0, 0])
+            (vec4 [0,          0,           1, 0])
+            (vec4 [0,          0,           0, 1])
       emitPrimitive $ do
         i <- var @Int "i" (-(fromIntegral count))
         while (get i `lt` (fromIntegral count + 1)) $

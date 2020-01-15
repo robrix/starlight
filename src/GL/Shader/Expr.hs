@@ -44,7 +44,7 @@ module GL.Shader.Expr
 , vec2
 , vec3
 , vec4
-, DVec2(..)
+, dvec2
 , dvec3
 , dvec4
 , mat2
@@ -284,29 +284,26 @@ float = Float
 double :: Expr k a -> Expr k Double
 double = Double
 
-vec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
-vec2 a b = Vec "" 2 [a, b]
 
-vec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
-vec3 a b c = Vec "" 3 [a, b, c]
+vec2 :: [Expr k a] -> Expr k (V2 a)
+vec2 = Vec "" 2
 
-vec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
-vec4 a b c d = Vec "" 4 [a, b, c, d]
+vec3 :: [Expr k a] -> Expr k (V3 a)
+vec3 = Vec "" 3
 
-class DVec2 t where
-  dvec2 :: t
+vec4 :: [Expr k a] -> Expr k (V4 a)
+vec4 = Vec "" 4
 
-instance DVec2 (Expr k a -> Expr k (V2 a)) where
-  dvec2 = Vec "d" 2 . (:[])
 
-instance DVec2 (Expr k a -> Expr k a -> Expr k (V2 a)) where
-  dvec2 a b = Vec "d" 2 [a, b]
+dvec2 :: [Expr k a] -> Expr k (V2 a)
+dvec2 = Vec "d" 2
 
-dvec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
-dvec3 a b c = Vec "d" 3 [a, b, c]
+dvec3 :: [Expr k a] -> Expr k (V3 a)
+dvec3 = Vec "d" 3
 
-dvec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
-dvec4 a b c d = Vec "d" 4 [a, b, c, d]
+dvec4 :: [Expr k a] -> Expr k (V4 a)
+dvec4 = Vec "d" 4
+
 
 mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
 mat2 = Mat2 ""
@@ -316,6 +313,7 @@ mat3 = Mat3 ""
 
 mat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
 mat4 = Mat4 ""
+
 
 dmat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
 dmat2 = Mat2 "d"

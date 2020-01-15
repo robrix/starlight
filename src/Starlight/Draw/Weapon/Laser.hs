@@ -79,7 +79,7 @@ range = Interval 0 (Identity (length vertices))
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ r } None -> main $
-    gl_Position .= D.coerce (matrix u) D.!* vec4 r 0 0 1)
+    gl_Position .= D.coerce (matrix u) D.!* vec4 [r, 0, 0, 1])
   >>> fragment (\ None O{ fragColour } -> main $
     fragColour .= colour u)
 

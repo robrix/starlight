@@ -90,20 +90,20 @@ shader = program $ \ U{ resolution, focus, zoom }
 
   >>> fragment (\ None O{ fragColour } -> main $ do
     resolution <- let' "resolution" (D.coerce resolution)
-    uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 1 (resolution^._y / resolution^._x)
+    uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var "focus" $ ext3 (D.coerce focus / (resolution D.^* 0.1)) 1
     a1 <- let' "a1" $ 0.2 + norm (get focus) / 1000 / resolution^._x * 2
     a2 <- let' "a2" $ 0.2 + norm (get focus) / 1000 / resolution^._y * 2
-    rot1 <- let' "rot1" $ mat2 (vec2 (cos a1) (sin a1)) (vec2 (-(sin a1)) (cos a1))
-    rot2 <- let' "rot2" $ mat2 (vec2 (cos a2) (sin a2)) (vec2 (-(sin a2)) (cos a2))
+    rot1 <- let' "rot1" $ mat2 (vec2 [cos a1, sin a1]) (vec2 [-(sin a1), cos a1])
+    rot2 <- let' "rot2" $ mat2 (vec2 [cos a2, sin a2]) (vec2 [-(sin a2), cos a2])
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
     focus^^._xz *!= rot1
     focus^^._xy *!= rot2
     s <- var "s" 0.1
     fade <- var "fade" 0.5
-    v <- var "v" $ vec3 0 0 0
+    v <- var "v" $ vec3 [0, 0, 0]
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
       p <- var "p" $ get focus + get dir D.^* get s
@@ -121,13 +121,13 @@ shader = program $ \ U{ resolution, focus, zoom }
       iff (get r `gt` 6)
         (fade *= 1.0 - dm)
         (pure ())
-      v += vec3 (get fade) (get fade) (get fade)
-      v += vec3 (get s) (get s ** 2) (get s ** 3) D.^* get a D.^* brightness D.^* get fade
+      v += vec3 [get fade]
+      v += vec3 [get s, get s ** 2, get s ** 3] D.^* get a D.^* brightness D.^* get fade
       fade *= distfading
       s += stepsize
       r += 1
     mag <- let' "mag" (norm (get v))
-    v .= lerp saturation (vec3 mag mag mag) (get v)
+    v .= lerp saturation (vec3 [mag]) (get v)
     fragColour .= ext4 (get v D.^* 0.01) 1)
   where
   iterations = 17
