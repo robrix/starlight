@@ -39,6 +39,7 @@ module GL.Shader.Expr
 , get
   -- ** Constructors
 , float
+, double
 , vec2
 , vec3
 , vec4
@@ -202,6 +203,7 @@ data Expr (k :: Type) a where
   Get :: Ref k a -> Expr k a
 
   Float :: Expr k a -> Expr k Float
+  Double :: Expr k a -> Expr k Double
   Vec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
   Vec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
   Vec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
@@ -271,6 +273,9 @@ get = Get
 
 float :: Expr k a -> Expr k Float
 float = Float
+
+double :: Expr k a -> Expr k Double
+double = Double
 
 vec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
 vec2 = Vec2
@@ -412,6 +417,7 @@ renderExpr = \case
   Gt a b -> parens $ renderExpr a <+> pretty '>' <+> renderExpr b
   Get r -> renderRef r
   Float a -> fn "float" [renderExpr a]
+  Double a -> fn "double" [renderExpr a]
   Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
   Vec3 a b c -> fn "vec3" [renderExpr a, renderExpr b, renderExpr c]
   Vec4 a b c d -> fn "vec4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
