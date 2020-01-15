@@ -93,8 +93,8 @@ shader = program $ \ U{ resolution, focus, zoom }
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 1 (resolution^._y / resolution^._x)
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var "focus" $ ext3 (D.coerce focus / (resolution D.^* 0.1)) 1
-    a1 <- let' "a1" $ 0.2 + norm (get focus) / resolution^._x * 2
-    a2 <- let' "a2" $ 0.2 + norm (get focus) / resolution^._y * 2
+    a1 <- let' "a1" $ 0.2 + norm (get focus) / 1000 / resolution^._x * 2
+    a2 <- let' "a2" $ 0.2 + norm (get focus) / 1000 / resolution^._y * 2
     rot1 <- let' "rot1" $ mat2 (vec2 (cos a1) (sin a1)) (vec2 (-(sin a1)) (cos a1))
     rot2 <- let' "rot2" $ mat2 (vec2 (cos a2) (sin a2)) (vec2 (-(sin a2)) (cos a2))
     dir^^._xz *!= rot1
