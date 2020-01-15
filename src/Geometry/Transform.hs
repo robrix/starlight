@@ -6,6 +6,7 @@ module Geometry.Transform
 , mkScale
 , mkRotation
 , apply
+, tmap
 , (>>>)
 ) where
 
@@ -15,6 +16,7 @@ import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
 import Linear.Exts
+import Prelude hiding ((.))
 
 newtype Transform c (a :: * -> *) (b :: * -> *) = Transform { getTransform :: M44 c }
   deriving (Show, Storable, GL.Type, Uniform)
@@ -35,3 +37,6 @@ mkRotation q = Transform (identity !*! mkTransformation q 0)
 
 apply :: Num c => Transform c a b -> V4 c -> V4 c
 apply (Transform m) v = m !* v
+
+tmap :: (c -> c') -> Transform c a b -> Transform c' a b
+tmap f = Transform . fmap (fmap f) . getTransform
