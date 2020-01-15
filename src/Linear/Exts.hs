@@ -53,10 +53,11 @@ orient alpha beta gamma
 
 -- | Compute a rotation turning to face a desired angle with a given maximum angular thrust.
 face
-  :: Radians Float    -- ^ Angular thrust. (Speed of rotation.)
-  -> Radians Float    -- ^ Desired angle.
-  -> Quaternion Float -- ^ Current rotation.
-  -> Quaternion Float -- ^ Resulting rotation.
+  :: (Epsilon a, RealFloat a)
+  => Radians a    -- ^ Angular thrust. (Speed of rotation.)
+  -> Radians a    -- ^ Desired angle.
+  -> Quaternion a -- ^ Current rotation.
+  -> Quaternion a -- ^ Resulting rotation.
 face angular angle rotation
   | nearZero delta = proposed
   | otherwise      = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
