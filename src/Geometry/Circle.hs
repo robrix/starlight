@@ -42,7 +42,7 @@ intersections
 intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
   o_c = o ^-^ c
   discriminant = b ** 2 - (quadrance o_c - r ** 2)
-  b = (l `dot` o_c)
+  b = l `dot` o_c
   root = sqrt discriminant
   (d1, d2) = (-b) ± root
   a ± b = (a + b, a - b)
