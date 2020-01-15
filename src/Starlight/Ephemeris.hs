@@ -94,7 +94,7 @@ fromDirectory = go Nothing
   go :: Has (Lift IO) sig m => Maybe BodyIdentifier -> FilePath -> m [(BodyIdentifier, Orbit)]
   go root dir
     =   sendM (listDirectory dir)
-    >>= traverse (\ path -> do
+    >>= fmap concat . traverse (\ path -> do
       isDir <- sendM (doesDirectoryExist (dir </> path))
       case parseIdentifier root path of
         [identifier] -> if isDir then
@@ -102,7 +102,6 @@ fromDirectory = go Nothing
         else
           pure . (,) identifier <$> fromFile (dir </> path)
         _ -> pure [])
-    >>= pure . concat
   parseIdentifier root path = do
     (code, rest) <- readDec path
     let name = pack (initCap (dropWhile isSpace (dropExtension rest)))
