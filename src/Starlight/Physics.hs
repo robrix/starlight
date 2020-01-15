@@ -56,7 +56,7 @@ gravity a = do
     | otherwise  = applyForce (convert force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
     force :: Newtons Double
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
-    -- FIXME: gravity seems extremely week
+    -- FIXME: gravity seems extremely weak
     r :: (Metres :*: Metres) Double
     r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
   gravC :: (Metres :*: Metres :*: Metres :/: Kilo Grams :/: Seconds :/: Seconds) Double
