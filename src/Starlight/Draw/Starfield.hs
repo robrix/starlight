@@ -103,7 +103,7 @@ shader = program $ \ U{ resolution, focus, zoom }
     focus^^._xy *!= rot2
     s <- var "s" 0.1
     fade <- var "fade" 0.5
-    v <- var "v" $ vec3 [0, 0, 0]
+    v <- var "v" $ vec3 [0]
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
       p <- var "p" $ get focus + get dir D.^* get s
