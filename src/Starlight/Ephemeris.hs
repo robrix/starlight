@@ -86,7 +86,7 @@ fromFile :: Has (Lift IO) sig m => FilePath -> m Orbit
 fromFile path = do
   lines <- lines <$> sendM (readFile path)
   let last = maybe (error ("no ephemerides found in file: " <> path)) pred (elemIndex "$$EOE" lines)
-  either (pure . error) (pure . fromEphemeris) (fromCSV (lines !! last))
+  pure $ either error fromEphemeris (fromCSV (lines !! last))
 
 fromDirectory :: Has (Lift IO) sig m => FilePath -> m [(BodyIdentifier, Orbit)]
 fromDirectory = go Nothing
