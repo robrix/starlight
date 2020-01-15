@@ -69,8 +69,8 @@ shader = program $ \ u
       (iff gl_FrontFacing
         -- Upper 4 bits: front faces
         -- Lower 4 bits: back faces
-        (fragColour .= colour * 16 / 255)
-        (fragColour .= colour * 1  / 255)))
+        (fragColour .= colour * (16 / 255))
+        (fragColour .= colour * (1  / 255))))
 
 
 data U v = U
