@@ -25,7 +25,7 @@ import           Data.Foldable (find, foldl')
 import           Data.Functor.Interval (Interval(..))
 import           Data.IORef
 import qualified Data.Map as Map
-import           Data.Maybe (catMaybes)
+import           Data.Maybe (mapMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import           Data.Vector ((!?))
@@ -186,7 +186,7 @@ layoutString face string = do
   pure (layoutGlyphs ranges (glyphsForString (allGlyphs face) string))
 
 glyphsForString :: Map.Map Char (Maybe Glyph) -> String -> [Glyph]
-glyphsForString allGlyphs = catMaybes . map (join . (allGlyphs Map.!?))
+glyphsForString allGlyphs = mapMaybe (join . (allGlyphs Map.!?))
 
 
 contourToPath :: [O.CurvePoint] -> Path V2 O.FWord
