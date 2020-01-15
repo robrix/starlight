@@ -43,9 +43,15 @@ module GL.Shader.Expr
 , vec2
 , vec3
 , vec4
+, dvec2
+, dvec3
+, dvec4
 , mat2
 , mat3
 , mat4
+, dmat2
+, dmat3
+, dmat4
 -- ** Vector operations
 , ext3
 , ext4
@@ -204,12 +210,12 @@ data Expr (k :: Type) a where
 
   Float :: Expr k a -> Expr k Float
   Double :: Expr k a -> Expr k Double
-  Vec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
-  Vec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
-  Vec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
-  Mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
-  Mat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
-  Mat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
+  Vec2 :: String -> Expr k a -> Expr k a -> Expr k (V2 a)
+  Vec3 :: String -> Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
+  Vec4 :: String -> Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
+  Mat2 :: String -> Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
+  Mat3 :: String -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
+  Mat4 :: String -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
   Ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
   Ext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
   Norm :: Expr k (v a) -> Expr k a
@@ -278,22 +284,40 @@ double :: Expr k a -> Expr k Double
 double = Double
 
 vec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
-vec2 = Vec2
+vec2 = Vec2 ""
 
 vec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
-vec3 = Vec3
+vec3 = Vec3 ""
 
 vec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
-vec4 = Vec4
+vec4 = Vec4 ""
+
+dvec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
+dvec2 = Vec2 "d"
+
+dvec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
+dvec3 = Vec3 "d"
+
+dvec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
+dvec4 = Vec4 "d"
 
 mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
-mat2 = Mat2
+mat2 = Mat2 ""
 
 mat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
-mat3 = Mat3
+mat3 = Mat3 ""
 
 mat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
-mat4 = Mat4
+mat4 = Mat4 ""
+
+dmat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
+dmat2 = Mat2 "d"
+
+dmat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
+dmat3 = Mat3 "d"
+
+dmat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
+dmat4 = Mat4 "d"
 
 
 ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
@@ -418,12 +442,12 @@ renderExpr = \case
   Get r -> renderRef r
   Float a -> fn "float" [renderExpr a]
   Double a -> fn "double" [renderExpr a]
-  Vec2 a b -> fn "vec2" [renderExpr a, renderExpr b]
-  Vec3 a b c -> fn "vec3" [renderExpr a, renderExpr b, renderExpr c]
-  Vec4 a b c d -> fn "vec4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
-  Mat2 a b -> fn "mat2" [renderExpr a, renderExpr b]
-  Mat3 a b c -> fn "mat3" [renderExpr a, renderExpr b, renderExpr c]
-  Mat4 a b c d -> fn "mat4" [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
+  Vec2 p a b -> fn (p <> "vec2") [renderExpr a, renderExpr b]
+  Vec3 p a b c -> fn (p <> "vec3") [renderExpr a, renderExpr b, renderExpr c]
+  Vec4 p a b c d -> fn (p <> "vec4") [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
+  Mat2 p a b -> fn (p <> "mat2") [renderExpr a, renderExpr b]
+  Mat3 p a b c -> fn (p <> "mat3") [renderExpr a, renderExpr b, renderExpr c]
+  Mat4 p a b c d -> fn (p <> "mat4") [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
   Ext3 a b -> fn "vec3" [renderExpr a, renderExpr b]
   Ext4 a b -> fn "vec4" [renderExpr a, renderExpr b]
   Norm a -> fn "length" [renderExpr a]
