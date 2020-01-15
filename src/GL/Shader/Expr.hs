@@ -55,6 +55,8 @@ module GL.Shader.Expr
 -- ** Vector operations
 , ext3
 , ext4
+, dext3
+, dext4
 , norm
 , dot
 , (^*)
@@ -216,8 +218,8 @@ data Expr (k :: Type) a where
   Mat2 :: String -> Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
   Mat3 :: String -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
   Mat4 :: String -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
-  Ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
-  Ext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
+  Ext3 :: String -> Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
+  Ext4 :: String -> Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
   Norm :: Expr k (v a) -> Expr k a
   Dot :: Expr k (v a) -> Expr k (v a) -> Expr k (v a)
   Lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
@@ -321,10 +323,16 @@ dmat4 = Mat4 "d"
 
 
 ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
-ext3 = Ext3
+ext3 = Ext3 ""
 
 ext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
-ext4 = Ext4
+ext4 = Ext4 ""
+
+dext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
+dext3 = Ext3 "d"
+
+dext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
+dext4 = Ext4 "d"
 
 norm :: Expr k (v a) -> Expr k a
 norm = Norm
@@ -448,8 +456,8 @@ renderExpr = \case
   Mat2 p a b -> fn (p <> "mat2") [renderExpr a, renderExpr b]
   Mat3 p a b c -> fn (p <> "mat3") [renderExpr a, renderExpr b, renderExpr c]
   Mat4 p a b c d -> fn (p <> "mat4") [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
-  Ext3 a b -> fn "vec3" [renderExpr a, renderExpr b]
-  Ext4 a b -> fn "vec4" [renderExpr a, renderExpr b]
+  Ext3 p a b -> fn (p <> "vec3") [renderExpr a, renderExpr b]
+  Ext4 p a b -> fn (p <> "vec4") [renderExpr a, renderExpr b]
   Norm a -> fn "length" [renderExpr a]
   Dot a b -> fn "dot" [renderExpr a, renderExpr b]
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
