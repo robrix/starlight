@@ -52,7 +52,6 @@ library
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
     Data.Functor.Interval
-    Data.Quadtree
     Foreign.C.String.Lift
     Foreign.Marshal.Alloc.Lift
     Foreign.Marshal.Array.Lift
