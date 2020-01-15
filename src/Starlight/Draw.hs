@@ -52,14 +52,14 @@ draw
      , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader (Seconds Float)) sig m
+     , Has (Reader (Seconds Double)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (Reader UI) sig m
      , Has (Reader View) sig m
      )
   => m ()
 draw = measure "draw" . runLiftIO $ do
-  dt <- ask @(Seconds Float)
+  dt <- ask @(Seconds Double)
   UI{ fps = fpsLabel, target = targetLabel, face } <- ask
   let font = Font face 18
   bind @Framebuffer Nothing
@@ -79,7 +79,7 @@ draw = measure "draw" . runLiftIO $ do
   measure "laser" $ for_ beams drawLaser
 
   let maxDim = maximum (fromIntegral <$> size) * 0.5
-      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = lengthToWindowPixels v * prj (distance pos position - (realToFrac <$> convert radius)) < maxDim
+      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = lengthToWindowPixels v * prj (distance pos position - convert radius) < maxDim
 
   measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) Body.draw
 

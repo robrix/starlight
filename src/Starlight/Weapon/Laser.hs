@@ -13,8 +13,8 @@ import           Unit.Angle
 import           Unit.Length
 
 data Beam = Beam
-  { position :: V3 (Mega Metres Float)
-  , angle    :: Radians Float
+  { position :: V3 (Mega Metres Double)
+  , angle    :: Radians Double
   , colour   :: Colour Float
   , firedBy  :: CharacterIdentifier
   }

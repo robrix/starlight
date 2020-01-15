@@ -65,7 +65,7 @@ face angular angle rotation
   delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
 
 
-easeInOutCubic :: Float -> Float
+easeInOutCubic :: Double -> Double
 easeInOutCubic t
   | t < 0.5   = 4 * t ** 3
   | otherwise = (t - 1) * (2 * t - 2) ** 2 + 1

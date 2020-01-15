@@ -41,30 +41,30 @@ import Unit.Length
 import Unit.Mass
 import Unit.Time
 
-inertia :: (Has (Reader (Seconds Float)) sig m, HasCallStack) => Actor -> m Actor
+inertia :: (Has (Reader (Seconds Double)) sig m, HasCallStack) => Actor -> m Actor
 inertia a@Actor{ velocity } = do
   dt <- ask @(Seconds _)
   pure $! a & position_ +~ ((.*. dt) <$> velocity)
 
-gravity :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m, HasCallStack) => Actor -> m Actor
+gravity :: (Has (Reader (Seconds Double)) sig m, Has (Reader (System StateVectors)) sig m, HasCallStack) => Actor -> m Actor
 gravity a = do
-  dt <- ask @(Seconds Float)
+  dt <- ask @(Seconds Double)
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
   go dt a StateVectors{ actor = b }
     | nearZero r = a
     | otherwise  = applyForce (convert force *^ coerce ((b^.position_) `direction` (a^.position_))) dt a where
-    force :: Newtons Float
+    force :: Newtons Double
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- FIXME: gravity seems extremely week
-    r :: (Metres :*: Metres) Float
+    r :: (Metres :*: Metres) Double
     r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
-  gravC :: (Metres :*: Metres :*: Metres :/: Kilo Grams :/: Seconds :/: Seconds) Float
+  gravC :: (Metres :*: Metres :*: Metres :/: Kilo Grams :/: Seconds :/: Seconds) Double
   gravC = 6.67430e-11
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
-hit :: (Has (Reader (Seconds Float)) sig m, Has (Reader (System StateVectors)) sig m) => CharacterIdentifier -> Character -> m Character
+hit :: (Has (Reader (Seconds Double)) sig m, Has (Reader (System StateVectors)) sig m) => CharacterIdentifier -> Character -> m Character
 hit i c = do
   dt <- ask
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
@@ -74,11 +74,11 @@ hit i c = do
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
     | otherwise
     = char
-  damage = 100 :: Float
+  damage = 100 :: Double
 
 
 runActions
-  :: ( Has (Reader (Seconds Float)) sig m
+  :: ( Has (Reader (Seconds Double)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (State (System Body)) sig m
      , HasCallStack
@@ -87,7 +87,7 @@ runActions
   -> Character
   -> m Character
 runActions i c = do
-  dt <- ask @(Seconds Float)
+  dt <- ask @(Seconds Double)
   system <- ask @(System StateVectors)
   foldM (go dt system) c (actions c) where
   go dt system c = \case
@@ -121,7 +121,7 @@ runActions i c = do
 
     Jump -> case target of
       Just target
-        | distance (projected (c^.actor_)) (projected target) < (10 :: Mega Metres Float) -> pure c
+        | distance (projected (c^.actor_)) (projected target) < (10 :: Mega Metres Double) -> pure c
         | isFacing (pi/128) rotation targetAngle -> do
           let distance' = distance (projected target) (projected (c^.actor_))
           pure $! c & actor_.position_ +~ (1 - target^.magnitude_ / distance') *^ (projected target - projected (c^.actor_))
@@ -130,7 +130,7 @@ runActions i c = do
         targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
       _ -> pure c
     where
-    thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Float
+    thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Double
     thrust  = 1000 * 20 * 60
     angular = getSeconds dt *^ Radians 5
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)

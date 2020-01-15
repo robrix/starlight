@@ -49,7 +49,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform Float (Mega Metres) (Mega Metres))
+  , transform :: !(Transform Double (Mega Metres) (Mega Metres))
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -57,8 +57,8 @@ data StateVectors = StateVectors
 instance HasActor StateVectors where
   actor_ = field @"actor"
 
-toBodySpace :: StateVectors -> Transform Float (Mega Metres) BodyUnits
-toBodySpace v = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) (realToFrac <$> radius (body v))))) >>> mkRotation (rotation (actor v))
+toBodySpace :: StateVectors -> Transform Double (Mega Metres) BodyUnits
+toBodySpace v = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) (radius (body v))))) >>> mkRotation (rotation (actor v))
 
 data Body = Body
   { radius      :: !(Kilo Metres Double)
@@ -71,6 +71,7 @@ data Body = Body
   deriving (Generic, Show)
 
 newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
+  deriving (Eq, Fractional, Num, Ord)
 
 data Orbit = Orbit
   { eccentricity    :: !Double
@@ -91,15 +92,14 @@ orbitTimeScale = 1
 
 actorAt :: Body -> Seconds Double -> Actor
 actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
-  { position = fmap realToFrac <$> position
-  , velocity = fmap (fmap realToFrac) $ if r == 0 || p == 0 then 0 else (./. Seconds 1) <$> position ^* h ^* pure eccentricity ^/ (r * p) ^* pure (prj (sin trueAnomaly))
+  { position
+  , velocity = if r == 0 || p == 0 then 0 else (./. Seconds 1) <$> position ^* h ^* pure eccentricity ^/ (r * p) ^* pure (prj (sin trueAnomaly))
   , rotation
-    = fmap realToFrac
-    $ orientation
+    = orientation
     * axis
     * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
-  , mass = realToFrac <$> mass
-  , magnitude = realToFrac <$> convert radius * 2
+  , mass
+  , magnitude = convert radius * 2
   } where
   position = ext (cartesian2 (pure <$> trueAnomaly) r) 0
   t' = timeOfPeriapsis + t * orbitTimeScale
@@ -133,7 +133,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     } where
     actor = actorAt body t
     rel = maybe rot ((>>> rot) . transform) (parent identifier >>= (bodies' Map.!?))
-    rot = mkRotation (realToFrac <$> orientation)
+    rot = mkRotation orientation
 
 -- | Subject to the invariant that w=1.
 extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)

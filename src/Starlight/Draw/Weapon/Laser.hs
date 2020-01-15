@@ -57,7 +57,7 @@ drawLaser
   -> m ()
 drawLaser beam@S.Beam{ colour } = UI.using getDrawable $ do
   view <- ask
-  matrix_ ?=
+  matrix_ ?= tmap realToFrac
     (   transformToSystem view
     >>> transformToActor (beam^.actor_)
     >>> mkScale (pure 1000))

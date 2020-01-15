@@ -59,7 +59,7 @@ draw
   -> m ()
 draw v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ do
   view <- ask
-  matrix_ ?=
+  matrix_ ?= tmap realToFrac
     (   transformToSystem view
     >>> Body.transform v
     >>> Body.toBodySpace v)

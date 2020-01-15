@@ -68,8 +68,8 @@ drawRadar = UI.using getDrawable $ do
     B.realloc (length vertices) B.Static B.Draw
     B.copy 0 vertices
 
-  matrix_ ?= transformToWindow view
-  here_   ?= here
+  matrix_ ?= tmap realToFrac (transformToWindow view)
+  here_   ?= (fmap realToFrac <$> here)
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -91,14 +91,14 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
 verticesForBodies vs =
-  [ V{ there = Identity (there^._xy), r = Identity (b^.actor_.magnitude_), colour = Identity colour }
+  [ V{ there = Identity (realToFrac <$> (there^._xy)), r = Identity (realToFrac <$> (b^.actor_.magnitude_)), colour = Identity colour }
   | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
-verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
+verticesForShips :: Foldable t => Double -> t Character -> [V Identity]
 verticesForShips scale cs =
-  [ V{ there = Identity (there^._xy), r = Identity (c^.actor_.magnitude_ ^/ scale), colour = Identity colour }
+  [ V{ there = Identity (realToFrac <$> (there^._xy)), r = Identity (realToFrac <$> (c^.actor_.magnitude_ ^/ scale)), colour = Identity colour }
   | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 

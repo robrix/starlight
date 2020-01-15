@@ -218,7 +218,7 @@ frame = runSystem . timed $ do
 -- | Compute the zoom factor for the given velocity.
 --
 -- Higher values correlate to more of the scene being visible.
-zoomForSpeed :: V2 (Window.Pixels Int) -> Float -> Float
+zoomForSpeed :: V2 (Window.Pixels Int) -> Double -> Double
 zoomForSpeed size x = go where
   Identity go
     | Identity x < min' speed = min' zoom
@@ -245,5 +245,5 @@ withView m = do
 
   let zoom = zoomForSpeed size (prj (norm velocity))
       solI = Star (10, "Sol")
-      scale = realToFrac $ un @(Kilo Metres) (100_000 / radius (body (bodies Map.! solI))) -- FIXME: account for unit size without hard-coding conversion factor
+      scale = un @(Kilo Metres) (100_000 / radius (body (bodies Map.! solI))) -- FIXME: account for unit size without hard-coding conversion factor
   runReader View{ ratio, size, zoom, scale, focus } m
