@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
@@ -43,7 +44,7 @@ module GL.Shader.Expr
 , vec2
 , vec3
 , vec4
-, dvec2
+, DVec2(..)
 , dvec3
 , dvec4
 , mat2
@@ -212,6 +213,7 @@ data Expr (k :: Type) a where
 
   Float :: Expr k a -> Expr k Float
   Double :: Expr k a -> Expr k Double
+  Vec :: String -> Int -> [Expr k a] -> Expr k (v a)
   Vec2 :: String -> Expr k a -> Expr k a -> Expr k (V2 a)
   Vec3 :: String -> Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
   Vec4 :: String -> Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
@@ -294,8 +296,14 @@ vec3 = Vec3 ""
 vec4 :: Expr k a -> Expr k a -> Expr k a -> Expr k a -> Expr k (V4 a)
 vec4 = Vec4 ""
 
-dvec2 :: Expr k a -> Expr k a -> Expr k (V2 a)
-dvec2 = Vec2 "d"
+class DVec2 t where
+  dvec2 :: t
+
+instance DVec2 (Expr k a -> Expr k (V2 a)) where
+  dvec2 = Vec "d" 2 . (:[])
+
+instance DVec2 (Expr k a -> Expr k a -> Expr k (V2 a)) where
+  dvec2 = Vec2 "d"
 
 dvec3 :: Expr k a -> Expr k a -> Expr k a -> Expr k (V3 a)
 dvec3 = Vec3 "d"
@@ -450,6 +458,7 @@ renderExpr = \case
   Get r -> renderRef r
   Float a -> fn "float" [renderExpr a]
   Double a -> fn "double" [renderExpr a]
+  Vec p n as -> fn (p <> "vec" <> show n) (map renderExpr as)
   Vec2 p a b -> fn (p <> "vec2") [renderExpr a, renderExpr b]
   Vec3 p a b c -> fn (p <> "vec3") [renderExpr a, renderExpr b, renderExpr c]
   Vec4 p a b c d -> fn (p <> "vec4") [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
