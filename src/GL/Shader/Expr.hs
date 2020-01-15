@@ -213,12 +213,12 @@ data Expr (k :: Type) a where
 
   Float :: Expr k a -> Expr k Float
   Double :: Expr k a -> Expr k Double
-  Vec :: String -> Int -> [Expr k a] -> Expr k (v a)
-  Mat2 :: String -> Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
-  Mat3 :: String -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
-  Mat4 :: String -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
-  Ext3 :: String -> Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
-  Ext4 :: String -> Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
+  Vec :: String -> Int -> [Expr k a] -> Expr k (v b)
+  Mat2 :: String -> Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 b)
+  Mat3 :: String -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 b)
+  Mat4 :: String -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 b)
+  Ext3 :: String -> Expr k (V2 a) -> Expr k a -> Expr k (V3 b)
+  Ext4 :: String -> Expr k (V3 a) -> Expr k a -> Expr k (V4 b)
   Norm :: Expr k (v a) -> Expr k a
   Dot :: Expr k (v a) -> Expr k (v a) -> Expr k (v a)
   Lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
@@ -285,57 +285,59 @@ double :: Expr k a -> Expr k Double
 double = Double
 
 
-vec2 :: [Expr k a] -> Expr k (V2 a)
+vec2 :: [Expr k a] -> Expr k (V2 Float)
 vec2 = Vec "" 2
 
-vec3 :: [Expr k a] -> Expr k (V3 a)
+vec3 :: [Expr k a] -> Expr k (V3 Float)
 vec3 = Vec "" 3
 
-vec4 :: [Expr k a] -> Expr k (V4 a)
+vec4 :: [Expr k a] -> Expr k (V4 Float)
 vec4 = Vec "" 4
 
 
-dvec2 :: [Expr k a] -> Expr k (V2 a)
+dvec2 :: [Expr k a] -> Expr k (V2 Double)
 dvec2 = Vec "d" 2
 
-dvec3 :: [Expr k a] -> Expr k (V3 a)
+dvec3 :: [Expr k a] -> Expr k (V3 Double)
 dvec3 = Vec "d" 3
 
-dvec4 :: [Expr k a] -> Expr k (V4 a)
+dvec4 :: [Expr k a] -> Expr k (V4 Double)
 dvec4 = Vec "d" 4
 
 
-mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
+mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 Float)
 mat2 = Mat2 ""
 
-mat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
+mat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 Float)
 mat3 = Mat3 ""
 
-mat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
+mat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 Float)
 mat4 = Mat4 ""
 
 
-dmat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 a)
+dmat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 Double)
 dmat2 = Mat2 "d"
 
-dmat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 a)
+dmat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 Double)
 dmat3 = Mat3 "d"
 
-dmat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 a)
+dmat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 Double)
 dmat4 = Mat4 "d"
 
 
-ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
+ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 Float)
 ext3 = Ext3 ""
 
-ext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
+ext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 Float)
 ext4 = Ext4 ""
 
-dext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 a)
+
+dext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 Double)
 dext3 = Ext3 "d"
 
-dext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 a)
+dext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 Double)
 dext4 = Ext4 "d"
+
 
 norm :: Expr k (v a) -> Expr k a
 norm = Norm
