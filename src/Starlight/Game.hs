@@ -226,7 +226,7 @@ zoomForSpeed size x = go where
     | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
   zoom = Interval 1 5
   speed = speedAt <$> zoom
-  speedAt x = x * fromIntegral (maximum size) * 2
+  speedAt x = x / 500 * fromIntegral (maximum size) * 2
 
 withView
   :: ( Has (Lift IO) sig m
