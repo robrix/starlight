@@ -49,9 +49,9 @@ drawStarfield = UI.using getDrawable $ do
   View{ size, zoom, focus } <- ask
 
   resolution_ ?= (fromIntegral <$> size)
-  let V2 (i1, r1) (i2, r2) = (`Fixed.divMod'` 1) . convert <$> focus
-  focus_      ?= (fmap realToFrac <$> V2 r1 r2)
-  focus2_     ?= (realToFrac <$> V2 i1 (i2 :: Integer))
+  let V2 (q1, r1) (q2, r2) = (`Fixed.divMod'` 1) . convert <$> focus
+  focusR_     ?= (fmap realToFrac <$> V2 r1 r2)
+  focusQ_     ?= (realToFrac <$> V2 q1 (q2 :: Integer))
   zoom_       ?= realToFrac zoom
 
   drawArrays TriangleStrip range
@@ -87,7 +87,7 @@ range = Interval 0 (Identity (length vertices))
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
 
 shader :: Shader U V O
-shader = program $ \ U{ resolution, focus, focus2, zoom }
+shader = program $ \ U{ resolution, focusQ, focusR, zoom }
   ->  vertex (\ V{ pos } None -> main $
     gl_Position .= ext4 (ext3 pos 0) 1)
 
@@ -95,28 +95,28 @@ shader = program $ \ U{ resolution, focus, focus2, zoom }
     resolution <- let' @(V2 Float) "resolution" (D.coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
-    focus <- var @(V3 Float) "focus" $ ext3 focus 1
-    focus2 <- var @(V3 Float) "focus2" $ ext3 focus2 1
+    focusR <- var @(V3 Float) "focusR" $ ext3 focusR 1
+    focusQ <- var @(V3 Float) "focusQ" $ ext3 focusQ 1
     let wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-    nf <- let' "nf" (norm (get focus2 + get focus))
+    nf <- let' "nf" (norm (get focusQ + get focusR))
     a1 <- let' "a1" $ wrap (-pi) pi (0.3 + 1/nf)
     a2 <- let' "a2" $ wrap (-pi) pi (0.2 + 1/nf)
     rot1 <- let' "rot1" $ mat2 (vec2 [cos a1, sin a1]) (vec2 [-sin a1, cos a1])
     rot2 <- let' "rot2" $ mat2 (vec2 [cos a2, sin a2]) (vec2 [-sin a2, cos a2])
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
-    focus^^._xz  *!= rot1
-    focus^^._xy  *!= rot2
-    focus2^^._xz *!= rot1
-    focus2^^._xy *!= rot2
-    focus  *= vec3 [10]
-    focus2 *= vec3 [10]
+    focusR^^._xz *!= rot1
+    focusR^^._xy *!= rot2
+    focusQ^^._xz *!= rot1
+    focusQ^^._xy *!= rot2
+    focusR *= vec3 [10]
+    focusQ *= vec3 [10]
     s <- var "s" 0.1
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 [0]
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
-      p <- var "p" $ get focus + get focus2 + get dir D.^* get s
+      p <- var "p" $ get focusR + get focusQ + get dir D.^* get s
       p .= abs (vec3 [tile] - mod' (get p) (vec3 [tile * 2]))
       pa <- var "pa" 0
       a <- var "a" 0
@@ -153,8 +153,8 @@ shader = program $ \ U{ resolution, focus, focus2, zoom }
 
 data U v = U
   { resolution :: v (V2 (Window.Pixels Float))
-  , focus      :: v (V2 (Giga Metres Float))
-  , focus2     :: v (V2 (Giga Metres Float))
+  , focusQ     :: v (V2 (Giga Metres Float))
+  , focusR     :: v (V2 (Giga Metres Float))
   , zoom       :: v Float
   }
   deriving (Generic)
@@ -164,11 +164,11 @@ instance Vars U
 resolution_ :: Lens' (U v) (v (V2 (Window.Pixels Float)))
 resolution_ = field @"resolution"
 
-focus_ :: Lens' (U v) (v (V2 (Giga Metres Float)))
-focus_ = field @"focus"
+focusQ_ :: Lens' (U v) (v (V2 (Giga Metres Float)))
+focusQ_ = field @"focusQ"
 
-focus2_ :: Lens' (U v) (v (V2 (Giga Metres Float)))
-focus2_ = field @"focus2"
+focusR_ :: Lens' (U v) (v (V2 (Giga Metres Float)))
+focusR_ = field @"focusR"
 
 zoom_ :: Lens' (U v) (v Float)
 zoom_ = field @"zoom"
