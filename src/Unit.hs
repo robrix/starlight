@@ -2,6 +2,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
@@ -16,10 +17,12 @@ module Unit
 , format
 , formatDec
 , formatExp
+, formatExpR
 ) where
 
 import Control.Lens ((^.))
 import Control.Lens.Iso
+import Data.Char
 import Data.Coerce
 import Data.Functor.Const
 import Numeric
@@ -59,3 +62,24 @@ formatDec = formatWith showFFloat
 
 formatExp :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
+
+formatExpR :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExpR = formatWith (\ prec x -> if
+  | isNaN x                   -> showString "NaN"
+  | isInfinite x              -> showString $ if x < 0 then "-Infinity" else "Infinity"
+  | x < 0 || isNegativeZero x -> showChar '-' . go prec (floatToDigits 10 (-x))
+  | otherwise                 -> go prec (floatToDigits 10 x)) where
+  go _    ([0], _) = showString "10⁰·0"
+  go prec (is,  e) = showString "10" . digits (e - 1) . showChar '·' . showDigits (take 1 is) . showChar '.' . showDigits (maybe id (fmap roundingLast . take . (+1)) prec (drop 1 is))
+  showDigits = foldr ((.) . showChar . intToDigit) id
+
+  roundingLast is
+    | _:_:_ <- is
+    , is' <- init is
+    , il <- last is' = init is' ++ [if last is >= 5 then il + 1 else il ]
+    | otherwise      = is
+
+  digits = go id where
+    go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go (((sup !! r):) . s) q
+           | otherwise = ((sup !! n):) . s
+  sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
