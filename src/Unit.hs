@@ -12,6 +12,7 @@ module Unit
 , unitary
 , un
 , nu
+, convert
   -- ** Formatting
 , formatWith
 , format
@@ -47,6 +48,9 @@ un = (^.unitary)
 
 nu :: forall u a dim . (Unit dim u, Fractional a) => a -> u a
 nu = (^.from unitary)
+
+convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
+convert = nu . un
 
 
 -- ** Formatting
