@@ -226,6 +226,7 @@ zoomForSpeed size x = go where
     | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
   zoom = Interval 1 5
   speed = speedAt <$> zoom
+  -- FIXME: figure this out w.r.t. actual units of velocity &c.
   speedAt x = x / 500 * fromIntegral (maximum size) * 2
 
 withView
