@@ -12,6 +12,8 @@ module Unit
 , unitary
 , convert
 , converting
+  -- ** Comparison
+, (.==.)
   -- ** Formatting
 , formatWith
 , format
@@ -46,6 +48,14 @@ convert = pure . (/ getConst (factor @_ @u')) . (* getConst (factor @_ @u)) . pr
 
 converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Fractional a, Fractional b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
+
+
+-- ** Comparison
+
+(.==.) :: forall u u' a dim . (Unit dim u, Unit dim u', Eq a, Fractional a) => u a -> u' a -> Bool
+a .==. b = prj a == prj (convert @u' @u b)
+
+infix 4 .==.
 
 
 -- ** Formatting
