@@ -17,6 +17,7 @@ module Unit
 , compareU
 , (.<.)
 , (.>.)
+, (.<=.)
   -- ** Formatting
 , formatWith
 , format
@@ -72,6 +73,11 @@ infix 4 .<.
 a .>. b = a `compareU` b == GT
 
 infix 4 .>.
+
+(.<=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+a .<=. b = a `compareU` b /= GT
+
+infix 4 .<=.
 
 
 -- ** Formatting
