@@ -99,8 +99,8 @@ shader = program $ \ U{ resolution, focusQ, focusR, zoom }
     focusQ <- var @(V3 Float) "focusQ" $ ext3 focusQ 1
     let wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
     nf <- let' "nf" (norm (get focusQ + get focusR))
-    a1 <- let' "a1" $ wrap (-pi) pi (0.3 + 1/nf)
-    a2 <- let' "a2" $ wrap (-pi) pi (0.2 + 1/nf)
+    a1 <- let' "a1" $ wrap (-pi) pi (0.3 + 0.1/nf)
+    a2 <- let' "a2" $ wrap (-pi) pi (0.2 + 0.1/nf)
     rot1 <- let' "rot1" $ mat2 (vec2 [cos a1, sin a1]) (vec2 [-sin a1, cos a1])
     rot2 <- let' "rot2" $ mat2 (vec2 [cos a2, sin a2]) (vec2 [-sin a2, cos a2])
     dir^^._xz *!= rot1
