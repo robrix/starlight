@@ -87,7 +87,7 @@ draw = measure "draw" . runLiftIO $ do
 
   let describeTarget target = case target >>= fmap . (,) <*> (^?to (system !?)._Just.choosing actor_ actor_.position_) of
         Just (identifier, pos)
-          -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
+          -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
         _ -> ""
 
   measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (nu @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (nu @(Frames :/: Seconds) (1/dt)))
