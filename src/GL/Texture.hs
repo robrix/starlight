@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -70,7 +69,7 @@ instance GL.Enum PixelFormat where
   glEnum = \case
     RGBA -> GL_RGBA
 
-data PixelType
+newtype PixelType
   = Packed8888 Bool
 
 instance GL.Enum PixelType where
@@ -78,7 +77,7 @@ instance GL.Enum PixelType where
     Packed8888 False -> GL_UNSIGNED_INT_8_8_8_8
     Packed8888 True  -> GL_UNSIGNED_INT_8_8_8_8_REV
 
-setImageFormat :: (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Type -> InternalFormat -> V2 Int -> PixelFormat -> PixelType -> m ()
+setImageFormat :: (Integral a, HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Type -> InternalFormat -> V2 a -> PixelFormat -> PixelType -> m ()
 setImageFormat target internalFormat (V2 width height) pixelFormat pixelType = checking . runLiftIO $ glTexImage2D (glEnum target) 0 (fromIntegral (glEnum internalFormat)) (fromIntegral width) (fromIntegral height) 0 (glEnum pixelFormat) (glEnum pixelType) nullPtr
 
 

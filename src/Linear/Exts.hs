@@ -2,7 +2,6 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Linear.Exts
 ( translated
-, translated3
 , orient
 , face
 , easeInOutCubic
@@ -32,24 +31,17 @@ import Linear.Matrix hiding (Trace(..))
 import Linear.Metric
 import Linear.Quaternion
 import Linear.V1
-import Linear.V2
+import Linear.V2 hiding (angle)
 import Linear.V3
 import Linear.V4
 import Linear.Vector
 import Unit.Angle
 
-translated :: V2 Float -> M33 Float
+translated :: Num a => V2 a -> M33 a
 translated (V2 tx ty) = V3
   (V3 1 0 tx)
   (V3 0 1 ty)
   (V3 0 0 1)
-
-translated3 :: V3 Float -> M44 Float
-translated3 (V3 tx ty tz) = V4
-  (V4 1 0 0 tx)
-  (V4 0 1 0 ty)
-  (V4 0 0 1 tz)
-  (V4 0 0 0 1)
 
 
 orient :: (Epsilon a, RealFloat a) => Radians a -> Radians a -> Radians a -> Quaternion a
@@ -61,16 +53,19 @@ orient alpha beta gamma
 
 -- | Compute a rotation turning to face a desired angle with a given maximum angular thrust.
 face
-  :: Radians Float    -- ^ Angular thrust. (Speed of rotation.)
-  -> Radians Float    -- ^ Desired angle.
-  -> Quaternion Float -- ^ Current rotation.
-  -> Quaternion Float -- ^ Resulting rotation.
-face angular angle rotation = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
+  :: (Epsilon a, RealFloat a)
+  => Radians a    -- ^ Angular thrust. (Speed of rotation.)
+  -> Radians a    -- ^ Desired angle.
+  -> Quaternion a -- ^ Current rotation.
+  -> Quaternion a -- ^ Resulting rotation.
+face angular angle rotation
+  | nearZero delta = proposed
+  | otherwise      = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
   proposed = axisAngle (unit _z) (getRadians angle)
   delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
 
 
-easeInOutCubic :: Float -> Float
+easeInOutCubic :: Double -> Double
 easeInOutCubic t
   | t < 0.5   = 4 * t ** 3
   | otherwise = (t - 1) * (2 * t - 2) ** 2 + 1
@@ -113,7 +108,7 @@ cartesian2 :: Floating a => Radians a -> a -> V2 a
 cartesian2 (Radians phi) r = V2 (r * cos phi) (r * sin phi)
 
 polar2 :: RealFloat a => V2 a -> (Radians a, a)
-polar2 v = (angleOf v, norm v) where
+polar2 v = (angleOf v, norm v)
 
 
 -- | Extensions of a vector with an extra dimension.

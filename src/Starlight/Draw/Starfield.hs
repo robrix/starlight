@@ -21,6 +21,7 @@ import           Control.Effect.Lift
 import           Control.Effect.Trace
 import           Control.Lens (Lens')
 import           Data.Coerce (coerce)
+import qualified Data.Fixed as Fixed
 import           Data.Functor.Identity
 import           Data.Functor.Interval hiding (max')
 import           Data.Generics.Product.Fields
@@ -32,9 +33,9 @@ import           GL.Object
 import           GL.Shader.DSL hiding (coerce, (!*!), (^*))
 import qualified GL.Shader.DSL as D
 import           Linear.V2 hiding (R1(..), R2(..))
-import           Linear.Vector hiding (lerp)
 import           Starlight.View
 import qualified UI.Drawable as UI
+import qualified UI.Window as Window
 import           Unit.Length
 
 drawStarfield
@@ -45,11 +46,13 @@ drawStarfield
      )
   => m ()
 drawStarfield = UI.using getDrawable $ do
-  View{ scale, size, zoom, focus } <- ask
+  View{ size, zoom, focus } <- ask
 
-  resolution_ ?= (fromIntegral <$> size ^* scale)
-  origin_     ?= (prj <$> (focus / (fromIntegral <$> size)))
-  zoom_       ?= zoom
+  resolution_ ?= (fromIntegral <$> size)
+  let V2 (q1, r1) (q2, r2) = (`Fixed.divMod'` 1) . convert <$> focus
+  focusR_     ?= (fmap realToFrac <$> V2 r1 r2)
+  focusQ_     ?= (realToFrac <$> V2 q1 (q2 :: Integer))
+  zoom_       ?= realToFrac zoom
 
   drawArrays TriangleStrip range
 
@@ -84,29 +87,37 @@ range = Interval 0 (Identity (length vertices))
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
 
 shader :: Shader U V O
-shader = program $ \ U{ resolution, origin, zoom }
+shader = program $ \ U{ resolution, focusQ, focusR, zoom }
   ->  vertex (\ V{ pos } None -> main $
     gl_Position .= ext4 (ext3 pos 0) 1)
 
   >>> fragment (\ None O{ fragColour } -> main $ do
-    uv <- let' "uv" $ (gl_FragCoord ^. _xy / resolution ^. _xy - 0.5) * vec2 1 (resolution ^. _y / resolution ^. _x)
+    resolution <- let' @(V2 Float) "resolution" (D.coerce resolution)
+    uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
-    origin <- var "origin" $ ext3 (D.coerce origin / (resolution D.^* 0.1)) 1
-    a1 <- let' "a1" $ 0.2 + norm (get origin) / resolution ^. _x * 2
-    a2 <- let' "a2" $ 0.2 + norm (get origin) / resolution ^. _y * 2
-    rot1 <- let' "rot1" $ mat2 (vec2 (cos a1) (sin a1)) (vec2 (-(sin a1)) (cos a1))
-    rot2 <- let' "rot2" $ mat2 (vec2 (cos a2) (sin a2)) (vec2 (-(sin a2)) (cos a2))
-    dir ^^. _xz *!= rot1
-    dir ^^. _xy *!= rot2
-    origin ^^. _xz *!= rot1
-    origin ^^. _xy *!= rot2
+    focusR <- var @(V3 Float) "focusR" $ ext3 focusR 1
+    focusQ <- var @(V3 Float) "focusQ" $ ext3 focusQ 1
+    let wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
+    nf <- let' "nf" (norm (get focusQ + get focusR))
+    a1 <- let' "a1" $ wrap (-pi) pi (0.3 + 0.1/nf)
+    a2 <- let' "a2" $ wrap (-pi) pi (0.2 + 0.1/nf)
+    rot1 <- let' "rot1" $ mat2 (vec2 [cos a1, sin a1]) (vec2 [-sin a1, cos a1])
+    rot2 <- let' "rot2" $ mat2 (vec2 [cos a2, sin a2]) (vec2 [-sin a2, cos a2])
+    dir^^._xz *!= rot1
+    dir^^._xy *!= rot2
+    focusR^^._xz *!= rot1
+    focusR^^._xy *!= rot2
+    focusQ^^._xz *!= rot1
+    focusQ^^._xy *!= rot2
+    focusR *= vec3 [10]
+    focusQ *= vec3 [10]
     s <- var "s" 0.1
     fade <- var "fade" 0.5
-    v <- var "v" $ vec3 0 0 0
+    v <- var "v" $ vec3 [0]
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
-      p <- var "p" $ get origin + get dir D.^* get s
-      p .= abs (tile - mod' (get p) (tile D.^* 2))
+      p <- var "p" $ get focusR + get focusQ + get dir D.^* get s
+      p .= abs (vec3 [tile] - mod' (get p) (vec3 [tile * 2]))
       pa <- var "pa" 0
       a <- var "a" 0
       i <- var @Int "i" 0
@@ -120,20 +131,20 @@ shader = program $ \ U{ resolution, origin, zoom }
       iff (get r `gt` 6)
         (fade *= 1.0 - dm)
         (pure ())
-      v += vec3 (get fade) (get fade) (get fade)
-      v += vec3 (get s) (get s ** 2) (get s ** 3) D.^* get a D.^* brightness D.^* get fade
+      v += vec3 [get fade]
+      v += vec3 [get s, get s ** 2, get s ** 3] D.^* get a D.^* brightness D.^* get fade
       fade *= distfading
       s += stepsize
       r += 1
     mag <- let' "mag" (norm (get v))
-    v .= lerp saturation (vec3 mag mag mag) (get v)
+    v .= lerp saturation (vec3 [mag]) (get v)
     fragColour .= ext4 (get v D.^* 0.01) 1)
   where
   iterations = 17
   formuparam = 0.53
   volsteps = 8
   stepsize = 0.1
-  tile = 0.85
+  tile = 1/1.61803398875
   brightness = 0.0015
   darkmatter = 0.3
   distfading = 0.73
@@ -141,19 +152,23 @@ shader = program $ \ U{ resolution, origin, zoom }
 
 
 data U v = U
-  { resolution :: v (V2 Float) -- FIXME: express in pixel units
-  , origin     :: v (V2 Float) -- FIXME: express in Kilo Metres
+  { resolution :: v (V2 (Window.Pixels Float))
+  , focusQ     :: v (V2 (Giga Metres Float))
+  , focusR     :: v (V2 (Giga Metres Float))
   , zoom       :: v Float
   }
   deriving (Generic)
 
 instance Vars U
 
-resolution_ :: Lens' (U v) (v (V2 Float))
+resolution_ :: Lens' (U v) (v (V2 (Window.Pixels Float)))
 resolution_ = field @"resolution"
 
-origin_ :: Lens' (U v) (v (V2 Float))
-origin_ = field @"origin"
+focusQ_ :: Lens' (U v) (v (V2 (Giga Metres Float)))
+focusQ_ = field @"focusQ"
+
+focusR_ :: Lens' (U v) (v (V2 (Giga Metres Float)))
+focusR_ = field @"focusR"
 
 zoom_ :: Lens' (U v) (v Float)
 zoom_ = field @"zoom"

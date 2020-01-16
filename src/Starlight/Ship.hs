@@ -18,7 +18,7 @@ import UI.Colour
 
 data Ship = Ship
   { colour :: Colour Float
-  , armour :: Interval Identity Float
+  , armour :: Interval Identity Double
   , radar  :: Radar
   }
   deriving (Generic, Show)
@@ -26,7 +26,7 @@ data Ship = Ship
 colour_ :: Lens' Ship (Colour Float)
 colour_ = field @"colour"
 
-armour_ :: Lens' Ship (Interval Identity Float)
+armour_ :: Lens' Ship (Interval Identity Double)
 armour_ = field @"armour"
 
 radar_ :: Lens' Ship Radar

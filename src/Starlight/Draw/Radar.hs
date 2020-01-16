@@ -33,9 +33,9 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Buffer as B
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy)
+import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
-import           Linear.Exts as Linear hiding (angle, (!*))
+import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
@@ -43,6 +43,8 @@ import qualified Starlight.Ship as S
 import           Starlight.System
 import           Starlight.View
 import qualified UI.Drawable as UI
+import qualified UI.Window as Window
+import           Unit.Angle
 import           Unit.Length
 
 drawRadar
@@ -55,7 +57,8 @@ drawRadar
      )
   => m ()
 drawRadar = UI.using getDrawable $ do
-  system@System{ scale, bodies } <- ask @(System B.StateVectors)
+  view@View{ scale } <- ask
+  system@System{ bodies } <- ask @(System B.StateVectors)
   let target   = system^.player_.target_
       here     = system^.player_.actor_.position_._xy
       npcs     = system^.npcs_
@@ -65,9 +68,8 @@ drawRadar = UI.using getDrawable $ do
     B.realloc (length vertices) B.Static B.Draw
     B.copy 0 vertices
 
-  matrix <- asks scaleToView
-  matrix_ ?= matrix
-  here_   ?= (prj <$> here)
+  matrix_ ?= tmap realToFrac (transformToWindow view)
+  here_   ?= (fmap realToFrac <$> here)
 
   -- FIXME: skip blips for extremely distant objects
   -- FIXME: blips should shadow more distant blips
@@ -89,14 +91,14 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
 verticesForBodies vs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (b^.actor_.magnitude_)), colour = Identity colour }
+  [ V{ there = Identity (realToFrac <$> (there^._xy)), r = Identity (realToFrac <$> (b^.actor_.magnitude_)), colour = Identity colour }
   | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
-verticesForShips :: Foldable t => Float -> t Character -> [V Identity]
+verticesForShips :: Foldable t => Double -> t Character -> [V Identity]
 verticesForShips scale cs =
-  [ V{ there = Identity (prj <$> there^._xy), r = Identity (prj (c^.actor_.magnitude_) / scale), colour = Identity colour }
+  [ V{ there = Identity (realToFrac <$> (there^._xy)), r = Identity (realToFrac <$> (c^.actor_.magnitude_ ^/ scale)), colour = Identity colour }
   | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 
@@ -107,22 +109,22 @@ targetBlipCount = 10
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
-    there <- let' "there" (there - here u)
+    there <- let' "there" (D.coerce there - D.coerce (here u))
     d     <- let' "d"     (D.norm there)
-    dir   <- let' "dir"   (there D.^* (1/D.norm there))
-    let perp v = vec2 (negate (v D.^.D._y)) (v D.^.D._x)
+    dir   <- let' "dir"   (there D.^* (1/d))
+    let perp v = vec2 [negate (v D.^.D._y), v D.^.D._x]
         angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
         wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-    edge  <- let' "edge"  (perp dir D.^* r D.^* 0.5 + dir D.^* d)
-    angle <- let' "angle" (angleOf there)
+    edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
+    angle <- let' "angle" (D.coerce (angleOf there))
     radius <- var "radius" radius
-    let step = D.max' 1 (D.min' (get radius/float (fromIntegral targetBlipCount)) (d / 50))
+    let step = D.max' 1 (D.min' maxStep (D.coerce d / (50 / 1000))) -- FIXME: account for unit size without hard-coding conversion factor
     iff (gl_InstanceID `gt` 0)
       (radius .= step * float gl_InstanceID)
       (pure ())
-    minSweep <- let' "minSweep" (minBlipSize / (2 * pi * get radius))
-    sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf edge - angle)))
-    pos   <- let' "pos"   (vec2 (cos angle) (sin angle) D.^* get radius)
+    minSweep <- let' "minSweep" (D.coerce (minBlipSize / (2 * pi * get radius)))
+    sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (D.coerce (angleOf edge) - angle)))
+    pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce (get radius))
     gl_PointSize .= 3
     colour2 .= colour
     gl_Position .= ext4 (ext3 pos 0) 1)
@@ -131,16 +133,17 @@ shader = program $ \ u
     primitiveIn Points
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
-      let rot theta = mat3
-            (vec3 (cos theta) (-(sin theta)) 0)
-            (vec3 (sin theta) (cos   theta)  0)
-            (vec3 0           0              1)
+      let rot theta = mat4
+            (vec4 [cos theta, -(sin theta), 0, 0])
+            (vec4 [sin theta,  cos  theta , 0, 0])
+            (vec4 [0,          0,           1, 0])
+            (vec4 [0,          0,           0, 1])
       emitPrimitive $ do
         i <- var @Int "i" (-(fromIntegral count))
         while (get i `lt` (fromIntegral count + 1)) $
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
-            gl_Position .= ext4 (matrix u D.!*! rot theta !* Var "gl_in[0].gl_Position.xyz") 1
+            gl_Position .= D.coerce (matrix u) D.!*! rot theta !* Var "gl_in[0].gl_Position"
             colour3 .= Var "colour2[0]"
             i += 1)
 
@@ -148,26 +151,27 @@ shader = program $ \ u
   minBlipSize = 16
   count = 16
   radius = 300
+  maxStep = radius / fromIntegral targetBlipCount
 
 
 data U v = U
-  { matrix :: v (M33 Float)
-  , here   :: v (V2 Float)
+  { matrix :: v (Transform Float ClipUnits Window.Pixels)
+  , here   :: v (V2 (Mega Metres Float))
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (M33 Float))
+matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Window.Pixels))
 matrix_ = field @"matrix"
 
-here_ :: Lens' (U v) (v (V2 Float))
+here_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
 here_ = field @"here"
 
 
 data IG v = IG
   { colour2 :: v (Colour Float)
-  , sweep   :: v Float
+  , sweep   :: v (Radians Float)
   }
   deriving (Generic)
 
@@ -180,8 +184,8 @@ instance Vars IF
 
 
 data V v = V
-  { there  :: v (V2 Float) -- location of object
-  , r      :: v Float      -- radius of object
+  { there  :: v (V2 (Mega Metres Float)) -- location of object
+  , r      :: v (Mega Metres Float)      -- radius of object
   , colour :: v (Colour Float)
   }
   deriving (Generic)

@@ -48,14 +48,14 @@ data Label = Label
   { text    :: !(Drawable Text.U  Text.V  Text.O)
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
-  , scale   :: !Int
+  , ratio   :: !(Window.Pixels Int)
   , ref     :: !(IORef (Maybe LabelState))
   }
 
 data LabelState = LabelState
-  { size     :: !(V2 Int)
+  { size     :: !(V2 (Window.Pixels Int))
   , string   :: !String
-  , baseline :: !Int
+  , baseline :: !(Window.Pixels Int)
   }
 
 
@@ -82,18 +82,18 @@ label = do
     , V2   1    1
     ]
 
-  scale <- Window.scale
+  ratio <- Window.ratio
 
   ref <- sendIO (newIORef Nothing)
-  pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, scale }
+  pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, ratio }
 
-labelSize :: Has (Lift IO) sig m => Label -> m (V2 Int)
+labelSize :: Has (Lift IO) sig m => Label -> m (V2 (Window.Pixels Int))
 labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
 
 
 -- | Set the label’s text.
 setLabel :: (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
-setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
+setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
   | null string = sendM (writeIORef ref Nothing)
   | otherwise   = runLiftIO $ do
     state <- sendIO (readIORef ref)
@@ -113,20 +113,20 @@ setLabel Label{ texture, fbuffer, scale, ref } font@(Font face _) string
         setParameter Texture2D MinFilter Nearest
         setParameter Texture2D WrapS ClampToEdge
         setParameter Texture2D WrapT ClampToEdge
-        setImageFormat Texture2D RGBA8 (scale *^ size) RGBA (Packed8888 True)
+        setImageFormat Texture2D RGBA8 (ratio *^ size) RGBA (Packed8888 True)
 
         bind (Just fbuffer)
         attachTexture (GL.Colour 0) texture
 
-        viewport $ scale *^ Interval 0 size
-        scissor  $ scale *^ Interval 0 size
+        viewport $ ratio *^ Interval 0 size
+        scissor  $ ratio *^ Interval 0 size
 
-        setClearColour transparent
+        setClearColour (transparent :: Colour Double)
         glClear GL_COLOR_BUFFER_BIT
 
-        let V2 sx sy = fromIntegral scale / fmap fromIntegral size
+        let V2 sx sy = fromIntegral ratio / fmap fromIntegral size
         runReader face . using glyphs $ do
-          Glyph.scale_     ?= 1 / fromIntegral scale
+          Glyph.scale_     ?= 1 / fromIntegral ratio
           Glyph.fontScale_ ?= fontScale font
           Glyph.matrix_    ?=
                 translated (-1)
@@ -145,11 +145,11 @@ drawLabel
      , Has (Lift IO) sig m
      )
   => Label
-  -> V2 Int
+  -> V2 (Window.Pixels Int)
   -> Colour Float
   -> Maybe (Colour Float)
   -> m ()
-drawLabel label@Label{ texture, scale, ref } offset colour bcolour = runReader label . runLiftIO $ do
+drawLabel label@Label{ texture, ratio, ref } offset colour bcolour = runReader label . runLiftIO $ do
   state <- sendIO (readIORef ref)
   case state of
     Just LabelState{ size, baseline } -> do
@@ -159,8 +159,8 @@ drawLabel label@Label{ texture, scale, ref } offset colour bcolour = runReader l
 
       let offset' = offset + V2 0 baseline
           bounds = Interval offset' (offset' + size)
-      viewport $ scale *^ bounds
-      scissor  $ scale *^ bounds
+      viewport $ ratio *^ bounds
+      scissor  $ ratio *^ bounds
 
       case bcolour of
         Just colour -> do

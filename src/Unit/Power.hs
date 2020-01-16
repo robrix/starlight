@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Unit.Power
-( Watts(..)
+( Power
+, Watts(..)
 , module Unit
 , module Unit.Multiple
 ) where
@@ -19,8 +21,10 @@ import Linear.Vector
 import Unit
 import Unit.Multiple
 
+data Power a
+
 newtype Watts a = Watts { getWatts :: a }
-  deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
-instance Unit Watts where suffix = Const ('W':)
+instance Unit Power Watts where suffix = Const ('W':)

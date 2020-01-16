@@ -57,6 +57,7 @@ library
     Foreign.Marshal.Array.Lift
     Foreign.Marshal.Utils.Lift
     Geometry.Circle
+    Geometry.Transform
     Geometry.Triangle
     GL
     GL.Array

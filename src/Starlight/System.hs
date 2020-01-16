@@ -5,13 +5,11 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.System
 ( System(..)
-, scale_
 , bodies_
 , player_
 , npcs_
 , characters_
 , beams_
-, systemTrans
 , identifiers
 , (!?)
 , neighbourhoodOf
@@ -35,15 +33,11 @@ import           Starlight.Weapon.Laser
 import           Unit.Power
 
 data System a = System
-  { scale      :: !Float
-  , bodies     :: !(Map.Map BodyIdentifier a)
+  { bodies     :: !(Map.Map BodyIdentifier a)
   , characters :: !(Map.Map CharacterIdentifier Character)
   , beams      :: ![Beam]
   }
   deriving (Generic, Show)
-
-scale_ :: Lens' (System a) Float
-scale_ = field @"scale"
 
 bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyIdentifier b)
 bodies_ = field @"bodies"
@@ -60,9 +54,6 @@ characters_ = field @"characters".asserting (Map.member Player)
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
 
-
-systemTrans :: System a -> M44 Float
-systemTrans System{ scale } = scaled (V4 scale scale scale 1)
 
 identifiers :: System a -> [Identifier]
 identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B (Map.keys bodies)
@@ -86,6 +77,7 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
   -- FIXME: laser power, not radar power, determines laser range
   -- FIXME: radar reflections
   -- FIXME: sharing radar with allies
+  -- FIXME: dimensional analysis
   visible i a = case i of
     B (Star _) -> True
     _          -> received > threshold
@@ -93,9 +85,10 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     r = qd (a^.actor_.position_) (c^.actor_.position_)
     received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * prj (a^.actor_.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 2)))
   patternPropagationFactor = 1
-  gain = 1000000
-  aperture = 1000000
-  threshold = Watts 1.0e-12 -- 1 picowatt
+  gain = 1
+  aperture = 1000
+  threshold :: Watts Double
+  threshold = 1.0e-12
 
 neighbourhoodOfPlayer :: HasActor a => System a -> System a
 neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys

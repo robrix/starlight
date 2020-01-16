@@ -1,11 +1,8 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
-{-# LANGUAGE TypeApplications #-}
 -- | A familiar star system.
 module Starlight.Sol
 ( system
@@ -23,13 +20,12 @@ import           Starlight.Identifier as Identifier
 import           Starlight.System
 import           UI.Colour
 import           Unit.Angle
-import           Unit.Length
 import           Unit.Time
 
 bodies :: Map.Map BodyIdentifier Orbit -> Map.Map BodyIdentifier Body
 bodies orbits = bodies where
   solI = Star (10, "Sol")
-  bodies = Map.fromList $
+  bodies = Map.fromList
     [ let identifier = solI in (identifier,) Body
       { radius      = 695_500.0
       , mass        = 1.988_5e30
@@ -214,16 +210,12 @@ system = do
         , colour      = white
         , orbit
         }
-      scale = un @(Kilo Metres) (100 / radius (bodies Map.! solI))
 
   pure System
-    { scale
-    , bodies     = Map.fromList
+    { bodies     = Map.fromList
       [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
       | (identifier, orbit) <- Map.toList orbits
       ]
     , characters = mempty
     , beams      = mempty
     }
-  where
-  solI = Star (10, "Sol")

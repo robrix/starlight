@@ -1,7 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
 module Unit.Force
-( Newtons
+( Force
+, Newtons
 , module Unit
 , module Unit.Multiple
 ) where
@@ -12,5 +13,7 @@ import Unit.Time
 import Unit
 import Unit.Algebra
 import Unit.Multiple
+
+data Force a
 
 type Newtons = Kilo Grams :*: Metres :/: Seconds :/: Seconds

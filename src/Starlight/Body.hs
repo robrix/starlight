@@ -12,7 +12,9 @@
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( StateVectors(..)
+, toBodySpace
 , Body(..)
+, BodyUnits(..)
 , Orbit(..)
 , rotationTimeScale
 , actorAt
@@ -31,6 +33,7 @@ import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
 import           Data.Time.Format.ISO8601
+import           Geometry.Transform
 import           GHC.Generics
 import           Linear.Exts
 import           Starlight.Actor
@@ -46,7 +49,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(M44 Float)
+  , transform :: !(Transform Double (Mega Metres) (Mega Metres))
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -54,22 +57,28 @@ data StateVectors = StateVectors
 instance HasActor StateVectors where
   actor_ = field @"actor"
 
+toBodySpace :: StateVectors -> Transform Double (Mega Metres) BodyUnits
+toBodySpace v = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) (radius (body v))))) >>> mkRotation (rotation (actor v))
+
 data Body = Body
-  { radius      :: !(Kilo Metres Float)
-  , mass        :: !(Kilo Grams Float)
-  , orientation :: !(Quaternion Float) -- relative to orbit
-  , period      :: !(Seconds Float)    -- sidereal rotation period
+  { radius      :: !(Kilo Metres Double)
+  , mass        :: !(Kilo Grams Double)
+  , orientation :: !(Quaternion Double) -- relative to orbit
+  , period      :: !(Seconds Double)    -- sidereal rotation period
   , colour      :: !(Colour Float)
   , orbit       :: !Orbit
   }
   deriving (Generic, Show)
 
+newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
+  deriving (Eq, Fractional, Num, Ord)
+
 data Orbit = Orbit
-  { eccentricity    :: !Float
-  , semimajor       :: !(Kilo Metres Float)
-  , orientation     :: !(Quaternion Float) -- relative to ecliptic
-  , period          :: !(Seconds Float)
-  , timeOfPeriapsis :: !(Seconds Float)    -- relative to epoch
+  { eccentricity    :: !Double
+  , semimajor       :: !(Kilo Metres Double)
+  , orientation     :: !(Quaternion Double) -- relative to ecliptic
+  , period          :: !(Seconds Double)
+  , timeOfPeriapsis :: !(Seconds Double)    -- relative to epoch
   }
   deriving (Show)
 
@@ -81,18 +90,18 @@ orbitTimeScale :: Num a => Seconds a
 orbitTimeScale = 1
 
 
-actorAt :: Body -> Seconds Float -> Actor
+actorAt :: Body -> Seconds Double -> Actor
 actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
-  { position = pure <$> position
-  , velocity = if r == 0 || p == 0 then 0 else pure <$> (position ^* h ^* eccentricity ^/ (r * p) ^* sin trueAnomaly)
+  { position
+  , velocity = if r == 0 || p == 0 then 0 else (./. Seconds 1) <$> position ^* h ^* pure eccentricity ^/ (r * p) ^* pure (prj (sin trueAnomaly))
   , rotation
     = orientation
     * axis
     * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
   , mass
-  , magnitude = radius * 2
+  , magnitude = convert radius * 2
   } where
-  position = ext (cartesian2 (Radians trueAnomaly) r) 0
+  position = ext (cartesian2 (pure <$> trueAnomaly) r) 0
   t' = timeOfPeriapsis + t * orbitTimeScale
   meanAnomaly = getSeconds (meanMotion * t')
   meanMotion = (2 * pi) / period
@@ -101,28 +110,30 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
       go n a
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
-  trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
-  r = prj semimajor * (1 - eccentricity * cos eccentricAnomaly)
+  trueAnomaly :: Radians Double
+  trueAnomaly = Radians (atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity))
+  r :: Mega Metres Double
+  r = convert semimajor ^* (1 - eccentricity * cos eccentricAnomaly)
   -- extremely dubious
   mu = 398600.5
-  p = prj semimajor * (1 - eccentricity ** 2)
-  h = sqrt ((1 - (eccentricity ** 2)) * prj semimajor * mu)
+  p = convert semimajor ^* (1 - eccentricity ** 2)
+  h = sqrt ((1 - (eccentricity ** 2)) *^ convert semimajor * mu)
   -- hr = h/r
 
 
-systemAt :: System Body -> Seconds Float -> System StateVectors
+systemAt :: System Body -> Seconds Double -> System StateVectors
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
   go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
     { body
-    , transform = rel !*! translated3 (prj <$> position actor)
+    , transform = rel >>> mkTranslation (prj <$> position actor)
     , actor = actor
-      & position_.coerced.extended 1 %~ (rel !*)
-      & velocity_.coerced.extended 0 %~ (rel !*)
+      & position_.coerced.extended 1 %~ apply rel
+      & velocity_.coerced.extended 0 %~ apply rel
     } where
     actor = actorAt body t
-    rel = maybe identity transform (parent identifier >>= (bodies' Map.!?))
-      !*! mkTransformation orientation 0
+    rel = maybe rot ((>>> rot) . transform) (parent identifier >>= (bodies' Map.!?))
+    rot = mkRotation orientation
 
 -- | Subject to the invariant that w=1.
 extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)

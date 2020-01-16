@@ -48,14 +48,14 @@ data Ephemeris = Ephemeris
 fromEphemeris :: Ephemeris -> Orbit
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
   = Orbit
-    { eccentricity    = realToFrac eccentricity
-    , semimajor       = realToFrac <$> semimajor
+    { eccentricity
+    , semimajor
     , orientation     = orient
-      (realToFrac <$> fromDegrees longitudeOfAscendingNode)
-      (realToFrac <$> fromDegrees inclination)
-      (realToFrac <$> fromDegrees argumentOfPerifocus)
-    , period          = realToFrac <$> siderealOrbitPeriod
-    , timeOfPeriapsis = realToFrac <$> timeOfPeriapsisRelativeToEpoch
+      (fromDegrees longitudeOfAscendingNode)
+      (fromDegrees inclination)
+      (fromDegrees argumentOfPerifocus)
+    , period          = siderealOrbitPeriod
+    , timeOfPeriapsis = timeOfPeriapsisRelativeToEpoch
     }
 
 fromCSV :: String -> Either String Ephemeris
@@ -85,8 +85,8 @@ fromCSV = toBody . splitOnCommas where
 fromFile :: Has (Lift IO) sig m => FilePath -> m Orbit
 fromFile path = do
   lines <- lines <$> sendM (readFile path)
-  last <- maybe (pure (error ("no ephemerides found in file: " <> path))) (pure . pred) (elemIndex "$$EOE" lines)
-  either (pure . error) (pure . fromEphemeris) (fromCSV (lines !! last))
+  let last = maybe (error ("no ephemerides found in file: " <> path)) pred (elemIndex "$$EOE" lines)
+  pure $ either error fromEphemeris (fromCSV (lines !! last))
 
 fromDirectory :: Has (Lift IO) sig m => FilePath -> m [(BodyIdentifier, Orbit)]
 fromDirectory = go Nothing
@@ -94,7 +94,7 @@ fromDirectory = go Nothing
   go :: Has (Lift IO) sig m => Maybe BodyIdentifier -> FilePath -> m [(BodyIdentifier, Orbit)]
   go root dir
     =   sendM (listDirectory dir)
-    >>= traverse (\ path -> do
+    >>= fmap concat . traverse (\ path -> do
       isDir <- sendM (doesDirectoryExist (dir </> path))
       case parseIdentifier root path of
         [identifier] -> if isDir then
@@ -102,7 +102,6 @@ fromDirectory = go Nothing
         else
           pure . (,) identifier <$> fromFile (dir </> path)
         _ -> pure [])
-    >>= pure . concat
   parseIdentifier root path = do
     (code, rest) <- readDec path
     let name = pack (initCap (dropWhile isSpace (dropExtension rest)))

@@ -1,12 +1,18 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
 module GL.Uniform
 ( Uniform(..)
+, Scalar(..)
+, Col(..)
 ) where
 
 import           Control.Monad.IO.Class.Lift
+import           Data.Coerce
 import           Data.Int
 import qualified Foreign.Marshal.Utils.Lift as A
 import           Foreign.Ptr
@@ -14,11 +20,10 @@ import           GHC.Stack
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
-import           Linear.Affine as Linear
-import           Linear.Matrix as Linear
-import           Linear.V2 as Linear
-import           Linear.V3 as Linear
-import           Linear.V4 as Linear
+import           Linear.Affine
+import           Linear.V2
+import           Linear.V3
+import           Linear.V4
 
 class GL.Type t => Uniform t where
   glslType :: String
@@ -44,52 +49,114 @@ instance Uniform Double where
   glslType = "double"
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
-instance Uniform (Linear.V2 Float) where
-  glslType = "vec2"
-  uniform prog loc (Linear.V2 x y) = runLiftIO $ glProgramUniform2f prog loc x y
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
+  glslType = glslTypeFor @t C2x1
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t C2x1 prog loc 1 . castPtr)
 
-instance Uniform (Linear.V2 Double) where
-  glslType = "dvec2"
-  uniform prog loc (Linear.V2 x y) = runLiftIO $ glProgramUniform2d prog loc x y
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
+  glslType = glslTypeFor @t C3x1
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t C3x1 prog loc 1 . castPtr)
 
-instance Uniform (Linear.V3 Float) where
-  glslType = "vec3"
-  uniform prog loc (Linear.V3 x y z) = runLiftIO $ glProgramUniform3f prog loc x y z
+instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
+  glslType = glslTypeFor @t C4x1
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t C4x1 prog loc 1 . castPtr)
 
-instance Uniform (Linear.V3 Double) where
-  glslType = "dvec3"
-  uniform prog loc (Linear.V3 x y z) = runLiftIO $ glProgramUniform3d prog loc x y z
+deriving instance Uniform (f a) => Uniform (Point f a)
 
-instance Uniform (Linear.V4 Float) where
-  glslType = "vec4"
-  uniform prog loc (Linear.V4 x y z w) = runLiftIO $ glProgramUniform4f prog loc x y z w
 
-instance Uniform (Linear.V4 Double) where
-  glslType = "dvec4"
-  uniform prog loc (Linear.V4 x y z w) = runLiftIO $ glProgramUniform4d prog loc x y z w
+-- | Types which can appear in vectors.
+--
+-- NB: The name is a bit misleading because matrices are vectors containing other vectors.
+class GL.Type t => Scalar t where
+  glslTypeFor :: Col -> String
 
-instance Uniform (Linear.M22 Float) where
-  glslType = "mat2"
-  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix2fv prog loc 1 GL_FALSE . castPtr)
+  uniformFor :: Col -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
-instance Uniform (Linear.M22 Double) where
-  glslType = "dmat2"
-  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix2dv prog loc 1 GL_FALSE . castPtr)
+data Col
+  = C2x1
+  | C2x2
+  | C2x3
+  | C2x4
+  | C3x1
+  | C3x2
+  | C3x3
+  | C3x4
+  | C4x1
+  | C4x2
+  | C4x3
+  | C4x4
+  deriving (Enum, Eq, Ord, Show)
 
-instance Uniform (Linear.M33 Float) where
-  glslType = "mat3"
-  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix3fv prog loc 1 GL_FALSE . castPtr)
+glslTypeForCol :: Col -> String
+glslTypeForCol = \case
+  C2x1 -> "vec2"
+  C2x2 -> "mat2"
+  C2x3 -> "mat2x3"
+  C2x4 -> "mat2x4"
+  C3x1 -> "vec3"
+  C3x2 -> "mat3x2"
+  C3x3 -> "mat3"
+  C3x4 -> "mat3x4"
+  C4x1 -> "vec4"
+  C4x2 -> "mat4x2"
+  C4x3 -> "mat4x3"
+  C4x4 -> "mat4"
 
-instance Uniform (Linear.M33 Double) where
-  glslType = "dmat3"
-  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix3dv prog loc 1 GL_FALSE . castPtr)
+transposing :: (GLuint -> GLint -> GLsizei -> GLboolean -> Ptr t -> IO ()) -> (GLuint -> GLint -> GLsizei -> Ptr t -> IO ())
+transposing f prog loc n = f prog loc n GL_TRUE
+{-# INLINE transposing #-}
 
-instance Uniform (Linear.M44 Float) where
-  glslType = "mat4"
-  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix4fv prog loc 1 GL_FALSE . castPtr)
+instance Scalar Float where
+  glslTypeFor = glslTypeForCol
+  {-# INLINE glslTypeFor #-}
 
-instance Uniform (Linear.M44 Double) where
-  glslType = "dmat4"
-  uniform prog loc matrix = A.with (Linear.transpose matrix) (runLiftIO . glProgramUniformMatrix4dv prog loc 1 GL_FALSE . castPtr)
+  uniformFor = \case
+    C2x1 -> glProgramUniform2fv
+    C2x2 -> transposing glProgramUniformMatrix2fv
+    C2x3 -> transposing glProgramUniformMatrix2x3fv
+    C2x4 -> transposing glProgramUniformMatrix2x4fv
+    C3x1 -> glProgramUniform3fv
+    C3x2 -> transposing glProgramUniformMatrix3x2fv
+    C3x3 -> transposing glProgramUniformMatrix3fv
+    C3x4 -> transposing glProgramUniformMatrix3x4fv
+    C4x1 -> glProgramUniform4fv
+    C4x2 -> transposing glProgramUniformMatrix4x2fv
+    C4x3 -> transposing glProgramUniformMatrix4x3fv
+    C4x4 -> transposing glProgramUniformMatrix4fv
+  {-# INLINE uniformFor #-}
 
-deriving instance Uniform (f a) => Uniform (Linear.Point f a)
+instance Scalar Double where
+  glslTypeFor = ('d':) . glslTypeForCol
+  {-# INLINE glslTypeFor #-}
+
+  uniformFor = \case
+    C2x1 -> glProgramUniform2dv
+    C2x2 -> transposing glProgramUniformMatrix2dv
+    C2x3 -> transposing glProgramUniformMatrix2x3dv
+    C2x4 -> transposing glProgramUniformMatrix2x4dv
+    C3x1 -> glProgramUniform3dv
+    C3x2 -> transposing glProgramUniformMatrix3x2dv
+    C3x3 -> transposing glProgramUniformMatrix3dv
+    C3x4 -> transposing glProgramUniformMatrix3x4dv
+    C4x1 -> glProgramUniform4dv
+    C4x2 -> transposing glProgramUniformMatrix4x2dv
+    C4x3 -> transposing glProgramUniformMatrix4x3dv
+    C4x4 -> transposing glProgramUniformMatrix4dv
+  {-# INLINE uniformFor #-}
+
+instance Scalar t => Scalar (V2 t) where
+  glslTypeFor = glslTypeFor @t . replace1d succ
+  uniformFor = coerce . uniformFor @t . replace1d succ
+
+instance Scalar t => Scalar (V3 t) where
+  glslTypeFor = glslTypeFor @t . replace1d (succ . succ)
+  uniformFor = coerce . uniformFor @t . replace1d (succ . succ)
+
+instance Scalar t => Scalar (V4 t) where
+  glslTypeFor = glslTypeFor @t . replace1d (succ . succ . succ)
+  uniformFor = coerce . uniformFor @t . replace1d (succ . succ . succ)
+
+replace1d :: (Col -> Col) -> Col -> Col
+replace1d f c
+  | c `elem` [C2x1, C3x1, C4x1] = f c
+  | otherwise                   = c

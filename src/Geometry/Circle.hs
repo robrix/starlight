@@ -10,9 +10,10 @@ import Linear.Exts
 
 -- | Construct vertices for a circle.
 circle
-  :: Float      -- ^ The radius.
-  -> Int        -- ^ The number of vertices to produce.
-  -> [V2 Float] -- ^ The vertices for the circle.
+  :: Floating a
+  => a      -- ^ The radius.
+  -> Int    -- ^ The number of vertices to produce.
+  -> [V2 a] -- ^ The vertices for the circle.
 circle radius n =
   [ cartesian2 theta radius
   | i <- [0..pred n]
@@ -41,7 +42,7 @@ intersections
 intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
   o_c = o ^-^ c
   discriminant = b ** 2 - (quadrance o_c - r ** 2)
-  b = (l `dot` o_c)
+  b = l `dot` o_c
   root = sqrt discriminant
   (d1, d2) = (-b) ± root
   a ± b = (a + b, a - b)

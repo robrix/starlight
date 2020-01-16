@@ -24,12 +24,12 @@ import GL.Shader.DSL
 shader :: Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos} IF{ uv } -> main $ do
-    uv .= (pos * vec2 1 (-1)) * 0.5 + 0.5
-    gl_Position .= ext4 (ext3 (pos * vec2 1 (-1)) 0) 1)
+    uv .= (pos * vec2 [1, -1]) * 0.5 + 0.5
+    gl_Position .= ext4 (ext3 (pos * vec2 [1, -1]) 0) 1)
 
   >>> fragment (\ IF{ uv } O{ fragColour } -> main $ do
     -- Get samples for -2/3 and -1/3
-    valueL <- let' "valueL" $ texture (sampler u) (vec2 (uv ^. _x + dFdx (uv ^. _x)) (uv ^. _y)) ^. _yz * 255
+    valueL <- let' "valueL" $ texture (sampler u) (vec2 [uv^._x + dFdx (uv^._x), uv^._y])^._yz * 255
     lowerL <- let' "lowerL" $ mod' valueL 16
     upperL <- let' "upperL" $ (valueL - lowerL) / 16
     alphaL <- let' "alphaL" $ min' (abs (upperL - lowerL)) 2
@@ -42,10 +42,11 @@ shader = program $ \ u
 
     -- Average the energy over the pixels on either side
     rgba <- let' "rgba" $ vec4
-      ((alphaR ^. _x + alphaR ^. _y + alphaR ^. _z) / 6)
-      ((alphaL ^. _y + alphaR ^. _x + alphaR ^. _y) / 6)
-      ((alphaL ^. _x + alphaL ^. _y + alphaR ^. _x) / 6)
-      0
+      [ (alphaR ^. _x + alphaR ^. _y + alphaR ^. _z) / 6
+      , (alphaL ^. _y + alphaR ^. _x + alphaR ^. _y) / 6
+      , (alphaL ^. _x + alphaL ^. _y + alphaR ^. _x) / 6
+      , 0
+      ]
 
     iff (colour u ^. _x `eq` 0)
       (fragColour .= 1 - rgba)

@@ -1,9 +1,7 @@
 {-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
@@ -28,7 +26,7 @@ import Numeric
 
 -- * Units
 
-class Applicative u => Unit u where
+class Applicative u => Unit (dim :: * -> *) u | u -> dim where
   prj :: u a -> a
   default prj :: Coercible (u a) a => u a -> a
   prj = coerce
@@ -38,26 +36,26 @@ class Applicative u => Unit u where
 
   suffix :: Const ShowS (u a)
 
-unitary :: forall u a b . (Unit u, Fractional a, Fractional b) => Iso (u a) (u b) a b
-unitary = iso ((* getConst (factor @u)) . prj) (pure . (/ getConst (factor @u)))
+unitary :: forall u a b dim . (Unit dim u, Fractional a, Fractional b) => Iso (u a) (u b) a b
+unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_ @u)))
 
-un :: (Unit u, Fractional a) => u a -> a
+un :: forall u a dim . (Unit dim u, Fractional a) => u a -> a
 un = (^.unitary)
 
-nu :: (Unit u, Fractional a) => a -> u a
+nu :: forall u a dim . (Unit dim u, Fractional a) => a -> u a
 nu = (^.from unitary)
 
 
 -- ** Formatting
 
-formatWith :: Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
+formatWith :: Unit dim u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
 formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const ('x':))) "")
 
-format :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+format :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat
 
-formatDec :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatDec :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatDec = formatWith showFFloat
 
-formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExp :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat

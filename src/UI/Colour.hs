@@ -58,5 +58,6 @@ opaque :: Num a => Colour a -> Colour a
 opaque = set _a 1
 
 
-setClearColour :: Has (Lift IO) sig m => Colour Float -> m ()
-setClearColour (V4 r g b a) = runLiftIO $ glClearColor r g b a
+setClearColour :: (Real a, Has (Lift IO) sig m) => Colour a -> m ()
+setClearColour v = runLiftIO $ glClearColor r g b a where
+  V4 r g b a = realToFrac <$> v

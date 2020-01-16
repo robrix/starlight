@@ -25,10 +25,10 @@ ai c@Character{ actor = Actor{ position = here, rotation }, target } = do
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
     -- FIXME: factor in the target’s velocity & distance
     -- FIXME: allow other behaviours relating to targets, e.g. following
-    Just (Left StateVectors{ actor = Actor{ position = there } }) -> Set.fromList $ concat
-      [ [ Face Target ]
-      , [ Thrust | isFacing (pi/4) rotation (angleTo' there) ]
-      ]
+    Just (Left StateVectors{ actor = Actor{ position = there } }) -> Set.fromList
+      ( Face Target
+      : [ Thrust | isFacing (pi/4) rotation (angleTo' there) ]
+      )
     Just (Right Character{ actor = Actor{ position = there } }) -> Set.fromList $ concat
       [ [ Face Target ]
       , [ Thrust    | isFacing (pi/4)   rotation (angleTo' there) ]

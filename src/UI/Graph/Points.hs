@@ -25,7 +25,7 @@ shader = program $ \ u
     gl_PointSize .= pointSize u)
 
   >>> fragment (\ None O{ fragColour } -> main $ do
-    p <- let' "p" (gl_PointCoord - vec2 0.5 0.5)
+    p <- let' "p" (gl_PointCoord - vec2 [0.5])
     iff (norm p `gt` 1)
       discard
       (do

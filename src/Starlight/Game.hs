@@ -38,7 +38,7 @@ import           Starlight.Body
 import           Starlight.Character
 import           Starlight.Controls
 import           Starlight.Draw
-import           Starlight.Draw.Body as Body
+import qualified Starlight.Draw.Body as Body
 import           Starlight.Draw.Radar as Radar
 import           Starlight.Draw.Ship as Ship
 import           Starlight.Draw.Starfield as Starfield
@@ -59,7 +59,7 @@ import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
-import           Unit.Time
+import           Unit.Length
 
 runGame
   :: ( Has (Lift IO) sig m
@@ -79,8 +79,8 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position  = V3 2_500_000 0 0
-            , velocity  = V3 0 150 0
+            { position  = V3 2_500 0 0
+            , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
@@ -91,8 +91,8 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500_000 0 0
-            , velocity  = V3 0 150 0
+            { position  = V3 2_500 0 0
+            , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 60
@@ -103,8 +103,8 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500_000 0 0
-            , velocity  = V3 0 150 0
+            { position  = V3 2_500 0 0
+            , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
@@ -115,8 +115,8 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500_000 0 0
-            , velocity  = V3 0 150 0
+            { position  = V3 2_500 0 0
+            , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
@@ -141,7 +141,7 @@ runFrame
      )
   => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
   -> m ()
-runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . runRadar . runLaser . runBody
+runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . runRadar . runLaser . Body.runBody
 
 game
   :: ( Effect sig
@@ -218,7 +218,7 @@ frame = runSystem . timed $ do
 -- | Compute the zoom factor for the given velocity.
 --
 -- Higher values correlate to more of the scene being visible.
-zoomForSpeed :: V2 Int -> Float -> Float
+zoomForSpeed :: V2 (Window.Pixels Int) -> Double -> Double
 zoomForSpeed size x = go where
   Identity go
     | Identity x < min' speed = min' zoom
@@ -236,11 +236,14 @@ withView
   => ReaderC View m a
   -> m a
 withView m = do
-  scale <- Window.scale
+  ratio <- Window.ratio
   size  <- Window.size
 
+  bodies   <- view (bodies_ @StateVectors)
   velocity <- view (player_ @StateVectors .actor_.velocity_)
   focus    <- view (player_ @StateVectors .actor_.position_._xy)
 
   let zoom = zoomForSpeed size (prj (norm velocity))
-  runReader View{ scale, size, zoom, focus } m
+      solI = Star (10, "Sol")
+      scale = un @(Kilo Metres) (100_000 / radius (body (bodies Map.! solI))) -- FIXME: account for unit size without hard-coding conversion factor
+  runReader View{ ratio, size, zoom, scale, focus } m

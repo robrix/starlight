@@ -4,9 +4,8 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -35,48 +34,48 @@ import Unit
 
 -- * Algebra
 
-class (Unit u, Unit v) => Mul u v where
+class (Unit dimu u, Unit dimv v) => Mul dimu u dimv v | u -> dimu, v -> dimv where
   type Res u v :: * -> *
   (.*.) :: Fractional a => u a -> v a -> Res u v a
 
 infixl 7 .*.
 
-(./.) :: forall u v a . (Mul u (Inv v), Unit v, Fractional a) => u a -> v a -> Res u (Inv v) a
+(./.) :: forall dimu u dimv v a . (Mul dimu u dimv (Inv v), Unit dimv v, Fractional a) => u a -> v a -> Res u (Inv v) a
 u ./. v = u .*. Inv @v (1/prj v)
 
 infixl 7 ./.
 
-instance (MulBy step u v, Step u v ~ step, Unit u, Unit v) => Mul u v where
+instance (MulBy step dimu u dimv v, Step u v ~ step, Unit dimu u, Unit dimv v) => Mul dimu u dimv v where
   type Res u v = ResBy (Step u v) u v
   (.*.) = mulBy @step
 
 
-class (Unit u, Unit v) => MulBy (step :: Act) u v where
+class (Unit dimu u, Unit dimv v) => MulBy (step :: Act) dimu u dimv v where
   type ResBy step u v :: * -> *
   mulBy :: Fractional a => u a -> v a -> ResBy step u v a
 
 -- | Append at the head of the chain.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v) => MulBy 'Prepend u v where
+instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v) => MulBy 'Prepend dimu u dimv v where
   type ResBy 'Prepend u v = u :*: v
   u `mulBy` v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals at left.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit u', u' ~ InvOf u) => MulBy 'CancelL (u :*: v) u' where
+instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v, Unit dimu' u', u' ~ InvOf u) => MulBy 'CancelL (dimu :*: dimv) (u :*: v) dimu' u' where
   type ResBy 'CancelL (u :*: v) u' = v
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Elimination by reciprocals at right.
-instance {-# OVERLAPPABLE #-} (Unit u, Unit v, Unit v', v' ~ InvOf v) => MulBy 'CancelR (u :*: v) v' where
+instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v, Unit dimv' v', v' ~ InvOf v) => MulBy 'CancelR (dimu :*: dimv) (u :*: v) dimv' v' where
   type ResBy 'CancelR (u :*: v) v' = u
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Decompose products on the right.
-instance {-# OVERLAPPABLE #-} (Mul u v', Mul (Res u v') v, Unit v', Unit (Res (Res u v') v)) => MulBy 'Decompose u (v :*: v') where
+instance {-# OVERLAPPABLE #-} (Mul dimu u dimv' v', Mul dimuv' (Res u v') dimv v, Unit dimv' v', Unit dimuv'v (Res (Res u v') v)) => MulBy 'Decompose dimu u (dimv :*: dimv') (v :*: v') where
   type ResBy 'Decompose u (v :*: v') = Res (Res u v') v
   u `mulBy` Prd v = pure (prj u * v)
 
 -- | Walk the chain.
-instance {-# OVERLAPPABLE #-} (Mul u v, Unit u') => MulBy 'Walk (u :*: u') v where
+instance {-# OVERLAPPABLE #-} (Mul dimu u dimv v, Unit dimu' u') => MulBy 'Walk (dimu :*: dimu') (u :*: u') dimv v where
   type ResBy 'Walk (u :*: u') v = Res u v :*: u'
   Prd u `mulBy` v = Prd (u * prj v)
 
@@ -100,24 +99,24 @@ type family InvOf u where
 -- * Combinators
 
 newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
-  deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
 infixl 7 :*:
 
-instance (Unit u, Unit v) => Unit (u :*: v) where
-  factor = Const (getConst (factor @u) * getConst (factor @v))
-  suffix = Const (getConst (suffix @u) . ('·' :) . getConst (suffix @v))
+instance (Unit dimu u, Unit dimv v) => Unit (dimu :*: dimv) (u :*: v) where
+  factor = Const (getConst (factor @_ @u) * getConst (factor @_ @v))
+  suffix = Const (getConst (suffix @_ @u) . ('·' :) . getConst (suffix @_ @v))
 
 
 newtype Inv (u :: * -> *) a = Inv { getInv :: a }
-  deriving (Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
 
-instance Unit u => Unit (Inv u) where
+instance Unit dimu u => Unit dimu (Inv u) where
   prj = getInv
-  factor = Const (1/getConst (factor @u))
-  suffix = Const (getConst (suffix @u) . ('⁻' :) . ('¹' :))
+  factor = Const (1/getConst (factor @_ @u))
+  suffix = Const (getConst (suffix @_ @u) . ('⁻' :) . ('¹' :))
 
 
 type (u :/: v) = u :*: Inv v

@@ -2,28 +2,26 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Draw
-( draw
+( Starlight.Draw.draw
 ) where
 
 import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Reader
-import Control.Lens (forOf_, traversed, (^.))
-import Control.Monad (when)
+import Control.Lens (choosing, filtered, to, traversed, (^.), (^?), _Just)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Functor.Const
 import Data.Functor.Identity
-import Data.Functor.Interval
 import GL.Effect.Check
 import GL.Framebuffer
-import GL.Viewport
 import Graphics.GL.Core41
 import Linear.Exts
 import Starlight.Actor
@@ -54,26 +52,23 @@ draw
      , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader (Seconds Float)) sig m
+     , Has (Reader (Seconds Double)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (Reader UI) sig m
      , Has (Reader View) sig m
      )
   => m ()
 draw = measure "draw" . runLiftIO $ do
-  dt <- ask @(Seconds Float)
+  dt <- ask @(Seconds Double)
   UI{ fps = fpsLabel, target = targetLabel, face } <- ask
   let font = Font face 18
   bind @Framebuffer Nothing
 
-  v@View{ size, zoom } <- ask
-  system@System{ scale, beams } <- ask @(System StateVectors)
+  v@View{ size } <- ask
+  system@System{ beams } <- ask @(System StateVectors)
   Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
 
-  let dsize = deviceSize v
-
-  viewport $ Interval 0 dsize
-  scissor  $ Interval 0 dsize
+  clipTo v
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
@@ -83,16 +78,16 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "laser" $ for_ beams drawLaser
 
-  let maxDim = maximum (fromIntegral <$> dsize) * zoom
-      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = scale * prj (distance pos position - radius) < maxDim * 0.5
+  let maxDim = maximum (fromIntegral <$> size) * 0.5
+      onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = lengthToWindowPixels v * prj (distance pos position - convert radius) < maxDim
 
-  measure "body" $ forOf_ (bodies_ . traversed) system $ \ sv -> when (onScreen sv) (drawBody sv)
+  measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) Body.draw
 
   measure "radar" drawRadar
 
-  let describeTarget target = case target >>= fmap . (,) <*> (system !?) of
-        Just (identifier, t)
-          | pos <- either Body.actor Character.actor t ^. position_ -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (pure @(Kilo Metres) (distance pos position))
+  let describeTarget target = case target >>= fmap . (,) <*> (^?to (system !?)._Just.choosing actor_ actor_.position_) of
+        Just (identifier, pos)
+          -> describeIdentifier identifier ++ ": " ++ formatExp (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
         _ -> ""
 
   measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (nu @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (nu @(Frames :/: Seconds) (1/dt)))
@@ -106,4 +101,6 @@ newtype Frames a = Frames a
   deriving (Eq, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac)
   deriving Applicative via Identity
 
-instance Unit Frames where suffix = Const ('f':)
+instance Unit Rate Frames where suffix = Const ('f':)
+
+data Rate a
