@@ -46,11 +46,8 @@ unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_
 un :: forall u a dim . (Unit dim u, Fractional a) => u a -> a
 un = (^.unitary)
 
-nu :: forall u a dim . (Unit dim u, Fractional a) => a -> u a
-nu = (^.from unitary)
-
 convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
-convert = nu . un
+convert = pure . (/ getConst (factor @_ @u)) . (* getConst (factor @_ @u')) . prj
 
 converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Fractional a, Fractional b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
