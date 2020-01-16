@@ -16,7 +16,7 @@ import Control.Applicative ((<|>))
 import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Effect.Reader
-import Control.Lens hiding (un, view, (%=))
+import Control.Lens hiding (view, (%=))
 import Control.Monad (foldM, guard)
 import Data.Coerce
 import Data.Foldable (foldl')
@@ -58,7 +58,7 @@ gravity a = do
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- FIXME: gravity seems extremely weak
     r :: (Metres :*: Metres) Double
-    r = pure $ fmap un (b^.position_) `qd` fmap un (a^.position_) -- “quadrance” (square of distance between actor & body)
+    r = pure $ fmap (getMetres . convert) (b^.position_) `qd` fmap (getMetres . convert) (a^.position_) -- “quadrance” (square of distance between actor & body)
   gravC :: (Metres :*: Metres :*: Metres :/: Kilo Grams :/: Seconds :/: Seconds) Double
   gravC = 6.67430e-11
 
