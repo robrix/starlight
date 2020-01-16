@@ -16,6 +16,7 @@ module Unit
 , (.==.)
 , compareU
 , (.<.)
+, (.>.)
   -- ** Formatting
 , formatWith
 , format
@@ -64,6 +65,9 @@ compareU a b = prj a `compare` prj (convert @u' @u b)
 
 (.<.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
 a .<. b = a `compareU` b == LT
+
+(.>.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+a .>. b = a `compareU` b == GT
 
 
 -- ** Formatting
