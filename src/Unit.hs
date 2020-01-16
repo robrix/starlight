@@ -10,7 +10,6 @@ module Unit
 ( -- * Units
   Unit(..)
 , unitary
-, un
 , convert
 , converting
   -- ** Formatting
@@ -21,7 +20,6 @@ module Unit
 , formatExpR
 ) where
 
-import Control.Lens ((^.))
 import Control.Lens.Iso
 import Data.Char
 import Data.Coerce
@@ -42,9 +40,6 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
 
 unitary :: forall u a b dim . (Unit dim u, Fractional a, Fractional b) => Iso (u a) (u b) a b
 unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_ @u)))
-
-un :: forall u a dim . (Unit dim u, Fractional a) => u a -> a
-un = (^.unitary)
 
 convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
 convert = pure . (/ getConst (factor @_ @u')) . (* getConst (factor @_ @u)) . prj
