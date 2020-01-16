@@ -11,7 +11,6 @@ module Unit
   Unit(..)
 , unitary
 , un
-, nu
 , convert
 , converting
   -- ** Formatting
