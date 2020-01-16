@@ -47,7 +47,7 @@ un :: forall u a dim . (Unit dim u, Fractional a) => u a -> a
 un = (^.unitary)
 
 convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
-convert = pure . (/ getConst (factor @_ @u)) . (* getConst (factor @_ @u')) . prj
+convert = pure . (/ getConst (factor @_ @u')) . (* getConst (factor @_ @u)) . prj
 
 converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Fractional a, Fractional b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
