@@ -13,6 +13,8 @@ module Unit.Algebra
 (  -- * Algebra
   (.*.)
 , (./.)
+  -- * Calculation
+, qdU
   -- * Combinators
 , (:*:)(..)
 , (:/:)
@@ -54,6 +56,13 @@ type family Mul u v where
   Mul  u            (Inv (v :*: w)) = Mul (Mul u (Inv w)) (Inv v) -- u / (v * w) = (u / w) / v
   Mul (u :*: v)           w         = Mul u w :*: v               -- (u * v) * w = (u * w) * v
   Mul  u                  v         = u :*: v                     -- u * v       = u * v
+
+
+-- * Calculation
+
+-- | Compute the square of the distance efficiently and in the correct dimensions.
+qdU :: (Metric v, Unit du u, Num a) => v (u a) -> v (u a) -> (u :*: u) a
+u `qdU` v = pure $ fmap prj u `qd` fmap prj v
 
 
 -- * Combinators
