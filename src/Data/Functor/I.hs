@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+-- | I got sick of writing 'Identity' out in full.
 module Data.Functor.I
 ( I(..)
 ) where
