@@ -80,17 +80,6 @@ instance {-# OVERLAPPABLE #-} (Mul dimu u dimv v, Unit dimu' u') => MulBy 'Walk 
   Prd u `mulBy` v = Prd (u * prj v)
 
 
-type family Mul' u v where
-  Mul' v         Identity = v
-  Mul' Identity  v        = v
-  Mul' (u :/: v) v        = u
-  Mul' u         v        = u :*: v
-
-type family Div' u v where
-  Div' (u :*: v) u = v
-  Div' (u :*: v) v = u
-  Div' u         v = u :/: v
-
 data Act = Prepend | CancelL | CancelR | Decompose | Walk
 
 type family Step u v where
