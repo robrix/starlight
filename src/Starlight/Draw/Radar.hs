@@ -118,7 +118,7 @@ shader = program $ \ u
     edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
     angle <- let' "angle" (angleOf there)
     radius <- var "radius" radius
-    let step = D.max' 1 (D.min' maxStep (d / (50 / 1000))) -- FIXME: account for unit size without hard-coding conversion factor
+    let step = D.max' 1 (D.min' maxStep (d * 20)) -- FIXME: account for unit size without hard-coding conversion factor
     iff (gl_InstanceID `gt` 0)
       (radius .= step * float gl_InstanceID)
       (pure ())
