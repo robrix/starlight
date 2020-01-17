@@ -20,7 +20,7 @@ import           Control.Effect.Lift
 import           Control.Effect.Trace
 import           Control.Lens (Lens', to, (&), (+~), (-~), (.~), (^.))
 import           Data.Coerce (coerce)
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
 import qualified Data.Set as Set
@@ -56,7 +56,7 @@ drawShip Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, arm
     >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale)))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v ^. _r) . (_r +~ 0.5) . (_b -~ 0.25) else id)
-    & _a .~ realToFrac (armour^.min_.to runIdentity / armour^.max_.to runIdentity))
+    & _a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
   drawArrays LineLoop range
 
 
@@ -75,7 +75,7 @@ runShip = UI.loadingDrawable Drawable shader vertices
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [V Identity]
+vertices :: [V I]
 vertices = coerce @[V2 Float]
   [ V2 1      0
   , V2 0      (-0.5)
@@ -83,7 +83,7 @@ vertices = coerce @[V2 Float]
   , V2 0      0.5
   ]
 
-range :: Interval Identity Int
+range :: Interval I Int
 range = Interval 0 4
 
 

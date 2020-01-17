@@ -19,7 +19,7 @@ import Control.Lens (choosing, filtered, to, traversed, (^.), (^?), _Just)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Functor.Const
-import Data.Functor.Identity
+import Data.Functor.I
 import GL.Effect.Check
 import GL.Framebuffer
 import Graphics.GL.Core41
@@ -99,7 +99,7 @@ draw = measure "draw" . runLiftIO $ do
 
 newtype Frames a = Frames a
   deriving (Eq, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac)
-  deriving Applicative via Identity
+  deriving Applicative via I
 
 instance Unit Rate Frames where suffix = Const ('f':)
 

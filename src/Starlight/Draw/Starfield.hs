@@ -22,7 +22,7 @@ import           Control.Effect.Trace
 import           Control.Lens (Lens')
 import           Data.Coerce (coerce)
 import qualified Data.Fixed as Fixed
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval hiding (max')
 import           Data.Generics.Product.Fields
 import           Foreign.Storable (Storable)
@@ -72,7 +72,7 @@ runStarfield = UI.loadingDrawable Drawable shader vertices
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [V Identity]
+vertices :: [V I]
 vertices = coerce @[V2 Float]
   [ V2 (-1) (-1)
   , V2   1  (-1)
@@ -80,8 +80,8 @@ vertices = coerce @[V2 Float]
   , V2   1    1
   ]
 
-range :: Interval Identity Int
-range = Interval 0 (Identity (length vertices))
+range :: Interval I Int
+range = Interval 0 (I (length vertices))
 
 
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj

@@ -19,7 +19,7 @@ import           Control.Effect.Lift
 import           Control.Effect.Trace
 import           Control.Lens (Lens', (^.))
 import           Data.Coerce (coerce)
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
 import           Foreign.Storable (Storable)
@@ -69,11 +69,11 @@ drawLaser beam@S.Beam{ colour } = UI.using getDrawable $ do
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [V Identity]
+vertices :: [V I]
 vertices = coerce @[Float] [0, 1]
 
-range :: Interval Identity Int
-range = Interval 0 (Identity (length vertices))
+range :: Interval I Int
+range = Interval 0 (I (length vertices))
 
 
 shader :: Shader U V O

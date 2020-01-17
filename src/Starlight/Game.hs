@@ -25,7 +25,7 @@ import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Function (fix)
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval
 import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
@@ -220,10 +220,10 @@ frame = runSystem . timed $ do
 -- Higher values correlate to more of the scene being visible.
 zoomForSpeed :: V2 (Window.Pixels Int) -> Double -> Double
 zoomForSpeed size x = go where
-  Identity go
-    | Identity x < min' speed = min' zoom
-    | Identity x > max' speed = max' zoom
-    | otherwise               = fromUnit zoom (coerce easeInOutCubic (toUnit speed (Identity x)))
+  I go
+    | I x < min' speed = min' zoom
+    | I x > max' speed = max' zoom
+    | otherwise        = fromUnit zoom (coerce easeInOutCubic (toUnit speed (I x)))
   zoom = Interval 1 5
   speed = speedAt <$> zoom
   -- FIXME: figure this out w.r.t. actual units of velocity &c.

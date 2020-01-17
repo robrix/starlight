@@ -11,7 +11,7 @@ import           Control.Carrier.Reader
 import           Control.Effect.Finally
 import           Control.Effect.Lift
 import           Control.Effect.Trace
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Foreign.Storable (Storable)
 import           GL.Array
 import qualified GL.Buffer as B
@@ -21,8 +21,8 @@ import           GL.Shader.DSL (Shader, Vars)
 
 data Drawable u v o = Drawable
   { program :: Program u v o
-  , array   :: Array (v Identity)
-  , buffer  :: B.Buffer 'B.Array (v Identity)
+  , array   :: Array (v I)
+  , buffer  :: B.Buffer 'B.Array (v I)
   }
 
 using
@@ -42,7 +42,7 @@ using getDrawable m = do
 runDrawable :: (Drawable u v o -> b) -> Drawable u v o -> ReaderC b m a -> m a
 runDrawable makeDrawable = runReader . makeDrawable
 
-loadingDrawable :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m, Storable (v Identity), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v Identity] -> ReaderC b m a -> m a
+loadingDrawable :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m, Storable (v I), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v I] -> ReaderC b m a -> m a
 loadingDrawable drawable shader vertices m = do
   program <- build shader
   (buffer, array) <- load vertices

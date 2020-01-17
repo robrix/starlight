@@ -15,7 +15,7 @@ import           Control.Effect.Trace (Trace)
 import           Control.Lens ((^.))
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval
 import           GL.Array
 import           GL.Effect.Check
@@ -30,7 +30,7 @@ import           UI.Graph.Vertex
 data Graph = Graph
   { matrix    :: !(M33 Float)
   , colour    :: !(V4 Float)
-  , array     :: !(Array (V Identity))
+  , array     :: !(Array (V I))
   , points    :: !(Program Points.U V Points.O)
   , lines     :: !(Program Lines.U  V Lines.O)
   , pointSize :: !Float
@@ -62,8 +62,8 @@ drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = bin
     Points.matrix_    ?= matrix
     Points.pointSize_ ?= pointSize
     Points.colour_    ?= colour
-    drawArrays Points    (Interval 0 (Identity count))
+    drawArrays Points    (Interval 0 (I count))
   use lines $ do
     Lines.matrix_ ?= matrix
     Lines.colour_ ?= colour
-    drawArrays LineStrip (Interval 0 (Identity count))
+    drawArrays LineStrip (Interval 0 (I count))

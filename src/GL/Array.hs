@@ -30,7 +30,7 @@ import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Functor.Const
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval
 import           Foreign.Marshal.Array.Lift
 import           Foreign.Ptr
@@ -57,7 +57,7 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (Effect sig, HasArray i m, B.HasBuffer 'B.Array i m, Vars i, S.Storable (i Identity), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
+configureArray :: (Effect sig, HasArray i m, B.HasBuffer 'B.Array i m, Vars i, S.Storable (i I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureArray = do
   a <- askArray <* B.askBuffer
   evalState (Offset 0) $ foldVarsM (\ f@Field { location, name } -> runLiftIO $ do
@@ -76,9 +76,9 @@ configureArray = do
   typeFor _ = GL.glType
   dimsFor :: GL.Type a => Field v a -> Const GLint a
   dimsFor _ = GL.glDims
-  like :: a Maybe -> Array (a Identity) -> a Maybe
+  like :: a Maybe -> Array (a I) -> a Maybe
   like = const
-  elemA :: Array (i Identity) -> i Identity
+  elemA :: Array (i I) -> i I
   elemA _ = undefined
   undefinedAtFieldType :: Field v a -> a
   undefinedAtFieldType _ = undefined
@@ -92,7 +92,7 @@ drawArrays
      , HasProgram u i o m
      )
   => Type
-  -> Interval Identity Int
+  -> Interval I Int
   -> m ()
 drawArrays mode i = askProgram >> askArray >> checking (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i))))
 
@@ -104,7 +104,7 @@ multiDrawArrays
      , HasProgram u i o m
      )
   => Type
-  -> [Interval Identity Int]
+  -> [Interval I Int]
   -> m ()
 multiDrawArrays mode is
   | null is   = pure ()
@@ -122,13 +122,13 @@ drawArraysInstanced
      , HasProgram u i o m
      )
   => Type
-  -> Interval Identity Int
+  -> Interval I Int
   -> Int
   -> m ()
 drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i)) (fromIntegral n)))
 
 
-load :: (Effect sig, Vars i, S.Storable (i Identity), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [i Identity] -> m (B.Buffer 'B.Array (i Identity), Array (i Identity))
+load :: (Effect sig, Vars i, S.Storable (i I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [i I] -> m (B.Buffer 'B.Array (i I), Array (i I))
 load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
@@ -139,17 +139,17 @@ load is = do
     (b, a) <$ configureArray
 
 
-bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (i Identity) -> ArrayC i m a -> m a
+bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (i I) -> ArrayC i m a -> m a
 bindArray array (ArrayC m) = do
   bind (Just array)
   a <- runReader array m
   a <$ bind @(Array _) Nothing
 
 class Monad m => HasArray i m | m -> i where
-  askArray :: m (Array (i Identity))
+  askArray :: m (Array (i I))
 
 
-newtype ArrayC i m a = ArrayC { runArrayT :: ReaderC (Array (i Identity)) m a }
+newtype ArrayC i m a = ArrayC { runArrayT :: ReaderC (Array (i I)) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 deriving instance HasArray             i   m => HasArray             i   (ProgramC u   i o m)

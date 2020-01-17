@@ -24,7 +24,7 @@ import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Lens (Lens', (^.))
 import           Data.Foldable (for_, toList)
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
 import           Data.List (elemIndex)
@@ -76,11 +76,11 @@ drawRadar = UI.using getDrawable $ do
   -- FIXME: fade colour with distance
   -- FIXME: IFF
   measure "bodies & npcs" $
-    drawArrays Points (Interval 0 (Identity (length vertices)))
+    drawArrays Points (Interval 0 (I (length vertices)))
 
   measure "targets" $
     for_ (target >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
-      drawArraysInstanced Points (Interval (Identity index) (Identity index + 1)) targetBlipCount
+      drawArraysInstanced Points (Interval (I index) (I index + 1)) targetBlipCount
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
 runRadar = UI.loadingDrawable Drawable shader []
@@ -89,16 +89,16 @@ runRadar = UI.loadingDrawable Drawable shader []
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-verticesForBodies :: Foldable t => t B.StateVectors -> [V Identity]
+verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
 verticesForBodies vs =
-  [ V{ there = Identity (realToFrac <$> (there^._xy)), r = Identity (realToFrac <$> (b^.actor_.magnitude_)), colour = Identity colour }
+  [ V{ there = I (realToFrac <$> (there^._xy)), r = I (realToFrac <$> (b^.actor_.magnitude_)), colour = I colour }
   | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
-verticesForShips :: Foldable t => Double -> t Character -> [V Identity]
+verticesForShips :: Foldable t => Double -> t Character -> [V I]
 verticesForShips scale cs =
-  [ V{ there = Identity (realToFrac <$> (there^._xy)), r = Identity (realToFrac <$> (c^.actor_.magnitude_ ^/ scale)), colour = Identity colour }
+  [ V{ there = I (realToFrac <$> (there^._xy)), r = I (realToFrac <$> (c^.actor_.magnitude_ ^/ scale)), colour = I colour }
   | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 
@@ -191,7 +191,7 @@ data V v = V
   deriving (Generic)
 
 instance Vars V
-deriving via Fields V instance Storable (V Identity)
+deriving via Fields V instance Storable (V I)
 
 
 newtype O v = O { fragColour :: v (Colour Float) }

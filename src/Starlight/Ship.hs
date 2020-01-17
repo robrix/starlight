@@ -9,7 +9,7 @@ module Starlight.Ship
 ) where
 
 import Control.Lens (Lens')
-import Data.Functor.Identity
+import Data.Functor.I
 import Data.Functor.Interval
 import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
@@ -18,7 +18,7 @@ import UI.Colour
 
 data Ship = Ship
   { colour :: Colour Float
-  , armour :: Interval Identity Double
+  , armour :: Interval I Double
   , radar  :: Radar
   }
   deriving (Generic, Show)
@@ -26,7 +26,7 @@ data Ship = Ship
 colour_ :: Lens' Ship (Colour Float)
 colour_ = field @"colour"
 
-armour_ :: Lens' Ship (Interval Identity Double)
+armour_ :: Lens' Ship (Interval I Double)
 armour_ = field @"armour"
 
 radar_ :: Lens' Ship Radar

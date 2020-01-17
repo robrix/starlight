@@ -20,7 +20,7 @@ import           Control.Effect.Lift
 import           Control.Effect.Trace
 import           Control.Lens (Lens')
 import           Data.Coerce
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
 import           Foreign.Storable
@@ -71,11 +71,11 @@ draw v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ 
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
-vertices :: [V Identity]
+vertices :: [V I]
 vertices = coerce @[V4 Float] . map (`ext` V2 0 (1 :: Float)) $ circle 1 128
 
-range :: Interval Identity Int
-range = Interval 0 (Identity (length vertices))
+range :: Interval I Int
+range = Interval 0 (I (length vertices))
 
 
 shader :: D.Shader U V O

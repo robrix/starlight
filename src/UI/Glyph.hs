@@ -11,7 +11,7 @@ module UI.Glyph
 ) where
 
 import           Data.Foldable (foldl')
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe)
@@ -28,11 +28,11 @@ data Glyph = Glyph
 
 data Instance = Instance
   { offset :: {-# UNPACK #-} !Float
-  , range  :: {-# UNPACK #-} !(Interval Identity Int)
+  , range  :: {-# UNPACK #-} !(Interval I Int)
   }
 
 
-layoutGlyphs :: Map.Map Char (Interval Identity Int) -> [Glyph] -> Run
+layoutGlyphs :: Map.Map Char (Interval I Int) -> [Glyph] -> Run
 layoutGlyphs chars = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState 0 id Nothing) where
   go (LayoutState offset is prev) g@Glyph{ char, bounds_ } = LayoutState
     { offset  = offset + advanceWidth g

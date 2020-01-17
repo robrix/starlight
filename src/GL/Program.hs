@@ -30,7 +30,7 @@ import           Control.Effect.State
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
-import           Data.Functor.Identity
+import           Data.Functor.I
 import qualified Data.IntMap as IntMap
 import           Data.Traversable (for)
 import qualified Foreign.C.String.Lift as C
@@ -52,7 +52,7 @@ data Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Pr
   , unProgram :: GLuint
   }
 
-type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u Identity) (Identity t))
+type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u I) (I t))
 
 
 build :: forall u i o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars i) => DSL.Shader u i o -> m (Program u i o)

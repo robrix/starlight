@@ -16,7 +16,7 @@ module Unit.Time
 ) where
 
 import Data.Functor.Const
-import Data.Functor.Identity
+import Data.Functor.I
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
@@ -31,7 +31,7 @@ data Time a
 
 newtype Seconds a = Seconds { getSeconds :: a }
   deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via Identity
+  deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Time Seconds where
   suffix = Const ('s':)

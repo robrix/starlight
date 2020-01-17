@@ -22,7 +22,7 @@ import           Control.Lens ((^.))
 import           Control.Monad ((<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Fixed (div')
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Text (Text)
 import           Foreign.Storable
 import           GL.Type as GL
@@ -33,7 +33,7 @@ import           SDL
 
 newtype Pixels a = Pixels { getPixels :: a }
   deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via Identity
+  deriving (Additive, Applicative, Metric, Monad) via I
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
 swap = ask >>= runLiftIO . glSwapWindow

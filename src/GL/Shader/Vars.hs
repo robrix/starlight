@@ -25,7 +25,7 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lift
 import           Data.Function (fix)
 import           Data.Functor.Const
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Maybe (fromMaybe)
 import           Data.Monoid (Ap(..), First(..), Sum(..))
 import qualified Foreign as F
@@ -49,7 +49,7 @@ instance Monoid Offset where
   mempty = 0
 
 
-newtype Fields v = Fields (v Identity)
+newtype Fields v = Fields (v I)
 
 instance Vars v => F.Storable (Fields v) where
   alignment _ = fromMaybe 0 (getFirst (foldVars @v (First . Just . F.alignment . undefinedAtFieldType) defaultVars))

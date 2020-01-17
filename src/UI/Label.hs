@@ -22,7 +22,7 @@ import           Control.Monad (when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Foldable (for_)
-import           Data.Functor.Identity
+import           Data.Functor.I
 import           Data.Functor.Interval as Interval
 import           Data.IORef
 import           GHC.Stack

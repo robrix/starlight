@@ -22,6 +22,7 @@ import           Data.Bifunctor (first)
 import           Data.Char (isPrint, isSeparator, ord)
 import           Data.Coerce (coerce)
 import           Data.Foldable (find, foldl')
+import           Data.Functor.I (I(..))
 import           Data.Functor.Interval (Interval(..))
 import           Data.IORef
 import qualified Data.Map as Map
@@ -48,7 +49,7 @@ data Typeface = Typeface
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
   , glyphs       :: Drawable Glyph.U Glyph.V Glyph.O
-  , rangesRef    :: IORef (Map.Map Char (Interval Identity Int))
+  , rangesRef    :: IORef (Map.Map Char (Interval I Int))
   }
 
 data Font = Font
@@ -131,7 +132,7 @@ readFontOfSize path size = (`Font` size) <$> readTypeface path
 cacheCharactersForDrawing :: (Effect sig, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => Typeface -> String -> m ()
 cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { buffer, array }, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
-      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + Identity (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
+      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
   bindArray array . bindBuffer buffer $ do
