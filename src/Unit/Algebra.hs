@@ -18,8 +18,8 @@ module Unit.Algebra
 , (./.)
   -- * Combinators
 , (:*:)(..)
-, (:/:)(..)
-, Inv
+, (:/:)
+, Inv(..)
 , I
 , pattern I
 , getI
@@ -39,30 +39,27 @@ import Unit
 
 -- * Algebra
 
-(.*.) :: (Unit du u, Unit dv v, Unit dw (Simplify (u :*: v)), Fractional a) => u a -> v a -> Simplify (u :*: v) a
+(.*.) :: (Unit du u, Unit dv v, Unit dw (Mul u v), Fractional a) => u a -> v a -> Mul u v a
 u .*. v = pure (prj v * prj u)
 
 infixl 7 .*.
 
-(./.) :: (Unit du u, Unit dv v, Unit dw (Simplify (u :/: v)), Fractional a) => u a -> v a -> Simplify (u :/: v) a
+(./.) :: (Unit du u, Unit dv v, Unit dw (Mul u (Inv v)), Fractional a) => u a -> v a -> Mul u (Inv v) a
 u ./. v = pure (prj u / prj v)
 
 infixl 7 ./.
 
-type family Simplify u where
-  Simplify (I       :*: u) = u
-  Simplify (u       :*: I) = u
-  Simplify (u       :/: I) = u
-  Simplify (u :/: v :*: v) = u
-  Simplify (u :*: v :/: v) = u
-  Simplify (v :*: u :/: v) = u
-  Simplify (u :*: v :*: w) = Simplify (u :*: w) :*: v
-  Simplify (u :*: v :/: w) = Simplify (u :/: w) :*: v
-  Simplify (u :/: v :*: w) = Simplify (u :*: w) :/: v
-  Simplify (u :/: v :/: w) = Simplify (u :/: w) :/: v
-  Simplify (u :*: (v :*: w)) = Simplify (u :*: v :*: w)
-  Simplify (u :/: (v :*: w)) = Simplify (u :/: v :/: w)
-  Simplify u               = u
+type family Mul u v where
+  Mul  u                  I         = u                           -- u * 1       = u
+  Mul  I                  v         = v                           -- 1 * v       = v
+  Mul  u            (Inv  I)        = u                           -- u / 1       = u
+  Mul (u :*: Inv v)       v         = u                           -- u / v * v   = u
+  Mul (u :*: v)     (Inv  v)        = u                           -- u * v / v   = u
+  Mul (u :*: v)     (Inv  u)        = v                           -- u * v / u   = v
+  Mul  u                 (v :*: w)  = Mul (Mul u w) v             -- u * (v * w) = (u * w) * v
+  Mul  u            (Inv (v :*: w)) = Mul (Mul u (Inv w)) (Inv v) -- u / (v * w) = (u / w) / v
+  Mul (u :*: v)           w         = Mul u w :*: v               -- (u * v) * w = (u * w) * v
+  Mul  u                  v         = u :*: v                     -- u * v       = u * v
 
 
 -- * Combinators
@@ -78,18 +75,19 @@ instance (Unit dimu u, Unit dimv v) => Unit (dimu :*: dimv) (u :*: v) where
   suffix = Const (getConst (suffix @_ @u) . ('·' :) . getConst (suffix @_ @v))
 
 
-newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
-  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via Identity
+type u :/: v = u :*: Inv v
 
 infixl 7 :/:
 
-instance (Unit dimu u, Unit dimv v) => Unit (dimu :/: dimv) (u :/: v) where
-  factor = Const (getConst (factor @_ @u) / getConst (factor @_ @v))
-  suffix = Const (getConst (suffix @_ @u) . ('/' :) . getConst (suffix @_ @v))
 
+newtype Inv (u :: * -> *) a = Inv { getInv :: a }
+  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
-type Inv u = I :/: u
+instance Unit dimu u => Unit dimu (Inv u) where
+  prj = getInv
+  factor = Const (1/getConst (factor @_ @u))
+  suffix = Const (getConst (suffix @_ @u) . ('⁻' :) . ('¹' :))
 
 
 type I = Identity
