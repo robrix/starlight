@@ -75,11 +75,6 @@ instance (Unit dimu u, Unit dimv v) => Unit (dimu :*: dimv) (u :*: v) where
   suffix = Const (getConst (suffix @_ @u) . ('·' :) . getConst (suffix @_ @v))
 
 
-type u :/: v = u :*: Inv v
-
-infixl 7 :/:
-
-
 newtype Inv (u :: * -> *) a = Inv { getInv :: a }
   deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via Identity
@@ -88,6 +83,11 @@ instance Unit dimu u => Unit dimu (Inv u) where
   prj = getInv
   factor = Const (1/getConst (factor @_ @u))
   suffix = Const (getConst (suffix @_ @u) . ('⁻' :) . ('¹' :))
+
+
+type u :/: v = u :*: Inv v
+
+infixl 7 :/:
 
 
 type I = Identity
