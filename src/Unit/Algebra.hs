@@ -53,7 +53,7 @@ instance (AlgBy step dimu u dimv v, Step u v ~ step, Unit dimu u, Unit dimv v) =
   (.*.) = mulBy @step
 
 
-class (Unit dimu u, Unit dimv v) => AlgBy (step :: Act) dimu u dimv v | u -> dimu, v -> dimv where
+class (Unit dimu u, Unit dimv v) => AlgBy (step :: Act (* -> *)) dimu u dimv v | u -> dimu, v -> dimv where
   type ResBy step u v (c :: (* -> *) -> (* -> *) -> (* -> *)) :: * -> *
   mulBy :: Fractional a => u a -> v a -> ResBy step u v (:*:) a
 
@@ -63,13 +63,13 @@ instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v) => AlgBy 'Prepend dimu 
   u `mulBy` v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals at left.
-instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v, Unit dimu' u', u' ~ InvOf u) => AlgBy 'CancelL (dimu :*: dimv) (u :*: v) dimu' u' where
-  type ResBy 'CancelL (u :*: v) u' (:*:) = v
+instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v, Unit dimu' u', u' ~ InvOf u) => AlgBy ('Cancel v) (dimu :*: dimv) (u :*: v) dimu' u' where
+  type ResBy ('Cancel v) (u :*: v) u' (:*:) = v
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Elimination by reciprocals at right.
-instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v, Unit dimv' v', v' ~ InvOf v) => AlgBy 'CancelR (dimu :*: dimv) (u :*: v) dimv' v' where
-  type ResBy 'CancelR (u :*: v) v' (:*:) = u
+instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v, Unit dimv' v', v' ~ InvOf v) => AlgBy ('Cancel u) (dimu :*: dimv) (u :*: v) dimv' v' where
+  type ResBy ('Cancel u) (u :*: v) v' (:*:) = u
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Decompose products on the right.
@@ -83,13 +83,13 @@ instance {-# OVERLAPPABLE #-} (Alg dimu u dimv v, Unit dimu' u') => AlgBy 'Walk 
   Prd u `mulBy` v = Prd (u * prj v)
 
 
-data Act = Prepend | CancelL | CancelR | Decompose | Walk
+data Act a = Prepend | Cancel a | Decompose | Walk
 
 type family Step u v where
-  Step (v     :*: _) (Inv v)   = 'CancelL
-  Step (Inv v :*: _) v         = 'CancelL
-  Step (_     :*: v) (Inv v)   = 'CancelR
-  Step (_     :/: v) v         = 'CancelR
+  Step (v     :*: u) (Inv v)   = 'Cancel u
+  Step (Inv v :*: u) v         = 'Cancel u
+  Step (u     :*: v) (Inv v)   = 'Cancel u
+  Step (u     :/: v) v         = 'Cancel u
   Step _             (_ :*: _) = 'Decompose
   Step (_     :*: _) _         = 'Walk
   Step _             _         = 'Prepend
