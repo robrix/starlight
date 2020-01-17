@@ -20,6 +20,7 @@ module Unit.Algebra
 , (:/:)(..)
 , Inv(..)
 , I
+, Identity(..)
 ) where
 
 import Data.Functor.Const
