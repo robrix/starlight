@@ -13,6 +13,7 @@ module GL.Uniform
 
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
+import           Data.Functor.Identity
 import           Data.Int
 import qualified Foreign.Marshal.Utils.Lift as A
 import           Foreign.Ptr
@@ -62,6 +63,8 @@ instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
   uniform prog loc vec = A.with vec (sendM . uniformFor @t C4x1 prog loc 1 . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Point f a)
+
+deriving instance Uniform a => Uniform (Identity a)
 
 
 -- | Types which can appear in vectors.
