@@ -70,6 +70,7 @@ drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> 
 
     matrix_ ?= tmap realToFrac (transformToWindow view)
     here_   ?= (fmap realToFrac <$> here)
+    scale_  ?= realToFrac (lengthToWindowPixels view)
 
     -- FIXME: skip blips for extremely distant objects
     -- FIXME: blips should shadow more distant blips
@@ -81,6 +82,7 @@ drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> 
   use targetProgram $ do
     matrix_ ?= tmap realToFrac (transformToWindow view)
     here_   ?= (fmap realToFrac <$> here)
+    scale_  ?= realToFrac (lengthToWindowPixels view)
 
     measure "targets" $
       for_ (system^.player_.target_ >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
@@ -192,6 +194,7 @@ targetShader = program $ \ u
 data U v = U
   { matrix :: v (Transform Float ClipUnits Window.Pixels)
   , here   :: v (V2 (Mega Metres Float))
+  , scale  :: v Float
   }
   deriving (Generic)
 
@@ -202,6 +205,9 @@ matrix_ = field @"matrix"
 
 here_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
 here_ = field @"here"
+
+scale_ :: Lens' (U v) (v Float)
+scale_ = field @"scale"
 
 
 data IG v = IG
