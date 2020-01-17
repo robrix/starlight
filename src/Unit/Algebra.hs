@@ -35,48 +35,48 @@ import Unit
 -- * Algebra
 
 class (Unit dimu u, Unit dimv v) => Mul dimu u dimv v | u -> dimu, v -> dimv where
-  type Res u v :: * -> *
-  (.*.) :: Fractional a => u a -> v a -> Res u v a
+  type Res u v (c :: (* -> *) -> (* -> *) -> (* -> *)) :: * -> *
+  (.*.) :: Fractional a => u a -> v a -> Res u v (:*:) a
 
 infixl 7 .*.
 
-(./.) :: forall dimu u dimv v a . (Mul dimu u dimv (Inv v), Unit dimv v, Fractional a) => u a -> v a -> Res u (Inv v) a
+(./.) :: forall dimu u dimv v a . (Mul dimu u dimv (Inv v), Unit dimv v, Fractional a) => u a -> v a -> Res u (Inv v) (:*:) a
 u ./. v = u .*. Inv @v (1/prj v)
 
 infixl 7 ./.
 
 instance (MulBy step dimu u dimv v, Step u v ~ step, Unit dimu u, Unit dimv v) => Mul dimu u dimv v where
-  type Res u v = ResBy (Step u v) u v
+  type Res u v c = ResBy (Step u v) u v c
   (.*.) = mulBy @step
 
 
 class (Unit dimu u, Unit dimv v) => MulBy (step :: Act) dimu u dimv v where
-  type ResBy step u v :: * -> *
-  mulBy :: Fractional a => u a -> v a -> ResBy step u v a
+  type ResBy step u v (c :: (* -> *) -> (* -> *) -> (* -> *)) :: * -> *
+  mulBy :: Fractional a => u a -> v a -> ResBy step u v (:*:) a
 
 -- | Prepend at the head of the chain.
 instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v) => MulBy 'Prepend dimu u dimv v where
-  type ResBy 'Prepend u v = u :*: v
+  type ResBy 'Prepend u v (:*:) = u :*: v
   u `mulBy` v = Prd (prj u * prj v)
 
 -- | Elimination by reciprocals at left.
 instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v, Unit dimu' u', u' ~ InvOf u) => MulBy 'CancelL (dimu :*: dimv) (u :*: v) dimu' u' where
-  type ResBy 'CancelL (u :*: v) u' = v
+  type ResBy 'CancelL (u :*: v) u' (:*:) = v
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Elimination by reciprocals at right.
 instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v, Unit dimv' v', v' ~ InvOf v) => MulBy 'CancelR (dimu :*: dimv) (u :*: v) dimv' v' where
-  type ResBy 'CancelR (u :*: v) v' = u
+  type ResBy 'CancelR (u :*: v) v' (:*:) = u
   u `mulBy` v = pure (prj u * prj v)
 
 -- | Decompose products on the right.
-instance {-# OVERLAPPABLE #-} (Mul dimu u dimv' v', Mul dimuv' (Res u v') dimv v, Unit dimv' v', Unit dimuv'v (Res (Res u v') v)) => MulBy 'Decompose dimu u (dimv :*: dimv') (v :*: v') where
-  type ResBy 'Decompose u (v :*: v') = Res (Res u v') v
+instance {-# OVERLAPPABLE #-} (Mul dimu u dimv' v', Mul dimuv' (Res u v' (:*:)) dimv v, Unit dimv' v', Unit dimuv'v (Res (Res u v' (:*:)) v (:*:))) => MulBy 'Decompose dimu u (dimv :*: dimv') (v :*: v') where
+  type ResBy 'Decompose u (v :*: v') (:*:) = Res (Res u v' (:*:)) v (:*:)
   u `mulBy` Prd v = pure (prj u * v)
 
 -- | Walk the chain.
 instance {-# OVERLAPPABLE #-} (Mul dimu u dimv v, Unit dimu' u') => MulBy 'Walk (dimu :*: dimu') (u :*: u') dimv v where
-  type ResBy 'Walk (u :*: u') v = Res u v :*: u'
+  type ResBy 'Walk (u :*: u') v (:*:) = Res u v (:*:) :*: u'
   Prd u `mulBy` v = Prd (u * prj v)
 
 
