@@ -125,7 +125,6 @@ shader = program $ \ u
     minSweep <- let' "minSweep" (D.coerce (minBlipSize / (2 * pi * get radius)))
     sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (D.coerce (angleOf edge) - angle)))
     pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce (get radius))
-    gl_PointSize .= 3
     colour2 .= colour
     gl_Position .= ext4 (ext3 pos 0) 1)
 
