@@ -80,8 +80,3 @@ newtype IF v = IF { uv :: v (V2 Float) }
   deriving (Generic)
 
 instance Vars IF
-
-newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
-
-instance Vars O

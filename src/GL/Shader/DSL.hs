@@ -23,6 +23,7 @@ module GL.Shader.DSL
 , (Cat.>>>)
 , None(..)
 , shaderSources
+, O(..)
 , module GL.Shader.Decl
 , module GL.Shader.Expr
 , module GL.Shader.Stmt
@@ -123,3 +124,9 @@ like = const
 
 pvar :: GL.Uniform a => String -> String -> K (Doc ()) a
 pvar qual n = fix $ \ c -> K $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline
+
+
+newtype O v = O { fragColour :: v (Colour Float) }
+  deriving (Generic)
+
+instance Vars O

@@ -50,9 +50,3 @@ pointSize_ = field @"pointSize"
 
 colour_ :: Lens' (U v) (v (Colour Float))
 colour_ = field @"colour"
-
-
-newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
-
-instance Vars O

@@ -190,9 +190,3 @@ data V v = V
 
 instance Vars V
 deriving via Fields V instance Storable (V I)
-
-
-newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
-
-instance Vars O

@@ -115,8 +115,3 @@ instance D.Vars V
 
 deriving instance Bind     (v (V4 Double)) => Bind     (V v)
 deriving instance Storable (v (V4 Double)) => Storable (V v)
-
-newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
-
-instance D.Vars O
