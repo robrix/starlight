@@ -1,2 +1,5 @@
 module Data.Functor.I
-() where
+( I(..)
+) where
+
+newtype I a = I { getI :: a }
