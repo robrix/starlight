@@ -78,6 +78,7 @@ class GL.Type t => Scalar t where
   uniformFor :: Col -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 deriving instance Scalar a => Scalar (Const a b)
+deriving instance Scalar a => Scalar (Identity a)
 data Col
   = C2x1
   | C2x2
