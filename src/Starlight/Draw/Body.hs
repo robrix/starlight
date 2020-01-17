@@ -72,7 +72,7 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
 
 
 vertices :: [V I]
-vertices = coerce @[V4 Float] . map (`ext` V2 0 (1 :: Float)) $ circle 1 128
+vertices = coerce @[V4 Double] . map (`ext` V2 0 (1 :: Double)) $ circle 1 128
 
 range :: Interval I Int
 range = Interval 0 (I (length vertices))
@@ -82,12 +82,12 @@ shader :: D.Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } D.None -> main $ do
     let cos90 = 6.123233995736766e-17
-    m <- var "m" (mat4 [matrix u])
+    m <- var "m" (D.coerce (matrix u))
     switch gl_InstanceID
-      [ (Just 1, m *= mat4 [vec4 [1, 0, 0, 0], vec4 [0, cos90, -1, 0], vec4 [0, 1, cos90, 0], vec4 [0, 0, 0, 1]] >> break)
-      , (Just 2, m *= mat4 [vec4 [cos90, 0, 1, 0], vec4 [0, 1, 0, 0], vec4 [-1, 0, cos90, 0], vec4 [0, 0, 0, 1]] >> break)
+      [ (Just 1, m *= dmat4 [dvec4 [1, 0, 0, 0], dvec4 [0, cos90, -1, 0], dvec4 [0, 1, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
+      , (Just 2, m *= dmat4 [dvec4 [cos90, 0, 1, 0], dvec4 [0, 1, 0, 0], dvec4 [-1, 0, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
       ]
-    gl_Position .= get m D.!* pos)
+    gl_Position .= vec4 [get m D.!* pos])
 
   >>> fragment (\ D.None O { fragColour } -> main $
     fragColour .= colour u)
@@ -108,13 +108,13 @@ colour_ :: Lens' (U v) (v (Colour Float))
 colour_ = field @"colour"
 
 
-newtype V v = V { pos :: v (V4 Float) }
+newtype V v = V { pos :: v (V4 Double) }
   deriving (Generic)
 
 instance D.Vars V
 
-deriving instance Bind     (v (V4 Float)) => Bind     (V v)
-deriving instance Storable (v (V4 Float)) => Storable (V v)
+deriving instance Bind     (v (V4 Double)) => Bind     (V v)
+deriving instance Storable (v (V4 Double)) => Storable (V v)
 
 newtype O v = O { fragColour :: v (Colour Float) }
   deriving (Generic)
