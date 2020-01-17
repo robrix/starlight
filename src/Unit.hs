@@ -31,6 +31,7 @@ import Control.Lens.Iso
 import Data.Char
 import Data.Coerce
 import Data.Functor.Const
+import Data.Functor.I
 import Data.Functor.Identity
 import Numeric
 
@@ -45,6 +46,9 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
   factor = 1
 
   suffix :: Const ShowS (u a)
+
+instance Unit I I where
+  suffix = Const (showChar '1')
 
 instance Unit Identity Identity where
   suffix = Const (showChar '1')
