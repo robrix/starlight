@@ -47,7 +47,7 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
   suffix :: Const ShowS (u a)
 
 instance Unit Identity Identity where
-  suffix = Const id
+  suffix = Const (showChar '1')
 
 unitary :: forall u a b dim . (Unit dim u, Fractional a, Fractional b) => Iso (u a) (u b) a b
 unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_ @u)))
