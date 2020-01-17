@@ -19,13 +19,11 @@ module Starlight.System
 
 import           Control.Effect.Lens.Exts (asserting)
 import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
-import           Data.Coerce
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (fromMaybe)
 import           GHC.Generics (Generic)
 import           GHC.Stack (HasCallStack)
-import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
 import           Starlight.Identifier
@@ -91,7 +89,7 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     crossSection :: (Mega Metres :*: Mega Metres) Double
     crossSection = a^.actor_.magnitude_ .*. a^.actor_.magnitude_
     r :: (Mega Metres :*: Mega Metres) Double
-    r = coerce $ (a^.actor_.position_) `qd` (c^.actor_.position_)
+    r = (a^.actor_.position_) `qdU` (c^.actor_.position_)
   aperture :: (Mega Metres :*: Mega Metres) Double
   aperture = 10
   gain :: I Double
