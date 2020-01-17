@@ -133,10 +133,11 @@ shader = program $ \ u
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
       let rot theta = mat4
-            (vec4 [cos theta, -(sin theta), 0, 0])
-            (vec4 [sin theta,  cos  theta , 0, 0])
-            (vec4 [0,          0,           1, 0])
-            (vec4 [0,          0,           0, 1])
+            [ vec4 [cos theta, -(sin theta), 0, 0]
+            , vec4 [sin theta,  cos  theta , 0, 0]
+            , vec4 [0,          0,           1, 0]
+            , vec4 [0,          0,           0, 1]
+            ]
       emitPrimitive $ do
         i <- var @Int "i" (-(fromIntegral count))
         while (get i `lt` (fromIntegral count + 1)) $
