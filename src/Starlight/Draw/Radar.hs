@@ -58,9 +58,8 @@ drawRadar
   => m ()
 drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindArray array . B.bindBuffer buffer $ do
   system@System{ bodies } <- ask @(System B.StateVectors)
-  view@View{ scale } <- ask
-  let here     = system^.player_.actor_.position_._xy
-      npcs     = system^.npcs_
+  view@View{ scale, focus = here } <- ask
+  let npcs     = system^.npcs_
       vertices = verticesForShips scale npcs <> verticesForBodies bodies
 
   use radarProgram $ do
