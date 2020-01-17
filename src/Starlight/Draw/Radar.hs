@@ -62,11 +62,11 @@ drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> 
   let npcs     = system^.npcs_
       vertices = verticesForShips scale npcs <> verticesForBodies bodies
 
-  use radarProgram $ do
-    measure "realloc/copy" $ do
-      B.realloc (length vertices) B.Static B.Draw
-      B.copy 0 vertices
+  measure "realloc/copy" $ do
+    B.realloc (length vertices) B.Static B.Draw
+    B.copy 0 vertices
 
+  use radarProgram $ do
     matrix_ ?= tmap realToFrac (transformToWindow view)
     here_   ?= (fmap realToFrac <$> here)
     scale_  ?= realToFrac (lengthToWindowPixels view)
