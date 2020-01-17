@@ -9,7 +9,7 @@ module UI.Graph.Points
 , pointSize_
 , colour_
 , V(..)
-, O(..)
+, Frag(..)
 ) where
 
 import Control.Lens (Lens')
@@ -18,13 +18,13 @@ import GHC.Generics (Generic)
 import GL.Shader.DSL
 import UI.Graph.Vertex
 
-shader :: Shader U V O
+shader :: Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ pos } None -> main $ do
     gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) ^. _xy) 0) 1
     gl_PointSize .= pointSize u)
 
-  >>> fragment (\ None O{ fragColour } -> main $ do
+  >>> fragment (\ None Frag{ fragColour } -> main $ do
     p <- let' "p" (gl_PointCoord - vec2 [0.5])
     iff (norm p `gt` 1)
       discard

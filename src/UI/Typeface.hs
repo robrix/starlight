@@ -48,7 +48,7 @@ data Typeface = Typeface
   { name         :: Maybe String
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
-  , glyphs       :: Drawable Glyph.U Glyph.V Glyph.O
+  , glyphs       :: Drawable Glyph.U Glyph.V Glyph.Frag
   , rangesRef    :: IORef (Map.Map Char (Interval I Int))
   }
 

@@ -68,7 +68,7 @@ draw v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ 
   drawArraysInstanced LineLoop range 3
 
 
-newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 vertices :: [V I]
@@ -78,7 +78,7 @@ range :: Interval I Int
 range = Interval 0 (I (length vertices))
 
 
-shader :: D.Shader U V O
+shader :: D.Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ pos } D.None -> main $ do
     let cos90 = 6.123233995736766e-17
@@ -89,7 +89,7 @@ shader = program $ \ u
       ]
     gl_Position .= vec4 [get m D.!* pos])
 
-  >>> fragment (\ D.None O { fragColour } -> main $
+  >>> fragment (\ D.None Frag{ fragColour } -> main $
     fragColour .= colour u)
 
 

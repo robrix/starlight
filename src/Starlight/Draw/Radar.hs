@@ -86,7 +86,7 @@ runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m
 runRadar = UI.loadingDrawable Drawable shader []
 
 
-newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
@@ -106,7 +106,7 @@ verticesForShips scale cs =
 targetBlipCount :: Int
 targetBlipCount = 10
 
-shader :: Shader U V O
+shader :: Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
     there <- let' "there" (D.coerce there - D.coerce (here u))
@@ -145,7 +145,7 @@ shader = program $ \ u
             colour3 .= Var "colour2[0]"
             i += 1)
 
-  >>> fragment (\ IF{ colour3 } O{ fragColour } -> main $ fragColour .= colour3) where
+  >>> fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3) where
   minBlipSize = 16
   count = 16
   radius = 300

@@ -13,7 +13,7 @@ module UI.Label.Glyph
 , fontScale_
 , offset_
 , V(..)
-, O(..)
+, Frag(..)
 ) where
 
 import Control.Lens (Lens')
@@ -24,7 +24,7 @@ import GL.Object
 import GL.Shader.DSL
 import Prelude hiding (break)
 
-shader :: Shader U V O
+shader :: Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ pos } IF{ _coord2, colour } -> main $ do
     _coord2 .= pos ^. _zw
@@ -63,7 +63,7 @@ shader = program $ \ u
           !*! trans2 (vec2 [offset u, 0])
     gl_Position .= ext4 (m !* ext3 (pos ^. _xy) 1) 0 ^. _xywz)
 
-  >>> fragment (\ IF{ _coord2, colour } O{ fragColour } -> main $
+  >>> fragment (\ IF{ _coord2, colour } Frag{ fragColour } -> main $
     iff (_coord2 ^. _x * _coord2 ^. _x - _coord2 ^. _y `gt` 0)
       discard
       (iff gl_FrontFacing
