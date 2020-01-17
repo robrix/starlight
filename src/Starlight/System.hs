@@ -88,7 +88,7 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     received :: Mega Watts Double
     received = (c^.ship_.radar_.power_ .*. gain .*. aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
     crossSection :: (Metres :*: Metres) Double
-    crossSection = convert @_ @Metres (a^.actor_.magnitude_) .*. convert @_ @Metres (a^.actor_.magnitude_)
+    crossSection = a^.actor_.magnitude_.converting @_ @Metres .*. a^.actor_.magnitude_.converting @_ @Metres
     r :: (Metres :*: Metres) Double
     r = pure $ fmap (getMetres . convert) (a^.actor_.position_) `qd` fmap (getMetres . convert) (c^.actor_.position_)
   aperture :: (Metres :*: Metres) Double
