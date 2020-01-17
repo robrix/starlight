@@ -31,6 +31,7 @@ import Control.Lens.Iso
 import Data.Char
 import Data.Coerce
 import Data.Functor.Const
+import Data.Functor.Identity
 import Numeric
 
 -- * Units
@@ -44,6 +45,9 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
   factor = 1
 
   suffix :: Const ShowS (u a)
+
+instance Unit Identity Identity where
+  suffix = Const id
 
 unitary :: forall u a b dim . (Unit dim u, Fractional a, Fractional b) => Iso (u a) (u b) a b
 unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_ @u)))
