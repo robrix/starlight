@@ -12,6 +12,7 @@ module Unit
   Unit(..)
 , unitary
 , convert
+, convertTo
 , converting
 , convertingFrom
 , convertingTo
@@ -61,6 +62,9 @@ unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_
 
 convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
 convert = pure . (/ getConst (factor @_ @u')) . (* getConst (factor @_ @u)) . prj
+
+convertTo :: (Unit dim u, Unit dim u', Fractional a) => (forall a . a -> u' a) -> u a -> u' a
+convertTo _ = convert
 
 converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Fractional a, Fractional b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
