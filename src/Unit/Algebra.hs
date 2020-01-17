@@ -81,7 +81,8 @@ instance {-# OVERLAPPABLE #-} (Mul dimu u dimv v, Unit dimu' u') => MulBy 'Walk 
 
 
 type family Mul' u v where
-  Mul' u v = u :*: v
+  Mul' (u :/: v) v = u
+  Mul' u         v = u :*: v
 
 type family Div' u v where
   Div' u v = u :/: v
