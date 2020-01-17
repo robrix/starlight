@@ -59,7 +59,7 @@ draw
   -> m ()
 draw v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ do
   view <- ask
-  matrix_ ?= tmap realToFrac
+  matrix_ ?=
     (   transformToSystem view
     >>> Body.transform v
     >>> Body.toBodySpace v)
@@ -82,7 +82,7 @@ shader :: D.Shader U V O
 shader = program $ \ u
   ->  vertex (\ V{ pos } D.None -> main $ do
     let cos90 = 6.123233995736766e-17
-    m <- var "m" (D.coerce (matrix u))
+    m <- var "m" (mat4 [matrix u])
     switch gl_InstanceID
       [ (Just 1, m *= mat4 [vec4 [1, 0, 0, 0], vec4 [0, cos90, -1, 0], vec4 [0, 1, cos90, 0], vec4 [0, 0, 0, 1]] >> break)
       , (Just 2, m *= mat4 [vec4 [cos90, 0, 1, 0], vec4 [0, 1, 0, 0], vec4 [-1, 0, cos90, 0], vec4 [0, 0, 0, 1]] >> break)
@@ -94,14 +94,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform Float ClipUnits Body.BodyUnits)
+  { matrix :: v (Transform Double ClipUnits Body.BodyUnits)
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Body.BodyUnits))
+matrix_ :: Lens' (U v) (v (Transform Double ClipUnits Body.BodyUnits))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))
