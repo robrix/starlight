@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.System
 ( System(..)
 , bodies_
@@ -30,6 +31,8 @@ import           Starlight.Identifier
 import           Starlight.Radar
 import           Starlight.Ship (radar_)
 import           Starlight.Weapon.Laser
+import           Unit.Algebra
+import           Unit.Length
 import           Unit.Power
 
 data System a = System
@@ -80,15 +83,22 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
   -- FIXME: dimensional analysis
   visible i a = case i of
     B (Star _) -> True
-    _          -> received > threshold
+    _          -> received .>. threshold
     where
-    r = qd (a^.actor_.position_) (c^.actor_.position_)
-    received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * prj (a^.actor_.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 2)))
-  patternPropagationFactor = 1
-  gain = 1
+    received :: Mega Watts Double
+    received = (c^.ship_.radar_.power_ .*. gain .*. aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
+    crossSection :: (Metres :*: Metres) Double
+    crossSection = convert @_ @Metres (a^.actor_.magnitude_) .*. convert @_ @Metres (a^.actor_.magnitude_)
+    r :: (Metres :*: Metres) Double
+    r = pure $ fmap (getMetres . convert) (a^.actor_.position_) `qd` fmap (getMetres . convert) (c^.actor_.position_)
+  aperture :: (Metres :*: Metres) Double
   aperture = 1000
-  threshold :: Watts Double
-  threshold = 1.0e-12
+  gain :: I Double
+  gain = 1
+  patternPropagationFactor :: I Double
+  patternPropagationFactor = 1
+  threshold :: Pico Watts Double
+  threshold = 1
 
 neighbourhoodOfPlayer :: HasActor a => System a -> System a
 neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys
