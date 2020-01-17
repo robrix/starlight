@@ -155,8 +155,8 @@ shader = program $ \ u
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
       let rot theta = mat2
-            [ vec2 [cos theta, -sin theta ]
-            , vec2 [sin theta,  cos theta ]
+            [ vec2 [ cos theta, -sin theta ]
+            , vec2 [ sin theta,  cos theta ]
             ]
       emitPrimitive $ do
         i <- var @Int "i" (-fromIntegral count)
@@ -180,8 +180,8 @@ targetShader = program $ \ u
     primitiveOut LineStrip ((count * 2 + 1) * 2)
     main $ do
       let rot theta = mat2
-            [ vec2 [cos theta, -sin theta ]
-            , vec2 [sin theta,  cos theta ]
+            [ vec2 [ cos theta, -sin theta ]
+            , vec2 [ sin theta,  cos theta ]
             ]
       i <- var @Int "i" (-fromIntegral count)
       while (get i `lt` (fromIntegral count + 1)) . emitPrimitive $ do
