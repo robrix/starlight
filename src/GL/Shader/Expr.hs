@@ -202,9 +202,9 @@ data Expr (k :: Type) a where
 
   (:^.) :: Expr k a -> Prj a b -> Expr k b
   (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
-  (:!*) :: Expr k (v (v Float)) -> Expr k (v Float) -> Expr k (v Float)
-  (:!!*) :: Expr k (v (v Float)) -> Expr k Float -> Expr k (v (v Float))
-  (:!*!) :: Expr k (v (v Float)) -> Expr k (v (v Float)) -> Expr k (v (v Float))
+  (:!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
+  (:!!*) :: Expr k (v (v a)) -> Expr k a -> Expr k (v (v a))
+  (:!*!) :: Expr k (v (v a)) -> Expr k (v (v a)) -> Expr k (v (v a))
 
   Eq :: Expr k a -> Expr k a -> Expr k Bool
   Lt :: Expr k a -> Expr k a -> Expr k Bool
@@ -350,17 +350,17 @@ dot = Dot
 
 infixl 7 ^*
 
-(!*) :: Expr k (v (v Float)) -> Expr k (v Float) -> Expr k (v Float)
+(!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
 (!*) = (:!*)
 
 infixl 7 !*
 
-(!!*) :: Expr k (v (v Float)) -> Expr k Float -> Expr k (v (v Float))
+(!!*) :: Expr k (v (v a)) -> Expr k a -> Expr k (v (v a))
 (!!*) = (:!!*)
 
 infixl 7 !!*
 
-(!*!) :: Expr k (v (v Float)) -> Expr k (v (v Float)) -> Expr k (v (v Float))
+(!*!) :: Expr k (v (v a)) -> Expr k (v (v a)) -> Expr k (v (v a))
 (!*!) = (:!*!)
 
 infixl 7 !*!
