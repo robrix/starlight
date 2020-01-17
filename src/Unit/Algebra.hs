@@ -6,7 +6,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -20,14 +19,11 @@ module Unit.Algebra
 , (:*:)(..)
 , (:/:)
 , Inv(..)
-, I
-, pattern I
-, getI
-, Identity(..)
+, I(..)
 ) where
 
 import Data.Functor.Const
-import Data.Functor.Identity
+import Data.Functor.I
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
@@ -66,7 +62,7 @@ type family Mul u v where
 
 newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
   deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via Identity
+  deriving (Additive, Applicative, Metric, Monad) via I
 
 infixl 7 :*:
 
@@ -77,7 +73,7 @@ instance (Unit dimu u, Unit dimv v) => Unit (dimu :*: dimv) (u :*: v) where
 
 newtype Inv (u :: * -> *) a = Inv { getInv :: a }
   deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via Identity
+  deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit dimu u => Unit dimu (Inv u) where
   prj = getInv
@@ -88,15 +84,3 @@ instance Unit dimu u => Unit dimu (Inv u) where
 type u :/: v = u :*: Inv v
 
 infixl 7 :/:
-
-
-type I = Identity
-
-pattern I :: a -> Identity a
-pattern I a = Identity a
-
-getI :: I a -> a
-getI = runIdentity
-{-# INLINABLE getI #-}
-
-{-# COMPLETE I #-}
