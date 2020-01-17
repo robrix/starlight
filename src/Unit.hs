@@ -93,7 +93,7 @@ infix 4 .>=.
 -- ** Formatting
 
 formatWith :: Unit dim u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
-formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const ('x':))) "")
+formatWith with n u = with n u (showChar ' ' (getConst (suffix `asTypeOf` (u <$ Const ('x':))) ""))
 
 format :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat
