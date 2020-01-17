@@ -23,6 +23,7 @@ module Unit.Algebra
 , Inv(..)
 , I
 , pattern I
+, getI
 , Identity(..)
 ) where
 
@@ -142,5 +143,9 @@ type I = Identity
 
 pattern I :: a -> Identity a
 pattern I a = Identity a
+
+getI :: I a -> a
+getI = runIdentity
+{-# INLINABLE getI #-}
 
 {-# COMPLETE I #-}
