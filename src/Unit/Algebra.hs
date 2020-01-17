@@ -54,7 +54,7 @@ class (Unit dimu u, Unit dimv v) => MulBy (step :: Act) dimu u dimv v where
   type ResBy step u v :: * -> *
   mulBy :: Fractional a => u a -> v a -> ResBy step u v a
 
--- | Append at the head of the chain.
+-- | Prepend at the head of the chain.
 instance {-# OVERLAPPABLE #-} (Unit dimu u, Unit dimv v) => MulBy 'Prepend dimu u dimv v where
   type ResBy 'Prepend u v = u :*: v
   u `mulBy` v = Prd (prj u * prj v)
