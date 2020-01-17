@@ -3,6 +3,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
@@ -12,6 +13,7 @@ module Unit
 , unitary
 , convert
 , converting
+, convertingTo
   -- ** Comparison
 , (.==.)
 , compareU
@@ -61,6 +63,9 @@ convert = pure . (/ getConst (factor @_ @u')) . (* getConst (factor @_ @u)) . pr
 
 converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Fractional a, Fractional b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
+
+convertingTo :: (Unit dim u, Unit dim u', Fractional a, Fractional b) => (forall a . a -> u a) -> Iso (u a) (u b) (u' a) (u' b)
+convertingTo _ = converting
 
 
 -- ** Comparison
