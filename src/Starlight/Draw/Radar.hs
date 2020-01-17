@@ -137,7 +137,7 @@ shader = program $ \ u
             , vec2 [sin theta,  cos theta ]
             ]
       emitPrimitive $ do
-        i <- var @Int "i" (-(fromIntegral count))
+        i <- var @Int "i" (-fromIntegral count)
         while (get i `lt` (fromIntegral count + 1)) $
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
