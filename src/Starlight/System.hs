@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.System
 ( System(..)
 , bodies_
@@ -23,13 +24,14 @@ import qualified Data.Map.Strict as Map
 import           Data.Maybe (fromMaybe)
 import           GHC.Generics (Generic)
 import           GHC.Stack (HasCallStack)
-import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
 import           Starlight.Identifier
 import           Starlight.Radar
 import           Starlight.Ship (radar_)
 import           Starlight.Weapon.Laser
+import           Unit.Algebra
+import           Unit.Length
 import           Unit.Power
 
 data System a = System
@@ -82,13 +84,20 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     B (Star _) -> True
     _          -> received > threshold
     where
-    r = qd (a^.actor_.position_) (c^.actor_.position_)
-    received = Watts ((c^.ship_.radar_.power_.unitary * gain * aperture * prj (a^.actor_.magnitude_) * patternPropagationFactor ** 4) / ((4 * pi) ** 2 * prj (r ** 2)))
-  patternPropagationFactor = 1
+    received :: Pico Watts Double
+    received = (c^.ship_.radar_.power_.convertingTo (Pico . Watts) .*. gain .*. aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
+    crossSection :: (Mega Metres :*: Mega Metres) Double
+    crossSection = a^.actor_.magnitude_ .*. a^.actor_.magnitude_
+    r :: (Mega Metres :*: Mega Metres) Double
+    r = (a^.actor_.position_) `qdU` (c^.actor_.position_)
+  aperture :: (Mega Metres :*: Mega Metres) Double
+  aperture = 10
+  gain :: I Double
   gain = 1
-  aperture = 1000
-  threshold :: Watts Double
-  threshold = 1.0e-12
+  patternPropagationFactor :: I Double
+  patternPropagationFactor = 1
+  threshold :: Pico Watts Double
+  threshold = 1
 
 neighbourhoodOfPlayer :: HasActor a => System a -> System a
 neighbourhoodOfPlayer sys = neighbourhoodOf (sys^.player_) sys

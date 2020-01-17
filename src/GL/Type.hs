@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module GL.Type
 ( Type(..)
 ) where
@@ -60,12 +62,5 @@ instance Type (f a) => Type (Point f a) where
 
   glDims = P <$> glDims
 
-instance Type a => Type (Const a b) where
-  glType = Const <$> glType
-
-  glDims = Const <$> glDims
-
-instance Type a => Type (Identity a) where
-  glType = Identity <$> glType
-
-  glDims = Identity <$> glDims
+deriving instance Type a => Type (Const a b)
+deriving instance Type a => Type (Identity a)

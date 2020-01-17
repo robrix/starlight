@@ -51,6 +51,7 @@ library
     Control.Effect.Thread
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
+    Data.Functor.I
     Data.Functor.Interval
     Foreign.C.String.Lift
     Foreign.Marshal.Alloc.Lift

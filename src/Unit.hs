@@ -3,15 +3,19 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Unit
 ( -- * Units
   Unit(..)
-, unitary
 , convert
+, convertFrom
+, convertTo
 , converting
+, convertingFrom
+, convertingTo
   -- ** Comparison
 , (.==.)
 , compareU
@@ -31,6 +35,8 @@ import Control.Lens.Iso
 import Data.Char
 import Data.Coerce
 import Data.Functor.Const
+import Data.Functor.I
+import Data.Functor.Identity
 import Numeric
 
 -- * Units
@@ -45,14 +51,29 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
 
   suffix :: Const ShowS (u a)
 
-unitary :: forall u a b dim . (Unit dim u, Fractional a, Fractional b) => Iso (u a) (u b) a b
-unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_ @u)))
+instance Unit I I where
+  suffix = Const (showChar '1')
+
+instance Unit Identity Identity where
+  suffix = Const (showChar '1')
 
 convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
 convert = pure . (/ getConst (factor @_ @u')) . (* getConst (factor @_ @u)) . prj
 
+convertFrom :: (Unit dim u, Unit dim u', Fractional a) => (forall a . a -> u a) -> u a -> u' a
+convertFrom _ = convert
+
+convertTo :: (Unit dim u, Unit dim u', Fractional a) => (forall a . a -> u' a) -> u a -> u' a
+convertTo _ = convert
+
 converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Fractional a, Fractional b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
+
+convertingFrom :: (Unit dim u, Unit dim u', Fractional a, Fractional b) => (forall a . a -> u a) -> Iso (u a) (u b) (u' a) (u' b)
+convertingFrom _ = converting
+
+convertingTo :: (Unit dim u, Unit dim u', Fractional a, Fractional b) => (forall a . a -> u' a) -> Iso (u a) (u b) (u' a) (u' b)
+convertingTo _ = converting
 
 
 -- ** Comparison
@@ -89,7 +110,7 @@ infix 4 .>=.
 -- ** Formatting
 
 formatWith :: Unit dim u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
-formatWith with n u = with n u (getConst (suffix `asTypeOf` (u <$ Const ('x':))) "")
+formatWith with n u = with n u (showChar ' ' (getConst (suffix `asTypeOf` (u <$ Const ('x':))) ""))
 
 format :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat
