@@ -6,6 +6,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -21,6 +22,7 @@ module Unit.Algebra
 , (:/:)
 , Inv(..)
 , I
+, pattern I
 , Identity(..)
 ) where
 
@@ -137,3 +139,8 @@ infixl 7 :/:
 
 
 type I = Identity
+
+pattern I :: a -> Identity a
+pattern I a = Identity a
+
+{-# COMPLETE I #-}
