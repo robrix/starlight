@@ -13,6 +13,7 @@ module GL.Uniform
 
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
+import           Data.Functor.Const
 import           Data.Functor.Identity
 import           Data.Int
 import qualified Foreign.Marshal.Utils.Lift as A
@@ -64,6 +65,7 @@ instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
 
 deriving instance Uniform (f a) => Uniform (Point f a)
 
+deriving instance Uniform a => Uniform (Const a b)
 deriving instance Uniform a => Uniform (Identity a)
 
 
