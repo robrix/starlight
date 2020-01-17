@@ -10,7 +10,6 @@
 module Unit
 ( -- * Units
   Unit(..)
-, unitary
 , convert
 , convertFrom
 , convertTo
@@ -57,9 +56,6 @@ instance Unit I I where
 
 instance Unit Identity Identity where
   suffix = Const (showChar '1')
-
-unitary :: forall u a b dim . (Unit dim u, Fractional a, Fractional b) => Iso (u a) (u b) a b
-unitary = iso ((* getConst (factor @_ @u)) . prj) (pure . (/ getConst (factor @_ @u)))
 
 convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
 convert = pure . (/ getConst (factor @_ @u')) . (* getConst (factor @_ @u)) . prj
