@@ -187,7 +187,7 @@ targetShader = program $ \ u
       while (get i `lt` (fromIntegral count + 1)) . emitPrimitive $ do
         theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
         emitVertex $ do
-          gl_Position .= D.coerce (matrix u) D.!*! mat4[mat3[0.01]] D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
+          gl_Position .= D.coerce (matrix u) D.!*! mat4[mat3[0.0]] D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
           colour3 .= Var "colour2[0]"
         emitVertex $ do
           gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
