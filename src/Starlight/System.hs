@@ -19,6 +19,7 @@ module Starlight.System
 
 import           Control.Effect.Lens.Exts (asserting)
 import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
+import           Data.Coerce
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (fromMaybe)
@@ -87,12 +88,12 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     where
     received :: Pico Watts Double
     received = (c^.ship_.radar_.power_.convertingTo (Pico . Watts) .*. gain .*. aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
-    crossSection :: (Metres :*: Metres) Double
-    crossSection = a^.actor_.magnitude_.convertingTo Metres .*. a^.actor_.magnitude_.convertingTo Metres
-    r :: (Metres :*: Metres) Double
-    r = pure $ fmap (getMetres . convert) (a^.actor_.position_) `qd` fmap (getMetres . convert) (c^.actor_.position_)
-  aperture :: (Metres :*: Metres) Double
-  aperture = 1000
+    crossSection :: (Mega Metres :*: Mega Metres) Double
+    crossSection = a^.actor_.magnitude_ .*. a^.actor_.magnitude_
+    r :: (Mega Metres :*: Mega Metres) Double
+    r = coerce $ (a^.actor_.position_) `qd` (c^.actor_.position_)
+  aperture :: (Mega Metres :*: Mega Metres) Double
+  aperture = 10
   gain :: I Double
   gain = 1
   patternPropagationFactor :: I Double
