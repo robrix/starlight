@@ -132,18 +132,16 @@ shader = program $ \ u
     primitiveIn Points
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
-      let rot theta = mat4
-            [ vec4 [cos theta, -(sin theta), 0, 0]
-            , vec4 [sin theta,  cos  theta , 0, 0]
-            , vec4 [0,          0,           1, 0]
-            , vec4 [0,          0,           0, 1]
+      let rot theta = mat2
+            [ vec2 [cos theta, -sin theta ]
+            , vec2 [sin theta,  cos theta ]
             ]
       emitPrimitive $ do
         i <- var @Int "i" (-(fromIntegral count))
         while (get i `lt` (fromIntegral count + 1)) $
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
-            gl_Position .= D.coerce (matrix u) D.!*! rot theta !* Var "gl_in[0].gl_Position"
+            gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
             colour3 .= Var "colour2[0]"
             i += 1)
 
