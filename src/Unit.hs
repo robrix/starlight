@@ -34,8 +34,8 @@ module Unit
 import Control.Lens.Iso
 import Data.Char
 import Data.Coerce
-import Data.Functor.Const
 import Data.Functor.I
+import Data.Functor.K
 import Data.Functor.Identity
 import Numeric
 
@@ -46,19 +46,19 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
   default prj :: Coercible (u a) a => u a -> a
   prj = coerce
 
-  factor :: Fractional a => Const a (u a)
+  factor :: Fractional a => K a (u a)
   factor = 1
 
-  suffix :: Const ShowS (u a)
+  suffix :: K ShowS (u a)
 
 instance Unit I I where
-  suffix = Const (showChar '1')
+  suffix = K (showChar '1')
 
 instance Unit Identity Identity where
-  suffix = Const (showChar '1')
+  suffix = K (showChar '1')
 
 convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
-convert = pure . (/ getConst (factor @_ @u')) . (* getConst (factor @_ @u)) . prj
+convert = pure . (/ getK (factor @_ @u')) . (* getK (factor @_ @u)) . prj
 
 convertFrom :: (Unit dim u, Unit dim u', Fractional a) => (forall a . a -> u a) -> u a -> u' a
 convertFrom _ = convert
@@ -110,7 +110,7 @@ infix 4 .>=.
 -- ** Formatting
 
 formatWith :: Unit dim u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
-formatWith with n u = with n u (showChar ' ' (getConst (suffix `asTypeOf` (u <$ Const ('x':))) ""))
+formatWith with n u = with n u (showChar ' ' (getK (suffix `asTypeOf` (u <$ K ('x':))) ""))
 
 format :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat

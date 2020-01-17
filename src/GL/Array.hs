@@ -28,8 +28,8 @@ import           Control.Effect.Finally
 import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
-import           Data.Functor.Const
 import           Data.Functor.I
+import           Data.Functor.K
 import           Data.Functor.Interval
 import           Foreign.Marshal.Array.Lift
 import           Foreign.Ptr
@@ -63,17 +63,17 @@ configureArray = do
     offset <- get
     let size = S.sizeOf (undefinedAtFieldType f)
         stride = S.sizeOf (elemA a)
-        Const ty = typeFor f
-        Const dims = dimsFor f
+        K ty = typeFor f
+        K dims = dimsFor f
     put (offset <> Offset size)
 
     trace $ "configuring field " <> name <> " attrib " <> show location <> " at offset " <> show offset <> " stride " <> show stride <> " dims " <> show dims <> " type " <> show ty
 
     checking $ glEnableVertexAttribArray (fromIntegral location)
     checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars `like` a) where
-  typeFor :: GL.Type a => Field v a -> Const GLenum a
+  typeFor :: GL.Type a => Field v a -> K GLenum a
   typeFor _ = GL.glType
-  dimsFor :: GL.Type a => Field v a -> Const GLint a
+  dimsFor :: GL.Type a => Field v a -> K GLint a
   dimsFor _ = GL.glDims
   like :: a Maybe -> Array (a I) -> a Maybe
   like = const

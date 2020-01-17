@@ -18,8 +18,8 @@ import Control.Effect.Reader
 import Control.Lens (choosing, filtered, to, traversed, (^.), (^?), _Just)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
-import Data.Functor.Const
 import Data.Functor.I
+import Data.Functor.K
 import GL.Effect.Check
 import GL.Framebuffer
 import Graphics.GL.Core41
@@ -101,6 +101,6 @@ newtype Frames a = Frames a
   deriving (Eq, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac)
   deriving Applicative via I
 
-instance Unit Rate Frames where suffix = Const ('f':)
+instance Unit Rate Frames where suffix = K ('f':)
 
 data Rate a

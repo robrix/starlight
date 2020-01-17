@@ -15,6 +15,7 @@ import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
 import           Data.Functor.Const
 import           Data.Functor.Identity
+import           Data.Functor.K
 import           Data.Int
 import qualified Foreign.Marshal.Utils.Lift as A
 import           Foreign.Ptr
@@ -67,6 +68,7 @@ deriving instance Uniform (f a) => Uniform (Point f a)
 
 deriving instance Uniform a => Uniform (Const a b)
 deriving instance Uniform a => Uniform (Identity a)
+deriving instance Uniform a => Uniform (K a b)
 
 
 -- | Types which can appear in vectors.
@@ -79,6 +81,8 @@ class GL.Type t => Scalar t where
 
 deriving instance Scalar a => Scalar (Const a b)
 deriving instance Scalar a => Scalar (Identity a)
+deriving instance Scalar a => Scalar (K a b)
+
 data Col
   = C2x1
   | C2x2

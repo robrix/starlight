@@ -24,8 +24,8 @@ import           Control.Carrier.Fresh.Strict
 import           Control.Carrier.State.Strict
 import           Control.Effect.Lift
 import           Data.Function (fix)
-import           Data.Functor.Const
 import           Data.Functor.I
+import           Data.Functor.K
 import           Data.Maybe (fromMaybe)
 import           Data.Monoid (Ap(..), First(..), Sum(..))
 import qualified Foreign as F
@@ -82,7 +82,7 @@ makeVarsM :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field Maybe 
 makeVarsM f = traverseVars (unComp1 . value) (makeVars (Comp1 . f))
 
 foldVars :: (Vars t, Monoid b) => (forall a . GL.Uniform a => Field v a -> b) -> t v -> b
-foldVars f t = getConst $ traverseVars (Const . f) t
+foldVars f t = getK $ traverseVars (K . f) t
 {-# INLINABLE foldVars #-}
 
 foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GL.Uniform a => Field v a -> m b) -> t v -> m b

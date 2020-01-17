@@ -22,8 +22,8 @@ module Unit.Algebra
 , I(..)
 ) where
 
-import Data.Functor.Const
 import Data.Functor.I
+import Data.Functor.K
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
@@ -74,8 +74,8 @@ newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
 infixl 7 :*:
 
 instance (Unit dimu u, Unit dimv v) => Unit (dimu :*: dimv) (u :*: v) where
-  factor = Const (getConst (factor @_ @u) * getConst (factor @_ @v))
-  suffix = Const (getConst (suffix @_ @u) . ('·' :) . getConst (suffix @_ @v))
+  factor = K (getK (factor @_ @u) * getK (factor @_ @v))
+  suffix = K (getK (suffix @_ @u) . ('·' :) . getK (suffix @_ @v))
 
 
 newtype Inv (u :: * -> *) a = Inv { getInv :: a }
@@ -84,8 +84,8 @@ newtype Inv (u :: * -> *) a = Inv { getInv :: a }
 
 instance Unit dimu u => Unit dimu (Inv u) where
   prj = getInv
-  factor = Const (1/getConst (factor @_ @u))
-  suffix = Const (getConst (suffix @_ @u) . ('⁻' :) . ('¹' :))
+  factor = K (1/getK (factor @_ @u))
+  suffix = K (getK (suffix @_ @u) . ('⁻' :) . ('¹' :))
 
 
 type u :/: v = u :*: Inv v

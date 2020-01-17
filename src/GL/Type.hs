@@ -7,6 +7,7 @@ module GL.Type
 import           Data.Int
 import           Data.Functor.Const
 import           Data.Functor.Identity
+import           Data.Functor.K
 import qualified Foreign.Storable as S
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
@@ -17,9 +18,9 @@ import           Linear.V3
 import           Linear.V4
 
 class S.Storable n => Type n where
-  glType :: Const GLenum n
+  glType :: K GLenum n
 
-  glDims :: Const GLint n
+  glDims :: K GLint n
   glDims = 1
 
 instance Type Bool where
@@ -64,3 +65,4 @@ instance Type (f a) => Type (Point f a) where
 
 deriving instance Type a => Type (Const a b)
 deriving instance Type a => Type (Identity a)
+deriving instance Type a => Type (K a b)

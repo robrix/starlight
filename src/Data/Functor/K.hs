@@ -8,10 +8,8 @@ module Data.Functor.K
 
 import Data.Functor.Const
 import Foreign.Storable
-import GL.Type as GL
-import GL.Uniform
 import Linear
 
 newtype K a b = K { getK :: a }
-  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable)
   deriving (Applicative) via Const a

@@ -24,7 +24,7 @@ module Unit.Multiple
 , Tera(..)
 ) where
 
-import Data.Functor.Const
+import Data.Functor.K
 import Data.Proxy
 import Foreign.Storable
 import GHC.TypeLits
@@ -46,7 +46,7 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit dimu u) => Unit dimu (Mult
 
   factor = fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))
 
-  suffix = Const ((symbolVal (Proxy @s) ++) . getConst (suffix @_ @u))
+  suffix = K ((symbolVal (Proxy @s) ++) . getK (suffix @_ @u))
 
 
 -- ** Submultiples

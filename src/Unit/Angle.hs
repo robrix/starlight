@@ -11,8 +11,8 @@ module Unit.Angle
 , module Unit.Multiple
 ) where
 
-import Data.Functor.Const
 import Data.Functor.I
+import Data.Functor.K
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
@@ -29,7 +29,7 @@ newtype Radians a = Radians { getRadians :: a }
   deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Angle Radians where suffix = Const ("rad"++)
+instance Unit Angle Radians where suffix = K ("rad"++)
 
 fromDegrees :: Floating a => Degrees a -> Radians a
 fromDegrees (Degrees d) = Radians (d * pi / 180)
@@ -39,4 +39,4 @@ newtype Degrees a = Degrees { getDegrees :: a }
   deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Angle Degrees where suffix = Const ('°':)
+instance Unit Angle Degrees where suffix = K ('°':)

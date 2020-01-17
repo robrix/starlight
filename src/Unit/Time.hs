@@ -15,8 +15,8 @@ module Unit.Time
 , module Unit.Multiple
 ) where
 
-import Data.Functor.Const
 import Data.Functor.I
+import Data.Functor.K
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
@@ -34,7 +34,7 @@ newtype Seconds a = Seconds { getSeconds :: a }
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Time Seconds where
-  suffix = Const ('s':)
+  suffix = K ('s':)
 
 -- | Convert days to 'Seconds'. Note that this does not take e.g. leap seconds into account.
 fromDays :: Num a => a -> Seconds a

@@ -42,7 +42,7 @@ module GL.Shader.DSL
 
 import qualified Control.Category as Cat
 import           Data.Function (fix)
-import           Data.Functor.Const
+import           Data.Functor.K
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
 import           GHC.Generics
@@ -96,7 +96,7 @@ instance Vars None
 shaderSources :: Shader u i o -> [(Shader.Type, String)]
 shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> stageSources u' (f u) where
   u = makeVars (Var . name)
-  u' = foldVars (getConst . value) (makeVars (pvar "uniform" . name) `like` u)
+  u' = foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
 
 stageSources :: Doc () -> Stage i o -> [(Shader.Type, Doc ())]
 stageSources u = \case
@@ -111,15 +111,15 @@ stageSources u = \case
     $  pretty "#version 410" <> hardline
     <> u
     <> case t of
-      Shader.Geometry -> foldVars (getConst . value) (makeVars (pvar "in" . (<> "[]") . name) `like` i)
-      _               -> foldVars (getConst . value) (makeVars (pvar "in"      . name) `like` i)
-    <> foldVars (getConst . value) (makeVars (pvar "out"     . name) `like` o)
+      Shader.Geometry -> foldVars (getK . value) (makeVars (pvar "in" . (<> "[]") . name) `like` i)
+      _               -> foldVars (getK . value) (makeVars (pvar "in"      . name) `like` i)
+    <> foldVars (getK . value) (makeVars (pvar "out"     . name) `like` o)
     <> renderDecl (f i o) where
     i = makeVars (Var . name)
     o = makeVars (Ref . name)
 
-like :: t (Const a) -> t b -> t (Const a)
+like :: t (K a) -> t b -> t (K a)
 like = const
 
-pvar :: GL.Uniform a => String -> String -> Const (Doc ()) a
-pvar qual n = fix $ \ c -> Const $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline
+pvar :: GL.Uniform a => String -> String -> K (Doc ()) a
+pvar qual n = fix $ \ c -> K $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline

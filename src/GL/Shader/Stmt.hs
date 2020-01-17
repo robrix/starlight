@@ -31,7 +31,7 @@ module GL.Shader.Stmt
 ) where
 
 import           Control.Monad (ap, liftM, (<=<))
-import           Data.Functor.Const
+import           Data.Functor.K
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           GL.Shader (Type(..))
 import           GL.Shader.Expr
@@ -40,7 +40,7 @@ import           Prelude hiding (break)
 
 data Stmt (k :: Type) a where
   Pure :: a -> Stmt k a
-  Let :: GL.Uniform b => String -> Expr k b -> (Const String b -> Stmt k a) -> Stmt k a
+  Let :: GL.Uniform b => String -> Expr k b -> (K String b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
   If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
   Switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k a -> Stmt k a
@@ -86,10 +86,10 @@ instance Monad (Stmt k) where
 
 
 let' :: GL.Uniform a => String -> Expr k a -> Stmt k (Expr k a)
-let' n v = Let n v (pure . Var . getConst)
+let' n v = Let n v (pure . Var . getK)
 
 var :: GL.Uniform a => String -> Expr k a -> Stmt k (Ref k a)
-var n v = Let n v (pure . Ref . getConst)
+var n v = Let n v (pure . Ref . getK)
 
 
 iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
@@ -142,7 +142,7 @@ renderStmt = \case
   Pure _ -> mempty
   Let n v k
     -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-    <> renderStmt (k (Const n))
+    <> renderStmt (k (K n))
   Discard k
     -> pretty "discard" <> pretty ';' <> hardline
     <> renderStmt k

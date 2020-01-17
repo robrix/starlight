@@ -9,8 +9,8 @@ module Unit.Mass
 , module Unit.Multiple
 ) where
 
-import Data.Functor.Const
 import Data.Functor.I
+import Data.Functor.K
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
@@ -27,4 +27,4 @@ newtype Grams a = Grams { getGrams :: a }
   deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Mass Grams where suffix = Const ('g':)
+instance Unit Mass Grams where suffix = K ('g':)
