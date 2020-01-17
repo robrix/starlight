@@ -19,6 +19,7 @@ module Unit.Algebra
 , (:*:)(..)
 , (:/:)(..)
 , Inv(..)
+, I
 ) where
 
 import Data.Functor.Const
@@ -128,3 +129,6 @@ infixl 7 :/:
 instance (Unit dimu u, Unit dimv v) => Unit (dimu :/: dimv) (u :/: v) where
   factor = Const (getConst (factor @_ @u) / getConst (factor @_ @v))
   suffix = Const (getConst (suffix @_ @u) . ('/' :) . getConst (suffix @_ @v))
+
+
+type I = Identity
