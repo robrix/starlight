@@ -32,6 +32,8 @@ import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Buffer as B
 import           GL.Effect.Check
+import           GL.Program
+import           GL.Shader (Type(..))
 import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts as Linear hiding ((!*))
@@ -41,7 +43,6 @@ import           Starlight.Character
 import qualified Starlight.Ship as S
 import           Starlight.System
 import           Starlight.View
-import qualified UI.Drawable as UI
 import qualified UI.Window as Window
 import           Unit.Angle
 import           Unit.Length
@@ -55,37 +56,50 @@ drawRadar
      , Has (Reader View) sig m
      )
   => m ()
-drawRadar = UI.using getDrawable $ do
-  view@View{ scale } <- ask
+drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindArray array . B.bindBuffer buffer $ do
   system@System{ bodies } <- ask @(System B.StateVectors)
-  let target   = system^.player_.target_
-      here     = system^.player_.actor_.position_._xy
+  view@View{ scale } <- ask
+  let here     = system^.player_.actor_.position_._xy
       npcs     = system^.npcs_
       vertices = verticesForShips scale npcs <> verticesForBodies bodies
 
-  measure "realloc/copy" $ do
-    B.realloc (length vertices) B.Static B.Draw
-    B.copy 0 vertices
+  use radarProgram $ do
+    measure "realloc/copy" $ do
+      B.realloc (length vertices) B.Static B.Draw
+      B.copy 0 vertices
 
-  matrix_ ?= tmap realToFrac (transformToWindow view)
-  here_   ?= (fmap realToFrac <$> here)
+    matrix_ ?= tmap realToFrac (transformToWindow view)
+    here_   ?= (fmap realToFrac <$> here)
 
-  -- FIXME: skip blips for extremely distant objects
-  -- FIXME: blips should shadow more distant blips
-  -- FIXME: fade colour with distance
-  -- FIXME: IFF
-  measure "bodies & npcs" $
-    drawArrays Points (Interval 0 (I (length vertices)))
+    -- FIXME: skip blips for extremely distant objects
+    -- FIXME: blips should shadow more distant blips
+    -- FIXME: fade colour with distance
+    -- FIXME: IFF
+    measure "bodies & npcs" $
+      drawArrays Points (Interval 0 (I (length vertices)))
 
-  measure "targets" $
-    for_ (target >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
-      drawArraysInstanced Points (Interval (I index) (I index + 1)) targetBlipCount
+  use targetProgram $ do
+    matrix_ ?= tmap realToFrac (transformToWindow view)
+    here_   ?= (fmap realToFrac <$> here)
+
+    measure "targets" $
+      for_ (system^.player_.target_ >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
+        drawArrays Points (Interval (I index) (I index + 1))
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
-runRadar = UI.loadingDrawable Drawable shader []
+runRadar m = do
+  radarProgram  <- build shader
+  targetProgram <- build targetShader
+  (buffer, array) <- load []
+  runReader Drawable{ radarProgram, targetProgram, array, buffer } m
 
 
-newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
+data Drawable = Drawable
+  { radarProgram  :: Program U V Frag
+  , targetProgram :: Program U V Frag
+  , array         :: Array (V I)
+  , buffer        :: B.Buffer 'B.Array (V I)
+  }
 
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
@@ -105,27 +119,36 @@ verticesForShips scale cs =
 targetBlipCount :: Int
 targetBlipCount = 10
 
+vertex' :: U (Expr 'Vertex) -> Stage V IG
+vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
+  there <- let' "there" (D.coerce there - D.coerce (here u))
+  d     <- let' "d"     (D.norm there)
+  dir   <- let' "dir"   (there D.^* (1/d))
+  let perp v = vec2 [negate (v D.^.D._y), v D.^.D._x]
+      angleOf vec = D.coerce $ atan2' (vec D.^.D._y) (vec D.^.D._x)
+      wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
+  edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
+  angle <- let' "angle" (angleOf there)
+  radius <- var "radius" radius
+  let step = D.max' 1 (D.min' maxStep (d * 20)) -- FIXME: account for unit size without hard-coding conversion factor
+  iff (gl_InstanceID `gt` 0)
+    (radius .= step * float gl_InstanceID)
+    (pure ())
+  minSweep <- let' "minSweep" (D.coerce (minBlipSize / (2 * pi * get radius)))
+  sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf edge - angle)))
+  pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce (get radius))
+  colour2 .= colour
+  gl_Position .= ext4 (ext3 pos 0) 1) where
+  minBlipSize = 16
+  radius = 300
+  maxStep = radius / fromIntegral targetBlipCount
+
+fragment' :: Stage IF Frag
+fragment' = fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
+
 shader :: Shader U V Frag
 shader = program $ \ u
-  ->  vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
-    there <- let' "there" (D.coerce there - D.coerce (here u))
-    d     <- let' "d"     (D.norm there)
-    dir   <- let' "dir"   (there D.^* (1/d))
-    let perp v = vec2 [negate (v D.^.D._y), v D.^.D._x]
-        angleOf vec = D.coerce $ atan2' (vec D.^.D._y) (vec D.^.D._x)
-        wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-    edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
-    angle <- let' "angle" (angleOf there)
-    radius <- var "radius" radius
-    let step = D.max' 1 (D.min' maxStep (d * 20)) -- FIXME: account for unit size without hard-coding conversion factor
-    iff (gl_InstanceID `gt` 0)
-      (radius .= step * float gl_InstanceID)
-      (pure ())
-    minSweep <- let' "minSweep" (D.coerce (minBlipSize / (2 * pi * get radius)))
-    sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf edge - angle)))
-    pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce (get radius))
-    colour2 .= colour
-    gl_Position .= ext4 (ext3 pos 0) 1)
+  ->  vertex' u
 
   >>> geometry (\ IG{} IF{ colour3 } -> do
     primitiveIn Points
@@ -137,18 +160,42 @@ shader = program $ \ u
             ]
       emitPrimitive $ do
         i <- var @Int "i" (-fromIntegral count)
-        while (get i `lt` (fromIntegral count + 1)) $
+        while (get i `lt` (fromIntegral count + 1)) $ do
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
             gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
             colour3 .= Var "colour2[0]"
-            i += 1)
+          i += 1)
 
-  >>> fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3) where
-  minBlipSize = 16
+  >>> fragment' where
   count = 16
-  radius = 300
-  maxStep = radius / fromIntegral targetBlipCount
+
+
+targetShader :: Shader U V Frag
+targetShader = program $ \ u
+  ->  vertex' u
+
+  >>> geometry (\ IG{} IF{ colour3 } -> do
+    primitiveIn Points
+    primitiveOut LineStrip ((count * 2 + 1) * 2)
+    main $ do
+      let rot theta = mat2
+            [ vec2 [cos theta, -sin theta ]
+            , vec2 [sin theta,  cos theta ]
+            ]
+      i <- var @Int "i" (-fromIntegral count)
+      while (get i `lt` (fromIntegral count + 1)) . emitPrimitive $ do
+        theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
+        emitVertex $ do
+          gl_Position .= D.coerce (matrix u) D.!*! mat4[mat3[0.01]] D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
+          colour3 .= Var "colour2[0]"
+        emitVertex $ do
+          gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
+          colour3 .= Var "colour2[0]"
+        i += 1)
+
+  >>> fragment' where
+  count = 1
 
 
 data U v = U
