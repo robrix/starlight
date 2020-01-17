@@ -85,7 +85,8 @@ type family Mul' u v where
   Mul' u         v = u :*: v
 
 type family Div' u v where
-  Div' u v = u :/: v
+  Div' (u :*: v) v = u
+  Div' u         v = u :/: v
 
 data Act = Prepend | CancelL | CancelR | Decompose | Walk
 
