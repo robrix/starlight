@@ -126,6 +126,12 @@ instance Unit dimu u => Unit dimu (Inv u) where
   suffix = Const (getConst (suffix @_ @u) . ('⁻' :) . ('¹' :))
 
 
-type (u :/: v) = u :*: Inv v
+newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
+  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Scalar, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via Identity
 
 infixl 7 :/:
+
+instance (Unit dimu u, Unit dimv v) => Unit (dimu :/: dimv) (u :/: v) where
+  factor = Const (getConst (factor @_ @u) / getConst (factor @_ @v))
+  suffix = Const (getConst (suffix @_ @u) . ('/' :) . getConst (suffix @_ @v))
