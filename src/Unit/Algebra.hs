@@ -17,7 +17,7 @@ module Unit.Algebra
 , (./.)
   -- * Combinators
 , (:*:)(..)
-, (:/:)
+, (:/:)(..)
 , Inv(..)
 ) where
 
