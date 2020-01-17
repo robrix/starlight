@@ -52,7 +52,7 @@ instance (AlgBy step dimu u dimv v, Step u v ~ step, Unit dimu u, Unit dimv v) =
   (.*.) = mulBy @step
 
 
-class (Unit dimu u, Unit dimv v) => AlgBy (step :: Act) dimu u dimv v where
+class (Unit dimu u, Unit dimv v) => AlgBy (step :: Act) dimu u dimv v | u -> dimu, v -> dimv where
   type ResBy step u v (c :: (* -> *) -> (* -> *) -> (* -> *)) :: * -> *
   mulBy :: Fractional a => u a -> v a -> ResBy step u v (:*:) a
 
