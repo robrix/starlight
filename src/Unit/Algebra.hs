@@ -94,13 +94,13 @@ type family Div' u v where
 data Act = Prepend | CancelL | CancelR | Decompose | Walk
 
 type family Step u v where
-  Step (v     :*: _)     (Inv v)   = 'CancelL
-  Step (Inv v :*: _)     v         = 'CancelL
-  Step (_     :*: v)     (Inv v)   = 'CancelR
-  Step (_     :/: v) v             = 'CancelR
-  Step _                 (_ :*: _) = 'Decompose
-  Step (_     :*: _)     _         = 'Walk
-  Step _                 _         = 'Prepend
+  Step (v     :*: _) (Inv v)   = 'CancelL
+  Step (Inv v :*: _) v         = 'CancelL
+  Step (_     :*: v) (Inv v)   = 'CancelR
+  Step (_     :/: v) v         = 'CancelR
+  Step _             (_ :*: _) = 'Decompose
+  Step (_     :*: _) _         = 'Walk
+  Step _             _         = 'Prepend
 
 type family InvOf u where
   InvOf (Inv u) = u
