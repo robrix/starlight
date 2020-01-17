@@ -17,8 +17,8 @@ module Unit.Algebra
 , (./.)
   -- * Combinators
 , (:*:)(..)
-, Inv(..)
 , (:/:)
+, Inv(..)
 ) where
 
 import Data.Functor.Const
