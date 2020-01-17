@@ -17,11 +17,11 @@ module Starlight.Draw.Radar
 
 import           Control.Carrier.Reader
 import           Control.Effect.Finally
-import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Profile
+import           Control.Effect.State (put)
 import           Control.Effect.Trace
-import           Control.Lens (Lens', (^.))
+import           Control.Lens (Lens', (^.), (?~), (&))
 import           Data.Foldable (for_, toList)
 import           Data.Functor.I
 import           Data.Functor.Interval
@@ -34,6 +34,7 @@ import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
 import           GL.Shader (Type(..))
+import           GL.Shader.Vars (defaultVars)
 import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts as Linear hiding ((!*))
@@ -61,16 +62,17 @@ drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> 
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
       vertices = verticesForShips scale npcs <> verticesForBodies bodies
+      vars = defaultVars
+        & matrix_ ?~ tmap realToFrac (transformToWindow view)
+        & here_   ?~ (fmap realToFrac <$> here)
+        & scale_  ?~ realToFrac (lengthToWindowPixels view)
 
   measure "realloc/copy" $ do
     B.realloc (length vertices) B.Static B.Draw
     B.copy 0 vertices
 
   use radarProgram $ do
-    matrix_ ?= tmap realToFrac (transformToWindow view)
-    here_   ?= (fmap realToFrac <$> here)
-    scale_  ?= realToFrac (lengthToWindowPixels view)
-
+    put vars
     -- FIXME: skip blips for extremely distant objects
     -- FIXME: blips should shadow more distant blips
     -- FIXME: fade colour with distance
@@ -79,9 +81,7 @@ drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> 
       drawArrays Points (Interval 0 (I (length vertices)))
 
   use targetProgram $ do
-    matrix_ ?= tmap realToFrac (transformToWindow view)
-    here_   ?= (fmap realToFrac <$> here)
-    scale_  ?= realToFrac (lengthToWindowPixels view)
+    put vars
 
     measure "targets" $
       for_ (system^.player_.target_ >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
