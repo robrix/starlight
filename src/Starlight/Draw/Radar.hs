@@ -116,9 +116,6 @@ verticesForShips scale cs =
   ]
 
 
-targetBlipCount :: Int
-targetBlipCount = 10
-
 vertex' :: U (Expr 'Vertex) -> Stage V IG
 vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
   there <- let' "there" (D.coerce there - D.coerce (here u))
@@ -129,19 +126,13 @@ vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
       wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
   edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
   angle <- let' "angle" (angleOf there)
-  radius <- var "radius" radius
-  let step = D.max' 1 (D.min' maxStep (d * 20)) -- FIXME: account for unit size without hard-coding conversion factor
-  iff (gl_InstanceID `gt` 0)
-    (radius .= step * float gl_InstanceID)
-    (pure ())
-  minSweep <- let' "minSweep" (D.coerce (minBlipSize / (2 * pi * get radius)))
+  minSweep <- let' "minSweep" (minBlipSize / (2 * pi * radius))
   sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf edge - angle)))
-  pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce (get radius))
+  pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
   colour2 .= colour
   gl_Position .= ext4 (ext3 pos 0) 1) where
   minBlipSize = 16
   radius = 300
-  maxStep = radius / fromIntegral targetBlipCount
 
 fragment' :: Stage IF Frag
 fragment' = fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
