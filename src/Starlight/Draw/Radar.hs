@@ -88,7 +88,7 @@ drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> 
 
 runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
 runRadar m = do
-  radarProgram  <- build shader
+  radarProgram  <- build radarShader
   targetProgram <- build targetShader
   (buffer, array) <- load []
   runReader Drawable{ radarProgram, targetProgram, array, buffer } m
@@ -137,8 +137,8 @@ vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
 fragment' :: Stage IF Frag
 fragment' = fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
 
-shader :: Shader U V Frag
-shader = program $ \ u
+radarShader :: Shader U V Frag
+radarShader = program $ \ u
   ->  vertex' u
 
   >>> geometry (\ IG{} IF{ colour3 } -> do
