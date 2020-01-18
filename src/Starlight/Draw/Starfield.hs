@@ -23,7 +23,7 @@ import           Control.Lens (Lens')
 import           Data.Coerce (coerce)
 import qualified Data.Fixed as Fixed
 import           Data.Functor.I
-import           Data.Functor.Interval hiding (max')
+import           Data.Functor.Interval hiding (range, max')
 import           Data.Generics.Product.Fields
 import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
