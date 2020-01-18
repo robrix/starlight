@@ -42,7 +42,6 @@ import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
-import qualified Starlight.Ship as S
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour
@@ -63,7 +62,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   system@System{ bodies } <- ask @(System B.StateVectors)
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
-      vertices = verticesForShips scale npcs <> verticesForBlips (blipFor 1 <$> bodies)
+      vertices = verticesForBlips (blipFor (1/scale) <$> npcs) <> verticesForBlips (blipFor 1 <$> bodies)
       vars = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
         & here_   ?~ here
@@ -117,17 +116,11 @@ instance HasColour Blip where
 blipFor :: (HasActor t, HasColour t) => Double -> t -> Blip
 blipFor scale t = Blip{ scale, actor = t^.actor_, colour = t^.colour_ }
 
+-- FIXME: take ship profile into account
 verticesForBlips :: Foldable t => t Blip -> [V I]
 verticesForBlips bs =
   [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_ ^* scale), colour = I (b^.colour_) }
   | b@Blip{ scale } <- toList bs
-  ]
-
--- FIXME: take ship profile into account
-verticesForShips :: Foldable t => Double -> t Character -> [V I]
-verticesForShips scale cs =
-  [ V{ there = I (there^._xy), r = I (c^.magnitude_ ^/ scale), colour = I colour }
-  | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 
 
