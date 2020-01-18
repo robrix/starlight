@@ -85,37 +85,15 @@ deriving instance Scalar a => Scalar (K a b)
 
 data Col
   = C2x1
-  | C2x2
-  | C2x3
-  | C2x4
   | C3x1
-  | C3x2
-  | C3x3
-  | C3x4
   | C4x1
-  | C4x2
-  | C4x3
-  | C4x4
   deriving (Enum, Eq, Ord, Show)
 
 glslTypeForCol :: Col -> String
 glslTypeForCol = \case
   C2x1 -> "vec2"
-  C2x2 -> "mat2"
-  C2x3 -> "mat2x3"
-  C2x4 -> "mat2x4"
   C3x1 -> "vec3"
-  C3x2 -> "mat3x2"
-  C3x3 -> "mat3"
-  C3x4 -> "mat3x4"
   C4x1 -> "vec4"
-  C4x2 -> "mat4x2"
-  C4x3 -> "mat4x3"
-  C4x4 -> "mat4"
-
-transposing :: (GLuint -> GLint -> GLsizei -> GLboolean -> Ptr t -> IO ()) -> (GLuint -> GLint -> GLsizei -> Ptr t -> IO ())
-transposing f prog loc n = f prog loc n GL_TRUE
-{-# INLINE transposing #-}
 
 instance Scalar Float where
   glslTypeFor = glslTypeForCol
@@ -123,17 +101,8 @@ instance Scalar Float where
 
   uniformFor = \case
     C2x1 -> glProgramUniform2fv
-    C2x2 -> transposing glProgramUniformMatrix2fv
-    C2x3 -> transposing glProgramUniformMatrix2x3fv
-    C2x4 -> transposing glProgramUniformMatrix2x4fv
     C3x1 -> glProgramUniform3fv
-    C3x2 -> transposing glProgramUniformMatrix3x2fv
-    C3x3 -> transposing glProgramUniformMatrix3fv
-    C3x4 -> transposing glProgramUniformMatrix3x4fv
     C4x1 -> glProgramUniform4fv
-    C4x2 -> transposing glProgramUniformMatrix4x2fv
-    C4x3 -> transposing glProgramUniformMatrix4x3fv
-    C4x4 -> transposing glProgramUniformMatrix4fv
   {-# INLINE uniformFor #-}
 
 instance Scalar Double where
@@ -142,32 +111,106 @@ instance Scalar Double where
 
   uniformFor = \case
     C2x1 -> glProgramUniform2dv
+    C3x1 -> glProgramUniform3dv
+    C4x1 -> glProgramUniform4dv
+  {-# INLINE uniformFor #-}
+
+instance Scalar2 t => Scalar (V2 t) where
+  glslTypeFor = glslTypeFor2 @t . replace2
+  uniformFor = coerce . uniformFor2 @t . replace2
+
+replace2 = \case
+  C2x1 -> C2x2
+  C3x1 -> C3x2
+  C4x1 -> C4x2
+{-# INLINE replace2 #-}
+
+instance Scalar2 t => Scalar (V3 t) where
+  glslTypeFor = glslTypeFor2 @t . replace3
+  uniformFor = coerce . uniformFor2 @t . replace3
+
+replace3 = \case
+  C2x1 -> C2x3
+  C3x1 -> C3x3
+  C4x1 -> C4x3
+{-# INLINE replace3 #-}
+
+instance Scalar2 t => Scalar (V4 t) where
+  glslTypeFor = glslTypeFor2 @t . replace4
+  uniformFor = coerce . uniformFor2 @t . replace4
+
+replace4 = \case
+  C2x1 -> C2x4
+  C3x1 -> C3x4
+  C4x1 -> C4x4
+{-# INLINE replace4 #-}
+
+
+class Scalar t => Scalar2 t where
+  glslTypeFor2 :: Col2 -> String
+
+  uniformFor2 :: Col2 -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+
+deriving instance Scalar2 a => Scalar2 (Const a b)
+deriving instance Scalar2 a => Scalar2 (Identity a)
+deriving instance Scalar2 a => Scalar2 (K a b)
+
+data Col2
+  = C2x2
+  | C2x3
+  | C2x4
+  | C3x2
+  | C3x3
+  | C3x4
+  | C4x2
+  | C4x3
+  | C4x4
+  deriving (Enum, Eq, Ord, Show)
+
+glslTypeForCol2 :: Col2 -> String
+glslTypeForCol2 = \case
+  C2x2 -> "mat2"
+  C2x3 -> "mat2x3"
+  C2x4 -> "mat2x4"
+  C3x2 -> "mat3x2"
+  C3x3 -> "mat3"
+  C3x4 -> "mat3x4"
+  C4x2 -> "mat4x2"
+  C4x3 -> "mat4x3"
+  C4x4 -> "mat4"
+
+transposing :: (GLuint -> GLint -> GLsizei -> GLboolean -> Ptr t -> IO ()) -> (GLuint -> GLint -> GLsizei -> Ptr t -> IO ())
+transposing f prog loc n = f prog loc n GL_TRUE
+{-# INLINE transposing #-}
+
+instance Scalar2 Float where
+  glslTypeFor2 = glslTypeForCol2
+  {-# INLINE glslTypeFor2 #-}
+
+  uniformFor2 = \case
+    C2x2 -> transposing glProgramUniformMatrix2fv
+    C2x3 -> transposing glProgramUniformMatrix2x3fv
+    C2x4 -> transposing glProgramUniformMatrix2x4fv
+    C3x2 -> transposing glProgramUniformMatrix3x2fv
+    C3x3 -> transposing glProgramUniformMatrix3fv
+    C3x4 -> transposing glProgramUniformMatrix3x4fv
+    C4x2 -> transposing glProgramUniformMatrix4x2fv
+    C4x3 -> transposing glProgramUniformMatrix4x3fv
+    C4x4 -> transposing glProgramUniformMatrix4fv
+  {-# INLINE uniformFor2 #-}
+
+instance Scalar2 Double where
+  glslTypeFor2 = ('d':) . glslTypeForCol2
+  {-# INLINE glslTypeFor2 #-}
+
+  uniformFor2 = \case
     C2x2 -> transposing glProgramUniformMatrix2dv
     C2x3 -> transposing glProgramUniformMatrix2x3dv
     C2x4 -> transposing glProgramUniformMatrix2x4dv
-    C3x1 -> glProgramUniform3dv
     C3x2 -> transposing glProgramUniformMatrix3x2dv
     C3x3 -> transposing glProgramUniformMatrix3dv
     C3x4 -> transposing glProgramUniformMatrix3x4dv
-    C4x1 -> glProgramUniform4dv
     C4x2 -> transposing glProgramUniformMatrix4x2dv
     C4x3 -> transposing glProgramUniformMatrix4x3dv
     C4x4 -> transposing glProgramUniformMatrix4dv
-  {-# INLINE uniformFor #-}
-
-instance Scalar t => Scalar (V2 t) where
-  glslTypeFor = glslTypeFor @t . replace1d succ
-  uniformFor = coerce . uniformFor @t . replace1d succ
-
-instance Scalar t => Scalar (V3 t) where
-  glslTypeFor = glslTypeFor @t . replace1d (succ . succ)
-  uniformFor = coerce . uniformFor @t . replace1d (succ . succ)
-
-instance Scalar t => Scalar (V4 t) where
-  glslTypeFor = glslTypeFor @t . replace1d (succ . succ . succ)
-  uniformFor = coerce . uniformFor @t . replace1d (succ . succ . succ)
-
-replace1d :: (Col -> Col) -> Col -> Col
-replace1d f c
-  | c `elem` [C2x1, C3x1, C4x1] = f c
-  | otherwise                   = c
+  {-# INLINE uniformFor2 #-}
