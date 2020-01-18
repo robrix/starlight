@@ -3,7 +3,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module UI.Typeface
-( Typeface(name, glyphs)
+( Typeface(name, glyphs, offsets)
 , Font(..)
 , fontScale
 , metrics
