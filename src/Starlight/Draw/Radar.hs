@@ -34,7 +34,7 @@ import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
 import           GL.Shader (Type(..))
-import           GL.Shader.Vars (defaultVars)
+import           GL.Shader.Vars (makeVars)
 import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts as Linear hiding ((!*))
@@ -62,7 +62,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
       vertices = verticesForShips scale npcs <> verticesForBodies bodies
-      vars = defaultVars
+      vars = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
         & here_   ?~ here
         & scale_  ?~ realToFrac (lengthToWindowPixels view)

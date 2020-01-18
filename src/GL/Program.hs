@@ -98,7 +98,7 @@ instance HasProgram u v o m => HasProgram u v o (StateC s m) where
 
 instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramC u v o m) where
   alg = \case
-    L (Get   k) -> k defaultVars
+    L (Get   k) -> k (makeVars (const Nothing))
     L (Put s k) -> do
       Program ls prog <- askProgram
       foldVarsM (\ Field { location, value } ->

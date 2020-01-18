@@ -69,8 +69,8 @@ configureSeparate :: forall v1 v2 m sig . (Effect sig, HasArray (v1 :**: v2) m, 
 configureSeparate b1 b2 = evalState (Offset 0) (askArray >> B.bindBuffer b1 (configureVars @v1 stride (defaultVars @v1)) >> B.bindBuffer b2 (configureVars @v2 stride (defaultVars @v2))) where
   stride = S.sizeOf @((v1 :**: v2) I) undefined
 
-configureVars :: (Vars v, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> v Maybe -> m ()
-configureVars stride = foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
+configureVars :: (Vars v, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> v Proxy -> m ()
+configureVars stride = foldVarsM (\ (Field{ location, name } :: Field Proxy a) -> runLiftIO $ do
   offset <- get
   let size   = S.sizeOf @a undefined
       K ty   = GL.glType @a

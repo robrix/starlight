@@ -85,8 +85,8 @@ deriving via Fields (l :**: r) instance (Vars l, Vars r) => F.Storable ((l :**: 
 
 
 class Vars t where
-  makeVars' :: Has Fresh sig m => (forall a . GL.Uniform a => Field Maybe a -> v a) -> m (t v)
-  default makeVars' :: (Generic (t v), GMakeVars t v (Rep (t v)), Has Fresh sig m) => (forall a . GL.Uniform a => Field Maybe a -> v a) -> m (t v)
+  makeVars' :: Has Fresh sig m => (forall a . GL.Uniform a => Field Proxy a -> v a) -> m (t v)
+  default makeVars' :: (Generic (t v), GMakeVars t v (Rep (t v)), Has Fresh sig m) => (forall a . GL.Uniform a => Field Proxy a -> v a) -> m (t v)
   makeVars' f = to <$> gmakeVars @t f
   {-# INLINABLE makeVars' #-}
 
@@ -109,13 +109,13 @@ instance (Vars l, Vars r) => Vars (l :**: r) where
   traverseVars' f (l :**: r) = liftA2 (:**:) <$> traverseVars' f l <*> traverseVars' f r
   {-# INLINABLE traverseVars' #-}
 
-makeVars :: Vars t => (forall a . GL.Uniform a => Field Maybe a -> v a) -> t v
+makeVars :: Vars t => (forall a . GL.Uniform a => Field Proxy a -> v a) -> t v
 makeVars f = run (evalFresh 0 (makeVars' f))
 
 traverseVars :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field v a -> m (v' a)) -> t v -> m (t v')
 traverseVars f t = run (evalFresh 0 (traverseVars' f t))
 
-makeVarsM :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field Maybe a -> m (v a)) -> m (t v)
+makeVarsM :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field Proxy a -> m (v a)) -> m (t v)
 makeVarsM f = traverseVars (unComp1 . value) (makeVars (Comp1 . f))
 
 foldVars :: (Vars t, Monoid b) => (forall a . GL.Uniform a => Field v a -> b) -> t v -> b
@@ -126,7 +126,7 @@ foldVarsM :: (Vars t, Monoid b, Applicative m) => (forall a . GL.Uniform a => Fi
 foldVarsM f t = getAp $ foldVars (Ap . f) t
 {-# INLINABLE foldVarsM #-}
 
-defaultVars :: Vars t => t Maybe
+defaultVars :: Vars t => t Proxy
 defaultVars = makeVars value
 {-# INLINABLE defaultVars #-}
 
@@ -140,7 +140,7 @@ displayVars = ($ "") . showBraces . foldr (.) id . intersperse (showString ", ")
 
 
 class GMakeVars t v f where
-  gmakeVars :: Has Fresh sig m => (forall a . GL.Uniform a => Field Maybe a -> v a) -> m (f (t v))
+  gmakeVars :: Has Fresh sig m => (forall a . GL.Uniform a => Field Proxy a -> v a) -> m (f (t v))
 
 instance GMakeVars t v f => GMakeVars t v (M1 D d f) where
   gmakeVars f = M1 <$> gmakeVars f
@@ -161,11 +161,11 @@ instance (GMakeVars t v fl, GMakeVars t v fr) => GMakeVars t v (fl :*: fr) where
 instance (GMakeVar t a v f, Selector s) => GMakeVars t v (M1 S s f) where
   gmakeVars f = do
     i <- fresh
-    pure (fix $ \ x -> M1 (gmakeVar f (Field (selName x) i Nothing)))
+    pure (fix $ \ x -> M1 (gmakeVar f (Field (selName x) i Proxy)))
   {-# INLINABLE gmakeVars #-}
 
 class GMakeVar t a v f | f -> a v where
-  gmakeVar :: (forall a . GL.Uniform a => Field Maybe a -> v a) -> (forall a . Field Maybe a) -> f (t v)
+  gmakeVar :: (forall a . GL.Uniform a => Field Proxy a -> v a) -> (forall a . Field Proxy a) -> f (t v)
 
 instance GL.Uniform a => GMakeVar t a v (K1 R (v a)) where
   gmakeVar f s = K1 (f s)
