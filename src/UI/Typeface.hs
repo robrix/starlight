@@ -13,7 +13,6 @@ module UI.Typeface
 , layoutString
 ) where
 
-import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
 import           Control.Effect.Trace
 import           Control.Lens
@@ -38,7 +37,6 @@ import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Object
 import           GL.Program
-import           GL.Shader.Vars (Offset(..))
 import           Linear.V2
 import qualified Opentype.Fileformat as O
 import           UI.Drawable
@@ -144,7 +142,7 @@ cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { array }, glyp
       realloc @'B.Array (length vertices) Static Draw
       copy @'B.Array 0 (coerce (map (fmap (fromIntegral @_ @Float)) vertices))
 
-      evalState (Offset 0) configureInterleaved
+      configureInterleaved
 
   sendM (writeIORef rangesRef ranges)
 

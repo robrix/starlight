@@ -62,10 +62,10 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureInterleaved :: forall v m sig . (HasArray v m, B.HasBuffer 'B.Array (v I) m, Vars v, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => m ()
+configureInterleaved :: forall v m sig . (Effect sig, HasArray v m, B.HasBuffer 'B.Array (v I) m, Vars v, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureInterleaved = do
   _ <- askArray <* B.askBuffer @'B.Array
-  foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
+  evalState (Offset 0) $ foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
     offset <- get
     let size   = S.sizeOf @a     undefined
         stride = S.sizeOf @(v I) undefined
@@ -197,7 +197,7 @@ load is = do
     B.realloc @'B.Array (length is) B.Static B.Draw
     B.copy @'B.Array 0 is
 
-    (b, a) <$ evalState (Offset 0) configureInterleaved
+    (b, a) <$ configureInterleaved
 
 
 bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (v I) -> ArrayC v m a -> m a
