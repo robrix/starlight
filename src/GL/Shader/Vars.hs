@@ -15,8 +15,8 @@ module GL.Shader.Vars
 ( Field(..)
 , Offset(..)
 , Fields(..)
-, Vars(..)
 , (:**:)(..)
+, Vars(..)
 , makeVars
 , traverseVars
 , makeVarsM
