@@ -20,14 +20,14 @@ import           Linear.V4 (V4)
 
 data Glyph = Glyph
   { char         :: {-# UNPACK #-} !Char
-  , advanceWidth :: {-# UNPACK #-} !Float
+  , advanceWidth :: {-# UNPACK #-} !Int
   , geometry     :: ![V4 Float]
   , bounds_      :: {-# UNPACK #-} !(Interval V2 Float)
   }
 
 
 data Instance = Instance
-  { offset :: {-# UNPACK #-} !Float
+  { offset :: {-# UNPACK #-} !Int
   , range  :: {-# UNPACK #-} !(Interval I Int)
   }
 
@@ -37,11 +37,11 @@ layoutGlyphs chars = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState
   go (LayoutState offset is prev) g@Glyph{ char, bounds_ } = LayoutState
     { offset  = offset + advanceWidth g
     , result  = is . (Instance offset (fromMaybe (Interval 0 0) (chars Map.!? char)) :)
-    , bounds_ = prev <> Just (Bounding (point (V2 offset 0) + bounds_))
+    , bounds_ = prev <> Just (Bounding (point (V2 (fromIntegral offset) 0) + bounds_))
     }
 
 data LayoutState = LayoutState
-  { offset  :: {-# UNPACK #-} !Float
+  { offset  :: {-# UNPACK #-} !Int
   , result  :: !([Instance] -> [Instance])
   , bounds_ :: !(Maybe (Bounding V2 Float))
   }

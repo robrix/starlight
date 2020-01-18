@@ -78,7 +78,7 @@ data U v = U
   { matrix    :: v (M33 Float)
   , ratio     :: v (Window.Pixels Int)
   , fontScale :: v Float
-  , offset    :: v Float
+  , offset    :: v Int
   }
   deriving (Generic)
 
@@ -93,7 +93,7 @@ ratio_ = field @"ratio"
 fontScale_ :: Lens' (U v) (v Float)
 fontScale_ = field @"fontScale"
 
-offset_ :: Lens' (U v) (v Float)
+offset_ :: Lens' (U v) (v Int)
 offset_ = field @"offset"
 
 
