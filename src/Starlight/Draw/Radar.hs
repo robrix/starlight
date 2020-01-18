@@ -63,7 +63,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   system@System{ bodies } <- ask @(System B.StateVectors)
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
-      vertices = verticesForShips scale npcs <> verticesForBodies bodies
+      vertices = verticesForShips scale npcs <> verticesForBlips (blipFor 1 <$> bodies)
       vars = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
         & here_   ?~ here
@@ -121,12 +121,6 @@ verticesForBlips :: Foldable t => t Blip -> [V I]
 verticesForBlips bs =
   [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_ ^* scale), colour = I (b^.colour_) }
   | b@Blip{ scale } <- toList bs
-  ]
-
-verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
-verticesForBodies vs =
-  [ V{ there = I (there^._xy), r = I (b^.magnitude_), colour = I colour }
-  | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
