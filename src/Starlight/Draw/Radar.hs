@@ -116,6 +116,12 @@ instance HasActor a => HasActor (Blip a) where
 instance HasColour a => HasColour (Blip a) where
   colour_ = field @"value".colour_
 
+verticesForBlip :: (Foldable t, HasActor a, HasColour a) => t (Blip a) -> [V I]
+verticesForBlip bs =
+  [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_), colour = I (b^.colour_) }
+  | b <- toList bs
+  ]
+
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
 verticesForBodies vs =
   [ V{ there = I (there^._xy), r = I (b^.magnitude_), colour = I colour }
