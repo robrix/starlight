@@ -141,7 +141,7 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
             Glyph.offset_ ?= offset
             drawArraysInstanced Triangles range 6
 
-        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline })) where
+        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline }))
 
 
 drawLabel
