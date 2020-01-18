@@ -62,7 +62,8 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   system@System{ bodies } <- ask @(System B.StateVectors)
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
-      vertices = verticesForBlips (blipFor (1/scale) <$> npcs) <> verticesForBlips (blipFor 1 <$> bodies)
+      blips    = map (blipFor (1/scale)) (toList npcs) <> map (blipFor 1) (toList bodies)
+      vertices = verticesForBlips blips
       vars = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
         & here_   ?~ here
