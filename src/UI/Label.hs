@@ -140,7 +140,7 @@ setLabel Label{ texture, fbuffer, ratio, ref, indices, offsets } font@(Font face
 
           -- FIXME: copy instance offsets into a buffer
           -- FIXME: use :*: to combine the interleaved vertex buffer with the non-interleaved offset in the vertices
-          -- FIXME: make a single drawElementsInstanced call
+          -- FIXME: make a single draw call
 
           let indices = instances >>= Interval.range . Glyph.range
           realloc @'ElementArray (length indices) Static Draw
