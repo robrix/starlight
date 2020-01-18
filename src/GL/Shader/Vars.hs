@@ -24,6 +24,7 @@ module GL.Shader.Vars
 , foldVars
 , foldVarsM
 , foldVars'
+, foldVarsM'
 , defaultVars
 , displayVars
 , Proxy(..)
@@ -130,6 +131,10 @@ foldVarsM f t = getAp $ foldVars (Ap . f) t
 foldVars' :: (Vars t, Monoid b, Has Fresh sig m) => (forall a . GL.Uniform a => Field v a -> b) -> t v -> m b
 foldVars' f t = getK <$> traverseVars' (K . f) t
 {-# INLINABLE foldVars' #-}
+
+foldVarsM' :: (Vars t, Monoid b, Has Fresh sig m) => (forall a . GL.Uniform a => Field v a -> m b) -> t v -> m b
+foldVarsM' f t = foldVars' (Ap . f) t >>= getAp
+{-# INLINABLE foldVarsM' #-}
 
 defaultVars :: Vars t => t Proxy
 defaultVars = makeVars value
