@@ -64,14 +64,14 @@ instance Bind (Array n) where
 
 
 configureInterleaved :: forall v m sig . (Effect sig, HasArray v m, B.HasBuffer 'B.Array (v I) m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
-configureInterleaved = askArray >> B.askBuffer @'B.Array >> evalState (Offset 0) (configureVars @v (S.sizeOf @(Fields v) undefined) (defaultVars @v))
+configureInterleaved = askArray >> B.askBuffer @'B.Array >> evalState (Offset 0) (evalFresh 0 (configureVars @v (S.sizeOf @(Fields v) undefined) (defaultVars @v)))
 
 configureSeparate :: forall v1 v2 m sig . (Effect sig, HasArray (v1 :**: v2) m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
-configureSeparate b1 b2 = evalState (Offset 0) (askArray >> B.bindBuffer b1 (configureVars @v1 stride (defaultVars @v1)) >> B.bindBuffer b2 (configureVars @v2 stride (defaultVars @v2))) where
+configureSeparate b1 b2 = evalState (Offset 0) (evalFresh 0 (askArray >> B.bindBuffer b1 (configureVars @v1 stride (defaultVars @v1)) >> B.bindBuffer b2 (configureVars @v2 stride (defaultVars @v2)))) where
   stride = S.sizeOf @((v1 :**: v2) I) undefined
 
-configureVars :: (Vars v, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> v Proxy -> m ()
-configureVars stride = foldVarsM (\ (Field{ location, name } :: Field Proxy a) -> runLiftIO $ do
+configureVars :: (Vars v, Has Check sig m, Has Fresh sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> v Proxy -> m ()
+configureVars stride = foldVarsM' (\ (Field{ location, name } :: Field Proxy a) -> runLiftIO $ do
   offset <- get
   let size   = S.sizeOf @a undefined
       K ty   = GL.glType @a
