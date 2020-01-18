@@ -13,7 +13,7 @@ module UI.Label.Glyph
 , fontScale_
 , offset_
 , V(..)
-, V'(..)
+, VOffset(..)
 , Frag(..)
 ) where
 
@@ -106,12 +106,12 @@ instance Vars V
 deriving via Fields V instance Storable (V I)
 
 
-newtype V' v = V' { offset' :: v Int }
+newtype VOffset v = VOffset { offset' :: v Int }
   deriving (Generic)
 
-instance Vars V'
+instance Vars VOffset
 
-deriving via Fields V' instance Storable (V' I)
+deriving via Fields VOffset instance Storable (VOffset I)
 
 
 data IF v = IF
