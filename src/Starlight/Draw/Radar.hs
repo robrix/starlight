@@ -117,8 +117,8 @@ instance HasColour Blip where
 blipFor :: (HasActor t, HasColour t) => Double -> t -> Blip
 blipFor scale t = Blip{ scale, actor = t^.actor_, colour = t^.colour_ }
 
-verticesForBlip :: Foldable t => t Blip -> [V I]
-verticesForBlip bs =
+verticesForBlips :: Foldable t => t Blip -> [V I]
+verticesForBlips bs =
   [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_ ^* scale), colour = I (b^.colour_) }
   | b@Blip{ scale } <- toList bs
   ]
