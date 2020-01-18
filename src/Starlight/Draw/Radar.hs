@@ -107,6 +107,9 @@ data Drawable = Drawable
 data Scaled a = Scaled { scale :: Float, value :: a }
   deriving (Generic)
 
+instance HasActor a => HasActor (Scaled a) where
+  actor_ = field @"value".actor_
+
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
 verticesForBodies vs =
   [ V{ there = I (there^._xy), r = I (b^.magnitude_), colour = I colour }
