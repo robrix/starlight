@@ -1,4 +1,5 @@
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
@@ -6,6 +7,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -71,6 +73,8 @@ undefinedAtFieldType _ = undefined
 
 data ((l :: (* -> *) -> *) :**: (r :: (* -> *) -> *)) (v :: * -> *)
   = l v :**: r v
+
+deriving via Fields (l :**: r) instance (Vars l, Vars r) => F.Storable ((l :**: r) I)
 
 
 class Vars t where
