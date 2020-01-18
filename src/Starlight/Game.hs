@@ -141,7 +141,7 @@ runFrame
      )
   => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
   -> m ()
-runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . Starfield.runStarfield . Ship.runShip . Radar.runRadar . Laser.runLaser . Body.runBody
+runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . Starfield.runStarfield . Ship.runShip . Radar.runRadar . Laser.run . Body.runBody
 
 game
   :: ( Effect sig

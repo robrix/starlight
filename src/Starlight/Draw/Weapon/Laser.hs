@@ -7,7 +7,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Weapon.Laser
-( runLaser
+( Starlight.Draw.Weapon.Laser.run
 , draw
 , Drawable
 ) where
@@ -35,7 +35,7 @@ import qualified Starlight.Weapon.Laser as S
 import qualified UI.Drawable as UI
 import           Unit.Length
 
-runLaser
+run
   :: ( Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
@@ -44,7 +44,7 @@ runLaser
      )
   => ReaderC Drawable m a
   -> m a
-runLaser = UI.loadingDrawable Drawable shader vertices
+run = UI.loadingDrawable Drawable shader vertices
 
 
 draw
