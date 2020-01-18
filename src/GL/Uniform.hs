@@ -126,8 +126,8 @@ instance Row Double where
   {-# INLINE uniformForRow #-}
 
 instance Column t => Row (V2 t) where
-  glslTypeForRow = glslTypeFor2 @t . replace2
-  uniformForRow = coerce . uniformFor2 @t . replace2
+  glslTypeForRow = glslTypeForColumn @t . replace2
+  uniformForRow = coerce . uniformForColumn @t . replace2
 
 replace2 = \case
   R2 -> C2x2
@@ -136,8 +136,8 @@ replace2 = \case
 {-# INLINE replace2 #-}
 
 instance Column t => Row (V3 t) where
-  glslTypeForRow = glslTypeFor2 @t . replace3
-  uniformForRow = coerce . uniformFor2 @t . replace3
+  glslTypeForRow = glslTypeForColumn @t . replace3
+  uniformForRow = coerce . uniformForColumn @t . replace3
 
 replace3 = \case
   R2 -> C2x3
@@ -146,8 +146,8 @@ replace3 = \case
 {-# INLINE replace3 #-}
 
 instance Column t => Row (V4 t) where
-  glslTypeForRow = glslTypeFor2 @t . replace4
-  uniformForRow = coerce . uniformFor2 @t . replace4
+  glslTypeForRow = glslTypeForColumn @t . replace4
+  uniformForRow = coerce . uniformForColumn @t . replace4
 
 replace4 = \case
   R2 -> C2x4
@@ -157,9 +157,9 @@ replace4 = \case
 
 
 class Row t => Column t where
-  glslTypeFor2 :: ColD -> String
+  glslTypeForColumn :: ColD -> String
 
-  uniformFor2 :: ColD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformForColumn :: ColD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 deriving instance Column a => Column (Const a b)
 deriving instance Column a => Column (Identity a)
@@ -194,10 +194,10 @@ transposing f prog loc n = f prog loc n GL_TRUE
 {-# INLINE transposing #-}
 
 instance Column Float where
-  glslTypeFor2 = glslTypeForCol2
-  {-# INLINE glslTypeFor2 #-}
+  glslTypeForColumn = glslTypeForCol2
+  {-# INLINE glslTypeForColumn #-}
 
-  uniformFor2 = \case
+  uniformForColumn = \case
     C2x2 -> transposing glProgramUniformMatrix2fv
     C2x3 -> transposing glProgramUniformMatrix2x3fv
     C2x4 -> transposing glProgramUniformMatrix2x4fv
@@ -207,13 +207,13 @@ instance Column Float where
     C4x2 -> transposing glProgramUniformMatrix4x2fv
     C4x3 -> transposing glProgramUniformMatrix4x3fv
     C4x4 -> transposing glProgramUniformMatrix4fv
-  {-# INLINE uniformFor2 #-}
+  {-# INLINE uniformForColumn #-}
 
 instance Column Double where
-  glslTypeFor2 = ('d':) . glslTypeForCol2
-  {-# INLINE glslTypeFor2 #-}
+  glslTypeForColumn = ('d':) . glslTypeForCol2
+  {-# INLINE glslTypeForColumn #-}
 
-  uniformFor2 = \case
+  uniformForColumn = \case
     C2x2 -> transposing glProgramUniformMatrix2dv
     C2x3 -> transposing glProgramUniformMatrix2x3dv
     C2x4 -> transposing glProgramUniformMatrix2x4dv
@@ -223,4 +223,4 @@ instance Column Double where
     C4x2 -> transposing glProgramUniformMatrix4x2dv
     C4x3 -> transposing glProgramUniformMatrix4x3dv
     C4x4 -> transposing glProgramUniformMatrix4dv
-  {-# INLINE uniformFor2 #-}
+  {-# INLINE uniformForColumn #-}
