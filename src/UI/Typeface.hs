@@ -13,10 +13,11 @@ module UI.Typeface
 , layoutString
 ) where
 
+import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
 import           Control.Effect.Trace
 import           Control.Lens
-import           Control.Monad (guard, join, void, (<=<))
+import           Control.Monad (guard, join, (<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Bifunctor (first)
 import           Data.Char (isPrint, isSeparator, ord)
@@ -37,6 +38,7 @@ import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Object
 import           GL.Program
+import           GL.Shader.Vars (Offset(..))
 import           Linear.V2
 import qualified Opentype.Fileformat as O
 import           UI.Drawable
@@ -140,7 +142,7 @@ cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { buffer, array
       realloc @'B.Array (length vertices) Static Draw
       copy @'B.Array 0 (coerce (map (fmap (fromIntegral @_ @Float)) vertices))
 
-      void configureInterleaved
+      evalState (Offset 0) configureInterleaved
 
   sendM (writeIORef rangesRef ranges)
 
