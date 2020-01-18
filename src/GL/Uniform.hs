@@ -55,16 +55,16 @@ instance Uniform Double where
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
-  glslType = glslTypeFor @t C2x1
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t C2x1 prog loc 1 . castPtr)
+  glslType = glslTypeFor @t R2
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t R2 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
-  glslType = glslTypeFor @t C3x1
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t C3x1 prog loc 1 . castPtr)
+  glslType = glslTypeFor @t R3
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t R3 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
-  glslType = glslTypeFor @t C4x1
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t C4x1 prog loc 1 . castPtr)
+  glslType = glslTypeFor @t R4
+  uniform prog loc vec = A.with vec (sendM . uniformFor @t R4 prog loc 1 . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Point f a)
 
@@ -86,25 +86,25 @@ deriving instance Scalar a => Scalar (Identity a)
 deriving instance Scalar a => Scalar (K a b)
 
 data RowD
-  = C2x1
-  | C3x1
-  | C4x1
+  = R2
+  | R3
+  | R4
   deriving (Enum, Eq, Ord, Show)
 
 glslTypeForCol :: RowD -> String
 glslTypeForCol = \case
-  C2x1 -> "vec2"
-  C3x1 -> "vec3"
-  C4x1 -> "vec4"
+  R2 -> "vec2"
+  R3 -> "vec3"
+  R4 -> "vec4"
 
 instance Scalar Int32 where
   glslTypeFor = ('i':) . glslTypeForCol
   {-# INLINE glslTypeFor #-}
 
   uniformFor = \case
-    C2x1 -> glProgramUniform2iv
-    C3x1 -> glProgramUniform3iv
-    C4x1 -> glProgramUniform4iv
+    R2 -> glProgramUniform2iv
+    R3 -> glProgramUniform3iv
+    R4 -> glProgramUniform4iv
   {-# INLINE uniformFor #-}
 
 instance Scalar Float where
@@ -112,9 +112,9 @@ instance Scalar Float where
   {-# INLINE glslTypeFor #-}
 
   uniformFor = \case
-    C2x1 -> glProgramUniform2fv
-    C3x1 -> glProgramUniform3fv
-    C4x1 -> glProgramUniform4fv
+    R2 -> glProgramUniform2fv
+    R3 -> glProgramUniform3fv
+    R4 -> glProgramUniform4fv
   {-# INLINE uniformFor #-}
 
 instance Scalar Double where
@@ -122,9 +122,9 @@ instance Scalar Double where
   {-# INLINE glslTypeFor #-}
 
   uniformFor = \case
-    C2x1 -> glProgramUniform2dv
-    C3x1 -> glProgramUniform3dv
-    C4x1 -> glProgramUniform4dv
+    R2 -> glProgramUniform2dv
+    R3 -> glProgramUniform3dv
+    R4 -> glProgramUniform4dv
   {-# INLINE uniformFor #-}
 
 instance Scalar2 t => Scalar (V2 t) where
@@ -132,9 +132,9 @@ instance Scalar2 t => Scalar (V2 t) where
   uniformFor = coerce . uniformFor2 @t . replace2
 
 replace2 = \case
-  C2x1 -> C2x2
-  C3x1 -> C3x2
-  C4x1 -> C4x2
+  R2 -> C2x2
+  R3 -> C3x2
+  R4 -> C4x2
 {-# INLINE replace2 #-}
 
 instance Scalar2 t => Scalar (V3 t) where
@@ -142,9 +142,9 @@ instance Scalar2 t => Scalar (V3 t) where
   uniformFor = coerce . uniformFor2 @t . replace3
 
 replace3 = \case
-  C2x1 -> C2x3
-  C3x1 -> C3x3
-  C4x1 -> C4x3
+  R2 -> C2x3
+  R3 -> C3x3
+  R4 -> C4x3
 {-# INLINE replace3 #-}
 
 instance Scalar2 t => Scalar (V4 t) where
@@ -152,9 +152,9 @@ instance Scalar2 t => Scalar (V4 t) where
   uniformFor = coerce . uniformFor2 @t . replace4
 
 replace4 = \case
-  C2x1 -> C2x4
-  C3x1 -> C3x4
-  C4x1 -> C4x4
+  R2 -> C2x4
+  R3 -> C3x4
+  R4 -> C4x4
 {-# INLINE replace4 #-}
 
 
