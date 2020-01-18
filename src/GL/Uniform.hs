@@ -7,7 +7,7 @@
 {-# LANGUAGE TypeApplications #-}
 module GL.Uniform
 ( Uniform(..)
-, Scalar(..)
+, Row(..)
 , Scalar2(..)
 , RowD(..)
 , ColD(..)
@@ -54,15 +54,15 @@ instance Uniform Double where
   glslType = "double"
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
-instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V2 t) where
+instance {-# OVERLAPPABLE #-} Row t => Uniform (V2 t) where
   glslType = glslTypeFor @t R2
   uniform prog loc vec = A.with vec (sendM . uniformFor @t R2 prog loc 1 . castPtr)
 
-instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V3 t) where
+instance {-# OVERLAPPABLE #-} Row t => Uniform (V3 t) where
   glslType = glslTypeFor @t R3
   uniform prog loc vec = A.with vec (sendM . uniformFor @t R3 prog loc 1 . castPtr)
 
-instance {-# OVERLAPPABLE #-} Scalar t => Uniform (V4 t) where
+instance {-# OVERLAPPABLE #-} Row t => Uniform (V4 t) where
   glslType = glslTypeFor @t R4
   uniform prog loc vec = A.with vec (sendM . uniformFor @t R4 prog loc 1 . castPtr)
 
@@ -74,16 +74,14 @@ deriving instance Uniform a => Uniform (K a b)
 
 
 -- | Types which can appear in vectors.
---
--- NB: The name is a bit misleading because matrices are vectors containing other vectors.
-class GL.Type t => Scalar t where
+class GL.Type t => Row t where
   glslTypeFor :: RowD -> String
 
   uniformFor :: RowD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
-deriving instance Scalar a => Scalar (Const a b)
-deriving instance Scalar a => Scalar (Identity a)
-deriving instance Scalar a => Scalar (K a b)
+deriving instance Row a => Row (Const a b)
+deriving instance Row a => Row (Identity a)
+deriving instance Row a => Row (K a b)
 
 data RowD
   = R2
@@ -97,7 +95,7 @@ glslTypeForCol = \case
   R3 -> "vec3"
   R4 -> "vec4"
 
-instance Scalar Int32 where
+instance Row Int32 where
   glslTypeFor = ('i':) . glslTypeForCol
   {-# INLINE glslTypeFor #-}
 
@@ -107,7 +105,7 @@ instance Scalar Int32 where
     R4 -> glProgramUniform4iv
   {-# INLINE uniformFor #-}
 
-instance Scalar Float where
+instance Row Float where
   glslTypeFor = glslTypeForCol
   {-# INLINE glslTypeFor #-}
 
@@ -117,7 +115,7 @@ instance Scalar Float where
     R4 -> glProgramUniform4fv
   {-# INLINE uniformFor #-}
 
-instance Scalar Double where
+instance Row Double where
   glslTypeFor = ('d':) . glslTypeForCol
   {-# INLINE glslTypeFor #-}
 
@@ -127,7 +125,7 @@ instance Scalar Double where
     R4 -> glProgramUniform4dv
   {-# INLINE uniformFor #-}
 
-instance Scalar2 t => Scalar (V2 t) where
+instance Scalar2 t => Row (V2 t) where
   glslTypeFor = glslTypeFor2 @t . replace2
   uniformFor = coerce . uniformFor2 @t . replace2
 
@@ -137,7 +135,7 @@ replace2 = \case
   R4 -> C4x2
 {-# INLINE replace2 #-}
 
-instance Scalar2 t => Scalar (V3 t) where
+instance Scalar2 t => Row (V3 t) where
   glslTypeFor = glslTypeFor2 @t . replace3
   uniformFor = coerce . uniformFor2 @t . replace3
 
@@ -147,7 +145,7 @@ replace3 = \case
   R4 -> C4x3
 {-# INLINE replace3 #-}
 
-instance Scalar2 t => Scalar (V4 t) where
+instance Scalar2 t => Row (V4 t) where
   glslTypeFor = glslTypeFor2 @t . replace4
   uniformFor = coerce . uniformFor2 @t . replace4
 
@@ -158,7 +156,7 @@ replace4 = \case
 {-# INLINE replace4 #-}
 
 
-class Scalar t => Scalar2 t where
+class Row t => Scalar2 t where
   glslTypeFor2 :: ColD -> String
 
   uniformFor2 :: ColD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
