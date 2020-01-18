@@ -9,7 +9,7 @@ module GL.Uniform
 ( Uniform(..)
 , Scalar(..)
 , Scalar2(..)
-, RowI(..)
+, RowD(..)
 , ColI(..)
 ) where
 
@@ -77,21 +77,21 @@ deriving instance Uniform a => Uniform (K a b)
 --
 -- NB: The name is a bit misleading because matrices are vectors containing other vectors.
 class GL.Type t => Scalar t where
-  glslTypeFor :: RowI -> String
+  glslTypeFor :: RowD -> String
 
-  uniformFor :: RowI -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformFor :: RowD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 deriving instance Scalar a => Scalar (Const a b)
 deriving instance Scalar a => Scalar (Identity a)
 deriving instance Scalar a => Scalar (K a b)
 
-data RowI
+data RowD
   = C2x1
   | C3x1
   | C4x1
   deriving (Enum, Eq, Ord, Show)
 
-glslTypeForCol :: RowI -> String
+glslTypeForCol :: RowD -> String
 glslTypeForCol = \case
   C2x1 -> "vec2"
   C3x1 -> "vec3"
