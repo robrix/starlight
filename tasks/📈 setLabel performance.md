@@ -102,3 +102,28 @@ label: {min: 2.410ms, mean: 2.466ms, max: 2.521ms}
 ```
 
 Reallocating the buffer with the `GL_STATIC` hint had negligible effect.
+
+
+## Reallocating & copying a buffer of per-vertex offsets
+
+Copy the instances’ offsets into a buffer. We’re not using them yet so this can only slow things down.
+
+```
+cacheCharactersForDrawing: {min: 374.622ms, mean: 374.622ms, max: 374.622ms}
+readTypeface: {min: 110.860ms, mean: 110.860ms, max: 110.860ms}
+frame: {min: 1.285ms, mean: 9.047ms, max: 206.386ms}
+  draw: {min: 3.644ms, mean: 8.756ms, max: 108.935ms}
+    setLabel: {min: 0.010ms, mean: 2.170ms, max: 54.034ms}
+    ship: {min: 1.121ms, mean: 1.298ms, max: 9.104ms}
+    radar: {min: 0.624ms, mean: 0.936ms, max: 65.553ms}
+      realloc/copy: {min: 0.072ms, mean: 0.144ms, max: 0.425ms}
+      bodies & npcs: {min: 0.035ms, mean: 0.107ms, max: 64.465ms}
+      targets: {min: 0.003ms, mean: 0.052ms, max: 12.922ms}
+    drawLabel: {min: 0.011ms, mean: 0.550ms, max: 5.815ms}
+    starfield: {min: 0.260ms, mean: 0.471ms, max: 14.314ms}
+    body: {min: 0.003ms, mean: 0.005ms, max: 0.203ms}
+    laser: {min: 0.002ms, mean: 0.003ms, max: 0.190ms}
+  input: {min: 0.032ms, mean: 0.162ms, max: 97.132ms}
+swap: {min: 0.234ms, mean: 7.824ms, max: 12.818ms}
+label: {min: 2.474ms, mean: 2.505ms, max: 2.536ms}
+```

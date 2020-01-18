@@ -98,7 +98,7 @@ labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
 
 -- | Set the label’s text.
 setLabel :: (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
-setLabel Label{ texture, fbuffer, ratio, ref, indices } font@(Font face _) string
+setLabel Label{ texture, fbuffer, ratio, ref, indices, offsets } font@(Font face _) string
   | null string = sendM (writeIORef ref Nothing)
   | otherwise   = runLiftIO $ do
     state <- sendIO (readIORef ref)
@@ -145,6 +145,11 @@ setLabel Label{ texture, fbuffer, ratio, ref, indices } font@(Font face _) strin
           let indices = instances >>= Interval.range . Glyph.range
           realloc @'ElementArray (length indices) Static Draw
           copy @'ElementArray 0 (map (fromIntegral @_ @Word32 . getI) indices)
+
+          bindBuffer offsets $ do
+            let offsets = instances >>= \ Instance{ offset, range } -> offset <$ Interval.range range
+            realloc @'B.Array (length offsets) Static Draw
+            copy @'B.Array 0 (coerce offsets)
 
           foldM_ (\ prev Instance{ offset, range } -> do
             let indices = Interval.range range
