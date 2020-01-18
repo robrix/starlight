@@ -45,6 +45,7 @@ import           Starlight.Character
 import qualified Starlight.Ship as S
 import           Starlight.System
 import           Starlight.View
+import           UI.Colour
 import qualified UI.Window as Window
 import           Unit.Angle
 import           Unit.Length
@@ -109,6 +110,9 @@ data Scaled a = Scaled { scale :: Float, value :: a }
 
 instance HasActor a => HasActor (Scaled a) where
   actor_ = field @"value".actor_
+
+instance HasColour a => HasColour (Scaled a) where
+  colour_ = field @"value".colour_
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
 verticesForBodies vs =
