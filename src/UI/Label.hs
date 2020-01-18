@@ -51,8 +51,8 @@ data Label = Label
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
   , ratio   :: !(Window.Pixels Int)
-  , ref     :: !(IORef (Maybe LabelState))
   , indices :: !(Buffer 'ElementArray Word32)
+  , ref     :: !(IORef (Maybe LabelState))
   }
 
 data LabelState = LabelState
