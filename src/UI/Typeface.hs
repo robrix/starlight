@@ -16,7 +16,7 @@ module UI.Typeface
 import           Control.Effect.Finally
 import           Control.Effect.Trace
 import           Control.Lens
-import           Control.Monad (guard, join, (<=<))
+import           Control.Monad (guard, join, void, (<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Bifunctor (first)
 import           Data.Char (isPrint, isSeparator, ord)
@@ -140,7 +140,7 @@ cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { buffer, array
       realloc @'B.Array (length vertices) Static Draw
       copy @'B.Array 0 (coerce (map (fmap (fromIntegral @_ @Float)) vertices))
 
-      configureInterleaved
+      void configureInterleaved
 
   sendM (writeIORef rangesRef ranges)
 
