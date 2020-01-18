@@ -72,7 +72,7 @@ draw = measure "draw" . runLiftIO $ do
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
-  measure "starfield" drawStarfield
+  measure "starfield" Starfield.draw
 
   measure "ship" $ for_ (system^.characters_) Ship.draw
 

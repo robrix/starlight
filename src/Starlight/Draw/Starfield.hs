@@ -9,7 +9,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Starfield
-( drawStarfield
+( draw
 , runStarfield
 , Drawable
 ) where
@@ -38,14 +38,14 @@ import qualified UI.Drawable as UI
 import qualified UI.Window as Window
 import           Unit.Length
 
-drawStarfield
+draw
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has (Reader Drawable) sig m
      , Has (Reader View) sig m
      )
   => m ()
-drawStarfield = UI.using getDrawable $ do
+draw = UI.using getDrawable $ do
   view@View{ zoom, focus } <- ask
 
   resolution_ ?= (fromIntegral <$> deviceSize view)
