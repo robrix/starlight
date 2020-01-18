@@ -28,7 +28,7 @@ import           Data.IORef
 import           Data.Word
 import           GHC.Stack
 import           GL.Array
-import           GL.Buffer
+import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Framebuffer as GL
 import           GL.Object
@@ -40,7 +40,7 @@ import           Graphics.GL.Core41
 import           Linear.Exts
 import           UI.Colour
 import           UI.Drawable
-import           UI.Glyph (Instance(..), Run(..))
+import           UI.Glyph as Glyph (Instance(..), Run(..))
 import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 import           UI.Typeface
@@ -141,9 +141,13 @@ setLabel Label{ texture, fbuffer, ratio, ref, indices } font@(Font face _) strin
           -- FIXME: use :*: to combine the interleaved vertex buffer with the non-interleaved offset in the vertices
           -- FIXME: make a single drawElementsInstanced call
 
+          realloc @'ElementArray (maximum (map (length . Interval.range . Glyph.range) instances)) Dynamic Draw
+
           for_ instances $ \ Instance{ offset, range } -> do
+            let indices = map getI (Interval.range range)
+            copy @'ElementArray 0 (map (fromIntegral @_ @Word32) indices)
             Glyph.offset_ ?= offset
-            drawElementsInstanced Triangles (map getI (Interval.range range)) 6
+            drawElementsInstanced Triangles indices 6
 
         sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline }))
 

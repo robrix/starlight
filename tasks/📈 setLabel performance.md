@@ -50,3 +50,28 @@ label: {min: 2.572ms, mean: 2.645ms, max: 2.719ms}
 Plan is to implement non-interleaved arrays to specify the instance offsets in a separate buffer from the vertex data, then write to the buffers for the instance offsets & elements en masse. Hypothesis is improvement due to making a single call; no per glyph instance uniform, write, or draw call.
 
 Reallocating the buffer with the `GL_DRAW` hint had negligible effect.
+
+
+## Reallocating at most once per `setLabel` call
+
+Pull `realloc` & `copy` out of `drawElementsInstanced` and reallocate once, rather once per glyph instance. Negligible effect.
+
+```
+cacheCharactersForDrawing: {min: 380.890ms, mean: 380.890ms, max: 380.890ms}
+readTypeface: {min: 109.240ms, mean: 109.240ms, max: 109.240ms}
+frame: {min: 1.324ms, mean: 9.291ms, max: 195.824ms}
+  draw: {min: 3.736ms, mean: 8.986ms, max: 107.841ms}
+    setLabel: {min: 0.010ms, mean: 2.227ms, max: 13.189ms}
+    ship: {min: 1.089ms, mean: 1.300ms, max: 9.582ms}
+    radar: {min: 0.578ms, mean: 0.977ms, max: 65.654ms}
+      realloc/copy: {min: 0.070ms, mean: 0.136ms, max: 0.367ms}
+      bodies & npcs: {min: 0.035ms, mean: 0.120ms, max: 64.497ms}
+      targets: {min: 0.004ms, mean: 0.062ms, max: 13.745ms}
+    drawLabel: {min: 0.011ms, mean: 0.566ms, max: 4.983ms}
+    starfield: {min: 0.259ms, mean: 0.503ms, max: 25.816ms}
+    body: {min: 0.003ms, mean: 0.005ms, max: 0.161ms}
+    laser: {min: 0.002ms, mean: 0.003ms, max: 0.153ms}
+  input: {min: 0.033ms, mean: 0.182ms, max: 87.851ms}
+swap: {min: 0.187ms, mean: 7.620ms, max: 41.156ms}
+label: {min: 2.292ms, mean: 2.400ms, max: 2.507ms}
+```
