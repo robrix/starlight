@@ -97,7 +97,7 @@ labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
 
 -- | Set the label’s text.
 setLabel :: (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
-setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
+setLabel Label{ texture, fbuffer, ratio, ref, indices } font@(Font face _) string
   | null string = sendM (writeIORef ref Nothing)
   | otherwise   = runLiftIO $ do
     state <- sendIO (readIORef ref)
@@ -129,7 +129,7 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
         glClear GL_COLOR_BUFFER_BIT
 
         let V2 sx sy = fromIntegral ratio / fmap fromIntegral size
-        runReader face . using glyphs $ do
+        runReader face . using glyphs . bindBuffer indices $ do
           Glyph.ratio_     ?= ratio
           Glyph.fontScale_ ?= fontScale font
           Glyph.matrix_
@@ -143,7 +143,7 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
 
           for_ instances $ \ Instance{ offset, range } -> do
             Glyph.offset_ ?= offset
-            drawArraysInstanced Triangles range 6
+            drawElementsInstanced Triangles (map getI (Interval.range range)) 6
 
         sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline }))
 
