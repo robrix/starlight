@@ -128,8 +128,8 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
         runReader face . using glyphs $ do
           Glyph.ratio_     ?= ratio
           Glyph.fontScale_ ?= fontScale font
-          Glyph.matrix_    ?=
-                translated (-1)
+          Glyph.matrix_
+            ?=  translated (-1)
             !*! scaled     (V3 sx sy 1)
             !*! translated (fromIntegral <$> negated (min' b'))
           for_ instances $ \ Instance{ offset, range } -> do
