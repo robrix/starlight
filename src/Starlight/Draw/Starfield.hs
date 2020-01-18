@@ -10,7 +10,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Starfield
 ( draw
-, runStarfield
+, Starlight.Draw.Starfield.run
 , Drawable
 ) where
 
@@ -57,7 +57,7 @@ draw = UI.using getDrawable $ do
   drawArrays TriangleStrip range
 
 
-runStarfield
+run
   :: ( Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
@@ -66,7 +66,7 @@ runStarfield
      )
   => ReaderC Drawable m a
   -> m a
-runStarfield = UI.loadingDrawable Drawable shader vertices
+run = UI.loadingDrawable Drawable shader vertices
 
 
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
