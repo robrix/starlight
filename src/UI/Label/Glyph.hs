@@ -23,6 +23,7 @@ import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Shader.DSL
 import Prelude hiding (break)
+import UI.Window as Window (Pixels)
 
 shader :: Shader U V Frag
 shader = program $ \ u
@@ -58,7 +59,7 @@ shader = program $ \ u
     let trans2 t = mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 t 1]
         scale2 s = mat3 [vec3 [s, 0, 0], vec3 [0, s, 0], vec3 [0, 0, 1]]
         m =   matrix u
-          !*! trans2 (get t ^* scale u)
+          !*! trans2 (get t ^* (1/float (scale u)))
           !*! scale2 (fontScale u)
           !*! trans2 (vec2 [offset u, 0])
     gl_Position .= ext4 (m !* ext3 (pos^._xy) 1) 0^._xywz)
@@ -75,7 +76,7 @@ shader = program $ \ u
 
 data U v = U
   { matrix    :: v (M33 Float)
-  , scale     :: v Float
+  , scale     :: v (Window.Pixels Int)
   , fontScale :: v Float
   , offset    :: v Float
   }
@@ -86,7 +87,7 @@ instance Vars U
 matrix_ :: Lens' (U v) (v (M33 Float))
 matrix_ = field @"matrix"
 
-scale_ :: Lens' (U v) (v Float)
+scale_ :: Lens' (U v) (v (Window.Pixels Int))
 scale_ = field @"scale"
 
 fontScale_ :: Lens' (U v) (v Float)
