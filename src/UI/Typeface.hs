@@ -139,7 +139,7 @@ cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { buffer, array
     realloc @'B.Array (length vertices) Static Draw
     copy @'B.Array 0 (coerce (map (fmap (fromIntegral @_ @Float)) vertices))
 
-    configureArray
+    configureInterleaved
 
   sendM (writeIORef rangesRef ranges)
 
