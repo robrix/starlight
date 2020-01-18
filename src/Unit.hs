@@ -35,8 +35,9 @@ import Control.Lens.Iso
 import Data.Char
 import Data.Coerce
 import Data.Functor.I
-import Data.Functor.K
 import Data.Functor.Identity
+import Data.Functor.K
+import Data.Ix
 import GHC.Stack
 import Numeric
 
@@ -143,7 +144,6 @@ formatExpR = formatWith (\ prec x -> if
            | n < 0     = error "wtf"
            | otherwise = (supAt n:) . s
   supAt i
-    | i < 0     = error "i < 0"
-    | i > 9     = error "i > 9"
-    | otherwise = sup !! i
+    | inRange (0, 9) i = sup !! i
+    | otherwise        = error $ "digit " <> show i <> " out of bounds (0, 9)"
   sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
