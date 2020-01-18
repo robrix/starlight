@@ -27,7 +27,8 @@ import           Data.Foldable (for_, toList)
 import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
-import           Data.List (elemIndex)
+import           Data.List (elemIndex, sortOn)
+import           Data.Ord (Down(..))
 import           Foreign.Storable (Storable(..))
 import           GHC.Generics (Generic)
 import           GL.Array
@@ -62,7 +63,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   system@System{ bodies } <- ask @(System B.StateVectors)
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
-      blips    = map (blipFor (1/scale)) (toList npcs) <> map (blipFor 1) (toList bodies)
+      blips    = sortOn (Down . qd here . (^.position_._xy)) (map (blipFor (1/scale)) (toList npcs) <> map (blipFor 1) (toList bodies))
       vertices = verticesForBlips blips
       vars     = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
