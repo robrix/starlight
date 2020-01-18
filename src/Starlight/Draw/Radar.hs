@@ -127,7 +127,7 @@ vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
       wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
   edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
   angle <- let' "angle" (angleOf (vec2 [there]))
-  radius <- let' "radius" (D.min' (Starlight.Draw.Radar.scale u * float d) radius)
+  radius <- let' "radius" (D.min' ((\ U{ scale } -> scale) u * float d) radius)
   minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
   sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf (vec2 [edge]) - angle)))
   pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
