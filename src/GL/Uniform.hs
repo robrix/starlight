@@ -8,7 +8,7 @@
 module GL.Uniform
 ( Uniform(..)
 , Scalar(..)
-, Col(..)
+, RowI(..)
 ) where
 
 import           Control.Monad.IO.Class.Lift
@@ -75,21 +75,21 @@ deriving instance Uniform a => Uniform (K a b)
 --
 -- NB: The name is a bit misleading because matrices are vectors containing other vectors.
 class GL.Type t => Scalar t where
-  glslTypeFor :: Col -> String
+  glslTypeFor :: RowI -> String
 
-  uniformFor :: Col -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformFor :: RowI -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 deriving instance Scalar a => Scalar (Const a b)
 deriving instance Scalar a => Scalar (Identity a)
 deriving instance Scalar a => Scalar (K a b)
 
-data Col
+data RowI
   = C2x1
   | C3x1
   | C4x1
   deriving (Enum, Eq, Ord, Show)
 
-glslTypeForCol :: Col -> String
+glslTypeForCol :: RowI -> String
 glslTypeForCol = \case
   C2x1 -> "vec2"
   C3x1 -> "vec3"
