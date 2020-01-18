@@ -105,13 +105,13 @@ data Drawable = Drawable
   }
 
 
-data Scaled a = Scaled { scale :: Float, value :: a }
+data Blip a = Blip { scale :: Float, value :: a }
   deriving (Generic)
 
-instance HasActor a => HasActor (Scaled a) where
+instance HasActor a => HasActor (Blip a) where
   actor_ = field @"value".actor_
 
-instance HasColour a => HasColour (Scaled a) where
+instance HasColour a => HasColour (Blip a) where
   colour_ = field @"value".colour_
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
