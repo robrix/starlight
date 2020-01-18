@@ -25,7 +25,6 @@ module GL.Shader.Vars
 , foldVarsM
 , defaultVars
 , displayVars
-, V1
 ) where
 
 import           Control.Applicative (liftA2)
