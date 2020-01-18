@@ -37,6 +37,7 @@ import Data.Coerce
 import Data.Functor.I
 import Data.Functor.K
 import Data.Functor.Identity
+import GHC.Stack
 import Numeric
 
 -- * Units
@@ -121,7 +122,7 @@ formatDec = formatWith showFFloat
 formatExp :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
 
-formatExpR :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExpR :: (HasCallStack, Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExpR = formatWith (\ prec x -> if
   | isNaN x                   -> showString "NaN"
   | isInfinite x              -> showString $ if x < 0 then "-Infinity" else "Infinity"
@@ -138,6 +139,11 @@ formatExpR = formatWith (\ prec x -> if
     | otherwise      = is
 
   digits = go id where
-    go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go (((sup !! r):) . s) q
-           | otherwise = ((sup !! n):) . s
+    go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
+           | n < 0     = error "wtf"
+           | otherwise = (supAt n:) . s
+  supAt i
+    | i < 0     = error "i < 0"
+    | i > 9     = error "i > 9"
+    | otherwise = sup !! i
   sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
