@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Body
-( runBody
+( Starlight.Draw.Body.run
 , Drawable
 , draw
 ) where
@@ -37,7 +37,7 @@ import qualified Starlight.Body as Body
 import           Starlight.View
 import qualified UI.Drawable as UI
 
-runBody
+run
   :: ( Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
@@ -46,7 +46,7 @@ runBody
      )
   => ReaderC Drawable m a
   -> m a
-runBody = UI.loadingDrawable Drawable shader vertices
+run = UI.loadingDrawable Drawable shader vertices
 
 
 draw
