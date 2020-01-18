@@ -22,6 +22,7 @@ import GHC.Generics (Generic)
 import Starlight.Actor (Actor, HasActor(..))
 import Starlight.Identifier
 import Starlight.Ship
+import UI.Colour
 
 data Character = Character
   { actor   :: !Actor
@@ -33,6 +34,9 @@ data Character = Character
 
 instance HasActor Character where
   actor_ = field @"actor"
+
+instance HasColour Character where
+  colour_ = ship_.colour_
 
 target_ :: Lens' Character (Maybe Identifier)
 target_ = field @"target"
