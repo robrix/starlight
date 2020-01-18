@@ -78,6 +78,11 @@ class Vars t where
   traverseVars f = fmap to . run . evalFresh 0 . gtraverseVars @t f . from
   {-# INLINABLE traverseVars #-}
 
+instance (Vars l, Vars r) => Vars (l :*: r) where
+  makeVars f = makeVars f :*: makeVars f
+
+  traverseVars f (l :*: r) = (:*:) <$> traverseVars f l <*> traverseVars f r
+
 makeVarsM :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field Maybe a -> m (v a)) -> m (t v)
 makeVarsM f = traverseVars (unComp1 . value) (makeVars (Comp1 . f))
 
