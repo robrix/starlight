@@ -105,7 +105,7 @@ data Drawable = Drawable
   }
 
 
-data Blip a = Blip { scale :: Float, value :: a }
+data Blip a = Blip { scale :: Double, value :: a }
   deriving (Generic)
 
 instance HasActor a => HasActor (Blip a) where
