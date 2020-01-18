@@ -50,6 +50,7 @@ data Label = Label
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
   , ratio   :: !(Window.Pixels Int)
+  , offsets :: !(Buffer 'B.Array (Glyph.V' I))
   , indices :: !(Buffer 'ElementArray Word32)
   , ref     :: !(IORef (Maybe LabelState))
   }
@@ -75,6 +76,7 @@ label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
   indices <- gen1
+  offsets <- gen1
 
   program <- build Text.shader
 
@@ -88,7 +90,7 @@ label = do
   ratio <- Window.ratio
 
   ref <- sendIO (newIORef Nothing)
-  pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, ratio, indices }
+  pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, ratio, indices, offsets }
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 (Window.Pixels Int))
 labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
