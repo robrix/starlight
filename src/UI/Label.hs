@@ -45,7 +45,7 @@ import           UI.Typeface
 import qualified UI.Window as Window
 
 data Label = Label
-  { text    :: !(Drawable Text.U  Text.V  Text.O)
+  { text    :: !(Drawable Text.U Text.V Text.Frag)
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
   , ratio   :: !(Window.Pixels Int)

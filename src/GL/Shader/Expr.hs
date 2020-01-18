@@ -202,9 +202,9 @@ data Expr (k :: Type) a where
 
   (:^.) :: Expr k a -> Prj a b -> Expr k b
   (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
-  (:!*) :: Expr k (v (v Float)) -> Expr k (v Float) -> Expr k (v Float)
-  (:!!*) :: Expr k (v (v Float)) -> Expr k Float -> Expr k (v (v Float))
-  (:!*!) :: Expr k (v (v Float)) -> Expr k (v (v Float)) -> Expr k (v (v Float))
+  (:!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
+  (:!!*) :: Expr k (v (v a)) -> Expr k a -> Expr k (v (v a))
+  (:!*!) :: Expr k (v (v a)) -> Expr k (v (v a)) -> Expr k (v (v a))
 
   Eq :: Expr k a -> Expr k a -> Expr k Bool
   Lt :: Expr k a -> Expr k a -> Expr k Bool
@@ -215,9 +215,7 @@ data Expr (k :: Type) a where
   Float :: Expr k a -> Expr k Float
   Double :: Expr k a -> Expr k Double
   Vec :: String -> Int -> [Expr k a] -> Expr k (v b)
-  Mat2 :: String -> Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 b)
-  Mat3 :: String -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 b)
-  Mat4 :: String -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 b)
+  Mat :: String -> Int -> [Expr k a] -> Expr k (v (v b))
   Ext3 :: String -> Expr k (V2 a) -> Expr k a -> Expr k (V3 b)
   Ext4 :: String -> Expr k (V3 a) -> Expr k a -> Expr k (V4 b)
   Norm :: Expr k (v a) -> Expr k a
@@ -307,24 +305,24 @@ dvec4 :: [Expr k a] -> Expr k (V4 Double)
 dvec4 = Vec "d" 4
 
 
-mat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 Float)
-mat2 = Mat2 ""
+mat2 :: [Expr k a] -> Expr k (M22 Float)
+mat2 = Mat "" 2
 
-mat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 Float)
-mat3 = Mat3 ""
+mat3 :: [Expr k a] -> Expr k (M33 Float)
+mat3 = Mat "" 3
 
-mat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 Float)
-mat4 = Mat4 ""
+mat4 :: [Expr k a] -> Expr k (M44 Float)
+mat4 = Mat "" 4
 
 
-dmat2 :: Expr k (V2 a) -> Expr k (V2 a) -> Expr k (M22 Double)
-dmat2 = Mat2 "d"
+dmat2 :: [Expr k a] -> Expr k (M22 Double)
+dmat2 = Mat "d" 2
 
-dmat3 :: Expr k (V3 a) -> Expr k (V3 a) -> Expr k (V3 a) -> Expr k (M33 Double)
-dmat3 = Mat3 "d"
+dmat3 :: [Expr k a] -> Expr k (M33 Double)
+dmat3 = Mat "d" 3
 
-dmat4 :: Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (V4 a) -> Expr k (M44 Double)
-dmat4 = Mat4 "d"
+dmat4 :: [Expr k a] -> Expr k (M44 Double)
+dmat4 = Mat "d" 4
 
 
 ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 Float)
@@ -352,17 +350,17 @@ dot = Dot
 
 infixl 7 ^*
 
-(!*) :: Expr k (v (v Float)) -> Expr k (v Float) -> Expr k (v Float)
+(!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
 (!*) = (:!*)
 
 infixl 7 !*
 
-(!!*) :: Expr k (v (v Float)) -> Expr k Float -> Expr k (v (v Float))
+(!!*) :: Expr k (v (v a)) -> Expr k a -> Expr k (v (v a))
 (!!*) = (:!!*)
 
 infixl 7 !!*
 
-(!*!) :: Expr k (v (v Float)) -> Expr k (v (v Float)) -> Expr k (v (v Float))
+(!*!) :: Expr k (v (v a)) -> Expr k (v (v a)) -> Expr k (v (v a))
 (!*!) = (:!*!)
 
 infixl 7 !*!
@@ -464,9 +462,7 @@ renderExpr = \case
   Float a -> fn "float" [renderExpr a]
   Double a -> fn "double" [renderExpr a]
   Vec p n as -> fn (p <> "vec" <> show n) (map renderExpr as)
-  Mat2 p a b -> fn (p <> "mat2") [renderExpr a, renderExpr b]
-  Mat3 p a b c -> fn (p <> "mat3") [renderExpr a, renderExpr b, renderExpr c]
-  Mat4 p a b c d -> fn (p <> "mat4") [renderExpr a, renderExpr b, renderExpr c, renderExpr d]
+  Mat p n as -> fn (p <> "mat" <> show n) (map renderExpr as)
   Ext3 p a b -> fn (p <> "vec3") [renderExpr a, renderExpr b]
   Ext4 p a b -> fn (p <> "vec4") [renderExpr a, renderExpr b]
   Norm a -> fn "length" [renderExpr a]

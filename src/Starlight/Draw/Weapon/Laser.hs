@@ -66,7 +66,7 @@ drawLaser beam@S.Beam{ colour } = UI.using getDrawable $ do
   drawArrays Lines range
 
 
-newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 vertices :: [V I]
@@ -76,11 +76,11 @@ range :: Interval I Int
 range = Interval 0 (I (length vertices))
 
 
-shader :: Shader U V O
+shader :: Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ r } None -> main $
     gl_Position .= D.coerce (matrix u) D.!* vec4 [r, 0, 0, 1])
-  >>> fragment (\ None O{ fragColour } -> main $
+  >>> fragment (\ None Frag{ fragColour } -> main $
     fragColour .= colour u)
 
 
@@ -106,8 +106,3 @@ instance Vars V
 
 deriving instance Bind     (v Float) => Bind     (V v)
 deriving instance Storable (v Float) => Storable (V v)
-
-newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
-
-instance Vars O

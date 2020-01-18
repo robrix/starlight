@@ -1,18 +1,9 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE UndecidableInstances #-}
 module GL.Shader.DSL
 ( Shader
 , program
@@ -23,6 +14,7 @@ module GL.Shader.DSL
 , (Cat.>>>)
 , None(..)
 , shaderSources
+, Frag(..)
 , module GL.Shader.Decl
 , module GL.Shader.Expr
 , module GL.Shader.Stmt
@@ -123,3 +115,9 @@ like = const
 
 pvar :: GL.Uniform a => String -> String -> K (Doc ()) a
 pvar qual n = fix $ \ c -> K $ pretty qual <+> renderTypeOf c <+> pretty n <> pretty ';' <> hardline
+
+
+newtype Frag v = Frag { fragColour :: v (Colour Float) }
+  deriving (Generic)
+
+instance Vars Frag

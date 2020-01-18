@@ -39,7 +39,7 @@ import           Starlight.Character
 import           Starlight.Controls
 import           Starlight.Draw
 import qualified Starlight.Draw.Body as Body
-import           Starlight.Draw.Radar as Radar
+import qualified Starlight.Draw.Radar as Radar
 import           Starlight.Draw.Ship as Ship
 import           Starlight.Draw.Starfield as Starfield
 import           Starlight.Draw.Weapon.Laser as Laser
@@ -141,7 +141,7 @@ runFrame
      )
   => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
   -> m ()
-runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . runRadar . runLaser . Body.runBody
+runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . runStarfield . runShip . Radar.runRadar . runLaser . Body.runBody
 
 game
   :: ( Effect sig

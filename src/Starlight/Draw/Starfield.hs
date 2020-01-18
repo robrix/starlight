@@ -69,7 +69,7 @@ runStarfield
 runStarfield = UI.loadingDrawable Drawable shader vertices
 
 
-newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 vertices :: [V I]
@@ -86,12 +86,12 @@ range = Interval 0 (I (length vertices))
 
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
 
-shader :: Shader U V O
+shader :: Shader U V Frag
 shader = program $ \ U{ resolution, focusQ, focusR, zoom }
   ->  vertex (\ V{ pos } None -> main $
     gl_Position .= ext4 (ext3 pos 0) 1)
 
-  >>> fragment (\ None O{ fragColour } -> main $ do
+  >>> fragment (\ None Frag{ fragColour } -> main $ do
     resolution <- let' @(V2 Float) "resolution" (D.coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
@@ -101,8 +101,8 @@ shader = program $ \ U{ resolution, focusQ, focusR, zoom }
     nf <- let' "nf" (norm (get focusQ + get focusR))
     a1 <- let' "a1" $ wrap (-pi) pi (0.3 + 0.1/nf)
     a2 <- let' "a2" $ wrap (-pi) pi (0.2 + 0.1/nf)
-    rot1 <- let' "rot1" $ mat2 (vec2 [cos a1, sin a1]) (vec2 [-sin a1, cos a1])
-    rot2 <- let' "rot2" $ mat2 (vec2 [cos a2, sin a2]) (vec2 [-sin a2, cos a2])
+    rot1 <- let' "rot1" $ mat2 [vec2 [cos a1, sin a1], vec2 [-sin a1, cos a1]]
+    rot2 <- let' "rot2" $ mat2 [vec2 [cos a2, sin a2], vec2 [-sin a2, cos a2]]
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
     focusR^^._xz *!= rot1
@@ -180,8 +180,3 @@ instance Vars V
 
 deriving instance Bind     (v (V2 Float)) => Bind     (V v)
 deriving instance Storable (v (V2 Float)) => Storable (V v)
-
-newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
-
-instance Vars O

@@ -72,7 +72,7 @@ runShip
 runShip = UI.loadingDrawable Drawable shader vertices
 
 
-newtype Drawable = Drawable { getDrawable :: UI.Drawable U V O }
+newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 vertices :: [V I]
@@ -87,12 +87,12 @@ range :: Interval I Int
 range = Interval 0 4
 
 
-shader :: D.Shader U V O
+shader :: D.Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ pos } None -> main $
     gl_Position .= D.coerce (matrix u) D.!* ext4 (ext3 pos 1) 1)
 
-  >>> fragment (\ None O { fragColour } -> main $
+  >>> fragment (\ None Frag{ fragColour } -> main $
     fragColour .= colour u)
 
 
@@ -118,8 +118,3 @@ instance D.Vars V
 
 deriving instance Bind     (v (V2 Float)) => Bind     (V v)
 deriving instance Storable (v (V2 Float)) => Storable (V v)
-
-newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
-
-instance D.Vars O

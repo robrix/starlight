@@ -13,7 +13,7 @@ module UI.Label.Glyph
 , fontScale_
 , offset_
 , V(..)
-, O(..)
+, Frag(..)
 ) where
 
 import Control.Lens (Lens')
@@ -24,7 +24,7 @@ import GL.Object
 import GL.Shader.DSL
 import Prelude hiding (break)
 
-shader :: Shader U V O
+shader :: Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ pos } IF{ _coord2, colour } -> main $ do
     _coord2 .= pos ^. _zw
@@ -55,15 +55,15 @@ shader = program $ \ u
         t .= vec2 [ 9/12.0,  3/12.0]
         break)
       ]
-    let trans2 t = mat3 (vec3 [1, 0, 0]) (vec3 [0, 1, 0]) (vec3 [t^._x, t^._y, 1])
-        scale2 s = mat3 (vec3 [s, 0, 0]) (vec3 [0, s, 0]) (vec3 [0, 0, 1])
+    let trans2 t = mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], vec3 [t^._x, t^._y, 1]]
+        scale2 s = mat3 [vec3 [s, 0, 0], vec3 [0, s, 0], vec3 [0, 0, 1]]
         m =   matrix u
           !*! trans2 (get t ^* scale u)
           !*! scale2 (fontScale u)
           !*! trans2 (vec2 [offset u, 0])
     gl_Position .= ext4 (m !* ext3 (pos ^. _xy) 1) 0 ^. _xywz)
 
-  >>> fragment (\ IF{ _coord2, colour } O{ fragColour } -> main $
+  >>> fragment (\ IF{ _coord2, colour } Frag{ fragColour } -> main $
     iff (_coord2 ^. _x * _coord2 ^. _x - _coord2 ^. _y `gt` 0)
       discard
       (iff gl_FrontFacing
@@ -111,8 +111,3 @@ data IF v = IF
   deriving (Generic)
 
 instance Vars IF
-
-newtype O v = O { fragColour :: v (Colour Float) }
-  deriving (Generic)
-
-instance Vars O

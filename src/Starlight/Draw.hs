@@ -83,7 +83,7 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) Body.draw
 
-  measure "radar" drawRadar
+  measure "radar" Radar.draw
 
   let describeTarget target = case target >>= fmap . (,) <*> (^?to (system !?)._Just.choosing actor_ actor_.position_) of
         Just (identifier, pos)
