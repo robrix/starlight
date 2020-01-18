@@ -49,8 +49,8 @@ data Typeface = Typeface
   , allGlyphs    :: Map.Map Char (Maybe Glyph)
   , opentypeFont :: O.OpentypeFont
   , glyphs       :: Drawable Glyph.U Glyph.V Glyph.Frag
-  , glyphsB      :: Buffer 'B.Array (Glyph.V  I)
-  , offsets      :: Buffer 'B.Array (Glyph.V' I)
+  , glyphsB      :: Buffer 'B.Array (Glyph.V       I)
+  , offsets      :: Buffer 'B.Array (Glyph.VOffset I)
   , rangesRef    :: IORef (Map.Map Char (Interval I Int))
   }
 
