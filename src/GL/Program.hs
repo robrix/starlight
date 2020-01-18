@@ -55,11 +55,11 @@ data Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Pr
 type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u I) (I t))
 
 
-build :: forall u i o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars i) => DSL.Shader u i o -> m (Program u i o)
+build :: forall u v o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars v) => DSL.Shader u v o -> m (Program u v o)
 build p = runLiftIO $ do
   program <- glCreateProgram
   onExit (glDeleteProgram program)
-  foldVarsM @i (\ Field { name, location } -> checking $
+  foldVarsM @v (\ Field { name, location } -> checking $
     C.withCString name (glBindAttribLocation program (fromIntegral location))) defaultVars
   shaders <- for (DSL.shaderSources p) $ \ (type', source) -> do
     shader <- createShader type'
@@ -77,23 +77,23 @@ build p = runLiftIO $ do
 
   pure (Program ls program)
 
-use :: Has (Lift IO) sig m => Program u i o -> ProgramC u i o m a -> m a
+use :: Has (Lift IO) sig m => Program u v o -> ProgramC u v o m a -> m a
 use (Program ls p) (ProgramC m) = do
   sendIO (glUseProgram p)
   runReader (Program ls p) m
 
 
-class Monad m => HasProgram (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u i o where
-  askProgram :: m (Program u i o)
+class Monad m => HasProgram (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u v o where
+  askProgram :: m (Program u v o)
 
 
-newtype ProgramC (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramT :: ReaderC (Program u i o) m a }
+newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramT :: ReaderC (Program u v o) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-instance HasProgram u i o m => HasProgram u i o (ReaderC r m) where
+instance HasProgram u v o m => HasProgram u v o (ReaderC r m) where
   askProgram = lift askProgram
 
-instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramC u i o m) where
+instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramC u v o m) where
   alg = \case
     L (Get   k) -> k defaultVars
     L (Put s k) -> do
@@ -103,8 +103,8 @@ instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u May
       k
     R other     -> ProgramC (send (handleCoercible other))
 
-instance Algebra sig m => HasProgram u i o (ProgramC u i o m) where
+instance Algebra sig m => HasProgram u v o (ProgramC u v o m) where
   askProgram = ProgramC ask
 
-deriving instance B.HasBuffer 'B.Array i   m => B.HasBuffer 'B.Array i   (ProgramC u   i o m)
-deriving instance HasProgram u         i o m => HasProgram u         i o (B.BufferC ty i   m)
+deriving instance B.HasBuffer 'B.Array v   m => B.HasBuffer 'B.Array v   (ProgramC u   v o m)
+deriving instance HasProgram u         v o m => HasProgram u         v o (B.BufferC ty v   m)
