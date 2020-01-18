@@ -22,7 +22,7 @@ import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.State (put)
 import           Control.Effect.Trace
-import           Control.Lens (Lens', lens, (%~), (&), (.~), (?~), (^.))
+import           Control.Lens (Lens', (&), (?~), (^.))
 import           Data.Foldable (for_, toList)
 import           Data.Functor.I
 import           Data.Functor.Interval
@@ -109,17 +109,15 @@ data Blip a = Blip { scale :: Double, value :: a }
   deriving (Generic)
 
 instance HasActor a => HasActor (Blip a) where
-  actor_ = lens get set where
-    get Blip{ scale, value } = value^.actor_ & magnitude_ %~ (^* scale)
-    set Blip{ scale, value } actor = Blip{ scale, value = value & actor_ .~ (actor & magnitude_ %~ (^* (1/scale))) }
+  actor_ = field @"value".actor_
 
 instance HasColour a => HasColour (Blip a) where
   colour_ = field @"value".colour_
 
 verticesForBlip :: (Foldable t, HasActor a, HasColour a) => t (Blip a) -> [V I]
 verticesForBlip bs =
-  [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_), colour = I (b^.colour_) }
-  | b <- toList bs
+  [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_ ^* scale), colour = I (b^.colour_) }
+  | b@Blip{ scale } <- toList bs
   ]
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
