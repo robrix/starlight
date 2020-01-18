@@ -105,16 +105,16 @@ data Drawable = Drawable
   }
 
 
-data Blip a = Blip { scale :: Double, value :: a }
+data Blip = Blip { scale :: Double, actor :: Actor, colour :: Colour Float }
   deriving (Generic)
 
-instance HasActor a => HasActor (Blip a) where
-  actor_ = field @"value".actor_
+instance HasActor Blip where
+  actor_ = field @"actor"
 
-instance HasColour a => HasColour (Blip a) where
-  colour_ = field @"value".colour_
+instance HasColour Blip where
+  colour_ = field @"colour"
 
-verticesForBlip :: (Foldable t, HasActor a, HasColour a) => t (Blip a) -> [V I]
+verticesForBlip :: Foldable t => t Blip -> [V I]
 verticesForBlip bs =
   [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_ ^* scale), colour = I (b^.colour_) }
   | b@Blip{ scale } <- toList bs
