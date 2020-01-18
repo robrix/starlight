@@ -1,4 +1,3 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -64,7 +63,7 @@ instance Bind (Array n) where
 
 
 configureInterleaved :: forall v m sig . (Effect sig, HasArray v m, B.HasBuffer 'B.Array (v I) m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
-configureInterleaved = askArray >> B.askBuffer @'B.Array >> evalState (Offset 0) (configureVars @v (S.sizeOf @(Fields v) undefined))
+configureInterleaved = askArray >> B.askBuffer @'B.Array >> evalState (Offset 0) (configureVars @v (S.sizeOf @(Fields v) undefined) (defaultVars @v))
 
 configure2 :: forall v1 v2 m sig . (Effect sig, HasArray (v1 :**: v2) m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
 configure2 b1 b2 = evalState (Offset 0) $ do
@@ -97,7 +96,7 @@ configure2 b1 b2 = evalState (Offset 0) $ do
   where
   stride = S.sizeOf @((v1 :**: v2) I) undefined
 
-configureVars :: forall v m sig . (Vars v, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> m ()
+configureVars :: (Vars v, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> v Maybe -> m ()
 configureVars stride = foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
   offset <- get
   let size   = S.sizeOf @a undefined
@@ -108,7 +107,7 @@ configureVars stride = foldVarsM (\ (Field{ location, name } :: Field Maybe a) -
   trace $ "configuring field " <> name <> " attrib " <> show location <> " at offset " <> show offset <> " stride " <> show stride <> " dims " <> show dims <> " type " <> show ty
 
   checking $ glEnableVertexAttribArray (fromIntegral location)
-  checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars @v)
+  checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset))
 
 
 drawArrays
