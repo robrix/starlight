@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -13,6 +14,7 @@ module GL.Shader.Vars
 , Offset(..)
 , Fields(..)
 , Vars(..)
+, (:**:)(..)
 , makeVarsM
 , foldVars
 , foldVarsM
@@ -65,6 +67,10 @@ instance Vars v => F.Storable (Fields v) where
 
 undefinedAtFieldType :: Field v a -> a
 undefinedAtFieldType _ = undefined
+
+
+data ((l :: (* -> *) -> *) :**: (r :: (* -> *) -> *)) (v :: * -> *)
+  = l v :**: r v
 
 
 class Vars t where
