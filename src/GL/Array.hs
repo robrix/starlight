@@ -15,6 +15,7 @@ module GL.Array
 , drawArrays
 , multiDrawArrays
 , drawArraysInstanced
+, drawElementsInstanced
 , load
 , bindArray
 , HasArray(..)
@@ -31,6 +32,8 @@ import           Control.Monad.Trans.Class
 import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Functor.Interval
+import           Data.List (genericLength)
+import           Data.Word (Word32)
 import           Foreign.Marshal.Array.Lift
 import           Foreign.Ptr
 import qualified Foreign.Storable as S
@@ -125,6 +128,19 @@ drawArraysInstanced
   -> Int
   -> m ()
 drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i)) (fromIntegral n)))
+
+drawElementsInstanced
+  :: ( Has Check sig m
+     , Has (Lift IO) sig m
+     , HasArray i m
+     , HasCallStack
+     , HasProgram u i o m
+     )
+  => Type
+  -> [Int]
+  -> Int
+  -> m ()
+drawElementsInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (withArray (map (fromIntegral @_ @Word32) i) (\ p -> glDrawElementsInstanced (glEnum mode) (genericLength i) GL_UNSIGNED_INT (castPtr p) (fromIntegral n))))
 
 
 load :: (Effect sig, Vars i, S.Storable (i I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [i I] -> m (B.Buffer 'B.Array (i I), Array (i I))
