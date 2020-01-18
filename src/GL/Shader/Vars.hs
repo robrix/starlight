@@ -129,7 +129,8 @@ defaultVars = makeVars value
 {-# INLINABLE defaultVars #-}
 
 displayVars :: Vars t => t v -> String
-displayVars = ($ "") . showBraces . foldr (.) id . intersperse (showString ", ") . foldVars (\ Field{ name, location } -> [shows location . showString " = ". showString name]) where
+displayVars = ($ "") . showBraces . foldr (.) id . intersperse (showString ", ") . foldVars displayField where
+  displayField Field{ name, location } = [shows location . showString " = " . showString name]
   showBraces a = showString "{ " . a . showString " }"
 
 
