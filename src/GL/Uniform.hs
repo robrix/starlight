@@ -9,7 +9,7 @@ module GL.Uniform
 ( Uniform(..)
 , Scalar(..)
 , RowI(..)
-, Col2(..)
+, ColI(..)
 ) where
 
 import           Control.Monad.IO.Class.Lift
@@ -158,15 +158,15 @@ replace4 = \case
 
 
 class Scalar t => Scalar2 t where
-  glslTypeFor2 :: Col2 -> String
+  glslTypeFor2 :: ColI -> String
 
-  uniformFor2 :: Col2 -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformFor2 :: ColI -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 deriving instance Scalar2 a => Scalar2 (Const a b)
 deriving instance Scalar2 a => Scalar2 (Identity a)
 deriving instance Scalar2 a => Scalar2 (K a b)
 
-data Col2
+data ColI
   = C2x2
   | C2x3
   | C2x4
@@ -178,7 +178,7 @@ data Col2
   | C4x4
   deriving (Enum, Eq, Ord, Show)
 
-glslTypeForCol2 :: Col2 -> String
+glslTypeForCol2 :: ColI -> String
 glslTypeForCol2 = \case
   C2x2 -> "mat2"
   C2x3 -> "mat2x3"
