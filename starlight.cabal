@@ -161,6 +161,7 @@ library
     , transformers ^>= 0.5
     , unordered-containers
     , vector ^>= 0.12
+    , vulkan-api
 
 executable starlight
   import:              common
