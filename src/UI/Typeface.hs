@@ -52,7 +52,6 @@ data Typeface = Typeface
   , opentypeFont :: O.OpentypeFont
   , glyphs       :: Drawable Glyph.U Glyph.V Glyph.Frag
   , glyphsB      :: Buffer 'B.Array (Glyph.V  I)
-  , offsets      :: Buffer 'B.Array (Glyph.V' I)
   , rangesRef    :: IORef (Map.Map Char (Interval I Int))
   }
 
@@ -95,7 +94,6 @@ fromOpentypeFont opentypeFont = do
   program <- build Glyph.shader
   array   <- gen1
   glyphsB <- gen1
-  offsets <- gen1
 
   rangesRef <- sendM (newIORef Map.empty)
 
@@ -105,7 +103,6 @@ fromOpentypeFont opentypeFont = do
     , opentypeFont
     , glyphs = Drawable{ program, array }
     , glyphsB
-    , offsets
     , rangesRef
     } where
   name = T.unpack . T.decodeUtf16BE . O.nameString <$> find ((== Just FullName) . nameID) (O.nameRecords (O.nameTable opentypeFont))
