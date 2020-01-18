@@ -7,3 +7,5 @@
 - fixity: "infixr 2 <--"
 - fixity: "infixr 2 -->"
 - fixity: "infixr 2 <->"
+
+- ignore: {name: Reduce duplication}
