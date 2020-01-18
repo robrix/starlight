@@ -105,6 +105,7 @@ data Drawable = Drawable
 
 
 data Scaled a = Scaled { scale :: Float, value :: a }
+  deriving (Generic)
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
 verticesForBodies vs =
