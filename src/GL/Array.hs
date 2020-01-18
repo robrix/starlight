@@ -133,6 +133,7 @@ drawElementsInstanced
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , HasArray v m
+     , B.HasBuffer 'B.ElementArray Word32 m
      , HasCallStack
      , HasProgram u v o m
      )
@@ -140,7 +141,13 @@ drawElementsInstanced
   -> [Int]
   -> Int
   -> m ()
-drawElementsInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (withArray (map (fromIntegral @_ @Word32) i) (\ p -> glDrawElementsInstanced (glEnum mode) (genericLength i) GL_UNSIGNED_INT (castPtr p) (fromIntegral n))))
+drawElementsInstanced mode is n = do
+  _ <- askProgram
+  _ <- askArray
+  _ <- B.askBuffer @'B.ElementArray
+  B.realloc @'B.ElementArray (length is) B.Static B.Read
+  B.copy @'B.ElementArray 0 (map (fromIntegral @_ @Word32) is)
+  checking (runLiftIO (glDrawElementsInstanced (glEnum mode) (genericLength is) GL_UNSIGNED_INT nullPtr (fromIntegral n)))
 
 
 load :: (Effect sig, Vars v, S.Storable (v I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [v I] -> m (B.Buffer 'B.Array (v I), Array (v I))
