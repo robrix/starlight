@@ -114,6 +114,9 @@ instance HasActor Blip where
 instance HasColour Blip where
   colour_ = field @"colour"
 
+blipFor :: (HasActor t, HasColour t) => Double -> t -> Blip
+blipFor scale t = Blip{ scale, actor = t^.actor_, colour = t^.colour_ }
+
 verticesForBlip :: Foldable t => t Blip -> [V I]
 verticesForBlip bs =
   [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_ ^* scale), colour = I (b^.colour_) }
