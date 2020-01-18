@@ -132,6 +132,7 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
             ?=  translated (-1)
             !*! scaled     (V3 sx sy 1)
             !*! translated (fromIntegral <$> negated (min' b'))
+          -- FIXME: draw elements
           for_ instances $ \ Instance{ offset, range } -> do
             Glyph.offset_ ?= offset
             drawArraysInstanced Triangles range 6
