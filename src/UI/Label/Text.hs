@@ -1,10 +1,10 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE UndecidableInstances #-}
 module UI.Label.Text
 ( shader
 , U(..)
@@ -15,6 +15,7 @@ module UI.Label.Text
 ) where
 
 import Control.Lens (Lens')
+import Data.Functor.I
 import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
@@ -72,7 +73,7 @@ newtype V v = V { pos :: v (V2 Float) }
 
 instance Vars V
 
-deriving instance Storable (v (V2 Float)) => Storable (V v)
+deriving via Fields V instance Storable (V I)
 
 newtype IF v = IF { uv :: v (V2 Float) }
   deriving (Generic)

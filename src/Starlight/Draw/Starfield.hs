@@ -1,13 +1,13 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Starfield
 ( draw
 , Starlight.Draw.Starfield.run
@@ -177,4 +177,4 @@ newtype V v = V { pos :: v (V2 Float) }
 
 instance Vars V
 
-deriving instance Storable (v (V2 Float)) => Storable (V v)
+deriving via Fields V instance Storable (V I)

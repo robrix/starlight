@@ -1,10 +1,10 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE UndecidableInstances #-}
 module UI.Label.Glyph
 ( shader
 , U(..)
@@ -17,6 +17,7 @@ module UI.Label.Glyph
 ) where
 
 import Control.Lens (Lens')
+import Data.Functor.I
 import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
@@ -100,7 +101,7 @@ newtype V v = V { pos :: v (V4 Float) }
 
 instance Vars V
 
-deriving instance Storable (v (V4 Float)) => Storable (V v)
+deriving via Fields V instance Storable (V I)
 
 data IF v = IF
   { _coord2 :: v (V2 Float)

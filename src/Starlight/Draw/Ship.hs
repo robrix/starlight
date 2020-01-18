@@ -1,12 +1,12 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Ship
 ( draw
 , Starlight.Draw.Ship.run
@@ -115,4 +115,4 @@ newtype V v = V { pos :: v (V2 Float) }
 
 instance D.Vars V
 
-deriving instance Storable (v (V2 Float)) => Storable (V v)
+deriving via Fields V instance Storable (V I)

@@ -1,11 +1,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Weapon.Laser
 ( Starlight.Draw.Weapon.Laser.run
 , draw
@@ -103,4 +103,4 @@ newtype V v = V { r :: v Float }
 
 instance Vars V
 
-deriving instance Storable (v Float) => Storable (V v)
+deriving via Fields V instance Storable (V I)

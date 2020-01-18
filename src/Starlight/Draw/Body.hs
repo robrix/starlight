@@ -1,12 +1,12 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Body
 ( Starlight.Draw.Body.run
 , Drawable
@@ -112,4 +112,4 @@ newtype V v = V { pos :: v (V4 Double) }
 
 instance D.Vars V
 
-deriving instance Storable (v (V4 Double)) => Storable (V v)
+deriving via Fields V instance Storable (V I)
