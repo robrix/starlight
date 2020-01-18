@@ -64,7 +64,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   let npcs     = system^.npcs_
       blips    = map (blipFor (1/scale)) (toList npcs) <> map (blipFor 1) (toList bodies)
       vertices = verticesForBlips blips
-      vars = makeVars (const Nothing)
+      vars     = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
         & here_   ?~ here
         & scale_  ?~ realToFrac (lengthToWindowPixels view)
