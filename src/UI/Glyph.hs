@@ -21,7 +21,7 @@ import           Linear.V4 (V4)
 data Glyph = Glyph
   { char         :: {-# UNPACK #-} !Char
   , advanceWidth :: {-# UNPACK #-} !Int
-  , geometry     :: ![V4 Float]
+  , geometry     :: ![V4 Int]
   , bounds_      :: {-# UNPACK #-} !(Interval V2 Int)
   }
 
