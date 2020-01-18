@@ -18,10 +18,9 @@ import           Control.Effect.Lens ((?=))
 import           Control.Effect.Lift
 import           Control.Effect.Trace
 import           Control.Lens ((^.))
-import           Control.Monad (when)
+import           Control.Monad (foldM_, when)
 import           Control.Monad.IO.Class.Lift
 import           Data.Coerce
-import           Data.Foldable (for_)
 import           Data.Functor.I
 import           Data.Functor.Interval as Interval
 import           Data.IORef
@@ -141,11 +140,19 @@ setLabel Label{ texture, fbuffer, ratio, ref, indices } font@(Font face _) strin
           -- FIXME: use :*: to combine the interleaved vertex buffer with the non-interleaved offset in the vertices
           -- FIXME: make a single draw call
 
-          for_ instances $ \ Instance{ offset, range } -> do
-            Glyph.offset_ ?= offset
-            drawArraysInstanced Triangles range 6
+          let indices = instances >>= Interval.range . Glyph.range
+          realloc @'ElementArray (length indices) Static Draw
+          copy @'ElementArray 0 (map (fromIntegral @_ @Word32 . getI) indices)
+
+          foldM_ drawInstance 0 instances
 
         sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline })) where
+        drawInstance prev Instance{ offset, range } = do
+            let indices = Interval.range range
+                len = I (length indices)
+            Glyph.offset_ ?= offset
+            drawElementsInstanced Triangles (Interval prev (prev + len)) 6
+            pure $! prev + len
 
 
 drawLabel
