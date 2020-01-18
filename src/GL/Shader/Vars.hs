@@ -25,6 +25,7 @@ module GL.Shader.Vars
 , foldVarsM
 , defaultVars
 , displayVars
+, Proxy(..)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -37,6 +38,7 @@ import           Data.Functor.K
 import           Data.List (intersperse)
 import           Data.Maybe (fromMaybe)
 import           Data.Monoid (Ap(..), First(..), Sum(..))
+import           Data.Proxy
 import qualified Foreign as F
 import           GHC.Generics
 import qualified GL.Uniform as GL
