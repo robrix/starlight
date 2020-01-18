@@ -35,7 +35,7 @@ import           Starlight.Actor
 import           Starlight.Character
 import qualified Starlight.Ship as S
 import           Starlight.View
-import           UI.Colour
+import qualified UI.Colour as UI
 import qualified UI.Drawable as UI
 import           Unit.Length
 
@@ -54,8 +54,8 @@ draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour 
     >>> transformToActor actor
     >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale)))
   colour_ ?= (colour
-    & (if Thrust `Set.member` actions then (\ v -> v ^/ v^._r) . (_r +~ 0.5) . (_b -~ 0.25) else id)
-    & _a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
+    & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
+    & UI._a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
   drawArrays LineLoop range
 
 
@@ -97,7 +97,7 @@ shader = program $ \ u
 
 data U v = U
   { matrix :: v (Transform Float ClipUnits (Mega Metres))
-  , colour :: v (Colour Float)
+  , colour :: v (UI.Colour Float)
   }
   deriving (Generic)
 
@@ -106,7 +106,7 @@ instance D.Vars U
 matrix_ :: Lens' (U v) (v (Transform Float ClipUnits (Mega Metres)))
 matrix_ = field @"matrix"
 
-colour_ :: Lens' (U v) (v (Colour Float))
+colour_ :: Lens' (U v) (v (UI.Colour Float))
 colour_ = field @"colour"
 
 

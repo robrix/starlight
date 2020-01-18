@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 module UI.Colour
 ( Colour
 , black
@@ -12,6 +13,7 @@ module UI.Colour
 , _a
 , opaque
 , setClearColour
+, HasColour(..)
 ) where
 
 import Control.Lens
@@ -61,3 +63,10 @@ opaque = set _a 1
 setClearColour :: (Real a, Has (Lift IO) sig m) => Colour a -> m ()
 setClearColour v = runLiftIO $ glClearColor r g b a where
   V4 r g b a = realToFrac <$> v
+
+
+class HasColour t where
+  colour_ :: Lens' t (Colour Float)
+
+instance HasColour (V4 Float) where
+  colour_ = id
