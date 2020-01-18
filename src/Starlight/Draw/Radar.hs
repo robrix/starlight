@@ -64,7 +64,7 @@ drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> 
       vertices = verticesForShips scale npcs <> verticesForBodies bodies
       vars = defaultVars
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
-        & here_   ?~ (fmap realToFrac <$> here)
+        & here_   ?~ here
         & scale_  ?~ realToFrac (lengthToWindowPixels view)
 
   measure "realloc/copy" $ do
@@ -105,31 +105,31 @@ data Drawable = Drawable
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
 verticesForBodies vs =
-  [ V{ there = I (realToFrac <$> (there^._xy)), r = I (realToFrac <$> (b^.actor_.magnitude_)), colour = I colour }
+  [ V{ there = I (there^._xy), r = I (b^.actor_.magnitude_), colour = I colour }
   | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
 verticesForShips :: Foldable t => Double -> t Character -> [V I]
 verticesForShips scale cs =
-  [ V{ there = I (realToFrac <$> (there^._xy)), r = I (realToFrac <$> (c^.actor_.magnitude_ ^/ scale)), colour = I colour }
+  [ V{ there = I (there^._xy), r = I (c^.actor_.magnitude_ ^/ scale), colour = I colour }
   | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 
 
 vertex' :: U (Expr 'Vertex) -> Stage V IG
 vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
-  there <- let' "there" (D.coerce there - D.coerce (here u))
+  there <- let' "there" (D.coerce (there - here u))
   d     <- let' "d"     (D.norm there)
   dir   <- let' "dir"   (there D.^* (1/d))
-  let perp v = vec2 [negate (v D.^.D._y), v D.^.D._x]
+  let perp v = dvec2 [negate (v D.^.D._y), v D.^.D._x]
       angleOf vec = D.coerce $ atan2' (vec D.^.D._y) (vec D.^.D._x)
       wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
   edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
-  angle <- let' "angle" (angleOf there)
-  radius <- let' "radius" (D.min' (Starlight.Draw.Radar.scale u * d) radius)
+  angle <- let' "angle" (angleOf (vec2 [there]))
+  radius <- let' "radius" (D.min' (Starlight.Draw.Radar.scale u * float d) radius)
   minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
-  sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf edge - angle)))
+  sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf (vec2 [edge]) - angle)))
   pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
   colour2 .= colour
   gl_Position .= ext4 (ext3 pos 0) 1) where
@@ -193,7 +193,7 @@ targetShader = program $ \ u
 
 data U v = U
   { matrix :: v (Transform Float ClipUnits Window.Pixels)
-  , here   :: v (V2 (Mega Metres Float))
+  , here   :: v (V2 (Mega Metres Double))
   , scale  :: v Float
   }
   deriving (Generic)
@@ -203,7 +203,7 @@ instance Vars U
 matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Window.Pixels))
 matrix_ = field @"matrix"
 
-here_ :: Lens' (U v) (v (V2 (Mega Metres Float)))
+here_ :: Lens' (U v) (v (V2 (Mega Metres Double)))
 here_ = field @"here"
 
 scale_ :: Lens' (U v) (v Float)
@@ -225,8 +225,8 @@ instance Vars IF
 
 
 data V v = V
-  { there  :: v (V2 (Mega Metres Float)) -- location of object
-  , r      :: v (Mega Metres Float)      -- radius of object
+  { there  :: v (V2 (Mega Metres Double)) -- location of object
+  , r      :: v (Mega Metres Double)      -- radius of object
   , colour :: v (Colour Float)
   }
   deriving (Generic)
