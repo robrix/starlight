@@ -9,7 +9,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Ship
 ( draw
-, runShip
+, Starlight.Draw.Ship.run
 , Drawable
 ) where
 
@@ -60,7 +60,7 @@ draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour 
   drawArrays LineLoop range
 
 
-runShip
+run
   :: ( Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
@@ -69,7 +69,7 @@ runShip
      )
   => ReaderC Drawable m a
   -> m a
-runShip = UI.loadingDrawable Drawable shader vertices
+run = UI.loadingDrawable Drawable shader vertices
 
 
 newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
