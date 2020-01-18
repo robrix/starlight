@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Ship
-( drawShip
+( draw
 , runShip
 , Drawable
 ) where
@@ -40,7 +40,7 @@ import           UI.Colour
 import qualified UI.Drawable as UI
 import           Unit.Length
 
-drawShip
+draw
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has (Reader Drawable) sig m
@@ -48,7 +48,7 @@ drawShip
      )
   => Character
   -> m ()
-drawShip Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
+draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
   view@View{ scale } <- ask
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
