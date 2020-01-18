@@ -9,7 +9,6 @@ module Data.Functor.Interval
 , size
 , toUnit
 , fromUnit
-, range
 , wrap
 , min_
 , max_
@@ -107,10 +106,6 @@ size (Interval min max) = max - min
 toUnit, fromUnit :: Fractional (f a) => Interval f a -> f a -> f a
 toUnit   i x = (x - min' i) / size i
 fromUnit i x =  x * size i  + min' i
-
-
-range :: Enum (f a) => Interval f a -> [f a]
-range = enumFromTo . min' <*> max'
 
 
 wrap :: Real (f a) => Interval f a -> f a -> f a
