@@ -136,8 +136,8 @@ cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { buffer, array
       vertices = vs []
 
   bindArray array . bindBuffer buffer $ do
-    realloc (length vertices) Static Draw
-    copy 0 (coerce (map (fmap (fromIntegral @_ @Float)) vertices))
+    realloc @'B.Array (length vertices) Static Draw
+    copy @'B.Array 0 (coerce (map (fmap (fromIntegral @_ @Float)) vertices))
 
     configureArray
 

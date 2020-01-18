@@ -61,7 +61,7 @@ instance Bind (Array n) where
 
 configureArray :: (Effect sig, HasArray i m, B.HasBuffer 'B.Array i m, Vars i, S.Storable (i I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureArray = do
-  a <- askArray <* B.askBuffer
+  a <- askArray <* B.askBuffer @'B.Array
   evalState (Offset 0) $ foldVarsM (\ f@Field { location, name } -> runLiftIO $ do
     offset <- get
     let size = S.sizeOf (undefinedAtFieldType f)
@@ -148,8 +148,8 @@ load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
   bindArray a . B.bindBuffer b $ do
-    B.realloc (length is) B.Static B.Draw
-    B.copy 0 is
+    B.realloc @'B.Array (length is) B.Static B.Draw
+    B.copy @'B.Array 0 is
 
     (b, a) <$ configureArray
 

@@ -49,10 +49,10 @@ instance KnownType ty => Bind (Buffer ty v) where
   bind = checking . runLiftIO . glBindBuffer (glEnum (typeVal @ty)) . maybe 0 unBuffer
 
 realloc :: forall ty v m sig . (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has (Lift IO) sig m) => Int -> Update -> Usage -> m ()
-realloc n update usage = askBuffer >> runLiftIO (glBufferData (glEnum (typeVal @ty)) (fromIntegral (n * S.sizeOf @(v I) undefined)) nullPtr (glEnum (Hint update usage)))
+realloc n update usage = askBuffer @ty >> runLiftIO (glBufferData (glEnum (typeVal @ty)) (fromIntegral (n * S.sizeOf @(v I) undefined)) nullPtr (glEnum (Hint update usage)))
 
 copy :: forall ty v m sig . (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m) => Int -> [v I] -> m ()
-copy offset vertices = askBuffer >> A.withArray vertices
+copy offset vertices = askBuffer @ty >> A.withArray vertices
   (checking . runLiftIO . glBufferSubData (glEnum (typeVal @ty)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr) where
   i = (Interval 0 (I (length vertices)) + pure offset) ^* S.sizeOf @(v I) undefined
 
@@ -110,8 +110,7 @@ bindBuffer buffer (BufferC m) = do
   a <- runReader buffer m
   a <$ bind (Nothing `asTypeOf` Just buffer)
 
--- FIXME: there can be different kinds of bound buffers simultaneously
-class Monad m => HasBuffer ty v m | m -> ty v where
+class Monad m => HasBuffer ty v m | m ty -> v where
   askBuffer :: m (Buffer ty (v I))
 
 instance HasBuffer ty i m => HasBuffer ty i (ReaderC r m) where

@@ -68,8 +68,8 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
         & scale_  ?~ realToFrac (lengthToWindowPixels view)
 
   measure "realloc/copy" $ do
-    B.realloc (length vertices) B.Static B.Draw
-    B.copy 0 vertices
+    B.realloc @'B.Array (length vertices) B.Static B.Draw
+    B.copy @'B.Array 0 vertices
 
   use radarProgram $ do
     put vars
