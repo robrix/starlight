@@ -143,7 +143,7 @@ setLabel Label{ texture, fbuffer, ratio, ref, indices } font@(Font face _) strin
           -- FIXME: make a single drawElementsInstanced call
 
           let indices = instances >>= Interval.range . Glyph.range
-          realloc @'ElementArray (length indices) Dynamic Draw
+          realloc @'ElementArray (length indices) Static Draw
           copy @'ElementArray 0 (map (fromIntegral @_ @Word32 . getI) indices)
 
           foldM_ (\ prev Instance{ offset, range } -> do

@@ -100,3 +100,5 @@ frame: {min: 1.270ms, mean: 7.464ms, max: 191.873ms}
   input: {min: 0.032ms, mean: 0.196ms, max: 86.957ms}
 label: {min: 2.410ms, mean: 2.466ms, max: 2.521ms}
 ```
+
+Reallocating the buffer with the `GL_STATIC` hint had negligible effect.
