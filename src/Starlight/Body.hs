@@ -70,6 +70,9 @@ data Body = Body
   }
   deriving (Generic, Show)
 
+instance HasColour Body where
+  colour_ = field @"colour"
+
 newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
   deriving (Eq, Fractional, Num, Ord)
 
