@@ -32,7 +32,7 @@ import           Linear.V4 as Linear
 import           SDL
 
 newtype Pixels a = Pixels { getPixels :: a }
-  deriving (Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()

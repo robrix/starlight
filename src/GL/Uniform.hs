@@ -8,7 +8,7 @@
 module GL.Uniform
 ( Uniform(..)
 , Row(..)
-, Scalar2(..)
+, Column(..)
 , RowD(..)
 , ColD(..)
 ) where
@@ -125,7 +125,7 @@ instance Row Double where
     R4 -> glProgramUniform4dv
   {-# INLINE uniformForRow #-}
 
-instance Scalar2 t => Row (V2 t) where
+instance Column t => Row (V2 t) where
   glslTypeForRow = glslTypeFor2 @t . replace2
   uniformForRow = coerce . uniformFor2 @t . replace2
 
@@ -135,7 +135,7 @@ replace2 = \case
   R4 -> C4x2
 {-# INLINE replace2 #-}
 
-instance Scalar2 t => Row (V3 t) where
+instance Column t => Row (V3 t) where
   glslTypeForRow = glslTypeFor2 @t . replace3
   uniformForRow = coerce . uniformFor2 @t . replace3
 
@@ -145,7 +145,7 @@ replace3 = \case
   R4 -> C4x3
 {-# INLINE replace3 #-}
 
-instance Scalar2 t => Row (V4 t) where
+instance Column t => Row (V4 t) where
   glslTypeForRow = glslTypeFor2 @t . replace4
   uniformForRow = coerce . uniformFor2 @t . replace4
 
@@ -156,14 +156,14 @@ replace4 = \case
 {-# INLINE replace4 #-}
 
 
-class Row t => Scalar2 t where
+class Row t => Column t where
   glslTypeFor2 :: ColD -> String
 
   uniformFor2 :: ColD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
-deriving instance Scalar2 a => Scalar2 (Const a b)
-deriving instance Scalar2 a => Scalar2 (Identity a)
-deriving instance Scalar2 a => Scalar2 (K a b)
+deriving instance Column a => Column (Const a b)
+deriving instance Column a => Column (Identity a)
+deriving instance Column a => Column (K a b)
 
 data ColD
   = C2x2
@@ -193,7 +193,7 @@ transposing :: (GLuint -> GLint -> GLsizei -> GLboolean -> Ptr t -> IO ()) -> (G
 transposing f prog loc n = f prog loc n GL_TRUE
 {-# INLINE transposing #-}
 
-instance Scalar2 Float where
+instance Column Float where
   glslTypeFor2 = glslTypeForCol2
   {-# INLINE glslTypeFor2 #-}
 
@@ -209,7 +209,7 @@ instance Scalar2 Float where
     C4x4 -> transposing glProgramUniformMatrix4fv
   {-# INLINE uniformFor2 #-}
 
-instance Scalar2 Double where
+instance Column Double where
   glslTypeFor2 = ('d':) . glslTypeForCol2
   {-# INLINE glslTypeFor2 #-}
 

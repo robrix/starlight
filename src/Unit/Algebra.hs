@@ -68,7 +68,7 @@ u `qdU` v = pure $ fmap prj u `qd` fmap prj v
 -- * Combinators
 
 newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
-  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 infixl 7 :*:
@@ -79,7 +79,7 @@ instance (Unit dimu u, Unit dimv v) => Unit (dimu :*: dimv) (u :*: v) where
 
 
 newtype Inv (u :: * -> *) a = Inv { getInv :: a }
-  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit dimu u => Unit dimu (Inv u) where
