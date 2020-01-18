@@ -22,7 +22,7 @@ import           Control.Effect.Lift
 import           Control.Effect.Profile
 import           Control.Effect.State (put)
 import           Control.Effect.Trace
-import           Control.Lens (Lens', (^.), (?~), (&))
+import           Control.Lens (Lens', lens, (%~), (&), (.~), (?~), (^.))
 import           Data.Foldable (for_, toList)
 import           Data.Functor.I
 import           Data.Functor.Interval
@@ -35,9 +35,9 @@ import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
 import           GL.Shader (Type(..))
-import           GL.Shader.Vars (makeVars)
 import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
+import           GL.Shader.Vars (makeVars)
 import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
 import qualified Starlight.Body as B
@@ -109,7 +109,9 @@ data Blip a = Blip { scale :: Double, value :: a }
   deriving (Generic)
 
 instance HasActor a => HasActor (Blip a) where
-  actor_ = field @"value".actor_
+  actor_ = lens get set where
+    get Blip{ scale, value } = value^.actor_ & magnitude_ %~ (^* scale)
+    set Blip{ scale, value } actor = Blip{ scale, value = value & actor_ .~ (actor & magnitude_ %~ (^* (1/scale))) }
 
 instance HasColour a => HasColour (Blip a) where
   colour_ = field @"value".colour_
