@@ -55,16 +55,16 @@ instance Uniform Double where
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
 instance {-# OVERLAPPABLE #-} Row t => Uniform (V2 t) where
-  glslType = glslTypeFor @t R2
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t R2 prog loc 1 . castPtr)
+  glslType = glslTypeForRow @t R2
+  uniform prog loc vec = A.with vec (sendM . uniformForRow @t R2 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Row t => Uniform (V3 t) where
-  glslType = glslTypeFor @t R3
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t R3 prog loc 1 . castPtr)
+  glslType = glslTypeForRow @t R3
+  uniform prog loc vec = A.with vec (sendM . uniformForRow @t R3 prog loc 1 . castPtr)
 
 instance {-# OVERLAPPABLE #-} Row t => Uniform (V4 t) where
-  glslType = glslTypeFor @t R4
-  uniform prog loc vec = A.with vec (sendM . uniformFor @t R4 prog loc 1 . castPtr)
+  glslType = glslTypeForRow @t R4
+  uniform prog loc vec = A.with vec (sendM . uniformForRow @t R4 prog loc 1 . castPtr)
 
 deriving instance Uniform (f a) => Uniform (Point f a)
 
@@ -75,9 +75,9 @@ deriving instance Uniform a => Uniform (K a b)
 
 -- | Types which can appear in vectors.
 class GL.Type t => Row t where
-  glslTypeFor :: RowD -> String
+  glslTypeForRow :: RowD -> String
 
-  uniformFor :: RowD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformForRow :: RowD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 deriving instance Row a => Row (Const a b)
 deriving instance Row a => Row (Identity a)
@@ -96,38 +96,38 @@ glslTypeForCol = \case
   R4 -> "vec4"
 
 instance Row Int32 where
-  glslTypeFor = ('i':) . glslTypeForCol
-  {-# INLINE glslTypeFor #-}
+  glslTypeForRow = ('i':) . glslTypeForCol
+  {-# INLINE glslTypeForRow #-}
 
-  uniformFor = \case
+  uniformForRow = \case
     R2 -> glProgramUniform2iv
     R3 -> glProgramUniform3iv
     R4 -> glProgramUniform4iv
-  {-# INLINE uniformFor #-}
+  {-# INLINE uniformForRow #-}
 
 instance Row Float where
-  glslTypeFor = glslTypeForCol
-  {-# INLINE glslTypeFor #-}
+  glslTypeForRow = glslTypeForCol
+  {-# INLINE glslTypeForRow #-}
 
-  uniformFor = \case
+  uniformForRow = \case
     R2 -> glProgramUniform2fv
     R3 -> glProgramUniform3fv
     R4 -> glProgramUniform4fv
-  {-# INLINE uniformFor #-}
+  {-# INLINE uniformForRow #-}
 
 instance Row Double where
-  glslTypeFor = ('d':) . glslTypeForCol
-  {-# INLINE glslTypeFor #-}
+  glslTypeForRow = ('d':) . glslTypeForCol
+  {-# INLINE glslTypeForRow #-}
 
-  uniformFor = \case
+  uniformForRow = \case
     R2 -> glProgramUniform2dv
     R3 -> glProgramUniform3dv
     R4 -> glProgramUniform4dv
-  {-# INLINE uniformFor #-}
+  {-# INLINE uniformForRow #-}
 
 instance Scalar2 t => Row (V2 t) where
-  glslTypeFor = glslTypeFor2 @t . replace2
-  uniformFor = coerce . uniformFor2 @t . replace2
+  glslTypeForRow = glslTypeFor2 @t . replace2
+  uniformForRow = coerce . uniformFor2 @t . replace2
 
 replace2 = \case
   R2 -> C2x2
@@ -136,8 +136,8 @@ replace2 = \case
 {-# INLINE replace2 #-}
 
 instance Scalar2 t => Row (V3 t) where
-  glslTypeFor = glslTypeFor2 @t . replace3
-  uniformFor = coerce . uniformFor2 @t . replace3
+  glslTypeForRow = glslTypeFor2 @t . replace3
+  uniformForRow = coerce . uniformFor2 @t . replace3
 
 replace3 = \case
   R2 -> C2x3
@@ -146,8 +146,8 @@ replace3 = \case
 {-# INLINE replace3 #-}
 
 instance Scalar2 t => Row (V4 t) where
-  glslTypeFor = glslTypeFor2 @t . replace4
-  uniformFor = coerce . uniformFor2 @t . replace4
+  glslTypeForRow = glslTypeFor2 @t . replace4
+  uniformForRow = coerce . uniformFor2 @t . replace4
 
 replace4 = \case
   R2 -> C2x4
