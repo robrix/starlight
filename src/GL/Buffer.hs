@@ -25,6 +25,7 @@ module GL.Buffer
 
 import           Control.Algebra
 import           Control.Carrier.Reader
+import           Control.Carrier.State.Strict
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Functor.I
@@ -115,6 +116,9 @@ class Monad m => HasBuffer ty v m | m ty -> v where
   askBuffer :: m (Buffer ty v)
 
 instance HasBuffer ty i m => HasBuffer ty i (ReaderC r m) where
+  askBuffer = lift askBuffer
+
+instance HasBuffer ty i m => HasBuffer ty i (StateC s m) where
   askBuffer = lift askBuffer
 
 
