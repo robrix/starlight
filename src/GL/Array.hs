@@ -165,7 +165,7 @@ drawElementsInstanced mode is n = do
   _ <- askProgram
   _ <- askArray
   _ <- B.askBuffer @'B.ElementArray
-  B.realloc @'B.ElementArray (length is) B.Static B.Read
+  B.realloc @'B.ElementArray (length is) B.Static B.Draw
   B.copy @'B.ElementArray 0 (map (fromIntegral @_ @Word32) is)
   checking (runLiftIO (glDrawElementsInstanced (glEnum mode) (genericLength is) GL_UNSIGNED_INT nullPtr (fromIntegral n)))
 

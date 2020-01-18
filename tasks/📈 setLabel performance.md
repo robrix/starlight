@@ -48,3 +48,5 @@ label: {min: 2.572ms, mean: 2.645ms, max: 2.719ms}
 ```
 
 Plan is to implement non-interleaved arrays to specify the instance offsets in a separate buffer from the vertex data, then write to the buffers for the instance offsets & elements en masse. Hypothesis is improvement due to making a single call; no per glyph instance uniform, write, or draw call.
+
+Reallocating the buffer with the `GL_DRAW` hint had negligible effect.
