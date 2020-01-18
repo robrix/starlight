@@ -17,6 +17,7 @@ module GL.Shader.Vars
 , Fields(..)
 , Vars(..)
 , (:**:)(..)
+, makeVars
 , makeVarsM
 , foldVars
 , foldVarsM
@@ -78,10 +79,10 @@ deriving via Fields (l :**: r) instance (Vars l, Vars r) => F.Storable ((l :**: 
 
 
 class Vars t where
-  makeVars :: (forall a . GL.Uniform a => Field Maybe a -> v a) -> t v
-  default makeVars :: (Generic (t v), GMakeVars t v (Rep (t v))) => (forall a . GL.Uniform a => Field Maybe a -> v a) -> t v
-  makeVars f = to (run (evalFresh 0 (gmakeVars @t f)))
-  {-# INLINABLE makeVars #-}
+  makeVars' :: Has Fresh sig m => (forall a . GL.Uniform a => Field Maybe a -> v a) -> m (t v)
+  default makeVars' :: (Generic (t v), GMakeVars t v (Rep (t v)), Has Fresh sig m) => (forall a . GL.Uniform a => Field Maybe a -> v a) -> m (t v)
+  makeVars' f = to <$> gmakeVars @t f
+  {-# INLINABLE makeVars' #-}
 
   traverseVars :: Applicative m => (forall a . GL.Uniform a => Field v a -> m (v' a)) -> t v -> m (t v')
   default traverseVars :: forall v v' m . (Generic (t v), Generic (t v'), GTraverseVars t v v' (Rep (t v)) (Rep (t v')), Applicative m) => (forall a . GL.Uniform a => Field v a -> m (v' a)) -> t v -> m (t v')
@@ -89,18 +90,21 @@ class Vars t where
   {-# INLINABLE traverseVars #-}
 
 instance (Vars l, Vars r) => Vars (l :*: r) where
-  makeVars f = makeVars f :*: makeVars f
-  {-# INLINABLE makeVars #-}
+  makeVars' f = (:*:) <$> makeVars' f <*> makeVars' f
+  {-# INLINABLE makeVars' #-}
 
   traverseVars f (l :*: r) = (:*:) <$> traverseVars f l <*> traverseVars f r
   {-# INLINABLE traverseVars #-}
 
 instance (Vars l, Vars r) => Vars (l :**: r) where
-  makeVars f = makeVars f :**: makeVars f
-  {-# INLINABLE makeVars #-}
+  makeVars' f = (:**:) <$> makeVars' f <*> makeVars' f
+  {-# INLINABLE makeVars' #-}
 
   traverseVars f (l :**: r) = (:**:) <$> traverseVars f l <*> traverseVars f r
   {-# INLINABLE traverseVars #-}
+
+makeVars :: Vars t => (forall a . GL.Uniform a => Field Maybe a -> v a) -> t v
+makeVars f = run (evalFresh 0 (makeVars' f))
 
 makeVarsM :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field Maybe a -> m (v a)) -> m (t v)
 makeVarsM f = traverseVars (unComp1 . value) (makeVars (Comp1 . f))
