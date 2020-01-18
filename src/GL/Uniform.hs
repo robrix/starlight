@@ -95,6 +95,16 @@ glslTypeForRowD = \case
   R3 -> "vec3"
   R4 -> "vec4"
 
+instance Row Int where
+  glslTypeForRow = ('i':) . glslTypeForRowD
+  {-# INLINE glslTypeForRow #-}
+
+  uniformForRow = \case
+    R2 -> coerce (glProgramUniform2iv @IO)
+    R3 -> coerce (glProgramUniform3iv @IO)
+    R4 -> coerce (glProgramUniform4iv @IO)
+  {-# INLINE uniformForRow #-}
+
 instance Row Int32 where
   glslTypeForRow = ('i':) . glslTypeForRowD
   {-# INLINE glslTypeForRow #-}
