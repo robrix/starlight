@@ -163,20 +163,7 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   start <- now
   fork . evalState start . fix $ \ loop -> do
-    id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
-      measure "controls" $ player_ @Body .actions_ <~ controls
-      measure "ai" $ npcs_ @Body <~> traverse ai
-
-      -- FIXME: this is so gross
-      beams_ @Body .= []
-      npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
-      characters_ @Body <~> itraverse
-        (\ i
-        -> local . neighbourhoodOf @StateVectors
-        <*> ( measure "gravity" . (actor_ @Character <-> gravity)
-          >=> measure "hit" . hit i
-          >=> measure "runActions" . runActions i
-          >=> measure "inertia" . (actor_ <-> inertia))))))
+    physics
     yield
     hasQuit <- get
     unless hasQuit loop
@@ -192,6 +179,31 @@ game = Sol.system >>= \ system -> runGame system $ do
     measure "swap" Window.swap
     loop
   put True
+
+physics
+  :: ( Effect sig
+     , Has (Lift IO) sig m
+     , Has Profile sig m
+     , Has (Reader Epoch) sig m
+     , Has (State Input) sig m
+     , Has (State UTCTime) sig m
+     , Has (State (System Body)) sig m
+     )
+  => m ()
+physics = id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
+  measure "controls" $ player_ @Body .actions_ <~ controls
+  measure "ai" $ npcs_ @Body <~> traverse ai
+
+  -- FIXME: this is so gross
+  beams_ @Body .= []
+  npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
+  characters_ @Body <~> itraverse
+    (\ i
+    -> local . neighbourhoodOf @StateVectors
+    <*> ( measure "gravity" . (actor_ @Character <-> gravity)
+      >=> measure "hit" . hit i
+      >=> measure "runActions" . runActions i
+      >=> measure "inertia" . (actor_ <-> inertia))))))
 
 frame
   :: ( Has Check sig m
