@@ -151,14 +151,15 @@ setLabel Label{ texture, fbuffer, ratio, ref, indices, offsets } font@(Font face
             realloc @'B.Array (length offsets) Static Draw
             copy @'B.Array 0 (coerce offsets)
 
-          foldM_ (\ prev Instance{ offset, range } -> do
+          foldM_ drawInstance 0 instances
+
+        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline })) where
+        drawInstance prev Instance{ offset, range } = do
             let indices = Interval.range range
                 len = I (length indices)
             Glyph.offset_ ?= offset
             drawElementsInstanced Triangles (Interval prev (prev + len)) 6
-            pure $! prev + len) 0 instances
-
-        sendIO (writeIORef ref (Just LabelState{ UI.Label.size, string, baseline }))
+            pure $! prev + len
 
 
 drawLabel
