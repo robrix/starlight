@@ -89,14 +89,14 @@ data RowD
   | R4
   deriving (Enum, Eq, Ord, Show)
 
-glslTypeForCol :: RowD -> String
-glslTypeForCol = \case
+glslTypeForRowD :: RowD -> String
+glslTypeForRowD = \case
   R2 -> "vec2"
   R3 -> "vec3"
   R4 -> "vec4"
 
 instance Row Int32 where
-  glslTypeForRow = ('i':) . glslTypeForCol
+  glslTypeForRow = ('i':) . glslTypeForRowD
   {-# INLINE glslTypeForRow #-}
 
   uniformForRow = \case
@@ -106,7 +106,7 @@ instance Row Int32 where
   {-# INLINE uniformForRow #-}
 
 instance Row Float where
-  glslTypeForRow = glslTypeForCol
+  glslTypeForRow = glslTypeForRowD
   {-# INLINE glslTypeForRow #-}
 
   uniformForRow = \case
@@ -116,7 +116,7 @@ instance Row Float where
   {-# INLINE uniformForRow #-}
 
 instance Row Double where
-  glslTypeForRow = ('d':) . glslTypeForCol
+  glslTypeForRow = ('d':) . glslTypeForRowD
   {-# INLINE glslTypeForRow #-}
 
   uniformForRow = \case
