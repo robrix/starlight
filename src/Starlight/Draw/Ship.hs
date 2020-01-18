@@ -28,7 +28,6 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Object
 import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
@@ -116,5 +115,4 @@ newtype V v = V { pos :: v (V2 Float) }
 
 instance D.Vars V
 
-deriving instance Bind     (v (V2 Float)) => Bind     (V v)
 deriving instance Storable (v (V2 Float)) => Storable (V v)

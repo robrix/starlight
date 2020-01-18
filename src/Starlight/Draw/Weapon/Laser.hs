@@ -26,7 +26,6 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Object
 import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _z)
 import qualified GL.Shader.DSL as D
 import           Starlight.Actor
@@ -104,5 +103,4 @@ newtype V v = V { r :: v Float }
 
 instance Vars V
 
-deriving instance Bind     (v Float) => Bind     (V v)
 deriving instance Storable (v Float) => Storable (V v)

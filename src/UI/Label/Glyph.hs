@@ -20,7 +20,6 @@ import Control.Lens (Lens')
 import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
-import GL.Object
 import GL.Shader.DSL
 import Prelude hiding (break)
 
@@ -101,7 +100,6 @@ newtype V v = V { pos :: v (V4 Float) }
 
 instance Vars V
 
-deriving instance Bind     (v (V4 Float)) => Bind     (V v)
 deriving instance Storable (v (V4 Float)) => Storable (V v)
 
 data IF v = IF

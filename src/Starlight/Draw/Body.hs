@@ -28,7 +28,6 @@ import           Geometry.Circle
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Object
 import           GL.Shader.DSL hiding (coerce, norm, (!*), (!*!))
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
@@ -113,5 +112,4 @@ newtype V v = V { pos :: v (V4 Double) }
 
 instance D.Vars V
 
-deriving instance Bind     (v (V4 Double)) => Bind     (V v)
 deriving instance Storable (v (V4 Double)) => Storable (V v)
