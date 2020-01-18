@@ -25,8 +25,10 @@ import           Data.Foldable (for_)
 import           Data.Functor.I
 import           Data.Functor.Interval as Interval
 import           Data.IORef
+import           Data.Word
 import           GHC.Stack
 import           GL.Array
+import           GL.Buffer
 import           GL.Effect.Check
 import           GL.Framebuffer as GL
 import           GL.Object
@@ -50,6 +52,7 @@ data Label = Label
   , fbuffer :: !Framebuffer
   , ratio   :: !(Window.Pixels Int)
   , ref     :: !(IORef (Maybe LabelState))
+  , indices :: !(Buffer 'ElementArray Word32)
   }
 
 data LabelState = LabelState
@@ -72,6 +75,7 @@ label
 label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
+  indices <- gen1
 
   program <- build Text.shader
 
@@ -85,7 +89,7 @@ label = do
   ratio <- Window.ratio
 
   ref <- sendIO (newIORef Nothing)
-  pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, ratio }
+  pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, ratio, indices }
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 (Window.Pixels Int))
 labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
