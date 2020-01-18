@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -6,6 +7,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module GL.Buffer
 ( Buffer(..)
@@ -27,7 +29,6 @@ import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Functor.I
 import           Data.Functor.Interval
-import           Data.Proxy
 import qualified Foreign.Marshal.Array.Lift as A
 import           Foreign.Ptr (castPtr, nullPtr)
 import           Foreign.Storable as S
@@ -45,7 +46,7 @@ instance Object (Buffer ty v) where
   delete = defaultDeleteWith glDeleteBuffers unBuffer
 
 instance KnownType ty => Bind (Buffer ty v) where
-  bind = checking . runLiftIO . glBindBuffer (glEnum (typeVal (Proxy :: Proxy ty))) . maybe 0 unBuffer
+  bind = checking . runLiftIO . glBindBuffer (glEnum (typeVal @ty)) . maybe 0 unBuffer
 
 realloc :: (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has (Lift IO) sig m) => Int -> Update -> Usage -> m ()
 realloc n update usage = do
@@ -59,10 +60,8 @@ copy offset vertices = do
   A.withArray vertices $
     checking . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr
 
-typeOf :: KnownType ty => Buffer ty a -> Type
-typeOf b = typeVal (typeProxy b)
-  where typeProxy :: Buffer ty a -> Proxy ty
-        typeProxy _ = Proxy
+typeOf :: forall ty a . KnownType ty => Buffer ty a -> Type
+typeOf _ = typeVal @ty
 
 sizeOfElem :: Storable a => Buffer ty a -> Int
 sizeOfElem b = S.sizeOf (elem b)
@@ -76,13 +75,13 @@ data Type
   deriving (Eq, Ord, Show)
 
 class KnownType (ty :: Type) where
-  typeVal :: proxy ty -> Type
+  typeVal :: Type
 
 instance KnownType 'Array where
-  typeVal _ = Array
+  typeVal = Array
 
 instance KnownType 'ElementArray where
-  typeVal _ = ElementArray
+  typeVal = ElementArray
 
 instance GL.Enum Type where
   glEnum = \case
