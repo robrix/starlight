@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module UI.Drawable
 ( Drawable(..)
@@ -14,7 +13,6 @@ import           Control.Effect.Trace
 import           Data.Functor.I
 import           Foreign.Storable (Storable)
 import           GL.Array
-import qualified GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
 import           GL.Shader.DSL (Shader, Vars)
@@ -22,7 +20,6 @@ import           GL.Shader.DSL (Shader, Vars)
 data Drawable u v o = Drawable
   { program :: Program u v o
   , array   :: Array (v I)
-  , buffer  :: B.Buffer 'B.Array (v I)
   }
 
 using
@@ -32,11 +29,11 @@ using
      , Vars u
      )
   => (a -> Drawable u v o)
-  -> B.BufferC 'B.Array (v I) (ArrayC v (ProgramC u v o m)) b
+  -> ArrayC v (ProgramC u v o m) b
   -> m b
 using getDrawable m = do
-  Drawable { program, array, buffer } <- asks getDrawable
-  use program $ bindArray array $ B.bindBuffer buffer m
+  Drawable { program, array } <- asks getDrawable
+  use program $ bindArray array m
 
 
 runDrawable :: (Drawable u v o -> b) -> Drawable u v o -> ReaderC b m a -> m a
@@ -45,5 +42,5 @@ runDrawable makeDrawable = runReader . makeDrawable
 loadingDrawable :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m, Storable (v I), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v I] -> ReaderC b m a -> m a
 loadingDrawable drawable shader vertices m = do
   program <- build shader
-  (buffer, array) <- load vertices
-  runDrawable drawable Drawable{ program, array, buffer } m
+  (_, array) <- load vertices
+  runDrawable drawable Drawable{ program, array } m

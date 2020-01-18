@@ -80,7 +80,7 @@ label = do
 
   program <- build Text.shader
 
-  (buffer, array) <- load $ coerce @[V2 Float]
+  (_, array) <- load $ coerce @[V2 Float]
     [ V2 (-1) (-1)
     , V2   1  (-1)
     , V2 (-1)   1
@@ -90,7 +90,7 @@ label = do
   ratio <- Window.ratio
 
   ref <- sendIO (newIORef Nothing)
-  pure Label{ text = Drawable{ program, array, buffer }, texture, fbuffer, ref, ratio, indices, offsets }
+  pure Label{ text = Drawable{ program, array }, texture, fbuffer, ref, ratio, indices, offsets }
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 (Window.Pixels Int))
 labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
