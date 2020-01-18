@@ -81,6 +81,9 @@ class KnownType (ty :: Type) where
 instance KnownType 'Array where
   typeVal _ = Array
 
+instance KnownType 'ElementArray where
+  typeVal _ = ElementArray
+
 instance GL.Enum Type where
   glEnum = \case
     Array        -> GL_ARRAY_BUFFER
