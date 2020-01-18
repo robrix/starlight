@@ -72,6 +72,7 @@ sizeOfElem b = S.sizeOf (elem b)
 
 data Type
   = Array
+  | ElementArray
   deriving (Eq, Ord, Show)
 
 class KnownType (ty :: Type) where
@@ -82,7 +83,8 @@ instance KnownType 'Array where
 
 instance GL.Enum Type where
   glEnum = \case
-    Array -> GL_ARRAY_BUFFER
+    Array        -> GL_ARRAY_BUFFER
+    ElementArray -> GL_ELEMENT_ARRAY_BUFFER
 
 
 data Update
