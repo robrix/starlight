@@ -135,11 +135,12 @@ cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { buffer, array
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
       vertices = vs []
 
-  bindArray array . bindBuffer buffer $ do
-    realloc @'B.Array (length vertices) Static Draw
-    copy @'B.Array 0 (coerce (map (fmap (fromIntegral @_ @Float)) vertices))
+  bindArray array $
+    bindBuffer buffer $ do
+      realloc @'B.Array (length vertices) Static Draw
+      copy @'B.Array 0 (coerce (map (fmap (fromIntegral @_ @Float)) vertices))
 
-    configureInterleaved
+      configureInterleaved
 
   sendM (writeIORef rangesRef ranges)
 
