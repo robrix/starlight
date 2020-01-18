@@ -194,10 +194,10 @@ class Monad m => HasArray v m | m -> v where
 newtype ArrayC v m a = ArrayC { runArrayT :: ReaderC (Array (v I)) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-deriving instance HasArray              v      m => HasArray              v      (ProgramC u    v    o m)
-deriving instance HasArray              v      m => HasArray              v      (B.BufferC ty (v I)   m)
-deriving instance B.HasBuffer 'B.Array (v I)   m => B.HasBuffer 'B.Array (v I)   (ArrayC        v      m)
-deriving instance HasProgram u          v    o m => HasProgram u          v    o (ArrayC        v      m)
+deriving instance HasArray     v   m => HasArray     v   (ProgramC u v o m)
+deriving instance HasArray     v   m => HasArray     v   (B.BufferC ty x m)
+deriving instance B.HasBuffer ty x m => B.HasBuffer ty x (ArrayC     v   m)
+deriving instance HasProgram u v o m => HasProgram u v o (ArrayC     v   m)
 
 instance HasArray v m => HasArray v (ReaderC r m) where
   askArray = lift askArray
