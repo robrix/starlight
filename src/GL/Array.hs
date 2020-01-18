@@ -27,6 +27,7 @@ module GL.Array
 ) where
 
 import           Control.Algebra
+import           Control.Carrier.Fresh.Strict
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
@@ -190,6 +191,9 @@ deriving instance HasArray     v   m => HasArray     v   (ProgramC u v o m)
 deriving instance HasArray     v   m => HasArray     v   (B.BufferC ty x m)
 deriving instance B.HasBuffer ty x m => B.HasBuffer ty x (ArrayC     v   m)
 deriving instance HasProgram u v o m => HasProgram u v o (ArrayC     v   m)
+
+instance HasArray v m => HasArray v (FreshC m) where
+  askArray = lift askArray
 
 instance HasArray v m => HasArray v (ReaderC r m) where
   askArray = lift askArray
