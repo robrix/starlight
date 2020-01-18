@@ -8,6 +8,7 @@
 module GL.Uniform
 ( Uniform(..)
 , Scalar(..)
+, Scalar2(..)
 , RowI(..)
 , ColI(..)
 ) where
