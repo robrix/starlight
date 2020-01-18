@@ -99,7 +99,7 @@ configure2 b1 b2 = evalState (Offset 0) $ do
 configureVars :: forall v m sig . (Vars v, HasArray v m, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> m ()
 configureVars stride = foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
   offset <- get
-  let size   = S.sizeOf @a     undefined
+  let size   = S.sizeOf @a undefined
       K ty   = GL.glType @a
       K dims = GL.glDims @a
   put (offset <> Offset size)
