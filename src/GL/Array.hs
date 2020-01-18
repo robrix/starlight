@@ -78,8 +78,8 @@ configureInterleaved = do
     checking $ glEnableVertexAttribArray (fromIntegral location)
     checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars @v)
 
-configure2 :: forall v1 v2 m sig . (HasArray (v1 :**: v2) m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
-configure2 b1 b2 = do
+configure2 :: forall v1 v2 m sig . (Effect sig, HasArray (v1 :**: v2) m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
+configure2 b1 b2 = evalState (Offset 0) $ do
   _ <- askArray
   B.bindBuffer b1 $
     foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
