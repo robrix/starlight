@@ -5,6 +5,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -59,31 +60,21 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (Effect sig, HasArray v m, B.HasBuffer 'B.Array (v I) m, Vars v, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
+configureArray ::forall v m sig . (Effect sig, HasArray v m, B.HasBuffer 'B.Array (v I) m, Vars v, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureArray = do
-  a <- askArray <* B.askBuffer @'B.Array
-  evalState (Offset 0) $ foldVarsM (\ f@Field { location, name } -> runLiftIO $ do
+  _ <- askArray <* B.askBuffer @'B.Array
+  evalState (Offset 0) $ foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
     offset <- get
-    let size = S.sizeOf (undefinedAtFieldType f)
-        stride = S.sizeOf (elemA a)
-        K ty = typeFor f
-        K dims = dimsFor f
+    let size = S.sizeOf @a undefined
+        stride = S.sizeOf @(v I) undefined
+        K ty = GL.glType @a
+        K dims = GL.glDims @a
     put (offset <> Offset size)
 
     trace $ "configuring field " <> name <> " attrib " <> show location <> " at offset " <> show offset <> " stride " <> show stride <> " dims " <> show dims <> " type " <> show ty
 
     checking $ glEnableVertexAttribArray (fromIntegral location)
-    checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars `like` a) where
-  typeFor :: GL.Type a => Field v a -> K GLenum a
-  typeFor _ = GL.glType
-  dimsFor :: GL.Type a => Field v a -> K GLint a
-  dimsFor _ = GL.glDims
-  like :: v Maybe -> Array (v I) -> v Maybe
-  like = const
-  elemA :: Array (v I) -> v I
-  elemA _ = undefined
-  undefinedAtFieldType :: Field v a -> a
-  undefinedAtFieldType _ = undefined
+    checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars @v)
 
 
 drawArrays
