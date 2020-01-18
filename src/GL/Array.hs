@@ -59,7 +59,7 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (Effect sig, HasArray i m, B.HasBuffer 'B.Array i m, Vars i, S.Storable (i I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
+configureArray :: (Effect sig, HasArray v m, B.HasBuffer 'B.Array v m, Vars v, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureArray = do
   a <- askArray <* B.askBuffer @'B.Array
   evalState (Offset 0) $ foldVarsM (\ f@Field { location, name } -> runLiftIO $ do
@@ -78,9 +78,9 @@ configureArray = do
   typeFor _ = GL.glType
   dimsFor :: GL.Type a => Field v a -> K GLint a
   dimsFor _ = GL.glDims
-  like :: a Maybe -> Array (a I) -> a Maybe
+  like :: v Maybe -> Array (v I) -> v Maybe
   like = const
-  elemA :: Array (i I) -> i I
+  elemA :: Array (v I) -> v I
   elemA _ = undefined
   undefinedAtFieldType :: Field v a -> a
   undefinedAtFieldType _ = undefined
@@ -89,9 +89,9 @@ configureArray = do
 drawArrays
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray i m
+     , HasArray v m
      , HasCallStack
-     , HasProgram u i o m
+     , HasProgram u v o m
      )
   => Type
   -> Interval I Int
@@ -101,9 +101,9 @@ drawArrays mode i = askProgram >> askArray >> checking (runLiftIO (glDrawArrays 
 multiDrawArrays
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray i m
+     , HasArray v m
      , HasCallStack
-     , HasProgram u i o m
+     , HasProgram u v o m
      )
   => Type
   -> [Interval I Int]
@@ -119,9 +119,9 @@ multiDrawArrays mode is
 drawArraysInstanced
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray i m
+     , HasArray v m
      , HasCallStack
-     , HasProgram u i o m
+     , HasProgram u v o m
      )
   => Type
   -> Interval I Int
@@ -132,9 +132,9 @@ drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (gl
 drawElementsInstanced
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray i m
+     , HasArray v m
      , HasCallStack
-     , HasProgram u i o m
+     , HasProgram u v o m
      )
   => Type
   -> [Int]
@@ -143,7 +143,7 @@ drawElementsInstanced
 drawElementsInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (withArray (map (fromIntegral @_ @Word32) i) (\ p -> glDrawElementsInstanced (glEnum mode) (genericLength i) GL_UNSIGNED_INT (castPtr p) (fromIntegral n))))
 
 
-load :: (Effect sig, Vars i, S.Storable (i I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [i I] -> m (B.Buffer 'B.Array (i I), Array (i I))
+load :: (Effect sig, Vars v, S.Storable (v I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [v I] -> m (B.Buffer 'B.Array (v I), Array (v I))
 load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
@@ -154,7 +154,7 @@ load is = do
     (b, a) <$ configureArray
 
 
-bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (i I) -> ArrayC i m a -> m a
+bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (v I) -> ArrayC v m a -> m a
 bindArray array (ArrayC m) = do
   bind (Just array)
   a <- runReader array m
@@ -164,19 +164,19 @@ class Monad m => HasArray i m | m -> i where
   askArray :: m (Array (i I))
 
 
-newtype ArrayC i m a = ArrayC { runArrayT :: ReaderC (Array (i I)) m a }
+newtype ArrayC v m a = ArrayC { runArrayT :: ReaderC (Array (v I)) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-deriving instance HasArray             i   m => HasArray             i   (ProgramC u   i o m)
-deriving instance HasArray             i   m => HasArray             i   (B.BufferC ty i   m)
-deriving instance B.HasBuffer 'B.Array i   m => B.HasBuffer 'B.Array i   (ArrayC       i   m)
-deriving instance HasProgram u         i o m => HasProgram u         i o (ArrayC       i   m)
+deriving instance HasArray             v   m => HasArray             v   (ProgramC u   v o m)
+deriving instance HasArray             v   m => HasArray             v   (B.BufferC ty v   m)
+deriving instance B.HasBuffer 'B.Array v   m => B.HasBuffer 'B.Array v   (ArrayC       v   m)
+deriving instance HasProgram u         v o m => HasProgram u         v o (ArrayC       v   m)
 
-instance HasArray i m => HasArray i (ReaderC r m) where
+instance HasArray v m => HasArray v (ReaderC r m) where
   askArray = lift askArray
 
-instance Algebra sig m => Algebra sig (ArrayC i m) where
+instance Algebra sig m => Algebra sig (ArrayC v m) where
   alg = ArrayC . send . handleCoercible
 
-instance Algebra sig m => HasArray i (ArrayC i m) where
+instance Algebra sig m => HasArray v (ArrayC v m) where
   askArray = ArrayC ask
