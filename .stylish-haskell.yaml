@@ -27,3 +27,7 @@ steps:
 columns: 120
 
 newline: native
+
+language_extensions:
+- FlexibleContexts
+- MultiParamTypeClasses
