@@ -75,3 +75,28 @@ frame: {min: 1.324ms, mean: 9.291ms, max: 195.824ms}
 swap: {min: 0.187ms, mean: 7.620ms, max: 41.156ms}
 label: {min: 2.292ms, mean: 2.400ms, max: 2.507ms}
 ```
+
+
+## Copying at most once per `setLabel` call
+
+`drawElementsInstanced` takes an `Interval` of indices to draw; issue at most one `copy` per `setLabel` call, before the loop; keep track of how many indices we’ve drawn as we go.
+
+```
+cacheCharactersForDrawing: {min: 379.933ms, mean: 379.933ms, max: 379.933ms}
+readTypeface: {min: 112.420ms, mean: 112.420ms, max: 112.420ms}
+swap: {min: 0.175ms, mean: 9.445ms, max: 12.878ms}
+frame: {min: 1.270ms, mean: 7.464ms, max: 191.873ms}
+  draw: {min: 3.595ms, mean: 7.146ms, max: 104.781ms}
+    setLabel: {min: 0.009ms, mean: 1.459ms, max: 32.420ms}
+    ship: {min: 1.111ms, mean: 1.309ms, max: 9.041ms}
+    radar: {min: 0.601ms, mean: 0.902ms, max: 65.310ms}
+      realloc/copy: {min: 0.072ms, mean: 0.130ms, max: 0.369ms}
+      bodies & npcs: {min: 0.035ms, mean: 0.128ms, max: 64.110ms}
+      targets: {min: 0.003ms, mean: 0.036ms, max: 13.056ms}
+    starfield: {min: 0.264ms, mean: 0.481ms, max: 13.229ms}
+    drawLabel: {min: 0.011ms, mean: 0.417ms, max: 5.519ms}
+    body: {min: 0.003ms, mean: 0.006ms, max: 0.179ms}
+    laser: {min: 0.002ms, mean: 0.003ms, max: 0.156ms}
+  input: {min: 0.032ms, mean: 0.196ms, max: 86.957ms}
+label: {min: 2.410ms, mean: 2.466ms, max: 2.521ms}
+```

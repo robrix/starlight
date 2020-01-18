@@ -33,7 +33,6 @@ import           Control.Monad.Trans.Class
 import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Functor.Interval
-import           Data.List (genericLength)
 import           Data.Word (Word32)
 import           Foreign.Marshal.Array.Lift
 import           Foreign.Ptr
@@ -139,13 +138,13 @@ drawElements
      , HasProgram u v o m
      )
   => Type
-  -> [Int]
+  -> Interval I Int
   -> m ()
-drawElements mode is = do
+drawElements mode i = do
   _ <- askProgram
   _ <- askArray
   _ <- B.askBuffer @'B.ElementArray
-  checking (runLiftIO (glDrawElements (glEnum mode) (genericLength is) GL_UNSIGNED_INT nullPtr))
+  checking (runLiftIO (glDrawElements (glEnum mode) (fromIntegral (size i)) GL_UNSIGNED_INT (nullPtr `plusPtr` (getI (min' i) * S.sizeOf @Word32 0))))
 
 drawElementsInstanced
   :: ( Has Check sig m
@@ -156,14 +155,14 @@ drawElementsInstanced
      , HasProgram u v o m
      )
   => Type
-  -> [Int]
+  -> Interval I Int
   -> Int
   -> m ()
-drawElementsInstanced mode is n = do
+drawElementsInstanced mode i n = do
   _ <- askProgram
   _ <- askArray
   _ <- B.askBuffer @'B.ElementArray
-  checking (runLiftIO (glDrawElementsInstanced (glEnum mode) (genericLength is) GL_UNSIGNED_INT nullPtr (fromIntegral n)))
+  checking (runLiftIO (glDrawElementsInstanced (glEnum mode) (fromIntegral (size i)) GL_UNSIGNED_INT (nullPtr `plusPtr` (getI (min' i) * S.sizeOf @Word32 0)) (fromIntegral n)))
 
 
 load :: (Effect sig, Vars v, S.Storable (v I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [v I] -> m (B.Buffer 'B.Array (v I), Array (v I))
