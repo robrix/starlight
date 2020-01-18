@@ -109,7 +109,7 @@ fromOpentypeFont opentypeFont = do
     glyphTable <- glyphTable
     g <- glyphTable !? fromIntegral glyphID
     let vertices = if isPrint char && not (isSeparator char) then glyphVertices g else []
-    pure $! Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^. _xy) vertices))
+    pure $! Glyph char (fromIntegral (O.advanceWidth g)) vertices (bounds (map (^._xy) vertices))
   cmap = find supportedPlatform (O.getCmaps (O.cmapTable opentypeFont))
   glyphTable = case O.outlineTables opentypeFont of
     O.QuadTables _ (O.GlyfTable glyphs) -> Just glyphs
