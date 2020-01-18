@@ -48,13 +48,13 @@ instance Object (Buffer ty v) where
 instance KnownType ty => Bind (Buffer ty v) where
   bind = checking . runLiftIO . glBindBuffer (glEnum (typeVal @ty)) . maybe 0 unBuffer
 
-realloc :: forall ty v m sig . (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has (Lift IO) sig m) => Int -> Update -> Usage -> m ()
-realloc n update usage = askBuffer @ty >> runLiftIO (glBufferData (glEnum (typeVal @ty)) (fromIntegral (n * S.sizeOf @(v I) undefined)) nullPtr (glEnum (Hint update usage)))
+realloc :: forall ty v m sig . (HasBuffer ty v m, KnownType ty, S.Storable v, Has (Lift IO) sig m) => Int -> Update -> Usage -> m ()
+realloc n update usage = askBuffer @ty >> runLiftIO (glBufferData (glEnum (typeVal @ty)) (fromIntegral (n * S.sizeOf @v undefined)) nullPtr (glEnum (Hint update usage)))
 
-copy :: forall ty v m sig . (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m) => Int -> [v I] -> m ()
+copy :: forall ty v m sig . (HasBuffer ty v m, KnownType ty, S.Storable v, Has Check sig m, Has (Lift IO) sig m) => Int -> [v] -> m ()
 copy offset vertices = askBuffer @ty >> A.withArray vertices
   (checking . runLiftIO . glBufferSubData (glEnum (typeVal @ty)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr) where
-  i = (Interval 0 (I (length vertices)) + pure offset) ^* S.sizeOf @(v I) undefined
+  i = (Interval 0 (I (length vertices)) + pure offset) ^* S.sizeOf @v undefined
 
 
 data Type
@@ -104,24 +104,24 @@ instance GL.Enum Hint where
     Hint Stream  Copy -> GL_STREAM_COPY
 
 
-bindBuffer :: (KnownType ty, Has Check sig m, Has (Lift IO) sig m) => Buffer ty (v I) -> BufferC ty v m a -> m a
+bindBuffer :: (KnownType ty, Has Check sig m, Has (Lift IO) sig m) => Buffer ty v -> BufferC ty v m a -> m a
 bindBuffer buffer (BufferC m) = do
   bind (Just buffer)
   a <- runReader buffer m
   a <$ bind (Nothing `asTypeOf` Just buffer)
 
 class Monad m => HasBuffer ty v m | m ty -> v where
-  askBuffer :: m (Buffer ty (v I))
+  askBuffer :: m (Buffer ty v)
 
 instance HasBuffer ty i m => HasBuffer ty i (ReaderC r m) where
   askBuffer = lift askBuffer
 
 
-newtype BufferC ty v m a = BufferC { runBuffer :: ReaderC (Buffer ty (v I)) m a }
+newtype BufferC ty v m a = BufferC { runBuffer :: ReaderC (Buffer ty v) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-instance Algebra sig m => HasBuffer ty i (BufferC ty i m) where
+instance Algebra sig m => HasBuffer ty v (BufferC ty v m) where
   askBuffer = BufferC ask
 
-instance Algebra sig m => Algebra sig (BufferC ty i m) where
+instance Algebra sig m => Algebra sig (BufferC ty v m) where
   alg = BufferC . send . handleCoercible

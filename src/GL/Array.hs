@@ -59,7 +59,7 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureArray :: (Effect sig, HasArray v m, B.HasBuffer 'B.Array v m, Vars v, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
+configureArray :: (Effect sig, HasArray v m, B.HasBuffer 'B.Array (v I) m, Vars v, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureArray = do
   a <- askArray <* B.askBuffer @'B.Array
   evalState (Offset 0) $ foldVarsM (\ f@Field { location, name } -> runLiftIO $ do
@@ -167,10 +167,10 @@ class Monad m => HasArray i m | m -> i where
 newtype ArrayC v m a = ArrayC { runArrayT :: ReaderC (Array (v I)) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-deriving instance HasArray             v   m => HasArray             v   (ProgramC u   v o m)
-deriving instance HasArray             v   m => HasArray             v   (B.BufferC ty v   m)
-deriving instance B.HasBuffer 'B.Array v   m => B.HasBuffer 'B.Array v   (ArrayC       v   m)
-deriving instance HasProgram u         v o m => HasProgram u         v o (ArrayC       v   m)
+deriving instance HasArray              v      m => HasArray              v      (ProgramC u    v    o m)
+deriving instance HasArray              v      m => HasArray              v      (B.BufferC ty (v I)   m)
+deriving instance B.HasBuffer 'B.Array (v I)   m => B.HasBuffer 'B.Array (v I)   (ArrayC        v      m)
+deriving instance HasProgram u          v    o m => HasProgram u          v    o (ArrayC        v      m)
 
 instance HasArray v m => HasArray v (ReaderC r m) where
   askArray = lift askArray

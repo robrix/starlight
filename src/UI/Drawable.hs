@@ -32,7 +32,7 @@ using
      , Vars u
      )
   => (a -> Drawable u v o)
-  -> B.BufferC 'B.Array v (ArrayC v (ProgramC u v o m)) b
+  -> B.BufferC 'B.Array (v I) (ArrayC v (ProgramC u v o m)) b
   -> m b
 using getDrawable m = do
   Drawable { program, array, buffer } <- asks getDrawable
