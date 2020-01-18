@@ -95,6 +95,16 @@ glslTypeForCol = \case
   C3x1 -> "vec3"
   C4x1 -> "vec4"
 
+instance Scalar Int32 where
+  glslTypeFor = ('i':) . glslTypeForCol
+  {-# INLINE glslTypeFor #-}
+
+  uniformFor = \case
+    C2x1 -> glProgramUniform2iv
+    C3x1 -> glProgramUniform3iv
+    C4x1 -> glProgramUniform4iv
+  {-# INLINE uniformFor #-}
+
 instance Scalar Float where
   glslTypeFor = glslTypeForCol
   {-# INLINE glslTypeFor #-}
