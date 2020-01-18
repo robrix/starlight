@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -96,7 +97,7 @@ configure2 b1 b2 = evalState (Offset 0) $ do
   where
   stride = S.sizeOf @((v1 :**: v2) I) undefined
 
-configureVars :: forall v m sig . (Vars v, HasArray v m, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> m ()
+configureVars :: forall v m sig . (Vars v, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => Int -> m ()
 configureVars stride = foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
   offset <- get
   let size   = S.sizeOf @a undefined
