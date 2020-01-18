@@ -5,6 +5,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -23,6 +24,7 @@ module GL.Shader.Vars
 , foldVars
 , foldVarsM
 , defaultVars
+, displayVars
 ) where
 
 import           Control.Applicative (liftA2)
@@ -32,6 +34,7 @@ import           Control.Effect.Lift
 import           Data.Function (fix)
 import           Data.Functor.I
 import           Data.Functor.K
+import           Data.List (intersperse)
 import           Data.Maybe (fromMaybe)
 import           Data.Monoid (Ap(..), First(..), Sum(..))
 import qualified Foreign as F
@@ -124,6 +127,10 @@ foldVarsM f t = getAp $ foldVars (Ap . f) t
 defaultVars :: Vars t => t Maybe
 defaultVars = makeVars value
 {-# INLINABLE defaultVars #-}
+
+displayVars :: Vars t => t v -> String
+displayVars = ($ "") . showBraces . foldr (.) id . intersperse (showString ", ") . foldVars (\ Field{ name } -> [showString name]) where
+  showBraces a = showString "{ " . a . showString " }"
 
 
 class GMakeVars t v f where
