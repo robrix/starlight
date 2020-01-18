@@ -188,6 +188,9 @@ deriving instance HasProgram u v o m => HasProgram u v o (ArrayC     v   m)
 instance HasArray v m => HasArray v (ReaderC r m) where
   askArray = lift askArray
 
+instance HasArray v m => HasArray v (StateC s m) where
+  askArray = lift askArray
+
 instance Algebra sig m => Algebra sig (ArrayC v m) where
   alg = ArrayC . send . handleCoercible
 
