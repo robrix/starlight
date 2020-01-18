@@ -28,7 +28,7 @@ shader :: Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ pos } IF{ _coord2, colour } -> main $ do
     _coord2 .= pos^._zw
-    t <- var "t" (vec2 [0, 0])
+    t <- var "t" (vec2 [0])
     switch gl_InstanceID
       [ (Just 0, do
         colour .= vec4 [1, 0, 0, 1]
