@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -102,6 +103,8 @@ data Drawable = Drawable
   , buffer        :: B.Buffer 'B.Array (V I)
   }
 
+
+data Scaled a = Scaled { scale :: Float, value :: a }
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
 verticesForBodies vs =
