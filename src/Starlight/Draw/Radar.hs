@@ -77,7 +77,6 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   use radarProgram $ do
     put vars
     -- FIXME: skip blips for extremely distant objects
-    -- FIXME: blips should shadow more distant blips
     -- FIXME: fade colour with distance
     -- FIXME: IFF
     measure "bodies & npcs" $
