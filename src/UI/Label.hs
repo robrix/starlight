@@ -126,7 +126,7 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
 
         let V2 sx sy = fromIntegral ratio / fmap fromIntegral size
         runReader face . using glyphs $ do
-          Glyph.scale_     ?= ratio
+          Glyph.ratio_     ?= ratio
           Glyph.fontScale_ ?= fontScale font
           Glyph.matrix_    ?=
                 translated (-1)
