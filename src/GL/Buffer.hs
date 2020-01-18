@@ -48,25 +48,13 @@ instance Object (Buffer ty v) where
 instance KnownType ty => Bind (Buffer ty v) where
   bind = checking . runLiftIO . glBindBuffer (glEnum (typeVal @ty)) . maybe 0 unBuffer
 
-realloc :: (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has (Lift IO) sig m) => Int -> Update -> Usage -> m ()
-realloc n update usage = do
-  b <- askBuffer
-  runLiftIO (glBufferData (glEnum (typeOf b)) (fromIntegral (n * sizeOfElem b)) nullPtr (glEnum (Hint update usage)))
+realloc :: forall ty v m sig . (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has (Lift IO) sig m) => Int -> Update -> Usage -> m ()
+realloc n update usage = askBuffer >> runLiftIO (glBufferData (glEnum (typeVal @ty)) (fromIntegral (n * S.sizeOf @(v I) undefined)) nullPtr (glEnum (Hint update usage)))
 
-copy :: (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m) => Int -> [v I] -> m ()
-copy offset vertices = do
-  b <- askBuffer
-  let i = (Interval 0 (I (length vertices)) + pure offset) ^* sizeOfElem b
-  A.withArray vertices $
-    checking . runLiftIO . glBufferSubData (glEnum (typeOf b)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr
-
-typeOf :: forall ty a . KnownType ty => Buffer ty a -> Type
-typeOf _ = typeVal @ty
-
-sizeOfElem :: Storable a => Buffer ty a -> Int
-sizeOfElem b = S.sizeOf (elem b)
-  where elem :: Buffer ty a -> a
-        elem _ = undefined
+copy :: forall ty v m sig . (HasBuffer ty v m, KnownType ty, S.Storable (v I), Has Check sig m, Has (Lift IO) sig m) => Int -> [v I] -> m ()
+copy offset vertices = askBuffer >> A.withArray vertices
+  (checking . runLiftIO . glBufferSubData (glEnum (typeVal @ty)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr) where
+  i = (Interval 0 (I (length vertices)) + pure offset) ^* S.sizeOf @(v I) undefined
 
 
 data Type
