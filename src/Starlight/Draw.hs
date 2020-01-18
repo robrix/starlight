@@ -76,7 +76,7 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "ship" $ for_ (system^.characters_) Ship.draw
 
-  measure "laser" $ for_ beams drawLaser
+  measure "laser" $ for_ beams Laser.draw
 
   let maxDim = maximum (fromIntegral <$> size) * 0.5
       onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = lengthToWindowPixels v * prj (distance pos position - convert radius) < maxDim

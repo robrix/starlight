@@ -8,7 +8,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Starlight.Draw.Weapon.Laser
 ( runLaser
-, drawLaser
+, draw
 , Drawable
 ) where
 
@@ -47,7 +47,7 @@ runLaser
 runLaser = UI.loadingDrawable Drawable shader vertices
 
 
-drawLaser
+draw
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has (Reader Drawable) sig m
@@ -55,7 +55,7 @@ drawLaser
      )
   => S.Beam
   -> m ()
-drawLaser beam@S.Beam{ colour } = UI.using getDrawable $ do
+draw beam@S.Beam{ colour } = UI.using getDrawable $ do
   view <- ask
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
