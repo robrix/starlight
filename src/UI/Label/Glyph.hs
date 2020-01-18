@@ -55,7 +55,7 @@ shader = program $ \ u
         t .= vec2 [ 9/12.0,  3/12.0]
         break)
       ]
-    let trans2 t = mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], vec3 [t^._x, t^._y, 1]]
+    let trans2 t = mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 t 1]
         scale2 s = mat3 [vec3 [s, 0, 0], vec3 [0, s, 0], vec3 [0, 0, 1]]
         m =   matrix u
           !*! trans2 (get t ^* scale u)
