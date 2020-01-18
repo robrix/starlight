@@ -8,10 +8,12 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module GL.Array
 ( Array(..)
 , configureInterleaved
+, configure2
 , Type(..)
 , drawArrays
 , multiDrawArrays
@@ -75,6 +77,37 @@ configureInterleaved = do
 
     checking $ glEnableVertexAttribArray (fromIntegral location)
     checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars @v)
+
+configure2 :: forall v1 v2 m sig . (HasArray (v1 :**: v2) m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has (State Offset) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
+configure2 b1 b2 = do
+  _ <- askArray
+  B.bindBuffer b1 $
+    foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
+      offset <- get
+      let size   = S.sizeOf @a undefined
+          K ty   = GL.glType @a
+          K dims = GL.glDims @a
+      put (offset <> Offset size)
+
+      trace $ "configuring field " <> name <> " attrib " <> show location <> " at offset " <> show offset <> " stride " <> show stride <> " dims " <> show dims <> " type " <> show ty
+
+      checking $ glEnableVertexAttribArray (fromIntegral location)
+      checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars @v1)
+
+  B.bindBuffer b2 $
+    foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
+      offset <- get
+      let size   = S.sizeOf @a undefined
+          K ty   = GL.glType @a
+          K dims = GL.glDims @a
+      put (offset <> Offset size)
+
+      trace $ "configuring field " <> name <> " attrib " <> show location <> " at offset " <> show offset <> " stride " <> show stride <> " dims " <> show dims <> " type " <> show ty
+
+      checking $ glEnableVertexAttribArray (fromIntegral location)
+      checking $ glVertexAttribPointer     (fromIntegral location) dims ty GL_FALSE (fromIntegral stride) (nullPtr `plusPtr` getOffset offset)) (defaultVars @v1)
+  where
+  stride = S.sizeOf @((v1 :**: v2) I) undefined
 
 
 drawArrays
