@@ -70,7 +70,7 @@ hit i c = do
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
   go (Seconds dt) char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
-    , intersects (c^._xy) (char^.actor_.magnitude_ * 0.5) (o^._xy) (cartesian2 (pure <$> theta) 1)
+    , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (cartesian2 (pure <$> theta) 1)
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
     | otherwise
     = char
@@ -94,7 +94,7 @@ runActions i c = do
     Thrust -> pure $ c & actor_ %~ applyForce ((convert thrust ^*) <$> rotate rotation (unit _x)) dt
 
     Face dir -> case direction (c^.actor_) target of
-      Just t  -> pure $! c & actor_.rotation_ %~ face angular (prj <$> angleOf (t^._xy))
+      Just t  -> pure $! c & rotation_ %~ face angular (prj <$> angleOf (t^._xy))
       Nothing -> pure c
       where
       direction Actor{ velocity, position } t = case dir of
@@ -102,12 +102,12 @@ runActions i c = do
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
         Target    -> t^?_Just.to projected.to (`L.direction` position).coerced
 
-    Turn t -> pure $! c & actor_.rotation_ *~ axisAngle (unit _z) (getRadians (case t of
+    Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) (getRadians (case t of
       L -> angular
       R -> -angular))
 
     Fire Main -> do
-      let position = projected (c^.actor_)
+      let position = projected c
       beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position, firedBy = i }:)
       pure c
 
@@ -121,18 +121,19 @@ runActions i c = do
 
     Jump -> case target of
       Just target
-        | distance (projected (c^.actor_)) (projected target) < (10 :: Mega Metres Double) -> pure c
+        | distance (projected c) (projected target) < (10 :: Mega Metres Double) -> pure c
         | isFacing (pi/128) rotation targetAngle -> do
-          let distance' = distance (projected target) (projected (c^.actor_))
-          pure $! c & actor_.position_ +~ (1 - target^.magnitude_ / distance') *^ (projected target - projected (c^.actor_))
+          let distance' = distance (projected target) (projected c)
+          pure $! c & position_ +~ (1 - target^.magnitude_ / distance') *^ (projected target - projected c)
         | otherwise                              -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
-        targetAngle = prj <$> angleTo (projected (c^.actor_)^._xy) (projected target^._xy)
+        targetAngle = prj <$> angleTo (projected c^._xy) (projected target^._xy)
       _ -> pure c
     where
     thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Double
     thrust  = 1000 * 20 * 60
     angular = getSeconds dt *^ Radians 5
+    projected :: HasActor t => t -> V3 (Mega Metres Double)
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
-    rotation = c^.actor_.rotation_
+    rotation = c^.rotation_
     target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_

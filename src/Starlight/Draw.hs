@@ -85,7 +85,7 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "radar" Radar.draw
 
-  let describeTarget target = case target >>= fmap . (,) <*> (^?to (system !?)._Just.choosing actor_ actor_.position_) of
+  let describeTarget target = case target >>= fmap . (,) <*> (^?to (system !?)._Just.choosing position_ position_) of
         Just (identifier, pos)
           -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
         _ -> ""

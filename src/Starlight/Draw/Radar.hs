@@ -105,14 +105,14 @@ data Drawable = Drawable
 
 verticesForBodies :: Foldable t => t B.StateVectors -> [V I]
 verticesForBodies vs =
-  [ V{ there = I (there^._xy), r = I (b^.actor_.magnitude_), colour = I colour }
+  [ V{ there = I (there^._xy), r = I (b^.magnitude_), colour = I colour }
   | b@B.StateVectors{ body = B.Body{ colour }, actor = Actor{ position = there } } <- toList vs
   ]
 
 -- FIXME: take ship profile into account
 verticesForShips :: Foldable t => Double -> t Character -> [V I]
 verticesForShips scale cs =
-  [ V{ there = I (there^._xy), r = I (c^.actor_.magnitude_ ^/ scale), colour = I colour }
+  [ V{ there = I (there^._xy), r = I (c^.magnitude_ ^/ scale), colour = I colour }
   | c@Character{ actor = Actor{ position = there }, ship = S.Ship { colour } } <- toList cs
   ]
 

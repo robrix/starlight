@@ -87,9 +87,9 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     received :: Pico Watts Double
     received = (c^.ship_.radar_.power_.convertingTo (Pico . Watts) .*. gain .*. aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
     crossSection :: (Mega Metres :*: Mega Metres) Double
-    crossSection = a^.actor_.magnitude_ .*. a^.actor_.magnitude_
+    crossSection = a^.magnitude_ .*. a^.magnitude_
     r :: (Mega Metres :*: Mega Metres) Double
-    r = (a^.actor_.position_) `qdU` (c^.actor_.position_)
+    r = (a^.position_) `qdU` (c^.position_)
   aperture :: (Mega Metres :*: Mega Metres) Double
   aperture = 10
   gain :: I Double

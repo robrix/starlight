@@ -253,8 +253,8 @@ withView m = do
   size  <- Window.size
 
   bodies   <- view (bodies_ @StateVectors)
-  velocity <- view (player_ @StateVectors .actor_.velocity_)
-  focus    <- view (player_ @StateVectors .actor_.position_._xy)
+  velocity <- view (player_ @StateVectors .velocity_)
+  focus    <- view (player_ @StateVectors .position_._xy)
 
   let zoom = zoomForSpeed size (prj (norm velocity))
       solI = Star (10, "Sol")
