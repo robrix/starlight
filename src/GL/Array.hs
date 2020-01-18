@@ -187,8 +187,8 @@ bindArray array (ArrayC m) = do
   a <- runReader array m
   a <$ bind @(Array _) Nothing
 
-class Monad m => HasArray i m | m -> i where
-  askArray :: m (Array (i I))
+class Monad m => HasArray v m | m -> v where
+  askArray :: m (Array (v I))
 
 
 newtype ArrayC v m a = ArrayC { runArrayT :: ReaderC (Array (v I)) m a }
