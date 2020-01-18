@@ -10,7 +10,7 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Draw.Radar
 ( draw
-, runRadar
+, Starlight.Draw.Radar.run
 , Drawable
 , V(..)
 ) where
@@ -87,8 +87,8 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
       for_ (system^.player_.target_ >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
         drawArrays Points (Interval (I index) (I index + 1))
 
-runRadar :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
-runRadar m = do
+run :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
+run m = do
   radarProgram  <- build radarShader
   targetProgram <- build targetShader
   (buffer, array) <- load []
