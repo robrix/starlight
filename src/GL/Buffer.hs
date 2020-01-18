@@ -118,6 +118,7 @@ bindBuffer buffer (BufferC m) = do
   a <- runReader buffer m
   a <$ bind (Nothing `asTypeOf` Just buffer)
 
+-- FIXME: there can be different kinds of bound buffers simultaneously
 class Monad m => HasBuffer ty v m | m -> ty v where
   askBuffer :: m (Buffer ty (v I))
 
