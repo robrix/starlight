@@ -136,7 +136,7 @@ formatExpR = formatWith (\ prec x -> if
   roundingLast is
     | _:_:_ <- is
     , is' <- init is
-    , il <- last is' = init is' ++ [if last is >= 5 then il + 1 else il ]
+    , il <- last is' = init is' ++ [ if last is >= 5 then il + 1 else il ]
     | otherwise      = is
 
   digits = go id where
