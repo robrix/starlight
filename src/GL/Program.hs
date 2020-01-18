@@ -25,8 +25,8 @@ module GL.Program
 
 import           Control.Algebra
 import           Control.Carrier.Reader
+import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
-import           Control.Effect.State
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
@@ -91,6 +91,9 @@ newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) 
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 instance HasProgram u v o m => HasProgram u v o (ReaderC r m) where
+  askProgram = lift askProgram
+
+instance HasProgram u v o m => HasProgram u v o (StateC s m) where
   askProgram = lift askProgram
 
 instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramC u v o m) where
