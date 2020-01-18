@@ -127,3 +127,7 @@ frame: {min: 1.285ms, mean: 9.047ms, max: 206.386ms}
 swap: {min: 0.234ms, mean: 7.824ms, max: 12.818ms}
 label: {min: 2.474ms, mean: 2.505ms, max: 2.536ms}
 ```
+
+## Epilogue
+
+Ended up reverting basically all of the changes to `Typeface`/`Label` drawing, because it required a kind of terrible design to store the offsets in a buffer instead of passing them in as uniforms, where we had to copy thousands of the same offset around on every update. (It also `SIGSEGV`’d.) This could probably be made to work, but I’d prefer a design where we could write one offset _per glyph instance_ to a buffer instead of one offset _per vertex_.
