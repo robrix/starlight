@@ -9,7 +9,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Draw.Radar
-( drawRadar
+( draw
 , runRadar
 , Drawable
 , V(..)
@@ -48,7 +48,7 @@ import qualified UI.Window as Window
 import           Unit.Angle
 import           Unit.Length
 
-drawRadar
+draw
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
@@ -57,7 +57,7 @@ drawRadar
      , Has (Reader View) sig m
      )
   => m ()
-drawRadar = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindArray array . B.bindBuffer buffer $ do
+draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindArray array . B.bindBuffer buffer $ do
   system@System{ bodies } <- ask @(System B.StateVectors)
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
