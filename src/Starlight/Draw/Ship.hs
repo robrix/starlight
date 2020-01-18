@@ -54,7 +54,7 @@ draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour 
     >>> transformToActor actor
     >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale)))
   colour_ ?= (colour
-    & (if Thrust `Set.member` actions then (\ v -> v ^/ v ^. _r) . (_r +~ 0.5) . (_b -~ 0.25) else id)
+    & (if Thrust `Set.member` actions then (\ v -> v ^/ v^._r) . (_r +~ 0.5) . (_b -~ 0.25) else id)
     & _a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
   drawArrays LineLoop range
 
