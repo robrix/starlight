@@ -21,3 +21,30 @@ frame: {min: 1.099ms, mean: 7.049ms, max: 255.006ms}
   input: {min: 0.032ms, mean: 0.324ms, max: 155.308ms}
 label: {min: 2.361ms, mean: 2.506ms, max: 2.652ms}
 ```
+
+
+## drawElementsInstanced
+
+Doing a `drawElementsInstanced` call per glyph instance. Significantly more expensive because we’re reallocating & copying into the `GL_ELEMENT_ARRAY_BUFFER` _n_ times.
+
+```
+cacheCharactersForDrawing: {min: 391.602ms, mean: 391.602ms, max: 391.602ms}
+readTypeface: {min: 111.088ms, mean: 111.088ms, max: 111.088ms}
+frame: {min: 1.078ms, mean: 9.008ms, max: 208.172ms}
+  draw: {min: 3.593ms, mean: 8.612ms, max: 106.119ms}
+    setLabel: {min: 0.009ms, mean: 2.209ms, max: 13.086ms}
+    ship: {min: 1.114ms, mean: 1.329ms, max: 9.454ms}
+    radar: {min: 0.601ms, mean: 0.957ms, max: 63.005ms}
+      bodies & npcs: {min: 0.035ms, mean: 0.156ms, max: 62.097ms}
+      realloc/copy: {min: 0.072ms, mean: 0.144ms, max: 0.399ms}
+      targets: {min: 0.003ms, mean: 0.038ms, max: 12.004ms}
+    starfield: {min: 0.262ms, mean: 0.487ms, max: 15.092ms}
+    drawLabel: {min: 0.010ms, mean: 0.399ms, max: 4.282ms}
+    body: {min: 0.003ms, mean: 0.005ms, max: 0.151ms}
+    laser: {min: 0.002ms, mean: 0.003ms, max: 0.035ms}
+  input: {min: 0.033ms, mean: 0.276ms, max: 101.922ms}
+swap: {min: 0.162ms, mean: 8.063ms, max: 53.884ms}
+label: {min: 2.572ms, mean: 2.645ms, max: 2.719ms}
+```
+
+Plan is to implement non-interleaved arrays to specify the instance offsets in a separate buffer from the vertex data, then write to the buffers for the instance offsets & elements en masse. Hypothesis is improvement due to making a single call; no per glyph instance uniform, write, or draw call.
