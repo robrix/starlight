@@ -139,7 +139,9 @@ formatExpR = formatWith (\ prec x -> if
     , il <- last is' = init is' ++ [ if last is >= 5 then il + 1 else il ]
     | otherwise      = is
 
-  digits = go id where
+  digits i
+    | signum i /= -1 = go id i
+    | otherwise      = ('⁻':) . go id (abs i) where
     go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
            | n < 0     = error "wtf"
            | otherwise = (supAt n:) . s
