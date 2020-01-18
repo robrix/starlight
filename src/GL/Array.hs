@@ -65,9 +65,9 @@ configureArray = do
   _ <- askArray <* B.askBuffer @'B.Array
   evalState (Offset 0) $ foldVarsM (\ (Field{ location, name } :: Field Maybe a) -> runLiftIO $ do
     offset <- get
-    let size = S.sizeOf @a undefined
+    let size   = S.sizeOf @a     undefined
         stride = S.sizeOf @(v I) undefined
-        K ty = GL.glType @a
+        K ty   = GL.glType @a
         K dims = GL.glDims @a
     put (offset <> Offset size)
 
