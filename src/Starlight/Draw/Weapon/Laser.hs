@@ -20,7 +20,7 @@ import           Control.Effect.Trace
 import           Control.Lens (Lens', (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.I
-import           Data.Functor.Interval
+import           Data.Functor.Interval hiding (range)
 import           Data.Generics.Product.Fields
 import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
