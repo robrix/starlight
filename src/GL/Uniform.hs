@@ -177,8 +177,8 @@ data ColD
   | C4x4
   deriving (Enum, Eq, Ord, Show)
 
-glslTypeForCol2 :: ColD -> String
-glslTypeForCol2 = \case
+glslTypeForColumnD :: ColD -> String
+glslTypeForColumnD = \case
   C2x2 -> "mat2"
   C2x3 -> "mat2x3"
   C2x4 -> "mat2x4"
@@ -194,7 +194,7 @@ transposing f prog loc n = f prog loc n GL_TRUE
 {-# INLINE transposing #-}
 
 instance Column Float where
-  glslTypeForColumn = glslTypeForCol2
+  glslTypeForColumn = glslTypeForColumnD
   {-# INLINE glslTypeForColumn #-}
 
   uniformForColumn = \case
@@ -210,7 +210,7 @@ instance Column Float where
   {-# INLINE uniformForColumn #-}
 
 instance Column Double where
-  glslTypeForColumn = ('d':) . glslTypeForCol2
+  glslTypeForColumn = ('d':) . glslTypeForColumnD
   {-# INLINE glslTypeForColumn #-}
 
   uniformForColumn = \case
