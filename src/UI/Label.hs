@@ -25,10 +25,8 @@ import           Data.Foldable (for_)
 import           Data.Functor.I
 import           Data.Functor.Interval as Interval
 import           Data.IORef
-import           Data.Word
 import           GHC.Stack
 import           GL.Array
-import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Framebuffer as GL
 import           GL.Object
@@ -51,7 +49,6 @@ data Label = Label
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
   , ratio   :: !(Window.Pixels Int)
-  , indices :: !(Buffer 'ElementArray Word32)
   , ref     :: !(IORef (Maybe LabelState))
   }
 
@@ -75,7 +72,6 @@ label
 label = do
   texture <- gen1 @(Texture 'Texture2D)
   fbuffer <- gen1
-  indices <- gen1
 
   program <- build Text.shader
 
@@ -89,7 +85,7 @@ label = do
   ratio <- Window.ratio
 
   ref <- sendIO (newIORef Nothing)
-  pure Label{ text = Drawable{ program, array }, texture, fbuffer, ref, ratio, indices }
+  pure Label{ text = Drawable{ program, array }, texture, fbuffer, ref, ratio }
 
 labelSize :: Has (Lift IO) sig m => Label -> m (V2 (Window.Pixels Int))
 labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
@@ -97,7 +93,7 @@ labelSize = sendM . fmap (maybe (V2 0 0) UI.Label.size) . readIORef . ref
 
 -- | Set the label’s text.
 setLabel :: (HasCallStack, Has Check sig m, Has (Lift IO) sig m) => Label -> Font -> String -> m ()
-setLabel Label{ texture, fbuffer, ratio, ref, indices } font@(Font face _) string
+setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
   | null string = sendM (writeIORef ref Nothing)
   | otherwise   = runLiftIO $ do
     state <- sendIO (readIORef ref)
@@ -129,7 +125,7 @@ setLabel Label{ texture, fbuffer, ratio, ref, indices } font@(Font face _) strin
         glClear GL_COLOR_BUFFER_BIT
 
         let V2 sx sy = fromIntegral ratio / fmap fromIntegral size
-        runReader face . using glyphs . bindBuffer indices $ do
+        runReader face . using glyphs $ do
           Glyph.ratio_     ?= ratio
           Glyph.fontScale_ ?= fontScale font
           Glyph.matrix_
