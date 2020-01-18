@@ -10,7 +10,7 @@ module GL.Uniform
 , Row(..)
 , Column(..)
 , RowD(..)
-, ColD(..)
+, ColumnD(..)
 ) where
 
 import           Control.Monad.IO.Class.Lift
@@ -157,15 +157,15 @@ replace4 = \case
 
 
 class Row t => Column t where
-  glslTypeForColumn :: ColD -> String
+  glslTypeForColumn :: ColumnD -> String
 
-  uniformForColumn :: ColD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
+  uniformForColumn :: ColumnD -> GLuint -> GLint -> GLsizei -> Ptr t -> IO ()
 
 deriving instance Column a => Column (Const a b)
 deriving instance Column a => Column (Identity a)
 deriving instance Column a => Column (K a b)
 
-data ColD
+data ColumnD
   = C2x2
   | C2x3
   | C2x4
@@ -177,7 +177,7 @@ data ColD
   | C4x4
   deriving (Enum, Eq, Ord, Show)
 
-glslTypeForColumnD :: ColD -> String
+glslTypeForColumnD :: ColumnD -> String
 glslTypeForColumnD = \case
   C2x2 -> "mat2"
   C2x3 -> "mat2x3"
