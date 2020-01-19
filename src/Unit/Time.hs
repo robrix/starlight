@@ -6,9 +6,6 @@
 module Unit.Time
 ( Time
 , Seconds(..)
-, fromDays
-, fromHours
-, fromMinutes
 , Minutes(..)
 , Hours(..)
 , Days(..)
@@ -37,16 +34,6 @@ newtype Seconds a = Seconds { getSeconds :: a }
 instance Unit Seconds where
   type Dim Seconds = Time
   suffix = K ('s':)
-
--- | Convert days to 'Seconds'. Note that this does not take e.g. leap seconds into account.
-fromDays :: Floating a => a -> Seconds a
-fromDays d = fromHours (Hours (d * 24))
-
-fromHours :: Floating a => Hours a -> Seconds a
-fromHours = convert
-
-fromMinutes :: Floating a => Minutes a -> Seconds a
-fromMinutes = convert
 
 
 newtype Minutes a = Minutes { getMinutes :: a }
