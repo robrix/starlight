@@ -6,7 +6,6 @@
 {-# LANGUAGE TypeFamilies #-}
 module Starlight.View
 ( View(..)
-, aspectRatio
 , contextSize
 , lengthToWindowPixels
   -- * Transforms
@@ -22,7 +21,7 @@ module Starlight.View
 ) where
 
 import Control.Effect.Lift
-import Control.Lens ((&), (.~), (^.))
+import Control.Lens ((&), (.~))
 import Data.Functor.I
 import Data.Functor.Interval
 import Data.Functor.K
@@ -45,10 +44,6 @@ data View = View
   , scale :: Double
   , focus :: V2 (Mega Metres Double)
   }
-
-aspectRatio :: View -> Float
-aspectRatio View{ size } = size'^._x / size'^._y where
-  size' = fromIntegral <$> size
 
 contextSize :: View -> V2 (Context.Pixels Int)
 contextSize View{ ratio, size } = fmap Context.Pixels (ratio *^ fmap Window.getPixels size)
