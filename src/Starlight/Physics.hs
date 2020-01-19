@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
@@ -58,7 +59,7 @@ gravity a = do
     force :: Newtons Double
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- FIXME: gravity seems extremely weak
-    r :: (Metres :*: Metres) Double
+    r :: (Metres :^: 2) Double
     r = convert ((b^.position_) `qdU` (a^.position_)) -- “quadrance” (square of distance between actor & body)
 
 
