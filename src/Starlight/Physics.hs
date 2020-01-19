@@ -53,7 +53,7 @@ gravity a = do
   pure $! foldl' (go dt) a bodies where
   go dt a StateVectors{ actor = b }
     | nearZero r = a
-    | otherwise  = applyForce (convert force *^ normalize (coerce (b^.position_ - a^.position_))) dt a where
+    | otherwise  = applyForce (force *^ normalize (coerce (b^.position_ - a^.position_))) dt a where
     force :: Newtons Double
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- FIXME: gravity seems extremely weak

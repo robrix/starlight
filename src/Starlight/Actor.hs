@@ -12,7 +12,7 @@ module Starlight.Actor
 ) where
 
 import Control.Effect.Lens.Exts (asserting)
-import Control.Lens (Lens', none, (&), (+~), (^.))
+import Control.Lens (Lens', mapping, none, (&), (+~), (^.))
 import Data.Generics.Product.Fields
 import Geometry.Transform
 import GHC.Generics (Generic)
@@ -20,6 +20,7 @@ import GHC.Stack (HasCallStack)
 import Linear.Quaternion
 import Linear.V3
 import Unit.Algebra
+import Unit.Force
 import Unit.Length
 import Unit.Mass
 import Unit.Time
@@ -36,8 +37,8 @@ data Actor = Actor
 transformToActor :: Actor -> Transform Double (Mega Metres) (Mega Metres)
 transformToActor Actor{ position, rotation } = mkTranslation (prj <$> position) >>> mkRotation rotation
 
-applyForce :: HasCallStack => V3 ((Kilo Grams :*: Mega Metres :/: Seconds :/: Seconds) Double) -> Seconds Double -> Actor -> Actor
-applyForce force dt a = a & velocity_ +~ ((.*. dt) . (./. a^.mass_) <$> force)
+applyForce :: HasCallStack => V3 (Newtons Double) -> Seconds Double -> Actor -> Actor
+applyForce force dt a = a & velocity_.mapping converting +~ ((.*. dt) . (./. a^.mass_) <$> force)
 
 
 class HasActor t where
