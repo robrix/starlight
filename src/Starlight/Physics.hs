@@ -137,6 +137,6 @@ runActions i c = do
     angular :: (I :/: Seconds) Double
     angular = 5
     projected :: HasActor t => t -> V3 (Mega Metres Double)
-    projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
+    projected a = a^.position_ + a^.velocity_ ^*. dt
     rotation = c^.rotation_
     target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
