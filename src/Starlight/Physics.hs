@@ -65,16 +65,16 @@ gravity a = do
 -- FIXME: do something smarter than ray-sphere intersection.
 hit :: (Has (Reader (Seconds Double)) sig m, Has (Reader (System StateVectors)) sig m) => CharacterIdentifier -> Character -> m Character
 hit i c = do
-  dt <- ask
+  dt <- ask @(Seconds Double)
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
-  go (Seconds dt) char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
+  go dt char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
-    -- FIXME: this shouldn’t be coercing
     , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (cartesian2 theta 1)
-    = char & ship_.armour_.min_.coerced -~ (damage * dt)
+    = char & ship_.armour_.min_ -~ damage .*. dt
     | otherwise
     = char
-  damage = 100 :: Double
+  damage :: (I :/: Seconds) Double
+  damage = 100
 
 
 runActions
