@@ -132,7 +132,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
   go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
     { body
-    , transform = rel >>> mkTranslation (prj <$> position actor)
+    , transform = rel >>> mkTranslation (position actor)
     , actor = actor
       & position_.coerced.extended 1 %~ apply rel
       & velocity_.coerced.extended 0 %~ apply rel

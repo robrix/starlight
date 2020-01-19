@@ -17,6 +17,7 @@ import GL.Type as GL
 import GL.Uniform
 import Linear.Exts
 import Prelude hiding ((.))
+import Unit
 
 newtype Transform c (a :: * -> *) (b :: * -> *) = Transform { getTransform :: M44 c }
   deriving (Show, Storable, GL.Type, Uniform)
@@ -25,8 +26,8 @@ instance Num c => Category (Transform c) where
   id = Transform identity
   Transform a . Transform b = Transform (b !*! a)
 
-mkTranslation :: Num c => V3 c -> Transform c a a
-mkTranslation v = Transform (identity & translation .~ v)
+mkTranslation :: (Num c, Unit a) => V3 (a c) -> Transform c a a
+mkTranslation v = Transform (identity & translation .~ fmap prj v)
 
 -- FIXME: scaling should introduce a change of units
 mkScale :: Num c => V3 c -> Transform c a b
