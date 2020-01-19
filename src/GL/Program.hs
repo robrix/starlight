@@ -85,7 +85,7 @@ use (Program ls p) m = do
 type HasProgram u v o sig m = DHas Program (Reader (Program u v o)) sig m
 
 askProgram :: DHas Program (Reader (Program u v o)) sig m => m (Program u v o)
-askProgram = runInDep @_ @Program ask
+askProgram = runInLabel @_ @Program ask
 
 
 newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramC :: ReaderC (Program u v o) m a }

@@ -112,6 +112,6 @@ bindBuffer buffer m = do
 type HasBuffer ty v sig m = DHas (Buffer ty) (Reader (Buffer ty v)) sig m
 
 askBuffer :: forall ty v m sig . DHas (Buffer ty) (Reader (Buffer ty v)) sig m => m (Buffer ty v)
-askBuffer = runInDep @_ @(Buffer ty) ask
+askBuffer = runInLabel @_ @(Buffer ty) ask
 
 type BufferC ty v = Labelled (Buffer ty) (ReaderC (Buffer ty v))
