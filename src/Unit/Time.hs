@@ -47,6 +47,13 @@ fromHours h = fromMinutes (h * 60)
 fromMinutes :: Num a => a -> Seconds a
 fromMinutes m = Seconds (m * 60)
 
-type Minutes = Mult 60 1 "min" Seconds
-
 type Hours = Mult 3600 1 "h" Seconds
+
+newtype Minutes a = Minutes { getMinutes :: a }
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
+instance Unit Minutes where
+  type Dim Minutes = Time
+  factor = K 60
+  suffix = K ("min"++)
