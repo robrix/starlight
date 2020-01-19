@@ -1,4 +1,3 @@
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
@@ -18,7 +17,6 @@ module GL.Array
 , drawElementsInstanced
 , load
 , bindArray
-, HasArray
 , askArray
 , ArrayC
 ) where
@@ -59,10 +57,10 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureInterleaved :: forall v m sig . (Effect sig, HasArray v sig m, HasLabelled (B.Buffer 'B.Array) (Reader (B.Buffer 'B.Array (v I))) sig m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
+configureInterleaved :: forall v m sig . (Effect sig, HasLabelled Array (Reader (Array (v I))) sig m, HasLabelled (B.Buffer 'B.Array) (Reader (B.Buffer 'B.Array (v I))) sig m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureInterleaved = askArray >> B.askBuffer @'B.Array >> evalState (Offset 0) (evalFresh 0 (configureVars @v (S.sizeOf @(Fields v) undefined) (defaultVars @v)))
 
-configureSeparate :: forall v1 v2 m sig . (Effect sig, HasArray (v1 :**: v2) sig m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
+configureSeparate :: forall v1 v2 m sig . (Effect sig, HasLabelled Array (Reader (Array ((v1 :**: v2) I))) sig m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
 configureSeparate b1 b2 = evalState (Offset 0) (evalFresh 0 (askArray >> B.bindBuffer b1 (configureVars @v1 stride (defaultVars @v1)) >> B.bindBuffer b2 (configureVars @v2 stride (defaultVars @v2)))) where
   stride = S.sizeOf @((v1 :**: v2) I) undefined
 
@@ -83,7 +81,7 @@ configureVars stride = foldVarsM' (\ (Field{ location, name } :: Field Proxy a) 
 drawArrays
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v sig m
+     , HasLabelled Array (Reader (Array (v I))) sig m
      , HasCallStack
      , HasProgram u v o sig m
      )
@@ -95,7 +93,7 @@ drawArrays mode i = askProgram >> askArray >> checking (runLiftIO (glDrawArrays 
 multiDrawArrays
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v sig m
+     , HasLabelled Array (Reader (Array (v I))) sig m
      , HasCallStack
      , HasProgram u v o sig m
      )
@@ -113,7 +111,7 @@ multiDrawArrays mode is
 drawArraysInstanced
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v sig m
+     , HasLabelled Array (Reader (Array (v I))) sig m
      , HasCallStack
      , HasProgram u v o sig m
      )
@@ -126,7 +124,7 @@ drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (gl
 drawElements
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v sig m
+     , HasLabelled Array (Reader (Array (v I))) sig m
      , HasLabelled (B.Buffer 'B.ElementArray) (Reader (B.Buffer 'B.ElementArray Word32)) sig m
      , HasCallStack
      , HasProgram u v o sig m
@@ -143,7 +141,7 @@ drawElements mode i = do
 drawElementsInstanced
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v sig m
+     , HasLabelled Array (Reader (Array (v I))) sig m
      , HasLabelled (B.Buffer 'B.ElementArray) (Reader (B.Buffer 'B.ElementArray Word32)) sig m
      , HasCallStack
      , HasProgram u v o sig m
@@ -175,8 +173,6 @@ bindArray array m = do
   bind (Just array)
   a <- runReader array (runLabelled m)
   a <$ bind @(Array _) Nothing
-
-type HasArray v sig m = HasLabelled Array (Reader (Array (v I))) sig m
 
 askArray :: HasLabelled Array (Reader (Array (v I))) sig m => m (Array (v I))
 askArray = runUnderLabel @_ @Array ask
