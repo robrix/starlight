@@ -9,8 +9,8 @@ module Unit.Time
 , fromDays
 , fromHours
 , fromMinutes
-, Minutes
-, Hours
+, Minutes(..)
+, Hours(..)
 , module Unit
 , module Unit.Multiple
 ) where
