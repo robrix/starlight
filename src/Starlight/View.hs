@@ -4,6 +4,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.View
 ( View(..)
 , contextSize
@@ -48,8 +49,8 @@ data View = View
 contextSize :: View -> V2 (Context.Pixels Int)
 contextSize View{ ratio, size } = fmap Context.Pixels (ratio *^ fmap Window.getPixels size)
 
-lengthToWindowPixels :: View -> Double
-lengthToWindowPixels View{ zoom, scale } = scale/zoom
+lengthToWindowPixels :: View -> (Window.Pixels :/: Mega Metres) Double
+lengthToWindowPixels View{ zoom, scale } = pure (scale / zoom)
 
 
 newtype ClipUnits a = ClipUnits { getClipUnits :: a }
