@@ -17,8 +17,8 @@ module Unit.Algebra
 , qdU
   -- * Combinators
 , (:*:)(..)
-, (:/:)
-, Inv(..)
+, (:/:)(..)
+, Inv
 , I(..)
 ) where
 
@@ -89,16 +89,15 @@ instance (Unit dimu u, Unit dimv v) => Unit (dimu :*: dimv) (u :*: v) where
   suffix = K (getK (suffix @_ @u) . ('·' :) . getK (suffix @_ @v))
 
 
-newtype Inv (u :: * -> *) a = Inv { getInv :: a }
+newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit dimu u => Unit dimu (Inv u) where
-  prj = getInv
-  factor = K (1/getK (factor @_ @u))
-  suffix = K (getK (suffix @_ @u) . ('⁻' :) . ('¹' :))
-
-
-type u :/: v = u :*: Inv v
-
 infixl 7 :/:
+
+instance (Unit dimu u, Unit dimv v) => Unit (dimu :/: dimv) (u :/: v) where
+  factor = K (getK (factor @_ @u) / getK (factor @_ @v))
+  suffix = K (getK (suffix @_ @u) . ('/' :) . getK (suffix @_ @v))
+
+
+type Inv u = I :/: u
