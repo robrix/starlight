@@ -76,7 +76,7 @@ askProgram = runUnderLabel @_ @Program ask
 
 
 newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramC :: ReaderC (Program u v o) m a }
-  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
 
 instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: Labelled Program (Reader (Program u v o)) :+: sig) (ProgramC u v o m) where
   alg = \case
