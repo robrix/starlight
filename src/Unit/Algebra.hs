@@ -46,18 +46,13 @@ u ./. v = pure (prj u / prj v)
 infixl 7 ./.
 
 type family Mul u v where
-  Mul  u                  I         = u                           -- u * 1       = u
-  Mul  I                  v         = v                           -- 1 * v       = v
-  Mul  u            (Inv  I)        = u                           -- u / 1       = u
-  Mul (u :*: Inv v)       v         = u                           -- u / v * v   = u
-  Mul (u :*: v)     (Inv  v)        = u                           -- u * v / v   = u
-  Mul (u :*: v)     (Inv  u)        = v                           -- u * v / u   = v
-  Mul  u                 (v :*: w)  = Mul (Mul u w) v             -- u * (v * w) = (u * w) * v
-  Mul  u            (Inv (v :*: w)) = Mul (Mul u (Inv w)) (Inv v) -- u / (v * w) = (u / w) / v
-  Mul (u :*: v)           w         = Mul u w :*: v               -- (u * v) * w = (u * w) * v
-  Mul  u            (Inv  u)        = I                           -- u / u       = 1
-  Mul (Inv u)             u         = I                           -- 1 / u * u   = 1
-  Mul  u                  v         = u :*: v                     -- u * v       = u * v
+  Mul  u         I        = u               -- u * 1       = u
+  Mul  I         v        = v               -- 1 * v       = v
+  Mul (u :/: v)  v        = u               -- u / v * v   = u
+  Mul  u        (v :*: w) = Mul (Mul u w) v -- u * (v * w) = (u * w) * v
+  Mul (u :*: v)  w        = Mul u w :*: v   -- (u * v) * w = (u * w) * v
+  Mul (u :/: v)  w        = Mul u w :/: v   -- (u / v) * w = (u * w) / v
+  Mul  u         v        = u :*: v         -- u * v       = u * v
 
 type family Div u v where
   Div  u         I        = u               -- u / 1       = u
