@@ -2,10 +2,10 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Draw
 ( Starlight.Draw.draw
@@ -101,6 +101,8 @@ newtype Frames a = Frames a
   deriving (Eq, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac)
   deriving Applicative via I
 
-instance Unit Rate Frames where suffix = K ('f':)
+instance Unit Frames where
+  type Dim Frames = Rate
+  suffix = K ('f':)
 
 data Rate a

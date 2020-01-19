@@ -2,7 +2,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 module Unit.Length
 ( Length
 , Metres(..)
@@ -29,7 +29,9 @@ newtype Metres a = Metres { getMetres :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Length Metres where suffix = K ('m':)
+instance Unit Metres where
+  type Dim Metres = Length
+  suffix = K ('m':)
 
 
 fromAUs :: Num a => a -> Metres a

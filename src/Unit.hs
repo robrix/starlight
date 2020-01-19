@@ -1,12 +1,12 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Unit
 ( -- * Units
   Unit(..)
@@ -44,7 +44,8 @@ import Numeric
 
 -- * Units
 
-class Applicative u => Unit (dim :: * -> *) u | u -> dim where
+class Applicative u => Unit u where
+  type Dim u :: * -> *
   prj :: u a -> a
   default prj :: Coercible (u a) a => u a -> a
   prj = coerce
@@ -54,57 +55,59 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
 
   suffix :: K ShowS (u a)
 
-instance Unit I I where
+instance Unit I where
+  type Dim I = I
   suffix = K (showChar '1')
 
-instance Unit Identity Identity where
+instance Unit Identity where
+  type Dim Identity = Identity
   suffix = K (showChar '1')
 
-convert :: forall u u' a dim . (Unit dim u, Unit dim u', Floating a) => u a -> u' a
-convert = pure . (/ getK (factor @_ @u')) . (* getK (factor @_ @u)) . prj
+convert :: forall u u' a . (Unit u, Unit u', Dim u ~ Dim u', Floating a) => u a -> u' a
+convert = pure . (/ getK (factor @u')) . (* getK (factor @u)) . prj
 
-convertFrom :: (Unit dim u, Unit dim u', Floating a) => (forall a . a -> u a) -> u a -> u' a
+convertFrom :: (Unit u, Unit u', Dim u ~ Dim u', Floating a) => (forall a . a -> u a) -> u a -> u' a
 convertFrom _ = convert
 
-convertTo :: (Unit dim u, Unit dim u', Floating a) => (forall a . a -> u' a) -> u a -> u' a
+convertTo :: (Unit u, Unit u', Dim u ~ Dim u', Floating a) => (forall a . a -> u' a) -> u a -> u' a
 convertTo _ = convert
 
-converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Floating a, Floating b) => Iso (u a) (u b) (u' a) (u' b)
+converting :: forall u u' a b . (Unit u, Unit u', Dim u ~ Dim u', Floating a, Floating b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
 
-convertingFrom :: (Unit dim u, Unit dim u', Floating a, Floating b) => (forall a . a -> u a) -> Iso (u a) (u b) (u' a) (u' b)
+convertingFrom :: (Unit u, Unit u', Dim u ~ Dim u', Floating a, Floating b) => (forall a . a -> u a) -> Iso (u a) (u b) (u' a) (u' b)
 convertingFrom _ = converting
 
-convertingTo :: (Unit dim u, Unit dim u', Floating a, Floating b) => (forall a . a -> u' a) -> Iso (u a) (u b) (u' a) (u' b)
+convertingTo :: (Unit u, Unit u', Dim u ~ Dim u', Floating a, Floating b) => (forall a . a -> u' a) -> Iso (u a) (u b) (u' a) (u' b)
 convertingTo _ = converting
 
 
 -- ** Comparison
 
-(.==.) :: forall u u' a dim . (Unit dim u, Unit dim u', Eq a, Floating a) => u a -> u' a -> Bool
+(.==.) :: forall u u' a . (Unit u, Unit u', Dim u ~ Dim u', Eq a, Floating a) => u a -> u' a -> Bool
 a .==. b = prj a == prj (convert @u' @u b)
 
 infix 4 .==.
 
-compareU :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Ordering
+compareU :: forall u u' a . (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Ordering
 compareU a b = prj a `compare` prj (convert @u' @u b)
 
-(.<.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Bool
+(.<.) :: (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .<. b = a `compareU` b == LT
 
 infix 4 .<.
 
-(.>.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Bool
+(.>.) :: (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .>. b = a `compareU` b == GT
 
 infix 4 .>.
 
-(.<=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Bool
+(.<=.) :: (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .<=. b = a `compareU` b /= GT
 
 infix 4 .<=.
 
-(.>=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Bool
+(.>=.) :: (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .>=. b = a `compareU` b /= LT
 
 infix 4 .>=.
@@ -112,19 +115,19 @@ infix 4 .>=.
 
 -- ** Formatting
 
-formatWith :: Unit dim u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
+formatWith :: Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
 formatWith with n u = with n u (showChar ' ' (getK (suffix `asTypeOf` (u <$ K ('x':))) ""))
 
-format :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+format :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat
 
-formatDec :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatDec :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatDec = formatWith showFFloat
 
-formatExp :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
 
-formatExpR :: (HasCallStack, Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExpR :: (HasCallStack, Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExpR = formatWith (\ prec x -> if
   | isNaN x                   -> showString "NaN"
   | isInfinite x              -> showString $ if x < 0 then "-Infinity" else "Infinity"

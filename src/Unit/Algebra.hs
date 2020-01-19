@@ -41,19 +41,19 @@ import Unit
 
 -- * Algebra
 
-(.*.) :: (Unit du u, Unit dv v, Unit dw (Mul u v), Fractional a) => u a -> v a -> Mul u v a
+(.*.) :: (Unit u, Unit v, Unit (Mul u v), Fractional a) => u a -> v a -> Mul u v a
 u .*. v = pure (prj v * prj u)
 
 infixl 7 .*.
 
-(./.) :: (Unit du u, Unit dv v, Unit dw (Div u v), Fractional a) => u a -> v a -> Div u v a
+(./.) :: (Unit u, Unit v, Unit (Div u v), Fractional a) => u a -> v a -> Div u v a
 u ./. v = pure (prj u / prj v)
 
 infixl 7 ./.
 
 data N (n :: Nat) = N
 
-(.^.) :: (Unit du u, Unit du' (Exp u n), Fractional a, KnownNat n) => u a -> N n -> Exp u n a
+(.^.) :: (Unit u, Unit (Exp u n), Fractional a, KnownNat n) => u a -> N n -> Exp u n a
 u .^. n = pure (prj u ^ natVal n)
 
 infixr 8 .^.
@@ -103,11 +103,11 @@ type family Sqrt u where
 
 -- * Calculation
 
-sqrtU :: (Unit du u, Unit du' (Sqrt u), Floating a) => u a -> Sqrt u a
+sqrtU :: (Unit u, Unit (Sqrt u), Floating a) => u a -> Sqrt u a
 sqrtU = pure . sqrt . prj
 
 -- | Compute the square of the distance efficiently and in the correct dimensions.
-qdU :: (Metric v, Unit du u, Num a) => v (u a) -> v (u a) -> (u :^: 2) a
+qdU :: (Metric v, Unit u, Num a) => v (u a) -> v (u a) -> (u :^: 2) a
 u `qdU` v = pure $ fmap prj u `qd` fmap prj v
 
 
@@ -119,9 +119,10 @@ newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
 
 infixl 7 :*:
 
-instance (Unit dimu u, Unit dimv v) => Unit (dimu :*: dimv) (u :*: v) where
-  factor = K (getK (factor @_ @u) * getK (factor @_ @v))
-  suffix = K (getK (suffix @_ @u) . ('·' :) . getK (suffix @_ @v))
+instance (Unit u, Unit v) => Unit (u :*: v) where
+  type Dim (u :*: v) = Dim u :*: Dim v
+  factor = K (getK (factor @u) * getK (factor @v))
+  suffix = K (getK (suffix @u) . ('·' :) . getK (suffix @v))
 
 
 newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
@@ -130,9 +131,10 @@ newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
 
 infixl 7 :/:
 
-instance (Unit dimu u, Unit dimv v) => Unit (dimu :/: dimv) (u :/: v) where
-  factor = K (getK (factor @_ @u) / getK (factor @_ @v))
-  suffix = K (getK (suffix @_ @u) . ('/' :) . getK (suffix @_ @v))
+instance (Unit u, Unit v) => Unit (u :/: v) where
+  type Dim (u :/: v) = Dim u :/: Dim v
+  factor = K (getK (factor @u) / getK (factor @v))
+  suffix = K (getK (suffix @u) . ('/' :) . getK (suffix @v))
 
 
 newtype ((u :: * -> *) :^: (n :: Nat)) a = Exp { getExp :: a }
@@ -141,6 +143,7 @@ newtype ((u :: * -> *) :^: (n :: Nat)) a = Exp { getExp :: a }
 
 infixr 8 :^:
 
-instance (Unit dimu u, KnownNat n) => Unit (dimu :^: n) (u :^: n) where
-  factor = K (getK (factor @_ @u) ^ natVal (Proxy @n))
-  suffix = K (getK (suffix @_ @u) . superscript (fromIntegral (natVal (Proxy @n))))
+instance (Unit u, KnownNat n) => Unit (u :^: n) where
+  type Dim (u :^: n) = Dim u :^: n
+  factor = K (getK (factor @u) ^ natVal (Proxy @n))
+  suffix = K (getK (suffix @u) . superscript (fromIntegral (natVal (Proxy @n))))

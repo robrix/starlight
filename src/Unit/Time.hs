@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 module Unit.Time
 ( Time
 , Seconds(..)
@@ -33,7 +33,8 @@ newtype Seconds a = Seconds { getSeconds :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Time Seconds where
+instance Unit Seconds where
+  type Dim Seconds = Time
   suffix = K ('s':)
 
 -- | Convert days to 'Seconds'. Note that this does not take e.g. leap seconds into account.
