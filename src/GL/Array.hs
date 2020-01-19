@@ -174,7 +174,7 @@ load is = do
 bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (v I) -> ArrayC v m a -> m a
 bindArray array m = do
   bind (Just array)
-  a <- runReader array (runDep m)
+  a <- runReader array (runLabelled m)
   a <$ bind @(Array _) Nothing
 
 type HasArray v sig m = DHas Array (Reader (Array (v I))) sig m
@@ -182,4 +182,4 @@ type HasArray v sig m = DHas Array (Reader (Array (v I))) sig m
 askArray :: DHas Array (Reader (Array (v I))) sig m => m (Array (v I))
 askArray = runInDep @_ @Array ask
 
-type ArrayC v = Dep Array (ReaderC (Array (v I)))
+type ArrayC v = Labelled Array (ReaderC (Array (v I)))

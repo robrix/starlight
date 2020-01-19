@@ -91,7 +91,7 @@ askProgram = runInDep @_ @Program ask
 newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramC :: ReaderC (Program u v o) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: Dep Program (Reader (Program u v o)) :+: sig) (ProgramC u v o m) where
+instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: Labelled Program (Reader (Program u v o)) :+: sig) (ProgramC u v o m) where
   alg = \case
     L (Get   k) -> k (makeVars (const Nothing))
     L (Put s k) -> do
@@ -99,5 +99,5 @@ instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u May
       foldVarsM (\ Field { location, value } ->
         maybe (pure ()) (checking . uniform prog (ls IntMap.! location)) value) s
       k
-    R (L other) -> ProgramC (send (handleCoercible (runDep other)))
+    R (L other) -> ProgramC (send (handleCoercible (runLabelled other)))
     R (R other) -> ProgramC (send (handleCoercible other))

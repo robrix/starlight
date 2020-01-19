@@ -106,7 +106,7 @@ instance GL.Enum Hint where
 bindBuffer :: (KnownType ty, Has Check sig m, Has (Lift IO) sig m) => Buffer ty v -> BufferC ty v m a -> m a
 bindBuffer buffer m = do
   bind (Just buffer)
-  a <- runReader buffer (runDep m)
+  a <- runReader buffer (runLabelled m)
   a <$ bind (Nothing `asTypeOf` Just buffer)
 
 type HasBuffer ty v sig m = DHas (Buffer ty) (Reader (Buffer ty v)) sig m
@@ -114,4 +114,4 @@ type HasBuffer ty v sig m = DHas (Buffer ty) (Reader (Buffer ty v)) sig m
 askBuffer :: forall ty v m sig . DHas (Buffer ty) (Reader (Buffer ty v)) sig m => m (Buffer ty v)
 askBuffer = runInDep @_ @(Buffer ty) ask
 
-type BufferC ty v = Dep (Buffer ty) (ReaderC (Buffer ty v))
+type BufferC ty v = Labelled (Buffer ty) (ReaderC (Buffer ty v))
