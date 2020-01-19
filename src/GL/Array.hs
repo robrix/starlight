@@ -1,15 +1,12 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE UndecidableInstances #-}
 module GL.Array
 ( Array(..)
 , configureInterleaved
@@ -22,8 +19,9 @@ module GL.Array
 , drawElementsInstanced
 , load
 , bindArray
-, HasArray(..)
-, ArrayC(..)
+, HasArray
+, askArray
+, ArrayC
 ) where
 
 import           Control.Algebra.Dependent
@@ -33,7 +31,6 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
 import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
-import           Control.Monad.Trans.Class
 import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Functor.Interval
@@ -47,7 +44,7 @@ import           GL.Effect.Check
 import           GL.Enum as GL
 import           GL.Object
 import           GL.Primitive
-import           GL.Program (HasProgram, ProgramC(..), askProgram)
+import           GL.Program (HasProgram, askProgram)
 import           GL.Shader.Vars
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
@@ -63,10 +60,10 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureInterleaved :: forall v m sig . (Effect sig, HasArray v m, B.HasBuffer 'B.Array (v I) m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
+configureInterleaved :: forall v m sig . (Effect sig, HasArray v sig m, B.HasBuffer 'B.Array (v I) m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureInterleaved = askArray >> B.askBuffer @'B.Array >> evalState (Offset 0) (evalFresh 0 (configureVars @v (S.sizeOf @(Fields v) undefined) (defaultVars @v)))
 
-configureSeparate :: forall v1 v2 m sig . (Effect sig, HasArray (v1 :**: v2) m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
+configureSeparate :: forall v1 v2 m sig . (Effect sig, HasArray (v1 :**: v2) sig m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
 configureSeparate b1 b2 = evalState (Offset 0) (evalFresh 0 (askArray >> B.bindBuffer b1 (configureVars @v1 stride (defaultVars @v1)) >> B.bindBuffer b2 (configureVars @v2 stride (defaultVars @v2)))) where
   stride = S.sizeOf @((v1 :**: v2) I) undefined
 
@@ -87,7 +84,7 @@ configureVars stride = foldVarsM' (\ (Field{ location, name } :: Field Proxy a) 
 drawArrays
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v m
+     , HasArray v sig m
      , HasCallStack
      , HasProgram u v o sig m
      )
@@ -99,7 +96,7 @@ drawArrays mode i = askProgram >> askArray >> checking (runLiftIO (glDrawArrays 
 multiDrawArrays
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v m
+     , HasArray v sig m
      , HasCallStack
      , HasProgram u v o sig m
      )
@@ -117,7 +114,7 @@ multiDrawArrays mode is
 drawArraysInstanced
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v m
+     , HasArray v sig m
      , HasCallStack
      , HasProgram u v o sig m
      )
@@ -130,7 +127,7 @@ drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (gl
 drawElements
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v m
+     , HasArray v sig m
      , B.HasBuffer 'B.ElementArray Word32 m
      , HasCallStack
      , HasProgram u v o sig m
@@ -147,7 +144,7 @@ drawElements mode i = do
 drawElementsInstanced
   :: ( Has Check sig m
      , Has (Lift IO) sig m
-     , HasArray v m
+     , HasArray v sig m
      , B.HasBuffer 'B.ElementArray Word32 m
      , HasCallStack
      , HasProgram u v o sig m
@@ -175,34 +172,14 @@ load is = do
 
 
 bindArray :: (Has Check sig m, Has (Lift IO) sig m) => Array (v I) -> ArrayC v m a -> m a
-bindArray array (ArrayC m) = do
+bindArray array m = do
   bind (Just array)
-  a <- runReader array m
+  a <- runReader array (runDep m)
   a <$ bind @(Array _) Nothing
 
-class Monad m => HasArray v m | m -> v where
-  askArray :: m (Array (v I))
+type HasArray v sig m = DHas Array (Reader (Array (v I))) sig m
 
+askArray :: DHas Array (Reader (Array (v I))) sig m => m (Array (v I))
+askArray = runInDep @_ @Array ask
 
-newtype ArrayC v m a = ArrayC { runArrayC :: ReaderC (Array (v I)) m a }
-  deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
-
-deriving instance HasArray     v (sub m) => HasArray     v   (Dep label sub  m)
-deriving instance HasArray     v      m  => HasArray     v   (ProgramC u v o m)
-deriving instance HasArray     v      m  => HasArray     v   (B.BufferC ty x m)
-deriving instance B.HasBuffer ty x    m  => B.HasBuffer ty x (ArrayC     v   m)
-
-instance HasArray v m => HasArray v (FreshC m) where
-  askArray = lift askArray
-
-instance HasArray v m => HasArray v (ReaderC r m) where
-  askArray = lift askArray
-
-instance HasArray v m => HasArray v (StateC s m) where
-  askArray = lift askArray
-
-instance Algebra sig m => Algebra sig (ArrayC v m) where
-  alg = ArrayC . send . handleCoercible
-
-instance Algebra sig m => HasArray v (ArrayC v m) where
-  askArray = ArrayC ask
+type ArrayC v = Dep Array (ReaderC (Array (v I)))
