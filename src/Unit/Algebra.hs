@@ -74,6 +74,7 @@ type family Div u v where
   Div  u               v        = u :/: v             -- u / v       = u / v
 
 type family Exp u n where
+  Exp I _ = I
   Exp _ 0 = I
   Exp u 1 = u
   Exp u n = u :^: n
