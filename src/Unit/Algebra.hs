@@ -42,7 +42,7 @@ import Unit
 
 -- * Algebra
 
-(.*.) :: (Unit u, Unit v, Unit (Mul u v), Fractional a) => u a -> v a -> Mul u v a
+(.*.) :: (Unit u, Unit v, Unit (Mul u v), Num a) => u a -> v a -> Mul u v a
 u .*. v = pure (prj v * prj u)
 
 infixl 7 .*.
