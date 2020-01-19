@@ -1,4 +1,3 @@
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -16,8 +15,6 @@ module GL.Program
 , use
 , askProgram
 , ProgramC(..)
-  -- * Uniforms
-, HasUniform
 ) where
 
 import           Control.Carrier.Reader
@@ -27,13 +24,10 @@ import           Control.Effect.Labelled
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
-import           Data.Functor.I
 import qualified Data.IntMap as IntMap
 import           Data.Traversable (for)
 import qualified Foreign.C.String.Lift as C
-import           GHC.Records
 import           GHC.Stack
-import           GHC.TypeLits
 import           GL.Effect.Check
 import           GL.Error
 import           GL.Shader
@@ -47,8 +41,6 @@ data Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Pr
   { locations :: IntMap.IntMap GLint
   , unProgram :: GLuint
   }
-
-type HasUniform sym t u = (KnownSymbol sym, Uniform t, HasField sym (u I) (I t))
 
 
 build :: forall u v o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars v) => DSL.Shader u v o -> m (Program u v o)
