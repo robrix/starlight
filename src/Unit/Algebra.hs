@@ -62,16 +62,16 @@ type family Mul u v where
   Mul  u         v        = u :*: v         -- u * v       = u * v
 
 type family Div u v where
-  Div  u         I        = u               -- u / 1       = u
-  Div  u         u        = I               -- u / u       = 1
-  Div (u :*: v)  v        = u               -- u * v / v   = u
-  Div (u :*: v)  u        = v               -- u * v / u   = v
-  Div (u :^: n)  u        = Exp u (n - 1)   -- uⁿ / u      = uⁿ⁻¹
-  Div (u :/: v :^: n)  v  = u :/: v :^: (n + 1) -- u / vⁿ / v = u / vⁿ⁺¹
-  Div  u        (v :*: w) = Div (Div u w) v -- u / (v * w) = (u / w) / v
-  Div (u :*: v)  w        = Mul (Div u w) v -- (u * v) / w = (u / w) * v
-  Div (u :/: v)  w        = Div u w :/: v   -- (u / v) / w = (u / w) / v
-  Div  u         v        = u :/: v         -- u / v       = u / v
+  Div  u               I        = u                   -- u / 1       = u
+  Div  u               u        = I                   -- u / u       = 1
+  Div (u :*: v)        v        = u                   -- u * v / v   = u
+  Div (u :*: v)        u        = v                   -- u * v / u   = v
+  Div (u :^: n)        u        = Exp u (n - 1)       -- uⁿ / u      = uⁿ⁻¹
+  Div (u :/: v :^: n)  v        = u :/: v :^: (n + 1) -- u / vⁿ / v  = u / vⁿ⁺¹
+  Div  u              (v :*: w) = Div (Div u w) v     -- u / (v * w) = (u / w) / v
+  Div (u :*: v)        w        = Mul (Div u w) v     -- (u * v) / w = (u / w) * v
+  Div (u :/: v)        w        = Div u w :/: v       -- (u / v) / w = (u / w) / v
+  Div  u               v        = u :/: v             -- u / v       = u / v
 
 type family Exp u n where
   Exp _ 0 = I
