@@ -30,6 +30,7 @@ import Starlight.Actor as Actor
 import Starlight.Body
 import Starlight.Character
 import Starlight.Identifier
+import Starlight.Physics.Constants
 import Starlight.Ship
 import Starlight.System as System
 import Starlight.Weapon.Laser as Laser
@@ -59,8 +60,6 @@ gravity a = do
     -- FIXME: gravity seems extremely weak
     r :: (Metres :*: Metres) Double
     r = convert ((b^.position_) `qdU` (a^.position_)) -- “quadrance” (square of distance between actor & body)
-  gravC :: (Metres :*: Metres :*: Metres :/: Kilo Grams :/: Seconds :/: Seconds) Double
-  gravC = 6.67430e-11
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
