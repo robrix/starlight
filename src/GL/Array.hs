@@ -180,6 +180,6 @@ bindArray array m = do
 type HasArray v sig m = HasLabelled Array (Reader (Array (v I))) sig m
 
 askArray :: HasLabelled Array (Reader (Array (v I))) sig m => m (Array (v I))
-askArray = runInLabel @_ @Array ask
+askArray = runUnderLabel @_ @Array ask
 
 type ArrayC v = Labelled Array (ReaderC (Array (v I)))
