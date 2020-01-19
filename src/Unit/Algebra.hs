@@ -56,6 +56,7 @@ type family Mul u v where
   Mul  u            (Inv (v :*: w)) = Mul (Mul u (Inv w)) (Inv v) -- u / (v * w) = (u / w) / v
   Mul (u :*: v)           w         = Mul u w :*: v               -- (u * v) * w = (u * w) * v
   Mul  u            (Inv  u)        = I                           -- u / u       = 1
+  Mul (Inv u)             u         = I                           -- 1 / u * u   = 1
   Mul  u                  v         = u :*: v                     -- u * v       = u * v
 
 
