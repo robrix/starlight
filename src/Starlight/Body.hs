@@ -37,6 +37,7 @@ import           GHC.Generics (Generic)
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
+import           Starlight.Physics.Constants
 import           Starlight.System
 import           Starlight.Time
 import           UI.Colour
@@ -88,42 +89,42 @@ data Orbit = Orbit
   deriving (Show)
 
 
-rotationTimeScale :: Num a => Seconds a
+rotationTimeScale :: Num a => I a
 rotationTimeScale = 1
 
-orbitTimeScale :: Num a => Seconds a
+orbitTimeScale :: Num a => I a
 orbitTimeScale = 1
 
 
 actorAt :: Body -> Seconds Double -> Actor
 actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
-  { position
-  , velocity = if r == 0 || p == 0 then 0 else (./. Seconds 1) <$> position ^* h ^* pure eccentricity ^/ (r * p) ^* pure (prj (sin trueAnomaly))
+  { position = convert <$> ext (V2 (r .*. cos trueAnomaly) (r .*. sin trueAnomaly)) (0 :: Metres Double)
+  , velocity = convert . (\ coord -> sqrtU (mu .*. convertTo Metres semimajor) ./. r .*. coord) <$> V3 (-sin eccentricAnomaly) (sqrt (1 - I eccentricity ** 2) .*. cos eccentricAnomaly) 0
   , rotation
     = orientation
     * axis
-    * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
+    * axisAngle (unit _z) (getI (t .*. rotationTimeScale ./. rot))
   , mass
   , magnitude = convert radius * 2
   } where
-  position = ext (cartesian2 (pure <$> trueAnomaly) r) 0
-  t' = timeOfPeriapsis + t * orbitTimeScale
-  meanAnomaly = getSeconds (meanMotion * t')
-  meanMotion = (2 * pi) / period
-  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity * sin ea) meanAnomaly where
+  t' :: Seconds Double
+  t' = timeOfPeriapsis + t .*. orbitTimeScale
+  meanAnomaly :: I Double
+  meanAnomaly = meanMotion .*. t'
+  meanMotion :: (I :/: Seconds) Double
+  meanMotion = I (2 * pi) ./. period
+  eccentricAnomaly :: I Double
+  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + I eccentricity .*. sin ea) meanAnomaly where
     iter n f = go n where
       go n a
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
-  trueAnomaly :: Radians Double
-  trueAnomaly = Radians (atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity))
-  r :: Mega Metres Double
-  r = convert semimajor ^* (1 - eccentricity * cos eccentricAnomaly)
-  -- extremely dubious
-  mu = 398600.5
-  p = convert semimajor ^* (1 - eccentricity ** 2)
-  h = sqrt ((1 - (eccentricity ** 2)) *^ convert semimajor * mu)
-  -- hr = h/r
+  trueAnomaly :: I Double
+  trueAnomaly = atan2 (sqrt (1 - I eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - I eccentricity)
+  r :: Metres Double
+  r = convert semimajor .*. (1 - I eccentricity * cos eccentricAnomaly)
+  mu :: (Metres :^: 3 :/: Seconds :^: 2) Double
+  mu = gravC .*. mass
 
 
 systemAt :: System Body -> Seconds Double -> System StateVectors
