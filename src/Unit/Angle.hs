@@ -3,8 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Unit.Angle
-( Angle
-, Radians(..)
+( Radians(..)
 , Degrees(..)
 , module Unit
 , module Unit.Multiple
@@ -22,19 +21,17 @@ import Linear.Vector
 import Unit
 import Unit.Multiple
 
-data Angle a
-
 newtype Radians a = Radians { getRadians :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Angle Radians where suffix = K ("rad"++)
+instance Unit I Radians where suffix = K ("rad"++)
 
 
 newtype Degrees a = Degrees { getDegrees :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Angle Degrees where
+instance Unit I Degrees where
   suffix = K ('°':)
   factor = K (pi/180)
