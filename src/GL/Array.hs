@@ -59,7 +59,7 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureInterleaved :: forall v m sig . (Effect sig, HasArray v sig m, B.HasBuffer 'B.Array (v I) sig m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
+configureInterleaved :: forall v m sig . (Effect sig, HasArray v sig m, HasLabelled (B.Buffer 'B.Array) (Reader (B.Buffer 'B.Array (v I))) sig m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureInterleaved = askArray >> B.askBuffer @'B.Array >> evalState (Offset 0) (evalFresh 0 (configureVars @v (S.sizeOf @(Fields v) undefined) (defaultVars @v)))
 
 configureSeparate :: forall v1 v2 m sig . (Effect sig, HasArray (v1 :**: v2) sig m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
@@ -127,7 +127,7 @@ drawElements
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , HasArray v sig m
-     , B.HasBuffer 'B.ElementArray Word32 sig m
+     , HasLabelled (B.Buffer 'B.ElementArray) (Reader (B.Buffer 'B.ElementArray Word32)) sig m
      , HasCallStack
      , HasProgram u v o sig m
      )
@@ -144,7 +144,7 @@ drawElementsInstanced
   :: ( Has Check sig m
      , Has (Lift IO) sig m
      , HasArray v sig m
-     , B.HasBuffer 'B.ElementArray Word32 sig m
+     , HasLabelled (B.Buffer 'B.ElementArray) (Reader (B.Buffer 'B.ElementArray Word32)) sig m
      , HasCallStack
      , HasProgram u v o sig m
      )

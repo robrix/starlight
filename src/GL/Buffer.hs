@@ -1,5 +1,4 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
@@ -16,7 +15,6 @@ module GL.Buffer
 , Update(..)
 , Usage(..)
 , bindBuffer
-, HasBuffer
 , askBuffer
 ) where
 
@@ -45,10 +43,10 @@ instance KnownType ty => Bind (Buffer ty v) where
   bind = checking . runLiftIO . glBindBuffer (glEnum (typeVal @ty)) . maybe 0 unBuffer
 
 -- FIXME: Store the current size and don’t reallocate when larger.
-realloc :: forall ty v m sig . (HasBuffer ty v sig m, KnownType ty, S.Storable v, Has (Lift IO) sig m) => Int -> Update -> Usage -> m ()
+realloc :: forall ty v m sig . (HasLabelled (Buffer ty) (Reader (Buffer ty v)) sig m, KnownType ty, S.Storable v, Has (Lift IO) sig m) => Int -> Update -> Usage -> m ()
 realloc n update usage = askBuffer @ty >> runLiftIO (glBufferData (glEnum (typeVal @ty)) (fromIntegral (n * S.sizeOf @v undefined)) nullPtr (glEnum (Hint update usage)))
 
-copy :: forall ty v m sig . (HasBuffer ty v sig m, KnownType ty, S.Storable v, Has Check sig m, Has (Lift IO) sig m) => Int -> [v] -> m ()
+copy :: forall ty v m sig . (HasLabelled (Buffer ty) (Reader (Buffer ty v)) sig m, KnownType ty, S.Storable v, Has Check sig m, Has (Lift IO) sig m) => Int -> [v] -> m ()
 copy offset vertices = askBuffer @ty >> A.withArray vertices
   (checking . runLiftIO . glBufferSubData (glEnum (typeVal @ty)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr) where
   i = (Interval 0 (I (length vertices)) + pure offset) ^* S.sizeOf @v undefined
@@ -106,8 +104,6 @@ bindBuffer buffer m = do
   bind (Just buffer)
   a <- runReader buffer (runLabelled m)
   a <$ bind (Nothing `asTypeOf` Just buffer)
-
-type HasBuffer ty v sig m = HasLabelled (Buffer ty) (Reader (Buffer ty v)) sig m
 
 askBuffer :: forall ty v m sig . HasLabelled (Buffer ty) (Reader (Buffer ty v)) sig m => m (Buffer ty v)
 askBuffer = runUnderLabel @_ @(Buffer ty) ask
