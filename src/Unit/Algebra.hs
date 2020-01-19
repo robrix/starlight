@@ -61,6 +61,7 @@ type family Mul u v where
   Mul (u :/: v)  w        = Mul u w :/: v   -- (u / v) * w = (u * w) / v
   Mul  u         v        = u :*: v         -- u * v       = u * v
 
+-- FIXME: can we simplify walking on right?
 type family Div u v where
   Div  u               I        = u                   -- u / 1       = u
   Div  u               u        = I                   -- u / u       = 1
