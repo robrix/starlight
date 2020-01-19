@@ -72,6 +72,10 @@ newtype Zoomed a = Zoomed { getZoomed :: a }
   deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
+instance Unit Zoomed where
+  type Dim Zoomed = Length
+  suffix = K ("zoomed"++)
+
 
 toContext :: View -> Transform Double ClipUnits Context.Pixels
 toContext View{ size } = mkScale (pure 1 & _xy .~ 1 / (fromIntegral <$> size))
