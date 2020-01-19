@@ -89,8 +89,8 @@ angleTo :: RealFloat a => V2 a -> V2 a -> a
 angleTo v1 v2 = angleOf (v2 - v1) -- FIXME: this should take input units and return dimensionless units
 
 
-isFacing :: (Real a, Floating a) => a -> Quaternion (I a) -> I a -> Bool
-isFacing epsilon rotation target = getI (abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation))) - target) < epsilon
+isFacing :: (Real a, Floating a) => I a -> Quaternion (I a) -> I a -> Bool
+isFacing epsilon rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation))) - target < epsilon
 
 
 -- | Compute the axis/angle of a rotation represented as a unit quaternion.
