@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -18,12 +19,14 @@ module Unit.Algebra
   -- * Combinators
 , (:*:)(..)
 , (:/:)(..)
+, (:^:)
 , I(..)
 ) where
 
 import Data.Functor.I
 import Data.Functor.K
 import Foreign.Storable
+import GHC.TypeLits hiding (Div)
 import GL.Type as GL
 import GL.Uniform
 import Linear.Conjugate
@@ -94,3 +97,11 @@ infixl 7 :/:
 instance (Unit dimu u, Unit dimv v) => Unit (dimu :/: dimv) (u :/: v) where
   factor = K (getK (factor @_ @u) / getK (factor @_ @v))
   suffix = K (getK (suffix @_ @u) . ('/' :) . getK (suffix @_ @v))
+
+
+type family u :^: n where
+  _ :^: 0 = I
+  u :^: 1 = u
+  u :^: n = u :*: u :^: (n - 1)
+
+infixr 8 :^:
