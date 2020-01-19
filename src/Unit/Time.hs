@@ -38,14 +38,14 @@ instance Unit Seconds where
   suffix = K ('s':)
 
 -- | Convert days to 'Seconds'. Note that this does not take e.g. leap seconds into account.
-fromDays :: Num a => a -> Seconds a
-fromDays d = fromHours (d * 24)
+fromDays :: Floating a => a -> Seconds a
+fromDays d = fromHours (Hours (d * 24))
 
-fromHours :: Num a => a -> Seconds a
-fromHours h = fromMinutes (h * 60)
+fromHours :: Floating a => Hours a -> Seconds a
+fromHours = convert
 
-fromMinutes :: Num a => a -> Seconds a
-fromMinutes m = Seconds (m * 60)
+fromMinutes :: Floating a => Minutes a -> Seconds a
+fromMinutes = convert
 
 
 newtype Minutes a = Minutes { getMinutes :: a }
