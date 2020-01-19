@@ -56,6 +56,8 @@ infixl 6 .+.
 (.-.) :: (Unit u, Num a) => u a -> u a -> u a
 u .-. v = pure (prj u - prj v)
 
+infixl 6 .-.
+
 (.*.) :: (Unit u, Unit v, Unit (Mul u v), Num a) => u a -> v a -> Mul u v a
 u .*. v = pure (prj v * prj u)
 
