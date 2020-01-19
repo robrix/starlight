@@ -47,7 +47,7 @@ draw
 draw = UI.using getDrawable $ do
   view@View{ zoom, focus } <- ask
 
-  resolution_ ?= (fromIntegral <$> deviceSize view)
+  resolution_ ?= (fromIntegral <$> contextSize view)
   let V2 (q1, r1) (q2, r2) = (`Fixed.divMod'` 1) . convert <$> focus
   focusR_     ?= (fmap realToFrac <$> V2 r1 r2)
   focusQ_     ?= (realToFrac <$> V2 q1 (q2 :: Integer))
