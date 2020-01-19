@@ -28,7 +28,7 @@ instance Num c => Category (Transform c) where
   id = Transform identity
   Transform a . Transform b = Transform (b !*! a)
 
-mkTranslation :: (Num c, Unit a) => V3 (a c) -> Transform c a a
+mkTranslation :: (Num c, Unit u) => V3 (u c) -> Transform c u u
 mkTranslation v = Transform (identity & translation .~ fmap prj v)
 
 -- FIXME: scaling should introduce a change of units
