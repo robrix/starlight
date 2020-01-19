@@ -83,7 +83,7 @@ instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u May
     L (Get   k) -> k (makeVars (const Nothing))
     L (Put s k) -> do
       Program ls prog <- askProgram
-      foldVarsM (\ Field { location, value } ->
+      foldVarsM (\ Field{ location, value } ->
         maybe (pure ()) (checking . uniform prog (ls IntMap.! location)) value) s
       k
     R (L other) -> ProgramC (send (handleCoercible (runLabelled other)))
