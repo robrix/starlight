@@ -93,14 +93,14 @@ runActions i c = do
   go dt system c = \case
     Thrust -> pure $ c & actor_ %~ applyForce ((convert thrust .*.) <$> rotate rotation (unit _x)) dt
 
-    Face dir -> case direction (c^.actor_) target of
-      Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) (angleOf (t^._xy))
+    Face dir -> case desiredAngle (c^.actor_) target of
+      Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) t
       Nothing -> pure c
       where
-      direction Actor{ velocity, position } t = case dir of
-        Forwards  -> Just velocity
-        Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
-        Target    -> t^?_Just.to projected.to (`L.direction` position).coerced
+      desiredAngle Actor{ velocity, position } t = case dir of
+        Forwards  -> Just (angleOf (velocity^._xy))
+        Backwards -> t^?_Just.velocity_.to (subtract velocity).to (angleOf.(^._xy)) <|> Just (-angleOf (velocity^._xy))
+        Target    -> t^?_Just.to projected.to (`L.direction` position).to (angleOf.(^._xy))
 
     Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) ((case t of
       L -> angular
