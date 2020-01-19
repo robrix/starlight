@@ -49,18 +49,18 @@ u ./. v = pure (prj u / prj v)
 infixl 7 ./.
 
 type family Mul u v where
-  Mul  u         I        = u               -- u * 1       = u
-  Mul  I         v        = v               -- 1 * v       = v
-  Mul (u :^: n)  u        = u :^: (n + 1)   -- uⁿ * u      = uⁿ⁺¹
-  Mul (u :^: i) (u :^: n) = u :^: (i + n)   -- uⁱ * uⁿ     = uⁱ⁺ⁿ
-  Mul  u         u        = u :^: 2         -- u * u       = u²
-  Mul (u :/: v)  v        = u               -- u / v * v   = u
-  Mul (u :/: v :^: n)  v  = Div u (Exp v (n - 1)) -- u / vⁿ * v   = u / vⁿ⁻¹
-  Mul  u        (v :*: w) = Mul (Mul u w) v -- u * (v * w) = (u * w) * v
-  Mul  u        (v :/: w) = Div (Mul u v) w -- u * (v / w) = (u * v) / w
-  Mul (u :*: v)  w        = Mul u w :*: v   -- (u * v) * w = (u * w) * v
-  Mul (u :/: v)  w        = Mul u w :/: v   -- (u / v) * w = (u * w) / v
-  Mul  u         v        = u :*: v         -- u * v       = u * v
+  Mul  u               I        = u                     -- u * 1       = u
+  Mul  I               v        = v                     -- 1 * v       = v
+  Mul (u :^: n)        u        = u :^: (n + 1)         -- uⁿ * u      = uⁿ⁺¹
+  Mul (u :^: i)       (u :^: n) = u :^: (i + n)         -- uⁱ * uⁿ     = uⁱ⁺ⁿ
+  Mul  u               u        = u :^: 2               -- u * u       = u²
+  Mul (u :/: v)        v        = u                     -- u / v * v   = u
+  Mul (u :/: v :^: n)  v        = Div u (Exp v (n - 1)) -- u / vⁿ * v   = u / vⁿ⁻¹
+  Mul  u              (v :*: w) = Mul (Mul u w) v       -- u * (v * w) = (u * w) * v
+  Mul  u              (v :/: w) = Div (Mul u v) w       -- u * (v / w) = (u * v) / w
+  Mul (u :*: v)        w        = Mul u w :*: v         -- (u * v) * w = (u * w) * v
+  Mul (u :/: v)        w        = Mul u w :/: v         -- (u / v) * w = (u * w) / v
+  Mul  u               v        = u :*: v               -- u * v       = u * v
 
 -- FIXME: can we simplify walking on right?
 type family Div u v where
