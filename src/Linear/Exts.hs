@@ -25,6 +25,8 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
+import Data.Coerce
+import Data.Functor.I
 import Data.Functor.Interval
 import Linear.Epsilon
 import Linear.Matrix hiding (Trace(..))
@@ -35,7 +37,6 @@ import Linear.V2 hiding (angle)
 import Linear.V3
 import Linear.V4
 import Linear.Vector
-import Unit.Angle
 
 translated :: Num a => V2 a -> M33 a
 translated (V2 tx ty) = V3
@@ -44,25 +45,25 @@ translated (V2 tx ty) = V3
   (V3 0 0 1)
 
 
-orient :: (Epsilon a, RealFloat a) => Radians a -> Radians a -> Radians a -> Quaternion a
+orient :: (Epsilon a, RealFloat a) => a -> a -> a -> Quaternion a
 orient alpha beta gamma
-  = axisAngle (unit _z) (getRadians alpha)
-  * axisAngle (unit _x) (getRadians beta)
-  * axisAngle (unit _z) (getRadians gamma)
+  = axisAngle (unit _z) alpha
+  * axisAngle (unit _x) beta
+  * axisAngle (unit _z) gamma
 
 
 -- | Compute a rotation turning to face a desired angle with a given maximum angular thrust.
 face
   :: (Epsilon a, RealFloat a)
-  => Radians a    -- ^ Angular thrust. (Speed of rotation.)
-  -> Radians a    -- ^ Desired angle.
+  => a            -- ^ Angular thrust. (Speed of rotation.)
+  -> a            -- ^ Desired angle.
   -> Quaternion a -- ^ Current rotation.
   -> Quaternion a -- ^ Resulting rotation.
 face angular angle rotation
-  | nearZero delta = proposed
-  | otherwise      = slerp rotation proposed (min 1 (getRadians (angular / delta))) where
-  proposed = axisAngle (unit _z) (getRadians angle)
-  delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
+  | nearZero delta = coerce proposed
+  | otherwise      = slerp rotation (coerce proposed) (min 1 (angular / getI delta)) where
+  proposed = axisAngle (unit _z) (I angle)
+  delta = abs (wrap (Interval (-pi) pi) (I (snd (toAxisAngle rotation)) - I angle))
 
 
 easeInOutCubic :: Double -> Double
@@ -81,33 +82,33 @@ direction a b = normalize (a ^-^ b)
 
 
 -- | The angle of a vector.
-angleOf :: RealFloat a => V2 a -> Radians a
-angleOf (V2 x y) = Radians (atan2 y x)
+angleOf :: RealFloat a => V2 a -> a
+angleOf (V2 x y) = atan2 y x -- FIXME: this should take input units and return dimensionless units
 
 -- | The angle from the first vector to the second.
-angleTo :: RealFloat a => V2 a -> V2 a -> Radians a
-angleTo v1 v2 = angleOf (v2 - v1)
+angleTo :: RealFloat a => V2 a -> V2 a -> a
+angleTo v1 v2 = angleOf (v2 - v1) -- FIXME: this should take input units and return dimensionless units
 
 
-isFacing :: (Real a, Floating a) => Radians a -> Quaternion a -> Radians a -> Bool
-isFacing epsilon rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - target)) < epsilon
+isFacing :: (Real a, Floating a) => a -> Quaternion a -> a -> Bool
+isFacing epsilon rotation target = abs (getI (wrap (Interval (-pi) pi) (I (snd (toAxisAngle rotation)))) - target) < epsilon
 
 
 -- | Compute the axis/angle of a rotation represented as a unit quaternion.
 --
 -- NB: Assumes unit magnitude. The axis is undefined for 0-rotations.
-toAxisAngle :: (Floating a, Ord a) => Quaternion a -> (V3 a, Radians a)
-toAxisAngle (Quaternion qw qv) = (v, Radians phi) where
+toAxisAngle :: (Floating a, Ord a) => Quaternion a -> (V3 a, a)
+toAxisAngle (Quaternion qw qv) = (v, phi) where
   v   = sign *^ qv ^/ sqrt (1 - qw ^ (2 :: Int))
   phi = sign * 2 * acos qw
   sign | qv >= 0   =  1
        | otherwise = -1
 
 
-cartesian2 :: Floating a => Radians a -> a -> V2 a
-cartesian2 (Radians phi) r = V2 (r * cos phi) (r * sin phi)
+cartesian2 :: Floating a => a -> a -> V2 a
+cartesian2 phi r = V2 (r * cos phi) (r * sin phi)
 
-polar2 :: RealFloat a => V2 a -> (Radians a, a)
+polar2 :: RealFloat a => V2 a -> (a, a)
 polar2 v = (angleOf v, norm v)
 
 

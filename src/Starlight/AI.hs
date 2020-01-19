@@ -38,4 +38,4 @@ ai c@Character{ actor = Actor{ position = here, rotation }, target } = do
     -- FIXME: pick a new target
     _ -> mempty
     where
-    angleTo' there = prj <$> angleTo (here^._xy) (there^._xy)
+    angleTo' there = pure . prj $ angleTo (here^._xy) (there^._xy)

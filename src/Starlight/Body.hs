@@ -66,8 +66,8 @@ toBodySpace v = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) (radius (body 
 data Body = Body
   { radius      :: !(Kilo Metres Double)
   , mass        :: !(Kilo Grams Double)
-  , orientation :: !(Quaternion Double) -- relative to orbit
-  , period      :: !(Seconds Double)    -- sidereal rotation period
+  , orientation :: !(Quaternion (I Double)) -- relative to orbit
+  , period      :: !(Seconds Double)        -- sidereal rotation period
   , colour      :: !(Colour Float)
   , orbit       :: !Orbit
   }
@@ -82,9 +82,9 @@ newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
 data Orbit = Orbit
   { eccentricity    :: !(I Double)
   , semimajor       :: !(Kilo Metres Double)
-  , orientation     :: !(Quaternion Double) -- relative to ecliptic
+  , orientation     :: !(Quaternion (I Double)) -- relative to ecliptic
   , period          :: !(Seconds Double)
-  , timeOfPeriapsis :: !(Seconds Double)    -- relative to epoch
+  , timeOfPeriapsis :: !(Seconds Double)        -- relative to epoch
   }
   deriving (Show)
 
@@ -103,7 +103,7 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
   , rotation
     = orientation
     * axis
-    * axisAngle (unit _z) (getI (t .*. rotationTimeScale ./. rot))
+    * axisAngle (unit _z) (t .*. rotationTimeScale ./. rot)
   , mass
   , magnitude = convert radius * 2
   } where

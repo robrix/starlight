@@ -28,7 +28,7 @@ import Unit.Time
 data Actor = Actor
   { position  :: !(V3 (Mega Metres Double))
   , velocity  :: !(V3 ((Mega Metres :/: Seconds) Double))
-  , rotation  :: !(Quaternion Double)
+  , rotation  :: !(Quaternion (I Double))
   , mass      :: !(Kilo Grams Double)
   , magnitude :: !(Mega Metres Double) -- approx. equivalent to diameter; should bound the actor’s geometry
   }
@@ -50,7 +50,7 @@ class HasActor t where
   velocity_ :: HasCallStack => Lens' t (V3 ((Mega Metres :/: Seconds) Double))
   velocity_ = actor_.field @"velocity".asserting (none isNaN)
 
-  rotation_ :: HasCallStack => Lens' t (Quaternion Double)
+  rotation_ :: HasCallStack => Lens' t (Quaternion (I Double))
   rotation_ = actor_.field @"rotation".asserting (none isNaN)
 
   mass_ :: HasCallStack => Lens' t (Kilo Grams Double)

@@ -70,7 +70,8 @@ hit i c = do
   foldl' (go dt) c <$> view (beams_ @StateVectors) where
   go (Seconds dt) char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
-    , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (cartesian2 (pure <$> theta) 1)
+    -- FIXME: this shouldn’t be coercing
+    , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (coerce (cartesian2 theta 1))
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
     | otherwise
     = char
@@ -91,10 +92,11 @@ runActions i c = do
   system <- ask @(System StateVectors)
   foldM (go dt system) c (actions c) where
   go dt system c = \case
-    Thrust -> pure $ c & actor_ %~ applyForce ((convert thrust ^*) <$> rotate rotation (unit _x)) dt
+    Thrust -> pure $ c & actor_ %~ applyForce ((convert thrust .*.) <$> rotate rotation (unit _x)) dt
 
     Face dir -> case direction (c^.actor_) target of
-      Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) (prj <$> angleOf (t^._xy))
+      -- FIXME: this shouldn’t be coercing
+      Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) (angleOf (t^._xy.coerced))
       Nothing -> pure c
       where
       direction Actor{ velocity, position } t = case dir of
@@ -102,9 +104,9 @@ runActions i c = do
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
         Target    -> t^?_Just.to projected.to (`L.direction` position).coerced
 
-    Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) (prj ((case t of
+    Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) ((case t of
       L -> angular
-      R -> -angular) .*. dt))
+      R -> -angular) .*. dt)
 
     Fire Main -> do
       let position = projected c
@@ -127,14 +129,15 @@ runActions i c = do
           pure $! c & position_ +~ (1 - target^.magnitude_ / distance') *^ (projected target - projected c)
         | otherwise                              -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
-        targetAngle = prj <$> angleTo (projected c^._xy) (projected target^._xy)
+        -- FIXME: this shouldn’t be coercing
+        targetAngle = coerce $ angleTo (projected c^._xy) (projected target^._xy)
       _ -> pure c
     where
     -- FIXME: measure thrust in Newtons
     thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :^: 2) Double
     thrust  = 1000 * 20 * 60
     -- FIXME: this should be a real acceleration, i.e. a change to velocity
-    angular :: (Radians :/: Seconds) Double
+    angular :: (I :/: Seconds) Double
     angular = 5
     projected :: HasActor t => t -> V3 (Mega Metres Double)
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)

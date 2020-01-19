@@ -1,5 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeFamilies #-}
 module Geometry.Transform
 ( Transform(..)
 , mkTranslation
@@ -12,6 +12,8 @@ module Geometry.Transform
 
 import Control.Category
 import Control.Lens ((&), (.~))
+import Data.Coerce
+import Data.Functor.I
 import Foreign.Storable
 import GL.Type as GL
 import GL.Uniform
@@ -33,8 +35,8 @@ mkTranslation v = Transform (identity & translation .~ fmap prj v)
 mkScale :: Num c => V3 c -> Transform c a b
 mkScale v = Transform (scaled (ext v 1))
 
-mkRotation :: Num c => Quaternion c -> Transform c a a
-mkRotation q = Transform (identity !*! mkTransformation q 0)
+mkRotation :: Num c => Quaternion (I c) -> Transform c a a
+mkRotation q = Transform (identity !*! mkTransformation (coerce q) 0)
 
 apply :: Num c => Transform c a b -> V4 c -> V4 c
 apply (Transform m) v = m !* v
