@@ -76,16 +76,23 @@ instance Unit Zoomed where
 
 
 toSystem :: View -> Transform Double Zoomed (Mega Metres)
-toSystem View{ scale, focus } = mkScale (pure (pure scale)) >>> mkTranslation (ext (negated focus) 0)
+toSystem View{ scale, focus }
+  =   mkScale (pure (pure scale))
+  >>> mkTranslation (ext (negated focus) 0)
 
 transformToWindow :: View -> Transform Double ClipUnits Window.Pixels
-transformToWindow View{ size, ratio } = mkScale (pure 1 & _xy .~ ClipUnits (fromIntegral ratio) ./^ (fmap fromIntegral <$> size))
+transformToWindow View{ size, ratio }
+  = mkScale (pure 1 & _xy .~ ClipUnits (fromIntegral ratio) ./^ (fmap fromIntegral <$> size))
 
 transformToZoomed :: View -> Transform Double ClipUnits Zoomed
-transformToZoomed view@View{ zoom } = transformToWindow view >>> mkScale (pure 1 & _xy .~ pure (Window.Pixels 1 ./. Zoomed zoom))
+transformToZoomed view@View{ zoom }
+  =   transformToWindow view
+  >>> mkScale (pure 1 & _xy .~ pure (Window.Pixels 1 ./. Zoomed zoom))
 
 transformToSystem :: View -> Transform Double ClipUnits (Mega Metres)
-transformToSystem view = transformToZoomed view >>> toSystem view
+transformToSystem view
+  =   transformToZoomed view
+  >>> toSystem view
 
 
 clipTo :: Has (Lift IO) sig m => View -> m ()
