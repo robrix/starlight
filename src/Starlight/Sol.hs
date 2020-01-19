@@ -32,7 +32,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 695_500.0
       , mass        = convertFrom (Kilo . Grams) 1.988_5e30
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 7.25))
-      , period      = fromDays 25.05
+      , period      = convertFrom Days 25.05
       , colour      = V4 1 1 0 1
       , orbit       = orbits Map.! identifier
       }
@@ -41,7 +41,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 2_439.7
       , mass        = convertFrom (Kilo . Grams) 3.302e23
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 0.034))
-      , period      = fromDays 58.646
+      , period      = convertFrom Days 58.646
       , colour      = V4 0.5 0.5 0.5 1
       , orbit       = orbits Map.! identifier
       }
@@ -50,7 +50,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 6_051.9
       , mass        = convertFrom (Kilo . Grams) 48.685e23
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 177.3))
-      , period      = fromDays 243.025
+      , period      = convertFrom Days 243.025
       , colour      = V4 1 1 0.5 1
       , orbit       = orbits Map.! identifier
       }
@@ -59,7 +59,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 6_378.14
       , mass        = convertFrom (Kilo . Grams) 5.972_19e24
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 23.4392911))
-      , period      = fromDays 0.997_269_68
+      , period      = convertFrom Days 0.997_269_68
       , colour      = V4 0 0 1 1
       , orbit       = orbits Map.! identifier
       }
@@ -68,7 +68,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 1_737.5
       , mass        = convertFrom (Kilo . Grams) 7.342e22
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 6.687))
-      , period      = fromDays 27.321_661
+      , period      = convertFrom Days 27.321_661
       , colour      = V4 0.5 0.5 0.5 1
       , orbit       = orbits Map.! identifier
       }
@@ -77,7 +77,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 3_397
       , mass        = convertFrom (Kilo . Grams) 6.417_1e23
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 25.19))
-      , period      = fromDays 1.025957
+      , period      = convertFrom Days 1.025957
       , colour      = V4 1 0 0 1
       , orbit       = orbits Map.! identifier
       }
@@ -104,7 +104,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 69_911
       , mass        = convertFrom (Kilo . Grams) 1_898.13e24
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 3.13))
-      , period      = fromHours 9.925
+      , period      = convertFrom Hours 9.925
       , colour      = V4 0.5 0.5 0 1
       , orbit       = orbits Map.! identifier
       }
@@ -158,7 +158,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 85 -- ground estimate
       , mass        = convertFrom (Kilo . Grams) 4.2e18
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 0))
-      , period      = fromHours 7.782 -- !
+      , period      = convertFrom Hours 7.782 -- !
       , colour      = V4 203 203 203 255 ^/ 255
       , orbit       = orbits Map.! identifier
       }
@@ -167,7 +167,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 58_232
       , mass        = convertFrom (Kilo . Grams) 5.683_4e26
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 26.73))
-      , period      = fromHours 10 + fromMinutes 33 + Seconds 38
+      , period      = convertFrom Hours 10 + convertFrom Minutes 33 + Seconds 38
       , colour      = V4 (229/255) (216/255) (167/255) 1
       , orbit       = orbits Map.! identifier
       }
@@ -176,7 +176,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 25_362
       , mass        = convertFrom (Kilo . Grams) 86.813e24
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 97.77))
-      , period      = fromDays 0.71833
+      , period      = convertFrom Days 0.71833
       , colour      = V4 (196/255) (221/255) (240/255) 1
       , orbit       = orbits Map.! identifier
       }
@@ -185,7 +185,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 24_624
       , mass        = convertFrom (Kilo . Grams) 102.413e24
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 28.32))
-      , period      = fromDays 0.6713
+      , period      = convertFrom Days 0.6713
       , colour      = V4 (138/255) (163/255) (217/255) 1
       , orbit       = orbits Map.! identifier
       }
@@ -194,7 +194,7 @@ bodies orbits = bodies where
       { radius      = convertFrom (Kilo . Metres) 1_188.3
       , mass        = convertFrom (Kilo . Grams) 1.303e22
       , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 122.53))
-      , period      = fromDays 6.387_230
+      , period      = convertFrom Days 6.387_230
       , colour      = V4 165 157 144 255 ^/ 255
       , orbit       = orbits Map.! identifier
       }
@@ -208,7 +208,7 @@ system = do
         { radius      = convertFrom (Kilo . Metres) 1_000
         , mass        = convertFrom (Kilo . Grams) 1.307e22
         , orientation = axisAngle (unit _x) (getRadians (convertFrom Degrees 5))
-        , period      = fromDays 1
+        , period      = convertFrom Days 1
         , colour      = white
         , orbit
         }
