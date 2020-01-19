@@ -25,6 +25,7 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
+import Control.Applicative (liftA2)
 import Data.Functor.I
 import Data.Functor.Interval
 import Linear.Epsilon
@@ -36,6 +37,8 @@ import Linear.V2 hiding (angle)
 import Linear.V3
 import Linear.V4
 import Linear.Vector
+import Unit
+import Unit.Algebra
 
 translated :: Num a => V2 a -> M33 a
 translated (V2 tx ty) = V3
@@ -81,12 +84,13 @@ direction a b = normalize (a ^-^ b)
 
 
 -- | The angle of a vector.
-angleOf :: RealFloat a => V2 a -> a
-angleOf (V2 x y) = atan2 y x -- FIXME: this should take input units and return dimensionless units
+angleOf :: (RealFloat a, Unit u) => V2 (u a) -> I a
+angleOf v = I (atan2 y x) where
+  V2 x y = prj <$> v
 
 -- | The angle from the first vector to the second.
-angleTo :: RealFloat a => V2 a -> V2 a -> a
-angleTo v1 v2 = angleOf (v2 - v1) -- FIXME: this should take input units and return dimensionless units
+angleTo :: (RealFloat a, Unit u) => V2 (u a) -> V2 (u a) -> I a
+angleTo v1 v2 = angleOf (liftA2 (-) <$> v2 <*> v1)
 
 
 isFacing :: (Real a, Floating a) => I a -> Quaternion (I a) -> I a -> Bool
@@ -104,11 +108,11 @@ toAxisAngle (Quaternion qw qv) = (v, phi) where
        | otherwise = -1
 
 
-cartesian2 :: Floating a => a -> a -> V2 a
-cartesian2 phi r = V2 (r * cos phi) (r * sin phi)
+cartesian2 :: (Floating a, Unit u) => I a -> u a -> V2 (u a)
+cartesian2 phi r = V2 (r .*. cos phi) (r .*. sin phi)
 
-polar2 :: RealFloat a => V2 a -> (a, a)
-polar2 v = (angleOf v, norm v)
+polar2 :: (RealFloat a, Unit u) => V2 (u a) -> (I a, I a)
+polar2 v = (angleOf v, normU v)
 
 
 -- | Extensions of a vector with an extra dimension.

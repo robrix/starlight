@@ -7,13 +7,14 @@ module Geometry.Circle
 import Control.Monad (guard)
 import Data.Maybe (isJust)
 import Linear.Exts
+import Unit
 
 -- | Construct vertices for a circle.
 circle
-  :: Floating a
-  => a      -- ^ The radius.
-  -> Int    -- ^ The number of vertices to produce.
-  -> [V2 a] -- ^ The vertices for the circle.
+  :: (Floating a, Unit u)
+  => u a        -- ^ The radius.
+  -> Int        -- ^ The number of vertices to produce.
+  -> [V2 (u a)] -- ^ The vertices for the circle.
 circle radius n =
   [ cartesian2 theta radius
   | i <- [0..pred n]

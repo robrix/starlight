@@ -71,7 +71,7 @@ hit i c = do
   go (Seconds dt) char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
     -- FIXME: this shouldn’t be coercing
-    , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (coerce (cartesian2 theta 1))
+    , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (cartesian2 theta 1)
     = char & ship_.armour_.min_.coerced -~ (damage * dt)
     | otherwise
     = char
@@ -95,8 +95,7 @@ runActions i c = do
     Thrust -> pure $ c & actor_ %~ applyForce ((convert thrust .*.) <$> rotate rotation (unit _x)) dt
 
     Face dir -> case direction (c^.actor_) target of
-      -- FIXME: this shouldn’t be coercing
-      Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) (angleOf (t^._xy.coerced))
+      Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) (angleOf (t^._xy))
       Nothing -> pure c
       where
       direction Actor{ velocity, position } t = case dir of
@@ -129,8 +128,7 @@ runActions i c = do
           pure $! c & position_ +~ (1 - target^.magnitude_ / distance') *^ (projected target - projected c)
         | otherwise                              -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
-        -- FIXME: this shouldn’t be coercing
-        targetAngle = coerce $ angleTo (projected c^._xy) (projected target^._xy)
+        targetAngle = angleTo (projected c^._xy) (projected target^._xy)
       _ -> pure c
     where
     -- FIXME: measure thrust in Newtons

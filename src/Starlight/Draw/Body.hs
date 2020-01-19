@@ -71,7 +71,7 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 vertices :: [V I]
-vertices = coerce @[V4 Double] . map (`ext` V2 0 (1 :: Double)) $ circle 1 128
+vertices = coerce @[V4 (I Double)] . map (`ext` V2 0 (I 1 :: I Double)) $ circle (I 1 :: I Double) 128
 
 range :: Interval I Int
 range = Interval 0 (I (length vertices))
