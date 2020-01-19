@@ -16,4 +16,4 @@ import Unit.Multiple
 
 data Force a
 
-type Newtons = Kilo Grams :*: Metres :/: Seconds :/: Seconds
+type Newtons = Kilo Grams :*: Metres :/: Seconds :^: 2
