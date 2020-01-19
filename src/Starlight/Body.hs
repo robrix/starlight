@@ -80,7 +80,7 @@ newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
   deriving (Eq, Fractional, Num, Ord)
 
 data Orbit = Orbit
-  { eccentricity    :: !Double
+  { eccentricity    :: !(I Double)
   , semimajor       :: !(Kilo Metres Double)
   , orientation     :: !(Quaternion Double) -- relative to ecliptic
   , period          :: !(Seconds Double)
@@ -99,7 +99,7 @@ orbitTimeScale = 1
 actorAt :: Body -> Seconds Double -> Actor
 actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
   { position = convert <$> ext (V2 (r .*. cos trueAnomaly) (r .*. sin trueAnomaly)) (0 :: Metres Double)
-  , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU (mu .*. convertTo Metres semimajor) ./. r .*. coord) <$> V3 (-sin eccentricAnomaly) (sqrt (1 - I eccentricity ** 2) .*. cos eccentricAnomaly) 0
+  , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU (mu .*. convertTo Metres semimajor) ./. r .*. coord) <$> V3 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly) 0
   , rotation
     = orientation
     * axis
@@ -114,15 +114,15 @@ actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ ecc
   meanMotion :: (I :/: Seconds) Double
   meanMotion = I (2 * pi) ./. period
   eccentricAnomaly :: I Double
-  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + I eccentricity .*. sin ea) meanAnomaly where
+  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity .*. sin ea) meanAnomaly where
     iter n f = go n where
       go n a
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
   trueAnomaly :: I Double
-  trueAnomaly = atan2 (sqrt (1 - I eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - I eccentricity)
+  trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
   r :: Metres Double
-  r = convert semimajor .*. (1 - I eccentricity * cos eccentricAnomaly)
+  r = convert semimajor .*. (1 - eccentricity * cos eccentricAnomaly)
   mu :: (Metres :^: 3 :/: Seconds :^: 2) Double
   mu = gravC .*. mass
 

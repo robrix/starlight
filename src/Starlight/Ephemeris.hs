@@ -48,7 +48,7 @@ data Ephemeris = Ephemeris
 fromEphemeris :: Ephemeris -> Orbit
 fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }
   = Orbit
-    { eccentricity
+    { eccentricity    = I eccentricity
     , semimajor
     , orientation     = orient
       (fromDegrees longitudeOfAscendingNode)
