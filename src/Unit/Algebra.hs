@@ -62,6 +62,7 @@ type family Div u v where
   Div  u         I        = u               -- u / 1       = u
   Div (u :*: v)  v        = u               -- u * v / v   = u
   Div (u :*: v)  u        = v               -- u * v / u   = v
+  Div (u :^: 2)  u        = u               -- u² / u      = u
   Div  u        (v :*: w) = Div (Div u w) v -- u / (v * w) = (u / w) / v
   Div (u :*: v)  w        = Mul (Div u w) v -- (u * v) / w = (u / w) * v
   Div (u :/: v)  w        = Div u w :/: v   -- (u / v) / w = (u / w) / v
