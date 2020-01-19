@@ -184,7 +184,7 @@ class Monad m => HasArray v m | m -> v where
   askArray :: m (Array (v I))
 
 
-newtype ArrayC v m a = ArrayC { runArrayT :: ReaderC (Array (v I)) m a }
+newtype ArrayC v m a = ArrayC { runArrayC :: ReaderC (Array (v I)) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 deriving instance HasArray     v   m => HasArray     v   (ProgramC u v o m)
