@@ -1,12 +1,15 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 module Starlight.Draw.Ship
 ( draw
 , Starlight.Draw.Ship.run
@@ -22,6 +25,7 @@ import           Control.Lens (Lens', to, (&), (+~), (-~), (.~), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.I
 import           Data.Functor.Interval hiding (range)
+import           Data.Functor.K
 import           Data.Generics.Product.Fields
 import qualified Data.Set as Set
 import           Foreign.Storable (Storable)
@@ -30,6 +34,9 @@ import           GL.Array
 import           GL.Effect.Check
 import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _a)
 import qualified GL.Shader.DSL as D
+import           GL.Type as GL
+import           GL.Uniform
+import           Linear.Conjugate
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
@@ -95,15 +102,23 @@ shader = program $ \ u
     fragColour .= colour u)
 
 
+newtype ShipUnits a = ShipUnits { getShipUnits :: a }
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
+instance Unit ShipUnits where
+  type Dim ShipUnits = Length
+  suffix = K ("ship"++)
+
 data U v = U
-  { matrix :: v (Transform Float ClipUnits (Mega Metres))
+  { matrix :: v (Transform Float ClipUnits ShipUnits)
   , colour :: v (UI.Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits (Mega Metres)))
+matrix_ :: Lens' (U v) (v (Transform Float ClipUnits ShipUnits))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (UI.Colour Float))
