@@ -34,6 +34,7 @@ import           Linear.V4 as Linear
 import           SDL
 import           Unit.Length
 
+-- FIXME: can we embed the ratio into this? maybe at the type level?
 newtype Pixels a = Pixels { getPixels :: a }
   deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
