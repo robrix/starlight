@@ -25,7 +25,6 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
-import Data.Coerce
 import Data.Functor.I
 import Data.Functor.Interval
 import Linear.Epsilon
@@ -55,15 +54,15 @@ orient alpha beta gamma
 -- | Compute a rotation turning to face a desired angle with a given maximum angular thrust.
 face
   :: (Epsilon a, RealFloat a)
-  => a            -- ^ Angular thrust. (Speed of rotation.)
-  -> a            -- ^ Desired angle.
-  -> Quaternion a -- ^ Current rotation.
-  -> Quaternion a -- ^ Resulting rotation.
+  => I a              -- ^ Angular thrust. (Speed of rotation.)
+  -> I a              -- ^ Desired angle.
+  -> Quaternion (I a) -- ^ Current rotation.
+  -> Quaternion (I a) -- ^ Resulting rotation.
 face angular angle rotation
-  | nearZero delta = coerce proposed
-  | otherwise      = slerp rotation (coerce proposed) (min 1 (angular / getI delta)) where
-  proposed = axisAngle (unit _z) (I angle)
-  delta = abs (wrap (Interval (-pi) pi) (I (snd (toAxisAngle rotation)) - I angle))
+  | nearZero delta = proposed
+  | otherwise      = slerp rotation proposed (min 1 (angular / delta)) where
+  proposed = axisAngle (unit _z) angle
+  delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
 
 
 easeInOutCubic :: Double -> Double
@@ -90,14 +89,14 @@ angleTo :: RealFloat a => V2 a -> V2 a -> a
 angleTo v1 v2 = angleOf (v2 - v1) -- FIXME: this should take input units and return dimensionless units
 
 
-isFacing :: (Real a, Floating a) => a -> Quaternion a -> a -> Bool
-isFacing epsilon rotation target = abs (getI (wrap (Interval (-pi) pi) (I (snd (toAxisAngle rotation)))) - target) < epsilon
+isFacing :: (Real a, Floating a) => a -> Quaternion (I a) -> I a -> Bool
+isFacing epsilon rotation target = getI (abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation))) - target) < epsilon
 
 
 -- | Compute the axis/angle of a rotation represented as a unit quaternion.
 --
 -- NB: Assumes unit magnitude. The axis is undefined for 0-rotations.
-toAxisAngle :: (Floating a, Ord a) => Quaternion a -> (V3 a, a)
+toAxisAngle :: (Floating a, Ord a) => Quaternion (I a) -> (V3 (I a), I a)
 toAxisAngle (Quaternion qw qv) = (v, phi) where
   v   = sign *^ qv ^/ sqrt (1 - qw ^ (2 :: Int))
   phi = sign * 2 * acos qw
