@@ -29,6 +29,7 @@ module Unit
 , formatDec
 , formatExp
 , formatExpR
+, superscript
 ) where
 
 import Control.Lens.Iso
@@ -130,7 +131,7 @@ formatExpR = formatWith (\ prec x -> if
   | x < 0 || isNegativeZero x -> showChar '-' . go prec (floatToDigits 10 (-x))
   | otherwise                 -> go prec (floatToDigits 10 x)) where
   go _    ([0], _) = showString "10⁰·0"
-  go prec (is,  e) = showString "10" . digits (e - 1) . showChar '·' . showDigits (take 1 is) . showChar '.' . showDigits (maybe id (fmap roundingLast . take . (+1)) prec (drop 1 is))
+  go prec (is,  e) = showString "10" . superscript (e - 1) . showChar '·' . showDigits (take 1 is) . showChar '.' . showDigits (maybe id (fmap roundingLast . take . (+1)) prec (drop 1 is))
   showDigits = foldr ((.) . showChar . intToDigit) id
 
   roundingLast is
@@ -139,11 +140,12 @@ formatExpR = formatWith (\ prec x -> if
     , il <- last is' = init is' ++ [ if last is >= 5 then il + 1 else il ]
     | otherwise      = is
 
-  digits i
-    | signum i /= -1 = go id i
-    | otherwise      = ('⁻':) . go id (abs i) where
-    go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
-           | otherwise = (supAt n:) . s
+superscript :: HasCallStack => Int -> ShowS
+superscript i
+  | signum i /= -1 = go id i
+  | otherwise      = ('⁻':) . go id (abs i) where
+  go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
+          | otherwise = (supAt n:) . s
   supAt i
     | inRange (0, 9) i = sup !! i
     | otherwise        = error $ "digit " <> show i <> " out of bounds (0, 9)"
