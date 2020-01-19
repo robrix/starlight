@@ -87,7 +87,7 @@ class Monad m => HasProgram (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -
   askProgram :: m (Program u v o)
 
 
-newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramT :: ReaderC (Program u v o) m a }
+newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramC :: ReaderC (Program u v o) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
 instance HasProgram u v o m => HasProgram u v o (ReaderC r m) where
