@@ -23,9 +23,7 @@ import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
 import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
-import           Data.Coerce
 import           Data.Function (fix)
-import           Data.Functor.I
 import           Data.Functor.Interval
 import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
@@ -226,20 +224,6 @@ frame
 frame = runSystem . timed $ do
   measure "input" input
   withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
-
--- | Compute the zoom factor for the given velocity.
---
--- Higher values correlate to more of the scene being visible.
-zoomForSpeed :: V2 (Window.Pixels Int) -> Double -> Double
-zoomForSpeed size x = go where
-  I go
-    | I x < min' speed = min' zoom
-    | I x > max' speed = max' zoom
-    | otherwise        = fromUnit zoom (coerce easeInOutCubic (toUnit speed (I x)))
-  zoom = Interval 1 5
-  speed = speedAt <$> zoom
-  -- FIXME: figure this out w.r.t. actual units of velocity &c.
-  speedAt x = x / 500 * fromIntegral (maximum size) * 2
 
 withView
   :: ( Has (Lift IO) sig m

@@ -9,6 +9,7 @@ module Starlight.View
 ( View(..)
 , contextSize
 , lengthToWindowPixels
+, zoomForSpeed
   -- * Transforms
 , ClipUnits(..)
 , Zoomed(..)
@@ -23,6 +24,7 @@ module Starlight.View
 
 import Control.Effect.Lift
 import Control.Lens ((&), (.~))
+import Data.Coerce
 import Data.Functor.I
 import Data.Functor.Interval
 import Data.Functor.K
@@ -51,6 +53,20 @@ contextSize View{ ratio, size } = fmap Context.Pixels (ratio *^ fmap Window.getP
 
 lengthToWindowPixels :: View -> (Window.Pixels :/: Mega Metres) Double
 lengthToWindowPixels View{ zoom, scale } = pure (scale / zoom)
+
+-- | Compute the zoom factor for the given velocity.
+--
+-- Higher values correlate to more of the scene being visible.
+zoomForSpeed :: V2 (Window.Pixels Int) -> Double -> Double
+zoomForSpeed size x = go where
+  I go
+    | I x < min' speed = min' zoom
+    | I x > max' speed = max' zoom
+    | otherwise        = fromUnit zoom (coerce easeInOutCubic (toUnit speed (I x)))
+  zoom = Interval 1 5
+  speed = speedAt <$> zoom
+  -- FIXME: figure this out w.r.t. actual units of velocity &c.
+  speedAt x = x / 500 * fromIntegral (maximum size) * 2
 
 
 newtype ClipUnits a = ClipUnits { getClipUnits :: a }
