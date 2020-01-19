@@ -14,6 +14,8 @@ module Unit.Algebra
 (  -- * Algebra
   (.*.)
 , (./.)
+, N(..)
+, (.^.)
   -- * Calculation
 , sqrtU
 , qdU
@@ -48,6 +50,13 @@ infixl 7 .*.
 u ./. v = pure (prj u / prj v)
 
 infixl 7 ./.
+
+data N (n :: Nat) = N
+
+(.^.) :: (Unit du u, Unit du' (Exp u n), Fractional a, KnownNat n) => u a -> N n -> Exp u n a
+u .^. n = pure (prj u ^ natVal n)
+
+infixr 8 .^.
 
 type family Mul u v where
   Mul  u               I        = u                             -- u * 1       = u
