@@ -51,6 +51,8 @@ import Unit
 (.+.) :: (Unit u, Num a) => u a -> u a -> u a
 u .+. v = pure (prj u + prj v)
 
+infixl 6 .+.
+
 (.-.) :: (Unit u, Num a) => u a -> u a -> u a
 u .-. v = pure (prj u - prj v)
 
