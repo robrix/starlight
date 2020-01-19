@@ -69,6 +69,11 @@ type family Div u v where
   Div  u         u        = I               -- u / u       = 1
   Div  u         v        = u :/: v         -- u / v       = u / v
 
+type family Exp u n where
+  Exp _ 0 = I
+  Exp u 1 = u
+  Exp u n = u :^: n
+
 
 -- * Calculation
 
