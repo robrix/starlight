@@ -45,7 +45,7 @@ import Unit.Time
 inertia :: (Has (Reader (Seconds Double)) sig m, HasCallStack) => Actor -> m Actor
 inertia a@Actor{ velocity } = do
   dt <- ask @(Seconds _)
-  pure $! a & position_ +~ ((.*. dt) <$> velocity)
+  pure $! a & position_ +~ velocity ^*. dt
 
 gravity :: (Has (Reader (Seconds Double)) sig m, Has (Reader (System StateVectors)) sig m, HasCallStack) => Actor -> m Actor
 gravity a = do
