@@ -18,7 +18,6 @@ module Unit.Algebra
   -- * Combinators
 , (:*:)(..)
 , (:/:)(..)
-, Inv
 , I(..)
 ) where
 
@@ -94,6 +93,3 @@ infixl 7 :/:
 instance (Unit dimu u, Unit dimv v) => Unit (dimu :/: dimv) (u :/: v) where
   factor = K (getK (factor @_ @u) / getK (factor @_ @v))
   suffix = K (getK (suffix @_ @u) . ('/' :) . getK (suffix @_ @v))
-
-
-type Inv u = I :/: u
