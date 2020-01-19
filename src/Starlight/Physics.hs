@@ -130,7 +130,7 @@ runActions i c = do
         targetAngle = prj <$> angleTo (projected c^._xy) (projected target^._xy)
       _ -> pure c
     where
-    thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :/: Seconds) Double
+    thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :^: 2) Double
     thrust  = 1000 * 20 * 60
     angular = getSeconds dt *^ Radians 5
     projected :: HasActor t => t -> V3 (Mega Metres Double)
