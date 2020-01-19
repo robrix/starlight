@@ -19,7 +19,6 @@ import Control.Effect.Lens
 import Control.Effect.Reader
 import Control.Lens hiding (view, (%=))
 import Control.Monad (foldM, guard)
-import Data.Coerce
 import Data.Foldable (foldl')
 import Data.Functor.Interval
 import Data.Ix (inRange)
@@ -55,7 +54,7 @@ gravity a = do
   pure $! foldl' (go dt) a bodies where
   go dt a StateVectors{ actor = b }
     | nearZero r = a
-    | otherwise  = applyForce (force *^ normalize (coerce (b^.position_ - a^.position_))) dt a where
+    | otherwise  = applyForce ((force .*.) <$> direction (b^.position_) (a^.position_)) dt a where
     force :: Newtons Double
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- FIXME: gravity seems extremely weak

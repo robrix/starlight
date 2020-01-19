@@ -79,8 +79,8 @@ reject a b = a ^-^ project a b
 
 
 -- | The unit vector in the direction of another vector.
-direction :: (Metric v, Epsilon a, Floating a) => v a -> v a -> v a
-direction a b = normalize (a ^-^ b)
+direction :: (Metric v, Epsilon a, Floating a, Unit u) => v (u a) -> v (u a) -> v (I a)
+direction a b = normalizeU (liftI2 (.-.) a b)
 
 
 -- | The angle of a vector.
