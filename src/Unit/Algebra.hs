@@ -22,6 +22,7 @@ module Unit.Algebra
 , sqrtU
 , qdU
 , normU
+, normalizeU
   -- * Combinators
 , (:*:)(..)
 , (:/:)(..)
@@ -121,6 +122,9 @@ u `qdU` v = pure $ fmap prj u `qd` fmap prj v
 
 normU :: (Metric v, Unit u, Floating a) => v (u a) -> I a
 normU = I . norm . fmap prj
+
+normalizeU :: (Metric v, Unit u, Floating a, Epsilon a) => v (u a) -> v (I a)
+normalizeU = fmap I . normalize . fmap prj
 
 
 -- * Combinators
