@@ -21,3 +21,5 @@ infixr 3 :#
 
 instance (Additive v, Applicative v, Applicative u) => Additive (v :# u) where
   zero = V (pure <$> zero)
+
+instance (Additive v, Applicative v, Applicative u, Foldable v, Foldable u) => Metric (v :# u)
