@@ -36,6 +36,7 @@ library
   import:              common
   hs-source-dirs:      src
   exposed-modules:
+    Control.Algebra.Dependent
     Control.Carrier.Empty.Church
     Control.Carrier.Empty.CPS
     Control.Carrier.Finally
