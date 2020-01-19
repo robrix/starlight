@@ -40,7 +40,7 @@ u .*. v = pure (prj v * prj u)
 
 infixl 7 .*.
 
-(./.) :: (Unit du u, Unit dv v, Unit dw (Mul u (Inv v)), Fractional a) => u a -> v a -> Mul u (Inv v) a
+(./.) :: (Unit du u, Unit dv v, Unit dw (Div u v), Fractional a) => u a -> v a -> Div u v a
 u ./. v = pure (prj u / prj v)
 
 infixl 7 ./.
