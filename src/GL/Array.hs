@@ -177,9 +177,9 @@ bindArray array m = do
   a <- runReader array (runLabelled m)
   a <$ bind @(Array _) Nothing
 
-type HasArray v sig m = DHas Array (Reader (Array (v I))) sig m
+type HasArray v sig m = HasLabelled Array (Reader (Array (v I))) sig m
 
-askArray :: DHas Array (Reader (Array (v I))) sig m => m (Array (v I))
+askArray :: HasLabelled Array (Reader (Array (v I))) sig m => m (Array (v I))
 askArray = runInLabel @_ @Array ask
 
 type ArrayC v = Labelled Array (ReaderC (Array (v I)))

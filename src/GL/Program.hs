@@ -82,9 +82,9 @@ use (Program ls p) m = do
   runReader (Program ls p) (runProgramC m)
 
 
-type HasProgram u v o sig m = DHas Program (Reader (Program u v o)) sig m
+type HasProgram u v o sig m = HasLabelled Program (Reader (Program u v o)) sig m
 
-askProgram :: DHas Program (Reader (Program u v o)) sig m => m (Program u v o)
+askProgram :: HasLabelled Program (Reader (Program u v o)) sig m => m (Program u v o)
 askProgram = runInLabel @_ @Program ask
 
 
