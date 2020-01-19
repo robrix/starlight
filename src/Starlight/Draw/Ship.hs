@@ -60,7 +60,7 @@ draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour 
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
     >>> transformToActor actor
-    >>> mkScale (pure @V3 (magnitude * 0.5 ./. ShipUnits scale)))
+    >>> mkScale (pure (magnitude * 0.5 ./. ShipUnits scale)))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
     & UI._a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
