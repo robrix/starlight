@@ -59,6 +59,15 @@ type family Mul u v where
   Mul (Inv u)             u         = I                           -- 1 / u * u   = 1
   Mul  u                  v         = u :*: v                     -- u * v       = u * v
 
+type family Div u v where
+  Div  u         I        = u               -- u / 1       = u
+  Div (u :*: v)  v        = u               -- u * v / v   = u
+  Div (u :*: v)  u        = v               -- u * v / u   = v
+  Div  u        (v :*: w) = Div (Div u w) v -- u / (v * w) = (u / w) / v
+  Div (u :*: v)  w        = Div u w :*: v   -- (u * v) / w = (u / w) * v
+  Div  u         u        = I               -- u / u       = 1
+  Div  u         v        = u :/: v         -- u / v       = u / v
+
 
 -- * Calculation
 
