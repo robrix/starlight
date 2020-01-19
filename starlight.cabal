@@ -138,6 +138,7 @@ library
     Unit.Multiple
     Unit.Power
     Unit.Time
+    Unit.Vector
   other-modules:
     Paths_starlight
   build-depends:
