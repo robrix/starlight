@@ -79,7 +79,6 @@ draw = measure "draw" . runLiftIO $ do
   measure "laser" $ for_ beams Laser.draw
 
   let hypotenuse = norm (fromIntegral <$> size) * 0.5
-      -- FIXME: units matter
       onScreen StateVectors{ body = Body{ radius }, actor = Actor{ position = pos } } = lengthToWindowPixels v .*. (distance pos position - convert radius) < hypotenuse
 
   measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) Body.draw
