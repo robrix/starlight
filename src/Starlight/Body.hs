@@ -33,7 +33,7 @@ import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
 import           Data.Time.Format.ISO8601
 import           Geometry.Transform
-import           GHC.Generics
+import           GHC.Generics (Generic)
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
