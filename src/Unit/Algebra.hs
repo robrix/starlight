@@ -25,6 +25,7 @@ module Unit.Algebra
 
 import Data.Functor.I
 import Data.Functor.K
+import Data.Proxy
 import Foreign.Storable
 import GHC.TypeLits hiding (Div)
 import GL.Type as GL
@@ -99,9 +100,12 @@ instance (Unit dimu u, Unit dimv v) => Unit (dimu :/: dimv) (u :/: v) where
   suffix = K (getK (suffix @_ @u) . ('/' :) . getK (suffix @_ @v))
 
 
-type family u :^: n where
-  _ :^: 0 = I
-  u :^: 1 = u
-  u :^: n = u :*: u :^: (n - 1)
+newtype ((u :: * -> *) :^: (n :: Nat)) a = Exp { getExp :: a }
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
 
 infixr 8 :^:
+
+instance (Unit dimu u, KnownNat n) => Unit (dimu :^: n) (u :^: n) where
+  factor = K (getK (factor @_ @u) ^ natVal (Proxy @n))
+  suffix = K (getK (suffix @_ @u) . superscript (fromIntegral (natVal (Proxy @n))))
