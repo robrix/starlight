@@ -7,6 +7,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 module GL.Buffer
@@ -23,7 +24,7 @@ module GL.Buffer
 , BufferC(BufferC)
 ) where
 
-import           Control.Algebra
+import           Control.Algebra.Dependent
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Monad.IO.Class.Lift
@@ -114,6 +115,8 @@ bindBuffer buffer (BufferC m) = do
 
 class Monad m => HasBuffer ty v m | m ty -> v where
   askBuffer :: m (Buffer ty v)
+
+deriving instance HasBuffer ty v (sub m) => HasBuffer ty v (Dep label sub  m)
 
 instance HasBuffer ty i m => HasBuffer ty i (ReaderC r m) where
   askBuffer = lift askBuffer
