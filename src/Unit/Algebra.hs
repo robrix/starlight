@@ -82,7 +82,7 @@ type family Exp u n where
 -- * Calculation
 
 -- | Compute the square of the distance efficiently and in the correct dimensions.
-qdU :: (Metric v, Unit du u, Num a) => v (u a) -> v (u a) -> (u :*: u) a
+qdU :: (Metric v, Unit du u, Num a) => v (u a) -> v (u a) -> (u :^: 2) a
 u `qdU` v = pure $ fmap prj u `qd` fmap prj v
 
 
