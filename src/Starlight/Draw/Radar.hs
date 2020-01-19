@@ -27,7 +27,8 @@ import           Data.Foldable (for_, toList)
 import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
-import           Data.List (elemIndex, sortOn)
+import           Data.List (findIndex, sortOn)
+import qualified Data.Map as Map
 import           Data.Ord (Down(..))
 import           Foreign.Storable (Storable(..))
 import           GHC.Generics (Generic)
@@ -43,6 +44,7 @@ import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
+import           Starlight.Identifier (CharacterIdentifier(..), Identifier(..))
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour
@@ -63,7 +65,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   system@System{ bodies } <- ask @(System B.StateVectors)
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
-      blips    = sortOn (Down . qd here . (^.position_._xy)) (map (blipFor (1/scale)) (toList npcs) <> map (blipFor 1) (toList bodies))
+      blips    = sortOn (Down . qd here . (^.position_._xy)) (zipWith (blipFor (1/scale) . C . NPC) [0..] npcs) <> map (uncurry (blipFor 1 . B)) (Map.toList bodies)
       vertices = verticesForBlips blips
       vars     = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
@@ -86,7 +88,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
     put vars
 
     measure "targets" $
-      for_ (system^.player_.target_ >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
+      for_ (system^.player_.target_ >>= (`findIndex` blips) . (. identifier) . (==)) $ \ index ->
         drawArrays Points (Interval (I index) (I index + 1))
 
 run :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
@@ -105,7 +107,7 @@ data Drawable = Drawable
   }
 
 
-data Blip = Blip { scale :: Double, actor :: Actor, colour :: Colour Float }
+data Blip = Blip { scale :: Double, identifier :: Identifier, actor :: Actor, colour :: Colour Float }
   deriving (Generic)
 
 instance HasActor Blip where
@@ -114,8 +116,8 @@ instance HasActor Blip where
 instance HasColour Blip where
   colour_ = field @"colour"
 
-blipFor :: (HasActor t, HasColour t) => Double -> t -> Blip
-blipFor scale t = Blip{ scale, actor = t^.actor_, colour = t^.colour_ }
+blipFor :: (HasActor t, HasColour t) => Double -> Identifier -> t -> Blip
+blipFor scale identifier t = Blip{ scale, identifier, actor = t^.actor_, colour = t^.colour_ }
 
 -- FIXME: take ship profile into account
 verticesForBlips :: Foldable t => t Blip -> [V I]
