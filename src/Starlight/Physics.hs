@@ -58,7 +58,7 @@ gravity a = do
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
     -- FIXME: gravity seems extremely weak
     r :: (Metres :*: Metres) Double
-    r = (b^.position_.mapping converting) `qdU` (a^.position_.mapping converting) -- “quadrance” (square of distance between actor & body)
+    r = convert ((b^.position_) `qdU` (a^.position_)) -- “quadrance” (square of distance between actor & body)
   gravC :: (Metres :*: Metres :*: Metres :/: Kilo Grams :/: Seconds :/: Seconds) Double
   gravC = 6.67430e-11
 
