@@ -49,7 +49,7 @@ class Applicative u => Unit (dim :: * -> *) u | u -> dim where
   default prj :: Coercible (u a) a => u a -> a
   prj = coerce
 
-  factor :: Fractional a => K a (u a)
+  factor :: Floating a => K a (u a)
   factor = 1
 
   suffix :: K ShowS (u a)
@@ -60,51 +60,51 @@ instance Unit I I where
 instance Unit Identity Identity where
   suffix = K (showChar '1')
 
-convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
+convert :: forall u u' a dim . (Unit dim u, Unit dim u', Floating a) => u a -> u' a
 convert = pure . (/ getK (factor @_ @u')) . (* getK (factor @_ @u)) . prj
 
-convertFrom :: (Unit dim u, Unit dim u', Fractional a) => (forall a . a -> u a) -> u a -> u' a
+convertFrom :: (Unit dim u, Unit dim u', Floating a) => (forall a . a -> u a) -> u a -> u' a
 convertFrom _ = convert
 
-convertTo :: (Unit dim u, Unit dim u', Fractional a) => (forall a . a -> u' a) -> u a -> u' a
+convertTo :: (Unit dim u, Unit dim u', Floating a) => (forall a . a -> u' a) -> u a -> u' a
 convertTo _ = convert
 
-converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Fractional a, Fractional b) => Iso (u a) (u b) (u' a) (u' b)
+converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Floating a, Floating b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
 
-convertingFrom :: (Unit dim u, Unit dim u', Fractional a, Fractional b) => (forall a . a -> u a) -> Iso (u a) (u b) (u' a) (u' b)
+convertingFrom :: (Unit dim u, Unit dim u', Floating a, Floating b) => (forall a . a -> u a) -> Iso (u a) (u b) (u' a) (u' b)
 convertingFrom _ = converting
 
-convertingTo :: (Unit dim u, Unit dim u', Fractional a, Fractional b) => (forall a . a -> u' a) -> Iso (u a) (u b) (u' a) (u' b)
+convertingTo :: (Unit dim u, Unit dim u', Floating a, Floating b) => (forall a . a -> u' a) -> Iso (u a) (u b) (u' a) (u' b)
 convertingTo _ = converting
 
 
 -- ** Comparison
 
-(.==.) :: forall u u' a dim . (Unit dim u, Unit dim u', Eq a, Fractional a) => u a -> u' a -> Bool
+(.==.) :: forall u u' a dim . (Unit dim u, Unit dim u', Eq a, Floating a) => u a -> u' a -> Bool
 a .==. b = prj a == prj (convert @u' @u b)
 
 infix 4 .==.
 
-compareU :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Ordering
+compareU :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Ordering
 compareU a b = prj a `compare` prj (convert @u' @u b)
 
-(.<.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+(.<.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .<. b = a `compareU` b == LT
 
 infix 4 .<.
 
-(.>.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+(.>.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .>. b = a `compareU` b == GT
 
 infix 4 .>.
 
-(.<=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+(.<=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .<=. b = a `compareU` b /= GT
 
 infix 4 .<=.
 
-(.>=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+(.>=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .>=. b = a `compareU` b /= LT
 
 infix 4 .>=.
