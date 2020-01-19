@@ -1,4 +1,7 @@
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module Starlight.View
 ( View(..)
@@ -23,9 +26,14 @@ module Starlight.View
 
 import Control.Effect.Lift
 import Control.Lens ((&), (.~), (^.))
+import Data.Functor.I
 import Data.Functor.Interval
+import Foreign.Storable
 import Geometry.Transform
+import GL.Type as GL
+import GL.Uniform
 import GL.Viewport
+import Linear.Conjugate
 import Linear.Exts
 import UI.Context as Context
 import UI.Window as Window
@@ -51,7 +59,12 @@ lengthToWindowPixels View{ zoom, scale } = 1/zoom * scale
 
 
 newtype ClipUnits a = ClipUnits { getClipUnits :: a }
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
 newtype Zoomed a = Zoomed { getZoomed :: a }
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
 
 
 toContext :: View -> Transform Double ClipUnits Context.Pixels
