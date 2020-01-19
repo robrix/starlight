@@ -41,7 +41,7 @@ newtype Pixels a = Pixels { getPixels :: a }
 
 instance Unit Pixels where
   type Dim Pixels = Length
-  suffix = K ("px"++)
+  suffix = K ("wpx"++)
 
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()

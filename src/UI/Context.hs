@@ -29,7 +29,7 @@ newtype Pixels a = Pixels { getPixels :: a }
 
 instance Unit Pixels where
   type Dim Pixels = Length
-  suffix = K ("px"++)
+  suffix = K ("cpx"++)
 
 runContext :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => ReaderC Context m a -> m a
 runContext = E.bracket
