@@ -12,7 +12,6 @@ import           Starlight.Actor as Actor
 import           Starlight.Body as Body
 import           Starlight.Character
 import           Starlight.System as System
-import           Unit
 
 ai
   :: Has (Reader (System StateVectors)) sig m
@@ -38,4 +37,4 @@ ai c@Character{ actor = Actor{ position = here, rotation }, target } = do
     -- FIXME: pick a new target
     _ -> mempty
     where
-    angleTo' there = pure . prj $ angleTo (here^._xy) (there^._xy)
+    angleTo' there = angleTo (here^._xy) (there^._xy)
