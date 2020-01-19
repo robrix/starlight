@@ -115,25 +115,3 @@ askBuffer :: forall ty v m sig . DHas (Buffer ty) (Reader (Buffer ty v)) sig m =
 askBuffer = runInDep @_ @(Buffer ty) ask
 
 type BufferC ty v = Dep (Buffer ty) (ReaderC (Buffer ty v))
-
-
--- class Monad m => HasBuffer ty v sig m | m ty -> v where
---   askBuffer :: m (Buffer ty v)
-
--- deriving instance HasBuffer ty v (sub m) => HasBuffer ty v (Dep label sub  m)
-
--- instance HasBuffer ty i m => HasBuffer ty i (ReaderC r m) where
---   askBuffer = lift askBuffer
-
--- instance HasBuffer ty i m => HasBuffer ty i (StateC s m) where
---   askBuffer = lift askBuffer
-
-
--- newtype BufferC ty v m a = BufferC { runBuffer :: ReaderC (Buffer ty v) m a }
---   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
-
--- instance Algebra sig m => HasBuffer ty v (BufferC ty v m) where
---   askBuffer = BufferC ask
-
--- instance Algebra sig m => Algebra sig (BufferC ty v m) where
---   alg = BufferC . send . handleCoercible
