@@ -19,6 +19,7 @@ module Unit.Algebra
 , (.*^)
 , (./.)
 , (^/.)
+, (./^)
 , N(..)
 , (.^.)
 , Mul
@@ -85,6 +86,11 @@ infixl 7 ./.
 u ^/. v = pure . (/ prj v) . prj <$> u
 
 infixl 7 ^/.
+
+(./^) :: (Unit u, Functor f, Unit v, Unit (Div u v), Fractional a) => u a -> f (v a) -> f (Div u v a)
+u ./^ v = pure . (prj u /) . prj <$> v
+
+infixl 7 ./^
 
 data N (n :: Nat) = N
 
