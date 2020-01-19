@@ -1,5 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -9,6 +11,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( StateVectors(..)
@@ -28,12 +31,18 @@ import           Control.Carrier.Reader
 import           Control.Effect.Lift
 import           Control.Effect.State
 import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
+import           Data.Functor.I
+import           Data.Functor.K
 import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
 import           Data.Time.Format.ISO8601
+import           Foreign.Storable
 import           Geometry.Transform
 import           GHC.Generics (Generic)
+import           GL.Type as GL
+import           GL.Uniform
+import           Linear.Conjugate
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
@@ -77,7 +86,12 @@ instance HasColour Body where
   colour_ = field @"colour"
 
 newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
-  deriving (Eq, Fractional, Num, Ord)
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
+instance Unit BodyUnits where
+  type Dim BodyUnits = Length
+  suffix = K ("body"++)
 
 data Orbit = Orbit
   { eccentricity    :: !(I Double)
