@@ -12,7 +12,6 @@ module Starlight.View
   -- * Transforms
 , ClipUnits(..)
 , Zoomed(..)
-, toWindow
 , toZoomed
 , toSystem
 , transformToWindow
@@ -76,9 +75,6 @@ instance Unit Zoomed where
   type Dim Zoomed = Length
   suffix = K ("zoomed"++)
 
-
-toWindow :: View -> Transform Double Context.Pixels Window.Pixels
-toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 
 toZoomed :: View -> Transform Double Window.Pixels Zoomed
 toZoomed View{ zoom } = mkScale (pure 1 & _xy .~ pure (Window.Pixels 1 ./. Zoomed zoom))
