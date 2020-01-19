@@ -15,6 +15,7 @@ module Unit.Algebra
   (.*.)
 , (./.)
   -- * Calculation
+, sqrtU
 , qdU
   -- * Combinators
 , (:*:)(..)
@@ -92,6 +93,9 @@ type family Sqrt u where
 
 
 -- * Calculation
+
+sqrtU :: (Unit du u, Unit du' (Sqrt u), Floating a) => u a -> Sqrt u a
+sqrtU = pure . sqrt . prj
 
 -- | Compute the square of the distance efficiently and in the correct dimensions.
 qdU :: (Metric v, Unit du u, Num a) => v (u a) -> v (u a) -> (u :^: 2) a
