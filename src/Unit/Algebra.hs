@@ -21,7 +21,6 @@ module Unit.Algebra
   -- * Calculation
 , sqrtU
 , qdU
-, normU
 , normalizeU
   -- * Combinators
 , (:*:)(..)
@@ -119,9 +118,6 @@ sqrtU = pure . sqrt . prj
 -- | Compute the square of the distance efficiently and in the correct dimensions.
 qdU :: (Metric v, Unit u, Num a) => v (u a) -> v (u a) -> (u :^: 2) a
 u `qdU` v = pure $ fmap prj u `qd` fmap prj v
-
-normU :: (Metric v, Unit u, Floating a) => v (u a) -> I a
-normU = I . norm . fmap prj
 
 normalizeU :: (Metric v, Unit u, Floating a, Epsilon a) => v (u a) -> v (I a)
 normalizeU = fmap I . normalize . fmap prj
