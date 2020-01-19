@@ -14,7 +14,6 @@ module GL.Program
 ( Program(..)
 , build
 , use
-, HasProgram
 , askProgram
 , ProgramC(..)
   -- * Uniforms
@@ -79,8 +78,6 @@ use (Program ls p) m = do
   sendIO (glUseProgram p)
   runReader (Program ls p) (runProgramC m)
 
-
-type HasProgram u v o sig m = HasLabelled Program (Reader (Program u v o)) sig m
 
 askProgram :: HasLabelled Program (Reader (Program u v o)) sig m => m (Program u v o)
 askProgram = runUnderLabel @_ @Program ask

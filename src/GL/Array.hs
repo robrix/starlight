@@ -41,7 +41,7 @@ import           GL.Effect.Check
 import           GL.Enum as GL
 import           GL.Object
 import           GL.Primitive
-import           GL.Program (HasProgram, askProgram)
+import           GL.Program (Program, askProgram)
 import           GL.Shader.Vars
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
@@ -83,7 +83,7 @@ drawArrays
      , Has (Lift IO) sig m
      , HasLabelled Array (Reader (Array (v I))) sig m
      , HasCallStack
-     , HasProgram u v o sig m
+     , HasLabelled Program (Reader (Program u v o)) sig m
      )
   => Type
   -> Interval I Int
@@ -95,7 +95,7 @@ multiDrawArrays
      , Has (Lift IO) sig m
      , HasLabelled Array (Reader (Array (v I))) sig m
      , HasCallStack
-     , HasProgram u v o sig m
+     , HasLabelled Program (Reader (Program u v o)) sig m
      )
   => Type
   -> [Interval I Int]
@@ -113,7 +113,7 @@ drawArraysInstanced
      , Has (Lift IO) sig m
      , HasLabelled Array (Reader (Array (v I))) sig m
      , HasCallStack
-     , HasProgram u v o sig m
+     , HasLabelled Program (Reader (Program u v o)) sig m
      )
   => Type
   -> Interval I Int
@@ -127,7 +127,7 @@ drawElements
      , HasLabelled Array (Reader (Array (v I))) sig m
      , HasLabelled (B.Buffer 'B.ElementArray) (Reader (B.Buffer 'B.ElementArray Word32)) sig m
      , HasCallStack
-     , HasProgram u v o sig m
+     , HasLabelled Program (Reader (Program u v o)) sig m
      )
   => Type
   -> Interval I Int
@@ -144,7 +144,7 @@ drawElementsInstanced
      , HasLabelled Array (Reader (Array (v I))) sig m
      , HasLabelled (B.Buffer 'B.ElementArray) (Reader (B.Buffer 'B.ElementArray Word32)) sig m
      , HasCallStack
-     , HasProgram u v o sig m
+     , HasLabelled Program (Reader (Program u v o)) sig m
      )
   => Type
   -> Interval I Int
