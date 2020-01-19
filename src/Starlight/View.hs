@@ -49,7 +49,7 @@ contextSize :: View -> V2 (Context.Pixels Int)
 contextSize View{ ratio, size } = fmap Context.Pixels (ratio *^ fmap Window.getPixels size)
 
 lengthToWindowPixels :: View -> Double
-lengthToWindowPixels View{ zoom, scale } = 1/zoom * scale
+lengthToWindowPixels View{ zoom, scale } = scale/zoom
 
 
 newtype ClipUnits a = ClipUnits { getClipUnits :: a }
