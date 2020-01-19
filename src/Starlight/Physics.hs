@@ -91,7 +91,7 @@ runActions i c = do
   system <- ask @(System StateVectors)
   foldM (go dt system) c (actions c) where
   go dt system c = \case
-    Thrust -> pure $! c & actor_ %~ applyForce ((convert thrust .*.) <$> rotate rotation (unit _x)) dt
+    Thrust -> pure $! c & actor_ %~ applyForce (convert thrust .*^ rotate rotation (unit _x)) dt
 
     Face dir -> case desiredAngle (c^.actor_) target of
       Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) t
