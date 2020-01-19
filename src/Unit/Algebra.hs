@@ -15,6 +15,7 @@ module Unit.Algebra
   (.+.)
 , (.-.)
 , (.*.)
+, (^*.)
 , (./.)
 , N(..)
 , (.^.)
@@ -62,6 +63,11 @@ infixl 6 .-.
 u .*. v = pure (prj u * prj v)
 
 infixl 7 .*.
+
+(^*.) :: (Functor f, Unit u, Unit v, Unit (Mul u v), Num a) => f (u a) -> v a -> f (Mul u v a)
+u ^*. v = pure . (* prj v) . prj <$> u
+
+infixl 7 ^*.
 
 (./.) :: (Unit u, Unit v, Unit (Div u v), Fractional a) => u a -> v a -> Div u v a
 u ./. v = pure (prj u / prj v)
