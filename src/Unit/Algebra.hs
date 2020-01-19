@@ -84,6 +84,12 @@ type family Exp u n where
   Exp u 1 = u
   Exp u n = u :^: n
 
+type family Sqrt u where
+  Sqrt (u :*: v) = Sqrt u :*: Sqrt v
+  Sqrt (u :/: v) = Sqrt u :/: Sqrt v
+  Sqrt (u :^: 2) = u
+  Sqrt (u :^: 4) = u :^: 2
+
 
 -- * Calculation
 
