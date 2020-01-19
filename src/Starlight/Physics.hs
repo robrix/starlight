@@ -132,6 +132,7 @@ runActions i c = do
     where
     thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :^: 2) Double
     thrust  = 1000 * 20 * 60
+    -- FIXME: this should be a real acceleration, i.e. a change to velocity
     angular :: (Radians :/: Seconds) Double
     angular = 5
     projected :: HasActor t => t -> V3 (Mega Metres Double)
