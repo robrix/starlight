@@ -70,7 +70,7 @@ instance HasColour StateVectors where
   colour_ = field @"body".colour_
 
 toBodySpace :: StateVectors -> Transform Double (Mega Metres) BodyUnits
-toBodySpace v = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) (radius (body v))))) >>> mkRotation (rotation (actor v))
+toBodySpace v = mkScale (pure (convert @_ @(Mega Metres) (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (rotation (actor v))
 
 data Body = Body
   { radius      :: !(Kilo Metres Double)

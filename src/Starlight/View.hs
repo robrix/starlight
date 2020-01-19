@@ -39,6 +39,7 @@ import Linear.Conjugate
 import Linear.Exts
 import UI.Context as Context
 import UI.Window as Window
+import Unit.Algebra
 import Unit.Length
 
 data View = View
@@ -78,16 +79,16 @@ instance Unit Zoomed where
 
 
 toContext :: View -> Transform Double ClipUnits Context.Pixels
-toContext View{ size } = mkScale (pure 1 & _xy .~ 1 / (fromIntegral <$> size))
+toContext View{ size } = mkScale (pure 1 & _xy .~ ((ClipUnits 1 ./.) . Context.Pixels . fromIntegral <$> size))
 
 toWindow :: View -> Transform Double Context.Pixels Window.Pixels
 toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
 
 toZoomed :: View -> Transform Double Window.Pixels Zoomed
-toZoomed View{ zoom } = mkScale (pure 1 & _xy .~ pure (1/zoom))
+toZoomed View{ zoom } = mkScale (pure 1 & _xy .~ pure (Window.Pixels 1 ./. Zoomed zoom))
 
 toSystem :: View -> Transform Double Zoomed (Mega Metres)
-toSystem View{ scale, focus } = mkScale (pure scale) >>> mkTranslation (ext (negated focus) 0)
+toSystem View{ scale, focus } = mkScale (pure (pure scale)) >>> mkTranslation (ext (negated focus) 0)
 
 transformToWindow :: View -> Transform Double ClipUnits Window.Pixels
 transformToWindow view = toContext view >>> toWindow view

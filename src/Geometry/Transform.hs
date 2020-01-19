@@ -1,5 +1,7 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Geometry.Transform
 ( Transform(..)
 , mkTranslation
@@ -20,6 +22,7 @@ import GL.Uniform
 import Linear.Exts
 import Prelude hiding ((.))
 import Unit
+import Unit.Algebra
 
 newtype Transform c (a :: * -> *) (b :: * -> *) = Transform { getTransform :: M44 c }
   deriving (Show, Storable, GL.Type, Uniform)
@@ -31,9 +34,8 @@ instance Num c => Category (Transform c) where
 mkTranslation :: (Num c, Unit u) => V3 (u c) -> Transform c u u
 mkTranslation v = Transform (identity & translation .~ fmap prj v)
 
--- FIXME: scaling should introduce a change of units
-mkScale :: Num c => V3 c -> Transform c a b
-mkScale v = Transform (scaled (ext v 1))
+mkScale :: (Num c, Unit u, Unit v, Unit (Div u v)) => V3 (Div u v c) -> Transform c u v
+mkScale v = Transform (scaled (point (prj <$> v)))
 
 mkRotation :: Num c => Quaternion (I c) -> Transform c a a
 mkRotation q = Transform (identity !*! mkTransformation (coerce q) 0)
