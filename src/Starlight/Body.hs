@@ -16,7 +16,6 @@ module Starlight.Body
 , Body(..)
 , BodyUnits(..)
 , Orbit(..)
-, rotationTimeScale
 , actorAt
 , systemAt
 , j2000
