@@ -91,7 +91,7 @@ toSystem :: View -> Transform Double Zoomed (Mega Metres)
 toSystem View{ scale, focus } = mkScale (pure (pure scale)) >>> mkTranslation (ext (negated focus) 0)
 
 transformToWindow :: View -> Transform Double ClipUnits Window.Pixels
-transformToWindow view = toContext view >>> toWindow view
+transformToWindow View{ size, ratio } = mkScale (pure 1 & _xy .~ ClipUnits (fromIntegral ratio) ./^ (fmap fromIntegral <$> size))
 
 transformToZoomed :: View -> Transform Double ClipUnits Zoomed
 transformToZoomed view = transformToWindow view >>> toZoomed view
