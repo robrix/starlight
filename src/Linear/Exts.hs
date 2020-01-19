@@ -12,7 +12,6 @@ module Linear.Exts
 , isFacing
 , toAxisAngle
 , cartesian2
-, polar2
 , Ext(..)
 , module Linear.Epsilon
 , module Linear.Matrix
@@ -110,9 +109,6 @@ toAxisAngle (Quaternion qw qv) = (v, phi) where
 
 cartesian2 :: (Floating a, Unit u) => I a -> u a -> V2 (u a)
 cartesian2 phi r = V2 (r .*. cos phi) (r .*. sin phi)
-
-polar2 :: (RealFloat a, Unit u, Floating (u a)) => V2 (u a) -> (I a, u a)
-polar2 v = (angleOf v, norm v)
 
 
 -- | Extensions of a vector with an extra dimension.
