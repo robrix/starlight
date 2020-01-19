@@ -1,2 +1,6 @@
+{-# LANGUAGE TypeOperators #-}
 module Unit.Vector
-() where
+( (:#)(..)
+) where
+
+newtype (v :# u) a = V { getV :: v (u a) }
