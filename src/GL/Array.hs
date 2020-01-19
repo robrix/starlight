@@ -26,7 +26,7 @@ module GL.Array
 , ArrayC(..)
 ) where
 
-import           Control.Algebra
+import           Control.Algebra.Dependent
 import           Control.Carrier.Fresh.Strict
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
@@ -187,10 +187,11 @@ class Monad m => HasArray v m | m -> v where
 newtype ArrayC v m a = ArrayC { runArrayC :: ReaderC (Array (v I)) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-deriving instance HasArray     v   m => HasArray     v   (ProgramC u v o m)
-deriving instance HasArray     v   m => HasArray     v   (B.BufferC ty x m)
-deriving instance B.HasBuffer ty x m => B.HasBuffer ty x (ArrayC     v   m)
-deriving instance HasProgram u v o m => HasProgram u v o (ArrayC     v   m)
+deriving instance HasArray     v (sub m) => HasArray     v   (Dep label sub  m)
+deriving instance HasArray     v      m  => HasArray     v   (ProgramC u v o m)
+deriving instance HasArray     v      m  => HasArray     v   (B.BufferC ty x m)
+deriving instance B.HasBuffer ty x    m  => B.HasBuffer ty x (ArrayC     v   m)
+deriving instance HasProgram u v o    m  => HasProgram u v o (ArrayC     v   m)
 
 instance HasArray v m => HasArray v (FreshC m) where
   askArray = lift askArray
