@@ -18,6 +18,10 @@ module Unit.Algebra
 , (./.)
 , N(..)
 , (.^.)
+, Mul
+, Div
+, Exp
+, Sqrt
   -- * Calculation
 , sqrtU
 , qdU
