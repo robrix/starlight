@@ -2,6 +2,13 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- | I got sick of writing 'Identity' out in full.
+--
+-- This functor is commonly used to:
+--
+-- * Represent the coordinates in 1-dimensional @"Data.Functor.Interval".'Data.Functor.Interval.Interval'@ used for e.g. vertex ranges.
+-- * Hold vertices’ values when copying into an array buffer.
+-- * Represent dimensionless units such as transcendental numbers, the arguments & results of trigonometric functions, angles, and ratios.
+-- * Represent the traditional dimension 1 of dimensionless units.
 module Data.Functor.I
 ( I(..)
 ) where
