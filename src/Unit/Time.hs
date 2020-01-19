@@ -11,6 +11,7 @@ module Unit.Time
 , fromMinutes
 , Minutes(..)
 , Hours(..)
+, Days(..)
 , module Unit
 , module Unit.Multiple
 ) where
@@ -66,3 +67,14 @@ instance Unit Hours where
   type Dim Hours = Time
   factor = K 3600
   suffix = K ("h"++)
+
+
+newtype Days a = Days { getDays :: a }
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
+-- | Note that this does not take e.g. leap seconds into account.
+instance Unit Days where
+  type Dim Days = Time
+  factor = K 86400
+  suffix = K ("d"++)
