@@ -18,3 +18,6 @@ newtype (v :# u) a = V { getV :: v (u a) }
   deriving Applicative via v :.: u
 
 infixr 3 :#
+
+instance (Additive v, Applicative v, Applicative u) => Additive (v :# u) where
+  zero = V (pure <$> zero)
