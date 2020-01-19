@@ -10,6 +10,7 @@
 module Unit
 ( -- * Units
   Unit(..)
+  -- ** Conversion
 , convert
 , convertFrom
 , convertTo
@@ -62,6 +63,9 @@ instance Unit I where
 instance Unit Identity where
   type Dim Identity = Identity
   suffix = K (showChar '1')
+
+
+-- ** Conversion
 
 convert :: forall u u' a . (Unit u, Unit u', Dim u ~ Dim u', Floating a) => u a -> u' a
 convert = pure . (/ getK (factor @u')) . (* getK (factor @u)) . prj
