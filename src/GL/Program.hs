@@ -23,7 +23,7 @@ module GL.Program
 , HasUniform
 ) where
 
-import           Control.Algebra
+import           Control.Algebra.Dependent
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
@@ -109,5 +109,6 @@ instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u May
 instance Algebra sig m => HasProgram u v o (ProgramC u v o m) where
   askProgram = ProgramC ask
 
-deriving instance B.HasBuffer ty x m => B.HasBuffer ty x (ProgramC u v o m)
-deriving instance HasProgram u v o m => HasProgram u v o (B.BufferC ty x m)
+deriving instance B.HasBuffer ty x      m  => B.HasBuffer ty x (ProgramC u v o m)
+deriving instance HasProgram u v o      m  => HasProgram u v o (B.BufferC ty x m)
+deriving instance HasProgram u v o (sub m) => HasProgram u v o (Dep label sub  m)
