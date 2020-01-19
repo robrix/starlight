@@ -39,4 +39,6 @@ newtype Degrees a = Degrees { getDegrees :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Angle Degrees where suffix = K ('°':)
+instance Unit Angle Degrees where
+  suffix = K ('°':)
+  factor = K (pi/180)
