@@ -79,7 +79,7 @@ instance Unit Zoomed where
 
 
 toContext :: View -> Transform Double ClipUnits Context.Pixels
-toContext View{ size } = mkScale (pure 1 & _xy .~ ((ClipUnits 1 ./.) . Context.Pixels . fromIntegral <$> size))
+toContext View{ size } = mkScale (pure 1 & _xy .~ (ClipUnits 1 ./^ (convertTo Context.Pixels . fmap fromIntegral <$> size)))
 
 toWindow :: View -> Transform Double Context.Pixels Window.Pixels
 toWindow View{ ratio } = mkScale (pure 1 & _xy .~ fromIntegral ratio)
