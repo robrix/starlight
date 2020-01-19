@@ -32,7 +32,7 @@ newtype Radians a = Radians { getRadians :: a }
 instance Unit Angle Radians where suffix = K ("rad"++)
 
 fromDegrees :: Floating a => Degrees a -> Radians a
-fromDegrees (Degrees d) = Radians (d * pi / 180)
+fromDegrees = convert
 
 
 newtype Degrees a = Degrees { getDegrees :: a }
