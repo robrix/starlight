@@ -51,6 +51,7 @@ infixl 7 ./.
 type family Mul u v where
   Mul  u         I        = u               -- u * 1       = u
   Mul  I         v        = v               -- 1 * v       = v
+  Mul (u :^: n)  u        = u :^: (n + 1)   -- uⁿ * u      = uⁿ⁺¹
   Mul (u :/: v)  v        = u               -- u / v * v   = u
   Mul  u        (v :*: w) = Mul (Mul u w) v -- u * (v * w) = (u * w) * v
   Mul  u        (v :/: w) = Div (Mul u v) w -- u * (v / w) = (u * v) / w
