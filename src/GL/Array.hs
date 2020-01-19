@@ -47,7 +47,7 @@ import           GL.Effect.Check
 import           GL.Enum as GL
 import           GL.Object
 import           GL.Primitive
-import           GL.Program (HasProgram(..), ProgramC(..))
+import           GL.Program (HasProgram, ProgramC(..), askProgram)
 import           GL.Shader.Vars
 import qualified GL.Type as GL
 import           Graphics.GL.Core41
@@ -89,7 +89,7 @@ drawArrays
      , Has (Lift IO) sig m
      , HasArray v m
      , HasCallStack
-     , HasProgram u v o m
+     , HasProgram u v o sig m
      )
   => Type
   -> Interval I Int
@@ -101,7 +101,7 @@ multiDrawArrays
      , Has (Lift IO) sig m
      , HasArray v m
      , HasCallStack
-     , HasProgram u v o m
+     , HasProgram u v o sig m
      )
   => Type
   -> [Interval I Int]
@@ -119,7 +119,7 @@ drawArraysInstanced
      , Has (Lift IO) sig m
      , HasArray v m
      , HasCallStack
-     , HasProgram u v o m
+     , HasProgram u v o sig m
      )
   => Type
   -> Interval I Int
@@ -133,7 +133,7 @@ drawElements
      , HasArray v m
      , B.HasBuffer 'B.ElementArray Word32 m
      , HasCallStack
-     , HasProgram u v o m
+     , HasProgram u v o sig m
      )
   => Type
   -> Interval I Int
@@ -150,7 +150,7 @@ drawElementsInstanced
      , HasArray v m
      , B.HasBuffer 'B.ElementArray Word32 m
      , HasCallStack
-     , HasProgram u v o m
+     , HasProgram u v o sig m
      )
   => Type
   -> Interval I Int
@@ -191,7 +191,6 @@ deriving instance HasArray     v (sub m) => HasArray     v   (Dep label sub  m)
 deriving instance HasArray     v      m  => HasArray     v   (ProgramC u v o m)
 deriving instance HasArray     v      m  => HasArray     v   (B.BufferC ty x m)
 deriving instance B.HasBuffer ty x    m  => B.HasBuffer ty x (ArrayC     v   m)
-deriving instance HasProgram u v o    m  => HasProgram u v o (ArrayC     v   m)
 
 instance HasArray v m => HasArray v (FreshC m) where
   askArray = lift askArray
