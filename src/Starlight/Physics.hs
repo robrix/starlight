@@ -94,7 +94,7 @@ runActions i c = do
     Thrust -> pure $ c & actor_ %~ applyForce ((convert thrust ^*) <$> rotate rotation (unit _x)) dt
 
     Face dir -> case direction (c^.actor_) target of
-      Just t  -> pure $! c & rotation_ %~ face angular (prj <$> angleOf (t^._xy))
+      Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) (prj <$> angleOf (t^._xy))
       Nothing -> pure c
       where
       direction Actor{ velocity, position } t = case dir of
@@ -102,9 +102,9 @@ runActions i c = do
         Backwards -> t^?_Just.velocity_.to (subtract velocity) <|> Just (-velocity)
         Target    -> t^?_Just.to projected.to (`L.direction` position).coerced
 
-    Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) (getRadians (case t of
+    Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) (prj ((case t of
       L -> angular
-      R -> -angular))
+      R -> -angular) .*. dt))
 
     Fire Main -> do
       let position = projected c
@@ -132,7 +132,8 @@ runActions i c = do
     where
     thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :^: 2) Double
     thrust  = 1000 * 20 * 60
-    angular = getSeconds dt *^ Radians 5
+    angular :: (Radians :/: Seconds) Double
+    angular = 5
     projected :: HasActor t => t -> V3 (Mega Metres Double)
     projected a = a^.position_ + ((.*. dt) <$> a^.velocity_)
     rotation = c^.rotation_
