@@ -5,7 +5,6 @@
 module Unit.Angle
 ( Angle
 , Radians(..)
-, fromDegrees
 , Degrees(..)
 , module Unit
 , module Unit.Multiple
@@ -30,9 +29,6 @@ newtype Radians a = Radians { getRadians :: a }
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Angle Radians where suffix = K ("rad"++)
-
-fromDegrees :: Floating a => Degrees a -> Radians a
-fromDegrees = convert
 
 
 newtype Degrees a = Degrees { getDegrees :: a }

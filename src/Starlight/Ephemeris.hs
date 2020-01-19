@@ -51,9 +51,9 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
     { eccentricity    = I eccentricity
     , semimajor
     , orientation     = orient
-      (fromDegrees longitudeOfAscendingNode)
-      (fromDegrees inclination)
-      (fromDegrees argumentOfPerifocus)
+      (convertFrom Degrees longitudeOfAscendingNode)
+      (convertFrom Degrees inclination)
+      (convertFrom Degrees argumentOfPerifocus)
     , period          = siderealOrbitPeriod
     , timeOfPeriapsis = timeOfPeriapsisRelativeToEpoch
     }
