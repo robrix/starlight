@@ -24,11 +24,11 @@ module GL.Array
 , ArrayC
 ) where
 
-import           Control.Algebra.Dependent
 import           Control.Carrier.Fresh.Strict
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
+import           Control.Effect.Labelled
 import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
 import           Data.Functor.I

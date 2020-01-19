@@ -22,8 +22,8 @@ module GL.Buffer
 , askBuffer
 ) where
 
-import           Control.Algebra.Dependent
 import           Control.Carrier.Reader
+import           Control.Effect.Labelled
 import           Control.Monad.IO.Class.Lift
 import           Data.Functor.I
 import           Data.Functor.Interval

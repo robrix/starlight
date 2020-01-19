@@ -23,10 +23,10 @@ module GL.Program
 , HasUniform
 ) where
 
-import           Control.Algebra.Dependent
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
+import           Control.Effect.Labelled
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)

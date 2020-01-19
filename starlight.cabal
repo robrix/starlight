@@ -36,7 +36,6 @@ library
   import:              common
   hs-source-dirs:      src
   exposed-modules:
-    Control.Algebra.Dependent
     Control.Carrier.Empty.Church
     Control.Carrier.Empty.CPS
     Control.Carrier.Finally
@@ -48,6 +47,7 @@ library
     Control.Carrier.Trace.Lift
     Control.Concurrent.Lift
     Control.Effect.Finally
+    Control.Effect.Labelled
     Control.Effect.Lens.Exts
     Control.Effect.Thread
     Control.Exception.Lift
