@@ -47,6 +47,7 @@ library
     Control.Carrier.Trace.Lift
     Control.Concurrent.Lift
     Control.Effect.Finally
+    Control.Effect.Labelled
     Control.Effect.Lens.Exts
     Control.Effect.Thread
     Control.Exception.Lift

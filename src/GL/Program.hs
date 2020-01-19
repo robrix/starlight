@@ -1,15 +1,12 @@
 {-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -17,16 +14,17 @@ module GL.Program
 ( Program(..)
 , build
 , use
-, HasProgram(..)
+, HasProgram
+, askProgram
 , ProgramC(..)
   -- * Uniforms
 , HasUniform
 ) where
 
-import           Control.Algebra
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
+import           Control.Effect.Labelled
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
@@ -37,7 +35,6 @@ import qualified Foreign.C.String.Lift as C
 import           GHC.Records
 import           GHC.Stack
 import           GHC.TypeLits
-import qualified GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Error
 import           GL.Shader
@@ -78,25 +75,21 @@ build p = runLiftIO $ do
   pure (Program ls program)
 
 use :: Has (Lift IO) sig m => Program u v o -> ProgramC u v o m a -> m a
-use (Program ls p) (ProgramC m) = do
+use (Program ls p) m = do
   sendIO (glUseProgram p)
-  runReader (Program ls p) m
+  runReader (Program ls p) (runProgramC m)
 
 
-class Monad m => HasProgram (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) (m :: * -> *) | m -> u v o where
-  askProgram :: m (Program u v o)
+type HasProgram u v o sig m = HasLabelled Program (Reader (Program u v o)) sig m
+
+askProgram :: HasLabelled Program (Reader (Program u v o)) sig m => m (Program u v o)
+askProgram = runUnderLabel @_ @Program ask
 
 
-newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramT :: ReaderC (Program u v o) m a }
+newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramC :: ReaderC (Program u v o) m a }
   deriving (Applicative, Functor, Monad, MonadIO, MonadTrans)
 
-instance HasProgram u v o m => HasProgram u v o (ReaderC r m) where
-  askProgram = lift askProgram
-
-instance HasProgram u v o m => HasProgram u v o (StateC s m) where
-  askProgram = lift askProgram
-
-instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: sig) (ProgramC u v o m) where
+instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: Labelled Program (Reader (Program u v o)) :+: sig) (ProgramC u v o m) where
   alg = \case
     L (Get   k) -> k (makeVars (const Nothing))
     L (Put s k) -> do
@@ -104,10 +97,5 @@ instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u May
       foldVarsM (\ Field { location, value } ->
         maybe (pure ()) (checking . uniform prog (ls IntMap.! location)) value) s
       k
-    R other     -> ProgramC (send (handleCoercible other))
-
-instance Algebra sig m => HasProgram u v o (ProgramC u v o m) where
-  askProgram = ProgramC ask
-
-deriving instance B.HasBuffer ty x m => B.HasBuffer ty x (ProgramC u v o m)
-deriving instance HasProgram u v o m => HasProgram u v o (B.BufferC ty x m)
+    R (L other) -> ProgramC (send (handleCoercible (runLabelled other)))
+    R (R other) -> ProgramC (send (handleCoercible other))
