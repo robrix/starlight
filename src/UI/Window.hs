@@ -2,6 +2,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TypeFamilies #-}
 module UI.Window
 ( Pixels(..)
 , swap
@@ -23,6 +24,7 @@ import           Control.Monad ((<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Fixed (div')
 import           Data.Functor.I
+import           Data.Functor.K
 import           Data.Text (Text)
 import           Foreign.Storable
 import           GL.Type as GL
@@ -30,10 +32,16 @@ import           GL.Uniform
 import           Linear.V2 as Linear
 import           Linear.V4 as Linear
 import           SDL
+import           Unit.Length
 
 newtype Pixels a = Pixels { getPixels :: a }
   deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
+
+instance Unit Pixels where
+  type Dim Pixels = Length
+  suffix = K ("px"++)
+
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
 swap = ask >>= runLiftIO . glSwapWindow
