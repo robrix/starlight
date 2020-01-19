@@ -94,7 +94,7 @@ angleTo v1 v2 = angleOf (liftA2 (-) <$> v2 <*> v1)
 
 
 isFacing :: (Real a, Floating a) => I a -> Quaternion (I a) -> I a -> Bool
-isFacing epsilon rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation))) - target < epsilon
+isFacing epsilon rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - target)) < epsilon
 
 
 -- | Compute the axis/angle of a rotation represented as a unit quaternion.
