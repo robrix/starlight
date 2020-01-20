@@ -136,7 +136,7 @@ runActions i c = do
       -- force sufficient to move 1000 kg by 10 km per second per second
     -- FIXME: this should be a real acceleration, i.e. a change to velocity
     angular :: (I :/: Seconds) Double
-    angular = 5
+    angular = 3
     projected :: HasActor t => t -> V3 (Mega Metres Double)
     projected a = a^.position_ + a^.velocity_ ^*. dt
     rotation = c^.rotation_
