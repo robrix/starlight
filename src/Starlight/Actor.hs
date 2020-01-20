@@ -7,7 +7,7 @@
 module Starlight.Actor
 ( Actor(..)
 , transformToActor
-, applyForce
+, applyImpulse
 , HasActor(..)
 ) where
 
@@ -37,8 +37,8 @@ data Actor = Actor
 transformToActor :: Actor -> Transform Double (Mega Metres) (Mega Metres)
 transformToActor Actor{ position, rotation } = mkTranslation position >>> mkRotation rotation
 
-applyForce :: HasCallStack => V3 (Newtons Double) -> Seconds Double -> Actor -> Actor
-applyForce force dt a = a & momentum_ +~ force ^*. dt
+applyImpulse :: HasCallStack => V3 (Newtons Double) -> Seconds Double -> Actor -> Actor
+applyImpulse force dt a = a & momentum_ +~ force ^*. dt
 
 
 class HasActor t where
