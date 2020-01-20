@@ -56,7 +56,7 @@ draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour 
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
     >>> transformToActor actor
-    -- FIXME: this is interpreting characters’ magnitude as a number of pixels, which is correct, but it’s not obvious that this is what’s happening here
+    -- FIXME: this interprets characters’ magnitudes as a quantity of pixels, which is correct, but it’s not obvious that this is what’s happening here
     >>> mkScale (pure (coerce @_ @(I Double) magnitude * 0.5 ./. scale)))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
