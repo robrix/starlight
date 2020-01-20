@@ -135,7 +135,6 @@ library
     Unit.Force
     Unit.Length
     Unit.Mass
-    Unit.Momentum
     Unit.Multiple
     Unit.Power
     Unit.Time
