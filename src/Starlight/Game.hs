@@ -243,6 +243,5 @@ withView m = do
 
   let zoom = zoomForSpeed size (prj (norm velocity))
       solI = Star (10, "Sol")
-      -- FIXME: units of scale should actually be Window.Pixels 100_000 ./. Kilo (Metres 695_500); zoom factors in some other way
-      scale = Zoomed 100_100 ./. convertTo (Mega . Metres) (radius (body (bodies Map.! solI)))
+      scale = Mega (Metres 100_100) ./. convertTo (Mega . Metres) (radius (body (bodies Map.! solI)))
   runReader View{ ratio, size, zoom, scale, focus } m

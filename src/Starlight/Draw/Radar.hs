@@ -109,7 +109,7 @@ data Drawable = Drawable
   }
 
 
-data Blip = Blip { scale :: (Zoomed :/: Mega Metres) Double, identifier :: Identifier, actor :: Actor, colour :: Colour Float }
+data Blip = Blip { scale :: I Double, identifier :: Identifier, actor :: Actor, colour :: Colour Float }
   deriving (Generic)
 
 instance HasActor Blip where
@@ -118,7 +118,7 @@ instance HasActor Blip where
 instance HasColour Blip where
   colour_ = field @"colour"
 
-blipFor :: (HasActor t, HasColour t) => (Zoomed :/: Mega Metres) Double -> Identifier -> t -> Blip
+blipFor :: (HasActor t, HasColour t) => I Double -> Identifier -> t -> Blip
 blipFor scale identifier t = Blip{ scale, identifier, actor = t^.actor_, colour = t^.colour_ }
 
 -- FIXME: take ship profile into account
@@ -238,7 +238,7 @@ instance Vars IF
 
 data V v = V
   { there  :: v (V2 (Mega Metres Double)) -- location of object
-  , r      :: v (Zoomed Double)      -- radius of object
+  , r      :: v (Mega Metres Double)      -- radius of object
   , colour :: v (Colour Float)
   }
   deriving (Generic)
