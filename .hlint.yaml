@@ -8,4 +8,15 @@
 - fixity: "infixr 2 -->"
 - fixity: "infixr 2 <->"
 
+- fixity: "infixl 6 .+."
+- fixity: "infixl 6 .-."
+- fixity: "infixl 7 .*."
+- fixity: "infixl 7 ^*."
+- fixity: "infixl 7 .*^"
+- fixity: "infixl 7 ./."
+- fixity: "infixl 7 ^/."
+- fixity: "infixl 7 ./^"
+- fixity: "infixl 7 :*:"
+- fixity: "infixl 7 :/:"
+
 - ignore: {name: Reduce duplication}
