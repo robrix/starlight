@@ -130,6 +130,7 @@ runActions i c = do
         targetAngle = angleTo (projected c^._xy) (projected target^._xy)
       _ -> pure c
     where
+    -- FIXME: motivate this
     thrust :: Newtons Double
     thrust  = 1000 * 1000 * 20 * 60
     -- FIXME: this should be a real acceleration, i.e. a change to velocity
