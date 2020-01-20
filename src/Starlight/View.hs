@@ -66,7 +66,7 @@ zoomForSpeed size x
   where
   hypotenuse = norm (fmap fromIntegral <$> size)
   distance = I (x .*. Seconds 1 ./. hypotenuse) -- how much of the screen will be traversed in a second
-  zoom = interval 1 5
+  zoom = interval 1 (1/5)
   bounds = interval 1 (20 :: Mega Metres Double) ^/. hypotenuse
 
 
