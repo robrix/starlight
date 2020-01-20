@@ -8,4 +8,4 @@ cd "$(dirname "$0")/.."
 
 cabal v2-build all --only-dependencies
 
-cabal v2-exec env -- -u GHC_ENVIRONMENT ghci -ghci-script=.ghci.repl $(script/ghci-flags) -no-ignore-dot-ghci -fexternal-interpreter -package pretty-simple $@
+cabal v2-exec env -- -u GHC_ENVIRONMENT ghci -ghci-script=.ghci.repl $(script/ghci-flags) -no-ignore-dot-ghci -fexternal-interpreter $@
