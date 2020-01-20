@@ -110,7 +110,12 @@ data Drawable = Drawable
   }
 
 
-data Blip = Blip { scale :: I Double, identifier :: Identifier, actor :: Actor, colour :: Colour Float }
+data Blip = Blip
+  { scale :: I Double
+  , identifier :: Identifier
+  , actor :: Actor
+  , colour :: Colour Float
+  }
   deriving (Generic)
 
 instance HasActor Blip where
