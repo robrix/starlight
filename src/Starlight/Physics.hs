@@ -39,7 +39,6 @@ import Unit.Algebra
 import Unit.Angle
 import Unit.Force
 import Unit.Length
-import Unit.Mass
 import Unit.Time
 
 inertia :: (Has (Reader (Seconds Double)) sig m, HasCallStack) => Actor -> m Actor
@@ -130,8 +129,7 @@ runActions i c = do
         targetAngle = angleTo (projected c^._xy) (projected target^._xy)
       _ -> pure c
     where
-    -- FIXME: measure thrust in Newtons
-    thrust :: (Kilo Grams :*: Kilo Metres :/: Seconds :^: 2) Double
+    thrust :: Newtons Double
     thrust  = 1000 * 20 * 60
     -- FIXME: this should be a real acceleration, i.e. a change to velocity
     angular :: (I :/: Seconds) Double
