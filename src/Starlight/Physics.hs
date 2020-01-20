@@ -123,9 +123,10 @@ runActions i c = do
         | distance (projected c) (projected target) .<. (10 :: Mega Metres Double) -> pure c
         | isFacing (pi/128) rotation targetAngle -> do
           let distance' = distance (projected target) (projected c)
-          pure $! c & position_ +~ (1 - target^.magnitude_ / distance') *^ (projected target - projected c)
+          pure $! c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected target - projected c)
         | otherwise                              -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
+        factor = 0.75
         targetAngle = angleTo (projected c^._xy) (projected target^._xy)
       _ -> pure c
     where
