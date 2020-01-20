@@ -52,13 +52,13 @@ contextSize :: View -> V2 (Context.Pixels Int)
 contextSize View{ ratio, size } = fmap Context.Pixels (ratio *^ fmap Window.getPixels size)
 
 lengthToWindowPixels :: View -> (Window.Pixels :/: Mega Metres) Double
-lengthToWindowPixels View{ zoom, scale } = scale .*. (1/zoom)
+lengthToWindowPixels View{ zoom, scale } = scale .*. zoom
 
 -- | Compute the zoom factor for the given velocity.
 --
 -- Higher values correlate to more of the scene being visible.
 zoomForSpeed :: V2 (Window.Pixels Int) -> Double -> (Window.Pixels :/: Zoomed) Double
-zoomForSpeed size x = pure go where
+zoomForSpeed size x = Window.Pixels 1 ./. Zoomed go where
   I go
     | I x < min' speed = min' zoom
     | I x > max' speed = max' zoom
@@ -93,7 +93,7 @@ transformToWindow View{ size, ratio }
 transformToZoomed :: View -> Transform Double ClipUnits Zoomed
 transformToZoomed view@View{ zoom }
   =   transformToWindow view
-  >>> mkScale (pure 1 & _xy .~ pure (1 / zoom))
+  >>> mkScale (pure 1 & _xy .~ pure zoom)
 
 transformToSystem :: View -> Transform Double ClipUnits (Mega Metres)
 transformToSystem view@View{ scale, focus }

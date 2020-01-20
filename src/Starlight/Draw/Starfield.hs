@@ -51,7 +51,7 @@ draw = UI.using getDrawable $ do
   let V2 (q1, r1) (q2, r2) = (`Fixed.divMod'` 1) . convert <$> focus
   focusR_     ?= (fmap realToFrac <$> V2 r1 r2)
   focusQ_     ?= (realToFrac <$> V2 q1 (q2 :: Integer))
-  zoom_       ?= realToFrac zoom
+  zoom_       ?= realToFrac (1/zoom)
 
   drawArrays TriangleStrip range
 
