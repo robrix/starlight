@@ -12,7 +12,7 @@ module Starlight.Actor
 ) where
 
 import Control.Effect.Lens.Exts (asserting)
-import Control.Lens (Lens', mapping, none, (&), (+~), (^.))
+import Control.Lens (Lens', lens, mapping, none, (&), (+~), (.~), (^.))
 import Data.Generics.Product.Fields
 import Geometry.Transform
 import GHC.Generics (Generic)
@@ -55,6 +55,13 @@ class HasActor t where
 
   mass_ :: HasCallStack => Lens' t (Kilo Grams Double)
   mass_ = actor_.field @"mass".asserting (not.isNaN)
+
+  momentum_ :: HasCallStack => Lens' t (V3 ((Kilo Grams :*: Metres :/: Seconds) Double))
+  momentum_ = lens get set where
+    get :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double)
+    get t = (t^.mass_ .*^ t^.velocity_)^.mapping converting
+    set :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double) -> t
+    set t p = t & velocity_.mapping converting .~ p ^/. t^.mass_
 
   magnitude_ :: HasCallStack => Lens' t (Mega Metres Double)
   magnitude_ = actor_.field @"magnitude".asserting (not.isNaN)
