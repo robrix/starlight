@@ -1,15 +1,14 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.Draw.Ship
 ( draw
 , Starlight.Draw.Ship.run
@@ -25,7 +24,6 @@ import           Control.Lens (Lens', to, (&), (+~), (-~), (.~), (^.))
 import           Data.Coerce (coerce)
 import           Data.Functor.I
 import           Data.Functor.Interval hiding (range)
-import           Data.Functor.K
 import           Data.Generics.Product.Fields
 import qualified Data.Set as Set
 import           Foreign.Storable (Storable)
@@ -34,9 +32,6 @@ import           GL.Array
 import           GL.Effect.Check
 import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _a)
 import qualified GL.Shader.DSL as D
-import           GL.Type as GL
-import           GL.Uniform
-import           Linear.Conjugate
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
@@ -44,6 +39,7 @@ import qualified Starlight.Ship as S
 import           Starlight.View
 import qualified UI.Colour as UI
 import qualified UI.Drawable as UI
+import qualified UI.Window as Window
 import           Unit.Algebra
 import           Unit.Length
 
@@ -60,8 +56,8 @@ draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour 
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
     >>> transformToActor actor
-    -- FIXME: this is clearly not how this should be done
-    >>> mkScale (pure (magnitude * 0.5 ./. ShipUnits (prj scale))))
+    -- FIXME: this is interpreting characters’ magnitude as a number of pixels, which is correct, but it’s not obvious that this is what’s happening here
+    >>> mkScale (pure (coerce @_ @(I Double) magnitude * 0.5 ./. scale)))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
     & UI._a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
@@ -104,23 +100,15 @@ shader = program $ \ u
     fragColour .= colour u)
 
 
-newtype ShipUnits a = ShipUnits { getShipUnits :: a }
-  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via I
-
-instance Unit ShipUnits where
-  type Dim ShipUnits = Length
-  suffix = K ("ship"++)
-
 data U v = U
-  { matrix :: v (Transform Float ClipUnits ShipUnits)
+  { matrix :: v (Transform Float ClipUnits Window.Pixels)
   , colour :: v (UI.Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits ShipUnits))
+matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Window.Pixels))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (UI.Colour Float))
