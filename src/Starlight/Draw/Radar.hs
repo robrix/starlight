@@ -137,17 +137,14 @@ verticesForBlips bs =
 
 vertex' :: U (Expr 'Vertex) -> Stage V IG
 vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
-  there <- let' "there" (D.coerce (there - here u))
+  there <- let' "there" (there - here u)
   d     <- let' "d"     (D.norm there)
-  dir   <- let' "dir"   (there D.^* (1/d))
-  let perp v = dvec2 [negate (v D.^.D._y), v D.^.D._x]
-      angleOf vec = D.coerce $ atan2' (vec D.^.D._y) (vec D.^.D._x)
+  let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
       wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-  edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
   angle <- let' "angle" (angleOf (vec2 [there]))
   radius <- let' "radius" (D.min' ((\ U{ scale } -> scale) u * float d) radius)
   minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
-  sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf (vec2 [edge]) - angle)))
+  sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (D.coerce (asin (float (r*0.5/d))))))
   pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
   colour2 .= colour
   gl_Position .= ext4 (ext3 pos 0) 1) where
