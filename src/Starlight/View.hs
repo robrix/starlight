@@ -39,6 +39,7 @@ import UI.Context as Context
 import UI.Window as Window
 import Unit.Algebra
 import Unit.Length
+import Unit.Time
 
 data View = View
   { ratio :: Int    -- ^ Ratio of window pixels per context pixel.
@@ -57,16 +58,16 @@ lengthToWindowPixels View{ zoom, scale } = scale .*. zoom
 -- | Compute the zoom factor for the given velocity.
 --
 -- Higher values correlate to more of the scene being visible.
-zoomForSpeed :: V2 (Window.Pixels Int) -> Double -> (Window.Pixels :/: Mega Metres) Double
-zoomForSpeed size x = Window.Pixels 1 ./. (Mega (Metres 1) .*. go) where
-  go
-    | I x < min' speed = min' zoom
-    | I x > max' speed = max' zoom
-    | otherwise        = fromUnit zoom (coerce easeInOutCubic (toUnit speed (I x)))
-  zoom = Interval 1 5
-  speed = speedAt <$> zoom
-  -- FIXME: figure this out w.r.t. actual units of velocity &c.
-  speedAt x = x / 500 * fromIntegral (maximum size) * 2
+zoomForSpeed :: V2 (Window.Pixels Int) -> (Mega Metres :/: Seconds) Double -> (Window.Pixels :/: Mega Metres) Double
+zoomForSpeed size x
+  | distance < min' bounds = getI $ min' zoom
+  | distance > max' bounds = getI $ max' zoom
+  | otherwise              = getI $ fromUnit zoom (coerce easeInOutCubic (toUnit bounds distance))
+  where
+  hypotenuse = norm (fmap fromIntegral <$> size)
+  distance = I (x .*. Seconds 1 ./. hypotenuse) -- how much of the screen will be traversed in a second
+  zoom = Window.Pixels 1 ./^ interval 1 (5 :: Mega Metres Double)
+  bounds = interval 1 (20 :: Mega Metres Double) ^/. hypotenuse
 
 
 newtype ClipUnits a = ClipUnits { getClipUnits :: a }
