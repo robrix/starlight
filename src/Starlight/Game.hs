@@ -243,5 +243,5 @@ withView m = do
 
   let zoom = zoomForSpeed size (norm velocity)
       solI = Star (10, "Sol")
-      scale = Mega (Metres 100_100) ./. convertTo (Mega . Metres) (radius (body (bodies Map.! solI)))
+      scale = Mega (Metres 100_000) ./. convertTo (Mega . Metres) (radius (body (bodies Map.! solI)))
   runReader View{ ratio, size, zoom, scale, focus } m
