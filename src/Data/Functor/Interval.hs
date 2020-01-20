@@ -13,11 +13,12 @@ module Data.Functor.Interval
 , wrap
 , min_
 , max_
+, imap
 , Bounding(..)
 ) where
 
 import Control.Applicative (liftA2)
-import Control.Lens
+import Control.Lens hiding (imap)
 import Data.Fixed (mod')
 import Data.Generics.Product.Fields
 import GHC.Generics (Generic)
@@ -122,6 +123,10 @@ min_ = field @"min'"
 
 max_ :: Lens' (Interval f a) (f a)
 max_ = field @"max'"
+
+
+imap :: (f a -> g b) -> Interval f a -> Interval g b
+imap f = Interval <$>  f . min' <*> f . max'
 
 
 newtype Bounding f a = Bounding { getBounding :: Interval f a }
