@@ -139,11 +139,12 @@ vertex' :: U (Expr 'Vertex) -> Stage V IG
 vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
   there <- let' "there" (there - here u)
   d     <- let' "d"     (D.norm there)
+  r     <- let' "r"     (r * 0.5)
   let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
   angle <- let' "angle" (angleOf (vec2 [there]))
   radius <- let' "radius" (D.min' ((\ U{ scale } -> scale) u * float d) radius)
   minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
-  sweep .= (minSweep `D.max'` abs (D.coerce (asin (float (r*0.5/d)))))
+  sweep .= (minSweep `D.max'` abs (D.coerce (asin (float (r/d)))))
   pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
   colour2 .= colour
   gl_Position .= ext4 (ext3 pos 0) 1) where
