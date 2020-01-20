@@ -89,7 +89,7 @@ angleOf v = I (atan2 y x) where
 
 -- | The angle from the first vector to the second.
 angleTo :: (RealFloat a, Unit u) => V2 (u a) -> V2 (u a) -> I a
-angleTo v1 v2 = angleOf (liftA2 (-) <$> v2 <*> v1)
+angleTo v1 v2 = angleOf (liftA2 (.-.) v2 v1)
 
 
 isFacing :: (Real a, Floating a) => I a -> Quaternion (I a) -> I a -> Bool
