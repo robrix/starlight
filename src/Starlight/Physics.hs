@@ -73,6 +73,8 @@ hit i c = do
     = char & ship_.armour_.min_ -~ damage .*. dt
     | otherwise
     = char
+  -- FIXME: motivate this from the laser intensity or w/e
+  -- FIXME: units for armour integrity
   damage :: (I :/: Seconds) Double
   damage = 100
 
