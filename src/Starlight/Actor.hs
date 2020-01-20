@@ -38,7 +38,7 @@ transformToActor :: Actor -> Transform Double (Mega Metres) (Mega Metres)
 transformToActor Actor{ position, rotation } = mkTranslation position >>> mkRotation rotation
 
 applyForce :: HasCallStack => V3 (Newtons Double) -> Seconds Double -> Actor -> Actor
-applyForce force dt a = a & velocity_.mapping converting +~ force ^/. a^.mass_ ^*. dt
+applyForce force dt a = a & momentum_ +~ force ^*. dt
 
 
 class HasActor t where
