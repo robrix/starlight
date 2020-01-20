@@ -57,6 +57,7 @@ import           UI.Context
 import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
+import           Unit.Algebra
 import           Unit.Length
 
 runGame
@@ -242,5 +243,6 @@ withView m = do
 
   let zoom = zoomForSpeed size (prj (norm velocity))
       solI = Star (10, "Sol")
-      scale = getMetres (convert (100_000 / radius (body (bodies Map.! solI)))) -- FIXME: account for unit size without hard-coding conversion factor
+      -- FIXME: units of scale should actually be Window.Pixels 100_000 ./. Kilo (Metres 695_500); zoom factors in some other way
+      scale = Zoomed 100_100 ./. convertTo (Mega . Metres) (radius (body (bodies Map.! solI)))
   runReader View{ ratio, size, zoom, scale, focus } m
