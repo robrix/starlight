@@ -67,7 +67,8 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   system@System{ bodies } <- ask @(System B.StateVectors)
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
-      blips    = sortOn (Down . qd here . (^.position_._xy)) (zipWith (blipFor (1/scale) . C . NPC) [0..] npcs) <> map (uncurry (blipFor 1 . B)) (Map.toList bodies)
+      -- FIXME: this is a lot of poorly motivated faffing about to get the units lined up just so we can multiply the magnitude by the scale
+      blips    = sortOn (Down . qd here . (^.position_._xy)) (zipWith (blipFor (I 1 ./. (scale ./. Window.Pixels 1 .*. Mega (Metres 1))) . C . NPC) [0..] npcs) <> map (uncurry (blipFor 1 . B)) (Map.toList bodies)
       vertices = verticesForBlips blips
       vars     = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
