@@ -40,8 +40,8 @@ mkScale v = Transform (scaled (point (prj <$> v)))
 mkRotation :: Num c => Quaternion (I c) -> Transform c a a
 mkRotation q = Transform (identity !*! mkTransformation (coerce q) 0)
 
-apply :: Num c => Transform c a b -> V4 c -> V4 c
-apply (Transform m) v = m !* v
+apply :: (Num c, Unit b) => Transform c a b -> V4 (b c) -> V4 (b c)
+apply (Transform m) v = pure <$> (m !* fmap prj v)
 
 tmap :: (c -> c') -> Transform c a b -> Transform c' a b
 tmap f = Transform . fmap (fmap f) . getTransform
