@@ -130,7 +130,7 @@ runActions i c = do
       _ -> pure c
     where
     thrust :: Newtons Double
-    thrust  = 1000 * 20 * 60
+    thrust  = 1000 * 1000 * 20 * 60
     -- FIXME: this should be a real acceleration, i.e. a change to velocity
     angular :: (I :/: Seconds) Double
     angular = 5
