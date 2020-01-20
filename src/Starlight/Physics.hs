@@ -48,7 +48,7 @@ inertia a@Actor{ velocity } = do
 
 gravity :: (Has (Reader (Seconds Double)) sig m, Has (Reader (System StateVectors)) sig m, HasCallStack) => Actor -> m Actor
 gravity a = do
-  dt <- ask @(Seconds Double)
+  dt <- ask
   System{ bodies } <- ask
   pure $! foldl' (go dt) a bodies where
   go dt a StateVectors{ actor = b }
