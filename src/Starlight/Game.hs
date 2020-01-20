@@ -78,7 +78,7 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position  = V3 2_500 0 0
+            { position  = start
             , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
@@ -90,7 +90,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500 0 0
+            { position  = start
             , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
@@ -102,7 +102,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500 0 0
+            { position  = start
             , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
@@ -114,7 +114,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = V3 2_500 0 0
+            { position  = start
             , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
@@ -129,6 +129,8 @@ runGame system
     . TVar.evalState False
     . runJ2000
     where
+  start :: V3 (Mega Metres Double)
+  start = V3 2_500 0 0
   radar = Radar 1000 -- GW radar
 
 runFrame
