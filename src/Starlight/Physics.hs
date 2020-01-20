@@ -99,7 +99,7 @@ runActions i c = do
       where
       desiredAngle Actor{ velocity, position } t = case dir of
         Forwards  -> Just (angleOf (velocity^._xy))
-        Backwards -> t^?_Just.velocity_.to (subtract velocity).to (angleOf.(^._xy)) <|> Just (-angleOf (velocity^._xy))
+        Backwards -> t^?_Just.velocity_.to (subtract velocity).to (angleOf.(^._xy)) <|> Just (angleOf (-velocity^._xy))
         Target    -> t^?_Just.to projected.to (`L.direction` position).to (angleOf.(^._xy))
 
     Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) ((case t of
