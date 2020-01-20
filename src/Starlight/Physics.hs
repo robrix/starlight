@@ -120,7 +120,7 @@ runActions i c = do
 
     Jump -> case target of
       Just target
-        | distance (projected c) (projected target) < (10 :: Mega Metres Double) -> pure c
+        | distance (projected c) (projected target) .<. (10 :: Mega Metres Double) -> pure c
         | isFacing (pi/128) rotation targetAngle -> do
           let distance' = distance (projected target) (projected c)
           pure $! c & position_ +~ (1 - target^.magnitude_ / distance') *^ (projected target - projected c)
