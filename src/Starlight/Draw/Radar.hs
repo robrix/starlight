@@ -143,7 +143,9 @@ vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ colour2, sweep } 
   angle <- let' "angle" (angleOf (vec2 [there]))
   radius <- let' "radius" (D.min' (scale * float d) radius)
   minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
-  sweep .= (minSweep `D.max'` abs (D.coerce (asin (float (r/d)))))
+  iff (r `gt` d)
+    (sweep .= pi/2)
+    (sweep .= (minSweep `D.max'` abs (D.coerce (asin (float (r/d))))))
   pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
   colour2 .= colour
   gl_Position .= ext4 (ext3 pos 0) 1) where
