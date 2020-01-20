@@ -49,8 +49,8 @@ inertia a@Actor{ velocity } = do
 gravity :: (Has (Reader (Seconds Double)) sig m, Has (Reader (System StateVectors)) sig m, HasCallStack) => Actor -> m Actor
 gravity a = do
   dt <- ask
-  System{ bodies } <- ask
-  pure $! foldl' (go dt) a bodies where
+  asks (foldl' (go dt) a . bodies)
+  where
   go dt a StateVectors{ actor = b }
     | nearZero r = a
     | otherwise  = applyForce (force .*^ direction (b^.position_) (a^.position_)) dt a where
