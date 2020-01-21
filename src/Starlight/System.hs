@@ -27,6 +27,7 @@ import           GHC.Stack (HasCallStack)
 import           Starlight.Actor
 import           Starlight.Character
 import           Starlight.Identifier
+import           Starlight.Physics.Constants
 import           Starlight.Radar
 import           Starlight.Ship (radar_)
 import           Starlight.Weapon.Laser
@@ -85,10 +86,10 @@ neighbourhoodOf c sys@System{ bodies, characters } = sys
     _          -> received > threshold
     where
     received :: Pico Watts Double
-    received = (c^.ship_.radar_.power_.convertingTo (Pico . Watts) .*. gain .*. aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
-    crossSection :: (Mega Metres :^: 2) Double
+    received = (c^.ship_.radar_.power_.convertingTo (Pico . Watts) .*. gain .*. convert @(Mega Metres :^: 2) @(Distance :^: 2) aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
+    crossSection :: (Distance :^: 2) Double
     crossSection = a^.magnitude_ .*. a^.magnitude_
-    r :: (Mega Metres :^: 2) Double
+    r :: (Distance :^: 2) Double
     r = (a^.position_) `qdU` (c^.position_)
   aperture :: (Mega Metres :^: 2) Double
   aperture = 10

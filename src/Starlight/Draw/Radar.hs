@@ -46,6 +46,7 @@ import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
 import           Starlight.Identifier (CharacterIdentifier(..), Identifier(..))
+import           Starlight.Physics.Constants
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour
@@ -209,7 +210,7 @@ targetShader = program $ \ u
 
 data U v = U
   { matrix :: v (Transform Float ClipUnits Window.Pixels)
-  , here   :: v (V2 (Mega Metres Double))
+  , here   :: v (V2 (Distance Double))
   , scale  :: v Float
   }
   deriving (Generic)
@@ -219,7 +220,7 @@ instance Vars U
 matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Window.Pixels))
 matrix_ = field @"matrix"
 
-here_ :: Lens' (U v) (v (V2 (Mega Metres Double)))
+here_ :: Lens' (U v) (v (V2 (Distance Double)))
 here_ = field @"here"
 
 scale_ :: Lens' (U v) (v Float)
@@ -241,8 +242,8 @@ instance Vars IF
 
 
 data V v = V
-  { there  :: v (V2 (Mega Metres Double)) -- location of object
-  , r      :: v (Mega Metres Double)      -- radius of object
+  { there  :: v (V2 (Distance Double)) -- location of object
+  , r      :: v (Distance Double)      -- radius of object
   , colour :: v (Colour Float)
   }
   deriving (Generic)

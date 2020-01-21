@@ -35,6 +35,7 @@ import GL.Uniform
 import GL.Viewport
 import Linear.Conjugate
 import Linear.Exts
+import Starlight.Physics.Constants
 import UI.Context as Context
 import UI.Window as Window
 import Unit.Algebra
@@ -45,20 +46,20 @@ data View = View
   { ratio :: Int    -- ^ Ratio of window pixels per context pixel.
   , size  :: V2 (Window.Pixels Int)
   , zoom  :: I Double
-  , scale :: (Window.Pixels :/: Mega Metres) Double
-  , focus :: V2 (Mega Metres Double)
+  , scale :: (Window.Pixels :/: Distance) Double
+  , focus :: V2 (Distance Double)
   }
 
 contextSize :: View -> V2 (Context.Pixels Int)
 contextSize View{ ratio, size } = fmap Context.Pixels (ratio *^ fmap Window.getPixels size)
 
-lengthToWindowPixels :: View -> (Window.Pixels :/: Mega Metres) Double
+lengthToWindowPixels :: View -> (Window.Pixels :/: Distance) Double
 lengthToWindowPixels View{ zoom, scale } = scale .*. zoom
 
 -- | Compute the zoom factor for the given velocity.
 --
 -- Higher values correlate to more of the scene being visible.
-zoomForSpeed :: V2 (Window.Pixels Int) -> (Mega Metres :/: Seconds) Double -> I Double
+zoomForSpeed :: V2 (Window.Pixels Int) -> (Distance :/: Seconds) Double -> I Double
 zoomForSpeed size x
   | distance < min' bounds = min' zoom
   | distance > max' bounds = max' zoom
@@ -96,7 +97,7 @@ transformToZoomed view@View{ zoom }
   =   transformToWindow view
   >>> mkScale (pure 1 & _xy .~ pure zoom)
 
-transformToSystem :: View -> Transform Double ClipUnits (Mega Metres)
+transformToSystem :: View -> Transform Double ClipUnits Distance
 transformToSystem view@View{ scale, focus }
   =   transformToZoomed view
   >>> mkScale (pure scale)

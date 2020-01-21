@@ -9,11 +9,11 @@ import           Data.Functor.I
 import           Linear.Exts
 import qualified Starlight.Actor as Actor
 import           Starlight.Identifier
+import           Starlight.Physics.Constants
 import           UI.Colour
-import           Unit.Length
 
 data Beam = Beam
-  { position :: V3 (Mega Metres Double)
+  { position :: V3 (Distance Double)
   , angle    :: I Double
   , colour   :: Colour Float
   , firedBy  :: CharacterIdentifier

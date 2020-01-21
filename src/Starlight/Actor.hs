@@ -19,6 +19,7 @@ import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import Linear.Quaternion
 import Linear.V3
+import Starlight.Physics.Constants
 import Unit.Algebra
 import Unit.Force
 import Unit.Length
@@ -26,15 +27,15 @@ import Unit.Mass
 import Unit.Time
 
 data Actor = Actor
-  { position  :: !(V3 (Mega Metres Double))
-  , velocity  :: !(V3 ((Mega Metres :/: Seconds) Double))
+  { position  :: !(V3 (Distance Double))
+  , velocity  :: !(V3 ((Distance :/: Seconds) Double))
   , rotation  :: !(Quaternion (I Double))
   , mass      :: !(Kilo Grams Double)
-  , magnitude :: !(Mega Metres Double) -- approx. equivalent to diameter; should bound the actor’s geometry
+  , magnitude :: !(Distance Double) -- approx. equivalent to diameter; should bound the actor’s geometry
   }
   deriving (Generic, Show)
 
-transformToActor :: Actor -> Transform Double (Mega Metres) (Mega Metres)
+transformToActor :: Actor -> Transform Double Distance Distance
 transformToActor Actor{ position, rotation } = mkTranslation position >>> mkRotation rotation
 
 applyImpulse :: HasCallStack => V3 (Newtons Double) -> Seconds Double -> Actor -> Actor
@@ -44,10 +45,10 @@ applyImpulse force dt a = a & momentum_ +~ force ^*. dt
 class HasActor t where
   actor_ :: Lens' t Actor
 
-  position_ :: HasCallStack => Lens' t (V3 (Mega Metres Double))
+  position_ :: HasCallStack => Lens' t (V3 (Distance Double))
   position_ = actor_.field @"position".asserting (none isNaN)
 
-  velocity_ :: HasCallStack => Lens' t (V3 ((Mega Metres :/: Seconds) Double))
+  velocity_ :: HasCallStack => Lens' t (V3 ((Distance :/: Seconds) Double))
   velocity_ = actor_.field @"velocity".asserting (none isNaN)
 
   rotation_ :: HasCallStack => Lens' t (Quaternion (I Double))
@@ -63,7 +64,7 @@ class HasActor t where
     set :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double) -> t
     set t p = t & velocity_.mapping converting .~ p ^/. t^.mass_
 
-  magnitude_ :: HasCallStack => Lens' t (Mega Metres Double)
+  magnitude_ :: HasCallStack => Lens' t (Distance Double)
   magnitude_ = actor_.field @"magnitude".asserting (not.isNaN)
 
 

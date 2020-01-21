@@ -58,7 +58,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform Double (Mega Metres) (Mega Metres))
+  , transform :: !(Transform Double Distance Distance)
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -69,7 +69,7 @@ instance HasActor StateVectors where
 instance HasColour StateVectors where
   colour_ = field @"body".colour_
 
-toBodySpace :: StateVectors -> Transform Double (Mega Metres) BodyUnits
+toBodySpace :: StateVectors -> Transform Double Distance BodyUnits
 toBodySpace v = mkScale (pure (convertTo (Mega . Metres) (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (rotation (actor v))
 
 data Body = Body

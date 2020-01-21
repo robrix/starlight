@@ -44,6 +44,7 @@ import qualified Starlight.Draw.Weapon.Laser as Laser
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
+import           Starlight.Physics.Constants
 import           Starlight.Radar
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol
@@ -246,6 +247,6 @@ withView m = do
   runReader View{ ratio, size, zoom, scale = Starlight.Game.scale, focus } m
 
 
-scale :: (Window.Pixels :/: Mega Metres) Double
-scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @(Mega Metres) 695_500.0
+scale :: (Window.Pixels :/: Distance) Double
+scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
   -- how many pixels to draw something / the radius of the sun

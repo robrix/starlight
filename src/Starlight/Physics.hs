@@ -139,7 +139,7 @@ runActions i c = do
     -- FIXME: this should be a real acceleration, i.e. a change to velocity
     angular :: (I :/: Seconds) Double
     angular = 3
-    projected :: HasActor t => t -> V3 (Mega Metres Double)
+    projected :: HasActor t => t -> V3 (Distance Double)
     projected a = a^.position_ + a^.velocity_ ^*. dt
     rotation = c^.rotation_
     target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
