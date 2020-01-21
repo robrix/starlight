@@ -48,7 +48,7 @@ data View = View
   , size      :: V2 (Window.Pixels Int)
   , zoom      :: I Double
   , scale     :: (Window.Pixels :/: Distance) Double
-  , shipScale :: (Distance :/: Window.Pixels) Double
+  , shipScale :: I Double
   , focus     :: V2 (Distance Double)
   }
 

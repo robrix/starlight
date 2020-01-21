@@ -256,5 +256,5 @@ scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
   -- how many pixels to draw something / the radius of the sun
 
 -- FIXME: this is really stupid; there *has* to be a better way to say “I want a 500 m ship to be 30 px long” or w/e
-shipScale :: (Distance :/: Window.Pixels) Double
-shipScale = convert ((30 :: Distance Double) ./. Window.Pixels 1)
+shipScale :: I Double
+shipScale = 30
