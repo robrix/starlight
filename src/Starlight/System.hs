@@ -68,7 +68,7 @@ beams_ = field @"beams"
 
 
 identifiers :: System a -> [Identifier]
-identifiers System{ bodies, players, npcs } = zipWith (const . C . Player) [0..] players <> zipWith (const . C . NPC) [0..] npcs <> map B (Map.keys bodies)
+identifiers System{ bodies, players, npcs } = imap (const . C . Player) players <> imap (const . C . NPC) npcs <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
 (!?) s = \case
