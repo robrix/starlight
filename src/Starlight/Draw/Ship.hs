@@ -40,8 +40,6 @@ import           Starlight.View
 import qualified UI.Colour as UI
 import qualified UI.Drawable as UI
 import qualified UI.Window as Window
-import           Unit.Algebra
-import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -51,13 +49,12 @@ draw
      )
   => Character
   -> m ()
-draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
-  view@View{ scale } <- ask
+draw Character{ actor, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
+  view@View{ shipScale } <- ask
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
     >>> transformToActor actor
-    -- FIXME: this interprets characters’ magnitudes as a quantity of pixels, which is correct, but it’s not obvious that this is what’s happening here
-    >>> mkScale (pure (coerce @_ @(I Double) magnitude * 0.5 ./. scale)))
+    >>> mkScale (pure shipScale))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
     & UI._a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
