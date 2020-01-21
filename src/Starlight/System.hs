@@ -79,8 +79,8 @@ identifiers System{ bodies, players, npcs } = imap (const . C . Player) players 
 neighbourhoodOf :: HasActor a => Character -> System a -> System a
 neighbourhoodOf c sys@System{ bodies, players, npcs } = sys
   { bodies  = Map.filterWithKey (visible . B) bodies
-  , players = map snd (filter (uncurry visible . first C) (zipWith ((,) . Player) [0..] players))
-  , npcs    = map snd (filter (uncurry visible . first C) (zipWith ((,) . NPC)    [0..] npcs))
+  , players = map snd (filter (uncurry visible . first C) (imap ((,) . Player) players))
+  , npcs    = map snd (filter (uncurry visible . first C) (imap ((,) . NPC)    npcs))
   } where
   -- FIXME: occlusion
   -- FIXME: jamming
