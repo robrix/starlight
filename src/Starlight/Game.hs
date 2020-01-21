@@ -83,7 +83,7 @@ runGame system
             , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
-            , magnitude = 30
+            , magnitude = convert magnitude
             }
           , target  = Nothing
           , actions = mempty
@@ -95,7 +95,7 @@ runGame system
             , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
-            , magnitude = 60
+            , magnitude = convert magnitude
             }
           , target  = Nothing -- Just (C Player)
           , actions = mempty
@@ -107,7 +107,7 @@ runGame system
             , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
-            , magnitude = 30
+            , magnitude = convert magnitude
             }
           , target  = Just $ B (Star (10, "Sol"))
           , actions = mempty
@@ -119,7 +119,7 @@ runGame system
             , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
-            , magnitude = 30
+            , magnitude = convert magnitude
             }
           , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
           , actions = mempty
@@ -130,6 +130,10 @@ runGame system
     . TVar.evalState False
     . runJ2000
     where
+  magnitude :: Metres Double
+  magnitude = 500
+    -- stem-to-stern length; currently interpreted as “diameter” for hit testing
+    -- compare: USS Gerald R. Ford is 337m long
   start :: V3 (Mega Metres Double)
   start = V3 2_500 0 0
   radar = Radar 1000 -- GW radar
