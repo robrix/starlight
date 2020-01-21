@@ -53,7 +53,6 @@ import           UI.Colour
 import qualified UI.Window as Window
 import           Unit.Algebra
 import           Unit.Angle
-import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -69,7 +68,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
   view@View{ scale, focus = here } <- ask
   let npcs     = system^.npcs_
       -- FIXME: this is a lot of poorly motivated faffing about to get the units lined up just so we can multiply the magnitude by the scale
-      blips    = sortOn (Down . qd here . (^.position_._xy)) (zipWith (blipFor (I 1 ./. (scale ./. Window.Pixels 1 .*. Mega (Metres 1))) . C . NPC) [0..] npcs) <> map (uncurry (blipFor 1 . B)) (Map.toList bodies)
+      blips    = sortOn (Down . qd here . (^.position_._xy)) (zipWith (blipFor (I 1 ./. (scale ./. Window.Pixels 1 .*. (1 :: Distance Double))) . C . NPC) [0..] npcs) <> map (uncurry (blipFor 1 . B)) (Map.toList bodies)
       vertices = verticesForBlips blips
       vars     = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
