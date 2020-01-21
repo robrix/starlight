@@ -239,11 +239,13 @@ withView m = do
   ratio <- Window.ratio
   size  <- Window.size
 
-  bodies   <- view (bodies_ @StateVectors)
   velocity <- view (player_ @StateVectors .velocity_)
   focus    <- view (player_ @StateVectors .position_._xy)
 
   let zoom = zoomForSpeed size (norm velocity)
-      solI = Star (10, "Sol")
-      scale = Window.Pixels 100_000 ./. convertTo (Mega . Metres) (radius (body (bodies Map.! solI)))
-  runReader View{ ratio, size, zoom, scale, focus } m
+  runReader View{ ratio, size, zoom, scale = Starlight.Game.scale, focus } m
+
+
+scale :: (Window.Pixels :/: Mega Metres) Double
+scale = Window.Pixels 100_000 ./. convert @(Kilo Metres) @(Mega Metres) 695_500.0
+  -- how many pixels to draw something / the radius of the sun
