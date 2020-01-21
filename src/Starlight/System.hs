@@ -46,13 +46,13 @@ bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyId
 bodies_ = field @"bodies"
 
 player_ :: HasCallStack => Lens' (System a) Character
-player_ = characters_.at Player .iso (fromMaybe (error "player missing")) Just
+player_ = characters_.at (Player 0).iso (fromMaybe (error "player missing")) Just
 
 npcs_ :: Lens' (System a) [Character]
-npcs_ = characters_.lens (Map.elems . Map.delete Player) (\ m cs -> Map.fromList ((Player, m Map.! Player) : zipWith ((,) . NPC) [0..] cs))
+npcs_ = characters_.lens (Map.elems . Map.delete (Player 0)) (\ m cs -> Map.fromList ((Player 0, m Map.! Player 0) : zipWith ((,) . NPC) [0..] cs))
 
 characters_ :: HasCallStack => Lens' (System a) (Map.Map CharacterIdentifier Character)
-characters_ = field @"characters".asserting (Map.member Player)
+characters_ = field @"characters".asserting (Map.member (Player 0))
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"

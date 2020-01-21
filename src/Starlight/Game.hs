@@ -76,7 +76,7 @@ runGame system
   . runFinally
   . TVar.evalState @Input mempty
   . TVar.evalState system
-      { characters = Map.fromList $ zip (Player : map NPC [0..])
+      { characters = Map.fromList $ zip (Player 0 : map NPC [0..])
         [ Character
           { actor   = Actor
             { position  = convert <$> start
