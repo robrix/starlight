@@ -35,11 +35,13 @@ import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
+import           Starlight.Physics.Constants
 import qualified Starlight.Ship as S
 import           Starlight.View
 import qualified UI.Colour as UI
 import qualified UI.Drawable as UI
 import qualified UI.Window as Window
+import           Unit.Algebra
 
 draw
   :: ( Has Check sig m
@@ -54,7 +56,8 @@ draw Character{ actor, ship = S.Ship{ colour, armour }, actions } = UI.using get
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
     >>> transformToActor actor
-    >>> mkScale (pure shipScale))
+    >>> mkScale @_ @_ @Window.Pixels (pure shipScale)
+    >>> mkScale (pure (actor^.magnitude_ ./. (1 :: Distance Double))))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
     & UI._a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
