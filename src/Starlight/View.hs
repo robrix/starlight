@@ -44,11 +44,12 @@ import Unit.Length
 import Unit.Time
 
 data View = View
-  { ratio :: Int    -- ^ Ratio of window pixels per context pixel.
-  , size  :: V2 (Window.Pixels Int)
-  , zoom  :: I Double
-  , scale :: (Window.Pixels :/: Distance) Double
-  , focus :: V2 (Distance Double)
+  { ratio     :: Int    -- ^ Ratio of window pixels per context pixel.
+  , size      :: V2 (Window.Pixels Int)
+  , zoom      :: I Double
+  , scale     :: (Window.Pixels :/: Distance) Double
+  , shipScale :: (Distance :/: Window.Pixels) Double
+  , focus     :: V2 (Distance Double)
   }
 
 contextSize :: View -> V2 (Context.Pixels Int)

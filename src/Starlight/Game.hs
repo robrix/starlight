@@ -248,7 +248,7 @@ withView m = do
   focus    <- view (player_ @StateVectors .position_._xy)
 
   let zoom = zoomForSpeed size (norm velocity)
-  runReader View{ ratio, size, zoom, scale = Starlight.Game.scale, focus } m
+  runReader View{ ratio, size, zoom, scale = Starlight.Game.scale, shipScale = Starlight.Game.shipScale, focus } m
 
 
 scale :: (Window.Pixels :/: Distance) Double
