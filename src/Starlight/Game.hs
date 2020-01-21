@@ -79,7 +79,7 @@ runGame system
         [ Character
           { actor   = Actor
             { position  = convert <$> start
-            , velocity  = V3 0 0 0
+            , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
@@ -91,7 +91,7 @@ runGame system
         , Character
           { actor   = Actor
             { position  = convert <$> start
-            , velocity  = V3 0 0 0
+            , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 60
@@ -103,7 +103,7 @@ runGame system
         , Character
           { actor   = Actor
             { position  = convert <$> start
-            , velocity  = V3 0 0 0
+            , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
@@ -115,7 +115,7 @@ runGame system
         , Character
           { actor   = Actor
             { position  = convert <$> start
-            , velocity  = V3 0 0 0
+            , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
             , magnitude = 30
