@@ -111,10 +111,10 @@ data Drawable = Drawable
 
 
 data Blip = Blip
-  { scale :: I Double
+  { scale      :: I Double
   , identifier :: Identifier
-  , actor :: Actor
-  , colour :: Colour Float
+  , actor      :: Actor
+  , colour     :: Colour Float
   }
   deriving (Generic)
 
