@@ -78,7 +78,7 @@ runGame system
       { characters = Map.fromList $ zip (Player : map NPC [0..])
         [ Character
           { actor   = Actor
-            { position  = start
+            { position  = convert <$> start
             , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
@@ -90,7 +90,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = start
+            { position  = convert <$> start
             , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
@@ -102,7 +102,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = start
+            { position  = convert <$> start
             , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
@@ -114,7 +114,7 @@ runGame system
           }
         , Character
           { actor   = Actor
-            { position  = start
+            { position  = convert <$> start
             , velocity  = V3 0 0 0
             , rotation  = axisAngle (unit _z) (pi/2)
             , mass      = 1000
