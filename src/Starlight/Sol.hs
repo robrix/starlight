@@ -214,10 +214,11 @@ system = do
         }
 
   pure System
-    { bodies     = Map.fromList
+    { bodies  = Map.fromList
       [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
       | (identifier, orbit) <- Map.toList orbits
       ]
-    , characters = mempty
-    , beams      = mempty
+    , players = mempty
+    , npcs    = mempty
+    , beams   = mempty
     }

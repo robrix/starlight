@@ -25,7 +25,6 @@ import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Function (fix)
 import           Data.Functor.Interval
-import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
 import           GL
 import           GL.Effect.Check
@@ -76,7 +75,7 @@ runGame system
   . runFinally
   . TVar.evalState @Input mempty
   . TVar.evalState system
-      { characters = Map.fromList $ zip (Player 0 : map NPC [0..])
+      { players =
         [ Character
           { actor   = Actor
             { position  = convert <$> start
@@ -89,7 +88,9 @@ runGame system
           , actions = mempty
           , ship    = Ship{ colour = white, armour = 1_000, radar }
           }
-        , Character
+        ]
+      , npcs    =
+        [ Character
           { actor   = Actor
             { position  = convert <$> start
             , velocity  = 0

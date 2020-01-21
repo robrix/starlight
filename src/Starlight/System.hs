@@ -18,8 +18,10 @@ module Starlight.System
 ) where
 
 import           Control.Effect.Lens.Exts (asserting)
-import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
+import           Control.Lens (Lens, Lens', at, imap, iso, ix, lens, to, (^.), (^?))
+import           Data.Bifunctor (first)
 import           Data.Generics.Product.Fields
+import           Data.List (partition)
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (fromMaybe)
 import           GHC.Generics (Generic)
@@ -36,9 +38,10 @@ import           Unit.Length
 import           Unit.Power
 
 data System a = System
-  { bodies     :: !(Map.Map BodyIdentifier a)
-  , characters :: !(Map.Map CharacterIdentifier Character)
-  , beams      :: ![Beam]
+  { bodies  :: !(Map.Map BodyIdentifier a)
+  , players :: ![Character]
+  , npcs    :: ![Character]
+  , beams   :: ![Beam]
   }
   deriving (Generic, Show)
 
@@ -48,18 +51,24 @@ bodies_ = field @"bodies"
 player_ :: HasCallStack => Lens' (System a) Character
 player_ = characters_.at (Player 0).iso (fromMaybe (error "player missing")) Just
 
+players_ :: Lens' (System a) [Character]
+players_ = field @"players"
+
 npcs_ :: Lens' (System a) [Character]
-npcs_ = characters_.lens (Map.elems . Map.delete (Player 0)) (\ m cs -> Map.fromList ((Player 0, m Map.! Player 0) : zipWith ((,) . NPC) [0..] cs))
+npcs_ = field @"npcs"
 
 characters_ :: HasCallStack => Lens' (System a) (Map.Map CharacterIdentifier Character)
-characters_ = field @"characters".asserting (Map.member (Player 0))
+characters_ = lens get set.asserting (Map.member (Player 0)) where
+  get s = Map.fromList (s^.players_.to (imap ((,) . Player)) <> s^.npcs_.to (imap ((,) . NPC)))
+  set s cs = s{ players = map snd p, npcs = map snd n } where
+    (p, n) = partition (\case{ Player _ -> True ; _ -> False } . fst) (Map.toList cs)
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
 
 
 identifiers :: System a -> [Identifier]
-identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B (Map.keys bodies)
+identifiers System{ bodies, players, npcs } = zipWith (const . C . Player) [0..] players <> zipWith (const . C . NPC) [0..] npcs <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
 (!?) s = \case
@@ -68,9 +77,10 @@ identifiers System{ bodies, characters } = map C (Map.keys characters) <> map B 
 
 
 neighbourhoodOf :: HasActor a => Character -> System a -> System a
-neighbourhoodOf c sys@System{ bodies, characters } = sys
-  { bodies     = Map.filterWithKey (visible . B) bodies
-  , characters = Map.filterWithKey (visible . C) characters
+neighbourhoodOf c sys@System{ bodies, players, npcs } = sys
+  { bodies  = Map.filterWithKey (visible . B) bodies
+  , players = map snd (filter (uncurry visible . first C) (zipWith ((,) . Player) [0..] players))
+  , npcs    = map snd (filter (uncurry visible . first C) (zipWith ((,) . NPC)    [0..] npcs))
   } where
   -- FIXME: occlusion
   -- FIXME: jamming
