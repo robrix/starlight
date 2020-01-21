@@ -169,7 +169,7 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   start <- now
   fork . evalState start . fix $ \ loop -> do
-    physics
+    integration
     yield
     hasQuit <- get
     unless hasQuit loop
@@ -186,7 +186,7 @@ game = Sol.system >>= \ system -> runGame system $ do
     loop
   put True
 
-physics
+integration
   :: ( Effect sig
      , Has (Lift IO) sig m
      , Has Profile sig m
@@ -196,7 +196,7 @@ physics
      , Has (State (System Body)) sig m
      )
   => m ()
-physics = id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
+integration = id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
   measure "controls" $ player_ @Body .actions_ <~ controls
   measure "ai" $ npcs_ @Body <~> traverse ai
 
