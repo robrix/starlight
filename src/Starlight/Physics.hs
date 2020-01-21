@@ -57,7 +57,7 @@ gravity a = do
     | otherwise  = applyImpulse (force .*^ direction (b^.position_) (a^.position_)) dt a where
     force :: Newtons Double
     force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
-    -- FIXME: gravity seems extremely weak
+    -- FIXME: gravity seems extremely weak, measures as a factor of approximately 46
     r :: (Metres :^: 2) Double
     r = convert ((b^.position_) `qdU` (a^.position_)) -- “quadrance” (square of distance between actor & body)
 
