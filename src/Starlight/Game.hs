@@ -202,7 +202,7 @@ integration = id <~> timed . flip (execState @(System Body)) (measure "integrati
 
   -- FIXME: this is so gross
   beams_ @Body .= []
-  npcs_ @Body %= filter (\ Character{ ship = Ship{ armour } } -> armour^.min_ > 0)
+  npcs_ @Body %= filter ((> 0) . (^.ship_.armour_.min_))
   characters_ @Body <~> itraverse
     (\ i
     -> local . neighbourhoodOf @StateVectors
