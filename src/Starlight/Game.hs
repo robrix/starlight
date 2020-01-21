@@ -254,3 +254,7 @@ withView m = do
 scale :: (Window.Pixels :/: Distance) Double
 scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
   -- how many pixels to draw something / the radius of the sun
+
+shipScale :: (Distance :/: Window.Pixels) Double
+shipScale = convert @Metres @Distance 500 ./. Window.Pixels 30
+  -- what size of ship / to draw at the given quantity of pixels
