@@ -247,5 +247,5 @@ withView m = do
 
 
 scale :: (Window.Pixels :/: Mega Metres) Double
-scale = Window.Pixels 100_000 ./. convert @(Kilo Metres) @(Mega Metres) 695_500.0
+scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @(Mega Metres) 695_500.0
   -- how many pixels to draw something / the radius of the sun
