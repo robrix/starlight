@@ -28,6 +28,7 @@ module Unit.Algebra
 , Sqrt
   -- * Calculation
 , sqrtU
+, quadranceU
 , qdU
 , normalizeU
   -- * Combinators
@@ -147,6 +148,10 @@ type family Sqrt u where
 
 sqrtU :: (Unit u, Unit (Sqrt u), Floating a) => u a -> Sqrt u a
 sqrtU = pure . sqrt . prj
+
+-- | Compute the square of the norm efficiently and in the correct dimensions.
+quadranceU :: (Metric v, Unit u, Num a) => v (u a) -> (u :^: 2) a
+quadranceU = pure . quadrance . fmap prj
 
 -- | Compute the square of the distance efficiently and in the correct dimensions.
 qdU :: (Metric v, Unit u, Num a) => v (u a) -> v (u a) -> (u :^: 2) a
