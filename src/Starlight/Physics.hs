@@ -53,13 +53,11 @@ gravity a = do
   asks @(System StateVectors) (foldl' (go dt) a . bodies)
   where
   go dt a b
-    | nearZero r = a
-    | otherwise  = applyImpulse (force .*^ direction (b^.position_) (a^.position_)) dt a where
-    force :: Newtons Double
-    force = (a^.mass_ .*. b^.mass_ ./. r) .*. gravC
-    -- FIXME: gravity seems extremely weak, measures as a factor of approximately 46
-    r :: (Metres :^: 2) Double
-    r = convert ((b^.position_) `qdU` (a^.position_)) -- “quadrance” (square of distance between actor & body)
+    | v1 == v2  = a
+    | otherwise = applyImpulse (gravitation (a^.mass_) (b^.mass_) (convert <$> v1) (convert <$> v2) .*^ direction v2 v1) dt a
+    where
+    v1 = a^.position_
+    v2 = b^.position_
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
