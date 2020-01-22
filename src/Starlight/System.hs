@@ -96,7 +96,7 @@ neighbourhoodOf c sys@System{ bodies, players, npcs } = sys
     _          -> received > threshold
     where
     received :: Pico Watts Double
-    received = (c^.ship_.radar_.power_.convertingTo (Pico . Watts) .*. gain .*. convert @(Mega Metres :^: 2) @(Distance :^: 2) aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
+    received = (c^.ship_.radar_.power_.convertingTo (Pico . Watts) .*. gain .*. convert @_ @(Distance :^: 2) aperture .*. crossSection .*. patternPropagationFactor ** 4) ./. (I ((4 * pi) ** 2) .*. r .*. r)
     crossSection :: (Distance :^: 2) Double
     crossSection = a^.magnitude_ .*. a^.magnitude_
     r :: (Distance :^: 2) Double
