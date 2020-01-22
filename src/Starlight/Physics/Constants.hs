@@ -15,7 +15,7 @@ import Unit.Time
 
 type Distance = Giga Metres
 
-gravC :: (Metres :^: 3 :/: Kilo Grams :/: Seconds :^: 2) Double
+gravC :: Fractional a => (Metres :^: 3 :/: Kilo Grams :/: Seconds :^: 2) a
 gravC = 6.67430e-11
 
 gravitation :: Metric v => Kilo Grams Double -> Kilo Grams Double -> v (Metres Double) -> v (Metres Double) -> Newtons Double
