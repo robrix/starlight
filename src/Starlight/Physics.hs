@@ -100,14 +100,14 @@ runActions i c = do
       desiredAngle Actor{ velocity, position } t = case dir of
         Forwards  -> Just (angleOf (velocity^._xy))
         Backwards -> t^?_Just.velocity_.to (subtract velocity).to (angleOf.(^._xy)) <|> Just (angleOf (-velocity^._xy))
-        Target    -> t^?_Just.to projected.to (`L.direction` position).to (angleOf.(^._xy))
+        Target    -> t^?_Just.to (projected dt).to (`L.direction` position).to (angleOf.(^._xy))
 
     Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) ((case t of
       L -> angular
       R -> -angular) .*. dt)
 
     Fire Main -> do
-      let position = projected c
+      let position = projected dt c
       beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position, firedBy = i }:)
       pure c
 
@@ -121,14 +121,14 @@ runActions i c = do
 
     Jump -> case target of
       Just target
-        | distance (projected c) (projected target) .<. factor * target ^.magnitude_ -> pure c
+        | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> pure c
         | isFacing (pi/128) rotation targetAngle -> do
-          let distance' = distance (projected target) (projected c)
-          pure $! c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected target - projected c)
+          let distance' = distance (projected dt target) (projected dt c)
+          pure $! c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected dt target - projected dt c)
         | otherwise                              -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
         factor = 0.75
-        targetAngle = angleTo (projected c^._xy) (projected target^._xy)
+        targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)
       _ -> pure c
     where
     thrust :: Newtons Double
@@ -137,7 +137,5 @@ runActions i c = do
     -- FIXME: this should be a real acceleration, i.e. a change to velocity
     angular :: (I :/: Seconds) Double
     angular = 3
-    projected :: HasActor t => t -> V3 (Distance Double)
-    projected a = a^.position_ + a^.velocity_ ^*. dt
     rotation = c^.rotation_
     target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_

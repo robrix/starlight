@@ -67,6 +67,9 @@ class HasActor t where
   magnitude_ :: HasCallStack => Lens' t (Distance Double)
   magnitude_ = actor_.field @"magnitude".asserting (not.isNaN)
 
+  projected :: HasCallStack => Seconds Double -> t -> V3 (Distance Double)
+  projected dt a = a^.position_ + a^.velocity_ ^*. dt
+
 
 instance HasActor Actor where
   actor_ = id
