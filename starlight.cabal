@@ -150,6 +150,7 @@ library
     , fused-effects      ^>= 1
     , fused-effects-lens ^>= 1.2
     , fused-effects-profile
+    , fused-effects-random
     , generic-lens
     , gl
     , lens

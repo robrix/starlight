@@ -7,10 +7,10 @@ source-repository-package
 
 source-repository-package
   type: git
-  location: https://github.com/fused-effects/fused-effects-mwc-random.git
-  tag: 885fad78af3cd2c8b5a995c12e1987d56659d34a
+  location: https://github.com/fused-effects/fused-effects-profile.git
+  tag: f710569baa2cecf86c6459506181c7a604432bf3
 
 source-repository-package
   type: git
-  location: https://github.com/fused-effects/fused-effects-profile.git
-  tag: f710569baa2cecf86c6459506181c7a604432bf3
+  location: https://github.com/fused-effects/fused-effects-random.git
+  tag: c726e58c80cfd437e9e5dfb7ce047a9b4ea4266a
