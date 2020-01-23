@@ -15,6 +15,7 @@
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( StateVectors(..)
+, body_
 , toBodySpace
 , Body(..)
 , BodyUnits(..)
@@ -30,7 +31,7 @@ module Starlight.Body
 import           Control.Carrier.Reader
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
+import           Control.Lens (Lens', Iso, coerced, iso, (%~), (&), (^.))
 import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Generics.Product.Fields
@@ -67,7 +68,10 @@ instance HasActor StateVectors where
   actor_ = field @"actor"
 
 instance HasColour StateVectors where
-  colour_ = field @"body".colour_
+  colour_ = body_.colour_
+
+body_ :: Lens' StateVectors Body
+body_ = field @"body"
 
 toBodySpace :: StateVectors -> Transform Double Distance BodyUnits
 toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (rotation (actor v))
