@@ -25,6 +25,7 @@ module Unit.Algebra
 , Mul
 , Div
 , Exp
+, Sq
 , Sqrt
   -- * Calculation
 , sqU
