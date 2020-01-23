@@ -27,6 +27,7 @@ module Unit.Algebra
 , Exp
 , Sqrt
   -- * Calculation
+, sqU
 , sqrtU
 , quadranceU
 , qdU
@@ -38,6 +39,7 @@ module Unit.Algebra
 , I(..)
 ) where
 
+import Control.Monad (join)
 import Data.Functor.I
 import Data.Functor.K
 import Data.Proxy
@@ -137,6 +139,10 @@ type family Exp u n where
   Exp u 1 = u
   Exp u n = u :^: n
 
+type family Sq u where
+  Sq I = I
+  Sq u = u :^: 2
+
 type family Sqrt u where
   Sqrt (u :*: v) = Sqrt u :*: Sqrt v
   Sqrt (u :/: v) = Sqrt u :/: Sqrt v
@@ -145,6 +151,9 @@ type family Sqrt u where
 
 
 -- * Calculation
+
+sqU :: (Unit u, Unit (Sq u), Num a) => u a -> Sq u a
+sqU = pure . join (*) . prj
 
 sqrtU :: (Unit u, Unit (Sqrt u), Floating a) => u a -> Sqrt u a
 sqrtU = pure . sqrt . prj
