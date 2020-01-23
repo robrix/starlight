@@ -1,13 +1,16 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Geometry.Circle
 ( circle
 , intersects
 , intersections
+, area
 ) where
 
 import Control.Monad (guard)
 import Data.Maybe (isJust)
 import Linear.Exts
 import Unit
+import Unit.Algebra
 
 -- | Construct vertices for a circle.
 circle
@@ -47,3 +50,7 @@ intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
   root = sqrt discriminant
   (d1, d2) = (-b) ± root
   a ± b = (a + b, a - b)
+
+
+area :: (Unit length, Unit (Sq length), Floating a) => length a -> Sq length a
+area r = I pi .*. sqU r
