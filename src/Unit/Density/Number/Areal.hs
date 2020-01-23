@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
-module Unit.Density.Areal
+module Unit.Density.Number.Areal
 ( Density
 ) where
 

@@ -133,7 +133,7 @@ library
     Unit.Algebra
     Unit.Angle
     Unit.Count
-    Unit.Density.Areal
+    Unit.Density.Number.Areal
     Unit.Force
     Unit.Length
     Unit.Mass
