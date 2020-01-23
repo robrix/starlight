@@ -132,6 +132,7 @@ library
     Unit
     Unit.Algebra
     Unit.Angle
+    Unit.Count
     Unit.Force
     Unit.Length
     Unit.Mass
