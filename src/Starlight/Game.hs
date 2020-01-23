@@ -13,6 +13,7 @@ module Starlight.Game
 import           Control.Algebra
 import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
+import           Control.Carrier.Random.Gen
 import           Control.Carrier.Reader
 import qualified Control.Carrier.State.STM.TVar as TVar
 import           Control.Carrier.State.Strict
@@ -52,6 +53,7 @@ import           Starlight.Time
 import           Starlight.UI
 import           Starlight.View
 import           System.FilePath
+import           System.Random
 import           UI.Colour
 import           UI.Context
 import           UI.Label as Label
@@ -61,11 +63,12 @@ import           Unit.Algebra
 import           Unit.Length
 
 runGame
-  :: ( Has (Lift IO) sig m
+  :: ( Effect sig
+     , Has (Lift IO) sig m
      , MonadFail m
      )
   => System Body
-  -> ReaderC Epoch (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))) a
+  -> ReaderC Epoch (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (RandomC System.Random.StdGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))))) a
   -> m a
 runGame system
   = Window.runSDL
@@ -73,6 +76,8 @@ runGame system
   . runContext
   . runGLC
   . runFinally
+  . runLiftIO
+  . evalRandomSystem
   . TVar.evalState @Input mempty
   . TVar.evalState system
       { players =
