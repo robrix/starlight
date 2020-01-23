@@ -140,8 +140,9 @@ type family Exp u n where
   Exp u n = u :^: n
 
 type family Sq u where
-  Sq I = I
-  Sq u = u :^: 2
+  Sq I         = I
+  Sq (u :^: n) = u :^: (n + n)
+  Sq u         = u :^: 2
 
 type family Sqrt u where
   Sqrt (u :*: v) = Sqrt u :*: Sqrt v
