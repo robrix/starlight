@@ -1,12 +1,8 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
 module Starlight.Draw
 ( Starlight.Draw.draw
 ) where
@@ -18,8 +14,6 @@ import Control.Effect.Reader
 import Control.Lens (choosing, filtered, to, traversed, (^.), (^?), _Just)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
-import Data.Functor.I
-import Data.Functor.K
 import GL.Effect.Check
 import GL.Framebuffer
 import Graphics.GL.Core41
@@ -40,6 +34,7 @@ import UI.Colour
 import UI.Label
 import UI.Typeface
 import Unit.Algebra
+import Unit.Count
 import Unit.Length
 import Unit.Time
 
@@ -90,19 +85,9 @@ draw = measure "draw" . runLiftIO $ do
           -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
         _ -> ""
 
-  measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (convert @_ @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (Frames 1 ./. dt))
+  measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (convert @_ @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (Count @"f" 1 ./. dt))
   measure "setLabel" $ setLabel targetLabel font (describeTarget target)
 
   fpsSize <- labelSize fpsLabel
   measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size^._y - fpsSize^._y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                            white Nothing
-
-newtype Frames a = Frames a
-  deriving (Eq, Floating, Fractional, Functor, Num, Ord, Real, RealFloat, RealFrac)
-  deriving Applicative via I
-
-instance Unit Frames where
-  type Dim Frames = Rate
-  suffix = K ('f':)
-
-data Rate a
