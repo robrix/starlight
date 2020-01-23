@@ -1,2 +1,5 @@
 module Unit.Count
-() where
+( Count(..)
+) where
+
+newtype Count a = Count { getCount :: a }
