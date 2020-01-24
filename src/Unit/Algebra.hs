@@ -18,7 +18,6 @@ module Unit.Algebra
 , (./.)
 , (^/.)
 , (./^)
-, N(..)
 , Mul
 , Div
 , Exp
@@ -85,8 +84,6 @@ infixl 7 ^/.
 u ./^ v = pure . (prj u /) . prj <$> v
 
 infixl 7 ./^
-
-data N (n :: Nat) = N
 
 
 type family Mul u v where
