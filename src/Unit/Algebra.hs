@@ -94,6 +94,7 @@ u .^. n = pure (prj u ^ natVal n)
 
 infixr 8 .^.
 
+
 type family Mul u v where
   Mul  u               I        = u                             -- u * 1       = u
   Mul  I               v        = v                             -- 1 * v       = v
