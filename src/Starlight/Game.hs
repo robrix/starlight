@@ -284,21 +284,23 @@ histogram buckets samples
   | [] <- buckets = []
   | [] <- samples = []
   | otherwise     = map fst (foldl' bucketSample (map (0,) buckets) samples)
-  where bucketSample accum sample = foldr (\ each rest -> case each of
-          (count, from)
-            | ((_, to) : _) <- rest
-            , from   <= sample
-            , sample <= to     -> (succ count, from) : rest
-            | otherwise        -> (     count, from) : rest) [] accum
+  where
+  bucketSample accum sample = foldr (\ each rest -> case each of
+    (count, from)
+      | ((_, to) : _) <- rest
+      , from   <= sample
+      , sample <= to     -> (succ count, from) : rest
+      | otherwise        -> (     count, from) : rest) [] accum
 
 sparkify :: [Int] -> String
 sparkify bins
   | null bins = ""
   | otherwise = spark <$> bins
-  where sparks = " ▁▂▃▄▅▆▇█"
-        maxSpark = pred (length sparks)
-        max = maximum bins
-        spark n = sparks !! round ((fromIntegral n / fromIntegral max :: Double) * fromIntegral maxSpark)
+  where
+  sparks = " ▁▂▃▄▅▆▇█"
+  maxSpark = pred (length sparks)
+  max = maximum bins
+  spark n = sparks !! round ((fromIntegral n / fromIntegral max :: Double) * fromIntegral maxSpark)
 
 printHistogram :: (Real a, Has (Lift IO) sig m) => [a] -> Int -> m a -> m ()
 printHistogram buckets n = replicateM n >=> sendM . putStrLn . sparkify . histogram buckets
