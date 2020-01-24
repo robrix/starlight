@@ -4,6 +4,7 @@
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Game
@@ -282,7 +283,7 @@ histogram :: Real a => [a] -> [a] -> [Int]
 histogram buckets samples
   | [] <- buckets = []
   | [] <- samples = []
-  | otherwise     = map fst (foldl' bucketSample (map ((,) 0) buckets) samples)
+  | otherwise     = map fst (foldl' bucketSample (map (0,) buckets) samples)
   where bucketSample accum sample = foldr (\ each rest -> case each of
           (count, from)
             | ((_, to) : _) <- rest
