@@ -115,6 +115,7 @@ library
     Starlight.UI
     Starlight.View
     Starlight.Weapon.Laser
+    Stochastic.Sampler.Rejection
     UI.Colour
     UI.Context
     UI.Drawable
