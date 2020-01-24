@@ -1,2 +1,5 @@
 module Stochastic.PDF
-() where
+( PDF(..)
+) where
+
+newtype PDF a b = PDF (a -> b)
