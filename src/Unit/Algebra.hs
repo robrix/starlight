@@ -141,6 +141,9 @@ class Dimension (dim :: * -> *) where
   type Sq dim (u :: * -> *) :: * -> *
   type Sq dim u = u :^: 2
 
+instance Dimension I where
+  type Sq I u = u
+
 
 -- * Calculation
 
