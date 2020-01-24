@@ -1,9 +1,12 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Unit.Time
 ( Time
 , Seconds(..)
@@ -32,6 +35,7 @@ import Unit.Multiple
 data Time a
 
 instance Dimension Time
+instance Unit Time u => Pow Time u n (u :^: n)
 
 
 newtype Seconds a = Seconds { getSeconds :: a }

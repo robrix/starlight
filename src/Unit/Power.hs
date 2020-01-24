@@ -1,8 +1,11 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Unit.Power
 ( Power
 , Watts(..)
@@ -28,6 +31,7 @@ import Unit.Multiple
 data Power a
 
 instance Dimension Power
+instance Unit Power u => Pow Power u n (u :^: n)
 
 
 newtype Watts a = Watts { getWatts :: a }

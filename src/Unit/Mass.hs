@@ -1,8 +1,11 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Unit.Mass
 ( Mass
 , Grams(..)
@@ -28,6 +31,7 @@ import Unit.Multiple
 data Mass a
 
 instance Dimension Mass
+instance Unit Mass u => Pow Mass u n (u :^: n)
 
 
 newtype Grams a = Grams { getGrams :: a }

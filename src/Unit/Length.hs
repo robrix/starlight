@@ -1,9 +1,11 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Unit.Length
 ( Length
 , Metres(..)
@@ -30,6 +32,7 @@ import Unit.Multiple
 data Length a
 
 instance Dimension Length
+instance Unit Length u => Pow Length u n (u :^: n)
 
 
 newtype Metres a = Metres { getMetres :: a }

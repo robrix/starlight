@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -31,6 +32,7 @@ newtype Count (sym :: Symbol) a = Count { getCount :: a }
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Dimension (Count sym)
+instance KnownSymbol sym => Pow (Count sym) (Count sym) n (Count sym)
 
 instance KnownSymbol sym => Unit (Count sym) (Count sym) where
   suffix = K (symbolVal (Proxy @sym) ++)
