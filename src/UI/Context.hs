@@ -19,12 +19,13 @@ import           GL.Type as GL
 import           GL.Uniform
 import           Graphics.GL.Core41
 import           SDL
+import           System.Random (Random)
 import           Unit.Length
 
 type Context = GLContext
 
 newtype Pixels a = Pixels { getPixels :: a }
-  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Pixels where

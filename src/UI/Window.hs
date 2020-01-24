@@ -32,11 +32,12 @@ import           GL.Uniform
 import           Linear.V2 as Linear
 import           Linear.V4 as Linear
 import           SDL
+import           System.Random (Random)
 import           Unit.Length
 
 -- FIXME: can we embed the ratio into this? maybe at the type level?
 newtype Pixels a = Pixels { getPixels :: a }
-  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Pixels where

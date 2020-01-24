@@ -37,6 +37,7 @@ import GL.Viewport
 import Linear.Conjugate
 import Linear.Exts
 import Starlight.Physics.Constants
+import System.Random (Random)
 import UI.Context as Context
 import UI.Window as Window
 import Unit.Algebra
@@ -74,7 +75,7 @@ zoomForSpeed size x
 
 
 newtype ClipUnits a = ClipUnits { getClipUnits :: a }
-  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit ClipUnits where
@@ -82,7 +83,7 @@ instance Unit ClipUnits where
   suffix = K ("clip"++)
 
 newtype Zoomed a = Zoomed { getZoomed :: a }
-  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Zoomed where

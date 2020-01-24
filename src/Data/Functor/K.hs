@@ -9,7 +9,8 @@ module Data.Functor.K
 import Data.Functor.Const
 import Foreign.Storable
 import Linear
+import System.Random (Random)
 
 newtype K a b = K { getK :: a }
-  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Show, Storable, Traversable)
+  deriving (Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Show, Storable, Traversable)
   deriving (Applicative) via Const a
