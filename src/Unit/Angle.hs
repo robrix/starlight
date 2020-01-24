@@ -7,6 +7,7 @@ module Unit.Angle
 , Radians(..)
 , Degrees(..)
 , module Unit
+, module Unit.Algebra
 , module Unit.Multiple
 ) where
 
@@ -21,6 +22,7 @@ import Linear.Metric
 import Linear.Vector
 import System.Random (Random)
 import Unit
+import Unit.Algebra
 import Unit.Multiple
 
 type Angle = I

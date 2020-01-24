@@ -4,6 +4,7 @@ module Unit.Force
 ( Force
 , Newtons
 , module Unit
+, module Unit.Algebra
 , module Unit.Multiple
 ) where
 

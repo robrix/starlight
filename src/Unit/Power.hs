@@ -6,6 +6,7 @@ module Unit.Power
 ( Power
 , Watts(..)
 , module Unit
+, module Unit.Algebra
 , module Unit.Multiple
 ) where
 
@@ -20,9 +21,13 @@ import Linear.Metric
 import Linear.Vector
 import System.Random (Random)
 import Unit
+import Unit.Algebra
 import Unit.Multiple
 
 data Power a
+
+instance Dimension Power
+
 
 newtype Watts a = Watts { getWatts :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
