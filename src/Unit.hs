@@ -46,7 +46,7 @@ import Numeric
 
 -- * Units
 
-class (Applicative u, forall a . Num a => Num (u a)) => Unit u where
+class (Applicative u, forall a . Num a => Num (u a), forall a . Fractional a => Fractional (u a)) => Unit u where
   type Dim u :: * -> *
   prj :: u a -> a
   default prj :: Coercible (u a) a => u a -> a
