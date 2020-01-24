@@ -26,6 +26,7 @@ import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Function (fix)
 import           Data.Functor.Interval
+import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
 import           GL
 import           GL.Effect.Check
@@ -174,10 +175,10 @@ game = Sol.system >>= \ system -> runGame system $ do
   targetLabel <- measure "label" Label.label
 
   runSystem $ do
-    let mx = 5.929_522_234_007_778_e9
-        sampler = V3 <$> uniformR (-mx, -mx) <*> uniformR (mx, mx) <*> pure 0
-
-    position <- sampler -- rejectionSample sampler (convert (I 1 ./. sqU (terra^.body_.radius_))) pdf
+    terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
+    theta <- uniformR (-pi, pi)
+    r <- (terra^.body_.radius_ +) <$> exponential 1
+    let position = ext (cartesian2 theta (convert @_ @Distance r)) 0 + terra^.position_
     npcs_ @Body %= (Character
         { actor   = Actor
           { position  = position
