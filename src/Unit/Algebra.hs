@@ -56,39 +56,39 @@ import Unit
 
 -- * Algebra
 
-(.*.) :: (Unit u, Unit v, Unit (Mul u v), Num a) => u a -> v a -> Mul u v a
+(.*.) :: (Unit du u, Unit dv v, Unit d' (Mul u v), Num a) => u a -> v a -> Mul u v a
 u .*. v = pure (prj u * prj v)
 
 infixl 7 .*.
 
-(^*.) :: (Functor f, Unit u, Unit v, Unit (Mul u v), Num a) => f (u a) -> v a -> f (Mul u v a)
+(^*.) :: (Functor f, Unit du u, Unit dv v, Unit d' (Mul u v), Num a) => f (u a) -> v a -> f (Mul u v a)
 u ^*. v = pure . (* prj v) . prj <$> u
 
 infixl 7 ^*.
 
-(.*^) :: (Unit u, Functor f, Unit v, Unit (Mul u v), Num a) => u a -> f (v a) -> f (Mul u v a)
+(.*^) :: (Unit du u, Functor f, Unit dv v, Unit d' (Mul u v), Num a) => u a -> f (v a) -> f (Mul u v a)
 u .*^ v = pure . (prj u *) . prj <$> v
 
 infixl 7 .*^
 
-(./.) :: (Unit u, Unit v, Unit (Div u v), Fractional a) => u a -> v a -> Div u v a
+(./.) :: (Unit du u, Unit dv v, Unit d' (Div u v), Fractional a) => u a -> v a -> Div u v a
 u ./. v = pure (prj u / prj v)
 
 infixl 7 ./.
 
-(^/.) :: (Functor f, Unit u, Unit v, Unit (Div u v), Fractional a) => f (u a) -> v a -> f (Div u v a)
+(^/.) :: (Functor f, Unit du u, Unit dv v, Unit d' (Div u v), Fractional a) => f (u a) -> v a -> f (Div u v a)
 u ^/. v = pure . (/ prj v) . prj <$> u
 
 infixl 7 ^/.
 
-(./^) :: (Unit u, Functor f, Unit v, Unit (Div u v), Fractional a) => u a -> f (v a) -> f (Div u v a)
+(./^) :: (Unit du u, Functor f, Unit dv v, Unit d' (Div u v), Fractional a) => u a -> f (v a) -> f (Div u v a)
 u ./^ v = pure . (prj u /) . prj <$> v
 
 infixl 7 ./^
 
 data N (n :: Nat) = N
 
-(.^.) :: (Unit u, Unit (Exp u n), Fractional a, KnownNat n) => u a -> N n -> Exp u n a
+(.^.) :: (Unit du u, Unit d' (Exp u n), Fractional a, KnownNat n) => u a -> N n -> Exp u n a
 u .^. n = pure (prj u ^ natVal n)
 
 infixr 8 .^.
@@ -147,24 +147,24 @@ instance Dimension I where
 
 -- * Calculation
 
-sqU :: (Unit u, Unit (Sq (Dim u) u), Num a) => u a -> Sq (Dim u) u a
+sqU :: (Unit du u, Unit dsqu (Sq du u), Num a) => u a -> Sq du u a
 sqU = pure . join (*) . prj
 
-sqrtU :: (Unit u, Unit (Sqrt u), Floating a) => u a -> Sqrt u a
+sqrtU :: (Unit du u, Unit dsqrtu (Sqrt u), Floating a) => u a -> Sqrt u a
 sqrtU = pure . sqrt . prj
 
-dotU :: (Num a, Metric v, Unit u) => v (u a) -> v (u a) -> u a
+dotU :: (Num a, Metric v, Unit d u) => v (u a) -> v (u a) -> u a
 dotU a b = pure (dot (prj <$> a) (prj <$> b))
 
 -- | Compute the square of the norm efficiently and in the correct dimensions.
-quadranceU :: (Metric v, Unit u, Num a) => v (u a) -> (u :^: 2) a
+quadranceU :: (Metric v, Unit d u, Num a) => v (u a) -> (u :^: 2) a
 quadranceU = pure . quadrance . fmap prj
 
 -- | Compute the square of the distance efficiently and in the correct dimensions.
-qdU :: (Metric v, Unit u, Num a) => v (u a) -> v (u a) -> (u :^: 2) a
+qdU :: (Metric v, Unit d u, Num a) => v (u a) -> v (u a) -> (u :^: 2) a
 u `qdU` v = pure $ fmap prj u `qd` fmap prj v
 
-normalizeU :: (Metric v, Unit u, Floating a, Epsilon a) => v (u a) -> v (I a)
+normalizeU :: (Metric v, Unit d u, Floating a, Epsilon a) => v (u a) -> v (I a)
 normalizeU = fmap I . normalize . fmap prj
 
 
@@ -179,10 +179,9 @@ infixl 7 :*:
 instance Dimension (du :*: dv) where
   type Sq (du :*: dv) (u :*: v) = u :^: 2 :*: v :^: 2
 
-instance (Unit u, Unit v) => Unit (u :*: v) where
-  type Dim (u :*: v) = Mul (Dim u) (Dim v)
-  factor = K (getK (factor @u) * getK (factor @v))
-  suffix = K (getK (suffix @u) . ('·' :) . getK (suffix @v))
+instance (Unit du u, Unit dv v, d ~ Mul du dv) => Unit d (u :*: v) where
+  factor = K (getK (factor @_ @u) * getK (factor @_ @v))
+  suffix = K (getK (suffix @_ @u) . ('·' :) . getK (suffix @_ @v))
 
 
 newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
@@ -194,10 +193,9 @@ infixl 7 :/:
 instance Dimension (du :/: dv) where
   type Sq (du :/: dv) (u :/: v) = u :^: 2 :/: v :^: 2
 
-instance (Unit u, Unit v) => Unit (u :/: v) where
-  type Dim (u :/: v) = Div (Dim u) (Dim v)
-  factor = K (getK (factor @u) / getK (factor @v))
-  suffix = K (getK (suffix @u) . ('/' :) . getK (suffix @v))
+instance (Unit du u, Unit dv v, d ~ Div du dv) => Unit d (u :/: v) where
+  factor = K (getK (factor @_ @u) / getK (factor @_ @v))
+  suffix = K (getK (suffix @_ @u) . ('/' :) . getK (suffix @_ @v))
 
 
 newtype ((u :: * -> *) :^: (n :: Nat)) a = Exp { getExp :: a }
@@ -209,7 +207,6 @@ infixr 8 :^:
 instance Dimension (du :^: m) where
   type Sq (du :^: m) u = u :^: (m + 2)
 
-instance (Unit u, KnownNat n) => Unit (u :^: n) where
-  type Dim (u :^: n) = Exp (Dim u) n
-  factor = K (getK (factor @u) ^ natVal (Proxy @n))
-  suffix = K (getK (suffix @u) . superscript (fromIntegral (natVal (Proxy @n))))
+instance (Unit du u, d ~ Exp du n, KnownNat n) => Unit d (u :^: n) where
+  factor = K (getK (factor @_ @u) ^ natVal (Proxy @n))
+  suffix = K (getK (suffix @_ @u) . superscript (fromIntegral (natVal (Proxy @n))))

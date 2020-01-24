@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 module Unit.Angle
 ( Angle
@@ -31,8 +32,7 @@ newtype Radians a = Radians { getRadians :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Radians where
-  type Dim Radians = Angle
+instance Unit I Radians where
   suffix = K ("rad"++)
 
 
@@ -40,7 +40,6 @@ newtype Degrees a = Degrees { getDegrees :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Degrees where
-  type Dim Degrees = Angle
+instance Unit I Degrees where
   suffix = K ('°':)
   factor = K (pi/180)
