@@ -176,6 +176,24 @@ game = Sol.system >>= \ system -> runGame system $ do
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
 
+  runSystem $ do
+    let mx = 5.929_522_234_007_778_e9
+        sampler = V3 <$> uniformR (-mx, -mx) <*> uniformR (mx, mx) <*> pure 0
+
+    position <- sampler -- rejectionSample sampler (convert (I 1 ./. sqU (terra^.body_.radius_))) pdf
+    npcs_ @Body %= (Character
+        { actor   = Actor
+          { position  = position
+          , velocity  = 0
+          , rotation  = axisAngle (unit _z) (pi/2)
+          , mass      = 1000
+          , magnitude = convert (Metres 500)
+          }
+        , target  = Nothing
+        , actions = mempty
+        , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
+        }:)
+
   start <- now
   fork . evalState start . fix $ \ loop -> do
     integration
