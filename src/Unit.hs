@@ -1,12 +1,11 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Unit
@@ -52,7 +51,8 @@ class ( Applicative u
       , forall a . Ord a => Ord (u a)
       , forall a . Real a => Real (u a)
       )
-   => Unit (dim :: * -> *) u | u -> dim where
+   => Unit u where
+  type Dim u :: * -> *
   prj :: u a -> a
   default prj :: Coercible (u a) a => u a -> a
   prj = coerce
@@ -62,48 +62,50 @@ class ( Applicative u
 
   suffix :: K ShowS (u a)
 
-instance Unit I I where
+instance Unit I where
+  type Dim I = I
   suffix = K (showChar '1')
 
-instance Unit Identity Identity where
+instance Unit Identity where
+  type Dim Identity = Identity
   suffix = K (showChar '1')
 
 
 -- ** Conversion
 
-convert :: forall u u' d a . (Unit d u, Unit d u', Floating a) => u a -> u' a
-convert = pure . (/ getK (factor @_ @u')) . (* getK (factor @_ @u)) . prj
+convert :: forall u u' a . (Unit u, Unit u', Dim u ~ Dim u', Floating a) => u a -> u' a
+convert = pure . (/ getK (factor @u')) . (* getK (factor @u)) . prj
 
-converting :: forall u u' d a b . (Unit d u, Unit d u', Floating a, Floating b) => Iso (u a) (u b) (u' a) (u' b)
+converting :: forall u u' a b . (Unit u, Unit u', Dim u ~ Dim u', Floating a, Floating b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
 
 
 -- ** Comparison
 
-(.==.) :: forall u u' d a . (Unit d u, Unit d u', Eq a, Floating a) => u a -> u' a -> Bool
+(.==.) :: forall u u' a . (Unit u, Unit u', Dim u ~ Dim u', Eq a, Floating a) => u a -> u' a -> Bool
 a .==. b = prj a == prj (convert @u' @u b)
 
 infix 4 .==.
 
-compareU :: forall u u' d a . (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Ordering
+compareU :: forall u u' a . (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Ordering
 compareU a b = prj a `compare` prj (convert @u' @u b)
 
-(.<.) :: (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Bool
+(.<.) :: (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .<. b = a `compareU` b == LT
 
 infix 4 .<.
 
-(.>.) :: (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Bool
+(.>.) :: (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .>. b = a `compareU` b == GT
 
 infix 4 .>.
 
-(.<=.) :: (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Bool
+(.<=.) :: (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .<=. b = a `compareU` b /= GT
 
 infix 4 .<=.
 
-(.>=.) :: (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Bool
+(.>=.) :: (Unit u, Unit u', Dim u ~ Dim u', Ord a, Floating a) => u a -> u' a -> Bool
 a .>=. b = a `compareU` b /= LT
 
 infix 4 .>=.
@@ -111,19 +113,19 @@ infix 4 .>=.
 
 -- ** Formatting
 
-formatWith :: forall u d a . Unit d u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
+formatWith :: Unit u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
 formatWith with n u = with n u (showChar ' ' (getK (suffix `asTypeOf` (u <$ K ('x':))) ""))
 
-format :: forall u d a . (Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
+format :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat
 
-formatDec :: forall u d a . (Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatDec :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatDec = formatWith showFFloat
 
-formatExp :: forall u d a . (Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExp :: (Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
 
-formatExpR :: forall u d a . (HasCallStack, Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExpR :: (HasCallStack, Unit u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExpR = formatWith (\ prec x -> if
   | isNaN x                   -> showString "NaN"
   | isInfinite x              -> showString $ if x < 0 then "-Infinity" else "Infinity"

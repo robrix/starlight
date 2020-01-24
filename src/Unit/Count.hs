@@ -2,7 +2,6 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -32,5 +31,6 @@ newtype Count (sym :: Symbol) a = Count { getCount :: a }
 
 instance Dimension (Count sym)
 
-instance KnownSymbol sym => Unit (Count sym) (Count sym) where
+instance KnownSymbol sym => Unit (Count sym) where
+  type Dim (Count sym) = Count sym
   suffix = K (symbolVal (Proxy @sym) ++)
