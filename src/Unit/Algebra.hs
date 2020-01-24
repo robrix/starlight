@@ -98,7 +98,7 @@ type family Mul u v where
   Mul  I               v        = v                             -- 1 * v       = v
   Mul (u :^: n)        u        = u :^: (n + 1)                 -- uⁿ * u      = uⁿ⁺¹
   Mul (u :^: i)       (u :^: n) = u :^: (i + n)                 -- uⁱ * uⁿ     = uⁱ⁺ⁿ
-  Mul  u               u        = u :^: 2                       -- u * u       = u²
+  Mul  u               u        = Exp u 2                       -- u * u       = u²
   Mul (u :/: v)        v        = u                             -- u / v * v   = u
   Mul (u :/: v :^: n)  v        = Div u (Exp v (n - 1))         -- u / vⁿ * v  = u / vⁿ⁻¹
   Mul  u              (v :*: w) = Mul (Mul u w) v               -- u * (v * w) = (u * w) * v
@@ -120,7 +120,7 @@ type family Div u v where
   Div  u              (v :^: n) = Div (Div u v) (Exp v (n - 1)) -- u / vⁿ      = (u / v) / vⁿ⁻¹
   Div  u              (v :/: w) = Mul (Div u v) w               -- u / (v / w) = u / v * w
   Div (u :*: v)        w        = Mul (Div u w) v               -- (u * v) / w = (u / w) * v
-  Div (u :/: v)        v        = u :/: v :^: 2                 -- (u / v) / v = u / v²
+  Div (u :/: v)        v        = u :/: Exp v 2                 -- (u / v) / v = u / v²
   Div (u :/: v)        w        = Div u w :/: v                 -- (u / v) / w = (u / w) / v
   Div  u               v        = u :/: v                       -- u / v       = u / v
 
