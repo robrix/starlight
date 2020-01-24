@@ -14,7 +14,7 @@ import Unit.Algebra
 
 -- | Construct vertices for a circle.
 circle
-  :: (Floating a, Unit u)
+  :: (Floating a, Unit d u)
   => u a        -- ^ The radius.
   -> Int        -- ^ The number of vertices to produce.
   -> [V2 (u a)] -- ^ The vertices for the circle.
@@ -26,7 +26,7 @@ circle radius n =
 
 
 intersects
-  :: (Floating a, Metric v, Unit l, Ord a)
+  :: (Floating a, Metric v, Unit d l, Ord a)
   => v (l a) -- ^ Sphere centre.
   -> l a     -- ^ Sphere radius.
   -> v (l a) -- ^ Ray origin.
@@ -37,7 +37,7 @@ intersects c r o l = isJust $ do
   guard (d1 >= 0 || d2 >= 0)
 
 intersections
-  :: (Floating a, Metric v, Unit l, Ord a)
+  :: (Floating a, Metric v, Unit d l, Ord a)
   => v (l a) -- ^ Sphere centre.
   -> l a     -- ^ Sphere radius.
   -> v (l a) -- ^ Ray origin.
@@ -52,5 +52,5 @@ intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
   a ± b = (a + b, a - b)
 
 
-area :: (Unit length, Unit (Sq length), Floating a) => length a -> Sq length a
+area :: (Unit d length, Unit d' (Sq length), Floating a) => length a -> Sq length a
 area r = I pi .*. sqU r

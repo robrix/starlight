@@ -31,16 +31,16 @@ instance Num c => Category (Transform c) where
   id = Transform identity
   Transform a . Transform b = Transform (b !*! a)
 
-mkTranslation :: (Num c, Unit u) => V3 (u c) -> Transform c u u
+mkTranslation :: (Num c, Unit d u) => V3 (u c) -> Transform c u u
 mkTranslation v = Transform (identity & translation .~ fmap prj v)
 
-mkScale :: (Num c, Unit u, Unit v, Unit (Div u v)) => V3 (Div u v c) -> Transform c u v
+mkScale :: (Num c, Unit du u, Unit dv v, Unit d' (Div u v)) => V3 (Div u v c) -> Transform c u v
 mkScale v = Transform (scaled (point (prj <$> v)))
 
 mkRotation :: Num c => Quaternion (I c) -> Transform c a a
 mkRotation q = Transform (identity !*! mkTransformation (coerce q) 0)
 
-apply :: (Num c, Unit b) => Transform c a b -> V4 (b c) -> V4 (b c)
+apply :: (Num c, Unit d b) => Transform c a b -> V4 (b c) -> V4 (b c)
 apply (Transform m) v = pure <$> (m !* fmap prj v)
 
 tmap :: (c -> c') -> Transform c a b -> Transform c' a b
