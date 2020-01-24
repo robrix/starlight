@@ -15,7 +15,6 @@ module Unit
 , convert
 , convertTo
 , converting
-, convertingTo
   -- ** Comparison
 , (.==.)
 , compareU
@@ -83,9 +82,6 @@ convertTo _ = convert
 
 converting :: forall u u' a b . (Unit u, Unit u', Dim u ~ Dim u', Floating a, Floating b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
-
-convertingTo :: (Unit u, Unit u', Dim u ~ Dim u', Floating a, Floating b) => (forall a . a -> u' a) -> Iso (u a) (u b) (u' a) (u' b)
-convertingTo _ = converting
 
 
 -- ** Comparison
