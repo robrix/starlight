@@ -1,0 +1,2 @@
+module Stochastic.Histogram
+() where
