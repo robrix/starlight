@@ -53,6 +53,7 @@ import           Starlight.Time
 import           Starlight.UI
 import           Starlight.View
 import           System.FilePath
+import qualified System.Random as R
 import           System.Random.TF (TFGen, newTFGen)
 import           UI.Colour
 import           UI.Context
@@ -264,3 +265,13 @@ scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
 -- FIXME: this is really stupid; there *has* to be a better way to say “I want a 500 m ship to be 30 px long” or w/e
 shipScale :: I Double
 shipScale = 30
+
+
+rejectionSampleR :: (R.Random a, R.Random b, Fractional b, Ord b, Has Random sig m) => (a, a) -> b -> (a -> b) -> m a
+rejectionSampleR r maxPdf pdf = fix $ \ loop -> do
+  x <- uniformR r
+  y <- uniformR (0, maxPdf)
+  if y <= pdf x then
+    pure x
+  else
+    loop
