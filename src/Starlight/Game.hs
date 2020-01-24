@@ -181,7 +181,7 @@ game = Sol.system >>= \ system -> runGame system $ do
     let position = ext (cartesian2 theta (convert @_ @Distance r)) 0 + terra^.position_
     npcs_ @Body %= (Character
         { actor   = Actor
-          { position  = position
+          { position
           , velocity  = 0
           , rotation  = axisAngle (unit _z) (pi/2)
           , mass      = 1000
