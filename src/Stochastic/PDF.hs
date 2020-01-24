@@ -2,4 +2,4 @@ module Stochastic.PDF
 ( PDF(..)
 ) where
 
-newtype PDF a b = PDF (a -> b)
+newtype PDF a b = PDF { runPDF :: a -> b }
