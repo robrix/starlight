@@ -91,6 +91,9 @@ angleTo :: (RealFloat a, Unit u) => V2 (u a) -> V2 (u a) -> I a
 angleTo v1 v2 = angleOf (v2 - v1)
 
 
+-- | Compute the angle between a rotation and a proposed angle.
+--
+-- The result lies in the interval [-pi, pi].
 facingRel :: (Real a, Floating a) => Quaternion (I a) -> I a -> I a
 facingRel rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - target))
 
