@@ -51,6 +51,7 @@ class ( Applicative u
       , forall a . Fractional a => Fractional (u a)
       , forall a . Eq a => Eq (u a)
       , forall a . Ord a => Ord (u a)
+      , forall a . Real a => Real (u a)
       , forall a b . Coercible a b => Coercible (u a) (u b)
       )
    => Unit u where
