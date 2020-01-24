@@ -8,4 +8,4 @@ import Data.Semigroup (Sum(..))
 
 newtype PDF a b = PDF { runPDF :: a -> b }
   deriving (Applicative, Functor, Monad)
-  deriving Semigroup via (a -> Sum b)
+  deriving (Monoid, Semigroup) via (a -> Sum b)
