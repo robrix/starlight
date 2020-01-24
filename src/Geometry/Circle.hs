@@ -1,4 +1,6 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeOperators #-}
 module Geometry.Circle
 ( circle
 , intersects
@@ -11,6 +13,7 @@ import Data.Maybe (isJust)
 import Linear.Exts
 import Unit
 import Unit.Algebra
+import Unit.Length
 
 -- | Construct vertices for a circle.
 circle
@@ -52,5 +55,5 @@ intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
   a ± b = (a + b, a - b)
 
 
-area :: (Unit d length, Unit d' (Sq length), Floating a) => length a -> Sq length a
+area :: (Unit Length length, Floating a) => length a -> (length :^: 2) a
 area r = I pi .*. sqU r

@@ -9,6 +9,7 @@ module Unit.Length
 , Metres(..)
 , fromAUs
 , module Unit
+, module Unit.Algebra
 , module Unit.Multiple
 ) where
 
@@ -23,9 +24,13 @@ import Linear.Metric
 import Linear.Vector
 import System.Random (Random)
 import Unit
+import Unit.Algebra
 import Unit.Multiple
 
 data Length a
+
+instance Dimension Length
+
 
 newtype Metres a = Metres { getMetres :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
