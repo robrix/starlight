@@ -298,9 +298,9 @@ sparkify bins
   | otherwise = spark <$> bins
   where
   sparks = " ▁▂▃▄▅▆▇█"
-  maxSpark = length sparks - 1
-  max = maximum bins
-  spark n = sparks !! round ((fromIntegral n / fromIntegral max :: Double) * fromIntegral maxSpark)
+  maxSpark = fromIntegral $ length sparks - 1
+  max = fromIntegral $ maximum bins :: Double
+  spark n = sparks !! round ((fromIntegral n / max) * maxSpark)
 
 printHistogram :: (Real a, Has (Lift IO) sig m) => [a] -> Int -> m a -> m ()
 printHistogram buckets n = replicateM n >=> sendM . putStrLn . sparkify . histogram buckets
