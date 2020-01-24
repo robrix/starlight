@@ -288,3 +288,12 @@ histogram buckets samples = map fst (foldl' bucketSample (map ((,) 0) buckets) s
             , from   <= sample
             , sample <= to     -> (succ count, from) : rest
             | otherwise        -> (     count, from) : rest) [] accum
+
+sparkify :: [Int] -> String
+sparkify bins
+  | null bins = ""
+  | otherwise = spark <$> bins
+  where sparks = " ▁▂▃▄▅▆▇█"
+        maxSpark = pred (length sparks)
+        max = maximum bins
+        spark n = sparks !! round ((fromIntegral n * ((1.0 :: Double) / fromIntegral max)) * fromIntegral maxSpark)
