@@ -53,7 +53,7 @@ import           Starlight.Time
 import           Starlight.UI
 import           Starlight.View
 import           System.FilePath
-import           System.Random (StdGen)
+import           System.Random.TF (TFGen, newTFGen)
 import           UI.Colour
 import           UI.Context
 import           UI.Label as Label
@@ -68,7 +68,7 @@ runGame
      , MonadFail m
      )
   => System Body
-  -> ReaderC Epoch (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (RandomC StdGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))))) a
+  -> ReaderC Epoch (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (RandomC TFGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))))) a
   -> m a
 runGame system
   = Window.runSDL
@@ -77,7 +77,7 @@ runGame system
   . runGLC
   . runFinally
   . runLiftIO
-  . evalRandomSystem
+  . (\ m -> sendM newTFGen >>= flip evalRandom m)
   . TVar.evalState @Input mempty
   . TVar.evalState system
       { players =
