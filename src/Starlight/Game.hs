@@ -174,7 +174,7 @@ game = Sol.system >>= \ system -> runGame system $ do
   targetLabel <- measure "label" Label.label
 
   start <- now
-  fork . evalState start . fix $ \ loop -> do
+  fork . interleave . evalState start . fix $ \ loop -> do
     integration
     yield
     hasQuit <- get
