@@ -159,6 +159,7 @@ library
     , optparse-applicative
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , random
     , sdl2 ^>= 2.5
     , stm ^>= 2.5
     , text
