@@ -83,6 +83,7 @@ runWindow name size = E.bracket
     , windowGraphicsContext = OpenGLContext glConfig
     , windowHighDPI         = True
     , windowMode            = FullscreenDesktop
+    , windowInputGrabbed    = True
     }
   glConfig = defaultOpenGL
     { glProfile        = Core Normal 4 1
