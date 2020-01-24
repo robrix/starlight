@@ -49,6 +49,7 @@ import Numeric
 class ( Applicative u
       , forall a b . Coercible a b => Coercible (u a) (u b)
       , forall a . Eq a => Eq (u a)
+      , forall a . Floating a => Floating (u a)
       , forall a . Fractional a => Fractional (u a)
       , forall a . Num a => Num (u a)
       , forall a . Ord a => Ord (u a)
