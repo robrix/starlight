@@ -176,6 +176,9 @@ newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
 
 infixl 7 :*:
 
+instance Dimension (du :*: dv) where
+  type Sq (du :*: dv) (u :*: v) = u :^: 2 :*: v :^: 2
+
 instance (Unit u, Unit v) => Unit (u :*: v) where
   type Dim (u :*: v) = Mul (Dim u) (Dim v)
   factor = K (getK (factor @u) * getK (factor @v))
@@ -188,6 +191,9 @@ newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
 
 infixl 7 :/:
 
+instance Dimension (du :/: dv) where
+  type Sq (du :/: dv) (u :/: v) = u :^: 2 :/: v :^: 2
+
 instance (Unit u, Unit v) => Unit (u :/: v) where
   type Dim (u :/: v) = Div (Dim u) (Dim v)
   factor = K (getK (factor @u) / getK (factor @v))
@@ -199,6 +205,9 @@ newtype ((u :: * -> *) :^: (n :: Nat)) a = Exp { getExp :: a }
   deriving (Additive, Applicative, Metric, Monad) via I
 
 infixr 8 :^:
+
+instance Dimension (du :^: m) where
+  type Sq (du :^: m) u = u :^: (m + 2)
 
 instance (Unit u, KnownNat n) => Unit (u :^: n) where
   type Dim (u :^: n) = Exp (Dim u) n
