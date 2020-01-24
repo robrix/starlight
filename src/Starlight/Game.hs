@@ -21,10 +21,9 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
-import           Control.Lens (itraverse, ix, (&), (^.), (+~))
-import           Control.Monad (replicateM, unless, (>=>))
+import           Control.Lens (itraverse, (^.))
+import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
-import           Data.Foldable (foldl')
 import           Data.Function (fix)
 import           Data.Functor.Interval
 import           Data.Time.Clock (UTCTime)
@@ -283,25 +282,3 @@ scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
 -- FIXME: this is really stupid; there *has* to be a better way to say “I want a 500 m ship to be 30 px long” or w/e
 shipScale :: I Double
 shipScale = 30
-
-
-histogram :: RealFrac a => Interval I a -> Int -> [a] -> [Int]
-histogram interval n samples
-  | [] <- samples = []
-  | otherwise     = foldl' bucket (replicate n 0) samples
-  where
-  which sample = floor (getI (toUnit interval (I sample)) * fromIntegral n)
-  bucket accum sample = accum & ix (which sample) +~ 1
-
-sparkify :: [Int] -> String
-sparkify bins
-  | null bins = ""
-  | otherwise = spark <$> bins
-  where
-  sparks = " ▁▂▃▄▅▆▇█"
-  maxSpark = fromIntegral $ length sparks - 1
-  max = fromIntegral $ maximum bins :: Double
-  spark n = sparks !! round ((fromIntegral n / max) * maxSpark)
-
-printHistogram :: (RealFrac a, Has (Lift IO) sig m) => Interval I a -> Int -> Int -> m a -> m ()
-printHistogram interval b n = replicateM n >=> sendM . putStrLn . sparkify . histogram interval b
