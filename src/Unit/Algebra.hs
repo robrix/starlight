@@ -19,7 +19,6 @@ module Unit.Algebra
 , (^/.)
 , (./^)
 , N(..)
-, (.^.)
 , Mul
 , Div
 , Exp
@@ -88,11 +87,6 @@ u ./^ v = pure . (prj u /) . prj <$> v
 infixl 7 ./^
 
 data N (n :: Nat) = N
-
-(.^.) :: (Unit du u, Unit d' (Exp u n), Fractional a, KnownNat n) => u a -> N n -> Exp u n a
-u .^. n = pure (prj u ^ natVal n)
-
-infixr 8 .^.
 
 
 type family Mul u v where
