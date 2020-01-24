@@ -31,6 +31,7 @@ import           Data.Time.Clock (UTCTime)
 import           GL
 import           GL.Effect.Check
 import           Linear.Exts
+import qualified SDL
 import           Starlight.Actor
 import           Starlight.AI
 import           Starlight.Body
@@ -167,6 +168,7 @@ game
      )
   => m ()
 game = Sol.system >>= \ system -> runGame system $ do
+  SDL.cursorVisible SDL.$= False
   trace "loading typeface"
   face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
   measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-⁻⁰¹²³⁴⁵⁶⁷⁸⁹·" -- characters to preload
