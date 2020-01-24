@@ -96,44 +96,6 @@ runGame system
           , ship    = Ship{ colour = white, armour = 1_000, radar }
           }
         ]
-      , npcs    =
-        [ Character
-          { actor   = Actor
-            { position  = convert <$> start
-            , velocity  = 0
-            , rotation  = axisAngle (unit _z) (pi/2)
-            , mass      = 1000
-            , magnitude = convert magnitude
-            }
-          , target  = Nothing -- Just (C Player)
-          , actions = mempty
-          , ship    = Ship{ colour = red, armour = Interval 500 500, radar }
-          }
-        , Character
-          { actor   = Actor
-            { position  = convert <$> start
-            , velocity  = 0
-            , rotation  = axisAngle (unit _z) (pi/2)
-            , mass      = 1000
-            , magnitude = convert magnitude
-            }
-          , target  = Just $ B (Star (10, "Sol"))
-          , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, radar }
-          }
-        , Character
-          { actor   = Actor
-            { position  = convert <$> start
-            , velocity  = 0
-            , rotation  = axisAngle (unit _z) (pi/2)
-            , mass      = 1000
-            , magnitude = convert magnitude
-            }
-          , target  = Just $ B (Star (10, "Sol") :/ (199, "Mercury"))
-          , actions = mempty
-          , ship    = Ship{ colour = white, armour = 1_000, radar }
-          }
-        ]
       }
     . TVar.evalState False
     . runJ2000
