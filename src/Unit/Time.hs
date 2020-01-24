@@ -22,13 +22,14 @@ import Linear.Conjugate
 import Linear.Epsilon
 import Linear.Metric
 import Linear.Vector
+import System.Random (Random)
 import Unit
 import Unit.Multiple
 
 data Time a
 
 newtype Seconds a = Seconds { getSeconds :: a }
-  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Seconds where
@@ -37,7 +38,7 @@ instance Unit Seconds where
 
 
 newtype Minutes a = Minutes { getMinutes :: a }
-  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Minutes where
@@ -47,7 +48,7 @@ instance Unit Minutes where
 
 
 newtype Hours a = Hours { getHours :: a }
-  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Hours where
@@ -57,7 +58,7 @@ instance Unit Hours where
 
 
 newtype Days a = Days { getDays :: a }
-  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 -- | Note that this does not take e.g. leap seconds into account.
