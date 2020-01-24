@@ -25,6 +25,7 @@ module Unit.Algebra
 , Exp
 , Sqrt
 , Dimension(..)
+, Pow
   -- * Calculation
 , sqU
 , sqrtU
