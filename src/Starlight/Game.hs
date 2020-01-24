@@ -299,5 +299,5 @@ sparkify bins
         max = maximum bins
         spark n = sparks !! round ((fromIntegral n * ((1.0 :: Double) / fromIntegral max)) * fromIntegral maxSpark)
 
-printHistogram :: (Real a, Has (Lift IO) sig m, Has Random sig m) => [a] -> Int -> m a -> m ()
+printHistogram :: (Real a, Has (Lift IO) sig m) => [a] -> Int -> m a -> m ()
 printHistogram buckets n = replicateM n >=> sendM . putStrLn . sparkify . histogram buckets
