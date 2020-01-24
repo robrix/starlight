@@ -2,6 +2,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Ephemeris
 ( Ephemeris(..)
@@ -51,9 +52,9 @@ fromEphemeris Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, incl
     { eccentricity    = I eccentricity
     , semimajor
     , orientation     = orient
-      (convertFrom Degrees longitudeOfAscendingNode)
-      (convertFrom Degrees inclination)
-      (convertFrom Degrees argumentOfPerifocus)
+      (convert @Degrees longitudeOfAscendingNode)
+      (convert @Degrees inclination)
+      (convert @Degrees argumentOfPerifocus)
     , period          = siderealOrbitPeriod
     , timeOfPeriapsis = timeOfPeriapsisRelativeToEpoch
     }

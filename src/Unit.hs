@@ -13,7 +13,6 @@ module Unit
   Unit(..)
   -- ** Conversion
 , convert
-, convertFrom
 , convertTo
 , converting
 , convertingFrom
@@ -79,9 +78,6 @@ instance Unit Identity where
 
 convert :: forall u u' a . (Unit u, Unit u', Dim u ~ Dim u', Floating a) => u a -> u' a
 convert = pure . (/ getK (factor @u')) . (* getK (factor @u)) . prj
-
-convertFrom :: (Unit u, Unit u', Dim u ~ Dim u', Floating a) => (forall a . a -> u a) -> u a -> u' a
-convertFrom _ = convert
 
 convertTo :: (Unit u, Unit u', Dim u ~ Dim u', Floating a) => (forall a . a -> u' a) -> u a -> u' a
 convertTo _ = convert
