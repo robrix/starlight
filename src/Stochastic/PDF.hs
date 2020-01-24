@@ -19,3 +19,8 @@ instance Num b => Num (PDF a b) where
   abs    = fmap abs
   signum = fmap signum
   fromInteger = pure . fromInteger
+
+instance Fractional b => Fractional (PDF a b) where
+  (/) = liftA2 (/)
+  recip = fmap recip
+  fromRational = pure . fromRational
