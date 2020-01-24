@@ -26,12 +26,12 @@ ai c@Character{ actor = Actor{ position = here, rotation }, target } = do
     -- FIXME: allow other behaviours relating to targets, e.g. following
     Just (Left StateVectors{ actor = Actor{ position = there } }) -> Set.fromList
       ( Face Target
-      : [ Thrust | isFacing (pi/4) rotation (angleTo' there) ]
+      : [ Thrust | facingRel rotation (angleTo' there) < pi/4 ]
       )
     Just (Right Character{ actor = Actor{ position = there } }) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust    | isFacing (pi/4)   rotation (angleTo' there) ]
-      , [ Fire Main | isFacing (pi/128) rotation (angleTo' there) ]
+      , [ Thrust    | facingRel rotation (angleTo' there) < pi/4 ]
+      , [ Fire Main | facingRel rotation (angleTo' there) < pi/128 ]
       ]
     -- FIXME: wander
     -- FIXME: pick a new target

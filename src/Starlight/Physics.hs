@@ -122,10 +122,10 @@ runActions i c = do
     Jump -> case target of
       Just target
         | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> pure c
-        | isFacing (pi/128) rotation targetAngle -> do
+        | facingRel rotation targetAngle < pi/128 -> do
           let distance' = distance (projected dt target) (projected dt c)
           pure $! c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected dt target - projected dt c)
-        | otherwise                              -> go dt system c (Face Target) -- FIXME: face *near* the target
+        | otherwise                               -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
         factor = 0.75
         targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)

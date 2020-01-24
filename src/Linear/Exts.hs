@@ -9,7 +9,7 @@ module Linear.Exts
 , direction
 , angleOf
 , angleTo
-, isFacing
+, facingRel
 , toAxisAngle
 , cartesian2
 , Ext(..)
@@ -91,8 +91,8 @@ angleTo :: (RealFloat a, Unit u) => V2 (u a) -> V2 (u a) -> I a
 angleTo v1 v2 = angleOf (v2 - v1)
 
 
-isFacing :: (Real a, Floating a) => I a -> Quaternion (I a) -> I a -> Bool
-isFacing epsilon rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - target)) < epsilon
+facingRel :: (Real a, Floating a) => Quaternion (I a) -> I a -> I a
+facingRel rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - target))
 
 
 -- | Compute the axis/angle of a rotation represented as a unit quaternion.
