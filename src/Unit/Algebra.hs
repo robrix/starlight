@@ -7,7 +7,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Unit.Algebra
@@ -138,11 +138,11 @@ type family Sqrt u where
 
 
 class Dimension (dim :: * -> *) where
-  type Sq dim (u :: * -> *) :: * -> *
+  type Sq dim (u :: * -> *) = (res :: * -> *) | res -> u
   type Sq dim u = u :^: 2
 
 instance Dimension I where
-  type Sq I u = u
+  type Sq I I = I
 
 
 -- * Calculation
