@@ -54,7 +54,6 @@ import           Starlight.Time
 import           Starlight.UI
 import           Starlight.View
 import           System.FilePath
-import qualified System.Random as R
 import           System.Random.TF (TFGen, newTFGen)
 import           UI.Colour
 import           UI.Context
