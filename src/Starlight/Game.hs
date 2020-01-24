@@ -24,6 +24,7 @@ import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
 import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
+import           Data.Foldable (foldl')
 import           Data.Function (fix)
 import           Data.Functor.Interval
 import           Data.Time.Clock (UTCTime)
@@ -275,3 +276,15 @@ rejectionSample sample maxPdf pdf = fix $ \ loop -> do
     pure x
   else
     loop
+
+
+histogram :: Real a => [a] -> [a] -> [Int]
+histogram []      _       = []
+histogram _       []      = []
+histogram buckets samples = map fst (foldl' bucketSample (map ((,) 0) buckets) samples)
+  where bucketSample accum sample = foldr (\ each rest -> case each of
+          (count, from)
+            | ((_, to) : _) <- rest
+            , from   <= sample
+            , sample <= to     -> (succ count, from) : rest
+            | otherwise        -> (     count, from) : rest) [] accum
