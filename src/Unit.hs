@@ -47,12 +47,12 @@ import Numeric
 -- * Units
 
 class ( Applicative u
-      , forall a . Num a => Num (u a)
-      , forall a . Fractional a => Fractional (u a)
+      , forall a b . Coercible a b => Coercible (u a) (u b)
       , forall a . Eq a => Eq (u a)
+      , forall a . Fractional a => Fractional (u a)
+      , forall a . Num a => Num (u a)
       , forall a . Ord a => Ord (u a)
       , forall a . Real a => Real (u a)
-      , forall a b . Coercible a b => Coercible (u a) (u b)
       )
    => Unit u where
   type Dim u :: * -> *
