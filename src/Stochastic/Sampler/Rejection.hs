@@ -1,2 +1,16 @@
 module Stochastic.Sampler.Rejection
-() where
+( sample
+) where
+
+import           Control.Effect.Random
+import           Data.Function (fix)
+import qualified System.Random as R
+
+sample :: (R.Random b, Num b, Ord b, Has Random sig m) => m a -> b -> (a -> b) -> m a
+sample sample maxPdf pdf = fix $ \ loop -> do
+  x <- sample
+  y <- uniformR (0, maxPdf)
+  if y <= pdf x then
+    pure x
+  else
+    loop
