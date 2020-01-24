@@ -22,7 +22,7 @@ import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
-import           Control.Monad (unless, when, (>=>))
+import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Function (fix)
 import           Data.Functor.Interval
@@ -176,17 +176,10 @@ game = Sol.system >>= \ system -> runGame system $ do
 
   runSystem $ do
     terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
-    let pdf v
-          | qdV .>. sqU (terra^.body_.radius_) = I 1 ./. qdV
-          | otherwise                          = 0
-          where
-          qdV = v `qdU` (terra^.position_)
-        mx = 5.929_522_234_007_778_e9
-        sample = V3 <$> uniformR (-mx, -mx) <*> uniformR (mx, mx) <*> pure 0
-    position <- sample
-    y <- uniformR (0, convert (I 1 ./. sqU (terra^.body_.radius_)))
-    when (y <= pdf position) $
-      npcs_ @Body %= (Character
+    theta <- uniformR (-pi, pi)
+    r <- (terra^.body_.radius_ +) <$> exponential 1
+    let position = ext (cartesian2 theta (convert @_ @Distance r)) 0 + terra^.position_
+    npcs_ @Body %= (Character
         { actor   = Actor
           { position
           , velocity  = 0
