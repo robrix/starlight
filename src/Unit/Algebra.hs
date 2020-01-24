@@ -198,6 +198,6 @@ newtype ((u :: * -> *) :^: (n :: Nat)) a = Exp { getExp :: a }
 infixr 8 :^:
 
 instance (Unit u, KnownNat n) => Unit (u :^: n) where
-  type Dim (u :^: n) = Dim u :^: n
+  type Dim (u :^: n) = Exp (Dim u) n
   factor = K (getK (factor @u) ^ natVal (Proxy @n))
   suffix = K (getK (suffix @u) . superscript (fromIntegral (natVal (Proxy @n))))
