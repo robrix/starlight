@@ -7,5 +7,5 @@ module Stochastic.PDF
 import Data.Semigroup (Sum(..))
 
 newtype PDF a b = PDF { runPDF :: a -> b }
-  deriving (Functor)
+  deriving (Applicative, Functor, Monad)
   deriving Semigroup via (a -> Sum b)
