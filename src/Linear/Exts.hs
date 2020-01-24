@@ -24,7 +24,6 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
-import Control.Applicative (liftA2)
 import Data.Functor.I
 import Data.Functor.Interval
 import Linear.Epsilon
@@ -79,7 +78,7 @@ reject a b = a ^-^ project a b
 
 -- | The unit vector in the direction of another vector.
 direction :: (Metric v, Epsilon a, Floating a, Unit u) => v (u a) -> v (u a) -> v (I a)
-direction a b = normalizeU (liftI2 (.-.) a b)
+direction a b = normalizeU (a ^-^ b)
 
 
 -- | The angle of a vector.
@@ -89,7 +88,7 @@ angleOf v = I (atan2 y x) where
 
 -- | The angle from the first vector to the second.
 angleTo :: (RealFloat a, Unit u) => V2 (u a) -> V2 (u a) -> I a
-angleTo v1 v2 = angleOf (liftA2 (.-.) v2 v1)
+angleTo v1 v2 = angleOf (v2 - v1)
 
 
 isFacing :: (Real a, Floating a) => I a -> Quaternion (I a) -> I a -> Bool
