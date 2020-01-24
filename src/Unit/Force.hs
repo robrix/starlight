@@ -16,4 +16,4 @@ import Unit.Time
 
 type Force mass length time = mass :*: length :/: time :^: 2
 
-type Newtons = Kilo Grams :*: Metres :/: Seconds :^: 2
+type Newtons = Force (Kilo Grams) Metres Seconds
