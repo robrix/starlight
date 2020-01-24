@@ -139,22 +139,8 @@ game = Sol.system >>= \ system -> runGame system $ do
   targetLabel <- measure "label" Label.label
 
   runSystem $ do
-    terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
-    theta <- uniformR (-pi, pi)
-    r <- (terra^.body_.radius_ +) <$> exponential 1
-    let position = ext (cartesian2 theta (convert @_ @Distance r)) 0 + terra^.position_
-    npcs_ @Body %= (Character
-        { actor   = Actor
-          { position
-          , velocity  = 0
-          , rotation  = axisAngle (unit _z) (pi/2)
-          , mass      = 1000
-          , magnitude = convert (Metres 500)
-          }
-        , target  = Nothing
-        , actions = mempty
-        , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
-        }:)
+    npc <- generateNPC
+    npcs_ @Body %= (npc:)
 
   start <- now
   fork . evalState start . fix $ \ loop -> do
@@ -174,6 +160,29 @@ game = Sol.system >>= \ system -> runGame system $ do
     measure "swap" Window.swap
     loop
   put True
+
+generateNPC
+  :: ( Has Random sig m
+     , Has (Reader (System StateVectors)) sig m
+     )
+  => m Character
+generateNPC = do
+  terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
+  theta <- uniformR (-pi, pi)
+  r <- (terra^.body_.radius_ +) <$> exponential 1
+  let position = ext (cartesian2 theta (convert @_ @Distance r)) 0 + terra^.position_
+  pure $! Character
+    { actor   = Actor
+      { position
+      , velocity  = 0
+      , rotation  = axisAngle (unit _z) (pi/2)
+      , mass      = 1000
+      , magnitude = convert (Metres 500)
+      }
+    , target  = Nothing
+    , actions = mempty
+    , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
+    }
 
 integration
   :: ( Effect sig
