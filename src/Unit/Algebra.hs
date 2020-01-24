@@ -24,7 +24,7 @@ module Unit.Algebra
 , Div
 , Exp
 , Sqrt
-, Dimension(..)
+, Dimension
 , Pow
   -- * Calculation
 , sqU
@@ -138,12 +138,9 @@ type family Sqrt u where
   Sqrt (u :^: 4) = u :^: 2
 
 
-class Dimension (dim :: * -> *) where
-  type Sq dim (u :: * -> *) = (res :: * -> *) | res -> u
-  type Sq dim u = u :^: 2
+class Dimension (dim :: * -> *)
 
-instance Dimension I where
-  type Sq I I = I
+instance Dimension I
 
 
 class (Dimension du, Unit du u) => Pow du u (n :: Nat) (pow :: * -> *) | du u n -> pow, du pow -> u
@@ -153,7 +150,7 @@ instance Unit I u => Pow I u n u
 
 -- * Calculation
 
-sqU :: (Unit du u, Unit dsqu (Sq du u), Num a) => u a -> Sq du u a
+sqU :: (Applicative squ, Pow du u 2 squ, Num a) => u a -> squ a
 sqU = pure . join (*) . prj
 
 sqrtU :: (Unit du u, Unit dsqrtu (Sqrt u), Floating a) => u a -> Sqrt u a
@@ -182,8 +179,7 @@ newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
 
 infixl 7 :*:
 
-instance Dimension (du :*: dv) where
-  type Sq (du :*: dv) (u :*: v) = u :^: 2 :*: v :^: 2
+instance Dimension (du :*: dv)
 
 instance (Pow du u n un, Pow dv v n vn) => Pow (du :*: dv) (u :*: v) n (un :*: vn)
 
@@ -198,8 +194,7 @@ newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
 
 infixl 7 :/:
 
-instance Dimension (du :/: dv) where
-  type Sq (du :/: dv) (u :/: v) = u :^: 2 :/: v :^: 2
+instance Dimension (du :/: dv)
 
 instance (Pow du u n un, Pow dv v n vn) => Pow (du :/: dv) (u :/: v) n (un :/: vn)
 
@@ -214,8 +209,7 @@ newtype ((u :: * -> *) :^: (n :: Nat)) a = Exp { getExp :: a }
 
 infixr 8 :^:
 
-instance Dimension (du :^: m) where
-  type Sq (du :^: m) u = u :^: (m + 2)
+instance Dimension (du :^: m)
 
 instance (Unit du u, mn ~ (m + n), KnownNat m) => Pow (du :^: m) (u :^: m) n (u :^: mn)
 
