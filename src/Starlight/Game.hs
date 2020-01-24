@@ -289,8 +289,8 @@ histogram buckets samples
     (count, from)
       | ((_, to) : _) <- rest
       , from   <= sample
-      , sample <= to     -> (succ count, from) : rest
-      | otherwise        -> (     count, from) : rest) [] accum
+      , sample <= to     -> (count + 1, from) : rest
+      | otherwise        -> (count,     from) : rest) [] accum
 
 sparkify :: [Int] -> String
 sparkify bins
@@ -298,7 +298,7 @@ sparkify bins
   | otherwise = spark <$> bins
   where
   sparks = " ▁▂▃▄▅▆▇█"
-  maxSpark = pred (length sparks)
+  maxSpark = length sparks - 1
   max = maximum bins
   spark n = sparks !! round ((fromIntegral n / fromIntegral max :: Double) * fromIntegral maxSpark)
 
