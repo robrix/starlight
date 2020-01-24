@@ -26,23 +26,23 @@ circle radius n =
 
 
 intersects
-  :: (Floating a, Metric v, Ord a)
-  => v a -- ^ Sphere centre.
-  -> a   -- ^ Sphere radius.
-  -> v a -- ^ Ray origin.
-  -> v a -- ^ Ray direction (unit vector).
+  :: (Floating a, Metric v, Unit l, Ord a)
+  => v (l a) -- ^ Sphere centre.
+  -> l a     -- ^ Sphere radius.
+  -> v (l a) -- ^ Ray origin.
+  -> v (l a) -- ^ Ray direction (unit vector).
   -> Bool
 intersects c r o l = isJust $ do
   (d1, d2) <- intersections c r o l
   guard (d1 >= 0 || d2 >= 0)
 
 intersections
-  :: (Floating a, Metric v, Ord a)
-  => v a -- ^ Sphere centre.
-  -> a   -- ^ Sphere radius.
-  -> v a -- ^ Ray origin.
-  -> v a -- ^ Ray direction (unit vector).
-  -> Maybe (a, a)
+  :: (Floating a, Metric v, Unit l, Ord a)
+  => v (l a) -- ^ Sphere centre.
+  -> l a     -- ^ Sphere radius.
+  -> v (l a) -- ^ Ray origin.
+  -> v (l a) -- ^ Ray direction (unit vector).
+  -> Maybe (l a, l a)
 intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
   o_c = o ^-^ c
   discriminant = b ** 2 - (quadrance o_c - r ** 2)
