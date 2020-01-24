@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 module Unit.Time
 ( Time
@@ -37,8 +38,7 @@ newtype Seconds a = Seconds { getSeconds :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Seconds where
-  type Dim Seconds = Time
+instance Unit Time Seconds where
   suffix = K ('s':)
 
 
@@ -46,8 +46,7 @@ newtype Minutes a = Minutes { getMinutes :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Minutes where
-  type Dim Minutes = Time
+instance Unit Time Minutes where
   factor = K 60
   suffix = K ("min"++)
 
@@ -56,8 +55,7 @@ newtype Hours a = Hours { getHours :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Hours where
-  type Dim Hours = Time
+instance Unit Time Hours where
   factor = K 3600
   suffix = K ("h"++)
 
@@ -67,7 +65,6 @@ newtype Days a = Days { getDays :: a }
   deriving (Additive, Applicative, Metric, Monad) via I
 
 -- | Note that this does not take e.g. leap seconds into account.
-instance Unit Days where
-  type Dim Days = Time
+instance Unit Time Days where
   factor = K 86400
   suffix = K ("d"++)

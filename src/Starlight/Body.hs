@@ -97,8 +97,7 @@ newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
   deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit BodyUnits where
-  type Dim BodyUnits = Length
+instance Unit Length BodyUnits where
   suffix = K ("body"++)
 
 data Orbit = Orbit
