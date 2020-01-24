@@ -186,7 +186,7 @@ newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
 infixl 7 :/:
 
 instance (Unit u, Unit v) => Unit (u :/: v) where
-  type Dim (u :/: v) = Dim u :/: Dim v
+  type Dim (u :/: v) = Div (Dim u) (Dim v)
   factor = K (getK (factor @u) / getK (factor @v))
   suffix = K (getK (suffix @u) . ('/' :) . getK (suffix @v))
 
