@@ -3,8 +3,8 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
@@ -143,6 +143,11 @@ class Dimension (dim :: * -> *) where
 
 instance Dimension I where
   type Sq I I = I
+
+
+class (Dimension du, Unit du u) => Pow du u (n :: Nat) (pow :: * -> *) | du u n -> pow, du pow -> u
+
+instance Unit I u => Pow I u n u
 
 
 -- * Calculation
