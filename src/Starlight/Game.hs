@@ -275,3 +275,12 @@ rejectionSampleR r maxPdf pdf = fix $ \ loop -> do
     pure x
   else
     loop
+
+rejectionSample :: (R.Random a, R.Random b, Fractional b, Ord b, Has Random sig m) => b -> (a -> b) -> m a
+rejectionSample maxPdf pdf = fix $ \ loop -> do
+  x <- uniform
+  y <- uniformR (0, maxPdf)
+  if y <= pdf x then
+    pure x
+  else
+    loop
