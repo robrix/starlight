@@ -30,6 +30,7 @@ module Unit.Algebra
   -- * Calculation
 , sqU
 , sqrtU
+, dotU
 , quadranceU
 , qdU
 , normalizeU
@@ -160,6 +161,9 @@ sqU = pure . join (*) . prj
 
 sqrtU :: (Unit u, Unit (Sqrt u), Floating a) => u a -> Sqrt u a
 sqrtU = pure . sqrt . prj
+
+dotU :: (Num a, Metric v, Unit u) => v (u a) -> v (u a) -> u a
+dotU a b = pure (dot (prj <$> a) (prj <$> b))
 
 -- | Compute the square of the norm efficiently and in the correct dimensions.
 quadranceU :: (Metric v, Unit u, Num a) => v (u a) -> (u :^: 2) a
