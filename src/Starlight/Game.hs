@@ -279,9 +279,10 @@ rejectionSample sample maxPdf pdf = fix $ \ loop -> do
 
 
 histogram :: Real a => [a] -> [a] -> [Int]
-histogram []      _       = []
-histogram _       []      = []
-histogram buckets samples = map fst (foldl' bucketSample (map ((,) 0) buckets) samples)
+histogram buckets samples
+  | [] <- buckets = []
+  | [] <- samples = []
+  | otherwise     = map fst (foldl' bucketSample (map ((,) 0) buckets) samples)
   where bucketSample accum sample = foldr (\ each rest -> case each of
           (count, from)
             | ((_, to) : _) <- rest
