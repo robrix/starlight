@@ -184,7 +184,7 @@ infixl 7 :*:
 instance Dimension (du :*: dv) where
   type Sq (du :*: dv) (u :*: v) = u :^: 2 :*: v :^: 2
 
-instance (Unit du u, Unit dv v, d ~ Mul du dv) => Unit d (u :*: v) where
+instance (Unit du u, Unit dv v) => Unit (du :*: dv) (u :*: v) where
   factor = K (getK (factor @_ @u) * getK (factor @_ @v))
   suffix = K (getK (suffix @_ @u) . ('·' :) . getK (suffix @_ @v))
 
@@ -198,7 +198,7 @@ infixl 7 :/:
 instance Dimension (du :/: dv) where
   type Sq (du :/: dv) (u :/: v) = u :^: 2 :/: v :^: 2
 
-instance (Unit du u, Unit dv v, d ~ Div du dv) => Unit d (u :/: v) where
+instance (Unit du u, Unit dv v) => Unit (du :/: dv) (u :/: v) where
   factor = K (getK (factor @_ @u) / getK (factor @_ @v))
   suffix = K (getK (suffix @_ @u) . ('/' :) . getK (suffix @_ @v))
 
@@ -212,6 +212,6 @@ infixr 8 :^:
 instance Dimension (du :^: m) where
   type Sq (du :^: m) u = u :^: (m + 2)
 
-instance (Unit du u, d ~ Exp du n, KnownNat n) => Unit d (u :^: n) where
+instance (Unit du u, KnownNat n) => Unit (du :^: n) (u :^: n) where
   factor = K (getK (factor @_ @u) ^ natVal (Proxy @n))
   suffix = K (getK (suffix @_ @u) . superscript (fromIntegral (natVal (Proxy @n))))
