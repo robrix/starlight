@@ -77,17 +77,17 @@ reject a b = a ^-^ project a b
 
 
 -- | The unit vector in the direction of another vector.
-direction :: (Metric v, Epsilon a, Floating a, Unit du u) => v (u a) -> v (u a) -> v (I a)
+direction :: (Metric v, Epsilon a, Floating a, Unit u) => v (u a) -> v (u a) -> v (I a)
 direction a b = normalizeU (a ^-^ b)
 
 
 -- | The angle of a vector.
-angleOf :: (RealFloat a, Unit du u) => V2 (u a) -> I a
+angleOf :: (RealFloat a, Unit u) => V2 (u a) -> I a
 angleOf v = I (atan2 y x) where
   V2 x y = prj <$> v
 
 -- | The angle from the first vector to the second.
-angleTo :: (RealFloat a, Unit du u) => V2 (u a) -> V2 (u a) -> I a
+angleTo :: (RealFloat a, Unit u) => V2 (u a) -> V2 (u a) -> I a
 angleTo v1 v2 = angleOf (v2 - v1)
 
 
@@ -109,7 +109,7 @@ toAxisAngle (Quaternion qw qv) = (v, phi) where
        | otherwise = -1
 
 
-cartesian2 :: (Floating a, Unit du u) => I a -> u a -> V2 (u a)
+cartesian2 :: (Floating a, Unit u) => I a -> u a -> V2 (u a)
 cartesian2 phi r = V2 (r .*. cos phi) (r .*. sin phi)
 
 
