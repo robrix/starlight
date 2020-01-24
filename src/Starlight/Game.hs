@@ -22,7 +22,7 @@ import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
-import           Control.Monad (unless, (>=>))
+import           Control.Monad (replicateM, unless, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Foldable (foldl')
 import           Data.Function (fix)
@@ -297,3 +297,6 @@ sparkify bins
         maxSpark = pred (length sparks)
         max = maximum bins
         spark n = sparks !! round ((fromIntegral n * ((1.0 :: Double) / fromIntegral max)) * fromIntegral maxSpark)
+
+printHistogram :: (Real a, Has (Lift IO) sig m, Has Random sig m) => [a] -> Int -> m a -> m ()
+printHistogram buckets n = replicateM n >=> sendM . putStrLn . sparkify . histogram buckets
