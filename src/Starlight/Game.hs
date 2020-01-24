@@ -269,7 +269,7 @@ shipScale :: I Double
 shipScale = 30
 
 
-rejectionSample :: (R.Random b, Fractional b, Ord b, Has Random sig m) => m a -> b -> (a -> b) -> m a
+rejectionSample :: (R.Random b, Num b, Ord b, Has Random sig m) => m a -> b -> (a -> b) -> m a
 rejectionSample sample maxPdf pdf = fix $ \ loop -> do
   x <- sample
   y <- uniformR (0, maxPdf)
