@@ -267,18 +267,9 @@ shipScale :: I Double
 shipScale = 30
 
 
-rejectionSampleR :: (R.Random a, R.Random b, Fractional b, Ord b, Has Random sig m) => (a, a) -> b -> (a -> b) -> m a
-rejectionSampleR r maxPdf pdf = fix $ \ loop -> do
-  x <- uniformR r
-  y <- uniformR (0, maxPdf)
-  if y <= pdf x then
-    pure x
-  else
-    loop
-
-rejectionSample :: (R.Random a, R.Random b, Fractional b, Ord b, Has Random sig m) => b -> (a -> b) -> m a
-rejectionSample maxPdf pdf = fix $ \ loop -> do
-  x <- uniform
+rejectionSample :: (R.Random b, Fractional b, Ord b, Has Random sig m) => m a -> b -> (a -> b) -> m a
+rejectionSample sample maxPdf pdf = fix $ \ loop -> do
+  x <- sample
   y <- uniformR (0, maxPdf)
   if y <= pdf x then
     pure x
