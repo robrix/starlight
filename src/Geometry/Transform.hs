@@ -1,3 +1,4 @@
+{-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -34,7 +35,7 @@ instance Num c => Category (Transform c) where
 mkTranslation :: (Num c, Unit d u) => V3 (u c) -> Transform c u u
 mkTranslation v = Transform (identity & translation .~ fmap prj v)
 
-mkScale :: (Num c, Unit du u, Unit dv v, Unit d' (Div u v)) => V3 (Div u v c) -> Transform c u v
+mkScale :: forall u v c du dv d' . (Num c, Unit du u, Unit dv v, Unit d' (Div u v)) => V3 (Div u v c) -> Transform c u v
 mkScale v = Transform (scaled (point (prj <$> v)))
 
 mkRotation :: Num c => Quaternion (I c) -> Transform c a a
