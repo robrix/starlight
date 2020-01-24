@@ -63,7 +63,7 @@ face angular angle rotation
   | nearZero delta = proposed
   | otherwise      = slerp rotation proposed (min 1 (angular / delta)) where
   proposed = axisAngle (unit _z) angle
-  delta = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - angle))
+  delta = facingRel rotation angle
 
 
 easeInOutCubic :: Double -> Double
