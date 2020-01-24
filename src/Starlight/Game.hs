@@ -22,7 +22,7 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
-import           Control.Lens (itraverse, (^.))
+import           Control.Lens (itraverse, ix, (&), (^.), (+~))
 import           Control.Monad (replicateM, unless, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Foldable (foldl')
@@ -279,18 +279,13 @@ rejectionSample sample maxPdf pdf = fix $ \ loop -> do
     loop
 
 
-histogram :: Real a => [a] -> [a] -> [Int]
-histogram buckets samples
-  | [] <- buckets = []
+histogram :: RealFrac a => Interval I a -> Int -> [a] -> [Int]
+histogram interval n samples
   | [] <- samples = []
-  | otherwise     = map fst (foldl' bucketSample (map (0,) buckets) samples)
+  | otherwise     = foldl' bucket (replicate n 0) samples
   where
-  bucketSample accum sample = foldr (\ each rest -> case each of
-    (count, from)
-      | ((_, to) : _) <- rest
-      , from   <= sample
-      , sample <= to     -> (count + 1, from) : rest
-      | otherwise        -> (count,     from) : rest) [] accum
+  which sample = floor (getI (toUnit interval (I sample)) * fromIntegral n)
+  bucket accum sample = accum & ix (which sample) +~ 1
 
 sparkify :: [Int] -> String
 sparkify bins
@@ -302,5 +297,5 @@ sparkify bins
   max = fromIntegral $ maximum bins :: Double
   spark n = sparks !! round ((fromIntegral n / max) * maxSpark)
 
-printHistogram :: (Real a, Has (Lift IO) sig m) => [a] -> Int -> m a -> m ()
-printHistogram buckets n = replicateM n >=> sendM . putStrLn . sparkify . histogram buckets
+printHistogram :: (RealFrac a, Has (Lift IO) sig m) => Interval I a -> Int -> Int -> m a -> m ()
+printHistogram interval b n = replicateM n >=> sendM . putStrLn . sparkify . histogram interval b
