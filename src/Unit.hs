@@ -1,6 +1,7 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -45,7 +46,7 @@ import Numeric
 
 -- * Units
 
-class Applicative u => Unit u where
+class (Applicative u, forall a . Num a => Num (u a)) => Unit u where
   type Dim u :: * -> *
   prj :: u a -> a
   default prj :: Coercible (u a) a => u a -> a
