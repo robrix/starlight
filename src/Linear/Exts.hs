@@ -114,23 +114,14 @@ cartesian2 phi r = V2 (r .*. cos phi) (r .*. sin phi)
 
 
 -- | Extensions of a vector with an extra dimension.
-class Ext v a v' | v v' -> a, v a -> v', v' a -> v where
-  ext :: v -> a -> v'
+class Ext v v' | v -> v', v' -> v where
+  ext :: v a -> a -> v' a
 
-instance Ext (V1 a) a (V2 a) where
+instance Ext V1 V2 where
   ext (V1 x) = V2 x
 
-instance Ext (V2 a) a (V3 a) where
+instance Ext V2 V3 where
   ext (V2 x y) = V3 x y
 
-instance Ext a (V2 a) (V3 a) where
-  ext x (V2 y z) = V3 x y z
-
-instance Ext (V2 a) (V2 a) (V4 a) where
-  ext (V2 x y) (V2 z w) = V4 x y z w
-
-instance Ext a (V3 a) (V4 a) where
-  ext x (V3 y z w) = V4 x y z w
-
-instance Ext (V3 a) a (V4 a) where
+instance Ext V3 V4 where
   ext (V3 x y z) = V4 x y z
