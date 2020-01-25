@@ -25,8 +25,8 @@ import           Unit.Length
 import           Unit.Mass
 import           Unit.Time
 
-bodies :: Map.Map BodyIdentifier Orbit -> Map.Map BodyIdentifier Body
-bodies orbits = bodies where
+bodiesFromOrbits :: Map.Map BodyIdentifier Orbit -> Map.Map BodyIdentifier Body
+bodiesFromOrbits orbits = bodies where
   solI = Star (10, "Sol")
   bodies = Map.fromList
     [ let identifier = solI in (identifier,) Body
@@ -204,7 +204,7 @@ bodies orbits = bodies where
 system :: Has (Lift IO) sig m => m (System Body)
 system = do
   orbits <- Map.fromList . map (fmap fromEphemeris) <$> fromDirectory "ephemerides"
-  let bodies = Starlight.Sol.bodies orbits
+  let bodies = bodiesFromOrbits orbits
       placeholder orbit = Body
         { radius      = convert @(Kilo Metres) 1_000
         , mass        = convert @(Kilo Grams) 1.307e22
