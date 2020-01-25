@@ -229,8 +229,8 @@ type family FromNat (n :: Nat) = (n' :: N n) | n' -> n where
 -- | Three-way injective addition (and thus also subtraction) of 'Nat's.
 --
 -- The technique for three-way injectivity is due to Oleg: http://archive.md/JwMNI
-class Plus (a :: Nat) (b :: Nat) (c :: Nat) | a b -> c, a c -> b, b c -> a
-instance (Plus' (FromNat a) (FromNat b) (FromNat c), Plus' (FromNat b) (FromNat a) (FromNat c)) => Plus a b c
+class (KnownNat a, KnownNat b, KnownNat c) => Plus (a :: Nat) (b :: Nat) (c :: Nat) | a b -> c, a c -> b, b c -> a
+instance (KnownNat a, KnownNat b, KnownNat c, Plus' (FromNat a) (FromNat b) (FromNat c), Plus' (FromNat b) (FromNat a) (FromNat c)) => Plus a b c
 
 class Plus' (a :: N na) (b :: N nb) (c :: N nc) | a b -> c, a c -> b
 instance Plus' 'Z n n
