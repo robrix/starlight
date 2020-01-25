@@ -83,16 +83,16 @@ fromCSV = toBody . splitOnCommas where
   readEither' :: Read a => String -> (a -> b) -> String -> Either String b
   readEither' err f = either (Left . ((err <> ": ") <>)) (Right . f) . readEither
 
-fromFile :: Has (Lift IO) sig m => FilePath -> m Orbit
+fromFile :: Has (Lift IO) sig m => FilePath -> m Ephemeris
 fromFile path = do
   lines <- lines <$> sendM (readFile path)
   let last = maybe (error ("no ephemerides found in file: " <> path)) pred (elemIndex "$$EOE" lines)
-  pure $ either error fromEphemeris (fromCSV (lines !! last))
+  pure $ either error id (fromCSV (lines !! last))
 
-fromDirectory :: Has (Lift IO) sig m => FilePath -> m [(BodyIdentifier, Orbit)]
+fromDirectory :: Has (Lift IO) sig m => FilePath -> m [(BodyIdentifier, Ephemeris)]
 fromDirectory = go Nothing
   where
-  go :: Has (Lift IO) sig m => Maybe BodyIdentifier -> FilePath -> m [(BodyIdentifier, Orbit)]
+  go :: Has (Lift IO) sig m => Maybe BodyIdentifier -> FilePath -> m [(BodyIdentifier, Ephemeris)]
   go root dir
     =   sendM (listDirectory dir)
     >>= fmap concat . traverse (\ path -> do

@@ -203,7 +203,7 @@ bodies orbits = bodies where
 
 system :: Has (Lift IO) sig m => m (System Body)
 system = do
-  orbits <- Map.fromList <$> fromDirectory "ephemerides"
+  orbits <- Map.fromList . map (fmap fromEphemeris) <$> fromDirectory "ephemerides"
   let bodies = Starlight.Sol.bodies orbits
       placeholder orbit = Body
         { radius      = convert @(Kilo Metres) 1_000
