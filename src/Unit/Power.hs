@@ -17,6 +17,7 @@ module Unit.Power
 import Data.Functor.I
 import Data.Functor.K
 import Foreign.Storable
+import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Conjugate
@@ -31,7 +32,7 @@ import Unit.Multiple
 data Power a
 
 instance Dimension Power
-instance Unit Power u => Pow Power u n (u :^: n)
+instance (Unit Power u, KnownNat n) => Pow Power (Power :^: n) u n (u :^: n)
 
 
 newtype Watts a = Watts { getWatts :: a }

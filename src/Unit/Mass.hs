@@ -17,6 +17,7 @@ module Unit.Mass
 import Data.Functor.I
 import Data.Functor.K
 import Foreign.Storable
+import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Conjugate
@@ -31,7 +32,7 @@ import Unit.Multiple
 data Mass a
 
 instance Dimension Mass
-instance Unit Mass u => Pow Mass u n (u :^: n)
+instance (Unit Mass u, KnownNat n) => Pow Mass (Mass :^: n) u n (u :^: n)
 
 
 newtype Grams a = Grams { getGrams :: a }

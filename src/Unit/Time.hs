@@ -21,6 +21,7 @@ module Unit.Time
 import Data.Functor.I
 import Data.Functor.K
 import Foreign.Storable
+import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Conjugate
@@ -35,7 +36,7 @@ import Unit.Multiple
 data Time a
 
 instance Dimension Time
-instance Unit Time u => Pow Time u n (u :^: n)
+instance (Unit Time u, KnownNat n) => Pow Time (Time :^: n) u n (u :^: n)
 
 
 newtype Seconds a = Seconds { getSeconds :: a }

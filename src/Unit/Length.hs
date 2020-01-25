@@ -18,6 +18,7 @@ module Unit.Length
 import Data.Functor.I
 import Data.Functor.K
 import Foreign.Storable
+import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Conjugate
@@ -32,7 +33,7 @@ import Unit.Multiple
 data Length a
 
 instance Dimension Length
-instance Unit Length u => Pow Length u n (u :^: n)
+instance (Unit Length u, KnownNat n) => Pow Length (Length :^: n) u n (u :^: n)
 
 
 newtype Metres a = Metres { getMetres :: a }

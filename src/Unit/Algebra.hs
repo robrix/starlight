@@ -137,14 +137,14 @@ class Dimension (dim :: * -> *)
 instance Dimension I
 
 
-class (Dimension du, Unit du u) => Pow du u (n :: Nat) (pow :: * -> *) | du u n -> pow, du pow -> u
+class (Dimension du, Unit du u, Unit du' u', KnownNat n) => Pow du du' u (n :: Nat) u' | du u n -> du' u', du du' u' n -> u, du' u' u n -> du, du n -> du'
 
-instance Unit I u => Pow I u n u
+instance (Unit I u, KnownNat n) => Pow I I u n u
 
 
 -- * Calculation
 
-sqU :: (Applicative squ, Pow du u 2 squ, Num a) => u a -> squ a
+sqU :: (Pow du dsqu u 2 squ, Num a) => u a -> squ a
 sqU = pure . join (*) . prj
 
 sqrtU :: (Unit du u, Unit dsqrtu (Sqrt u), Floating a) => u a -> Sqrt u a
@@ -175,7 +175,7 @@ infixl 7 :*:
 
 instance Dimension (du :*: dv)
 
-instance (Pow du u n un, Pow dv v n vn) => Pow (du :*: dv) (u :*: v) n (un :*: vn)
+instance (Pow du dun u n un, Pow dv dvn v n vn) => Pow (du :*: dv) (dun :*: dvn) (u :*: v) n (un :*: vn)
 
 instance (Unit du u, Unit dv v) => Unit (du :*: dv) (u :*: v) where
   factor = K (getK (factor @_ @u) * getK (factor @_ @v))
@@ -190,7 +190,7 @@ infixl 7 :/:
 
 instance Dimension (du :/: dv)
 
-instance (Pow du u n un, Pow dv v n vn) => Pow (du :/: dv) (u :/: v) n (un :/: vn)
+instance (Pow du dun u n un, Pow dv dvn v n vn) => Pow (du :/: dv) (dun :/: dvn) (u :/: v) n (un :/: vn)
 
 instance (Unit du u, Unit dv v) => Unit (du :/: dv) (u :/: v) where
   factor = K (getK (factor @_ @u) / getK (factor @_ @v))
@@ -205,7 +205,7 @@ infixr 8 :^:
 
 instance Dimension (du :^: m)
 
-instance (Unit du u, mn ~ (m + n), KnownNat m) => Pow (du :^: m) (u :^: m) n (u :^: mn)
+instance (Unit du u, Plus m n o) => Pow (du :^: m) (du :^: o) (u :^: m) n (u :^: o)
 
 instance (Unit du u, KnownNat n) => Unit (du :^: n) (u :^: n) where
   factor = K (getK (factor @_ @u) ^ natVal (Proxy @n))
