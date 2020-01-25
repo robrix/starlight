@@ -24,7 +24,7 @@ import Starlight.Body
 import Starlight.Identifier
 import System.Directory
 import System.FilePath
-import Text.Read
+import Text.Read hiding (parens)
 import Unit.Algebra
 import Unit.Angle
 import Unit.Length
@@ -116,6 +116,22 @@ fromDirectory = go Nothing
 
 
 toInsert :: BodyIdentifier -> Ephemeris -> Doc ()
-toInsert i Ephemeris{  } = pretty "insert into bodies values" <> nest 2 (line <> tupled
-  [ pretty (describeIdentifier (B i))
-  ]) <> semi
+toInsert i Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch } = pretty "insert into bodies values" <> nest 2 (line <> tupled
+  [ maybe (pretty "null") (selectParent . getLeaf) (parent i) -- parentId
+  , pretty (fst (getLeaf i)) -- code
+  , dquotes (pretty (snd (getLeaf i))) -- name
+  , pretty "-- radius"
+  , pretty "-- mass"
+  , pretty "-- tilt"
+  , pretty "-- rotationalPeriod"
+  , pretty "-- colour"
+  , pretty eccentricity
+  , pretty (getMetres (getKilo semimajor))
+  , pretty (getDegrees longitudeOfAscendingNode)
+  , pretty (getDegrees inclination)
+  , pretty (getDegrees argumentOfPerifocus)
+  , pretty (getSeconds siderealOrbitPeriod)
+  , pretty (getSeconds timeOfPeriapsisRelativeToEpoch)
+  ]) <> semi <> line
+  where
+  selectParent (code, name) = parens (pretty "select id from bodies where code = " <> pretty code <> pretty ", name = " <> dquotes (pretty name))
