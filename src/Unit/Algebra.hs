@@ -225,3 +225,4 @@ type family FromNat (n :: Nat) = (n' :: N n) | n' -> n where
 class Plus (a :: Nat) (b :: Nat) (c :: Nat) | a b -> c, a c -> b, b c -> a
 
 class Plus' (a :: N na) (b :: N nb) (c :: N nc) | a b -> c, a c -> b
+instance Plus' 'Z n n
