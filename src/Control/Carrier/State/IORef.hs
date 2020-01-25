@@ -19,6 +19,7 @@ module Control.Carrier.State.IORef
 import Control.Algebra
 import Control.Carrier.Reader
 import Control.Effect.State
+import Control.Monad.Fix
 import Control.Monad.IO.Class.Lift
 import Control.Monad.Trans.Class
 import Data.IORef
@@ -40,7 +41,7 @@ execState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 
 newtype StateC s m a = StateC (ReaderC (IORef s) m a)
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (State s :+: sig) (StateC s m) where
   alg = \case
