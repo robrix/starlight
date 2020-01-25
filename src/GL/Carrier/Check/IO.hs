@@ -15,6 +15,7 @@ module GL.Carrier.Check.IO
 ) where
 
 import Control.Algebra
+import Control.Monad.Fix
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (toList)
 import GHC.Stack
@@ -23,7 +24,7 @@ import GL.Error
 import Graphics.GL.Core41
 
 newtype CheckC m a = CheckC { runCheck :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Check :+: sig) (CheckC m) where
   alg = \case
