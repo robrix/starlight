@@ -10,7 +10,7 @@ Development currently assumes a Mac with `ghc` 8.8 & `cabal` 3.0. You can instal
 Initial setup:
 
 ```bash
-brew bundle # for sdl2
+brew bundle # for sdl2 & sqlite3
 cabal build # to set up dist-newstyle with the ghc package db
 ```
 
