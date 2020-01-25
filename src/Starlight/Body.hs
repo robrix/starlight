@@ -120,7 +120,7 @@ orbitTimeScale = 1
 actorAt :: Body -> Seconds Double -> Actor
 actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
   { position = convert <$> ext (cartesian2 trueAnomaly r) (0 :: Kilo Metres Double)
-  , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU (mu .*. semimajor) ./. r .*. coord) <$> V3 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly) 0
+  , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU @(Length :^: 2 :/: Time) (mu .*. semimajor) ./. r .*. coord) <$> V3 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly) 0
   , rotation
     = orientation
     * axis

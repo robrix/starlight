@@ -23,7 +23,6 @@ module Unit.Algebra
 , Mul
 , Div
 , Exp
-, Sqrt
 , Dimension
 , Pow
   -- * Calculation
@@ -125,12 +124,6 @@ type family Exp u n where
   Exp u 1 = u
   Exp u n = u :^: n
 
-type family Sqrt u where
-  Sqrt (u :*: v) = Sqrt u :*: Sqrt v
-  Sqrt (u :/: v) = Sqrt u :/: Sqrt v
-  Sqrt (u :^: 2) = u
-  Sqrt (u :^: 4) = u :^: 2
-
 
 class Dimension (dim :: * -> *)
 
@@ -147,7 +140,7 @@ instance (Unit I u, KnownNat n) => Pow I I u n u
 sqU :: (Pow du dsqu u 2 squ, Num a) => u a -> squ a
 sqU = pure . join (*) . prj
 
-sqrtU :: (Unit du u, Unit dsqrtu (Sqrt u), Floating a) => u a -> Sqrt u a
+sqrtU :: (Pow dsqrtu du sqrtu 2 u, Floating a) => u a -> sqrtu a
 sqrtU = pure . sqrt . prj
 
 dotU :: (Num a, Metric v, Unit d u) => v (u a) -> v (u a) -> u a
