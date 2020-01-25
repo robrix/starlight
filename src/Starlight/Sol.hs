@@ -12,8 +12,10 @@ import           Control.Exception.Lift
 import           Control.Lens (review)
 import           Control.Monad.Fix
 import qualified Data.Map as Map
+import           Data.Text (pack)
 import           Database.SQLite3
 import           Linear.Exts
+import           Paths_starlight
 import           Starlight.Body
 import           Starlight.Identifier
 import           UI.Colour
@@ -23,7 +25,7 @@ import           Unit.Mass
 import           Unit.Time
 
 bodiesFromSQL :: Has (Lift IO) sig m => m (Map.Map BodyIdentifier Body)
-bodiesFromSQL = bracket (sendM (open "ephemerides/ephemerides.db")) (sendM . close) $ \ db -> sendM $ do
+bodiesFromSQL = sendM (getDataFileName "ephemerides/ephemerides.db") >>= \ file -> bracket (sendM (open (pack file))) (sendM . close) $ \ db -> sendM $ do
   stmt <- prepare db "select rowid, * from bodies"
   entries <- mfix $ \ ephemerides -> fix (\ loop elems -> do
     res <- step stmt
