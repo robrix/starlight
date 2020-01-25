@@ -220,6 +220,7 @@ data N (n :: Nat) where
   S :: N (n - 1) -> N n
 
 
+-- | Select the 'N' corresponding to a given 'Nat', injectively.
 type family FromNat (n :: Nat) = (n' :: N n) | n' -> n where
   FromNat 0 = 'Z
   FromNat n = 'S (FromNat (n - 1))
