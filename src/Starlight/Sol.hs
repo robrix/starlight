@@ -39,6 +39,7 @@ bodiesFromSQL = bracket (sendM (open "ephemerides/ephemerides.db")) (sendM . clo
       Row  -> do
         entry <- fromColumns ephemerides cols
         loop (elems . (entry:))) id
+  finalize stmt
   pure $! Map.fromList (map snd entries)
   where
   fromColumns ephemerides = \case
