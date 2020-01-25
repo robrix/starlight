@@ -4,6 +4,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -208,3 +209,8 @@ instance (Unit du u, mn ~ (m + n), KnownNat m) => Pow (du :^: m) (u :^: m) n (u 
 instance (Unit du u, KnownNat n) => Unit (du :^: n) (u :^: n) where
   factor = K (getK (factor @_ @u) ^ natVal (Proxy @n))
   suffix = K (getK (suffix @_ @u) . superscript (fromIntegral (natVal (Proxy @n))))
+
+
+data N (n :: Nat) where
+  Z :: N 0
+  S :: N (n - 1) -> N n
