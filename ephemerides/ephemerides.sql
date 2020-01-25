@@ -4,6 +4,6 @@ create table bodies
   , radius real not null -- km
   , mass real not null -- kg
   , tilt real not null -- degrees
-  , period real not null -- days
+  , rotationalPeriod real not null -- days
   , colour integer not null -- 32-bit packed
   );
