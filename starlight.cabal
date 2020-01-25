@@ -103,7 +103,6 @@ library
     Starlight.Draw.Ship
     Starlight.Draw.Starfield
     Starlight.Draw.Weapon.Laser
-    Starlight.Ephemeris
     Starlight.Game
     Starlight.Identifier
     Starlight.Input
