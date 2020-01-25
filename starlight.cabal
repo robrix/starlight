@@ -148,6 +148,7 @@ library
   build-depends:
       base
     , containers
+    , direct-sqlite
     , directory ^>= 1.3
     , filepath ^>= 1.4
     , fused-effects      ^>= 1
