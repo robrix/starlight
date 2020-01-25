@@ -226,3 +226,5 @@ class Plus (a :: Nat) (b :: Nat) (c :: Nat) | a b -> c, a c -> b, b c -> a
 
 class Plus' (a :: N na) (b :: N nb) (c :: N nc) | a b -> c, a c -> b
 instance Plus' 'Z n n
+instance Plus' m n o
+      => Plus' ('S m) n ('S o)
