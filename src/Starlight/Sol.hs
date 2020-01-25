@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeApplications #-}
 -- | A familiar star bodies.
 module Starlight.Sol
-( Starlight.Sol.bodies
+( bodiesAndEphemerides
 ) where
 
 import           Control.Effect.Lift
@@ -200,10 +200,12 @@ bodiesFromOrbits orbits = bodies where
       }
     ]
 
-bodies :: Has (Lift IO) sig m => m (Map.Map BodyIdentifier Body)
-bodies = do
-  orbits <- Map.fromList . map (fmap fromEphemeris) <$> fromDirectory "ephemerides"
-  let bodies = bodiesFromOrbits orbits
+bodiesAndEphemerides :: Has (Lift IO) sig m => m (Map.Map BodyIdentifier (Ephemeris, Body))
+bodiesAndEphemerides = do
+  ephemeridesList <- fromDirectory "ephemerides"
+  let orbits = Map.fromList (map (fmap fromEphemeris) ephemeridesList)
+      ephemerides = Map.fromList ephemeridesList
+      bodies = bodiesFromOrbits orbits
       placeholder orbit = Body
         { radius      = convert @(Kilo Metres) 1_000
         , mass        = convert @(Kilo Grams) 1.307e22
@@ -214,6 +216,6 @@ bodies = do
         }
 
   pure $! Map.fromList
-    [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
+    [ (identifier, (ephemerides Map.! identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier)))
     | (identifier, orbit) <- Map.toList orbits
     ]

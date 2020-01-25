@@ -132,7 +132,7 @@ game
      , MonadFail m
      )
   => m ()
-game = Sol.bodies >>= \ bodies -> runGame bodies $ do
+game = Sol.bodiesAndEphemerides >>= \ bodiesAndEphemerides -> runGame (snd <$> bodiesAndEphemerides) $ do
   SDL.cursorVisible SDL.$= False
   trace "loading typeface"
   face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
