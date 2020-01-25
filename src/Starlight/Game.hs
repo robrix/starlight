@@ -69,10 +69,10 @@ runGame
      , Has (Lift IO) sig m
      , MonadFail m
      )
-  => System Body
+  => Map.Map BodyIdentifier Body
   -> ReaderC Epoch (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (RandomC TFGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))))) a
   -> m a
-runGame system
+runGame bodies
   = Window.runSDL
   . Window.runWindow "Starlight" (V2 1024 768)
   . runContext
@@ -81,8 +81,9 @@ runGame system
   . runLiftIO
   . (\ m -> sendM newTFGen >>= flip evalRandom m)
   . TVar.evalState @Input mempty
-  . TVar.evalState system
-      { players =
+  . TVar.evalState System
+      { bodies
+      , players =
         [ Character
           { actor   = Actor
             { position  = convert <$> start
@@ -96,6 +97,8 @@ runGame system
           , ship    = Ship{ colour = white, armour = 1_000, radar }
           }
         ]
+      , npcs    = mempty
+      , beams   = mempty
       }
     . TVar.evalState False
     . runJ2000
@@ -129,7 +132,7 @@ game
      , MonadFail m
      )
   => m ()
-game = Sol.system >>= \ system -> runGame system $ do
+game = Sol.bodies >>= \ bodies -> runGame bodies $ do
   SDL.cursorVisible SDL.$= False
   trace "loading typeface"
   face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")

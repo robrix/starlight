@@ -4,9 +4,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
--- | A familiar star system.
+-- | A familiar star bodies.
 module Starlight.Sol
-( system
+( Starlight.Sol.bodies
 ) where
 
 import           Control.Effect.Lift
@@ -18,7 +18,6 @@ import           Linear.Vector
 import           Starlight.Body
 import           Starlight.Ephemeris
 import           Starlight.Identifier as Identifier
-import           Starlight.System
 import           UI.Colour
 import           Unit.Angle
 import           Unit.Length
@@ -201,8 +200,8 @@ bodiesFromOrbits orbits = bodies where
       }
     ]
 
-system :: Has (Lift IO) sig m => m (System Body)
-system = do
+bodies :: Has (Lift IO) sig m => m (Map.Map BodyIdentifier Body)
+bodies = do
   orbits <- Map.fromList . map (fmap fromEphemeris) <$> fromDirectory "ephemerides"
   let bodies = bodiesFromOrbits orbits
       placeholder orbit = Body
@@ -214,12 +213,7 @@ system = do
         , orbit
         }
 
-  pure System
-    { bodies  = Map.fromList
-      [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
-      | (identifier, orbit) <- Map.toList orbits
-      ]
-    , players = mempty
-    , npcs    = mempty
-    , beams   = mempty
-    }
+  pure $! Map.fromList
+    [ (identifier, fromMaybe (placeholder orbit) (bodies Map.!? identifier))
+    | (identifier, orbit) <- Map.toList orbits
+    ]
