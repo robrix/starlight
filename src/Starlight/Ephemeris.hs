@@ -134,4 +134,4 @@ toInsert i Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclina
   , pretty (getSeconds timeOfPeriapsisRelativeToEpoch)
   ]) <> semi <> line
   where
-  selectParent (code, name) = parens (pretty "select id from bodies where code = " <> pretty code <> pretty ", name = " <> dquotes (pretty name))
+  selectParent (code, name) = parens (pretty "select id from bodies where code = " <> pretty code <> pretty " and name = " <> dquotes (pretty name))
