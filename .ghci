@@ -1,2 +1,3 @@
+-- Disable the ghci sandbox so we can run the SDL thread
 :set -fno-ghci-sandbox
 :set -fno-break-on-error
