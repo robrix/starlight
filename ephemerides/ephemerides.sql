@@ -1,3 +1,4 @@
+-- schema for the ephemerides table
 create table bodies
   ( id integer primary key
   , name text not null
