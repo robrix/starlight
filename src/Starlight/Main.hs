@@ -21,6 +21,7 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
 import qualified Control.Exception.Lift as E
+import           Control.Monad.Fix
 import           Control.Monad.IO.Class.Lift
 import           Data.Bool (bool)
 import           Data.Kind (Constraint)
@@ -51,7 +52,7 @@ runProfile
      , Effect sig
      , Has (Reader CLI.Options) sig m
      )
-  => (forall t . (Lifts MonadFail t, Lifts MonadIO t, Algebra (Profile :+: sig) (t m)) => t m a)
+  => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Profile :+: sig) (t m)) => t m a)
   -> m a
 runProfile m = view CLI.profile_ >>= bool (NoProfile.runProfile m) (Profile.reportProfile m)
 
@@ -59,7 +60,7 @@ runTrace
   :: ( Has (Lift IO) sig m
      , Has (Reader CLI.Options) sig m
      )
-  => (forall t . (Lifts MonadFail t, Lifts MonadIO t, Algebra (Trace :+: sig) (t m)) => t m a)
+  => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Trace :+: sig) (t m)) => t m a)
   -> m a
 runTrace m = view CLI.trace_ >>= bool (NoTrace.runTrace m) (Trace.runTrace m)
 
@@ -67,7 +68,7 @@ runCheck
   :: ( Has (Lift IO) sig m
      , Has (Reader CLI.Options) sig m
      )
-  => (forall t . (Lifts MonadFail t, Lifts MonadIO t, Algebra (Check :+: sig) (t m)) => t m a)
+  => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Check :+: sig) (t m)) => t m a)
   -> m a
 runCheck m = view CLI.trace_ >>= bool (NoCheck.runCheck m) (Check.runCheck m)
 
