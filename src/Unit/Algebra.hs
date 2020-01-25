@@ -134,7 +134,11 @@ class Dimension (dim :: * -> *)
 instance Dimension I
 
 
-class (Dimension du, Unit du u, Unit du' u') => Pow du du' u (n :: N n') u' | du u n -> du' u', du du' u' n -> u, du' u' u n -> du, du n -> du'
+class (Dimension du, Unit du u, Unit du' u') => Pow du du' u (n :: N n') u'
+  | du u n -> du' u'
+  , du du' u' n -> u
+  , du' u' u n -> du
+  , du n -> du'
 
 instance Unit I u => Pow I I u n u
 
