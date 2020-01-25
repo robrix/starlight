@@ -2,6 +2,7 @@
 create table bodies
   ( id integer primary key
   , parentId integer
+  , code integer not null
   , name text not null
   , radius real not null -- km
   , mass real not null -- kg
