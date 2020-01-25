@@ -212,6 +212,9 @@ instance (Unit du u, KnownNat n) => Unit (du :^: n) (u :^: n) where
   suffix = K (getK (suffix @_ @u) . superscript (fromIntegral (natVal (Proxy @n))))
 
 
+-- | Inductive, 'Nat'-indexed naturals, used for injective operations on 'Nat'.
+--
+-- The type families for operations on 'Nat' are non-injective, and thus we have to resort to cleverness here. Inductive definitions of the naturals are standard, while the type index allows us to inductively relate a 'Nat' to the corresponding 'N' without losing injectivity.
 data N (n :: Nat) where
   Z :: N 0
   S :: N (n - 1) -> N n
