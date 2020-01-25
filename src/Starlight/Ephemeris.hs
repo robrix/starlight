@@ -14,12 +14,11 @@ module Starlight.Ephemeris
 ) where
 
 import Control.Effect.Lift
-import Data.Bits
+import Control.Lens ((^.))
 import Data.Char (isSpace, toUpper)
 import Data.List (elemIndex)
 import Data.Text (pack)
 import Data.Text.Prettyprint.Doc
-import Data.Word
 import Linear.Exts
 import Numeric (readDec)
 import Starlight.Body
@@ -27,6 +26,7 @@ import Starlight.Identifier
 import System.Directory
 import System.FilePath
 import Text.Read hiding (parens)
+import UI.Colour
 import Unit.Algebra
 import Unit.Angle
 import Unit.Length
@@ -127,7 +127,7 @@ toInsert i (Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclin
   , pretty (getGrams (getKilo mass))
   , pretty (getDegrees tilt)
   , pretty (getSeconds period)
-  , pretty (shiftL r 24 .|. shiftL g 16 .|. shiftL b 8 .|. a :: Word32)
+  , pretty (colour^.packed)
   , pretty eccentricity
   , pretty (getMetres (getKilo semimajor))
   , pretty (getDegrees longitudeOfAscendingNode)
@@ -137,5 +137,4 @@ toInsert i (Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclin
   , pretty (getSeconds timeOfPeriapsisRelativeToEpoch)
   ]) <> semi <> line
   where
-  V4 r g b a = round . (* 255) <$> colour
   selectParent (code, name) = parens (pretty "select rowid from bodies where code = " <> pretty code <> pretty " and name = " <> dquotes (pretty name))
