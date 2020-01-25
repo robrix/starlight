@@ -147,6 +147,8 @@ library
     Unit.Time
   other-modules:
     Paths_starlight
+  autogen-modules:
+    Paths_starlight
   build-depends:
       base
     , containers
