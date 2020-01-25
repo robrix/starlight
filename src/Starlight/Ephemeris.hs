@@ -28,6 +28,7 @@ import Text.Read hiding (parens)
 import Unit.Algebra
 import Unit.Angle
 import Unit.Length
+import Unit.Mass
 import Unit.Time
 
 data Ephemeris = Ephemeris
@@ -115,15 +116,15 @@ fromDirectory = go Nothing
     c:cs -> toUpper c : cs
 
 
-toInsert :: BodyIdentifier -> Ephemeris -> Doc ()
-toInsert i Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch } = pretty "insert into bodies values" <> nest 2 (line <> tupled
+toInsert :: BodyIdentifier -> (Ephemeris, Body) -> Doc ()
+toInsert i (Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }, Body{ radius, mass, tilt, period }) = pretty "insert into bodies values" <> nest 2 (line <> tupled
   [ maybe (pretty "null") (selectParent . getLeaf) (parent i) -- parentId
   , pretty (fst (getLeaf i)) -- code
   , dquotes (pretty (snd (getLeaf i))) -- name
-  , pretty "-- radius"
-  , pretty "-- mass"
-  , pretty "-- tilt"
-  , pretty "-- rotationalPeriod"
+  , pretty (getMetres (getKilo radius))
+  , pretty (getGrams (getKilo mass))
+  , pretty (getDegrees tilt)
+  , pretty (getSeconds period)
   , pretty "-- colour"
   , pretty eccentricity
   , pretty (getMetres (getKilo semimajor))
