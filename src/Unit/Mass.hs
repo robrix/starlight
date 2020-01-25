@@ -32,7 +32,7 @@ import Unit.Multiple
 data Mass a
 
 instance Dimension Mass
-instance (Unit Mass u, KnownNat n, n' ~ FromNat n) => Pow Mass (Mass :^: n) u n' (u :^: n)
+instance (Unit Mass u, KnownNat n) => Pow Mass (Mass :^: n) u n (u :^: n)
 
 
 newtype Grams a = Grams { getGrams :: a }

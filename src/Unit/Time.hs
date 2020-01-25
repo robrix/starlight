@@ -36,7 +36,7 @@ import Unit.Multiple
 data Time a
 
 instance Dimension Time
-instance (Unit Time u, KnownNat n, n' ~ FromNat n) => Pow Time (Time :^: n) u n' (u :^: n)
+instance (Unit Time u, KnownNat n) => Pow Time (Time :^: n) u n (u :^: n)
 
 
 newtype Seconds a = Seconds { getSeconds :: a }
