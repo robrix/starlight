@@ -14,10 +14,12 @@ module Starlight.Ephemeris
 ) where
 
 import Control.Effect.Lift
+import Data.Bits
 import Data.Char (isSpace, toUpper)
 import Data.List (elemIndex)
 import Data.Text (pack)
 import Data.Text.Prettyprint.Doc
+import Data.Word
 import Linear.Exts
 import Numeric (readDec)
 import Starlight.Body
@@ -117,7 +119,7 @@ fromDirectory = go Nothing
 
 
 toInsert :: BodyIdentifier -> (Ephemeris, Body) -> Doc ()
-toInsert i (Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }, Body{ radius, mass, tilt, period }) = pretty "insert into bodies values" <> nest 2 (line <> tupled
+toInsert i (Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclination, argumentOfPerifocus, siderealOrbitPeriod, timeOfPeriapsisRelativeToEpoch }, Body{ radius, mass, tilt, period, colour }) = pretty "insert into bodies values" <> nest 2 (line <> tupled
   [ maybe (pretty "null") (selectParent . getLeaf) (parent i) -- parentId
   , pretty (fst (getLeaf i)) -- code
   , dquotes (pretty (snd (getLeaf i))) -- name
@@ -125,7 +127,7 @@ toInsert i (Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclin
   , pretty (getGrams (getKilo mass))
   , pretty (getDegrees tilt)
   , pretty (getSeconds period)
-  , pretty "-- colour"
+  , pretty (shiftL r 24 .|. shiftL g 16 .|. shiftL b 8 .|. a :: Word32)
   , pretty eccentricity
   , pretty (getMetres (getKilo semimajor))
   , pretty (getDegrees longitudeOfAscendingNode)
@@ -135,4 +137,5 @@ toInsert i (Ephemeris{ eccentricity, semimajor, longitudeOfAscendingNode, inclin
   , pretty (getSeconds timeOfPeriapsisRelativeToEpoch)
   ]) <> semi <> line
   where
+  V4 r g b a = round . (* 255) <$> colour
   selectParent (code, name) = parens (pretty "select rowid from bodies where code = " <> pretty code <> pretty " and name = " <> dquotes (pretty name))
