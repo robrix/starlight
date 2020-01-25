@@ -6,6 +6,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
@@ -214,6 +215,11 @@ instance (Unit du u, KnownNat n) => Unit (du :^: n) (u :^: n) where
 data N (n :: Nat) where
   Z :: N 0
   S :: N (n - 1) -> N n
+
+
+type family FromNat (n :: Nat) = (n' :: N n) | n' -> n where
+  FromNat 0 = 'Z
+  FromNat n = 'S (FromNat (n - 1))
 
 
 class Plus (a :: Nat) (b :: Nat) (c :: Nat) | a b -> c, a c -> b, b c -> a
