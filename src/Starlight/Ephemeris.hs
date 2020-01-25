@@ -10,12 +10,14 @@ module Starlight.Ephemeris
 , fromCSV
 , fromFile
 , fromDirectory
+, toInsert
 ) where
 
 import Control.Effect.Lift
 import Data.Char (isSpace, toUpper)
 import Data.List (elemIndex)
 import Data.Text (pack)
+import Data.Text.Prettyprint.Doc
 import Linear.Exts
 import Numeric (readDec)
 import Starlight.Body
@@ -111,3 +113,9 @@ fromDirectory = go Nothing
   initCap = \case
     ""   -> ""
     c:cs -> toUpper c : cs
+
+
+toInsert :: BodyIdentifier -> Ephemeris -> Doc ()
+toInsert i Ephemeris{  } = pretty "insert into bodies values" <> nest 2 (line <> tupled
+  [ pretty (describeIdentifier (B i))
+  ]) <> semi
