@@ -33,7 +33,7 @@ import Unit.Multiple
 data Length a
 
 instance Dimension Length
-instance (Unit Length u, KnownNat n, n' ~ FromNat n) => Pow Length (Length :^: n) u n' (u :^: n)
+instance (Unit Length u, KnownNat n) => Pow Length (Length :^: n) u n (u :^: n)
 
 
 newtype Metres a = Metres { getMetres :: a }
