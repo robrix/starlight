@@ -1,1 +1,2 @@
 :set -fno-ghci-sandbox
+:set -fno-break-on-error
