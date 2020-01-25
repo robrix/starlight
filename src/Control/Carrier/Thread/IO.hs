@@ -16,10 +16,11 @@ import qualified Control.Concurrent as CC
 import           Control.Effect.Lift
 import           Control.Effect.Thread
 import           Control.Monad (void)
+import           Control.Monad.Fix
 import           Control.Monad.IO.Class
 
 newtype ThreadC m a = ThreadC { runThread :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Thread :+: sig) (ThreadC m) where
   alg = \case
