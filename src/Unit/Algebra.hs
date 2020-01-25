@@ -214,3 +214,6 @@ instance (Unit du u, KnownNat n) => Unit (du :^: n) (u :^: n) where
 data N (n :: Nat) where
   Z :: N 0
   S :: N (n - 1) -> N n
+
+
+class Plus (a :: Nat) (b :: Nat) (c :: Nat) | a b -> c, a c -> b, b c -> a
