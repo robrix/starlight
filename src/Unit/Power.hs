@@ -32,7 +32,7 @@ import Unit.Multiple
 data Power a
 
 instance Dimension Power
-instance (Unit Power u, KnownNat n) => Pow Power (Power :^: n) u n (u :^: n)
+instance (Unit Power u, KnownNat n, n' ~ FromNat n) => Pow Power (Power :^: n) u n' (u :^: n)
 
 
 newtype Watts a = Watts { getWatts :: a }
