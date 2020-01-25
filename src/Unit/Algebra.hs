@@ -37,6 +37,10 @@ module Unit.Algebra
 , (:/:)(..)
 , (:^:)
 , I(..)
+  -- * Type-level computation
+, N(..)
+, FromNat
+, Plus
 ) where
 
 import Control.Monad (join)
