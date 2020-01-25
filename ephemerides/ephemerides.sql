@@ -1,6 +1,7 @@
 -- schema for the ephemerides table
 create table bodies
   ( id integer primary key
+  , parentId integer
   , name text not null
   , radius real not null -- km
   , mass real not null -- kg
