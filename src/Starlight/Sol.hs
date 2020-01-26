@@ -43,9 +43,9 @@ bodiesFromSQL = sendM (getDataFileName "ephemerides/ephemerides.db") >>= \ file 
       let leaf = (fromIntegral code, name)
           identifier = maybe (Star leaf) (:/ leaf) (lookupParent ephemerides parentId)
       pure (rowid, (identifier, Body
-        { radius           = pure @(Kilo Metres) radius
-        , mass             = pure @(Kilo Grams)  mass
-        , rotation         = Revolution
+        { radius          = pure @(Kilo Metres) radius
+        , mass            = pure @(Kilo Grams)  mass
+        , rotation        = Revolution
           { orientation = axisAngle (unit _x) (convert @Degrees (pure tilt))
           , period      = convert @Days @Seconds (pure rotationalPeriod)
           }
@@ -59,7 +59,7 @@ bodiesFromSQL = sendM (getDataFileName "ephemerides/ephemerides.db") >>= \ file 
           , period      = pure @Seconds orbitalPeriod
           }
         , timeOfPeriapsis = pure @Seconds timeOfPeriapsis
-        , colour           = review packed (fromIntegral colour)
+        , colour          = review packed (fromIntegral colour)
         }))
     row -> fail $ "bad row: " <> show row
   lookupParent ephemerides = \case
