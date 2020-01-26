@@ -85,7 +85,8 @@ runGame bodies
       { bodies
       , players =
         [ Character
-          { actor   = Actor
+          { name    = "you"
+          , actor   = Actor
             { position  = convert <$> start
             , velocity  = 0
             , rotation  = axisAngle (unit _z) (pi/2)
@@ -175,7 +176,8 @@ generateNPC = do
   r <- (terra^.body_.radius_ +) <$> exponential 1
   let position = ext (cartesian2 theta (convert @_ @Distance r)) 0 + terra^.position_
   pure $! Character
-    { actor   = Actor
+    { name    = "them"
+    , actor   = Actor
       { position
       , velocity  = 0
       , rotation  = axisAngle (unit _z) (pi/2)
