@@ -192,6 +192,7 @@ generateNPC = do
     , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
     }
 
+-- FIXME: do something clever, more generative
 generateName :: (Has (Lift IO) sig m, Has Random sig m) => m Text.Text
 generateName = do
   names <- lines <$> sendM (readFile "data/ship-names.txt")
