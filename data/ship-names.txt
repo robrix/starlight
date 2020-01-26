@@ -7,7 +7,7 @@ Adamant
 SS Adler
 Admiral Kingsmill
 Adolf Vinnen
-French privateer Adolphe
+Adolphe
 Adriatic
 Adventure
 SS Aenos
@@ -442,7 +442,7 @@ MV Glen Sannox
 Glenbervie
 Glenburnie
 Globe
-French ship Gloire
+Gloire
 SS Glückauf
 MV Glücksburg
 Golconda
@@ -1055,7 +1055,6 @@ SS Traffic
 SS Transylvania
 MV Treasure
 MS Trelleborg
-True Briton
 True Briton
 SS Tung An
 SS Tungenes
