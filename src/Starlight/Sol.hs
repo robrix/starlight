@@ -39,16 +39,16 @@ bodiesFromSQL = sendM (getDataFileName "ephemerides/ephemerides.db") >>= \ file 
   pure $! Map.fromList (map snd entries)
   where
   fromColumns ephemerides = \case
-    [ SQLInteger rowid, parentId, SQLInteger code, SQLText name, SQLFloat radius, SQLFloat mass, SQLFloat tilt, SQLFloat period, SQLInteger colour, SQLFloat eccentricity, SQLFloat semimajor, SQLFloat longitudeOfAscendingNode, SQLFloat inclination, SQLFloat argumentOfPerifocus, SQLFloat orbitalPeriod, SQLFloat timeOfPeriapsis ] -> do
+    [ SQLInteger rowid, parentId, SQLInteger code, SQLText name, SQLFloat radius, SQLFloat mass, SQLFloat tilt, SQLFloat rotationalPeriod, SQLInteger colour, SQLFloat eccentricity, SQLFloat semimajor, SQLFloat longitudeOfAscendingNode, SQLFloat inclination, SQLFloat argumentOfPerifocus, SQLFloat orbitalPeriod, SQLFloat timeOfPeriapsis ] -> do
       let leaf = (fromIntegral code, name)
           identifier = maybe (Star leaf) (:/ leaf) (lookupParent ephemerides parentId)
       pure (rowid, (identifier, Body
-        { radius = pure @(Kilo Metres) radius
-        , mass   = pure @(Kilo Grams)  mass
-        , tilt   = pure @Degrees       tilt
-        , period = convert @Days @Seconds (pure period)
-        , colour = review packed (fromIntegral colour)
-        , orbit  = Orbit
+        { radius           = pure @(Kilo Metres) radius
+        , mass             = pure @(Kilo Grams)  mass
+        , tilt             = pure @Degrees       tilt
+        , rotationalPeriod = convert @Days @Seconds (pure rotationalPeriod)
+        , colour           = review packed (fromIntegral colour)
+        , orbit            = Orbit
           { eccentricity    = I eccentricity
           , semimajor       = pure @(Kilo Metres) semimajor
           , orientation     = orient
