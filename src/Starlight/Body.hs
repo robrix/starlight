@@ -20,7 +20,6 @@ module Starlight.Body
 , Body(..)
 , radius_
 , BodyUnits(..)
-, Orbit(..)
 , actorAt
 , systemAt
 , j2000
@@ -78,12 +77,16 @@ toBodySpace :: StateVectors -> Transform Double Distance BodyUnits
 toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (rotation (actor v))
 
 data Body = Body
-  { radius      :: !(Kilo Metres Double)
-  , mass        :: !(Kilo Grams Double)
-  , tilt        :: !(Degrees Double)
+  { radius           :: !(Kilo Metres Double)
+  , mass             :: !(Kilo Grams Double)
+  , tilt             :: !(Degrees Double)
   , rotationalPeriod :: !(Seconds Double)        -- sidereal rotation period
-  , colour      :: !(Colour Float)
-  , orbit       :: !Orbit
+  , eccentricity     :: !(I Double)
+  , semimajor        :: !(Kilo Metres Double)
+  , orientation      :: !(Quaternion (I Double)) -- relative to ecliptic
+  , period           :: !(Seconds Double)
+  , timeOfPeriapsis  :: !(Seconds Double)        -- relative to epoch
+  , colour           :: !(Colour Float)
   }
   deriving (Generic, Show)
 
@@ -100,15 +103,6 @@ newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
 instance Unit Length BodyUnits where
   suffix = K ("body"++)
 
-data Orbit = Orbit
-  { eccentricity    :: !(I Double)
-  , semimajor       :: !(Kilo Metres Double)
-  , orientation     :: !(Quaternion (I Double)) -- relative to ecliptic
-  , period          :: !(Seconds Double)
-  , timeOfPeriapsis :: !(Seconds Double)        -- relative to epoch
-  }
-  deriving (Show)
-
 
 rotationTimeScale :: Num a => I a
 rotationTimeScale = 1
@@ -118,7 +112,7 @@ orbitTimeScale = 1
 
 
 actorAt :: Body -> Seconds Double -> Actor
-actorAt Body{ tilt, radius, mass, rotationalPeriod, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
+actorAt Body{ tilt, radius, mass, rotationalPeriod, eccentricity, semimajor, period, timeOfPeriapsis, orientation } t = Actor
   { position = convert <$> ext (cartesian2 trueAnomaly r) (0 :: Kilo Metres Double)
   , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU @(Length :^: 2 :/: Time) (mu .*. semimajor) ./. r .*. coord) <$> V3 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly) 0
   , rotation
@@ -151,7 +145,7 @@ actorAt Body{ tilt, radius, mass, rotationalPeriod, orbit = Orbit{ eccentricity,
 systemAt :: System Body -> Seconds Double -> System StateVectors
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
-  go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
+  go identifier body@Body{ orientation } = StateVectors
     { body
     , transform = rel >>> mkTranslation (position actor)
     , actor = actor

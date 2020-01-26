@@ -47,17 +47,15 @@ bodiesFromSQL = sendM (getDataFileName "ephemerides/ephemerides.db") >>= \ file 
         , mass             = pure @(Kilo Grams)  mass
         , tilt             = pure @Degrees       tilt
         , rotationalPeriod = convert @Days @Seconds (pure rotationalPeriod)
+        , eccentricity    = I eccentricity
+        , semimajor       = pure @(Kilo Metres) semimajor
+        , orientation     = orient
+          (convert @Degrees (pure longitudeOfAscendingNode))
+          (convert @Degrees (pure inclination))
+          (convert @Degrees (pure argumentOfPerifocus))
+        , period          = pure @Seconds orbitalPeriod
+        , timeOfPeriapsis = pure @Seconds timeOfPeriapsis
         , colour           = review packed (fromIntegral colour)
-        , orbit            = Orbit
-          { eccentricity    = I eccentricity
-          , semimajor       = pure @(Kilo Metres) semimajor
-          , orientation     = orient
-            (convert @Degrees (pure longitudeOfAscendingNode))
-            (convert @Degrees (pure inclination))
-            (convert @Degrees (pure argumentOfPerifocus))
-          , period          = pure @Seconds orbitalPeriod
-          , timeOfPeriapsis = pure @Seconds timeOfPeriapsis
-          }
         }))
     row -> fail $ "bad row: " <> show row
   lookupParent ephemerides = \case
