@@ -8,4 +8,4 @@ cd "$(dirname "$0")/.."
 
 cabal v2-build all --only-dependencies
 
-env starlight_datadir=. cabal v2-exec env -- -u GHC_ENVIRONMENT ghci -ghci-script=.ghci.repl $(script/ghci-flags) -no-ignore-dot-ghci $@
+env starlight_datadir=. cabal v2-exec env -- -u GHC_ENVIRONMENT ghci +RTS -N9 -s -RTS -ghci-script=.ghci.repl $(script/ghci-flags) -no-ignore-dot-ghci $@
