@@ -8,6 +8,7 @@ module Starlight.System
 ( System(..)
 , bodies_
 , player_
+, players_
 , npcs_
 , characters_
 , beams_
