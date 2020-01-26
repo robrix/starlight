@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.System
@@ -19,10 +20,9 @@ module Starlight.System
 ) where
 
 import           Control.Effect.Lens.Exts (asserting)
-import           Control.Lens (Lens, Lens', at, imap, iso, ix, lens, to, (^.), (^?))
-import           Data.Bifunctor (first)
+import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
+import           Data.Either (partitionEithers)
 import           Data.Generics.Product.Fields
-import           Data.List (partition)
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (fromMaybe)
 import           GHC.Generics (Generic)
@@ -40,8 +40,8 @@ import           Unit.Power
 
 data System a = System
   { bodies  :: !(Map.Map BodyIdentifier a)
-  , players :: ![Character]
-  , npcs    :: ![Character]
+  , players :: !(Map.Map (Code, Name) Character)
+  , npcs    :: !(Map.Map (Code, Name) Character)
   , beams   :: ![Beam]
   }
   deriving (Generic, Show)
@@ -50,26 +50,26 @@ bodies_ :: Lens (System a) (System b) (Map.Map BodyIdentifier a) (Map.Map BodyId
 bodies_ = field @"bodies"
 
 player_ :: HasCallStack => Lens' (System a) Character
-player_ = characters_.at (Player 0).iso (fromMaybe (error "player missing")) Just
+player_ = characters_.at (Player (0, "you")).iso (fromMaybe (error "player missing")) Just
 
-players_ :: Lens' (System a) [Character]
+players_ :: Lens' (System a) (Map.Map (Code, Name) Character)
 players_ = field @"players"
 
-npcs_ :: Lens' (System a) [Character]
+npcs_ :: Lens' (System a) (Map.Map (Code, Name) Character)
 npcs_ = field @"npcs"
 
 characters_ :: HasCallStack => Lens' (System a) (Map.Map CharacterIdentifier Character)
-characters_ = lens get set.asserting (Map.member (Player 0)) where
-  get s = Map.fromList (s^.players_.to (imap ((,) . Player)) <> s^.npcs_.to (imap ((,) . NPC)))
-  set s cs = s{ players = map snd p, npcs = map snd n } where
-    (p, n) = partition (\case{ Player _ -> True ; _ -> False } . fst) (Map.toList cs)
+characters_ = lens get set.asserting (Map.member (Player (0, "you"))) where
+  get System{ players, npcs } = Map.mapKeys Player players <> Map.mapKeys NPC npcs
+  set s cs = s{ players = Map.fromList p, npcs = Map.fromList n } where
+    (p, n) = partitionEithers (map (\case{ (Player k, v) -> Left (k, v) ; (NPC k, v) -> Right (k, v) }) (Map.toList cs))
 
 beams_ :: Lens' (System a) [Beam]
 beams_ = field @"beams"
 
 
 identifiers :: System a -> [Identifier]
-identifiers System{ bodies, players, npcs } = imap (const . C . Player) players <> imap (const . C . NPC) npcs <> map B (Map.keys bodies)
+identifiers System{ bodies, players, npcs } = map (C . Player) (Map.keys players) <> map (C . NPC) (Map.keys npcs) <> map B (Map.keys bodies)
 
 (!?) :: System a -> Identifier -> Maybe (Either a Character)
 (!?) s = \case
@@ -79,9 +79,9 @@ identifiers System{ bodies, players, npcs } = imap (const . C . Player) players 
 
 neighbourhoodOf :: HasActor a => Character -> System a -> System a
 neighbourhoodOf c sys@System{ bodies, players, npcs } = sys
-  { bodies  = Map.filterWithKey (visible . B) bodies
-  , players = map snd (filter (uncurry visible . first C) (imap ((,) . Player) players))
-  , npcs    = map snd (filter (uncurry visible . first C) (imap ((,) . NPC)    npcs))
+  { bodies  = Map.filterWithKey (visible . B)          bodies
+  , players = Map.filterWithKey (visible . C . Player) players
+  , npcs    = Map.filterWithKey (visible . C . NPC)    npcs
   } where
   -- FIXME: occlusion
   -- FIXME: jamming

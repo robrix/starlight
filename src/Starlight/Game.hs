@@ -83,8 +83,8 @@ runGame bodies
   . TVar.evalState @Input mempty
   . TVar.evalState System
       { bodies
-      , players =
-        [ Character
+      , players = Map.fromList
+        [ (,) (0, "you") $ Character
           { name    = "you"
           , actor   = Actor
             { position  = convert <$> start
@@ -144,7 +144,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
 
   runSystem $ do
     npc <- generateNPC
-    npcs_ @Body %= (npc:)
+    npcs_ @Body %= (Map.singleton (0, name npc) npc <>)
 
   start <- now
   fork . evalState start . fix $ \ loop -> do
@@ -205,7 +205,7 @@ integration = id <~> timed . flip (execState @(System Body)) (measure "integrati
 
   -- FIXME: this is so gross
   beams_ @Body .= []
-  npcs_ @Body %= filter ((> 0) . (^.ship_.armour_.min_))
+  npcs_ @Body %= Map.filter ((> 0) . (^.ship_.armour_.min_))
   characters_ @Body <~> itraverse
     (\ i
     -> local . neighbourhoodOf @StateVectors
