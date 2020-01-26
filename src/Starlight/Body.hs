@@ -75,7 +75,7 @@ body_ :: Lens' StateVectors Body
 body_ = field @"body"
 
 toBodySpace :: StateVectors -> Transform Double Distance BodyUnits
-toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (rotation (actor v))
+toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (actor v^.rotation_)
 
 data Revolution = Revolution
   { orientation :: !(Quaternion (I Double))
@@ -86,13 +86,11 @@ data Revolution = Revolution
 data Body = Body
   { radius           :: !(Kilo Metres Double)
   , mass             :: !(Kilo Grams Double)
-  , tilt             :: !(Degrees Double)
-  , rotationalPeriod :: !(Seconds Double)        -- sidereal rotation period
+  , rotation         :: !Revolution           -- axial tilt & sidereal rotation period
   , eccentricity     :: !(I Double)
   , semimajor        :: !(Kilo Metres Double)
-  , orientation      :: !(Quaternion (I Double)) -- relative to ecliptic
-  , period           :: !(Seconds Double)
-  , timeOfPeriapsis  :: !(Seconds Double)        -- relative to epoch
+  , revolution       :: !Revolution           -- relative to ecliptic
+  , timeOfPeriapsis  :: !(Seconds Double)     -- relative to epoch
   , colour           :: !(Colour Float)
   }
   deriving (Generic, Show)
@@ -119,13 +117,13 @@ orbitTimeScale = 1
 
 
 actorAt :: Body -> Seconds Double -> Actor
-actorAt Body{ tilt, radius, mass, rotationalPeriod, eccentricity, semimajor, period, timeOfPeriapsis, orientation } t = Actor
+actorAt Body{ radius, mass, rotation, eccentricity, semimajor, revolution, timeOfPeriapsis } t = Actor
   { position = convert <$> ext (cartesian2 trueAnomaly r) (0 :: Kilo Metres Double)
   , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU @(Length :^: 2 :/: Time) (mu .*. semimajor) ./. r .*. coord) <$> V3 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly) 0
   , rotation
-    = orientation
-    * axisAngle (unit _x) (convert @Degrees tilt)
-    * axisAngle (unit _z) (t .*. rotationTimeScale ./. rotationalPeriod)
+    = orientation revolution
+    * orientation rotation
+    * axisAngle (unit _z) (t .*. rotationTimeScale ./. period rotation)
   , mass
   , magnitude = convert radius * 2
   } where
@@ -134,7 +132,7 @@ actorAt Body{ tilt, radius, mass, rotationalPeriod, eccentricity, semimajor, per
   meanAnomaly :: I Double
   meanAnomaly = meanMotion .*. t'
   meanMotion :: (I :/: Seconds) Double
-  meanMotion = I (2 * pi) ./. period
+  meanMotion = I (2 * pi) ./. period revolution
   eccentricAnomaly :: I Double
   eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity .*. sin ea) meanAnomaly where
     iter n f = go n where
@@ -152,7 +150,7 @@ actorAt Body{ tilt, radius, mass, rotationalPeriod, eccentricity, semimajor, per
 systemAt :: System Body -> Seconds Double -> System StateVectors
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
-  go identifier body@Body{ orientation } = StateVectors
+  go identifier body@Body{ revolution } = StateVectors
     { body
     , transform = rel >>> mkTranslation (position actor)
     , actor = actor
@@ -161,7 +159,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     } where
     actor = actorAt body t
     rel = maybe rot ((>>> rot) . transform) (parent identifier >>= (bodies' Map.!?))
-    rot = mkRotation orientation
+    rot = mkRotation (orientation revolution)
 
 -- | Subject to the invariant that w=1.
 extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)

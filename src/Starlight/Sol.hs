@@ -45,15 +45,19 @@ bodiesFromSQL = sendM (getDataFileName "ephemerides/ephemerides.db") >>= \ file 
       pure (rowid, (identifier, Body
         { radius           = pure @(Kilo Metres) radius
         , mass             = pure @(Kilo Grams)  mass
-        , tilt             = pure @Degrees       tilt
-        , rotationalPeriod = convert @Days @Seconds (pure rotationalPeriod)
+        , rotation         = Revolution
+          { orientation = axisAngle (unit _x) (convert @Degrees (pure tilt))
+          , period      = convert @Days @Seconds (pure rotationalPeriod)
+          }
         , eccentricity    = I eccentricity
         , semimajor       = pure @(Kilo Metres) semimajor
-        , orientation     = orient
-          (convert @Degrees (pure longitudeOfAscendingNode))
-          (convert @Degrees (pure inclination))
-          (convert @Degrees (pure argumentOfPerifocus))
-        , period          = pure @Seconds orbitalPeriod
+        , revolution      = Revolution
+          { orientation = orient
+            (convert @Degrees (pure longitudeOfAscendingNode))
+            (convert @Degrees (pure inclination))
+            (convert @Degrees (pure argumentOfPerifocus))
+          , period      = pure @Seconds orbitalPeriod
+          }
         , timeOfPeriapsis = pure @Seconds timeOfPeriapsis
         , colour           = review packed (fromIntegral colour)
         }))
