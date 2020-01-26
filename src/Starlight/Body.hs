@@ -17,6 +17,7 @@ module Starlight.Body
 ( StateVectors(..)
 , body_
 , toBodySpace
+, Revolution(..)
 , Body(..)
 , radius_
 , BodyUnits(..)
@@ -75,6 +76,12 @@ body_ = field @"body"
 
 toBodySpace :: StateVectors -> Transform Double Distance BodyUnits
 toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (rotation (actor v))
+
+data Revolution = Revolution
+  { orientation :: !(Quaternion (I Double))
+  , period      :: !(Seconds Double)
+  }
+  deriving (Generic, Show)
 
 data Body = Body
   { radius           :: !(Kilo Metres Double)
