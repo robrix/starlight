@@ -27,6 +27,7 @@ import           Control.Monad.IO.Class.Lift
 import           Data.Function (fix)
 import           Data.Functor.Interval
 import qualified Data.Map as Map
+import qualified Data.Text as Text
 import           Data.Time.Clock (UTCTime)
 import           GL
 import           GL.Effect.Check
@@ -166,7 +167,8 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   put True
 
 generateNPC
-  :: ( Has Random sig m
+  :: ( Has (Lift IO) sig m
+     , Has Random sig m
      , Has (Reader (System StateVectors)) sig m
      )
   => m Character
@@ -174,9 +176,10 @@ generateNPC = do
   terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
   theta <- uniformR (-pi, pi)
   r <- (terra^.body_.radius_ +) <$> exponential 1
+  name <- generateName
   let position = ext (cartesian2 theta (convert @_ @Distance r)) 0 + terra^.position_
   pure $! Character
-    { name    = "them"
+    { name
     , actor   = Actor
       { position
       , velocity  = 0
@@ -188,6 +191,12 @@ generateNPC = do
     , actions = mempty
     , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
     }
+
+generateName :: (Has (Lift IO) sig m, Has Random sig m) => m Text.Text
+generateName = do
+  names <- lines <$> sendM (readFile "data/ship-names.txt")
+  i <- uniformR (0, pred (length names))
+  pure $! Text.pack (names !! i)
 
 integration
   :: ( Effect sig
