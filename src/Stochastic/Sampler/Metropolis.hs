@@ -28,6 +28,8 @@ sample x0 proposal (PDF pdf) = fix (\ loop x -> do
     loop x) x0
 
 
+-- Taken from mwc-random
+
 -- | Generate a normally distributed random variate with given mean
 -- and standard deviation.
 normal :: (Fractional a, Has Random sig m)
