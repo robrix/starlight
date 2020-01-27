@@ -44,8 +44,8 @@ normal m s = do
 -- Compared to the ziggurat algorithm usually used, this is slower,
 -- but generates more independent variates that pass stringent tests
 -- of randomness.
-standard :: Has Random sig m => m Double
-standard = loop where
+standard :: (Fractional a, Has Random sig m) => m a
+standard = realToFrac <$> loop where
   loop = do
     u  <- subtract 1 . (*2) <$> uniform
     ri <- uniform
