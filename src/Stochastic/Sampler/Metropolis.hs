@@ -60,9 +60,10 @@ standard = loop where
             d  = exp (-0.5 * (bi * bi - xx))
             e  = exp (-0.5 * (bj * bj - xx))
         c <- uniform
-        if e + c * (d - e) < 1
-          then pure x
-          else loop
+        if e + c * (d - e) < 1 then
+          pure x
+        else
+          loop
   normalTail neg = tailing
     where
     tailing = do
