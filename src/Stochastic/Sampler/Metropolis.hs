@@ -66,9 +66,10 @@ standard = loop where
     where tailing  = do
             x <- (/rNorm) . log <$> uniform
             y <- log            <$> uniform
-            if y * (-2) < x * x
-              then tailing
-              else pure $! if neg then x - rNorm else rNorm - x
+            if y * (-2) < x * x then
+              tailing
+            else
+              pure $! if neg then x - rNorm else rNorm - x
 {-# INLINE standard #-}
 
 
