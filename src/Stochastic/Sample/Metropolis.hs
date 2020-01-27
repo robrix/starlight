@@ -13,9 +13,8 @@ module Stochastic.Sample.Metropolis
 
 import           Control.Effect.Random
 import           Control.Effect.State
-import           Control.Monad (replicateM_)
+import           Control.Monad (replicateM_, when)
 import           Data.Bits
-import           Data.Function (fix)
 import qualified Data.Vector.Unboxed as I
 import           Data.Word
 import           Stochastic.PDF
@@ -26,14 +25,12 @@ burnIn i proposal = replicateM_ i . sample proposal
 
 
 sample :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig m) => (a -> m a) -> PDF a b -> m a
-sample proposal (PDF pdf) = get >>= fix (\ loop x -> do
+sample proposal (PDF pdf) = do
+  x <- get
   x' <- proposal x
   let alpha = pdf x' / pdf x
   u <- uniform
-  if u <= alpha then
-    x' <$ put x'
-  else
-    loop x)
+  x' <$ when (u <= alpha) (put x')
 
 
 normalPDF :: Floating a => a -> a -> PDF a a
