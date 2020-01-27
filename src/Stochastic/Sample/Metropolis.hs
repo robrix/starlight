@@ -20,12 +20,12 @@ import           Data.Word
 import           Stochastic.PDF
 import qualified System.Random as R
 
-burnIn :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig m) => Int -> (a -> m a) -> PDF a b -> m ()
-burnIn i proposal = replicateM_ i . sample proposal
+burnIn :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig m) => Int -> (a -> PDF a a) -> (a -> m a) -> PDF a b -> m ()
+burnIn i proposalPDF proposal = replicateM_ i . sample proposalPDF proposal
 
 
-sample :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig m) => (a -> m a) -> PDF a b -> m a
-sample proposal (PDF pdf) = do
+sample :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig m) => (a -> PDF a a) -> (a -> m a) -> PDF a b -> m a
+sample proposalPDF proposal (PDF pdf) = do
   x <- get
   x' <- proposal x
   let alpha = pdf x' / pdf x
