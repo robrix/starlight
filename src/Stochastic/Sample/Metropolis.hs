@@ -24,7 +24,7 @@ sample proposal (PDF pdf) = get >>= fix (\ loop x -> do
   let alpha = pdf x' / pdf x
   u <- uniform
   if u <= alpha then
-    pure x'
+    x' <$ put x'
   else
     loop x)
 
