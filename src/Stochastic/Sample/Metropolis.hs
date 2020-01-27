@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RankNTypes #-}
-module Stochastic.Sampler.Metropolis
+module Stochastic.Sample.Metropolis
 ( sample
 , normal
 , standard

@@ -1,4 +1,4 @@
-module Stochastic.Sampler.Rejection
+module Stochastic.Sample.Rejection
 ( sample
 ) where
 
