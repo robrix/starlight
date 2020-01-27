@@ -28,7 +28,7 @@ sample :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig 
 sample proposal (PDF pdf) = do
   x <- get
   x' <- proposal x
-  let alpha = pdf x' / pdf x
+  let alpha = min 1 (pdf x' / pdf x)
   u <- uniform
   if u <= alpha then
     x' <$ put x'
