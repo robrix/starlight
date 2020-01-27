@@ -1,10 +1,12 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE RankNTypes #-}
 module Stochastic.Sampler.Metropolis
 ( sample
 , normal
 , standard
+, standardFrom
 ) where
 
 import           Control.Effect.Random
@@ -74,6 +76,37 @@ standard = realToFrac <$> loop where
       else
         pure $! if neg then x - rNorm else rNorm - x
 {-# INLINE standard #-}
+
+standardFrom :: (Fractional a, Monad m) => (forall a . R.Random a => m a) -> m a
+standardFrom uniform = realToFrac <$> loop where
+  loop = do
+    u  <- subtract 1 . (*2) <$> uniform
+    ri <- uniform
+    let i  = fromIntegral ((ri :: Word32) .&. 127)
+        bi = I.unsafeIndex blocks i
+        bj = I.unsafeIndex blocks (i+1)
+    if| abs u < I.unsafeIndex ratios i -> pure $! u * bi
+      | i == 0                         -> normalTail (u < 0)
+      | otherwise                      -> do
+        let x  = u * bi
+            xx = x * x
+            d  = exp (-0.5 * (bi * bi - xx))
+            e  = exp (-0.5 * (bj * bj - xx))
+        c <- uniform
+        if e + c * (d - e) < 1 then
+          pure x
+        else
+          loop
+  normalTail neg = tailing
+    where
+    tailing = do
+      x <- (/rNorm) . log <$> uniform
+      y <- log            <$> uniform
+      if y * (-2) < x * x then
+        tailing
+      else
+        pure $! if neg then x - rNorm else rNorm - x
+{-# INLINE standardFrom #-}
 
 -- Constants used by standard/normal. They are floated to the top
 -- level to avoid performance regression (Bug #16) when blocks/ratios
