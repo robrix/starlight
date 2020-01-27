@@ -3,7 +3,8 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RankNTypes #-}
 module Stochastic.Sample.Metropolis
-( sample
+( burnIn
+, sample
 , normal
 , standard
 , standardFrom
@@ -11,12 +12,17 @@ module Stochastic.Sample.Metropolis
 
 import           Control.Effect.Random
 import           Control.Effect.State
+import           Control.Monad (replicateM_)
 import           Data.Bits
 import           Data.Function (fix)
 import qualified Data.Vector.Unboxed as I
 import           Data.Word
 import           Stochastic.PDF
 import qualified System.Random as R
+
+burnIn :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig m) => Int -> (a -> m a) -> PDF a b -> m ()
+burnIn i proposal = replicateM_ i . sample proposal
+
 
 sample :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig m) => (a -> m a) -> PDF a b -> m a
 sample proposal (PDF pdf) = get >>= fix (\ loop x -> do
