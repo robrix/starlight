@@ -63,14 +63,15 @@ standard = loop where
         if e + c * (d - e) < 1
           then pure x
           else loop
-  normalTail neg  = tailing
-    where tailing  = do
-            x <- (/rNorm) . log <$> uniform
-            y <- log            <$> uniform
-            if y * (-2) < x * x then
-              tailing
-            else
-              pure $! if neg then x - rNorm else rNorm - x
+  normalTail neg = tailing
+    where
+    tailing = do
+      x <- (/rNorm) . log <$> uniform
+      y <- log            <$> uniform
+      if y * (-2) < x * x then
+        tailing
+      else
+        pure $! if neg then x - rNorm else rNorm - x
 {-# INLINE standard #-}
 
 
