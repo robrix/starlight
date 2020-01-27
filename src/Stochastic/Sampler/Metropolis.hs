@@ -75,7 +75,6 @@ standard = realToFrac <$> loop where
         pure $! if neg then x - rNorm else rNorm - x
 {-# INLINE standard #-}
 
-
 -- Constants used by standard/normal. They are floated to the top
 -- level to avoid performance regression (Bug #16) when blocks/ratios
 -- are recalculated on each call to standard/normal. It's also
