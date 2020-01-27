@@ -5,6 +5,7 @@
 module Stochastic.Sample.Metropolis
 ( burnIn
 , sample
+, normalPDF
 , normal
 , standard
 , standardFrom
@@ -33,6 +34,11 @@ sample proposal (PDF pdf) = get >>= fix (\ loop x -> do
     x' <$ put x'
   else
     loop x)
+
+
+normalPDF :: Floating a => a -> a -> PDF a a
+normalPDF mean stddev = PDF $ \ x ->
+  (1 / (stddev * sqrt (2 * pi))) ** exp (-0.5 * ((x - mean) / stddev) ** 2)
 
 
 -- Taken from mwc-random
