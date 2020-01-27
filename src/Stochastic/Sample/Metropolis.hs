@@ -10,6 +10,7 @@ module Stochastic.Sample.Metropolis
 ) where
 
 import           Control.Effect.Random
+import           Control.Effect.State
 import           Data.Bits
 import           Data.Function (fix)
 import qualified Data.Vector.Unboxed as I
@@ -17,15 +18,15 @@ import           Data.Word
 import           Stochastic.PDF
 import qualified System.Random as R
 
-sample :: (R.Random b, Fractional b, Ord b, Has Random sig m) => a -> (a -> m a) -> PDF a b -> m a
-sample x0 proposal (PDF pdf) = fix (\ loop x -> do
+sample :: (R.Random b, Fractional b, Ord b, Has Random sig m, Has (State a) sig m) => (a -> m a) -> PDF a b -> m a
+sample proposal (PDF pdf) = get >>= fix (\ loop x -> do
   x' <- proposal x
   let alpha = pdf x' / pdf x
   u <- uniform
   if u <= alpha then
     pure x'
   else
-    loop x) x0
+    loop x)
 
 
 -- Taken from mwc-random
