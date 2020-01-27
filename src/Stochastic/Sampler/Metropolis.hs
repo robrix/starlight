@@ -51,8 +51,7 @@ standard = loop where
     let i  = fromIntegral ((ri :: Word32) .&. 127)
         bi = I.unsafeIndex blocks i
         bj = I.unsafeIndex blocks (i+1)
-    if
-      | abs u < I.unsafeIndex ratios i -> pure $! u * bi
+    if| abs u < I.unsafeIndex ratios i -> pure $! u * bi
       | i == 0                         -> normalTail (u < 0)
       | otherwise                      -> do
         let x  = u * bi
