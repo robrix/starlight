@@ -15,14 +15,15 @@ import           Data.Word
 import           Stochastic.PDF
 import qualified System.Random as R
 
-sample :: (R.Random b, Num b, Ord b, Has Random sig m) => m a -> b -> PDF a b -> m a
-sample sample maxPdf pdf = fix (\ loop -> do
-  x <- sample
-  y <- uniformR (0, maxPdf)
-  if y <= runPDF pdf x then
-    pure x
+sample :: (R.Random b, Fractional b, Ord b, Has Random sig m) => a -> (a -> m a) -> PDF a b -> m a
+sample x0 proposal (PDF pdf) = fix (\ loop x -> do
+  x' <- proposal x
+  let alpha = pdf x' / pdf x
+  u <- uniform
+  if u <= alpha then
+    pure x'
   else
-    loop)
+    loop x) x0
 
 
 -- | Generate a normally distributed random variate with given mean
