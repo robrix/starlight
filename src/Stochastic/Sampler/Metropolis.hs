@@ -29,8 +29,8 @@ sample x0 proposal (PDF pdf) = fix (\ loop x -> do
 -- | Generate a normally distributed random variate with given mean
 -- and standard deviation.
 normal :: Has Random sig m
-       => Double                -- ^ Mean
-       -> Double                -- ^ Standard deviation
+       => Double -- ^ Mean
+       -> Double -- ^ Standard deviation
        -> m Double
 normal m s = do
   x <- standard
