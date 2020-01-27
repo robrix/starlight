@@ -83,11 +83,11 @@ standard = realToFrac <$> loop where
 blocks :: I.Vector Double
 blocks = (`I.snoc` 0) . I.cons (v/f) . I.cons rNorm . I.unfoldrN 126 go $! T rNorm f
   where
-    go (T b g) = let !u = T h (exp (-0.5 * h * h))
-                     h  = sqrt (-2 * log (v / b + g))
-                 in Just (h, u)
-    v = 9.91256303526217e-3
-    f = exp (-0.5 * rNorm * rNorm)
+  go (T b g) = let !u = T h (exp (-0.5 * h * h))
+                   h  = sqrt (-2 * log (v / b + g))
+                in Just (h, u)
+  v = 9.91256303526217e-3
+  f = exp (-0.5 * rNorm * rNorm)
 {-# NOINLINE blocks #-}
 
 rNorm :: Double
