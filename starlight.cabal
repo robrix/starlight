@@ -119,6 +119,7 @@ library
     Starlight.Weapon.Laser
     Stochastic.Histogram
     Stochastic.PDF
+    Stochastic.Sampler.Metropolis
     Stochastic.Sampler.Rejection
     UI.Colour
     UI.Context
