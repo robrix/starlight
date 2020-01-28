@@ -38,7 +38,7 @@ sample proposal (PDF pdf) = do
 
 normalPDF :: Floating a => a -> a -> PDF a a
 normalPDF mean stddev = PDF $ \ x ->
-  (1 / (stddev * sqrt (2 * pi))) ** exp (-0.5 * ((x - mean) / stddev) ** 2)
+  (1 / (stddev * sqrt (2 * pi))) * exp (-0.5 * ((x - mean) / stddev) ** 2)
 
 
 -- Taken from mwc-random
