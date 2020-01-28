@@ -28,6 +28,8 @@ module Data.Functor.Interval
 import           Control.Applicative (liftA2)
 import           Control.Effect.Random
 import           Control.Lens hiding (imap)
+import           Control.Monad (join)
+import           Control.Monad.Trans.Class
 import           Data.Coerce (coerce)
 import           Data.Fixed (mod')
 import           Data.Generics.Product.Fields
@@ -46,6 +48,9 @@ instance Applicative f => Applicative (Interval f) where
 
 instance Monad f => Monad (Interval f) where
   Interval m1 m2 >>= f = Interval (m1 >>= min' . f) (m2 >>= max' . f)
+
+instance MonadTrans Interval where
+  lift = join Interval
 
 instance (Applicative f, Num a) => Num (Interval f a) where
   (+) = liftA2 (+)
