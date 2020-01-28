@@ -31,7 +31,7 @@ data Interval f a = Interval
   { min' :: !(f a)
   , max' :: !(f a)
   }
-  deriving (Eq, Foldable, Functor, Generic, Show, Traversable)
+  deriving (Eq, Foldable, Functor, Generic, Ord, Show, Traversable)
 
 instance Applicative f => Applicative (Interval f) where
   pure a = Interval (pure a) (pure a)
