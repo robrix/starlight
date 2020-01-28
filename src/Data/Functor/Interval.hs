@@ -16,6 +16,7 @@ module Data.Functor.Interval
 , min_
 , max_
 , imap
+, isSubintervalOf
 , uniformI
 , Union(..)
 , union
@@ -139,6 +140,10 @@ max_ = field @"max'"
 
 imap :: (f a -> g b) -> Interval f a -> Interval g b
 imap f = Interval <$>  f . min' <*> f . max'
+
+
+isSubintervalOf :: Ord (f a) => Interval f a -> Interval f a -> Bool
+isSubintervalOf a b = min' a >= min' b && max' a <= max' b
 
 
 uniformI :: (R.Random a, Applicative f, Traversable f, Has Random sig m) => Interval f a -> m (f a)
