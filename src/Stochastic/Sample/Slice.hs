@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeApplications #-}
 module Stochastic.Sample.Slice
 ( sample
@@ -6,7 +8,6 @@ module Stochastic.Sample.Slice
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.State.Strict
 import           Control.Lens ((&), (+~), (-~), (.~))
-import           Data.Function (fix)
 import           Data.Functor.I
 import           Data.Functor.Interval
 import           Stochastic.PDF
@@ -18,15 +19,7 @@ sample w m (PDF pdf) = do
   y <- uniformR (0, pdf x)
   i <- step x y <$> uniform <*> uniformR @Double (0, fromIntegral m)
 
-  fix (\ shrink i -> do
-    x' <- uniformI i
-    if pdf x' > y then
-      x' <$ put x'
-    else if x' < x then
-      shrink $ i & min_ .~ x'
-    else
-      shrink $ i & max_ .~ x')
-    i
+  shrink x y i
   where
   step x y u v = go (Interval l (l + w)) (Interval j (m - 1 - j))
     where
@@ -36,3 +29,9 @@ sample w m (PDF pdf) = do
       | otherwise                    = i
     l = x - w * u
     j = floor v
+  shrink x y = go
+    where
+    go i = uniformI i >>= \case
+      x' | pdf x' > y -> x' <$ put x'
+         | x' < x     -> go (i & min_ .~ x')
+         | otherwise  -> go (i & max_ .~ x')
