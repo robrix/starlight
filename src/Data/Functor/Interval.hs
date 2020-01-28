@@ -14,14 +14,17 @@ module Data.Functor.Interval
 , min_
 , max_
 , imap
+, uniformI
 , Bounding(..)
 ) where
 
-import Control.Applicative (liftA2)
-import Control.Lens hiding (imap)
-import Data.Fixed (mod')
-import Data.Generics.Product.Fields
-import GHC.Generics (Generic)
+import           Control.Applicative (liftA2)
+import           Control.Effect.Random
+import           Control.Lens hiding (imap)
+import           Data.Fixed (mod')
+import           Data.Generics.Product.Fields
+import           GHC.Generics (Generic)
+import qualified System.Random as R
 
 data Interval f a = Interval
   { min' :: !(f a)
@@ -127,6 +130,10 @@ max_ = field @"max'"
 
 imap :: (f a -> g b) -> Interval f a -> Interval g b
 imap f = Interval <$>  f . min' <*> f . max'
+
+
+uniformI :: (R.Random a, Applicative f, Traversable f, Has Random sig m) => Interval f a -> m (f a)
+uniformI (Interval mn mx) = traverse uniformR ((,) <$> mn <*> mx)
 
 
 newtype Bounding f a = Bounding { getBounding :: Interval f a }
