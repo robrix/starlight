@@ -27,7 +27,7 @@ sample w m (PDF pdf) = do
   fix (\ shrink (l, r) -> do
     x' <- uniformR (l, r)
     if pdf x' > y then
-      pure x'
+      x' <$ put x'
     else if x' < x then
       shrink (x', r)
     else
