@@ -38,6 +38,9 @@ instance Applicative f => Applicative (Interval f) where
   pure a = Interval (pure a) (pure a)
   Interval f1 f2 <*> Interval a1 a2 = Interval (f1 <*> a1) (f2 <*> a2)
 
+instance Monad f => Monad (Interval f) where
+  Interval m1 m2 >>= f = Interval (m1 >>= min' . f) (m2 >>= max' . f)
+
 instance (Applicative f, Num a) => Num (Interval f a) where
   (+) = liftA2 (+)
   {-# INLINE (+) #-}
