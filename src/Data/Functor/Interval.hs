@@ -142,14 +142,14 @@ uniformI (Interval mn mx) = traverse uniformR ((,) <$> mn <*> mx)
 
 
 newtype Union f a = Union { getUnion :: Interval f a }
-  deriving (Applicative, Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Eq, Foldable, Functor, Monad, Ord, Show, Traversable)
 
 instance (Applicative f, Ord a) => Semigroup (Union f a) where
   Union i1 <> Union i2 = Union (interval min max <*> i1 <*> i2)
 
 
 newtype Intersection f a = Intersection { getIntersection :: Interval f a }
-  deriving (Applicative, Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Eq, Foldable, Functor, Monad, Ord, Show, Traversable)
 
 instance (Applicative f, Ord a) => Semigroup (Intersection f a) where
   Intersection i1 <> Intersection i2 = Intersection (interval max min <*> i1 <*> i2)
