@@ -55,6 +55,8 @@ import           Starlight.System as System
 import           Starlight.Time
 import           Starlight.UI
 import           Starlight.View
+import           Stochastic.PDF
+import           Stochastic.Sample.Slice
 import           System.FilePath
 import           System.Random.TF (TFGen, newTFGen)
 import           UI.Colour
@@ -167,17 +169,22 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   put True
 
 generateNPC
-  :: ( Has (Lift IO) sig m
+  :: ( Effect sig
+     , Has (Lift IO) sig m
      , Has Random sig m
      , Has (Reader (System StateVectors)) sig m
      )
   => m Character
 generateNPC = do
   terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
-  theta <- uniformR (-pi, pi)
-  r <- (terra^.body_.radius_ +) <$> exponential 1
+  let pdf v
+        | qdV .>. sqU (terra^.body_.radius_) = I 1 ./. qdV
+        | otherwise                          = 0
+        where
+        qdV = v `qdU` (terra^.position_)
+      mx = convert @(Kilo Metres) @Distance 5.929522234007778e9
+  position <- evalState (0 :: V3 (Distance Double)) (sample (interval 0 1) (interval (-mx) mx) (PDF pdf))
   name <- generateName
-  let position = ext (cartesian2 theta (convert @_ @Distance r)) 0 + terra^.position_
   pure $! Character
     { name
     , actor   = Actor
