@@ -119,7 +119,7 @@ interval :: Applicative f => a -> a -> Interval f a
 interval mn mx = Interval (pure mn) (pure mx)
 
 point :: f a -> Interval f a
-point fa = Interval fa fa
+point = join Interval
 
 size :: Num (f a) => Interval f a -> f a
 size (Interval min max) = max - min
