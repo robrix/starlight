@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module Data.Functor.Interval
 ( Interval(..)
@@ -17,12 +18,14 @@ module Data.Functor.Interval
 , imap
 , uniformI
 , Union(..)
+, union
 , Intersection(..)
 ) where
 
 import           Control.Applicative (liftA2)
 import           Control.Effect.Random
 import           Control.Lens hiding (imap)
+import           Data.Coerce (coerce)
 import           Data.Fixed (mod')
 import           Data.Generics.Product.Fields
 import           GHC.Generics (Generic)
@@ -146,6 +149,9 @@ newtype Union f a = Union { getUnion :: Interval f a }
 
 instance (Applicative f, Ord a) => Semigroup (Union f a) where
   Union i1 <> Union i2 = Union (interval min max <*> i1 <*> i2)
+
+union :: forall f a . (Applicative f, Ord a) => Interval f a -> Interval f a -> Interval f a
+union = coerce ((<>) :: Union f a -> Union f a -> Union f a)
 
 
 newtype Intersection f a = Intersection { getIntersection :: Interval f a }
