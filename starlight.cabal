@@ -122,6 +122,7 @@ library
     Stochastic.Sample.Markov
     Stochastic.Sample.Metropolis
     Stochastic.Sample.Rejection
+    Stochastic.Sample.Slice
     UI.Colour
     UI.Context
     UI.Drawable
