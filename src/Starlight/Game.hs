@@ -181,9 +181,9 @@ generateNPC = do
         | qdV .>. sqU (terra^.body_.radius_) = I 1 ./. qdV
         | otherwise                          = 0
         where
-        qdV = v `qdU` (terra^.position_)
+        qdV = v `qdU` (terra^.position_._xy)
       mx = convert @(Kilo Metres) @Distance 5.929522234007778e9
-  position <- evalState (0 :: V3 (Distance Double)) (sample (interval 0 1) (interval (-mx) mx) (PDF pdf))
+  position <- (`ext` 0) <$> evalState (0 :: V2 (Distance Double)) (sample (interval 0 1) (interval (-mx) mx) (PDF pdf))
   name <- generateName
   pure $! Character
     { name
