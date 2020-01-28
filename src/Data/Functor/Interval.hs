@@ -138,6 +138,7 @@ uniformI (Interval mn mx) = traverse uniformR ((,) <$> mn <*> mx)
 
 
 newtype Union f a = Union { getUnion :: Interval f a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 instance (Applicative f, Ord a) => Semigroup (Union f a) where
   Union i1 <> Union i2 = Union (interval min max <*> i1 <*> i2)
