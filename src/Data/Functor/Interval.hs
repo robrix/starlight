@@ -145,6 +145,7 @@ instance (Applicative f, Ord a) => Semigroup (Union f a) where
 
 
 newtype Intersection f a = Intersection { getIntersection :: Interval f a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 instance (Applicative f, Ord a) => Semigroup (Intersection f a) where
   Intersection i1 <> Intersection i2 = Intersection (interval max min <*> i1 <*> i2)
