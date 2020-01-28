@@ -17,7 +17,7 @@ sample :: (R.Random a, RealFrac a, Has Random sig m, Has (State (I a)) sig m) =>
 sample w m (PDF pdf) = do
   x <- get
   y <- uniformR (0, pdf x)
-  i <- step x y <$> uniform <*> uniformR @Double (0, fromIntegral m)
+  i <- step x y <$> uniformI (Interval 0 1) <*> uniformR @Double (0, fromIntegral m)
 
   shrink x y i
   where
