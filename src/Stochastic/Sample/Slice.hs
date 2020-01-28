@@ -17,7 +17,7 @@ sample :: (R.Random a, RealFrac a, Has Random sig m, Has (State (I a)) sig m) =>
 sample w m (PDF pdf) = do
   x <- get
   y <- uniformR (0, pdf x)
-  i <- step x y <$> uniformI (Interval 0 1)
+  i <- step x y <$> uniformI (Interval 0 w)
 
   shrink x y i
   where
@@ -27,7 +27,7 @@ sample w m (PDF pdf) = do
       | min' i > min' m, y < pdf (min' i) = go (i & min_ -~ w)
       | max' i < max' m, y < pdf (max' i) = go (i & max_ +~ w)
       | otherwise                         = i
-    l = x - w * u
+    l = x - u
   shrink x y = go
     where
     go i = uniformI i >>= \case
