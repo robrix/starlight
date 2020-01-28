@@ -37,13 +37,13 @@ layoutGlyphs chars = (Run . ($ []) . result <*> bounds) . foldl' go (LayoutState
   go (LayoutState offset is prev) g@Glyph{ char, bounds_ } = LayoutState
     { offset  = offset + advanceWidth g
     , result  = is . (Instance offset (fromMaybe (Interval 0 0) (chars Map.!? char)) :)
-    , bounds_ = prev <> Just (Bounding (point (V2 offset 0) + bounds_))
+    , bounds_ = prev <> Just (Union (point (V2 offset 0) + bounds_))
     }
 
 data LayoutState = LayoutState
   { offset  :: {-# UNPACK #-} !Int
   , result  :: !([Instance] -> [Instance])
-  , bounds_ :: !(Maybe (Bounding V2 Int))
+  , bounds_ :: !(Maybe (Union V2 Int))
   }
 
 data Run = Run
@@ -59,10 +59,10 @@ instance HasBounds Glyph where
   bounds = bounds_
 
 instance HasBounds LayoutState where
-  bounds LayoutState{ bounds_ } = maybe (Interval 0 0) getBounding bounds_
+  bounds LayoutState{ bounds_ } = maybe (Interval 0 0) getUnion bounds_
 
 instance HasBounds t => HasBounds [t] where
-  bounds = maybe (Interval 0 0) getBounding . foldMap (Just . Bounding . bounds)
+  bounds = maybe (Interval 0 0) getUnion . foldMap (Just . Union . bounds)
 
 instance HasBounds (V2 Int) where
   bounds = Interval <*> id

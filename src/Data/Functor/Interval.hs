@@ -15,7 +15,7 @@ module Data.Functor.Interval
 , max_
 , imap
 , uniformI
-, Bounding(..)
+, Union(..)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -136,7 +136,7 @@ uniformI :: (R.Random a, Applicative f, Traversable f, Has Random sig m) => Inte
 uniformI (Interval mn mx) = traverse uniformR ((,) <$> mn <*> mx)
 
 
-newtype Bounding f a = Bounding { getBounding :: Interval f a }
+newtype Union f a = Union { getUnion :: Interval f a }
 
-instance (Applicative f, Ord a) => Semigroup (Bounding f a) where
-  Bounding i1 <> Bounding i2 = Bounding (Interval (pure min) (pure max) <*> i1 <*> i2)
+instance (Applicative f, Ord a) => Semigroup (Union f a) where
+  Union i1 <> Union i2 = Union (Interval (pure min) (pure max) <*> i1 <*> i2)
