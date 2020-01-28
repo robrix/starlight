@@ -16,12 +16,7 @@ sample :: (R.Random a, RealFrac a, Has Random sig m, Has (State (I a)) sig m) =>
 sample w m (PDF pdf) = do
   x <- get
   y <- uniformR (0, pdf x)
-  lr <- (\ u -> let l = x - w * u in Interval l (l + w)) <$> uniform
-  jk <- (\ v -> let j = floor v in Interval j (m - 1 - j)) <$> uniformR @Double (0, fromIntegral m)
-  let step i b
-        | min' b > 0, y < pdf (min' i) = step (i & min_ -~ w) (b & min_ -~ 1)
-        | max' b > 0, y < pdf (max' i) = step (i & max_ +~ w) (b & max_ -~ 1)
-        | otherwise                    = i
+  i <- step x y <$> uniform <*> uniformR @Double (0, fromIntegral m)
 
   fix (\ shrink i -> do
     x' <- uniformI i
@@ -31,4 +26,13 @@ sample w m (PDF pdf) = do
       shrink $ i & min_ .~ x'
     else
       shrink $ i & max_ .~ x')
-    (step lr jk)
+    i
+  where
+  step x y u v = go lr jk
+    where
+      go i b
+        | min' b > 0, y < pdf (min' i) = go (i & min_ -~ w) (b & min_ -~ 1)
+        | max' b > 0, y < pdf (max' i) = go (i & max_ +~ w) (b & max_ -~ 1)
+        | otherwise                    = i
+      lr = let l = x - w * u in Interval l (l + w)
+      jk = let j = floor v in Interval j (m - 1 - j)
