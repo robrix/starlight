@@ -28,11 +28,11 @@ sample w m (PDF pdf) = do
       shrink $ i & max_ .~ x')
     i
   where
-  step x y u v = go lr jk
+  step x y u v = go (Interval l (l + w)) (Interval j (m - 1 - j))
     where
       go i b
         | min' b > 0, y < pdf (min' i) = go (i & min_ -~ w) (b & min_ -~ 1)
         | max' b > 0, y < pdf (max' i) = go (i & max_ +~ w) (b & max_ -~ 1)
         | otherwise                    = i
-      lr = let l = x - w * u in Interval l (l + w)
-      jk = let j = floor v in Interval j (m - 1 - j)
+      l = x - w * u
+      j = floor v
