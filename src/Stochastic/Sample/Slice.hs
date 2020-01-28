@@ -7,15 +7,14 @@ module Stochastic.Sample.Slice
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.State.Strict
 import           Control.Lens ((&), (+~), (-~), (.~))
-import           Data.Functor.I
 import           Data.Functor.Interval
 import           Stochastic.PDF
 import qualified System.Random as R
 
-sample :: (R.Random a, RealFrac a, Has Random sig m, Has (State (I a)) sig m) => Interval I a -> Interval I a -> PDF (I a) (I a) -> m (I a)
+sample :: (Applicative f, Traversable f, R.Random a, RealFrac (f a), Has Random sig m, Has (State (f a)) sig m) => Interval f a -> Interval f a -> PDF (f a) (f a) -> m (f a)
 sample w m (PDF pdf) = do
   x <- get
-  y <- uniformR (0, pdf x)
+  y <- uniformI (Interval 0 (pdf x))
   i <- step x y <$> uniformI w
 
   shrink x y i
