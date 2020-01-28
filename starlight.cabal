@@ -117,6 +117,7 @@ library
     Starlight.UI
     Starlight.View
     Starlight.Weapon.Laser
+    Stochastic.Distribution
     Stochastic.Histogram
     Stochastic.PDF
     Stochastic.Sample.Markov
