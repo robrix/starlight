@@ -20,6 +20,7 @@ module Data.Functor.Interval
 , Union(..)
 , union
 , Intersection(..)
+, intersection
 ) where
 
 import           Control.Applicative (liftA2)
@@ -159,3 +160,6 @@ newtype Intersection f a = Intersection { getIntersection :: Interval f a }
 
 instance (Applicative f, Ord a) => Semigroup (Intersection f a) where
   Intersection i1 <> Intersection i2 = Intersection (interval max min <*> i1 <*> i2)
+
+intersection :: forall f a . (Applicative f, Ord a) => Interval f a -> Interval f a -> Interval f a
+intersection = coerce ((<>) :: Intersection f a -> Intersection f a -> Intersection f a)
