@@ -13,19 +13,19 @@ import           Data.Functor.Interval
 import           Stochastic.PDF
 import qualified System.Random as R
 
-sample :: (R.Random a, RealFrac a, Has Random sig m, Has (State (I a)) sig m) => I a -> Interval I a -> PDF (I a) (I a) -> m (I a)
+sample :: (R.Random a, RealFrac a, Has Random sig m, Has (State (I a)) sig m) => Interval I a -> Interval I a -> PDF (I a) (I a) -> m (I a)
 sample w m (PDF pdf) = do
   x <- get
   y <- uniformR (0, pdf x)
-  i <- step x y <$> uniformI (Interval 0 w)
+  i <- step x y <$> uniformI w
 
   shrink x y i
   where
-  step x y u = go (Interval l (l + w))
+  step x y u = go (Interval l (l + size w))
     where
     go i
-      | min' i > min' m, y < pdf (min' i) = go (i & min_ -~ w)
-      | max' i < max' m, y < pdf (max' i) = go (i & max_ +~ w)
+      | min' i > min' m, y < pdf (min' i) = go (i & min_ -~ size w)
+      | max' i < max' m, y < pdf (max' i) = go (i & max_ +~ size w)
       | otherwise                         = i
     l = x - u
   shrink x y = go
