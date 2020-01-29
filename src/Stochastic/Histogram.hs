@@ -14,9 +14,7 @@ import Data.Functor.Interval
 import System.Console.Terminal.Size as Size
 
 histogram :: RealFrac a => Interval I a -> Int -> [I a] -> [I Int]
-histogram interval n samples
-  | [] <- samples = []
-  | otherwise     = foldl' bucket (replicate n 0) samples
+histogram interval n = foldl' bucket (replicate n 0)
   where
   which sample = floor (toUnit interval sample * fromIntegral n)
   bucket accum sample = accum & ix (which sample) +~ 1
