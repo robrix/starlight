@@ -7,10 +7,11 @@ module Stochastic.Histogram
 
 import Control.Effect.Lift
 import Control.Lens (ix, (&), (+~))
-import Control.Monad (replicateM, (>=>))
+import Control.Monad (replicateM)
 import Data.Foldable (foldl')
 import Data.Functor.I
 import Data.Functor.Interval
+import System.Console.Terminal.Size as Size
 
 histogram :: RealFrac a => Interval I a -> Int -> [a] -> [Int]
 histogram interval n samples
@@ -30,5 +31,8 @@ sparkify bins
   max = fromIntegral $ maximum bins :: Double
   spark n = sparks !! round ((fromIntegral n / max) * maxSpark)
 
-printHistogram :: (RealFrac a, Has (Lift IO) sig m) => Interval I a -> Int -> Int -> m a -> m ()
-printHistogram interval b n = replicateM n >=> sendM . putStrLn . sparkify . histogram interval b
+printHistogram :: (RealFrac a, Has (Lift IO) sig m) => Interval I a -> Int -> m a -> m ()
+printHistogram interval n m = do
+  s <- maybe 80 Size.width <$> sendM Size.size
+  samples <- replicateM n m
+  sendM (putStrLn (sparkify (histogram interval s samples)))
