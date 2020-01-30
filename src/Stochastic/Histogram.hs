@@ -5,6 +5,7 @@ module Stochastic.Histogram
 , histogram2
 , sparkify
 , printHistogram
+, printHistogram2
 ) where
 
 import           Control.Effect.Lift
@@ -46,3 +47,9 @@ printHistogram interval n m = do
   s <- maybe 80 Size.width <$> sendM Size.size
   samples <- replicateM n (fmap I m)
   sendM (putStrLn (sparkify (U.toList (histogram interval s samples))))
+
+printHistogram2 :: (RealFrac a, Has (Lift IO) sig m) => Interval V2 a -> Int -> m (V2 a) -> m ()
+printHistogram2 interval n m = do
+  s <- maybe 80 (pure . Size.width) <$> sendM Size.size
+  samples <- replicateM n m
+  sendM (putStrLn (unlines (map (sparkify . U.toList) (V.toList (histogram2 interval s samples)))))
