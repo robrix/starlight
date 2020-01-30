@@ -7,17 +7,18 @@ module Stochastic.Histogram
 , printHistogram
 ) where
 
-import Control.Effect.Lift
-import Control.Lens (ix, (&), (+~), (^.))
-import Control.Monad (replicateM)
-import Data.Foldable (foldl')
-import Data.Functor.I
-import Data.Functor.Interval
-import Linear.V2
-import System.Console.Terminal.Size as Size
+import           Control.Effect.Lift
+import           Control.Lens (ix, (&), (+~), (^.))
+import           Control.Monad (replicateM)
+import           Data.Foldable (foldl')
+import           Data.Functor.I
+import           Data.Functor.Interval
+import qualified Data.Vector.Unboxed as V
+import           Linear.V2
+import           System.Console.Terminal.Size as Size
 
-histogram :: RealFrac a => Interval I a -> I Int -> [I a] -> [Int]
-histogram interval n = foldl' bucket (replicate (getI n) 0)
+histogram :: RealFrac a => Interval I a -> I Int -> [I a] -> V.Vector Int
+histogram interval n = foldl' bucket (V.replicate (getI n) 0)
   where
   which sample = floor (toUnit interval sample * fromIntegral n)
   bucket accum sample = accum & ix (which sample) +~ 1
@@ -43,4 +44,4 @@ printHistogram :: (RealFrac a, Has (Lift IO) sig m) => Interval I a -> Int -> m 
 printHistogram interval n m = do
   s <- maybe 80 Size.width <$> sendM Size.size
   samples <- replicateM n (fmap I m)
-  sendM (putStrLn (sparkify (histogram interval s samples)))
+  sendM (putStrLn (sparkify (V.toList (histogram interval s samples))))
