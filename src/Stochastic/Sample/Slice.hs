@@ -7,12 +7,12 @@ module Stochastic.Sample.Slice
 import           Control.Applicative (liftA2)
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.State.Strict
-import           Control.Lens ((&), (+~), (-~), (.~))
+import           Control.Lens ((&), (+~), (-~))
 import           Data.Functor.Interval
 import           Stochastic.PDF
 import qualified System.Random as R
 
-sample :: (Applicative f, Traversable f, Applicative g, Traversable g, R.Random a, R.Random b, Num (f a), Ord a, Ord (f a), Num (g b), Ord (g b), Has Random sig m, Has (State (f a)) sig m) => Interval f a -> Interval f a -> PDF (f a) (g b) -> m (f a)
+sample :: (Applicative f, Traversable f, Applicative g, Traversable g, R.Random a, R.Random b, Num (f a), Ord a, Num (g b), Ord (g b), Has Random sig m, Has (State (f a)) sig m) => Interval f a -> Interval f a -> PDF (f a) (g b) -> m (f a)
 sample w m (PDF pdf) = do
   x <- get
   y <- uniformI (Interval 0 (pdf x))
@@ -31,5 +31,4 @@ sample w m (PDF pdf) = do
     where
     go i = uniformI i >>= \case
       x' | y < pdf x' -> x' <$ put x'
-         | x' < x     -> go (i & min_ .~ x')
-         | otherwise  -> go (i & max_ .~ x')
+         | otherwise  -> go (Interval (max <$> x <*> x') (min <$> x <*> x'))
