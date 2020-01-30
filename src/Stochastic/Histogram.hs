@@ -4,6 +4,7 @@ module Stochastic.Histogram
 ( histogram
 , histogram2
 , sparkify
+, sparkify2
 , printHistogram
 , printHistogram2
 ) where
@@ -35,6 +36,11 @@ histogram2 interval n = foldl' bucket (V.replicate (n ^. _y) (U.replicate (n ^. 
 sparkify :: [Int] -> String
 sparkify bins = sparkifyRelativeTo (maximum bins) bins
 
+sparkify2 :: [[Int]] -> [String]
+sparkify2 bins = map (sparkifyRelativeTo max) bins
+  where
+  max = maximum (map maximum bins)
+
 sparkifyRelativeTo :: Int -> [Int] -> String
 sparkifyRelativeTo max bins
   | null bins = ""
@@ -54,4 +60,4 @@ printHistogram2 :: (RealFrac a, Has (Lift IO) sig m) => Interval V2 a -> Int -> 
 printHistogram2 interval n m = do
   s <- maybe 80 (pure . Size.width) <$> sendM Size.size
   samples <- replicateM n m
-  sendM (putStrLn (unlines (map (sparkify . U.toList) (V.toList (histogram2 interval s samples)))))
+  sendM (putStrLn (unlines (sparkify2 (map U.toList (V.toList (histogram2 interval s samples))))))
