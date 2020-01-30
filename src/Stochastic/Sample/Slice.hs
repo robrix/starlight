@@ -18,7 +18,7 @@ sample w m (PDF pdf) = do
   y <- uniformI (Interval 0 (pdf x))
   i <- step x y <$> uniformI w
 
-  shrink x y i
+  shrink x y (intersection i m)
   where
   step x y u = go (Interval l (l + size w))
     where
