@@ -33,16 +33,16 @@ histogram2 interval n = foldl' bucket (V.replicate (n ^. _y) (U.replicate (n ^. 
     V2 x y = which sample
 
 sparkify :: [Int] -> String
-sparkify bins = sparkifyRelativeTo (fromIntegral (maximum bins)) bins
+sparkify bins = sparkifyRelativeTo (maximum bins) bins
 
-sparkifyRelativeTo :: Double -> [Int] -> String
+sparkifyRelativeTo :: Int -> [Int] -> String
 sparkifyRelativeTo max bins
   | null bins = ""
   | otherwise = spark <$> bins
   where
   sparks = " ▁▂▃▄▅▆▇█"
   maxSpark = fromIntegral $ length sparks - 1
-  spark n = sparks !! round ((fromIntegral n / max) * maxSpark)
+  spark n = sparks !! round ((fromIntegral n / fromIntegral max :: Double) * maxSpark)
 
 printHistogram :: (RealFrac a, Has (Lift IO) sig m) => Interval I a -> Int -> m a -> m ()
 printHistogram interval n m = do
