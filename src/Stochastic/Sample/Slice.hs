@@ -29,6 +29,6 @@ sample w m (PDF pdf) = do
   shrink x y = go
     where
     go i = uniformI i >>= \case
-      x' | pdf x' > y -> x' <$ put x'
+      x' | y < pdf x' -> x' <$ put x'
          | x' < x     -> go (i & min_ .~ x')
          | otherwise  -> go (i & max_ .~ x')
