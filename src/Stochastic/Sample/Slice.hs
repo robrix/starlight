@@ -30,6 +30,6 @@ sample w m (PDF pdf) = runReader w $ do
   shrink x y = fix (\ go -> ask >>= uniformI >>= \case
     x' | y < pdf x' -> x' <$ put x'
        | otherwise  -> local (shrinkI x x') go)
-  shrinkI x x' i = Interval (mn <$> x <*> x') (mx <$> x <*> x') <*> i
+  shrinkI x x' i = interval mn mx <*> point x <*> point x' <*> i
   mn x x' i = if x' < x then x' else i
   mx x x' i = if x' < x then i  else x'
