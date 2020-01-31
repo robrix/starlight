@@ -1,2 +1,5 @@
 module Stochastic.Sample.Markov
-() where
+( Chain(..)
+) where
+
+newtype Chain a = Chain { getChain :: a }
