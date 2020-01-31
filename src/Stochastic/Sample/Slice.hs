@@ -8,7 +8,7 @@ module Stochastic.Sample.Slice
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
-import           Control.Lens ((&), (+~), (-~))
+import           Control.Lens ((+~), (-~))
 import           Data.Function (fix)
 import           Data.Functor.Interval
 import           Stochastic.PDF
@@ -18,17 +18,17 @@ sample :: (Applicative f, Traversable f, Applicative g, Traversable g, R.Random 
 sample w m (PDF pdf) = runReader w $ do
   x <- get
   y <- uniformI (Interval 0 (pdf x))
-  i <- ask >>= uniformI >>= step y . (x -)
-
-  local (const (intersection i m)) (shrink x y)
+  u <- ask >>= uniformI
+  step y (x - u) (local (intersection m) (shrink x y))
   where
-  step y l = do
+  step y l m' = do
     size' <- asks size
-    fix (\ go i -> if
-      | or ((>) <$> min' i <*> min' m), y < pdf (min' i) -> go (i & min_ -~ size')
-      | or ((<) <$> max' i <*> max' m), y < pdf (max' i) -> go (i & max_ +~ size')
-      | otherwise                                        -> pure i)
-      (Interval l (l + size'))
+    local (const (Interval l (l + size'))) $ fix (\ go -> do
+      i <- ask
+      if
+        | or ((>) <$> min' i <*> min' m), y < pdf (min' i) -> local (min_ -~ size') go
+        | or ((<) <$> max' i <*> max' m), y < pdf (max' i) -> local (max_ +~ size') go
+        | otherwise                                        -> m')
   shrink x y = go
     where
     go = ask >>= uniformI >>= \case
