@@ -33,4 +33,5 @@ sample w m (PDF pdf) = runReader w $ do
     where
     go = ask >>= uniformI >>= \case
       x' | y < pdf x' -> x' <$ put x'
+         -- FIXME: we should be shrinking the interval pointwise based on pointwise x < x', rather than makng a new one
          | otherwise  -> local (const (interval max min <*> point x <*> point x')) go
