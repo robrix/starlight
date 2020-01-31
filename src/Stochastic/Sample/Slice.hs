@@ -36,7 +36,8 @@ sample w m (PDF pdf) = runReader w $ do
   x <- get
   y <- uniformI (Interval 0 (pdf x))
   u <- uniformI =<< ask
-  step y (x - u) (local (intersection m) (shrink x y))
+  let l = x - u
+  step y l (local (intersection m) (shrink x y))
   where
   step y l m' = do
     size' <- asks size
