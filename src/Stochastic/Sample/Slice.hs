@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiWayIf #-}
 module Stochastic.Sample.Slice
 ( sample
 ) where
@@ -8,6 +9,7 @@ import           Control.Carrier.Random.Gen
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Lens ((&), (+~), (-~))
+import           Data.Function (fix)
 import           Data.Functor.Interval
 import           Stochastic.PDF
 import qualified System.Random as R
@@ -23,11 +25,11 @@ sample w m (PDF pdf) = runReader w $ do
   step x y u = do
     size' <- asks size
     let l = x - u
-        go i
-          | or ((>) <$> min' i <*> min' m), y < pdf (min' i) = go (i & min_ -~ size')
-          | or ((<) <$> max' i <*> max' m), y < pdf (max' i) = go (i & max_ +~ size')
-          | otherwise                                        = pure i
-    go (Interval l (l + size'))
+    fix (\ go i -> if
+      | or ((>) <$> min' i <*> min' m), y < pdf (min' i) -> go (i & min_ -~ size')
+      | or ((<) <$> max' i <*> max' m), y < pdf (max' i) -> go (i & max_ +~ size')
+      | otherwise                                        -> pure i)
+      (Interval l (l + size'))
   shrink x y = go
     where
     go i = uniformI i >>= \case
