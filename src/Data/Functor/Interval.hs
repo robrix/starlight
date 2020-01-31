@@ -8,6 +8,7 @@ module Data.Functor.Interval
 ( Interval(..)
 , interval
 , point
+, pointwise
 , size
 , toUnit
 , fromUnit
@@ -32,6 +33,7 @@ import           Control.Monad (join)
 import           Control.Monad.Trans.Class
 import           Data.Coerce (coerce)
 import           Data.Fixed (mod')
+import           Data.Functor.I
 import           Data.Generics.Product.Fields
 import           GHC.Generics (Generic)
 import qualified System.Random as R
@@ -120,6 +122,9 @@ interval mn mx = Interval (pure mn) (pure mx)
 
 point :: f a -> Interval f a
 point = join Interval
+
+pointwise :: Applicative f => (Interval I a -> b) -> Interval f a -> f b
+pointwise f (Interval mn mx) = fmap f . interval <$> mn <*> mx
 
 size :: Num (f a) => Interval f a -> f a
 size (Interval min max) = max - min
