@@ -9,7 +9,6 @@ import           Control.Carrier.Random.Gen
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Lens ((&), (+~), (-~))
-import           Data.Function (fix)
 import           Data.Functor.Interval
 import           Stochastic.PDF
 import qualified System.Random as R
@@ -42,9 +41,9 @@ sample w bounds (PDF pdf) = runReader w $ do
         | or ((>) <$> min' i <*> min' bounds), y < pdf (min' i) = step (i & min_ -~ size')
         | or ((<) <$> max' i <*> max' bounds), y < pdf (max' i) = step (i & max_ +~ size')
         | otherwise                                             = i
-      shrink = fix (\ go -> ask >>= uniformI >>= \case
+      shrink = ask >>= uniformI >>= \case
         x' | y < pdf x' -> x' <$ put x'
-           | otherwise  -> local (interval mn mx <*> point x <*> point x' <*>) go)
+           | otherwise  -> local (interval mn mx <*> point x <*> point x' <*>) shrink
       mn x x' i = if x' < x then x' else i
       mx x x' i = if x' < x then i  else x'
 
