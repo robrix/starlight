@@ -20,7 +20,7 @@ sample w m (PDF pdf) = runReader w $ do
   y <- uniformI (Interval 0 (pdf x))
   i <- ask >>= uniformI >>= step y . (x -)
 
-  shrink x y (intersection i m)
+  local (const (intersection i m)) (shrink x y)
   where
   step y l = do
     size' <- asks size
@@ -31,6 +31,6 @@ sample w m (PDF pdf) = runReader w $ do
       (Interval l (l + size'))
   shrink x y = go
     where
-    go i = uniformI i >>= \case
+    go = ask >>= uniformI >>= \case
       x' | y < pdf x' -> x' <$ put x'
-         | otherwise  -> go (interval max min <*> point x <*> point x')
+         | otherwise  -> local (const (interval max min <*> point x <*> point x')) go
