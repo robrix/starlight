@@ -18,13 +18,12 @@ sample :: (Applicative f, Traversable f, Applicative g, Traversable g, R.Random 
 sample w m (PDF pdf) = runReader w $ do
   x <- get
   y <- uniformI (Interval 0 (pdf x))
-  i <- ask >>= uniformI >>= step x y
+  i <- ask >>= uniformI >>= step y . (x -)
 
   shrink x y (intersection i m)
   where
-  step x y u = do
+  step y l = do
     size' <- asks size
-    let l = x - u
     fix (\ go i -> if
       | or ((>) <$> min' i <*> min' m), y < pdf (min' i) -> go (i & min_ -~ size')
       | or ((<) <$> max' i <*> max' m), y < pdf (max' i) -> go (i & max_ +~ size')
