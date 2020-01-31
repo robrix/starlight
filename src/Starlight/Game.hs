@@ -178,7 +178,7 @@ generateNPC
 generateNPC = do
   terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
   let pdf v
-        | qdV .>. sqU (terra^.body_.radius_) = I 1 ./. qdV
+        | qdV .>. sqU (terra^.body_.radius_) = terra^.mass_ ./. qdV
         | otherwise                          = 0
         where
         qdV = v `qdU` (terra^.position_._xy)
