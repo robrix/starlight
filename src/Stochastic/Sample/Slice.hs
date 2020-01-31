@@ -33,4 +33,4 @@ sample w m (PDF pdf) = runReader w $ do
     where
     go i = uniformI i >>= \case
       x' | y < pdf x' -> x' <$ put x'
-         | otherwise  -> go (Interval (max <$> x <*> x') (min <$> x <*> x'))
+         | otherwise  -> go (interval max min <*> point x <*> point x')
