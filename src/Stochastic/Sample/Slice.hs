@@ -5,18 +5,17 @@ module Stochastic.Sample.Slice
 ( sample
 ) where
 
+import           Control.Applicative (liftA2)
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Lens (over, (&))
 import           Data.Functor.Interval
-import           Linear.Vector
 import           Stochastic.PDF
 import qualified System.Random as R
 
 sample
-  :: ( Additive f
-     , Applicative f
+  :: ( Applicative f
      , Traversable f
      , Applicative g
      , Traversable g
@@ -40,9 +39,9 @@ sample w bounds (PDF pdf) = runReader w $ do
   size' <- asks size
   let step i
         -- if any coordinate of the interval’s min is in-bounds & it still lies under the curve, step the min outwards
-        | or ((>) <$> min' i <*> min' bounds), y < pdf (min' i) = step (i & over min_ (^-^ size'))
+        | or ((>) <$> min' i <*> min' bounds), y < pdf (min' i) = step (i & over min_ (flip (liftA2 (-)) size'))
         -- if any coordinate of the interval’s max is in-bounds & it still lies under the curve, step the max outwards
-        | or ((<) <$> max' i <*> max' bounds), y < pdf (max' i) = step (i & over max_ (^+^ size'))
+        | or ((<) <$> max' i <*> max' bounds), y < pdf (max' i) = step (i & over max_ (liftA2 (+) size'))
         | otherwise                                             = i
       shrink = ask >>= uniformI >>= \case
         x' | y < pdf x' -> x' <$ put x'
@@ -50,4 +49,4 @@ sample w bounds (PDF pdf) = runReader w $ do
       mn x x' i = if x' < x then x' else i
       mx x x' i = if x' < x then i  else x'
 
-  local (intersection bounds . step . (point (x ^-^ u) +)) shrink
+  local (intersection bounds . step . (point (liftA2 (-) x u) +)) shrink
