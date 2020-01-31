@@ -39,14 +39,16 @@ sample w bounds (PDF pdf) = runReader w $ do
   size' <- asks size
   let step i
         -- if any coordinate of the interval’s min is in-bounds & it still lies under the curve, step the min outwards
-        | or ((>) <$> min' i <*> min' bounds), y < pdf (min' i) = step (i & over min_ (flip (liftA2 (-)) size'))
+        | or ((>) <$> min' i <*> min' bounds), y < pdf (min' i) = step (i & over min_ (^-^ size'))
         -- if any coordinate of the interval’s max is in-bounds & it still lies under the curve, step the max outwards
-        | or ((<) <$> max' i <*> max' bounds), y < pdf (max' i) = step (i & over max_ (liftA2 (+) size'))
+        | or ((<) <$> max' i <*> max' bounds), y < pdf (max' i) = step (i & over max_ (^+^ size'))
         | otherwise                                             = i
       shrink = ask >>= uniformI >>= \case
         x' | y < pdf x' -> x' <$ put x'
            | otherwise  -> local (interval mn mx <*> point x <*> point x' <*>) shrink
       mn x x' i = if x' < x then x' else i
       mx x x' i = if x' < x then i  else x'
+      (^-^) = liftA2 (-)
+      (^+^) = liftA2 (+)
 
-  local (intersection bounds . step . (point (liftA2 (-) x u) +)) shrink
+  local (intersection bounds . step . (point (x ^-^ u) +)) shrink
