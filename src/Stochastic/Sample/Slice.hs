@@ -42,7 +42,7 @@ sample w bounds (PDF pdf) = runReader w $ do
         | or ((>) <$> min' i <*> min' bounds), y < pdf (min' i) = step (i & min_ -~ size')
         | or ((<) <$> max' i <*> max' bounds), y < pdf (max' i) = step (i & max_ +~ size')
         | otherwise                                             = i
-  local (point (x - u) +) (local step (local (intersection bounds) (shrink x y)))
+  local (intersection bounds . step . (point (x - u) +)) (shrink x y)
   where
   shrink x y = fix (\ go -> ask >>= uniformI >>= \case
     x' | y < pdf x' -> x' <$ put x'
