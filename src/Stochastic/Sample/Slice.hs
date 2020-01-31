@@ -14,7 +14,24 @@ import           Data.Functor.Interval
 import           Stochastic.PDF
 import qualified System.Random as R
 
-sample :: (Applicative f, Traversable f, Applicative g, Traversable g, R.Random a, R.Random b, Num (f a), Ord a, Num (g b), Ord (g b), Has Random sig m, Has (State (f a)) sig m) => Interval f a -> Interval f a -> PDF (f a) (g b) -> m (f a)
+sample
+  :: ( Applicative f
+     , Traversable f
+     , Applicative g
+     , Traversable g
+     , R.Random a
+     , R.Random b
+     , Num (f a)
+     , Ord a
+     , Num (g b)
+     , Ord (g b)
+     , Has Random sig m
+     , Has (State (f a)) sig m
+     )
+  => Interval f a
+  -> Interval f a
+  -> PDF (f a) (g b)
+  -> m (f a)
 sample w m (PDF pdf) = runReader w $ do
   x <- get
   y <- uniformI (Interval 0 (pdf x))
