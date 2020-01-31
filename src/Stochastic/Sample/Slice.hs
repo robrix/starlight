@@ -23,7 +23,7 @@ sample
      , R.Random b
      , Num a
      , Ord a
-     , Num (g b)
+     , Num b
      , Ord (g b)
      , Has Random sig m
      , Has (State (f a)) sig m
@@ -34,7 +34,7 @@ sample
   -> m (f a)
 sample w bounds (PDF pdf) = runReader w $ do
   x <- get
-  y <- uniformI (Interval 0 (pdf x))
+  y <- uniformI (Interval (pure 0) (pdf x))
   u <- uniformI =<< ask
   size' <- asks size
   let step i
