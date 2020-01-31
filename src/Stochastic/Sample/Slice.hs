@@ -38,7 +38,9 @@ sample w bounds (PDF pdf) = runReader w $ do
   u <- uniformI =<< ask
   size' <- asks size
   let step i
+        -- if any coordinate of the interval’s min is in-bounds & it still lies under the curve, step the min outwards
         | or ((>) <$> min' i <*> min' bounds), y < pdf (min' i) = step (i & min_ -~ size')
+        -- if any coordinate of the interval’s max is in-bounds & it still lies under the curve, step the max outwards
         | or ((<) <$> max' i <*> max' bounds), y < pdf (max' i) = step (i & max_ +~ size')
         | otherwise                                             = i
       shrink = ask >>= uniformI >>= \case
