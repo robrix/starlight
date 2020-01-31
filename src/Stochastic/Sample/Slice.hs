@@ -4,7 +4,6 @@ module Stochastic.Sample.Slice
 ( sample
 ) where
 
-import           Control.Applicative (liftA2)
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.State.Strict
 import           Control.Lens ((&), (+~), (-~))
@@ -23,9 +22,9 @@ sample w m (PDF pdf) = do
   step x y u = go (Interval l (l + size w))
     where
     go i
-      | or (liftA2 (>) (min' i) (min' m)), y < pdf (min' i) = go (i & min_ -~ size w)
-      | or (liftA2 (<) (max' i) (max' m)), y < pdf (max' i) = go (i & max_ +~ size w)
-      | otherwise                                           = i
+      | or ((>) <$> min' i <*> min' m), y < pdf (min' i) = go (i & min_ -~ size w)
+      | or ((<) <$> max' i <*> max' m), y < pdf (max' i) = go (i & max_ +~ size w)
+      | otherwise                                        = i
     l = x - u
   shrink x y = go
     where
