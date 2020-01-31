@@ -39,12 +39,12 @@ sample w bounds (PDF pdf) = runReader w $ do
   let l = x - u
   step y l (local (intersection bounds) (shrink x y))
   where
-  step y l m' = do
+  step y l m = do
     size' <- asks size
     local (const (Interval l (l + size'))) $ fix (\ go -> ask >>= \ i -> if
       | or ((>) <$> min' i <*> min' bounds), y < pdf (min' i) -> local (min_ -~ size') go
       | or ((<) <$> max' i <*> max' bounds), y < pdf (max' i) -> local (max_ +~ size') go
-      | otherwise                                             -> m')
+      | otherwise                                             -> m)
   shrink x y = fix (\ go -> ask >>= uniformI >>= \case
     x' | y < pdf x' -> x' <$ put x'
        | otherwise  -> local (interval mn mx <*> point x <*> point x' <*>) go)
