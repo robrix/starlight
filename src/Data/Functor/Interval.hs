@@ -126,20 +126,20 @@ point = join Interval
 pointwise :: Applicative f => (Interval I a -> b) -> Interval f a -> f b
 pointwise f (Interval mn mx) = fmap f . interval <$> mn <*> mx
 
-size :: Num (f a) => Interval f a -> f a
-size (Interval min max) = max - min
+size :: (Applicative f, Num a) => Interval f a -> f a
+size (Interval min max) = liftA2 (-) max min
 
-toUnit, fromUnit :: Fractional (f a) => Interval f a -> f a -> f a
-toUnit   i x = (x - min' i) / size i
-fromUnit i x =  x * size i  + min' i
+toUnit, fromUnit :: (Applicative f, Fractional a) => Interval f a -> f a -> f a
+toUnit   i x = pointwise (\ i x -> getI ((I x - min' i) / size i)) i <*> x
+fromUnit i x = pointwise (\ i x -> getI  (I x * size i  + min' i)) i <*> x
 
 
 range :: Enum (f a) => Interval f a -> [f a]
 range = enumFromTo . min' <*> max'
 
 
-wrap :: Real (f a) => Interval f a -> f a -> f a
-wrap i x = ((x + max' i) `mod'` size i) + min' i
+wrap :: (Applicative f, Real a) => Interval f a -> f a -> f a
+wrap i x = pointwise (\ i x -> getI (((I x + max' i) `mod'` size i) + min' i)) i <*> x
 
 
 min_ :: Lens' (Interval f a) (f a)
