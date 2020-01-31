@@ -29,7 +29,6 @@ sample w m (PDF pdf) = runReader w $ do
       | otherwise                                        -> m')
   shrink x y = fix (\ go -> ask >>= uniformI >>= \case
     x' | y < pdf x' -> x' <$ put x'
-       -- FIXME: we should be shrinking the interval pointwise based on pointwise x < x', rather than makng a new one
        | otherwise  -> local (shrinkI x x') go)
   shrinkI x x' i = Interval (mn <$> x <*> x' <*> min' i) (mx <$> x <*> x' <*> max' i)
     where
