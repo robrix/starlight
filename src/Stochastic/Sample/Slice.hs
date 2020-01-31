@@ -31,6 +31,5 @@ sample w m (PDF pdf) = runReader w $ do
     x' | y < pdf x' -> x' <$ put x'
        | otherwise  -> local (shrinkI x x') go)
   shrinkI x x' i = Interval (mn <$> x <*> x' <*> min' i) (mx <$> x <*> x' <*> max' i)
-    where
-    mn x x' i = if x' < x then x' else i
-    mx x x' i = if x' < x then i else x'
+  mn x x' i = if x' < x then x' else i
+  mx x x' i = if x' < x then i  else x'
