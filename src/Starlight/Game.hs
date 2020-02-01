@@ -172,12 +172,11 @@ spawnPDF = views (bodies_ @StateVectors) (nearBody . (Map.! (Star (10, "Sol") :/
 
 pickSpawnPoint
   :: ( Has Random sig m
-     , Has (Reader (System StateVectors)) sig m
      , Has (State (Chain (V2 (Distance Double)))) sig m
      )
-  => m (V3 (Distance Double))
-pickSpawnPoint = do
-  pdf <- spawnPDF
+  => PDF (V2 (Distance Double)) ((:/:) (Kilo Grams) (Giga Metres :^: 2) Double)
+  -> m (V3 (Distance Double))
+pickSpawnPoint pdf = do
   let mx = convert @(Kilo Metres) @Distance 6e9
   (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) pdf
 
@@ -230,7 +229,8 @@ integration = id <~> timed . flip (execState @(System Body)) (measure "integrati
   measure "controls" $ player_ @Body .actions_ <~ controls
   measure "ai" $ npcs_ @Body <~> traverse ai
 
-  pos <- pickSpawnPoint
+  pdf <- spawnPDF
+  pos <- pickSpawnPoint pdf
   playerPos <- use (player_ @Body .position_)
   when (distance pos playerPos < 1) $ do
     npc <- npc <$> pickName <*> pure pos
