@@ -167,6 +167,9 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
     loop
   put (toFlag Quit True)
 
+spawnPDF :: Has (Reader (System StateVectors)) sig m => m (PDF (V2 (Distance Double)) ((:/:) (Kilo Grams) (Giga Metres :^: 2) Double))
+spawnPDF = views (bodies_ @StateVectors) (nearBody . (Map.! (Star (10, "Sol") :/ (399, "Terra"))))
+
 pickSpawnPoint
   :: ( Has Random sig m
      , Has (Reader (System StateVectors)) sig m
@@ -174,9 +177,9 @@ pickSpawnPoint
      )
   => m (V3 (Distance Double))
 pickSpawnPoint = do
-  terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
+  pdf <- spawnPDF
   let mx = convert @(Kilo Metres) @Distance 6e9
-  (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) (nearBody terra)
+  (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) pdf
 
 nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((:/:) (Kilo Grams) (Giga Metres :^: 2) Double)
 nearBody sv = PDF pdf
