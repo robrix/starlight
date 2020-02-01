@@ -24,6 +24,7 @@ import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
 import           Control.Monad (unless, (>=>))
 import           Control.Monad.IO.Class.Lift
+import           Data.Flag
 import           Data.Function (fix)
 import           Data.Functor.Interval
 import qualified Data.Map as Map
@@ -74,7 +75,7 @@ runGame
      , MonadFail m
      )
   => Map.Map BodyIdentifier Body
-  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (RandomC TFGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))))))) a
+  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC (Flag Quit) (TVar.StateC (System Body) (TVar.StateC Input (RandomC TFGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))))))) a
   -> m a
 runGame bodies
   = Window.runSDL
@@ -105,7 +106,7 @@ runGame bodies
       , npcs    = mempty
       , beams   = mempty
       }
-    . TVar.evalState False
+    . TVar.evalState (toFlag Quit False)
     . evalState (Chain (0 :: V2 (Distance Double)))
     . runJ2000
     where
@@ -155,7 +156,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   fork . evalState start . fix $ \ loop -> do
     integration
     yield
-    hasQuit <- get
+    hasQuit <- gets (fromFlag Quit)
     unless hasQuit loop
 
   enabled_ Blend            .= True
@@ -168,7 +169,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
     measure "frame" frame
     measure "swap" Window.swap
     loop
-  put True
+  put (toFlag Quit True)
 
 generateNPC
   :: ( Has (Lift IO) sig m
