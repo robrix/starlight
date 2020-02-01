@@ -148,7 +148,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
 
   runSystem $ do
     npc <- npc <$> pickName <*> pickSpawnPoint
-    npcs_ @Body %= (Map.singleton (0, name npc) npc <>)
+    npcs_ @Body %= Map.insert (0, name npc) npc
 
   start <- now
   fork . evalState start . fix $ \ loop -> do
