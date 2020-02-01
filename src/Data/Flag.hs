@@ -2,9 +2,13 @@
 module Data.Flag
 ( Flag
 , toFlag
+, fromFlag
 ) where
 
-newtype Flag t = Flag Bool
+newtype Flag t = Flag { getFlag :: Bool }
 
 toFlag :: t -> Bool -> Flag t
 toFlag _ = Flag
+
+fromFlag :: t -> Flag t -> Bool
+fromFlag _ = getFlag
