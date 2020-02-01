@@ -11,6 +11,7 @@ import           Control.Carrier.State.Strict
 import           Control.Lens (over, (&))
 import           Data.Functor.Interval
 import           Stochastic.PDF
+import           Stochastic.Sample.Markov
 import qualified System.Random as R
 
 sample
@@ -25,14 +26,14 @@ sample
      , Num b
      , Ord (g b)
      , Has Random sig m
-     , Has (State (f a)) sig m
+     , Has (State (Chain (f a))) sig m
      )
   => Interval f a
   -> Interval f a
   -> PDF (f a) (g b)
   -> m (f a)
 sample w bounds (PDF pdf) = do
-  x <- get
+  x <- gets getChain
   y <- uniformI (Interval (pure 0) (pdf x))
   u <- uniformI w
   let step i
@@ -46,7 +47,7 @@ sample w bounds (PDF pdf) = do
         , y < pdf (max' i) = step (i & over max_ (^+^ size w))
         | otherwise        = i
       shrink i = uniformI i >>= \case
-        x' | y < pdf x' -> x' <$ put x'
+        x' | y < pdf x' -> x' <$ put (Chain x')
            | otherwise  -> shrink (interval mn mx <*> point x <*> point x' <*> i)
       mn x x' i = if x' < x then x' else i
       mx x x' i = if x' < x then i  else x'

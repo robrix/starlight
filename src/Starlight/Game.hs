@@ -56,6 +56,7 @@ import           Starlight.Time
 import           Starlight.UI
 import           Starlight.View
 import           Stochastic.PDF
+import           Stochastic.Sample.Markov
 import           Stochastic.Sample.Slice
 import           System.FilePath
 import           System.Random.TF (TFGen, newTFGen)
@@ -183,7 +184,7 @@ generateNPC = do
         where
         qdV = v `qdU` (terra^.position_._xy)
       mx = convert @(Kilo Metres) @Distance 5.929522234007778e9
-  position <- (`ext` 0) <$> evalState (0 :: V2 (Distance Double)) (sample (interval 0 1) (interval (-mx) mx) (PDF pdf))
+  position <- (`ext` 0) <$> evalState (Chain (0 :: V2 (Distance Double))) (sample (interval 0 1) (interval (-mx) mx) (PDF pdf))
   name <- generateName
   pure $! Character
     { name
