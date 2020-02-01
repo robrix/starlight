@@ -149,7 +149,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   targetLabel <- measure "label" Label.label
 
   runSystem $ do
-    npc <- generateNPC
+    npc <- generateNPC =<< pickSpawnPoint
     npcs_ @Body %= (Map.singleton (0, name npc) npc <>)
 
   start <- now
@@ -171,14 +171,13 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
     loop
   put (toFlag Quit True)
 
-generateNPC
-  :: ( Has (Lift IO) sig m
-     , Has Random sig m
+pickSpawnPoint
+  :: ( Has Random sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (State (Chain (V2 (Distance Double)))) sig m
      )
-  => m Character
-generateNPC = do
+  => m (V3 (Distance Double))
+pickSpawnPoint = do
   terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
   let pdf v
         | qdV .>. sqU (terra^.body_.radius_) = terra^.mass_ ./. qdV
@@ -186,7 +185,15 @@ generateNPC = do
         where
         qdV = v `qdU` (terra^.position_._xy)
       mx = convert @(Kilo Metres) @Distance 5.929522234007778e9
-  position <- (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) (PDF pdf)
+  (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) (PDF pdf)
+
+generateNPC
+  :: ( Has (Lift IO) sig m
+     , Has Random sig m
+     )
+  => V3 (Distance Double)
+  -> m Character
+generateNPC position = do
   name <- generateName
   pure $! Character
     { name
