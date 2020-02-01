@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
--- | A familiar star bodies.
+-- | A familiar star system.
 module Starlight.Sol
 ( bodiesFromSQL
 ) where
