@@ -280,3 +280,7 @@ scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
 -- FIXME: this is really stupid; there *has* to be a better way to say “I want a 500 m ship to be 30 px long” or w/e
 shipScale :: I Double
 shipScale = 30
+
+
+-- | Flag parameter indicating the meaning of the signal to quit the threads.
+data Quit = Quit
