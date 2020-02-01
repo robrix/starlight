@@ -1,9 +1,7 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Game
