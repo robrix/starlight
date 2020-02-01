@@ -149,7 +149,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   targetLabel <- measure "label" Label.label
 
   runSystem $ do
-    npc <- generateNPC =<< pickSpawnPoint
+    npc <- npc <$> generateName <*> pickSpawnPoint
     npcs_ @Body %= (Map.singleton (0, name npc) npc <>)
 
   start <- now
@@ -187,27 +187,23 @@ pickSpawnPoint = do
       mx = convert @(Kilo Metres) @Distance 5.929522234007778e9
   (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) (PDF pdf)
 
-generateNPC
-  :: ( Has (Lift IO) sig m
-     , Has Random sig m
-     )
-  => V3 (Distance Double)
-  -> m Character
-generateNPC position = do
-  name <- generateName
-  pure $! Character
-    { name
-    , actor   = Actor
-      { position
-      , velocity  = 0
-      , rotation  = axisAngle (unit _z) (pi/2)
-      , mass      = 1000
-      , magnitude = convert (Metres 500)
-      }
-    , target  = Nothing
-    , actions = mempty
-    , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
+npc
+  :: Text.Text
+  -> V3 (Distance Double)
+  -> Character
+npc name position = Character
+  { name
+  , actor   = Actor
+    { position
+    , velocity  = 0
+    , rotation  = axisAngle (unit _z) (pi/2)
+    , mass      = 1000
+    , magnitude = convert (Metres 500)
     }
+  , target  = Nothing
+  , actions = mempty
+  , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
+  }
 
 -- FIXME: do something clever, more generative
 generateName :: (Has (Lift IO) sig m, Has Random sig m) => m Text.Text
