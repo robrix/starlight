@@ -1,0 +1,228 @@
+- 🏁 shooting
+  - ✅ system has laser beams
+  - ✅ firing adds a beam to the system
+  - ✅ draw lasers when firing
+  - ✅ characters have health
+  - ✅ check for ship/laser collisions
+  - ✅ reduce health on hit
+  - ✅ remove character on destruction
+  - ✅ disallow shooting oneself
+
+- 🏁 system scale
+  - ✅ never scale positions & sizes in the data (Actor &c.)
+  - ✅ scale positions & sizes when drawing
+  - ✅ apply scale to bodies
+  - ✅ apply inverse scale to ships?
+  - ✅ draw things in km instead of m
+  - ✅ actor positions & velocities are defined in terms of km & km/s
+
+- 🏁 jumping
+  - ✅ add a jump control/action
+  - ✅ turn to face target
+  - ✅ accelerate in direction of target
+  - estimate time to target
+  - face projected location of target modulo estimated time
+  - ✅ when going fast enough, jump
+  - stretch intervening space
+  - ✅ stop when near the target
+  - slow down on other side
+  - enter orbit around bodies
+
+- 🏁 npc spawning
+  - notice when the player is approaching a body
+  - spawn in NPCs
+  - denser probability cloud near bodies, sparser farther away
+  - do not spawn inside of bodies
+  - not near the sun?
+  - spawn outside of radar range
+  - spawn *behind* bodies (“outside of radar range” once radar occlusion works)
+
+- 🏁 background physics
+  - ✅ did this, apparently didn’t list it here
+
+- 🏛 Architecture
+  - Draw into a framebuffer on a background thread
+  - ✅ Process events on the main thread
+  - ✅ Do physics in background thread
+  - ✅ Do AI in background thread
+  - Drop-in-drop-out co-op multiplayer
+  - peer to peer networking?
+  - sort into quadtrees for distance bucketing?
+  - don’t issue drawing commands for things offscreen
+  - ✅ update labels less often
+  - ✅ do less matrix multiplication on the CPU
+    - ✅ share more
+    - ✅ offload more to GPU
+  - ✅ set uniforms less often
+  - precompute direction & distance between player & targets?
+  - 🚫 use foreign ptrs to finalize allocations?
+    - this isn’t how they work—you need a `FunPtr`, which you can only get from foreign code
+    - `Foreign.Concurrent` allows you to associate arbitrary `IO` actions with a `ForeignPtr` as its finalizer, but these are run on another thread, and so further coordination is required to do something on the main thread
+  - loading and saving
+  - ✅ reader/state split of System leads to drawing/aiming in the wrong places
+  - ✅ store actors in system
+  - ✅ instantaneous representation of entire system
+  - ✅ update radar data in arrays instead of uniforms
+  - ✅ sort & filter the view on the solar system for radar, targetting, AI, etc. to limit range
+  - share a buffer between ship, radar, & body drawing
+    - ✅ radar
+    - ✅ target
+    - ship
+    - body
+  - higher-level way of writing shaders, buffers, arrays, and programs
+    - write shader as haskell program taking inputs and producing pixels
+    - take care of copying data into buffers, setting up arrays, etc.
+  - use a fixed time interval for physics integration
+  - account for floating point error by sectoring the solar system
+  - draw glyphs more efficiently
+  - systems shouldn’t require a player
+    - filtered systems may not have one
+    - network games may have >1
+  - the player shouldn’t be special in the `System`
+  - compose units and vectors
+  - ✅ zoom and scale have each other’s units. scale determines the size of the solar system bodies, relating lengths of space distance to lengths of pixels, zoom is a multiplier on that to show how much we get on screen at a time and can be applied before or after scale with the same effect
+  - process input multiple times per frame on the main thread for fine control
+  - share glyph buffer between multiple text buffers for drawing static text labels, e.g. planet names, cheaply
+    - when to purge & redraw cached static text?
+  - DSL for scripting game events
+    - metalanguage for adding/removing things to the system
+
+- 🎛 Controls
+  - targetting as a zipper on a list of trees — star/planets/moons, ships, etc
+
+- 🖥 UI
+  - ✅ radar falloff for range/whatever
+  - radar ring N/E/S/W?
+  - IFF
+  - set “default” zoom factor?
+  - ✅ select target
+  - ✅ display range to target
+  - ✅ fps counter
+  - show the throttle
+  - targeting reticle
+  - indicators for:
+    - throttle
+    - heading
+      - spike from radar ring
+    - ✅ target name/properties
+      - spike from radar ring
+    - ✅ thrusters (little orange glow?)
+      - glow at the back of the ship only
+  - zoom out (scroll wheel) for map
+    - solar system
+    - your radar
+    - friends’ radar (only when in line of sight?)
+    - select target/region for jumping?
+  - ✅ filter system by power rather than range
+    - ✅ always include first- and second-order major bodies
+    - ✅ higher radar power includes more distant ships & minor bodies
+    - ✅ larger objects show up more easily
+    - radar cross-section rather than just size
+    - laser power, not radar power, determines its range
+    - radar bounces
+  - ✅ visual radar occlusion
+  - targetting radar occlusion
+  - ✅ show distances in most-significant-first scientific notation, e.g. 10⁴·7.6km
+  - place the target label on the vector toward the target
+  - split the target label into distance & name
+  - label planets
+  - label ships
+
+- 🤦🏻‍♀️ Features
+  - ✅ “warp”
+  - ✅ target ships
+  - asteroids
+  - ✅ enemies!!!
+  - procedural characters
+  - energy weapons
+  - missiles
+  - kinetic weapons
+  - mining
+  - ✅ Jupiter’s moons
+  - planetary rings
+  - ✅ planetary tilt
+  - procedural ships
+  - procedural weapons
+  - space stations
+  - save/load
+  - repair drones
+  - attack drones
+  - radar drones
+  - decoy drones
+  - mine drones
+  - missile drones
+  - jamming
+  - radar ghosts
+  - radar spoofing
+  - doppler effect
+  - spawn characters in near planets
+  - spawn player in near planets
+
+- 🌁 Graphics
+  - shade planets
+  - tesselate circles/spheres?
+  - trace orbits
+  - ✅ why does the starfield look so much less interesting than the original shader?
+  - perspective
+  - iso angle?
+  - lasers cast light
+  - ✅ thrusters cast light
+  - animations/manoeuvres (e.g. barrel roll when killing enemy fighters)
+  - scale ships very subtly with velocity?
+  - use mat3x4 instead of mat4 to avoid copying quite so much
+  - define units for colours
+
+- 🤖 AI
+  - Target position/orientations
+  - many more ships
+  - ephemeral ships
+
+- 🐞 Bugs
+  - ✅ Label descender length affects positioning
+  - ✅ Major/minor bodies’ codes can collide
+  - ✅ Glyph metrics should be integral
+  - ✅ Fullscreen is really low frame rate but doesn’t measure as such?
+    - This appears to have been fixed, probably by -fexternal-interpreter
+  - ✅ Window vs. device coords is extremely confusing
+  - ✅ drawing is slow
+  - ✅ units are easy to mix up
+  - ✅ system scale is hard to apply consistently
+  - ✅ system scale has to be undone for many calculations
+  - ✅ magnitudes are half what they should be
+  - gravity is weirdly, stupidly weak; 46x?
+  - the starfield looks pretty terrible; choppy/pixelated, especially as you get further from the sun; FP precision
+  - ✅ radar blip size is wrong when close to large bodies
+  - ✅ ships are visible on system radar at their unscaled size
+  - ✅ the mouse cursor should not be visible unless we can actually click on things
+
+- ⤴️ Extract
+  - ✅ fused-effects-profile
+  - Control.Carrier.Empty.Church
+  - Control.Carrier.Empty.CPS
+  - execEmpty
+    execEmpty :: Functor m => EmptyC m a -> m Bool
+    execEmpty = fmap isJust . runEmpty
+  - evalEmpty
+    evalEmpty :: Functor m => EmptyC m a -> m ()
+    evalEmpty = void . runEmpty
+  - Control.Effect.Labelled
+  - locally
+
+- 🧹 Housekeeping
+  - ✅ move Starlight.Draw.*.Shader into their parent modules
+  - ✅ rename drawShip &c to draw
+  - ✅ lift position_, velocity_, etc. into HasActor, classy-lenses–style
+  - split module hierarchies into separate packages
+  - 🚫 make `Colour` monomorphic
+    - it seems useful to be able to do e.g. `Colour Word8` over the network
+  - ✅ derive instances via `Fields` instead of using `UndecidableInstances`
+  - ✅ classy-lenses–style `HasColour` class
+
+- ❓ Questions
+  - how should friendly fire be handled?
+  - should there be ephemeral NPCs or should we model them all?
+
+- 📝 tests
+  - test unit conversions for multiplicities
+  - test linear stuff
+  - test physics stuff
