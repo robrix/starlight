@@ -66,8 +66,8 @@ import           UI.Label as Label
 import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
 import           Unit.Algebra
+import           Unit.Count
 import           Unit.Length
-import           Unit.Mass
 
 runGame
   :: ( Effect sig
@@ -167,25 +167,25 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
     loop
   put (toFlag Quit True)
 
-spawnPDF :: Has (Reader (System StateVectors)) sig m => m (PDF (V2 (Distance Double)) ((Kilo Grams :/: Giga Metres :^: 2) Double))
+spawnPDF :: Has (Reader (System StateVectors)) sig m => m (PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double))
 spawnPDF = views (bodies_ @StateVectors) (nearBody . (Map.! (Star (10, "Sol") :/ (399, "Terra"))))
 
 pickSpawnPoint
   :: ( Has Random sig m
      , Has (State (Chain (V2 (Distance Double)))) sig m
      )
-  => PDF (V2 (Distance Double)) ((Kilo Grams :/: Giga Metres :^: 2) Double)
+  => PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double)
   -> m (V3 (Distance Double))
 pickSpawnPoint pdf = do
   let mx = convert @(Kilo Metres) @Distance 6e9
   (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) pdf
 
-nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Kilo Grams :/: Giga Metres :^: 2) Double)
+nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double)
 nearBody sv = PDF pdf
   where
   pdf v
     | let qdV = v `qdU` (sv^.position_._xy)
-    , qdV .>. sqU (sv^.body_.radius_) = sv^.mass_ ./. qdV
+    , qdV .>. sqU (sv^.body_.radius_) = Count @"population" 10_000_000_000 ./. qdV
     | otherwise                       = 0
 
 npc
@@ -229,12 +229,14 @@ integration = id <~> timed . flip (execState @(System Body)) (measure "integrati
   measure "controls" $ player_ @Body .actions_ <~ controls
   measure "ai" $ npcs_ @Body <~> traverse ai
 
-  pdf <- spawnPDF
-  pos <- pickSpawnPoint pdf
   playerPos <- use (player_ @Body .position_)
-  when (distance pos playerPos < 1) $ do
-    npc <- npc <$> pickName <*> pure pos
-    npcs_ @Body %= Map.insert (0, name npc) npc
+  nearbyNPCs <- uses (npcs_ @Body) (length . filter ((< 1) . distance playerPos . (^.position_)) . Map.elems)
+  pdf <- spawnPDF
+  when (fromIntegral nearbyNPCs < runPDF pdf (playerPos^._xy)) $ do
+    pos <- pickSpawnPoint pdf
+    when (distance pos playerPos < 1) $ do
+      npc <- npc <$> pickName <*> pure pos
+      npcs_ @Body %= Map.insert (0, name npc) npc
 
   -- FIXME: this is so gross
   beams_ @Body .= []
