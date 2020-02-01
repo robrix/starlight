@@ -13,11 +13,16 @@ output_file="${HIE_BIOS_OUTPUT:-/dev/stdout}"
 build_dir="dist-newstyle/build/x86_64-osx/ghc-$ghc_version"
 build_products_dir="$build_dir/build-repl"
 
+cores=$(sysctl -n machdep.cpu.core_count || echo 4)
+
 function flags {
   # disable optimizations for faster loading
   echo "-O0"
   # don’t load .ghci files (for ghcide)
   echo "-ignore-dot-ghci"
+
+  # use as many jobs as there are physical cores
+  echo "-j$cores"
 
   # where to put build products
   echo "-outputdir $build_products_dir"
