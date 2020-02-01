@@ -149,7 +149,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   targetLabel <- measure "label" Label.label
 
   runSystem $ do
-    npc <- npc <$> generateName <*> pickSpawnPoint
+    npc <- npc <$> pickName <*> pickSpawnPoint
     npcs_ @Body %= (Map.singleton (0, name npc) npc <>)
 
   start <- now
@@ -206,8 +206,8 @@ npc name position = Character
   }
 
 -- FIXME: do something clever, more generative
-generateName :: (Has (Lift IO) sig m, Has Random sig m) => m Text.Text
-generateName = do
+pickName :: (Has (Lift IO) sig m, Has Random sig m) => m Text.Text
+pickName = do
   names <- lines <$> sendM (readFile "data/ship-names.txt")
   i <- uniformR (0, pred (length names))
   pure $! Text.pack (names !! i)
