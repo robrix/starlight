@@ -21,7 +21,7 @@ import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Lens (itraverse, (^.))
-import           Control.Monad (unless, (>=>))
+import           Control.Monad (unless, when, (>=>))
 import           Control.Monad.IO.Class.Lift
 import           Data.Flag
 import           Data.Function (fix)
@@ -148,10 +148,6 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   fpsLabel    <- measure "label" Label.label
   targetLabel <- measure "label" Label.label
 
-  runSystem $ do
-    npc <- npc <$> pickName <*> pickSpawnPoint
-    npcs_ @Body %= Map.insert (0, name npc) npc
-
   start <- now
   fork . evalState start . fix $ \ loop -> do
     integration
@@ -219,7 +215,9 @@ integration
   :: ( Effect sig
      , Has (Lift IO) sig m
      , Has Profile sig m
+     , Has Random sig m
      , Has (Reader Epoch) sig m
+     , Has (State (Chain (V2 (Distance Double)))) sig m
      , Has (State Input) sig m
      , Has (State UTCTime) sig m
      , Has (State (System Body)) sig m
@@ -228,6 +226,12 @@ integration
 integration = id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
   measure "controls" $ player_ @Body .actions_ <~ controls
   measure "ai" $ npcs_ @Body <~> traverse ai
+
+  pos <- pickSpawnPoint
+  playerPos <- use (player_ @Body .position_)
+  when (distance pos playerPos < 1) $ do
+    npc <- npc <$> pickName <*> pure pos
+    npcs_ @Body %= Map.insert (0, name npc) npc
 
   -- FIXME: this is so gross
   beams_ @Body .= []
