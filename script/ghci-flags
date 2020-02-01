@@ -22,7 +22,7 @@ function flags {
   echo "-ignore-dot-ghci"
 
   # use as many jobs as there are physical cores
-  echo "-j$cores"
+  echo "-j$((cores + 1))"
 
   # where to put build products
   echo "-outputdir $build_products_dir"
