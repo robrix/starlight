@@ -184,7 +184,7 @@ pickSpawnPoint = do
         | otherwise                          = 0
         where
         qdV = v `qdU` (terra^.position_._xy)
-      mx = convert @(Kilo Metres) @Distance 5.929522234007778e9
+      mx = convert @(Kilo Metres) @Distance 6e9
   (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) (PDF pdf)
 
 npc
