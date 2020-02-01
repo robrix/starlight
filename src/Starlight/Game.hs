@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
@@ -66,6 +67,7 @@ import           UI.Typeface (cacheCharactersForDrawing, readTypeface)
 import qualified UI.Window as Window
 import           Unit.Algebra
 import           Unit.Length
+import           Unit.Mass
 
 runGame
   :: ( Effect sig
@@ -177,13 +179,16 @@ pickSpawnPoint
   => m (V3 (Distance Double))
 pickSpawnPoint = do
   terra <- views (bodies_ @StateVectors) (Map.! (Star (10, "Sol") :/ (399, "Terra")))
-  let pdf v
-        | qdV .>. sqU (terra^.body_.radius_) = terra^.mass_ ./. qdV
-        | otherwise                          = 0
-        where
-        qdV = v `qdU` (terra^.position_._xy)
-      mx = convert @(Kilo Metres) @Distance 6e9
-  (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) (PDF pdf)
+  let mx = convert @(Kilo Metres) @Distance 6e9
+  (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) (nearBody terra)
+
+nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((:/:) (Kilo Grams) (Giga Metres :^: 2) Double)
+nearBody sv = PDF pdf
+  where
+  pdf v
+    | let qdV = v `qdU` (sv^.position_._xy)
+    , qdV .>. sqU (sv^.body_.radius_) = sv^.mass_ ./. qdV
+    | otherwise                       = 0
 
 npc
   :: Text.Text
