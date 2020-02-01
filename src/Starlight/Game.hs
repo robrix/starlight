@@ -74,7 +74,7 @@ runGame
      , MonadFail m
      )
   => Map.Map BodyIdentifier Body
-  -> ReaderC Epoch (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (RandomC TFGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))))) a
+  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC Bool (TVar.StateC (System Body) (TVar.StateC Input (RandomC TFGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))))))) a
   -> m a
 runGame bodies
   = Window.runSDL
@@ -106,6 +106,7 @@ runGame bodies
       , beams   = mempty
       }
     . TVar.evalState False
+    . evalState (Chain (0 :: V2 (Distance Double)))
     . runJ2000
     where
   magnitude :: Metres Double
@@ -170,10 +171,10 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   put True
 
 generateNPC
-  :: ( Effect sig
-     , Has (Lift IO) sig m
+  :: ( Has (Lift IO) sig m
      , Has Random sig m
      , Has (Reader (System StateVectors)) sig m
+     , Has (State (Chain (V2 (Distance Double)))) sig m
      )
   => m Character
 generateNPC = do
@@ -184,7 +185,7 @@ generateNPC = do
         where
         qdV = v `qdU` (terra^.position_._xy)
       mx = convert @(Kilo Metres) @Distance 5.929522234007778e9
-  position <- (`ext` 0) <$> evalState (Chain (0 :: V2 (Distance Double))) (sample (interval 0 1) (interval (-mx) mx) (PDF pdf))
+  position <- (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) (PDF pdf)
   name <- generateName
   pure $! Character
     { name
