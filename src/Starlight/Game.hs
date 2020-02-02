@@ -10,7 +10,6 @@ module Starlight.Game
 ) where
 
 import           Control.Algebra
-import           Control.Carrier.Empty.Church
 import           Control.Carrier.Finally
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.Reader
@@ -40,11 +39,6 @@ import           Starlight.Body
 import           Starlight.Character
 import           Starlight.Controls
 import           Starlight.Draw
-import qualified Starlight.Draw.Body as Body
-import qualified Starlight.Draw.Radar as Radar
-import qualified Starlight.Draw.Ship as Ship
-import qualified Starlight.Draw.Starfield as Starfield
-import qualified Starlight.Draw.Weapon.Laser as Laser
 import           Starlight.Identifier
 import           Starlight.Input
 import           Starlight.Physics
@@ -55,7 +49,6 @@ import qualified Starlight.Sol as Sol
 import           Starlight.System as System
 import           Starlight.Time
 import           Starlight.UI
-import           Starlight.View
 import           Stochastic.PDF
 import           Stochastic.Sample.Markov
 import           Stochastic.Sample.Slice
@@ -118,17 +111,6 @@ runGame bodies
   start :: V3 (Mega Metres Double)
   start = V3 2_500 0 0
   radar = Radar 1000 -- GW radar
-
-runFrame
-  :: ( Effect sig
-     , Has Check sig m
-     , Has Finally sig m
-     , Has (Lift IO) sig m
-     , Has Trace sig m
-     )
-  => ReaderC Body.Drawable (ReaderC Laser.Drawable (ReaderC Radar.Drawable (ReaderC Ship.Drawable (ReaderC Starfield.Drawable (StateC UTCTime (EmptyC m)))))) a
-  -> m ()
-runFrame = evalEmpty . (\ m -> now >>= \ start -> evalState start m) . Starfield.run . Ship.run . Radar.run . Laser.run . Body.run
 
 game
   :: ( Effect sig
@@ -253,28 +235,6 @@ integration = id <~> timed . flip (execState @(System Body)) (measure "integrati
       >=> measure "hit" . hit i
       >=> measure "runActions" . runActions i
       >=> measure "inertia" . (actor_ <-> inertia))))))
-
-frame
-  :: ( Has Check sig m
-     , Has Empty sig m
-     , Has (Lift IO) sig m
-     , Has Profile sig m
-     , Has (Reader Body.Drawable) sig m
-     , Has (Reader Laser.Drawable) sig m
-     , Has (Reader Radar.Drawable) sig m
-     , Has (Reader Ship.Drawable) sig m
-     , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader Epoch) sig m
-     , Has (Reader UI) sig m
-     , Has (Reader Window.Window) sig m
-     , Has (State Input) sig m
-     , Has (State (System Body)) sig m
-     , Has (State UTCTime) sig m
-     )
-  => m ()
-frame = runSystem . timed $ do
-  measure "input" input
-  withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
 
 
 -- | Flag parameter indicating the meaning of the signal to quit the threads.
