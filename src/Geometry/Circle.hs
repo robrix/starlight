@@ -5,6 +5,7 @@ module Geometry.Circle
 ( circle
 , intersects
 , intersections
+, circumference
 , area
 , surfaceArea
 , volume
@@ -56,6 +57,9 @@ intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
   (d1, d2) = (-b) ± root
   a ± b = (a + b, a - b)
 
+
+circumference :: (Unit Length length, Floating a) => length a -> length a
+circumference r = 2 * pi * r
 
 area :: (Unit Length length, Floating a) => length a -> (length :^: 2) a
 area r = I pi .*. sqU r
