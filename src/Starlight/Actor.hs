@@ -3,7 +3,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
--- | An 'Actor' has 'position', 'velocity', and 'rotation', and can be acted on by the physics simulation.
+-- | An 'Actor' has 'position', 'velocity', 'rotation', 'mass', and 'magnitude', and can be acted on by the physics simulation.
 module Starlight.Actor
 ( Actor(..)
 , transformToActor
