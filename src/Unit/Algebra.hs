@@ -27,6 +27,7 @@ module Unit.Algebra
 , Pow
   -- * Calculation
 , sqU
+, cuU
 , sqrtU
 , dotU
 , quadranceU
@@ -147,6 +148,9 @@ instance Unit I u => Pow I I u n u
 
 sqU :: (Pow du dsqu u 2 squ, Num a) => u a -> squ a
 sqU = pure . join (*) . prj
+
+cuU :: (Pow du dcube u 3 cube, Num a) => u a -> cube a
+cuU = pure . (^ (3 :: Int)) . prj
 
 sqrtU :: (Pow dsqrtu du sqrtu 2 u, Floating a) => u a -> sqrtu a
 sqrtU = pure . sqrt . prj
