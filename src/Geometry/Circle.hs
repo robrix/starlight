@@ -7,6 +7,7 @@ module Geometry.Circle
 , intersections
 , area
 , surfaceArea
+, volume
 ) where
 
 import Control.Monad (guard)
@@ -61,3 +62,6 @@ area r = I pi .*. sqU r
 
 surfaceArea :: (Unit Length length, Floating a) => length a -> (length :^: 2) a
 surfaceArea r = I (4 * pi) .*. sqU r
+
+volume :: (Unit Length length, Floating a) => length a -> (length :^: 3) a
+volume r = I (4 / 3 * pi) .*. cuU r
