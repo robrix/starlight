@@ -60,7 +60,9 @@ import Unit.Length
 import Unit.Mass
 import Unit.Time
 
-spawnPDF :: Has (Reader (System StateVectors)) sig m => m (PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double))
+type Population = Count "population"
+
+spawnPDF :: Has (Reader (System StateVectors)) sig m => m (PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double))
 spawnPDF = views (bodies_ @StateVectors)
   (  nearBody . (Map.! (Star (10, "Sol") :/ (199, "Mercury")))
   <> nearBody . (Map.! (Star (10, "Sol") :/ (299, "Venus")))
@@ -71,13 +73,13 @@ pickSpawnPoint
   :: ( Has Random sig m
      , Has (State (Chain (V2 (Distance Double)))) sig m
      )
-  => PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double)
+  => PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
   -> m (V3 (Distance Double))
 pickSpawnPoint pdf = do
   let mx = convert @(Kilo Metres) @Distance 6e9
   (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) pdf
 
-nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double)
+nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
 nearBody sv = PDF pdf
   where
   pdf v
