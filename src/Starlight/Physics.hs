@@ -3,11 +3,14 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NumericUnderscores #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Physics
-( inertia
+( integration
+, inertia
 , gravity
 , hit
 , runActions
@@ -15,32 +18,134 @@ module Starlight.Physics
 
 import Control.Applicative ((<|>))
 import Control.Carrier.State.Strict
-import Control.Effect.Lens
+import Control.Effect.Lens.Exts
+import Control.Effect.Lift
+import Control.Effect.Profile
+import Control.Effect.Random
 import Control.Effect.Reader
-import Control.Lens hiding (view, (%=))
-import Control.Monad (foldM, guard)
+import Control.Lens hiding (use, uses, view, views, (%=), (.=), (<~))
+import Control.Monad (foldM, guard, when, (>=>))
 import Data.Foldable (foldl')
 import Data.Functor.Interval
 import Data.Ix (inRange)
 import Data.List (elemIndex)
-import Geometry.Circle (intersects)
+import Data.Map as Map (elems, filter, insert, (!))
+import Data.Text as Text (Text, pack)
+import Data.Time.Clock
+import Geometry.Circle (area, intersects)
 import GHC.Stack (HasCallStack)
 import Linear.Exts as L
 import Starlight.Actor as Actor
+import Starlight.AI
 import Starlight.Body
 import Starlight.Character
+import Starlight.Controls
 import Starlight.Identifier
+import Starlight.Input
 import Starlight.Physics.Constants
+import Starlight.Radar
 import Starlight.Ship
 import Starlight.System as System
+import Starlight.Time
 import Starlight.Weapon.Laser as Laser
+import Stochastic.PDF
+import Stochastic.Sample.Markov
+import Stochastic.Sample.Slice
 import UI.Colour
 import Unit.Algebra
 import Unit.Angle
+import Unit.Count
 import Unit.Force
 import Unit.Length
 import Unit.Mass
 import Unit.Time
+
+spawnPDF :: Has (Reader (System StateVectors)) sig m => m (PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double))
+spawnPDF = views (bodies_ @StateVectors) (nearBody . (Map.! (Star (10, "Sol") :/ (399, "Terra"))))
+
+pickSpawnPoint
+  :: ( Has Random sig m
+     , Has (State (Chain (V2 (Distance Double)))) sig m
+     )
+  => PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double)
+  -> m (V3 (Distance Double))
+pickSpawnPoint pdf = do
+  let mx = convert @(Kilo Metres) @Distance 6e9
+  (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) pdf
+
+nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Count "population" :/: Giga Metres :^: 2) Double)
+nearBody sv = PDF pdf
+  where
+  pdf v
+    | let qdV = v `qdU` (sv^.position_._xy)
+    , qdV .>. sqU radius = population ./. qdV
+    | otherwise          = 0
+  radius = sv^.body_.radius_
+  population = Count @"population" (prj (I (10_000_000_000 / 1_000_000) ./. a)) -- assume one in a million people actually goes to space
+  a = area radius
+
+npc
+  :: Text.Text
+  -> V3 (Distance Double)
+  -> Character
+npc name position = Character
+  { name
+  , actor   = Actor
+    { position
+    , velocity  = 0
+    , rotation  = axisAngle (unit _z) (pi/2)
+    , mass      = 1000
+    , magnitude = convert (Metres 500)
+    }
+  , target  = Nothing
+  , actions = mempty
+  , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
+  }
+
+-- FIXME: do something clever, more generative
+pickName :: (Has (Lift IO) sig m, Has Random sig m) => m Text.Text
+pickName = do
+  names <- lines <$> sendM (readFile "data/ship-names.txt")
+  i <- uniformR (0, pred (length names))
+  pure $! Text.pack (names !! i)
+
+integration
+  :: ( Effect sig
+     , Has (Lift IO) sig m
+     , Has Profile sig m
+     , Has Random sig m
+     , Has (Reader Epoch) sig m
+     , Has (State (Chain (V2 (Distance Double)))) sig m
+     , Has (State Input) sig m
+     , Has (State UTCTime) sig m
+     )
+  => System Body
+  -> m (System Body)
+integration = timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
+  measure "controls" $ player_ @Body .actions_ <~ controls
+  measure "ai" $ npcs_ @Body <~> traverse ai
+
+  playerPos <- use (player_ @Body .position_)
+  let radius = 1
+  nearbyNPCs <- uses (npcs_ @Body) (Count @"population" . fromIntegral . length . Prelude.filter ((< radius) . distance playerPos . (^.position_)) . Map.elems)
+  pdf <- spawnPDF
+  when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
+    pos <- pickSpawnPoint pdf
+    when (distance pos playerPos < 1) $ do
+      npc <- npc <$> pickName <*> pure pos
+      npcs_ @Body %= Map.insert (0, name npc) npc
+
+  -- FIXME: this is so gross
+  beams_ @Body .= []
+  npcs_ @Body %= Map.filter ((> 0) . (^.ship_.armour_.min_))
+  characters_ @Body <~> itraverse
+    (\ i
+    -> local . neighbourhoodOf @StateVectors
+    <*> ( measure "gravity" . (actor_ @Character <-> gravity)
+      >=> measure "hit" . hit i
+      >=> measure "runActions" . runActions i
+      >=> measure "inertia" . (actor_ <-> inertia))))))
+
 
 inertia :: (Has (Reader (Seconds Double)) sig m, HasCallStack) => Actor -> m Actor
 inertia a@Actor{ velocity } = do
