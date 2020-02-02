@@ -133,7 +133,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
 
   start <- now
   fork . evalState start . fix $ \ loop -> do
-    integration
+    id <~> integration
     yield
     hasQuit <- gets (fromFlag Quit)
     unless hasQuit loop
@@ -208,10 +208,10 @@ integration
      , Has (State (Chain (V2 (Distance Double)))) sig m
      , Has (State Input) sig m
      , Has (State UTCTime) sig m
-     , Has (State (System Body)) sig m
      )
-  => m ()
-integration = id <~> timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
+  => System Body
+  -> m (System Body)
+integration = timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
   measure "controls" $ player_ @Body .actions_ <~ controls
   measure "ai" $ npcs_ @Body <~> traverse ai
 
