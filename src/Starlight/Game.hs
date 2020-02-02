@@ -93,7 +93,7 @@ runGame bodies
     . TVar.evalState (toFlag Quit False)
     . evalState (Chain (0 :: V2 (Distance Double)))
     . runJ2000
-    where
+  where
   magnitude :: Metres Double
   magnitude = 500
     -- stem-to-stern length; currently interpreted as “diameter” for hit testing
