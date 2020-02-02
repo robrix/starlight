@@ -106,9 +106,9 @@ library
     Starlight.Draw.Weapon.Laser
     Starlight.Game
     Starlight.Identifier
+    Starlight.Integration
     Starlight.Input
     Starlight.Main
-    Starlight.Physics
     Starlight.Physics
     Starlight.Radar
     Starlight.Ship
