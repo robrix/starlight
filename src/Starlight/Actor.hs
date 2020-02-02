@@ -9,6 +9,7 @@ module Starlight.Actor
 , transformToActor
 , applyImpulse
 , HasActor(..)
+, momentum_
 ) where
 
 import Control.Effect.Lens.Exts (asserting)
@@ -57,13 +58,6 @@ class HasActor t where
   mass_ :: HasCallStack => Lens' t (Kilo Grams Double)
   mass_ = actor_.field @"mass".asserting (not.isNaN)
 
-  momentum_ :: HasCallStack => Lens' t (V3 ((Kilo Grams :*: Metres :/: Seconds) Double))
-  momentum_ = lens get set where
-    get :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double)
-    get t = (t^.mass_ .*^ t^.velocity_)^.mapping converting
-    set :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double) -> t
-    set t p = t & velocity_.mapping converting .~ p ^/. t^.mass_
-
   magnitude_ :: HasCallStack => Lens' t (Distance Double)
   magnitude_ = actor_.field @"magnitude".asserting (not.isNaN)
 
@@ -72,3 +66,10 @@ class HasActor t where
 
 instance HasActor Actor where
   actor_ = id
+
+momentum_ :: (HasCallStack, HasActor t) => Lens' t (V3 ((Kilo Grams :*: Metres :/: Seconds) Double))
+momentum_ = lens get set where
+  get :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double)
+  get t = (t^.mass_ .*^ t^.velocity_)^.mapping converting
+  set :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double) -> t
+  set t p = t & velocity_.mapping converting .~ p ^/. t^.mass_
