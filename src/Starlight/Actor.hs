@@ -62,6 +62,8 @@ class HasActor t where
   magnitude_ :: HasCallStack => Lens' t (Distance Double)
   magnitude_ = actor_.field @"magnitude".asserting (not.isNaN)
 
+  {-# MINIMAL actor_ #-}
+
 instance HasActor Actor where
   actor_ = id
 
