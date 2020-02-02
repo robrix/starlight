@@ -276,32 +276,6 @@ frame = runSystem . timed $ do
   measure "input" input
   withView (local (neighbourhoodOfPlayer @StateVectors) draw) -- draw with current readonly positions & beams
 
-withView
-  :: ( Has (Lift IO) sig m
-     , Has (Reader (System StateVectors)) sig m
-     , Has (Reader Window.Window) sig m
-     )
-  => ReaderC View m a
-  -> m a
-withView m = do
-  ratio <- Window.ratio
-  size  <- Window.size
-
-  velocity <- view (player_ @StateVectors .velocity_)
-  focus    <- view (player_ @StateVectors .position_._xy)
-
-  let zoom = zoomForSpeed size (norm velocity)
-  runReader View{ ratio, size, zoom, scale = Starlight.Game.scale, shipScale = Starlight.Game.shipScale, focus } m
-
-
-scale :: (Window.Pixels :/: Distance) Double
-scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
-  -- how many pixels to draw something / the radius of the sun
-
--- FIXME: this is really stupid; there *has* to be a better way to say “I want a 500 m ship to be 30 px long” or w/e
-shipScale :: I Double
-shipScale = 30
-
 
 -- | Flag parameter indicating the meaning of the signal to quit the threads.
 data Quit = Quit

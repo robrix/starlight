@@ -4,6 +4,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -12,6 +13,7 @@ module Starlight.View
 , contextSize
 , lengthToWindowPixels
 , zoomForSpeed
+, withView
   -- * Transforms
 , ClipUnits(..)
 , Zoomed(..)
@@ -24,6 +26,8 @@ module Starlight.View
 , module Geometry.Transform
 ) where
 
+import Control.Carrier.Reader
+import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Lens ((&), (.~))
 import Data.Coerce
@@ -37,7 +41,10 @@ import GL.Uniform
 import GL.Viewport
 import Linear.Conjugate
 import Linear.Exts
+import Starlight.Actor
+import Starlight.Body
 import Starlight.Physics.Constants
+import Starlight.System
 import System.Random (Random)
 import UI.Context as Context
 import UI.Window as Window
@@ -73,6 +80,28 @@ zoomForSpeed size x
   distance = I (convert @Distance @(Mega Metres) (x .*. Seconds 1) ./. hypotenuse) -- how much of the screen will be traversed in a second
   zoom = interval 1 (1/5)
   bounds = interval 1 (20 :: Mega Metres Double) ^/. hypotenuse
+
+withView
+  :: ( Has (Lift IO) sig m
+     , Has (Reader (System StateVectors)) sig m
+     , Has (Reader Window.Window) sig m
+     )
+  => ReaderC View m a
+  -> m a
+withView m = do
+  ratio <- Window.ratio
+  size  <- Window.size
+
+  velocity <- view (player_ @StateVectors .velocity_)
+  focus    <- view (player_ @StateVectors .position_._xy)
+
+  let zoom = zoomForSpeed size (norm velocity)
+      -- how many pixels to draw something / the radius of the sun
+      scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
+      -- FIXME: this is really stupid; there *has* to be a better way to say “I want a 500 m ship to be 30 px long” or w/e
+      shipScale = 30
+
+  runReader View{ ratio, size, zoom, scale, shipScale, focus } m
 
 
 newtype ClipUnits a = ClipUnits { getClipUnits :: a }
