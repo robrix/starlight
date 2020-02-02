@@ -29,6 +29,7 @@ import           Data.Functor.Interval
 import qualified Data.Map as Map
 import qualified Data.Text as Text
 import           Data.Time.Clock (UTCTime)
+import           Geometry.Circle
 import           GL
 import           GL.Effect.Check
 import           Linear.Exts
@@ -230,9 +231,10 @@ integration = id <~> timed . flip (execState @(System Body)) (measure "integrati
   measure "ai" $ npcs_ @Body <~> traverse ai
 
   playerPos <- use (player_ @Body .position_)
-  nearbyNPCs <- uses (npcs_ @Body) (length . filter ((< 1) . distance playerPos . (^.position_)) . Map.elems)
+  let radius = 1
+  nearbyNPCs <- uses (npcs_ @Body) (Count @"population" . fromIntegral . length . filter ((< radius) . distance playerPos . (^.position_)) . Map.elems)
   pdf <- spawnPDF
-  when (fromIntegral nearbyNPCs < runPDF pdf (playerPos^._xy)) $ do
+  when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
     pos <- pickSpawnPoint pdf
     when (distance pos playerPos < 1) $ do
       npc <- npc <$> pickName <*> pure pos
