@@ -59,7 +59,7 @@ runGame
      , MonadFail m
      )
   => Map.Map BodyIdentifier Body
-  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC (Flag Quit) (TVar.StateC (System Body) (TVar.StateC Input (RandomC SMGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))))))) a
+  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC (Flag HasQuit) (TVar.StateC (System Body) (TVar.StateC Input (RandomC SMGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))))))) a
   -> m a
 runGame bodies
   = Window.runSDL
@@ -90,7 +90,7 @@ runGame bodies
       , npcs    = mempty
       , beams   = mempty
       }
-    . TVar.evalState (toFlag Quit False)
+    . TVar.evalState (toFlag HasQuit False)
     . evalState (Chain (0 :: V2 (Distance Double)))
     . runJ2000
   where
@@ -125,7 +125,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   fork . evalState start . fix $ \ loop -> do
     id <~> integration
     yield
-    hasQuit <- gets (fromFlag Quit)
+    hasQuit <- gets (fromFlag HasQuit)
     unless hasQuit loop
 
   enabled_ Blend            .= True
@@ -138,8 +138,8 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
     measure "frame" frame
     measure "swap" Window.swap
     loop
-  put (toFlag Quit True)
+  put (toFlag HasQuit True)
 
 
 -- | Flag parameter indicating the meaning of the signal to quit the threads.
-data Quit = Quit
+data HasQuit = HasQuit
