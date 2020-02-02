@@ -6,6 +6,7 @@ module Geometry.Circle
 , intersects
 , intersections
 , area
+, surfaceArea
 ) where
 
 import Control.Monad (guard)
@@ -57,3 +58,6 @@ intersections c r o l = (d1, d2) <$ guard (discriminant >= 0) where
 
 area :: (Unit Length length, Floating a) => length a -> (length :^: 2) a
 area r = I pi .*. sqU r
+
+surfaceArea :: (Unit Length length, Floating a) => length a -> (length :^: 2) a
+surfaceArea r = I (4 * pi) .*. sqU r
