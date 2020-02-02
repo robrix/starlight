@@ -174,10 +174,10 @@ library
     , prettyprinter-ansi-terminal
     , random
     , sdl2 ^>= 2.5
+    , splitmix
     , stm ^>= 2.5
     , terminal-size
     , text
-    , tf-random
     , time ^>= 1.9
     , transformers ^>= 0.5
     , unordered-containers

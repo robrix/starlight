@@ -53,7 +53,7 @@ import           Stochastic.PDF
 import           Stochastic.Sample.Markov
 import           Stochastic.Sample.Slice
 import           System.FilePath
-import           System.Random.TF (TFGen, newTFGen)
+import           System.Random.SplitMix (SMGen, newSMGen)
 import           UI.Colour
 import           UI.Context
 import           UI.Label as Label
@@ -69,7 +69,7 @@ runGame
      , MonadFail m
      )
   => Map.Map BodyIdentifier Body
-  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC (Flag Quit) (TVar.StateC (System Body) (TVar.StateC Input (RandomC TFGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))))))) a
+  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC (Flag Quit) (TVar.StateC (System Body) (TVar.StateC Input (RandomC SMGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))))))) a
   -> m a
 runGame bodies
   = Window.runSDL
@@ -78,7 +78,7 @@ runGame bodies
   . runGLC
   . runFinally
   . runLiftIO
-  . (\ m -> sendM newTFGen >>= flip evalRandom m)
+  . (\ m -> sendM newSMGen >>= flip evalRandom m)
   . TVar.evalState @Input mempty
   . TVar.evalState System
       { bodies
