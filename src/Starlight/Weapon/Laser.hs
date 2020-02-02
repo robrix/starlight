@@ -9,7 +9,7 @@ import           Data.Functor.I
 import           Linear.Exts
 import qualified Starlight.Actor as Actor
 import           Starlight.Identifier
-import           Starlight.Physics.Constants
+import           Starlight.Physics
 import           UI.Colour
 
 data Beam = Beam

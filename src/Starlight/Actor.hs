@@ -19,7 +19,7 @@ import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import Linear.Quaternion
 import Linear.V3
-import Starlight.Physics.Constants
+import Starlight.Physics
 import Unit.Algebra
 import Unit.Force
 import Unit.Length

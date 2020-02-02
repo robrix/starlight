@@ -48,7 +48,7 @@ import           Linear.Conjugate
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
-import           Starlight.Physics.Constants
+import           Starlight.Physics
 import           Starlight.System
 import           Starlight.Time
 import           UI.Colour

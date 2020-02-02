@@ -30,7 +30,7 @@ import           GHC.Stack (HasCallStack)
 import           Starlight.Actor
 import           Starlight.Character
 import           Starlight.Identifier
-import           Starlight.Physics.Constants
+import           Starlight.Physics
 import           Starlight.Radar
 import           Starlight.Ship (radar_)
 import           Starlight.Weapon.Laser

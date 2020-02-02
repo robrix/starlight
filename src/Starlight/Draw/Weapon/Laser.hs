@@ -29,7 +29,7 @@ import           GL.Effect.Check
 import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _z)
 import qualified GL.Shader.DSL as D
 import           Starlight.Actor
-import           Starlight.Physics.Constants
+import           Starlight.Physics
 import           Starlight.View
 import qualified Starlight.Weapon.Laser as S
 import qualified UI.Drawable as UI

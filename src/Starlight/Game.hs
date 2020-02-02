@@ -34,8 +34,8 @@ import           Starlight.Character
 import           Starlight.Draw
 import           Starlight.Identifier
 import           Starlight.Input
+import           Starlight.Integration
 import           Starlight.Physics
-import           Starlight.Physics.Constants
 import           Starlight.Radar
 import           Starlight.Ship
 import qualified Starlight.Sol as Sol

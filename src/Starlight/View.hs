@@ -43,7 +43,7 @@ import Linear.Conjugate
 import Linear.Exts
 import Starlight.Actor
 import Starlight.Body
-import Starlight.Physics.Constants
+import Starlight.Physics
 import Starlight.System
 import System.Random (Random)
 import UI.Context as Context

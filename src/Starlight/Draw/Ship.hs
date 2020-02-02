@@ -35,7 +35,7 @@ import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
-import           Starlight.Physics.Constants
+import           Starlight.Physics
 import qualified Starlight.Ship as S
 import           Starlight.View
 import qualified UI.Colour as UI

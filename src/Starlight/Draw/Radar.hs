@@ -46,7 +46,7 @@ import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
 import           Starlight.Identifier (CharacterIdentifier(..), Identifier(..))
-import           Starlight.Physics.Constants
+import           Starlight.Physics
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour
