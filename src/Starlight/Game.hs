@@ -186,8 +186,11 @@ nearBody sv = PDF pdf
   where
   pdf v
     | let qdV = v `qdU` (sv^.position_._xy)
-    , qdV .>. sqU (sv^.body_.radius_) = Count @"population" 10_000_000_000 ./. qdV
-    | otherwise                       = 0
+    , qdV .>. sqU radius = population ./. qdV
+    | otherwise          = 0
+  radius = sv^.body_.radius_
+  population = Count @"population" (prj (I (10_000_000_000 / 1_000_000) ./. a)) -- assume one in a million people actually goes to space
+  a = area radius
 
 npc
   :: Text.Text
