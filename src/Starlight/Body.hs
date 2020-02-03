@@ -32,7 +32,7 @@ module Starlight.Body
 import           Control.Carrier.Reader
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Control.Lens (Lens', Iso, coerced, iso, (%~), (&), (^.))
+import           Control.Lens (Lens', coerced, (%~), (&), (^.))
 import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Generics.Product.Fields
@@ -160,10 +160,6 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     actor = actorAt body t
     rel = maybe rot ((>>> rot) . transform) (parent identifier >>= (bodies' Map.!?))
     rot = mkRotation (orientation revolution)
-
--- | Subject to the invariant that w=1.
-extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)
-extended a = iso (`ext` a) (^. _xyz)
 
 
 j2000 :: MonadFail m => m Epoch

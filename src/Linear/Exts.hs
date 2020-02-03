@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE RankNTypes #-}
 module Linear.Exts
 ( translated
 , orient
@@ -13,6 +14,7 @@ module Linear.Exts
 , toAxisAngle
 , cartesian2
 , Ext(..)
+, extended
 , module Linear.Epsilon
 , module Linear.Matrix
 , module Linear.Metric
@@ -24,7 +26,7 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
-import Control.Lens ((^.))
+import Control.Lens (Iso, iso, (^.))
 import Data.Functor.I
 import Data.Functor.Interval
 import Linear.Epsilon
@@ -130,3 +132,7 @@ instance Ext V2 V3 where
 instance Ext V3 V4 where
   ext (V3 x y z) = V4 x y z
   unext = (^._xyz)
+
+-- | Subject to the invariant that w=1.
+extended :: Ext v v' => a -> Iso (v a) (v b) (v' a) (v' b)
+extended a = iso (`ext` a) unext
