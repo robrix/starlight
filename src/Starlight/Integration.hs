@@ -139,9 +139,8 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   pdf <- spawnPDF
   when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
     pos <- pickSpawnPoint pdf radius
-    when (distance pos playerPos < 1) $ do
-      npc <- npc <$> pickName <*> pure pos
-      npcs_ @Body %= Map.insert (0, name npc) npc
+    npc <- npc <$> pickName <*> pure pos
+    npcs_ @Body %= Map.insert (0, name npc) npc
 
   -- FIXME: this is so gross
   beams_ @Body .= []
