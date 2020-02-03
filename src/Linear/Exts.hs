@@ -24,6 +24,7 @@ module Linear.Exts
 , module Linear.Vector
 ) where
 
+import Control.Lens ((^.))
 import Data.Functor.I
 import Data.Functor.Interval
 import Linear.Epsilon
@@ -116,12 +117,16 @@ cartesian2 phi r = V2 (r .*. cos phi) (r .*. sin phi)
 -- | Extensions of a vector with an extra dimension.
 class Ext v v' | v -> v', v' -> v where
   ext :: v a -> a -> v' a
+  unext :: v' a -> v a
 
 instance Ext V1 V2 where
   ext (V1 x) = V2 x
+  unext = V1 . (^._x)
 
 instance Ext V2 V3 where
   ext (V2 x y) = V3 x y
+  unext = (^._xy)
 
 instance Ext V3 V4 where
   ext (V3 x y z) = V4 x y z
+  unext = (^._xyz)
