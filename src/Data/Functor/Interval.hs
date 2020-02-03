@@ -17,6 +17,7 @@ module Data.Functor.Interval
 , min_
 , max_
 , imap
+, member
 , isSubintervalOf
 , isProperSubintervalOf
 , uniformI
@@ -151,6 +152,10 @@ max_ = field @"max'"
 
 imap :: (f a -> g b) -> Interval f a -> Interval g b
 imap f = Interval <$>  f . min' <*> f . max'
+
+
+member :: (Applicative f, Foldable f, Ord a) => f a -> Interval f a -> Bool
+member x i = and ((>=) <$> x <*> min' i) && and ((<=) <$> x <*> max' i)
 
 
 isSubintervalOf :: (Applicative f, Foldable f, Ord a) => Interval f a -> Interval f a -> Bool
