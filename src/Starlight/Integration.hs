@@ -74,10 +74,10 @@ pickSpawnPoint
      , Has (State (Chain (V2 (Distance Double)))) sig m
      )
   => PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
-  -> m (V3 (Distance Double))
+  -> m (V2 (Distance Double))
 pickSpawnPoint pdf = do
   let mx = convert @(Kilo Metres) @Distance 6e9
-  (`ext` 0) <$> sample (interval 0 1) (interval (-mx) mx) pdf
+  sample (interval 0 1) (interval (-mx) mx) pdf
 
 nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
 nearBody sv = PDF pdf
@@ -92,7 +92,7 @@ nearBody sv = PDF pdf
 
 npc
   :: Text.Text
-  -> V3 (Distance Double)
+  -> V2 (Distance Double)
   -> Character
 npc name position = Character
   { name
@@ -202,7 +202,7 @@ runActions i c = do
   system <- ask @(System StateVectors)
   foldM (go dt system) c (actions c) where
   go dt system c = \case
-    Thrust -> pure $! c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)) dt
+    Thrust -> pure $! c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
 
     Face dir -> case desiredAngle (c^.actor_) target of
       Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) t

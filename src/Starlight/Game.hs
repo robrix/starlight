@@ -98,8 +98,8 @@ runGame bodies
   magnitude = 500
     -- stem-to-stern length; currently interpreted as “diameter” for hit testing
     -- compare: USS Gerald R. Ford is 337m long
-  start :: V3 (Mega Metres Double)
-  start = V3 2_500 0 0
+  start :: V2 (Mega Metres Double)
+  start = V2 2_500 0
   radar = Radar 1000 -- GW radar
 
 game

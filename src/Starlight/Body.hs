@@ -118,8 +118,8 @@ orbitTimeScale = 1
 
 actorAt :: Body -> Seconds Double -> Actor
 actorAt Body{ radius, mass, rotation, eccentricity, semimajor, revolution, timeOfPeriapsis } t = Actor
-  { position = convert <$> ext (cartesian2 trueAnomaly r) (0 :: Kilo Metres Double)
-  , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU @(Length :^: 2 :/: Time) (mu .*. semimajor) ./. r .*. coord) <$> V3 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly) 0
+  { position = convert <$> cartesian2 trueAnomaly r
+  , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU @(Length :^: 2 :/: Time) (mu .*. semimajor) ./. r .*. coord) <$> V2 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly)
   , rotation
     = orientation revolution
     * orientation rotation
@@ -154,8 +154,8 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     { body
     , transform = rel >>> mkTranslation (position actor)
     , actor = actor
-      & position_.extended 1 %~ apply rel
-      & velocity_.coerced.extended 0 %~ apply rel
+      & position_.extended 0.extended 1 %~ apply rel
+      & velocity_.coerced.extended 0.extended 0 %~ apply rel
     } where
     actor = actorAt body t
     rel = maybe rot ((>>> rot) . transform) (parent identifier >>= (bodies' Map.!?))

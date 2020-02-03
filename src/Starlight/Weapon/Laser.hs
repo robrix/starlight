@@ -13,7 +13,7 @@ import           Starlight.Physics
 import           UI.Colour
 
 data Beam = Beam
-  { position :: V3 (Distance Double)
+  { position :: V2 (Distance Double)
   , angle    :: I Double
   , colour   :: Colour Float
   , firedBy  :: CharacterIdentifier

@@ -20,7 +20,7 @@ import Geometry.Transform
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import Linear.Quaternion
-import Linear.V3
+import Linear.V2
 import Starlight.Physics
 import Unit.Algebra
 import Unit.Force
@@ -29,8 +29,8 @@ import Unit.Mass
 import Unit.Time
 
 data Actor = Actor
-  { position  :: !(V3 (Distance Double))
-  , velocity  :: !(V3 ((Distance :/: Seconds) Double))
+  { position  :: !(V2 (Distance Double))
+  , velocity  :: !(V2 ((Distance :/: Seconds) Double))
   , rotation  :: !(Quaternion (I Double))
   , mass      :: !(Kilo Grams Double)
   , magnitude :: !(Distance Double) -- approx. equivalent to diameter; should bound the actor’s geometry
@@ -40,17 +40,17 @@ data Actor = Actor
 transformToActor :: Actor -> Transform Double Distance Distance
 transformToActor Actor{ position, rotation } = mkTranslation position >>> mkRotation rotation
 
-applyImpulse :: HasCallStack => V3 (Newtons Double) -> Seconds Double -> Actor -> Actor
+applyImpulse :: HasCallStack => V2 (Newtons Double) -> Seconds Double -> Actor -> Actor
 applyImpulse force dt a = a & momentum_ +~ force ^*. dt
 
 
 class HasActor t where
   actor_ :: Lens' t Actor
 
-  position_ :: HasCallStack => Lens' t (V3 (Distance Double))
+  position_ :: HasCallStack => Lens' t (V2 (Distance Double))
   position_ = actor_.field @"position".asserting (none isNaN)
 
-  velocity_ :: HasCallStack => Lens' t (V3 ((Distance :/: Seconds) Double))
+  velocity_ :: HasCallStack => Lens' t (V2 ((Distance :/: Seconds) Double))
   velocity_ = actor_.field @"velocity".asserting (none isNaN)
 
   rotation_ :: HasCallStack => Lens' t (Quaternion (I Double))
@@ -67,12 +67,12 @@ class HasActor t where
 instance HasActor Actor where
   actor_ = id
 
-momentum_ :: (HasCallStack, HasActor t) => Lens' t (V3 ((Kilo Grams :*: Metres :/: Seconds) Double))
+momentum_ :: (HasCallStack, HasActor t) => Lens' t (V2 ((Kilo Grams :*: Metres :/: Seconds) Double))
 momentum_ = lens get set where
-  get :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double)
+  get :: HasActor t => t -> V2 ((Kilo Grams :*: Metres :/: Seconds) Double)
   get t = (t^.mass_ .*^ t^.velocity_)^.mapping converting
-  set :: HasActor t => t -> V3 ((Kilo Grams :*: Metres :/: Seconds) Double) -> t
+  set :: HasActor t => t -> V2 ((Kilo Grams :*: Metres :/: Seconds) Double) -> t
   set t p = t & velocity_.mapping converting .~ p ^/. t^.mass_
 
-projected :: (HasCallStack, HasActor t) => Seconds Double -> t -> V3 (Distance Double)
+projected :: (HasCallStack, HasActor t) => Seconds Double -> t -> V2 (Distance Double)
 projected dt a = a^.position_ + a^.velocity_ ^*. dt
