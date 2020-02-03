@@ -130,6 +130,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   measure "controls" $ player_ @Body .actions_ <~ controls
   measure "ai" $ npcs_ @Body <~> traverse ai
 
+  -- FIXME: operate over all players
   playerPos <- view (player_ @StateVectors .position_)
   let radius = 0.001
   nearbyNPCs <- uses (npcs_ @Body) (Count @"population" . fromIntegral . length . Prelude.filter ((< radius) . distance playerPos . (^.position_)) . Map.elems)
