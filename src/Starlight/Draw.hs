@@ -105,6 +105,9 @@ draw = measure "draw" . runLiftIO $ do
   system@System{ beams } <- ask @(System StateVectors)
   Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
 
+  let hypotenuse = norm (fromIntegral <$> size) * 0.5
+      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) position - a^.magnitude_ * 0.5) < hypotenuse
+
   clipTo v
 
   glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -114,9 +117,6 @@ draw = measure "draw" . runLiftIO $ do
   measure "ship" $ for_ (system^.characters_) Ship.draw
 
   measure "laser" $ for_ beams Laser.draw
-
-  let hypotenuse = norm (fromIntegral <$> size) * 0.5
-      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) position - a^.magnitude_ * 0.5) < hypotenuse
 
   measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) Body.draw
 
