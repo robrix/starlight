@@ -25,7 +25,7 @@ import Control.Effect.Random
 import Control.Effect.Reader
 import Control.Lens hiding (use, uses, view, views, (%=), (.=), (<~))
 import Control.Monad (foldM, guard, when, (>=>))
-import Data.Foldable (foldl')
+import Data.Foldable (foldl', for_)
 import Data.Functor.Interval as Interval
 import Data.Ix (inRange)
 import Data.List (elemIndex)
@@ -130,15 +130,16 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   measure "controls" $ player_ @Body .actions_ <~ controls
   measure "ai" $ npcs_ @Body <~> traverse ai
 
-  -- FIXME: operate over all players
-  playerPos <- view (player_ @StateVectors .position_)
+  playerPositions <- views (players_ @StateVectors) (map (^.position_) . Map.elems)
   let radius = 0.001
-  nearbyNPCs <- uses (npcs_ @Body) (Count @"population" . fromIntegral . length . Prelude.filter ((< radius) . distance playerPos . (^.position_)) . Map.elems)
-  pdf <- spawnPDF
-  when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
-    pos <- pickSpawnPoint pdf (Interval.point playerPos + interval (-radius) radius)
-    npc <- npc <$> pickName <*> pure pos
-    npcs_ @Body %= Map.insert (0, name npc) npc
+  npcs <- use (npcs_ @Body)
+  for_ playerPositions $ \ playerPos -> do
+    let nearbyNPCs = Count @"population" (fromIntegral (length (Prelude.filter ((< radius) . distance playerPos . (^.position_)) (Map.elems npcs))))
+    pdf <- spawnPDF
+    when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
+      pos <- pickSpawnPoint pdf (Interval.point playerPos + interval (-radius) radius)
+      npc <- npc <$> pickName <*> pure pos
+      npcs_ @Body %= Map.insert (0, name npc) npc
 
   -- FIXME: this is so gross
   beams_ @Body .= []
