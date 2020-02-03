@@ -34,6 +34,10 @@ sample
   -> m (f a)
 sample w bounds (PDF pdf) = do
   x <- gets getChain
+  x <- if x `member` bounds then
+    pure x
+  else
+    uniformI bounds
   y <- uniformI (Interval (pure 0) (pdf x))
   u <- uniformI w
   let step i
