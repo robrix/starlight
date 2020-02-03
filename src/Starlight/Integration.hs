@@ -71,15 +71,12 @@ spawnPDF = views (bodies_ @StateVectors)
 
 pickSpawnPoint
   :: ( Has Random sig m
-     , Has (Reader (System StateVectors)) sig m
      , Has (State (Chain (V2 (Distance Double)))) sig m
      )
   => PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
-  -> Distance Double
+  -> Interval V2 (Distance Double)
   -> m (V2 (Distance Double))
-pickSpawnPoint pdf r = do
-  playerPos <- view (player_ @StateVectors .position_._xy)
-  sample (interval 0 0.001) (Interval.point playerPos + interval (-r) r) pdf
+pickSpawnPoint pdf i = sample (interval 0 0.001) i pdf
 
 nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
 nearBody sv = PDF pdf
@@ -138,7 +135,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   nearbyNPCs <- uses (npcs_ @Body) (Count @"population" . fromIntegral . length . Prelude.filter ((< radius) . distance playerPos . (^.position_)) . Map.elems)
   pdf <- spawnPDF
   when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
-    pos <- pickSpawnPoint pdf radius
+    pos <- pickSpawnPoint pdf (Interval.point playerPos + interval (-radius) radius)
     npc <- npc <$> pickName <*> pure pos
     npcs_ @Body %= Map.insert (0, name npc) npc
 
