@@ -134,7 +134,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   measure "ai" $ npcs_ @Body <~> traverse ai
 
   playerPos <- view (player_ @StateVectors .position_)
-  let radius = 0.01
+  let radius = 0.001
   nearbyNPCs <- uses (npcs_ @Body) (Count @"population" . fromIntegral . length . Prelude.filter ((< radius) . distance playerPos . (^.position_)) . Map.elems)
   pdf <- spawnPDF
   when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
