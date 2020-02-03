@@ -26,7 +26,7 @@ import Control.Effect.Reader
 import Control.Lens hiding (use, uses, view, views, (%=), (.=), (<~))
 import Control.Monad (foldM, guard, when, (>=>))
 import Data.Foldable (foldl')
-import Data.Functor.Interval
+import Data.Functor.Interval as Interval
 import Data.Ix (inRange)
 import Data.List (elemIndex)
 import Data.Map as Map (elems, filter, insert, (!))
@@ -71,13 +71,14 @@ spawnPDF = views (bodies_ @StateVectors)
 
 pickSpawnPoint
   :: ( Has Random sig m
+     , Has (Reader (System StateVectors)) sig m
      , Has (State (Chain (V2 (Distance Double)))) sig m
      )
   => PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
   -> m (V2 (Distance Double))
 pickSpawnPoint pdf = do
-  let mx = convert @(Kilo Metres) @Distance 6e9
-  sample (interval 0 1) (interval (-mx) mx) pdf
+  playerPos <- view (player_ @StateVectors .position_._xy)
+  sample (interval 0 0.001) (Interval.point playerPos + interval (-0.01) 0.01) pdf
 
 nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
 nearBody sv = PDF pdf
@@ -131,8 +132,8 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   measure "controls" $ player_ @Body .actions_ <~ controls
   measure "ai" $ npcs_ @Body <~> traverse ai
 
-  playerPos <- use (player_ @Body .position_)
-  let radius = 1
+  playerPos <- view (player_ @StateVectors .position_)
+  let radius = 0.01
   nearbyNPCs <- uses (npcs_ @Body) (Count @"population" . fromIntegral . length . Prelude.filter ((< radius) . distance playerPos . (^.position_)) . Map.elems)
   pdf <- spawnPDF
   when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
