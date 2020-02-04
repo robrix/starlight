@@ -131,7 +131,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   measure "ai" $ npcs_ @Body <~> traverse ai
 
   playerPositions <- views (players_ @StateVectors) (map (^.position_) . Map.elems)
-  let radius = 0.001
+  let radius = 0.01
   npcs <- use (npcs_ @Body)
   for_ playerPositions $ \ playerPos -> do
     let nearbyNPCs = Count @"population" (fromIntegral (length (Prelude.filter ((< radius) . distance playerPos . (^.position_)) (Map.elems npcs))))
