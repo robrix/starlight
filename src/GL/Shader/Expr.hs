@@ -183,6 +183,7 @@ data Expr (k :: Type) a where
 
   (:/) :: Expr k a -> Expr k a -> Expr k a
 
+  Fn :: String -> [Expr k a] -> Expr k b
   Exp :: Expr k a -> Expr k a
   Log :: Expr k a -> Expr k a
   Sqrt :: Expr k a -> Expr k a
@@ -434,6 +435,7 @@ renderExpr = \case
   Negate a -> parens $ pretty "-" <> renderExpr a
   Abs a -> fn "abs" [renderExpr a]
   FromInteger i -> pretty i
+  Fn s as -> fn s (map renderExpr as)
   Exp a -> fn "exp" [renderExpr a]
   Log a -> fn "log" [renderExpr a]
   Sqrt a -> fn "sqrt" [renderExpr a]
