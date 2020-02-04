@@ -64,6 +64,7 @@ module GL.Shader.Expr
 , (!!*)
 , (!*!)
 -- ** General operations
+, exp2
 , lerp
 , lerp2
 , dFdx
@@ -366,6 +367,9 @@ infixl 7 !!*
 
 infixl 7 !*!
 
+
+exp2 :: Expr k a -> Expr k a
+exp2 a = Fn "exp2" [a]
 
 lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
 lerp = Lerp
