@@ -16,7 +16,7 @@ import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Trace
-import Control.Lens (choosing, filtered, to, traversed, (^.), (^?), _Just)
+import Control.Lens (choosing, filtered, to, traversed, (^.), (^..), (^?), _Just)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Time.Clock
@@ -114,11 +114,11 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "starfield" Starfield.draw
 
-  measure "ship" $ for_ (system^?characters_.traversed.filtered onScreen) Ship.draw
+  measure "ship" $ for_ (system^..characters_.traversed.filtered onScreen) Ship.draw
 
   measure "laser" $ for_ beams Laser.draw
 
-  measure "body" $ for_ (system^?bodies_.traversed.filtered onScreen) Body.draw
+  measure "body" $ for_ (system^..bodies_.traversed.filtered onScreen) Body.draw
 
   measure "radar" Radar.draw
 
