@@ -86,6 +86,7 @@
     - when to purge & redraw cached static text?
   - DSL for scripting game events
     - metalanguage for adding/removing things to the system
+  - sometimes the integration thread doesn’t actually quit
 
 - 🎛 Controls
   - targetting as a zipper on a list of trees — star/planets/moons, ships, etc
