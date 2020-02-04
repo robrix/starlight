@@ -430,7 +430,7 @@ renderExpr = \case
   a :* b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a :- b -> parens $ renderExpr a <+> pretty '-' <+> renderExpr b
   a :/ b -> parens $ renderExpr a <+> pretty '/' <+> renderExpr b
-  Signum a -> fn "signum" [renderExpr a] -- log
+  Signum a -> fn "sign" [renderExpr a]
   Negate a -> parens $ pretty "-" <> renderExpr a
   Abs a -> fn "abs" [renderExpr a]
   FromInteger i -> pretty i
