@@ -86,7 +86,7 @@ nearBody sv = PDF pdf
     , qdV .>. sqU radius = population ./. qdV
     | otherwise          = 0
   radius = sv^.body_.radius_
-  population = Count @"population" (10_000_000_000 / 1_000_000 / prj a) -- assume one in a million people actually goes to space
+  population = Count @"population" (fromIntegral (sv^.body_.population_) / prj a) -- assume one in a million people actually goes to space
   a = area radius
 
 npc
