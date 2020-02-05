@@ -189,13 +189,12 @@ hit i c = do
 runActions
   :: ( Has (Reader (Seconds Double)) sig m
      , Has (Reader (System StateVectors)) sig m
-     , Has (State (System Body)) sig m
      , HasCallStack
      )
   => CharacterIdentifier
   -> Character
   -> m Character
-runActions i c = do
+runActions _ c = do
   dt <- ask @(Seconds Double)
   system <- ask @(System StateVectors)
   foldM (go dt system) c (actions c) where
@@ -215,10 +214,7 @@ runActions i c = do
       L -> angular
       R -> -angular) .*. dt)
 
-    Fire Main -> do
-      let position = projected dt c
-      beams_ @Body %= (Beam{ colour = green, angle = snd (toAxisAngle rotation), position, firedBy = i }:)
-      pure c
+    Fire Main -> pure c -- we don’t have to do anything here because whether or not a character is firing is derived from its actions
 
     ChangeTarget change -> pure $! c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
       elimChange prev next = \case { Prev -> prev ; Next -> next }
