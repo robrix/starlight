@@ -39,11 +39,12 @@ bodiesFromSQL = sendM (getDataFileName "ephemerides/ephemerides.db") >>= \ file 
   pure $! Map.fromList (map snd entries)
   where
   fromColumns ephemerides = \case
-    [ SQLInteger rowid, parentId, SQLInteger code, SQLText name, SQLFloat radius, SQLFloat mass, SQLFloat tilt, SQLFloat rotationalPeriod, SQLInteger colour, SQLFloat eccentricity, SQLFloat semimajor, SQLFloat longitudeOfAscendingNode, SQLFloat inclination, SQLFloat argumentOfPerifocus, SQLFloat orbitalPeriod, SQLFloat timeOfPeriapsis ] -> do
+    [ SQLInteger rowid, parentId, SQLInteger code, SQLText name, SQLInteger population, SQLFloat radius, SQLFloat mass, SQLFloat tilt, SQLFloat rotationalPeriod, SQLInteger colour, SQLFloat eccentricity, SQLFloat semimajor, SQLFloat longitudeOfAscendingNode, SQLFloat inclination, SQLFloat argumentOfPerifocus, SQLFloat orbitalPeriod, SQLFloat timeOfPeriapsis ] -> do
       let leaf = (fromIntegral code, name)
           identifier = maybe (Star leaf) (:/ leaf) (lookupParent ephemerides parentId)
       pure (rowid, (identifier, Body
-        { radius          = pure @(Kilo Metres) radius
+        { population      = fromIntegral population
+        , radius          = pure @(Kilo Metres) radius
         , mass            = pure @(Kilo Grams)  mass
         , rotation        = Revolution
           { orientation = axisAngle (unit _x) (convert @Degrees (pure tilt))

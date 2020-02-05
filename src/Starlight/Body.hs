@@ -84,7 +84,8 @@ data Revolution = Revolution
   deriving (Generic, Show)
 
 data Body = Body
-  { radius           :: !(Kilo Metres Double)
+  { population       :: !Integer
+  , radius           :: !(Kilo Metres Double)
   , mass             :: !(Kilo Grams Double)
   , rotation         :: !Revolution           -- axial tilt & sidereal rotation period
   , eccentricity     :: !(I Double)
