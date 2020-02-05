@@ -116,7 +116,7 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "ship" $ for_ (system^..characters_.traversed.filtered onScreen) Ship.draw
 
-  measure "laser" $ for_ (system^.beams_) Laser.draw
+  measure "laser" $ for_ (beams system) Laser.draw
 
   measure "body" $ for_ (system^..bodies_.traversed.filtered onScreen) Body.draw
 

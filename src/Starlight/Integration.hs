@@ -173,7 +173,7 @@ gravity a = do
 hit :: (Has (Reader (Seconds Double)) sig m, Has (Reader (System StateVectors)) sig m) => CharacterIdentifier -> Character -> m Character
 hit i c = do
   dt <- ask @(Seconds Double)
-  foldl' (go dt) c <$> view (beams_ @StateVectors) where
+  foldl' (go dt) c <$> asks (beams @StateVectors) where
   go dt char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
     , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (cartesian2 theta 1)

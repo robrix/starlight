@@ -13,7 +13,7 @@ module Starlight.System
 , players_
 , npcs_
 , characters_
-, beams_
+, beams
 , identifiers
 , (!?)
 , neighbourhoodOf
@@ -25,7 +25,6 @@ import           Control.Lens
 import           Data.Either (partitionEithers)
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import           Data.Maybe (fromMaybe)
 import           GHC.Generics (Generic)
 import           GHC.Stack (HasCallStack)
@@ -67,10 +66,8 @@ characters_ = lens get set.asserting (Map.member (Player (0, "you"))) where
   set s cs = s{ players = Map.fromList p, npcs = Map.fromList n } where
     (p, n) = partitionEithers (map (\case{ (Player k, v) -> Left (k, v) ; (NPC k, v) -> Right (k, v) }) (Map.toList cs))
 
-beams_ :: Lens' (System a) [Beam]
-beams_ = lens get set where
-  get s = s^..characters_.itraversed.filtered (view (actions_.contains (Fire Main))).withIndex.to beam
-  set s beams = s & characters_.itraversed.indices (`Set.member` Set.fromList (map firedBy beams)).actions_.contains (Fire Main) .~ True
+beams :: System a -> [Beam]
+beams = toListOf (characters_.itraversed.filtered (view (actions_.contains (Fire Main))).withIndex.to beam) where
   beam (i, c) = Beam{ position = c^.position_, angle = snd (toAxisAngle (c^.rotation_)), colour = green, firedBy = i }
 
 
