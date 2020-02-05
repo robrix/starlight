@@ -30,6 +30,7 @@ import Data.Functor.Interval as Interval
 import Data.Ix (inRange)
 import Data.List (elemIndex)
 import Data.Map as Map (elems, filter, insert)
+import Data.Maybe (fromMaybe)
 import Data.Text as Text (Text, pack)
 import Data.Time.Clock
 import Geometry.Circle (area, intersects)
@@ -63,7 +64,7 @@ import Unit.Time
 type Population = Count "population"
 
 spawnPDF :: Has (Reader (System StateVectors)) sig m => m (PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double))
-spawnPDF = views (bodies_ @StateVectors) (foldMap nearBody)
+spawnPDF = views (bodies_ @StateVectors) (fromMaybe mempty . foldMap (\ b -> guard (b^.body_.population_ > 0) *> Just (nearBody b)))
 
 pickSpawnPoint
   :: ( Has Random sig m
