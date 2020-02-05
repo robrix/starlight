@@ -20,6 +20,7 @@ module Starlight.Body
 , Revolution(..)
 , Body(..)
 , radius_
+, population_
 , BodyUnits(..)
 , actorAt
 , systemAt
@@ -101,6 +102,9 @@ instance HasColour Body where
 
 radius_ :: Lens' Body (Kilo Metres Double)
 radius_ = field @"radius"
+
+population_ :: Lens' Body Int
+population_ = field @"population"
 
 newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
   deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
