@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -20,13 +21,15 @@ module Starlight.System
 ) where
 
 import           Control.Effect.Lens.Exts (asserting)
-import           Control.Lens (Lens, Lens', at, iso, ix, lens, (^.), (^?))
+import           Control.Lens
 import           Data.Either (partitionEithers)
 import           Data.Generics.Product.Fields
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import           Data.Maybe (fromMaybe)
 import           GHC.Generics (Generic)
 import           GHC.Stack (HasCallStack)
+import           Linear.Exts (toAxisAngle)
 import           Starlight.Actor
 import           Starlight.Character
 import           Starlight.Identifier
@@ -34,6 +37,7 @@ import           Starlight.Physics
 import           Starlight.Radar
 import           Starlight.Ship (radar_)
 import           Starlight.Weapon.Laser
+import           UI.Colour
 import           Unit.Algebra
 import           Unit.Length
 import           Unit.Power
@@ -42,7 +46,6 @@ data System a = System
   { bodies  :: !(Map.Map BodyIdentifier a)
   , players :: !(Map.Map (Code, Name) Character)
   , npcs    :: !(Map.Map (Code, Name) Character)
-  , beams   :: ![Beam]
   }
   deriving (Generic, Show)
 
@@ -65,7 +68,10 @@ characters_ = lens get set.asserting (Map.member (Player (0, "you"))) where
     (p, n) = partitionEithers (map (\case{ (Player k, v) -> Left (k, v) ; (NPC k, v) -> Right (k, v) }) (Map.toList cs))
 
 beams_ :: Lens' (System a) [Beam]
-beams_ = field @"beams"
+beams_ = lens get set where
+  get s = s^..characters_.itraversed.filtered (view (actions_.contains (Fire Main))).withIndex.to beam
+  set s beams = s & characters_.itraversed.indices (`Set.member` Set.fromList (map firedBy beams)).actions_.contains (Fire Main) .~ True
+  beam (i, c) = Beam{ position = c^.position_, angle = snd (toAxisAngle (c^.rotation_)), colour = green, firedBy = i }
 
 
 identifiers :: System a -> [Identifier]

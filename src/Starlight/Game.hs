@@ -88,7 +88,6 @@ runGame bodies
           }
         ]
       , npcs    = mempty
-      , beams   = mempty
       }
     . TVar.evalState (toFlag HasQuit False)
     . evalState (Chain (0 :: V2 (Distance Double)))

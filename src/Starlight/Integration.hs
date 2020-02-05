@@ -141,8 +141,6 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
       npc <- npc <$> pickName <*> pure pos
       npcs_ @Body %= Map.insert (0, name npc) npc
 
-  -- FIXME: this is so gross
-  beams_ @Body .= []
   npcs_ @Body %= Map.filter ((> 0) . (^.ship_.armour_.min_))
   characters_ @Body <~> itraverse
     (\ i
