@@ -132,6 +132,9 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
 
   playerPositions <- views (players_ @StateVectors) (map (^.position_) . Map.elems)
   let radius = 0.01
+
+  npcs_ @Body %= Map.filter ((&&) <$> (> 0) . (^.ship_.armour_.min_) <*> (`any` playerPositions) . fmap (< 10 * radius) . distance . (^.position_))
+
   npcs <- use (npcs_ @Body)
   for_ playerPositions $ \ playerPos -> do
     let nearbyNPCs = Count @"population" (fromIntegral (length (Prelude.filter ((< radius) . distance playerPos . (^.position_)) (Map.elems npcs))))
@@ -141,7 +144,6 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
       npc <- npc <$> pickName <*> pure pos
       npcs_ @Body %= Map.insert (0, name npc) npc
 
-  npcs_ @Body %= Map.filter ((&&) <$> (> 0) . (^.ship_.armour_.min_) <*> (`any` playerPositions) . fmap (< 10 * radius) . distance . (^.position_))
   characters_ @Body <~> itraverse
     (\ i
     -> local . neighbourhoodOf @StateVectors
