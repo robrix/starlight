@@ -102,7 +102,7 @@ draw = measure "draw" . runLiftIO $ do
   bind @Framebuffer Nothing
 
   v@View{ size } <- ask
-  system@System{ beams } <- ask @(System StateVectors)
+  system <- ask @(System StateVectors)
   Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
 
   let hypotenuse = norm (fromIntegral <$> size) * 0.5
@@ -116,7 +116,7 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "ship" $ for_ (system^..characters_.traversed.filtered onScreen) Ship.draw
 
-  measure "laser" $ for_ beams Laser.draw
+  measure "laser" $ for_ (system^.beams_) Laser.draw
 
   measure "body" $ for_ (system^..bodies_.traversed.filtered onScreen) Body.draw
 
