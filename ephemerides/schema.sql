@@ -3,6 +3,7 @@ create table bodies
   ( parentId integer
   , code integer not null
   , name text not null
+  , population integer not null
   , radius real not null -- km
   , mass real not null -- kg
   , tilt real not null -- degrees

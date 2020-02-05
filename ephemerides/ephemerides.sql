@@ -2,6 +2,7 @@ insert into bodies values
   ( null
   , 10
   , "Sol"
+  , 0
   , 695500.0
   , 1.9885e30
   , 7.250000000000001
@@ -19,6 +20,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 1
   , "Ceres"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -36,6 +38,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 2
   , "Pallas"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -53,6 +56,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 4
   , "Vesta"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -70,6 +74,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 10
   , "Hygiea"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -87,6 +92,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 199
   , "Mercury"
+  , 1000
   , 2439.7
   , 3.302e23
   , 3.4e-2
@@ -104,6 +110,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 299
   , "Venus"
+  , 10000
   , 6051.9
   , 4.8685e24
   , 177.3
@@ -121,6 +128,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 399
   , "Terra"
+  , 10000
   , 6378.14
   , 5.97219e24
   , 23.4392911
@@ -138,6 +146,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 399 and name = "Terra")
   , 301
   , "Luna"
+  , 1000
   , 1737.5
   , 7.342e22
   , 6.687
@@ -155,6 +164,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 499
   , "Mars"
+  , 10000
   , 3397.0
   , 6.4171e23
   , 25.19
@@ -172,6 +182,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 499 and name = "Mars")
   , 401
   , "Phobos"
+  , 0
   , 11.2667
   , 1.0659e16
   , 0.0
@@ -189,6 +200,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 499 and name = "Mars")
   , 402
   , "Deimos"
+  , 0
   , 6.2
   , 1.4762e15
   , 0.0
@@ -206,6 +218,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 599
   , "Jupiter"
+  , 100000
   , 69911.0
   , 1.89813e27
   , 3.13
@@ -223,6 +236,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 599 and name = "Jupiter")
   , 501
   , "Io"
+  , 0
   , 1821.3
   , 8.933e22
   , 1.0
@@ -240,6 +254,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 599 and name = "Jupiter")
   , 502
   , "Europa"
+  , 0
   , 1560.8
   , 4.799844e22
   , 0.1
@@ -257,6 +272,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 599 and name = "Jupiter")
   , 503
   , "Ganymede"
+  , 0
   , 2634.1
   , 1.4819e23
   , 0.33
@@ -274,6 +290,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 599 and name = "Jupiter")
   , 504
   , "Callisto"
+  , 0
   , 2410.3
   , 1.075938e23
   , 0.0
@@ -291,6 +308,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 599 and name = "Jupiter")
   , 505
   , "Amalthea"
+  , 0
   , 83.5
   , 2.08e18
   , 0.0
@@ -308,6 +326,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 599 and name = "Jupiter")
   , 506
   , "Himalia"
+  , 0
   , 85.0
   , 4.2e18
   , 0.0
@@ -325,6 +344,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 699
   , "Saturn"
+  , 0
   , 58232.0
   , 5.6834e26
   , 26.73
@@ -342,6 +362,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 699 and name = "Saturn")
   , 601
   , "Mimas"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -359,6 +380,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 699 and name = "Saturn")
   , 602
   , "Enceladus"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -376,6 +398,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 699 and name = "Saturn")
   , 603
   , "Tethys"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -393,6 +416,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 699 and name = "Saturn")
   , 604
   , "Dione"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -410,6 +434,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 699 and name = "Saturn")
   , 605
   , "Rhea"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -427,6 +452,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 699 and name = "Saturn")
   , 606
   , "Titan"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -444,6 +470,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 699 and name = "Saturn")
   , 607
   , "Hyperion"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -461,6 +488,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 699 and name = "Saturn")
   , 608
   , "Iapetus"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -478,6 +506,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 799
   , "Uranus"
+  , 0
   , 25362.0
   , 8.6813e25
   , 97.77
@@ -495,6 +524,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 799 and name = "Uranus")
   , 701
   , "Ariel"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -512,6 +542,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 799 and name = "Uranus")
   , 702
   , "Umbriel"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -529,6 +560,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 799 and name = "Uranus")
   , 703
   , "Titania"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -546,6 +578,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 799 and name = "Uranus")
   , 704
   , "Oberon"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -563,6 +596,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 899
   , "Neptune"
+  , 0
   , 24624.0
   , 1.02413e26
   , 28.32
@@ -580,6 +614,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 899 and name = "Neptune")
   , 801
   , "Triton"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -597,6 +632,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 899 and name = "Neptune")
   , 802
   , "Nereid"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -614,6 +650,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 899 and name = "Neptune")
   , 803
   , "Naiad"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -631,6 +668,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 899 and name = "Neptune")
   , 804
   , "Thalassa"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -648,6 +686,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 899 and name = "Neptune")
   , 805
   , "Despina"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -665,6 +704,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 10 and name = "Sol")
   , 999
   , "Pluto"
+  , 0
   , 1188.3
   , 1.303e22
   , 122.53000000000002
@@ -682,6 +722,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 999 and name = "Pluto")
   , 901
   , "Charon"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -699,6 +740,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 999 and name = "Pluto")
   , 902
   , "Nix"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
@@ -716,6 +758,7 @@ insert into bodies values
   ( (select rowid from bodies where code = 999 and name = "Pluto")
   , 903
   , "Hydra"
+  , 0
   , 1000.0
   , 1.307e22
   , 5.0
