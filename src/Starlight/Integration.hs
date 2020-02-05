@@ -147,7 +147,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
     -> local . neighbourhoodOf @StateVectors
     <*> ( measure "gravity" . (actor_ @Character <-> gravity)
       >=> measure "hit" . hit i
-      >=> measure "runActions" . runActions i
+      >=> measure "runActions" . runActions
       >=> measure "inertia" . (actor_ <-> inertia))))))
 
 
@@ -191,10 +191,9 @@ runActions
      , Has (Reader (System StateVectors)) sig m
      , HasCallStack
      )
-  => CharacterIdentifier
-  -> Character
+  => Character
   -> m Character
-runActions _ c = do
+runActions c = do
   dt <- ask @(Seconds Double)
   system <- ask @(System StateVectors)
   foldM (go dt system) c (actions c) where
