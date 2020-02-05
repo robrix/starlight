@@ -127,9 +127,6 @@ integration
   => System Body
   -> m (System Body)
 integration = timed . flip (execState @(System Body)) (measure "integration" (runSystem (do
-  measure "controls" $ player_ @Body .actions_ <~ controls
-  measure "ai" $ npcs_ @Body <~> traverse ai
-
   playerPositions <- views (players_ @StateVectors) (map (^.position_) . Map.elems)
   let radius = 0.01
 
@@ -143,6 +140,9 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
       pos <- pickSpawnPoint pdf (Interval.point playerPos + interval (-radius) radius)
       npc <- npc <$> pickName <*> pure pos
       npcs_ @Body %= Map.insert (0, name npc) npc
+
+  measure "controls" $ player_ @Body .actions_ <~ controls
+  measure "ai" $ npcs_ @Body <~> traverse ai
 
   characters_ @Body <~> itraverse
     (\ i
