@@ -141,7 +141,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
       npc <- npc <$> pickName <*> pure pos
       npcs_ @Body %= Map.insert (0, name npc) npc
 
-  npcs_ @Body %= Map.filter ((> 0) . (^.ship_.armour_.min_))
+  npcs_ @Body %= Map.filter ((&&) <$> (> 0) . (^.ship_.armour_.min_) <*> (`any` playerPositions) . fmap (< radius) . distance . (^.position_))
   characters_ @Body <~> itraverse
     (\ i
     -> local . neighbourhoodOf @StateVectors
