@@ -117,8 +117,9 @@ shader = program $ \ U{ resolution, focus, zoom }
       i <- var @Int "i" 0
       while (get i `lt` iterations) $ do
         p .= abs (get p) / dot (get p) (get p) - formuparam
-        a += abs (norm (get p) - get pa)
+        prev <- let' "prev" (get pa)
         pa .= norm (get p)
+        a += abs (get pa - prev)
         i += 1
       a *= get a ** 2
       v += vec3 [get fade]
