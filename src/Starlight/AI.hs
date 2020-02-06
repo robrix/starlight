@@ -1,5 +1,6 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeApplications #-}
 module Starlight.AI
 ( ai
 ) where
@@ -18,20 +19,20 @@ ai
   => Character
   -> m Character
 ai c@Character{ actor = Actor{ position = here, rotation }, target } = do
-  system <- ask
+  system <- ask @(System StateVectors)
   pure $! c & actions_ .~ case target >>= (system !?) of
     -- FIXME: different kinds of behaviours: aggressive, patrolling, mining, trading, etc.
     -- FIXME: don’t just fly directly at the target at full throttle, dumbass
     -- FIXME: factor in the target’s velocity & distance
     -- FIXME: allow other behaviours relating to targets, e.g. following
-    Just (Left StateVectors{ actor = Actor{ position = there } }) -> Set.fromList
+    Just (Left sv) -> Set.fromList
       ( Face Target
-      : [ Thrust | facingRel rotation (angleTo' there) < pi/4 ]
+      : [ Thrust | facingRel rotation (angleTo' (sv^.position_)) < pi/4 ]
       )
-    Just (Right Character{ actor = Actor{ position = there } }) -> Set.fromList $ concat
+    Just (Right c) -> Set.fromList $ concat
       [ [ Face Target ]
-      , [ Thrust    | facingRel rotation (angleTo' there) < pi/4 ]
-      , [ Fire Main | facingRel rotation (angleTo' there) < pi/128 ]
+      , [ Thrust    | facingRel rotation (angleTo' (c^.position_)) < pi/4 ]
+      , [ Fire Main | facingRel rotation (angleTo' (c^.position_)) < pi/128 ]
       ]
     -- FIXME: wander
     -- FIXME: pick a new target
