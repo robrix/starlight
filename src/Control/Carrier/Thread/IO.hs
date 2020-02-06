@@ -27,5 +27,6 @@ instance Has (Lift IO) sig m => Algebra (Labelled Thread (Thread CC.ThreadId) :+
   alg = \case
     -- NB: this discards state changes in the other thread
     L (Labelled (Fork m k)) -> liftWith (\ ctx run -> (<$ ctx) <$> CC.forkIO (void (run (m <$ ctx)))) >>= k
+    L (Labelled (Kill i k)) -> sendM (CC.killThread i) >> k
     L (Labelled (Yield  k)) -> sendM CC.yield >> k
     R other                 -> ThreadC (send (handleCoercible other))
