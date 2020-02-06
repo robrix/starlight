@@ -120,11 +120,6 @@ shader = program $ \ U{ resolution, focus, zoom }
         pa .= norm (get p)
         i += 1
       a *= get a ** 2
-      iff (get r `gt` 6)
-        (do
-          dm <- let' "dm" $ max' 0 (darkmatter - get a * get a * 0.001)
-          fade *= 1.0 - dm)
-        (pure ())
       v += vec3 [get fade]
       v += vec3 [get s, get s ** 2, get s ** 3] D.^* get a D.^* brightness D.^* get fade
       fade *= distfading
@@ -140,7 +135,6 @@ shader = program $ \ U{ resolution, focus, zoom }
   stepsize = 0.1
   tile = 1/1.61803398875
   brightness = 0.0015
-  darkmatter = 0.3
   distfading = 0.73
   saturation = 0.85
 
