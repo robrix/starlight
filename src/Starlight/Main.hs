@@ -72,4 +72,4 @@ runCheck
   -> m a
 runCheck m = view CLI.trace_ >>= bool (NoCheck.runCheck m) (Check.runCheck m)
 
-type Lifts (c :: (* -> *) -> Constraint) t = (forall m' . c m' => c (t m')) :: Constraint
+type Lifts (c :: (* -> *) -> Constraint) t = ((forall m' . c m' => c (t m')) :: Constraint)
