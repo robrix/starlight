@@ -93,11 +93,12 @@ shader = program $ \ U{ resolution, focus, zoom }
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var @(V3 Double) "focus" $ dext3 focus 1
     let wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
+        rot a = mat2 [vec2 [cos a, sin a], vec2 [-sin a, cos a]]
     nf <- let' "nf" (norm (get focus))
     a1 <- let' "a1" $ float (wrap (-pi) pi (0.3 + 0.1/nf))
     a2 <- let' "a2" $ float (wrap (-pi) pi (0.2 + 0.1/nf))
-    rot1 <- let' "rot1" $ mat2 [vec2 [cos a1, sin a1], vec2 [-sin a1, cos a1]]
-    rot2 <- let' "rot2" $ mat2 [vec2 [cos a2, sin a2], vec2 [-sin a2, cos a2]]
+    rot1 <- let' "rot1" $ rot a1
+    rot2 <- let' "rot2" $ rot a2
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
     focus^^._xz *!= dmat2 [rot1]
