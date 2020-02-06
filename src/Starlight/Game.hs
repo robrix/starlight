@@ -20,9 +20,7 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
-import           Control.Monad (unless)
 import           Control.Monad.IO.Class.Lift
-import           Data.Flag
 import           Data.Function (fix)
 import qualified Data.Map as Map
 import           GL
@@ -60,7 +58,7 @@ runGame
      , MonadFail m
      )
   => Map.Map BodyIdentifier Body
-  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC (Flag HasQuit) (TVar.StateC (System Body) (TVar.StateC Input (RandomC SMGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m)))))))))) a
+  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC (System Body) (TVar.StateC Input (RandomC SMGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))))) a
   -> m a
 runGame bodies
   = Window.runSDL
@@ -90,7 +88,6 @@ runGame bodies
         ]
       , npcs    = mempty
       }
-    . TVar.evalState (toFlag HasQuit False)
     . evalState (Chain (0 :: V2 (Distance Double)))
     . runJ2000
   where
@@ -122,11 +119,10 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   targetLabel <- measure "label" Label.label
 
   start <- now
-  _ <- fork . evalState start . fix $ \ loop -> do
+  integration <- fork . evalState start . fix $ \ loop -> do
     id <~> integration
     yield
-    hasQuit <- gets (fromFlag HasQuit)
-    unless hasQuit loop
+    loop
 
   enabled_ Blend            .= True
   enabled_ DepthClamp       .= True
@@ -138,8 +134,4 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
     measure "frame" frame
     measure "swap" Window.swap
     loop
-  put (toFlag HasQuit True)
-
-
--- | Flag parameter indicating the meaning of the signal to quit the threads.
-data HasQuit = HasQuit
+  kill integration
