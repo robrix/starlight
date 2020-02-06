@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -106,7 +107,7 @@ game
      , Has Check sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
-     , Has Thread sig m
+     , HasLabelled Thread (Thread id) sig m
      , Has Trace sig m
      , MonadFail m
      )
