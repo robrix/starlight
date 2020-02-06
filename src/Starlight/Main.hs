@@ -34,7 +34,7 @@ import           System.Environment
 import           System.Exit
 
 main :: IO ()
-main = handling $ CLI.execParser CLI.argumentsParser >>= runThread . (`runReader` (runCheck (runProfile (runTrace game))))
+main = handling $ CLI.execParser CLI.argumentsParser >>= runThread . (`runReader` runCheck (runProfile (runTrace game)))
   where
   handling m = do
     name <- getProgName
