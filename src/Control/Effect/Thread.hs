@@ -7,6 +7,7 @@
 module Control.Effect.Thread
 ( -- * Thread effect
   fork
+, kill
 , yield
 , Thread(..)
   -- * Re-exports
@@ -21,6 +22,9 @@ import Control.Effect.Labelled
 
 fork :: HasLabelled Thread (Thread id) sig m => m () -> m id
 fork m = sendLabelled @Thread (Labelled (Fork m pure))
+
+kill :: HasLabelled Thread (Thread id) sig m => id -> m ()
+kill i = sendLabelled @Thread (Labelled (Kill i (pure ())))
 
 yield :: HasLabelled Thread (Thread id) sig m => m ()
 yield = sendLabelled @Thread (Labelled (Yield (pure ())))
