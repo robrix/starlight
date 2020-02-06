@@ -47,7 +47,7 @@ draw = UI.using getDrawable $ do
   view@View{ zoom, focus } <- ask
 
   resolution_ ?= (fromIntegral <$> contextSize view)
-  focus_      ?= (fmap realToFrac <$> focus)
+  focus_      ?= focus
   zoom_       ?= realToFrac (1/zoom)
 
   drawArrays TriangleStrip range
@@ -91,24 +91,25 @@ shader = program $ \ U{ resolution, focus, zoom }
     resolution <- let' @(V2 Float) "resolution" (D.coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
-    focus <- var @(V3 Float) "focus" $ ext3 focus 1
+    focus <- var @(V3 Double) "focus" $ dext3 focus 1
     let wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
     nf <- let' "nf" (norm (get focus))
-    a1 <- let' "a1" $ wrap (-pi) pi (0.3 + 0.1/nf)
-    a2 <- let' "a2" $ wrap (-pi) pi (0.2 + 0.1/nf)
+    a1 <- let' "a1" $ float (wrap (-pi) pi (0.3 + 0.1/nf))
+    a2 <- let' "a2" $ float (wrap (-pi) pi (0.2 + 0.1/nf))
     rot1 <- let' "rot1" $ mat2 [vec2 [cos a1, sin a1], vec2 [-sin a1, cos a1]]
     rot2 <- let' "rot2" $ mat2 [vec2 [cos a2, sin a2], vec2 [-sin a2, cos a2]]
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
-    focus^^._xz *!= rot1
-    focus^^._xy *!= rot2
-    focus *= vec3 [10]
+    focus^^._xz *!= dmat2 [rot1]
+    focus^^._xy *!= dmat2 [rot2]
+    focus *= dvec3 [10]
     s <- var "s" 0.1
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 [0]
     r <- var @Int "r" 0
+    focus2 <- let' "focus2" $ vec3 [ mod' (get focus) (dvec3 [tile * 2]) ]
     while (get r `lt` volsteps) $ do
-      p <- var "p" $ get focus + get dir D.^* get s
+      p <- var "p" $ focus2 + get dir D.^* get s
       p .= abs (vec3 [tile] - mod' (get p) (vec3 [tile * 2]))
       pa <- var "pa" 0
       a <- var "a" 0
@@ -145,7 +146,7 @@ shader = program $ \ U{ resolution, focus, zoom }
 
 data U v = U
   { resolution :: v (V2 (Window.Pixels Float))
-  , focus      :: v (V2 (Giga Metres Float))
+  , focus      :: v (V2 (Giga Metres Double))
   , zoom       :: v Float
   }
   deriving (Generic)
@@ -155,7 +156,7 @@ instance Vars U
 resolution_ :: Lens' (U v) (v (V2 (Window.Pixels Float)))
 resolution_ = field @"resolution"
 
-focus_ :: Lens' (U v) (v (V2 (Giga Metres Float)))
+focus_ :: Lens' (U v) (v (V2 (Giga Metres Double)))
 focus_ = field @"focus"
 
 zoom_ :: Lens' (U v) (v Float)
