@@ -119,10 +119,11 @@ shader = program $ \ U{ resolution, focus, zoom }
         a += abs (norm (get p) - get pa)
         pa .= norm (get p)
         i += 1
-      dm <- let' "dm" $ max' 0 (darkmatter - get a * get a * 0.001)
       a *= get a ** 2
       iff (get r `gt` 6)
-        (fade *= 1.0 - dm)
+        (do
+          dm <- let' "dm" $ max' 0 (darkmatter - get a * get a * 0.001)
+          fade *= 1.0 - dm)
         (pure ())
       v += vec3 [get fade]
       v += vec3 [get s, get s ** 2, get s ** 3] D.^* get a D.^* brightness D.^* get fade
