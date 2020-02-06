@@ -85,15 +85,15 @@ data Revolution = Revolution
   deriving (Generic, Show)
 
 data Body = Body
-  { population       :: !Int
-  , radius           :: !(Kilo Metres Double)
-  , mass             :: !(Kilo Grams Double)
-  , rotation         :: !Revolution           -- axial tilt & sidereal rotation period
-  , eccentricity     :: !(I Double)
-  , semimajor        :: !(Kilo Metres Double)
-  , revolution       :: !Revolution           -- relative to ecliptic
-  , timeOfPeriapsis  :: !(Seconds Double)     -- relative to epoch
-  , colour           :: !(Colour Float)
+  { population      :: !Int
+  , radius          :: !(Kilo Metres Double)
+  , mass            :: !(Kilo Grams Double)
+  , rotation        :: !Revolution           -- axial tilt & sidereal rotation period
+  , eccentricity    :: !(I Double)
+  , semimajor       :: !(Kilo Metres Double)
+  , revolution      :: !Revolution           -- relative to ecliptic
+  , timeOfPeriapsis :: !(Seconds Double)     -- relative to epoch
+  , colour          :: !(Colour Float)
   }
   deriving (Generic, Show)
 
