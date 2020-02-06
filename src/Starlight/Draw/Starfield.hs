@@ -106,10 +106,10 @@ shader = program $ \ U{ resolution, focus, zoom }
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 [0]
     r <- var @Int "r" 0
-    focus2 <- let' "focus2" $ vec3 [ mod' (get focus) (dvec3 [tile * 2]) ]
+    focus2 <- let' "focus2" $ vec3 [ get focus `mod'` dvec3 [tile * 2] ]
     while (get r `lt` volsteps) $ do
       p <- var "p" $ focus2 * 10 + get dir D.^* get s
-      p .= abs (vec3 [tile] - mod' (get p) (vec3 [tile * 2]))
+      p .= abs (vec3 [tile] - (get p `mod'` vec3 [tile * 2]))
       pa <- var "pa" 0
       a <- var "a" 0
       i <- var @Int "i" 0
