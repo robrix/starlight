@@ -122,7 +122,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   targetLabel <- measure "label" Label.label
 
   start <- now
-  fork . evalState start . fix $ \ loop -> do
+  _ <- fork . evalState start . fix $ \ loop -> do
     id <~> integration
     yield
     hasQuit <- gets (fromFlag HasQuit)
