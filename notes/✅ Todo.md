@@ -195,6 +195,7 @@
   - ✅ radar blip size is wrong when close to large bodies
   - ✅ ships are visible on system radar at their unscaled size
   - ✅ the mouse cursor should not be visible unless we can actually click on things
+  - switching to another app and back on macOS improves framerate?
 
 - ⤴️ Extract
   - ✅ fused-effects-profile
