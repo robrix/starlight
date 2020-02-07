@@ -191,7 +191,7 @@
   - ✅ system scale has to be undone for many calculations
   - ✅ magnitudes are half what they should be
   - gravity is weirdly, stupidly weak; 46x?
-  - the starfield looks pretty terrible; choppy/pixelated, especially as you get further from the sun; FP precision
+  - ✅ the starfield looks pretty terrible; choppy/pixelated, especially as you get further from the sun; FP precision
   - ✅ radar blip size is wrong when close to large bodies
   - ✅ ships are visible on system radar at their unscaled size
   - ✅ the mouse cursor should not be visible unless we can actually click on things
