@@ -183,7 +183,7 @@
   - ✅ Major/minor bodies’ codes can collide
   - ✅ Glyph metrics should be integral
   - ✅ Fullscreen is really low frame rate but doesn’t measure as such?
-    - This appears to have been fixed, probably by -fexternal-interpreter
+    - This appears to have been fixed, probably by ~~`-fexternal-interpreter`~~ using the threaded RTS
   - ✅ Window vs. device coords is extremely confusing
   - ✅ drawing is slow
   - ✅ units are easy to mix up
