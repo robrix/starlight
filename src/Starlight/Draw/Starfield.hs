@@ -122,7 +122,6 @@ shader = program $ \ U{ resolution, focus, zoom }
         a += abs (get pa - prev)
         i += 1
       a .= get a ** 3
-      v += vec3 [get fade]
       v += vec3 [get s, get s ** 2, get s ** 3] D.^* get a D.^* brightness D.^* get fade
       fade *= distfading
       s += stepsize
