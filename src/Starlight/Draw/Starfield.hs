@@ -105,12 +105,12 @@ shader = program $ \ U{ resolution, focus, zoom }
     focus^^._xz *!= rot1
     focus^^._xy *!= rot2
     focus *= 10
-    s <- var "s" 0.1
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 [0]
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
-      p <- var "p" $ get focus + get dir D.^* get s
+      s <- let' "s" (0.1 * float (get r + 1))
+      p <- var "p" $ get focus + get dir D.^* s
       p .= abs (vec3 [tile] - (get p `mod'` vec3 [tile * 2]))
       pa <- var "pa" 0
       a <- var "a" 0
@@ -122,9 +122,8 @@ shader = program $ \ U{ resolution, focus, zoom }
         a += abs (get pa - prev)
         i += 1
       a .= get a ** 3
-      v += vec3 [get s, get s ** 2, get s ** 3] D.^* get a D.^* brightness D.^* get fade
+      v += vec3 [s, s ** 2, s ** 3] D.^* get a D.^* brightness D.^* get fade
       fade *= distfading
-      s += stepsize
       r += 1
     mag <- let' "mag" (norm (get v))
     v .= lerp saturation (vec3 [mag]) (get v)
@@ -133,7 +132,6 @@ shader = program $ \ U{ resolution, focus, zoom }
   iterations = 17
   formuparam = 0.53
   volsteps = 8
-  stepsize = 0.1
   tile = 1/1.61803398875
   brightness = 0.0015
   distfading = 0.73
