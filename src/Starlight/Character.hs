@@ -4,6 +4,7 @@
 -- | Characters are player or non-player characters.
 module Starlight.Character
 ( Character(..)
+, name_
 , target_
 , actions_
 , ship_
@@ -18,6 +19,7 @@ module Starlight.Character
 import Control.Lens (Lens')
 import Data.Generics.Product.Fields
 import Data.Set (Set)
+import Data.Text (Text)
 import GHC.Generics (Generic)
 import Starlight.Actor (Actor, HasActor(..))
 import Starlight.Identifier
@@ -25,7 +27,8 @@ import Starlight.Ship
 import UI.Colour
 
 data Character = Character
-  { actor   :: !Actor
+  { name    :: !Text
+  , actor   :: !Actor
   , target  :: !(Maybe Identifier)
   , actions :: !(Set Action)
   , ship    :: !Ship
@@ -37,6 +40,9 @@ instance HasActor Character where
 
 instance HasColour Character where
   colour_ = ship_.colour_
+
+name_ :: Lens' Character Text
+name_ = field @"name"
 
 target_ :: Lens' Character (Maybe Identifier)
 target_ = field @"target"

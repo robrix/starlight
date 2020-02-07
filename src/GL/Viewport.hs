@@ -3,7 +3,6 @@ module GL.Viewport
 , max_
 , viewport
 , scissor
-, Bounding(..)
 ) where
 
 import Control.Monad.IO.Class.Lift

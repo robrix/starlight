@@ -15,11 +15,12 @@ module Control.Carrier.Trace.Lift
 import Control.Algebra
 import Control.Effect.Lift
 import Control.Effect.Trace
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import System.IO
 
 newtype TraceC m a = TraceC { runTrace :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Trace :+: sig) (TraceC m) where
   alg = \case

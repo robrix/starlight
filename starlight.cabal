@@ -14,6 +14,9 @@ copyright:           Rob Rix
 build-type:          Simple
 extra-source-files:  README.md
 
+data-files:
+  ephemerides/ephemerides.db
+
 common common
   default-language: Haskell2010
   ghc-options:
@@ -47,10 +50,12 @@ library
     Control.Carrier.Trace.Lift
     Control.Concurrent.Lift
     Control.Effect.Finally
+    Control.Effect.Labelled
     Control.Effect.Lens.Exts
     Control.Effect.Thread
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
+    Data.Flag
     Data.Functor.I
     Data.Functor.Interval
     Data.Functor.K
@@ -99,9 +104,9 @@ library
     Starlight.Draw.Ship
     Starlight.Draw.Starfield
     Starlight.Draw.Weapon.Laser
-    Starlight.Ephemeris
     Starlight.Game
     Starlight.Identifier
+    Starlight.Integration
     Starlight.Input
     Starlight.Main
     Starlight.Physics
@@ -113,6 +118,13 @@ library
     Starlight.UI
     Starlight.View
     Starlight.Weapon.Laser
+    Stochastic.Distribution
+    Stochastic.Histogram
+    Stochastic.PDF
+    Stochastic.Sample.Markov
+    Stochastic.Sample.Metropolis
+    Stochastic.Sample.Rejection
+    Stochastic.Sample.Slice
     UI.Colour
     UI.Context
     UI.Drawable
@@ -130,6 +142,8 @@ library
     Unit
     Unit.Algebra
     Unit.Angle
+    Unit.Count
+    Unit.Density.Number.Areal
     Unit.Force
     Unit.Length
     Unit.Mass
@@ -138,14 +152,18 @@ library
     Unit.Time
   other-modules:
     Paths_starlight
+  autogen-modules:
+    Paths_starlight
   build-depends:
       base
     , containers
+    , direct-sqlite ^>= 2.3
     , directory ^>= 1.3
     , filepath ^>= 1.4
     , fused-effects      ^>= 1
     , fused-effects-lens ^>= 1.2
     , fused-effects-profile
+    , fused-effects-random
     , generic-lens
     , gl
     , lens
@@ -154,8 +172,11 @@ library
     , optparse-applicative
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , random
     , sdl2 ^>= 2.5
+    , splitmix
     , stm ^>= 2.5
+    , terminal-size
     , text
     , time ^>= 1.9
     , transformers ^>= 0.5

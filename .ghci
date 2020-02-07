@@ -1,1 +1,5 @@
+-- Disable the ghci sandbox so we can run the SDL thread
 :set -fno-ghci-sandbox
+
+-- Disable breaking on error since it hangs on uncaught exceptions when the sandbox is disabled: https://gitlab.haskell.org/ghc/ghc/issues/17743
+:set -fno-break-on-error

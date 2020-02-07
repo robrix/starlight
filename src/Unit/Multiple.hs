@@ -3,11 +3,11 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Unit.Multiple
 ( -- * Prefixes
@@ -34,14 +34,15 @@ import Linear.Conjugate
 import Linear.Epsilon
 import Linear.Metric
 import Linear.Vector
+import System.Random (Random)
 import Unit
 
 -- * Prefixes
 
 newtype Mult (n :: Nat) (d :: Nat) (s :: Symbol) u a = Mult { getMult :: u a }
- deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+ deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
 
-instance (KnownNat n, KnownNat d, KnownSymbol s, Unit dimu u) => Unit dimu (Mult n d s u) where
+instance (KnownNat n, KnownNat d, KnownSymbol s, Unit du u) => Unit du (Mult n d s u) where
   prj = prj . getMult
 
   factor = fromIntegral (natVal (Proxy @n)) / fromIntegral (natVal (Proxy @d))
@@ -52,36 +53,36 @@ instance (KnownNat n, KnownNat d, KnownSymbol s, Unit dimu u) => Unit dimu (Mult
 -- ** Submultiples
 
 newtype Pico u a = Pico { getPico :: u a }
-  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Unit dim) via Mult 1 1_000_000_000_000 "p" u
+  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit d) via Mult 1 1_000_000_000_000 "p" u
 
 newtype Nano u a = Nano { getNano :: u a }
-  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Unit dim) via Mult 1 1_000_000_000 "n" u
+  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit d) via Mult 1 1_000_000_000 "n" u
 
 newtype Micro u a = Micro { getMicro :: u a }
-  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Unit dim) via Mult 1 1_000_000 "μ" u
+  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit d) via Mult 1 1_000_000 "μ" u
 
 newtype Milli u a = Milli { getMilli :: u a }
-  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Unit dim) via Mult 1 1_000 "m" u
+  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit d) via Mult 1 1_000 "m" u
 
 
 -- ** Multiples
 
 newtype Kilo u a = Kilo { getKilo :: u a }
-  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Unit dim) via Mult 1_000 1 "k" u
+  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit d) via Mult 1_000 1 "k" u
 
 newtype Mega u a = Mega { getMega :: u a }
-  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Unit dim) via Mult 1_000_000 1 "M" u
+  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit d) via Mult 1_000_000 1 "M" u
 
 newtype Giga u a = Giga { getGiga :: u a }
-  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Unit dim) via Mult 1_000_000_000 1 "G" u
+  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit d) via Mult 1_000_000_000 1 "G" u
 
 newtype Tera u a = Tera { getTera :: u a }
-  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Unit dim) via Mult 1_000_000_000_000 1 "T" u
+  deriving (Additive, Applicative, Column, Conjugate, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Metric, Monad, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Unit d) via Mult 1_000_000_000_000 1 "T" u

@@ -1,5 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -9,14 +11,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 module Starlight.Body
 ( StateVectors(..)
+, body_
 , toBodySpace
+, Revolution(..)
 , Body(..)
+, radius_
+, population_
 , BodyUnits(..)
-, Orbit(..)
-, rotationTimeScale
 , actorAt
 , systemAt
 , j2000
@@ -28,16 +33,23 @@ module Starlight.Body
 import           Control.Carrier.Reader
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Control.Lens (Iso, coerced, iso, (%~), (&), (^.))
+import           Control.Lens (Lens', coerced, (%~), (&), (^.))
+import           Data.Functor.I
+import           Data.Functor.K
 import           Data.Generics.Product.Fields
 import qualified Data.Map as Map
 import           Data.Time.Clock (UTCTime)
 import           Data.Time.Format.ISO8601
+import           Foreign.Storable
 import           Geometry.Transform
-import           GHC.Generics
+import           GHC.Generics (Generic)
+import           GL.Type as GL
+import           GL.Uniform
+import           Linear.Conjugate
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Identifier
+import           Starlight.Physics
 import           Starlight.System
 import           Starlight.Time
 import           UI.Colour
@@ -49,7 +61,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform Double (Mega Metres) (Mega Metres))
+  , transform :: !(Transform Double Distance Distance)
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -58,92 +70,101 @@ instance HasActor StateVectors where
   actor_ = field @"actor"
 
 instance HasColour StateVectors where
-  colour_ = field @"body".colour_
+  colour_ = body_.colour_
 
-toBodySpace :: StateVectors -> Transform Double (Mega Metres) BodyUnits
-toBodySpace v = mkScale (pure @V3 (prj (convert @_ @(Mega Metres) (radius (body v))))) >>> mkRotation (rotation (actor v))
+body_ :: Lens' StateVectors Body
+body_ = field @"body"
+
+toBodySpace :: StateVectors -> Transform Double Distance BodyUnits
+toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (actor v^.rotation_)
+
+data Revolution = Revolution
+  { orientation :: !(Quaternion (I Double))
+  , period      :: !(Seconds Double)
+  }
+  deriving (Generic, Show)
 
 data Body = Body
-  { radius      :: !(Kilo Metres Double)
-  , mass        :: !(Kilo Grams Double)
-  , orientation :: !(Quaternion Double) -- relative to orbit
-  , period      :: !(Seconds Double)    -- sidereal rotation period
-  , colour      :: !(Colour Float)
-  , orbit       :: !Orbit
+  { population      :: !Int
+  , radius          :: !(Kilo Metres Double)
+  , mass            :: !(Kilo Grams Double)
+  , rotation        :: !Revolution           -- axial tilt & sidereal rotation period
+  , eccentricity    :: !(I Double)
+  , semimajor       :: !(Kilo Metres Double)
+  , revolution      :: !Revolution           -- relative to ecliptic
+  , timeOfPeriapsis :: !(Seconds Double)     -- relative to epoch
+  , colour          :: !(Colour Float)
   }
   deriving (Generic, Show)
 
 instance HasColour Body where
   colour_ = field @"colour"
 
+radius_ :: Lens' Body (Kilo Metres Double)
+radius_ = field @"radius"
+
+population_ :: Lens' Body Int
+population_ = field @"population"
+
 newtype BodyUnits a = BodyUnits { getBodyUnits :: a }
-  deriving (Eq, Fractional, Num, Ord)
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
 
-data Orbit = Orbit
-  { eccentricity    :: !Double
-  , semimajor       :: !(Kilo Metres Double)
-  , orientation     :: !(Quaternion Double) -- relative to ecliptic
-  , period          :: !(Seconds Double)
-  , timeOfPeriapsis :: !(Seconds Double)    -- relative to epoch
-  }
-  deriving (Show)
+instance Unit Length BodyUnits where
+  suffix = K ("body"++)
 
 
-rotationTimeScale :: Num a => Seconds a
+rotationTimeScale :: Num a => I a
 rotationTimeScale = 1
 
-orbitTimeScale :: Num a => Seconds a
+orbitTimeScale :: Num a => I a
 orbitTimeScale = 1
 
 
 actorAt :: Body -> Seconds Double -> Actor
-actorAt Body{ orientation = axis, radius, mass, period = rot, orbit = Orbit{ eccentricity, semimajor, period, timeOfPeriapsis, orientation } } t = Actor
-  { position
-  , velocity = if r == 0 || p == 0 then 0 else (./. Seconds 1) <$> position ^* h ^* pure eccentricity ^/ (r * p) ^* pure (prj (sin trueAnomaly))
+actorAt Body{ radius, mass, rotation, eccentricity, semimajor, revolution, timeOfPeriapsis } t = Actor
+  { position = convert <$> cartesian2 trueAnomaly r
+  , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU @(Length :^: 2 :/: Time) (mu .*. semimajor) ./. r .*. coord) <$> V2 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly)
   , rotation
-    = orientation
-    * axis
-    * axisAngle (unit _z) (getSeconds (t * rotationTimeScale / rot))
+    = orientation revolution
+    * orientation rotation
+    * axisAngle (unit _z) (t .*. rotationTimeScale ./. period rotation)
   , mass
   , magnitude = convert radius * 2
   } where
-  position = ext (cartesian2 (pure <$> trueAnomaly) r) 0
-  t' = timeOfPeriapsis + t * orbitTimeScale
-  meanAnomaly = getSeconds (meanMotion * t')
-  meanMotion = (2 * pi) / period
-  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity * sin ea) meanAnomaly where
+  t' :: Seconds Double
+  t' = timeOfPeriapsis + t .*. orbitTimeScale
+  meanAnomaly :: I Double
+  meanAnomaly = meanMotion .*. t'
+  meanMotion :: (I :/: Seconds) Double
+  meanMotion = I (2 * pi) ./. period revolution
+  eccentricAnomaly :: I Double
+  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity .*. sin ea) meanAnomaly where
     iter n f = go n where
       go n a
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
-  trueAnomaly :: Radians Double
-  trueAnomaly = Radians (atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity))
-  r :: Mega Metres Double
-  r = convert semimajor ^* (1 - eccentricity * cos eccentricAnomaly)
-  -- extremely dubious
-  mu = 398600.5
-  p = convert semimajor ^* (1 - eccentricity ** 2)
-  h = sqrt ((1 - (eccentricity ** 2)) *^ convert semimajor * mu)
-  -- hr = h/r
+  trueAnomaly :: I Double
+  trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
+  r :: Kilo Metres Double
+  r = semimajor .*. (1 - eccentricity * cos eccentricAnomaly)
+  mu :: (Kilo Metres :^: 3 :/: Seconds :^: 2) Double
+  mu = convert $ gravC .*. mass
 
 
 systemAt :: System Body -> Seconds Double -> System StateVectors
 systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
-  go identifier body@Body{ orbit = Orbit{ orientation } } = StateVectors
+  go identifier body@Body{ revolution } = StateVectors
     { body
-    , transform = rel >>> mkTranslation (prj <$> position actor)
+    , transform = rel >>> mkTranslation (position actor)
     , actor = actor
-      & position_.coerced.extended 1 %~ apply rel
-      & velocity_.coerced.extended 0 %~ apply rel
+      & position_.extended 0.extended 1 %~ apply rel
+      & velocity_.coerced.extended 0.extended 0 %~ apply rel
     } where
     actor = actorAt body t
     rel = maybe rot ((>>> rot) . transform) (parent identifier >>= (bodies' Map.!?))
-    rot = mkRotation orientation
-
--- | Subject to the invariant that w=1.
-extended :: a -> Iso (V3 a) (V3 b) (V4 a) (V4 b)
-extended a = iso (`ext` a) (^. _xyz)
+    rot = mkRotation (orientation revolution)
 
 
 j2000 :: MonadFail m => m Epoch

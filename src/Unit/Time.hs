@@ -1,51 +1,75 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Unit.Time
 ( Time
 , Seconds(..)
-, fromDays
-, fromHours
-, fromMinutes
-, Minutes
-, Hours
+, Minutes(..)
+, Hours(..)
+, Days(..)
 , module Unit
+, module Unit.Algebra
 , module Unit.Multiple
 ) where
 
 import Data.Functor.I
 import Data.Functor.K
 import Foreign.Storable
+import GHC.TypeLits
 import GL.Type as GL
 import GL.Uniform
 import Linear.Conjugate
 import Linear.Epsilon
 import Linear.Metric
 import Linear.Vector
+import System.Random (Random)
 import Unit
+import Unit.Algebra
 import Unit.Multiple
 
 data Time a
 
+instance Dimension Time
+instance (Unit Time u, KnownNat n) => Pow Time (Time :^: n) u n (u :^: n)
+
+
 newtype Seconds a = Seconds { getSeconds :: a }
-  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Time Seconds where
   suffix = K ('s':)
 
--- | Convert days to 'Seconds'. Note that this does not take e.g. leap seconds into account.
-fromDays :: Num a => a -> Seconds a
-fromDays d = fromHours (d * 24)
 
-fromHours :: Num a => a -> Seconds a
-fromHours h = fromMinutes (h * 60)
+newtype Minutes a = Minutes { getMinutes :: a }
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
 
-fromMinutes :: Num a => a -> Seconds a
-fromMinutes m = Seconds (m * 60)
+instance Unit Time Minutes where
+  factor = K 60
+  suffix = K ("min"++)
 
-type Minutes = Mult 60 1 "min" Seconds
 
-type Hours = Mult 3600 1 "h" Seconds
+newtype Hours a = Hours { getHours :: a }
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
+instance Unit Time Hours where
+  factor = K 3600
+  suffix = K ("h"++)
+
+
+newtype Days a = Days { getDays :: a }
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
+-- | Note that this does not take e.g. leap seconds into account.
+instance Unit Time Days where
+  factor = K 86400
+  suffix = K ("d"++)

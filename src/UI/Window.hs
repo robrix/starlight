@@ -2,6 +2,8 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 module UI.Window
 ( Pixels(..)
 , swap
@@ -23,6 +25,7 @@ import           Control.Monad ((<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Fixed (div')
 import           Data.Functor.I
+import           Data.Functor.K
 import           Data.Text (Text)
 import           Foreign.Storable
 import           GL.Type as GL
@@ -30,10 +33,17 @@ import           GL.Uniform
 import           Linear.V2 as Linear
 import           Linear.V4 as Linear
 import           SDL
+import           System.Random (Random)
+import           Unit.Length
 
+-- FIXME: can we embed the ratio into this? maybe at the type level?
 newtype Pixels a = Pixels { getPixels :: a }
-  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
+
+instance Unit Length Pixels where
+  suffix = K ("wpx"++)
+
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
 swap = ask >>= runLiftIO . glSwapWindow
@@ -73,6 +83,7 @@ runWindow name size = E.bracket
     , windowGraphicsContext = OpenGLContext glConfig
     , windowHighDPI         = True
     , windowMode            = FullscreenDesktop
+    , windowInputGrabbed    = True
     }
   glConfig = defaultOpenGL
     { glProfile        = Core Normal 4 1

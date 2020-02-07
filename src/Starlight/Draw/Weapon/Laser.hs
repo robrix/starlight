@@ -29,10 +29,10 @@ import           GL.Effect.Check
 import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _z)
 import qualified GL.Shader.DSL as D
 import           Starlight.Actor
+import           Starlight.Physics
 import           Starlight.View
 import qualified Starlight.Weapon.Laser as S
 import qualified UI.Drawable as UI
-import           Unit.Length
 
 run
   :: ( Has Check sig m
@@ -84,14 +84,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform Float ClipUnits (Mega Metres))
+  { matrix :: v (Transform Float ClipUnits Distance)
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits (Mega Metres)))
+matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Distance))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))

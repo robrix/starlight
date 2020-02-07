@@ -3,19 +3,18 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Unit
 ( -- * Units
   Unit(..)
+  -- ** Conversion
 , convert
-, convertFrom
-, convertTo
 , converting
-, convertingFrom
-, convertingTo
   -- ** Comparison
 , (.==.)
 , compareU
@@ -29,6 +28,7 @@ module Unit
 , formatDec
 , formatExp
 , formatExpR
+, superscript
 ) where
 
 import Control.Lens.Iso
@@ -43,12 +43,21 @@ import Numeric
 
 -- * Units
 
-class Applicative u => Unit (dim :: * -> *) u | u -> dim where
+class ( Applicative u
+      , forall a b . Coercible a b => Coercible (u a) (u b)
+      , forall a . Eq a => Eq (u a)
+      , forall a . Floating a => Floating (u a)
+      , forall a . Fractional a => Fractional (u a)
+      , forall a . Num a => Num (u a)
+      , forall a . Ord a => Ord (u a)
+      , forall a . Real a => Real (u a)
+      )
+   => Unit (dim :: * -> *) u | u -> dim where
   prj :: u a -> a
   default prj :: Coercible (u a) a => u a -> a
   prj = coerce
 
-  factor :: Fractional a => K a (u a)
+  factor :: Floating a => K a (u a)
   factor = 1
 
   suffix :: K ShowS (u a)
@@ -59,51 +68,42 @@ instance Unit I I where
 instance Unit Identity Identity where
   suffix = K (showChar '1')
 
-convert :: forall u u' a dim . (Unit dim u, Unit dim u', Fractional a) => u a -> u' a
+
+-- ** Conversion
+
+convert :: forall u u' d a . (Unit d u, Unit d u', Floating a) => u a -> u' a
 convert = pure . (/ getK (factor @_ @u')) . (* getK (factor @_ @u)) . prj
 
-convertFrom :: (Unit dim u, Unit dim u', Fractional a) => (forall a . a -> u a) -> u a -> u' a
-convertFrom _ = convert
-
-convertTo :: (Unit dim u, Unit dim u', Fractional a) => (forall a . a -> u' a) -> u a -> u' a
-convertTo _ = convert
-
-converting :: forall u u' a b dim . (Unit dim u, Unit dim u', Fractional a, Fractional b) => Iso (u a) (u b) (u' a) (u' b)
+converting :: forall u u' d a b . (Unit d u, Unit d u', Floating a, Floating b) => Iso (u a) (u b) (u' a) (u' b)
 converting = iso convert convert
-
-convertingFrom :: (Unit dim u, Unit dim u', Fractional a, Fractional b) => (forall a . a -> u a) -> Iso (u a) (u b) (u' a) (u' b)
-convertingFrom _ = converting
-
-convertingTo :: (Unit dim u, Unit dim u', Fractional a, Fractional b) => (forall a . a -> u' a) -> Iso (u a) (u b) (u' a) (u' b)
-convertingTo _ = converting
 
 
 -- ** Comparison
 
-(.==.) :: forall u u' a dim . (Unit dim u, Unit dim u', Eq a, Fractional a) => u a -> u' a -> Bool
+(.==.) :: forall u u' d a . (Unit d u, Unit d u', Eq a, Floating a) => u a -> u' a -> Bool
 a .==. b = prj a == prj (convert @u' @u b)
 
 infix 4 .==.
 
-compareU :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Ordering
+compareU :: forall u u' d a . (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Ordering
 compareU a b = prj a `compare` prj (convert @u' @u b)
 
-(.<.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+(.<.) :: (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Bool
 a .<. b = a `compareU` b == LT
 
 infix 4 .<.
 
-(.>.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+(.>.) :: (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Bool
 a .>. b = a `compareU` b == GT
 
 infix 4 .>.
 
-(.<=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+(.<=.) :: (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Bool
 a .<=. b = a `compareU` b /= GT
 
 infix 4 .<=.
 
-(.>=.) :: forall u u' a dim . (Unit dim u, Unit dim u', Ord a, Fractional a) => u a -> u' a -> Bool
+(.>=.) :: (Unit d u, Unit d u', Ord a, Floating a) => u a -> u' a -> Bool
 a .>=. b = a `compareU` b /= LT
 
 infix 4 .>=.
@@ -111,26 +111,26 @@ infix 4 .>=.
 
 -- ** Formatting
 
-formatWith :: Unit dim u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
+formatWith :: forall u d a . Unit d u => (Maybe Int -> u a -> ShowS) -> Maybe Int -> u a -> String
 formatWith with n u = with n u (showChar ' ' (getK (suffix `asTypeOf` (u <$ K ('x':))) ""))
 
-format :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+format :: forall u d a . (Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
 format = formatWith showGFloat
 
-formatDec :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatDec :: forall u d a . (Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatDec = formatWith showFFloat
 
-formatExp :: (Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExp :: forall u d a . (Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
 
-formatExpR :: (HasCallStack, Unit dim u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExpR :: forall u d a . (HasCallStack, Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExpR = formatWith (\ prec x -> if
   | isNaN x                   -> showString "NaN"
   | isInfinite x              -> showString $ if x < 0 then "-Infinity" else "Infinity"
   | x < 0 || isNegativeZero x -> showChar '-' . go prec (floatToDigits 10 (-x))
   | otherwise                 -> go prec (floatToDigits 10 x)) where
   go _    ([0], _) = showString "10⁰·0"
-  go prec (is,  e) = showString "10" . digits (e - 1) . showChar '·' . showDigits (take 1 is) . showChar '.' . showDigits (maybe id (fmap roundingLast . take . (+1)) prec (drop 1 is))
+  go prec (is,  e) = showString "10" . superscript (e - 1) . showChar '·' . showDigits (take 1 is) . showChar '.' . showDigits (maybe id (fmap roundingLast . take . (+1)) prec (drop 1 is))
   showDigits = foldr ((.) . showChar . intToDigit) id
 
   roundingLast is
@@ -139,11 +139,12 @@ formatExpR = formatWith (\ prec x -> if
     , il <- last is' = init is' ++ [ if last is >= 5 then il + 1 else il ]
     | otherwise      = is
 
-  digits i
-    | signum i /= -1 = go id i
-    | otherwise      = ('⁻':) . go id (abs i) where
-    go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
-           | otherwise = (supAt n:) . s
+superscript :: HasCallStack => Int -> ShowS
+superscript i
+  | signum i /= -1 = go id i
+  | otherwise      = ('⁻':) . go id (abs i) where
+  go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
+          | otherwise = (supAt n:) . s
   supAt i
     | inRange (0, 9) i = sup !! i
     | otherwise        = error $ "digit " <> show i <> " out of bounds (0, 9)"

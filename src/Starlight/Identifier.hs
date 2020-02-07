@@ -27,14 +27,14 @@ data Identifier
 
 describeIdentifier :: Identifier -> String
 describeIdentifier = \case
-  B      i  -> showLeaf (getLeaf i) where
+  B         i  -> showLeaf (getLeaf i) where
     showLeaf (code, name) = show code <> " " <> unpack name
-  C (NPC i) -> show i
-  C Player  -> "player"
+  C (NPC    i) -> unpack (snd i)
+  C (Player i) -> "player " <> unpack (snd i)
 
 data CharacterIdentifier
-  = Player
-  | NPC Int
+  = Player (Code, Name)
+  | NPC (Code, Name)
   deriving (Eq, Ord, Show)
 
 data BodyIdentifier

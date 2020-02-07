@@ -30,7 +30,6 @@ import           GL.Array
 import           GL.Effect.Check
 import           GL.Shader.DSL hiding (coerce, norm, (!*), (!*!))
 import qualified GL.Shader.DSL as D
-import           Linear.Exts
 import           Prelude hiding (break)
 import qualified Starlight.Body as Body
 import           Starlight.View
@@ -71,7 +70,7 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 vertices :: [V I]
-vertices = coerce @[V4 Double] . map (`ext` V2 0 (1 :: Double)) $ circle 1 128
+vertices = coerce @[V2 (I Double)] $ circle 1 128
 
 range :: Interval I Int
 range = Interval 0 (I (length vertices))
@@ -86,7 +85,7 @@ shader = program $ \ u
       [ (Just 1, m *= dmat4 [dvec4 [1, 0, 0, 0], dvec4 [0, cos90, -1, 0], dvec4 [0, 1, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
       , (Just 2, m *= dmat4 [dvec4 [cos90, 0, 1, 0], dvec4 [0, 1, 0, 0], dvec4 [-1, 0, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
       ]
-    gl_Position .= vec4 [get m D.!* pos])
+    gl_Position .= vec4 [get m D.!* dext4 (dext3 pos 0) 1])
 
   >>> fragment (\ D.None Frag{ fragColour } -> main $
     fragColour .= colour u)
@@ -107,7 +106,7 @@ colour_ :: Lens' (U v) (v (Colour Float))
 colour_ = field @"colour"
 
 
-newtype V v = V { pos :: v (V4 Double) }
+newtype V v = V { pos :: v (V2 Double) }
   deriving (Generic)
 
 instance D.Vars V

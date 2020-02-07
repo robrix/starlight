@@ -13,11 +13,12 @@ module GL.Carrier.Check.Identity
 ) where
 
 import Control.Algebra
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import GL.Effect.Check
 
 newtype CheckC m a = CheckC { runCheck :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Algebra sig m => Algebra (Check :+: sig) (CheckC m) where
   alg = \case

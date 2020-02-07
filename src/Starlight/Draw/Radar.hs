@@ -9,6 +9,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.Draw.Radar
 ( draw
 , Starlight.Draw.Radar.run
@@ -27,7 +28,8 @@ import           Data.Foldable (for_, toList)
 import           Data.Functor.I
 import           Data.Functor.Interval
 import           Data.Generics.Product.Fields
-import           Data.List (elemIndex, sortOn)
+import           Data.List (findIndex, sortOn)
+import qualified Data.Map as Map
 import           Data.Ord (Down(..))
 import           Foreign.Storable (Storable(..))
 import           GHC.Generics (Generic)
@@ -43,12 +45,14 @@ import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
 import qualified Starlight.Body as B
 import           Starlight.Character
+import           Starlight.Identifier (CharacterIdentifier(..), Identifier(..))
+import           Starlight.Physics
 import           Starlight.System
 import           Starlight.View
 import           UI.Colour
 import qualified UI.Window as Window
+import           Unit.Algebra
 import           Unit.Angle
-import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -61,9 +65,10 @@ draw
   => m ()
 draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindArray array . B.bindBuffer buffer $ do
   system@System{ bodies } <- ask @(System B.StateVectors)
-  view@View{ scale, focus = here } <- ask
+  view@View{ shipScale, focus = here } <- ask
   let npcs     = system^.npcs_
-      blips    = sortOn (Down . qd here . (^.position_._xy)) (map (blipFor (1/scale)) (toList npcs) <> map (blipFor 1) (toList bodies))
+      -- FIXME: this is a lot of poorly motivated faffing about to get the units lined up just so we can multiply the magnitude by the scale
+      blips    = sortOn (Down . qd here . (^.position_._xy)) (map (uncurry (blipFor shipScale . C . NPC)) (Map.toList npcs)) <> map (uncurry (blipFor 1 . B)) (Map.toList bodies)
       vertices = verticesForBlips blips
       vars     = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
@@ -86,7 +91,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
     put vars
 
     measure "targets" $
-      for_ (system^.player_.target_ >>= (`elemIndex` drop 1 (identifiers system))) $ \ index ->
+      for_ (system^.player_.target_ >>= (`findIndex` blips) . (. identifier) . (==)) $ \ index ->
         drawArrays Points (Interval (I index) (I index + 1))
 
 run :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
@@ -105,7 +110,12 @@ data Drawable = Drawable
   }
 
 
-data Blip = Blip { scale :: Double, actor :: Actor, colour :: Colour Float }
+data Blip = Blip
+  { scale      :: I Double
+  , identifier :: Identifier
+  , actor      :: Actor
+  , colour     :: Colour Float
+  }
   deriving (Generic)
 
 instance HasActor Blip where
@@ -114,30 +124,28 @@ instance HasActor Blip where
 instance HasColour Blip where
   colour_ = field @"colour"
 
-blipFor :: (HasActor t, HasColour t) => Double -> t -> Blip
-blipFor scale t = Blip{ scale, actor = t^.actor_, colour = t^.colour_ }
+blipFor :: (HasActor t, HasColour t) => I Double -> Identifier -> t -> Blip
+blipFor scale identifier t = Blip{ scale, identifier, actor = t^.actor_, colour = t^.colour_ }
 
 -- FIXME: take ship profile into account
 verticesForBlips :: Foldable t => t Blip -> [V I]
 verticesForBlips bs =
-  [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_ ^* scale), colour = I (b^.colour_) }
+  [ V{ there = I (b^.position_._xy), r = I (b^.magnitude_ .*. scale * 0.5), colour = I (b^.colour_) }
   | b@Blip{ scale } <- toList bs
   ]
 
 
 vertex' :: U (Expr 'Vertex) -> Stage V IG
-vertex' u = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
-  there <- let' "there" (D.coerce (there - here u))
+vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
+  there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
-  dir   <- let' "dir"   (there D.^* (1/d))
-  let perp v = dvec2 [negate (v D.^.D._y), v D.^.D._x]
-      angleOf vec = D.coerce $ atan2' (vec D.^.D._y) (vec D.^.D._x)
-      wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-  edge  <- let' "edge"  (perp dir D.^* D.coerce r D.^* 0.5 + there)
+  let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
   angle <- let' "angle" (angleOf (vec2 [there]))
-  radius <- let' "radius" (D.min' ((\ U{ scale } -> scale) u * float d) radius)
+  radius <- let' "radius" (D.min' (scale * float d) radius)
   minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
-  sweep .= (minSweep `D.max'` abs (wrap (-pi) pi (angleOf (vec2 [edge]) - angle)))
+  iff (r `gt` d)
+    (sweep .= pi/2)
+    (sweep .= (minSweep `D.max'` abs (D.coerce (asin (float (r/d))))))
   pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
   colour2 .= colour
   gl_Position .= ext4 (ext3 pos 0) 1) where
@@ -201,7 +209,7 @@ targetShader = program $ \ u
 
 data U v = U
   { matrix :: v (Transform Float ClipUnits Window.Pixels)
-  , here   :: v (V2 (Mega Metres Double))
+  , here   :: v (V2 (Distance Double))
   , scale  :: v Float
   }
   deriving (Generic)
@@ -211,7 +219,7 @@ instance Vars U
 matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Window.Pixels))
 matrix_ = field @"matrix"
 
-here_ :: Lens' (U v) (v (V2 (Mega Metres Double)))
+here_ :: Lens' (U v) (v (V2 (Distance Double)))
 here_ = field @"here"
 
 scale_ :: Lens' (U v) (v Float)
@@ -233,8 +241,8 @@ instance Vars IF
 
 
 data V v = V
-  { there  :: v (V2 (Mega Metres Double)) -- location of object
-  , r      :: v (Mega Metres Double)      -- radius of object
+  { there  :: v (V2 (Distance Double)) -- location of object
+  , r      :: v (Distance Double)      -- radius of object
   , colour :: v (Colour Float)
   }
   deriving (Generic)

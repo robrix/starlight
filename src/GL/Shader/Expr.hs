@@ -64,6 +64,8 @@ module GL.Shader.Expr
 , (!!*)
 , (!*!)
 -- ** General operations
+, log2
+, exp2
 , lerp
 , lerp2
 , dFdx
@@ -183,6 +185,7 @@ data Expr (k :: Type) a where
 
   (:/) :: Expr k a -> Expr k a -> Expr k a
 
+  Fn :: String -> [Expr k a] -> Expr k b
   Exp :: Expr k a -> Expr k a
   Log :: Expr k a -> Expr k a
   Sqrt :: Expr k a -> Expr k a
@@ -366,6 +369,12 @@ infixl 7 !!*
 infixl 7 !*!
 
 
+log2 :: Expr k a -> Expr k a
+log2 a = Fn "log2" [a]
+
+exp2 :: Expr k a -> Expr k a
+exp2 a = Fn "exp2" [a]
+
 lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
 lerp = Lerp
 
@@ -430,10 +439,11 @@ renderExpr = \case
   a :* b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a :- b -> parens $ renderExpr a <+> pretty '-' <+> renderExpr b
   a :/ b -> parens $ renderExpr a <+> pretty '/' <+> renderExpr b
-  Signum a -> fn "signum" [renderExpr a] -- log
+  Signum a -> fn "sign" [renderExpr a]
   Negate a -> parens $ pretty "-" <> renderExpr a
   Abs a -> fn "abs" [renderExpr a]
   FromInteger i -> pretty i
+  Fn s as -> fn s (map renderExpr as)
   Exp a -> fn "exp" [renderExpr a]
   Log a -> fn "log" [renderExpr a]
   Sqrt a -> fn "sqrt" [renderExpr a]

@@ -2,12 +2,13 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 module Unit.Angle
 ( Angle
 , Radians(..)
-, fromDegrees
 , Degrees(..)
 , module Unit
+, module Unit.Algebra
 , module Unit.Multiple
 ) where
 
@@ -20,23 +21,26 @@ import Linear.Conjugate
 import Linear.Epsilon
 import Linear.Metric
 import Linear.Vector
+import System.Random (Random)
 import Unit
+import Unit.Algebra
 import Unit.Multiple
 
-data Angle a
+type Angle = I
+
 
 newtype Radians a = Radians { getRadians :: a }
-  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Angle Radians where suffix = K ("rad"++)
-
-fromDegrees :: Floating a => Degrees a -> Radians a
-fromDegrees (Degrees d) = Radians (d * pi / 180)
+instance Unit I Radians where
+  suffix = K ("rad"++)
 
 
 newtype Degrees a = Degrees { getDegrees :: a }
-  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
+  deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Angle Degrees where suffix = K ('°':)
+instance Unit I Degrees where
+  suffix = K ('°':)
+  factor = K (pi/180)

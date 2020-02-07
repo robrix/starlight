@@ -7,6 +7,8 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Starlight.Draw.Ship
 ( draw
 , Starlight.Draw.Ship.run
@@ -33,11 +35,12 @@ import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
 import           Starlight.Character
+import           Starlight.Physics
 import qualified Starlight.Ship as S
 import           Starlight.View
 import qualified UI.Colour as UI
 import qualified UI.Drawable as UI
-import           Unit.Length
+import           Unit.Algebra
 
 draw
   :: ( Has Check sig m
@@ -47,12 +50,13 @@ draw
      )
   => Character
   -> m ()
-draw Character{ actor = actor@Actor{ magnitude }, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
-  view@View{ scale } <- ask
+draw Character{ actor, ship = S.Ship{ colour, armour }, actions } = UI.using getDrawable $ do
+  view@View{ shipScale } <- ask
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
     >>> transformToActor actor
-    >>> mkScale (pure @V3 (prj magnitude * 0.5 / scale)))
+    >>> mkScale @_ @Distance (pure shipScale)
+    >>> mkScale (pure (actor^.magnitude_ ./. (1 :: Distance Double))))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
     & UI._a .~ realToFrac (armour^.min_.to getI / armour^.max_.to getI))
@@ -96,14 +100,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform Float ClipUnits (Mega Metres))
+  { matrix :: v (Transform Float ClipUnits Distance)
   , colour :: v (UI.Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits (Mega Metres)))
+matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Distance))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (UI.Colour Float))
