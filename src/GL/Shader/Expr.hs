@@ -74,6 +74,7 @@ module GL.Shader.Expr
 , max'
 , atan2'
 , texture
+, fract
 , coerce
   -- ** Comparison
 , eq
@@ -398,6 +399,9 @@ atan2' = Atan2
 
 texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 texture = Texture
+
+fract :: Expr k a -> Expr k a
+fract = Fn "fract" . pure
 
 
 coerce :: C.Coercible a b => Expr k a -> Expr k b
