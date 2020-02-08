@@ -134,7 +134,7 @@ shader = program $ \ U{ resolution, focus, zoom }
   volsteps = 8
   tile = 1/1.61803398875
   brightness = 0.0015
-  distfading = 0.73
+  distfading = 0.65
   saturation = 0.65
 
 
