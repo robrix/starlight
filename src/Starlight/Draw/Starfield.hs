@@ -110,7 +110,6 @@ shader = program $ \ U{ resolution, focus, zoom }
     v <- var "v" $ vec3 [0]
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
-      fade <- let' "fade" (0.5 * distfading ** float (get r))
       s <- let' "s" (0.1 * float (get r + 1))
       p <- var "p" $ focus + get dir D.^* s
       p .= abs (vec3 [tile] - (get p `mod'` vec3 [tile * 2]))
@@ -124,7 +123,7 @@ shader = program $ \ U{ resolution, focus, zoom }
         a += abs (get pa - prev)
         i += 1
       a .= get a ** 3
-      v += vec3 [s, s ** 2, s ** 3] D.^* get a D.^* brightness D.^* fade
+      v += vec3 [s, s ** 2, s ** 3] D.^* get a D.^* brightness D.^* (0.5 * distfading ** float (get r))
       r += 1
     mag <- let' "mag" (norm (get v))
     v .= lerp saturation (vec3 [mag]) (get v)
