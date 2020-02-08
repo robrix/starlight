@@ -93,7 +93,7 @@ shader = program $ \ U{ resolution, focus, zoom }
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var "focus" $ dext3 focus 1
     let wrap x = ((x + pi) `mod'` (pi * 2)) - pi
-    nf <- let' "nf" (float (0.1 / norm (get focus)))
+    nf <- let' "nf" (float (0.01 / norm (get focus)))
     a1 <- let' "a1" (wrap (0.3 + nf))
     cos_a1 <- let' "cos_a1" (cos a1)
     sin_a1 <- let' "sin_a1" (sin a1)
