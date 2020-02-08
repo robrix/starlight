@@ -47,7 +47,7 @@ instance Unit Length Pixels where
 
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
-swap = runLiftIO glFinish >> ask >>= runLiftIO . glSwapWindow
+swap = runLiftIO glFlush >> ask >>= runLiftIO . glSwapWindow
 
 poll :: Has (Lift IO) sig m => m (Maybe Event)
 poll = runLiftIO pollEvent
