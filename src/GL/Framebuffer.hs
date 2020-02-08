@@ -30,7 +30,7 @@ instance Bind Framebuffer where
   bind = checking . runLiftIO . glBindFramebuffer GL_FRAMEBUFFER . maybe 0 unFramebuffer
 
 
-data Attachment
+newtype Attachment
   = Colour Int
 
 instance GL.Enum Attachment where
