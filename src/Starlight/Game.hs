@@ -12,12 +12,12 @@ module Starlight.Game
 
 import           Control.Algebra
 import           Control.Carrier.Finally
+import           Control.Carrier.Profile.Tree
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.Reader
 import qualified Control.Carrier.State.STM.TVar as TVar
 import           Control.Carrier.State.Strict
 import           Control.Effect.Lens.Exts as Lens
-import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Exception.Lift
@@ -120,10 +120,11 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   target <- measure "label" Label.label
 
   start <- now
-  integration <- fork . evalState start . fix $ \ loop -> do
-    id <~> integration
-    yield
-    loop
+  integration <- fork . (>>= throwIO) . reportProfile . evalState start . fix $ \ loop -> do
+    err <- try @SomeException (id <~> integration)
+    case err of
+      Left err -> pure err
+      Right () -> yield >> loop
 
   enabled_ Blend            .= True
   enabled_ DepthClamp       .= True
