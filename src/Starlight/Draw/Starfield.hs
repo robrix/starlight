@@ -91,10 +91,9 @@ shader = program $ \ U{ resolution, focus, zoom }
     resolution <- let' @(V2 Float) "resolution" (D.coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
-    focus <- let' @(V3 Double) "focus" $ dext3 focus 1
+    focus <- var "focus" $ dext3 focus 1
     let wrap x = ((x + pi) `mod'` (pi * 2)) - pi
-    nf <- let' "nf" (float (0.1 / norm focus))
-    focus <- var "focus2" $ vec3 [ focus `mod'` dvec3 [tile * 2] ]
+    nf <- let' "nf" (float (0.1 / norm (get focus)))
     a1 <- let' "a1" (wrap (0.3 + nf))
     cos_a1 <- let' "cos_a1" (cos a1)
     sin_a1 <- let' "sin_a1" (sin a1)
@@ -105,15 +104,15 @@ shader = program $ \ U{ resolution, focus, zoom }
     rot2 <- let' "rot2" $ mat2 [vec2 [cos_a2, sin_a2], vec2 [-sin_a2, cos_a2]]
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
-    focus^^._xz *!= rot1
-    focus^^._xy *!= rot2
-    focus *= 10
+    focus^^._xz *!= dmat2 [rot1]
+    focus^^._xy *!= dmat2 [rot2]
+    focus <- let' "focus2" $ vec3 [ get focus `mod'` dvec3 [tile * 2] ] * 10
     fade <- var "fade" 0.5
     v <- var "v" $ vec3 [0]
     r <- var @Int "r" 0
     while (get r `lt` volsteps) $ do
       s <- let' "s" (0.1 * float (get r + 1))
-      p <- var "p" $ get focus + get dir D.^* s
+      p <- var "p" $ focus + get dir D.^* s
       p .= abs (vec3 [tile] - (get p `mod'` vec3 [tile * 2]))
       pa <- var "pa" 0
       a <- var "a" 0
