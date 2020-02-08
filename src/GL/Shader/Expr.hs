@@ -60,6 +60,7 @@ module GL.Shader.Expr
 , norm
 , dot
 , (^*)
+, (^/)
 , (!*)
 , (!!*)
 , (!*!)
@@ -206,6 +207,7 @@ data Expr (k :: Type) a where
 
   (:^.) :: Expr k a -> Prj a b -> Expr k b
   (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
+  (:^/) :: Expr k (v a) -> Expr k a -> Expr k (v a)
   (:!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
   (:!!*) :: Expr k (v (v a)) -> Expr k a -> Expr k (v (v a))
   (:!*!) :: Expr k (v (v a)) -> Expr k (v (v a)) -> Expr k (v (v a))
@@ -354,6 +356,11 @@ dot = Dot
 
 infixl 7 ^*
 
+(^/) :: Expr k (v a) -> Expr k a -> Expr k (v a)
+(^/) = (:^/)
+
+infixl 7 ^/
+
 (!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
 (!*) = (:!*)
 
@@ -466,6 +473,7 @@ renderExpr = \case
   ATanH a -> fn "atanh" [renderExpr a]
   a :^. Prj s -> renderExpr a <> pretty s
   a :^*  b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a :^/  b -> parens $ renderExpr a <+> pretty '/' <+> renderExpr b
   a :!*  b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a :!!*  b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a :!*! b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
