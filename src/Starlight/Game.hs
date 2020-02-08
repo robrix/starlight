@@ -20,6 +20,7 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Thread
 import           Control.Effect.Trace
+import           Control.Exception.Lift
 import           Control.Monad.IO.Class.Lift
 import           Data.Function (fix)
 import qualified Data.Map as Map
@@ -130,8 +131,8 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   enabled_ ProgramPointSize .= True
   enabled_ ScissorTest      .= True
 
-  runFrame . runReader UI{ fps, target, face } . fix $ \ loop -> do
+  (runFrame . runReader UI{ fps, target, face } . fix $ \ loop -> do
     measure "frame" frame
     measure "swap" Window.swap
-    loop
-  kill integration
+    loop)
+    `finally` kill integration
