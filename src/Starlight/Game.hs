@@ -116,7 +116,6 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
   measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-⁻⁰¹²³⁴⁵⁶⁷⁸⁹·" -- characters to preload
 
-  fps    <- measure "label" Label.label
   target <- measure "label" Label.label
 
   start <- now
@@ -132,7 +131,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   enabled_ ProgramPointSize .= True
   enabled_ ScissorTest      .= True
 
-  (runFrame . runReader UI{ fps, target, face } . fix $ \ loop -> do
+  (runFrame . runReader UI{ target, face } . fix $ \ loop -> do
     measure "frame" frame
     measure "swap" Window.swap
     loop)
