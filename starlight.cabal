@@ -41,6 +41,7 @@ library
   exposed-modules:
     Control.Carrier.Empty.Church
     Control.Carrier.Empty.CPS
+    Control.Carrier.Error.IO
     Control.Carrier.Finally
     Control.Carrier.Reader.Relation
     Control.Carrier.State.IORef
