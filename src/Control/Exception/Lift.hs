@@ -30,15 +30,11 @@ catch :: (E.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
 catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `E.catch` (run . (<$ ctx) . h)
 
 -- | See @"Control.Exception".'E.catches'@.
---
--- @since 1.0.0.0
 catches :: Has (Lift IO) sig m => m a -> [Handler m a] -> m a
 catches m hs = liftWith $ \ ctx run ->
   E.catches (run (m <$ ctx)) (map (\ (Handler h) -> E.Handler (run . (<$ ctx) . h)) hs)
 
 -- | See @"Control.Exception".'E.Handler'@.
---
--- @since 1.0.0.0
 data Handler m a
   = forall e . E.Exception e => Handler (e -> m a)
 
