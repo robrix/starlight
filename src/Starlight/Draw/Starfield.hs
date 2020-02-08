@@ -110,7 +110,7 @@ shader = program $ \ U{ resolution, focus, zoom }
     v <- var "v" $ vec3 [0]
     r <- var @Int "r" 2
     while (get r `lt` volsteps) $ do
-      s <- let' "s" (0.1 * float (get r + 1))
+      s <- let' "s" (0.1 + 0.125 * float (get r))
       p <- var "p" $ focus + get dir D.^* s
       p .= abs (vec3 [tile] - (get p `mod'` vec3 [tile * 2]))
       pa <- var "pa" 0
