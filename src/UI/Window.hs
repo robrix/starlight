@@ -30,6 +30,7 @@ import           Data.Text (Text)
 import           Foreign.Storable
 import           GL.Type as GL
 import           GL.Uniform
+import           Graphics.GL.Core41
 import           Linear.V2 as Linear
 import           Linear.V4 as Linear
 import           SDL
@@ -46,7 +47,7 @@ instance Unit Length Pixels where
 
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
-swap = ask >>= runLiftIO . glSwapWindow
+swap = runLiftIO glFinish >> ask >>= runLiftIO . glSwapWindow
 
 poll :: Has (Lift IO) sig m => m (Maybe Event)
 poll = runLiftIO pollEvent
