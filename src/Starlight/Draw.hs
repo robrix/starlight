@@ -133,3 +133,5 @@ draw = measure "draw" . runLiftIO $ do
   fpsSize <- labelSize fpsLabel
   measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size^._y - fpsSize^._y - 10)) white Nothing
   measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                            white Nothing
+
+  glFinish
