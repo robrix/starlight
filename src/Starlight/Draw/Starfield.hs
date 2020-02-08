@@ -117,7 +117,7 @@ shader = program $ \ U{ resolution, focus, zoom }
       a <- var "a" 0
       i <- var @Int "i" 0
       while (get i `lt` iterations) $ do
-        p .= abs (get p) / dot (get p) (get p) - formuparam
+        p .= abs (get p) ^/ dot (get p) (get p) - formuparam
         prev <- let' "prev" (get pa)
         pa .= norm (get p)
         a += abs (get pa - prev)

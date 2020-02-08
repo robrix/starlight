@@ -225,7 +225,7 @@ data Expr (k :: Type) a where
   Ext3 :: String -> Expr k (V2 a) -> Expr k a -> Expr k (V3 b)
   Ext4 :: String -> Expr k (V3 a) -> Expr k a -> Expr k (V4 b)
   Norm :: Expr k (v a) -> Expr k a
-  Dot :: Expr k (v a) -> Expr k (v a) -> Expr k (v a)
+  Dot :: Expr k (v a) -> Expr k (v a) -> Expr k a
   Lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
   Lerp2 :: Expr k (v a) -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
   Dfdx :: Expr k a -> Expr k a
@@ -348,7 +348,7 @@ dext4 = Ext4 "d"
 norm :: Expr k (v a) -> Expr k a
 norm = Norm
 
-dot :: Expr k (v a) -> Expr k (v a) -> Expr k (v a)
+dot :: Expr k (v a) -> Expr k (v a) -> Expr k a
 dot = Dot
 
 (^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
