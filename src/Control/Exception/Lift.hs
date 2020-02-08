@@ -10,6 +10,7 @@ module Control.Exception.Lift
 , catches
 , Handler(..)
 , handle
+, try
 , mask
 , bracket
 , bracket_
@@ -46,6 +47,10 @@ deriving instance Functor m => Functor (Handler m)
 -- | See @"Control.Exception".'E.handle'@.
 handle :: (E.Exception e, Has (Lift IO) sig m) => (e -> m a) -> m a -> m a
 handle h m = liftWith $ \ ctx run -> (run . (<$ ctx) . h) `E.handle` run (m <$ ctx)
+
+-- | See @"Control.Exception".'E.try'@.
+try :: (E.Exception e, Has (Lift IO) sig m) => m a -> m (Either e a)
+try = handle (pure . Left) . fmap Right
 
 -- | See @"Control.Exception".'E.mask'@.
 mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
