@@ -108,7 +108,7 @@ shader = program $ \ U{ resolution, focus, zoom }
     focus^^._xy *!= dmat2 [rot2]
     focus <- let' "focus2" $ vec3 [ get focus `mod'` dvec3 [tile * 2] ] * 10
     v <- var "v" $ vec3 [0]
-    r <- var @Int "r" 0
+    r <- var @Int "r" 2
     while (get r `lt` volsteps) $ do
       s <- let' "s" (0.1 * float (get r + 1))
       p <- var "p" $ focus + get dir D.^* s
