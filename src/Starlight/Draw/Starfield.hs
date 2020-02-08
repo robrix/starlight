@@ -123,7 +123,7 @@ shader = program $ \ U{ resolution, focus, zoom }
         a += abs (get pa - prev)
         i += 1
       a .= get a ** 3
-      v += vec3 [s, s ** 2, s ** 3] D.^* get a D.^* brightness D.^* (0.5 * distfading ** float (get r))
+      v += vec3 [s, s ** 2, s ** 2] D.^* get a D.^* brightness D.^* (0.5 * distfading ** float (get r))
       r += 1
     mag <- let' "mag" (norm (get v))
     v .= lerp saturation (vec3 [mag]) (get v)
