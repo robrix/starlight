@@ -89,8 +89,9 @@ nearBody sv = PDF pdf
 npc
   :: Text.Text
   -> V2 (Distance Double)
+  -> Colour Float
   -> Character
-npc name position = Character
+npc name position colour = Character
   { name
   , actor   = Actor
     { position
@@ -101,7 +102,7 @@ npc name position = Character
     }
   , target  = Nothing
   , actions = mempty
-  , ship    = Ship{ colour = red, armour = Interval 500 500, radar = Radar 1000 }
+  , ship    = Ship{ colour, armour = Interval 500 500, radar = Radar 1000 }
   }
 
 -- FIXME: do something clever, more generative
@@ -110,6 +111,9 @@ pickName = do
   names <- lines <$> sendM (readFile "data/ship-names.txt")
   i <- uniformR (0, pred (length names))
   pure $! Text.pack (names !! i)
+
+pickColour :: Has Random sig m => m (Colour Float)
+pickColour = V4 <$> uniform <*> uniform <*> uniform <*> pure 1
 
 integration
   :: ( Effect sig
@@ -135,7 +139,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
     pdf <- spawnPDF
     when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
       pos <- pickSpawnPoint pdf (Interval.point playerPos + interval (-radius) radius)
-      npc <- npc <$> pickName <*> pure pos
+      npc <- npc <$> pickName <*> pure pos <*> pickColour
       npcs_ @Body %= Map.insert (0, name npc) npc
 
   measure "controls" $ player_ @Body .actions_ <~ controls
