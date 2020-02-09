@@ -238,14 +238,14 @@ runAction dt system c = \case
   rotation = c^.rotation_
   target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
 
-  face dir = case desiredAngle (c^.actor_) target dir of
+  face dir = case desiredAngle c target dir of
     Just t  -> c & rotation_ %~ L.face (angular .*. dt) t
     Nothing -> c
 
-  desiredAngle Actor{ velocity, position } t = \case
-    Forwards  -> Just (angleOf (velocity^._xy))
-    Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract velocity) <|> Just (angleOf (-velocity^._xy))
-    Target    -> t^?_Just.to (projected dt).to (`L.direction` position).to (angleOf.(^._xy))
+  desiredAngle c t = \case
+    Forwards  -> Just (angleOf (c^.velocity_._xy))
+    Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract (c^.velocity_)) <|> Just (angleOf (-c^.velocity_._xy))
+    Target    -> t^?_Just.to (projected dt).to (`L.direction` (c^.position_)).to (angleOf.(^._xy))
 
 thrust :: Newtons Double
 thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
