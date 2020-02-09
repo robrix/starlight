@@ -1,6 +1,6 @@
 # `starlight`
 
-A game.
+<img width="2048" alt="screenshot showing player’s ship in quite a close approach to Mercury" src="https://user-images.githubusercontent.com/59671/74091980-28e20780-4a8c-11ea-8ed8-15247cb06eaf.png">
 
 
 ## Development

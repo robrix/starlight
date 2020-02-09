@@ -10,6 +10,7 @@ module Control.Exception.Lift
 , catches
 , Handler(..)
 , handle
+, try
 , mask
 , bracket
 , bracket_
@@ -29,15 +30,11 @@ catch :: (E.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
 catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `E.catch` (run . (<$ ctx) . h)
 
 -- | See @"Control.Exception".'E.catches'@.
---
--- @since 1.0.0.0
 catches :: Has (Lift IO) sig m => m a -> [Handler m a] -> m a
 catches m hs = liftWith $ \ ctx run ->
   E.catches (run (m <$ ctx)) (map (\ (Handler h) -> E.Handler (run . (<$ ctx) . h)) hs)
 
 -- | See @"Control.Exception".'E.Handler'@.
---
--- @since 1.0.0.0
 data Handler m a
   = forall e . E.Exception e => Handler (e -> m a)
 
@@ -46,6 +43,10 @@ deriving instance Functor m => Functor (Handler m)
 -- | See @"Control.Exception".'E.handle'@.
 handle :: (E.Exception e, Has (Lift IO) sig m) => (e -> m a) -> m a -> m a
 handle h m = liftWith $ \ ctx run -> (run . (<$ ctx) . h) `E.handle` run (m <$ ctx)
+
+-- | See @"Control.Exception".'E.try'@.
+try :: (E.Exception e, Has (Lift IO) sig m) => m a -> m (Either e a)
+try = handle (pure . Left) . fmap Right
 
 -- | See @"Control.Exception".'E.mask'@.
 mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b

@@ -91,40 +91,39 @@ shader = program $ \ U{ resolution, focus, zoom }
     resolution <- let' @(V2 Float) "resolution" (D.coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
-    focus <- let' @(V3 Double) "focus" $ dext3 focus 1
-    let wrap mn mx x = ((x + mx) `mod'` (mx - mn)) + mn
-        rot a = mat2 [vec2 [cos a, sin a], vec2 [-sin a, cos a]]
-    nf <- let' "nf" (float (0.1 / norm focus))
-    focus <- var "focus2" $ vec3 [ focus `mod'` dvec3 [tile * 2] ]
-    a1 <- let' "a1" (wrap (-pi) pi (0.3 + nf))
-    a2 <- let' "a2" (wrap (-pi) pi (0.2 + nf))
-    rot1 <- let' "rot1" $ rot a1
-    rot2 <- let' "rot2" $ rot a2
+    focus <- var "focus" $ dext3 focus 1
+    let wrap x = ((x + pi) `mod'` (pi * 2)) - pi
+    nf <- let' "nf" (float (0.01 / norm (get focus)))
+    a1 <- let' "a1" (wrap (0.3 + nf))
+    cos_a1 <- let' "cos_a1" (cos a1)
+    sin_a1 <- let' "sin_a1" (sin a1)
+    rot1 <- let' "rot1" $ mat2 [vec2 [cos_a1, sin_a1], vec2 [-sin_a1, cos_a1]]
+    a2 <- let' "a2" (wrap (0.2 + nf))
+    cos_a2 <- let' "cos_a2" (cos a2)
+    sin_a2 <- let' "sin_a2" (sin a2)
+    rot2 <- let' "rot2" $ mat2 [vec2 [cos_a2, sin_a2], vec2 [-sin_a2, cos_a2]]
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
-    focus^^._xz *!= rot1
-    focus^^._xy *!= rot2
-    focus *= 10
-    s <- var "s" 0.1
-    fade <- var "fade" 0.5
+    focus^^._xz *!= dmat2 [rot1]
+    focus^^._xy *!= dmat2 [rot2]
+    focus <- let' "focus2" $ vec3 [ get focus `mod'` dvec3 [tile * 2] ] * 10
     v <- var "v" $ vec3 [0]
-    r <- var @Int "r" 0
+    r <- var @Int "r" 2
     while (get r `lt` volsteps) $ do
-      p <- var "p" $ get focus + get dir D.^* get s
+      s <- let' "s" (0.1 + 0.125 * float (get r))
+      p <- var "p" $ focus + get dir D.^* s
       p .= abs (vec3 [tile] - (get p `mod'` vec3 [tile * 2]))
       pa <- var "pa" 0
       a <- var "a" 0
       i <- var @Int "i" 0
       while (get i `lt` iterations) $ do
-        p .= abs (get p) / dot (get p) (get p) - formuparam
+        p .= abs (get p) ^/ dot (get p) (get p) - formuparam
         prev <- let' "prev" (get pa)
         pa .= norm (get p)
         a += abs (get pa - prev)
         i += 1
       a .= get a ** 3
-      v += vec3 [get s, get s ** 2, get s ** 3] D.^* get a D.^* brightness D.^* get fade
-      fade *= distfading
-      s += stepsize
+      v += vec3 [s, s ** 2, s ** 2] D.^* get a D.^* brightness D.^* (0.5 * distfading ** float (get r))
       r += 1
     mag <- let' "mag" (norm (get v))
     v .= lerp saturation (vec3 [mag]) (get v)
@@ -133,10 +132,9 @@ shader = program $ \ U{ resolution, focus, zoom }
   iterations = 17
   formuparam = 0.53
   volsteps = 8
-  stepsize = 0.1
   tile = 1/1.61803398875
   brightness = 0.0015
-  distfading = 0.73
+  distfading = 0.65
   saturation = 0.65
 
 

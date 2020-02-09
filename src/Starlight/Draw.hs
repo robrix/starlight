@@ -45,7 +45,6 @@ import UI.Window as Window
 import Unit.Algebra
 import Unit.Count
 import Unit.Length
-import Unit.Time
 
 runFrame
   :: ( Effect sig
@@ -73,10 +72,9 @@ frame
      , Has (Reader Window.Window) sig m
      , Has (State Input) sig m
      , Has (State (System Body)) sig m
-     , Has (State UTCTime) sig m
      )
   => m ()
-frame = runSystem . timed $ do
+frame = runSystem $ do
   measure "input" Starlight.Input.input
   withView (local (neighbourhoodOfPlayer @StateVectors) Starlight.Draw.draw) -- draw with current readonly positions & beams
 
@@ -89,15 +87,13 @@ draw
      , Has (Reader Radar.Drawable) sig m
      , Has (Reader Ship.Drawable) sig m
      , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader (Seconds Double)) sig m
      , Has (Reader (System StateVectors)) sig m
      , Has (Reader UI) sig m
      , Has (Reader View) sig m
      )
   => m ()
 draw = measure "draw" . runLiftIO $ do
-  dt <- ask @(Seconds Double)
-  UI{ fps = fpsLabel, target = targetLabel, face } <- ask
+  UI{ target = targetLabel, face } <- ask
   let font = Font face 18
   bind @Framebuffer Nothing
 
@@ -127,9 +123,5 @@ draw = measure "draw" . runLiftIO $ do
           -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
         _ -> ""
 
-  measure "setLabel" $ setLabel fpsLabel    font (formatDec (Just 1) (convert @_ @(Milli Seconds) dt) <> "/" <> formatDec (Just 1) (Count @"f" 1 ./. dt))
   measure "setLabel" $ setLabel targetLabel font (describeTarget target)
-
-  fpsSize <- labelSize fpsLabel
-  measure "drawLabel" $ drawLabel fpsLabel    (V2 10 (size^._y - fpsSize^._y - 10)) white Nothing
-  measure "drawLabel" $ drawLabel targetLabel (V2 10 10)                            white Nothing
+  measure "drawLabel" $ drawLabel targetLabel (V2 10 10) white Nothing

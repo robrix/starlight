@@ -60,6 +60,7 @@ module GL.Shader.Expr
 , norm
 , dot
 , (^*)
+, (^/)
 , (!*)
 , (!!*)
 , (!*!)
@@ -74,6 +75,7 @@ module GL.Shader.Expr
 , max'
 , atan2'
 , texture
+, fract
 , coerce
   -- ** Comparison
 , eq
@@ -205,6 +207,7 @@ data Expr (k :: Type) a where
 
   (:^.) :: Expr k a -> Prj a b -> Expr k b
   (:^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
+  (:^/) :: Expr k (v a) -> Expr k a -> Expr k (v a)
   (:!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
   (:!!*) :: Expr k (v (v a)) -> Expr k a -> Expr k (v (v a))
   (:!*!) :: Expr k (v (v a)) -> Expr k (v (v a)) -> Expr k (v (v a))
@@ -222,7 +225,7 @@ data Expr (k :: Type) a where
   Ext3 :: String -> Expr k (V2 a) -> Expr k a -> Expr k (V3 b)
   Ext4 :: String -> Expr k (V3 a) -> Expr k a -> Expr k (V4 b)
   Norm :: Expr k (v a) -> Expr k a
-  Dot :: Expr k (v a) -> Expr k (v a) -> Expr k (v a)
+  Dot :: Expr k (v a) -> Expr k (v a) -> Expr k a
   Lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
   Lerp2 :: Expr k (v a) -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
   Dfdx :: Expr k a -> Expr k a
@@ -345,13 +348,18 @@ dext4 = Ext4 "d"
 norm :: Expr k (v a) -> Expr k a
 norm = Norm
 
-dot :: Expr k (v a) -> Expr k (v a) -> Expr k (v a)
+dot :: Expr k (v a) -> Expr k (v a) -> Expr k a
 dot = Dot
 
 (^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
 (^*) = (:^*)
 
 infixl 7 ^*
+
+(^/) :: Expr k (v a) -> Expr k a -> Expr k (v a)
+(^/) = (:^/)
+
+infixl 7 ^/
 
 (!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
 (!*) = (:!*)
@@ -398,6 +406,9 @@ atan2' = Atan2
 
 texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
 texture = Texture
+
+fract :: Expr k a -> Expr k a
+fract = Fn "fract" . pure
 
 
 coerce :: C.Coercible a b => Expr k a -> Expr k b
@@ -462,6 +473,7 @@ renderExpr = \case
   ATanH a -> fn "atanh" [renderExpr a]
   a :^. Prj s -> renderExpr a <> pretty s
   a :^*  b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a :^/  b -> parens $ renderExpr a <+> pretty '/' <+> renderExpr b
   a :!*  b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a :!!*  b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a :!*! b -> parens $ renderExpr a <+> pretty '*' <+> renderExpr b
