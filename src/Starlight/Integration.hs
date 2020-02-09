@@ -203,7 +203,7 @@ runActions c = do
 
 runAction :: HasCallStack => Seconds Double -> System StateVectors -> Character -> Action -> Character
 runAction dt system c = \case
-  Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate (c^.rotation_) (unit _x)^._xy) dt
+  Thrust -> thrust c Starlight.Integration.thrust
 
   Brake -> face c Backwards
 
@@ -236,6 +236,8 @@ runAction dt system c = \case
     _ -> c
   where
   target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
+
+  thrust c amount = c & actor_ %~ applyImpulse (amount .*^ rotate (c^.rotation_) (unit _x)^._xy) dt
 
   isFacing c targetAngle = facingRel (c^.rotation_) targetAngle < pi/128
 
