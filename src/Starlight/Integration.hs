@@ -165,10 +165,10 @@ gravity a = do
   where
   go dt a b
     | v1 == v2  = a
-    | otherwise = applyImpulse (gravitation (a^.mass_) (b^.mass_) (convert <$> v1) (convert <$> v2)) dt a
+    | otherwise = applyImpulse (gravitation (a^.mass_) (b^.mass_) v1 v2) dt a
     where
-    v1 = a^.position_
-    v2 = b^.position_
+    v1 = convert <$> a^.position_
+    v2 = convert <$> b^.position_
 
 
 -- FIXME: do something smarter than ray-sphere intersection.
