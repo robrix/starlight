@@ -205,7 +205,12 @@ runAction :: HasCallStack => Seconds Double -> System StateVectors -> Character 
 runAction dt system c = \case
   Thrust -> thrust c Starlight.Integration.thrust
 
-  Brake -> face c Backwards
+  Brake
+    | isFacing c relativeVelocity
+    , norm relativeVelocity > 0 -> thrust c Starlight.Integration.thrust
+    | otherwise                 -> face c Backwards
+    where
+    relativeVelocity = fromMaybe (angleOf (-c^.velocity_)) (target^?_Just.velocity_.to (angleOf.subtract (c^.velocity_)))
 
   Face dir -> face c dir
 
