@@ -163,7 +163,8 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
       & velocity_.coerced.extended 0.extended 0 %~ apply rel
     } where
     actor = actorAt body t
-    rel = maybe rot ((>>> rot) . transform) (parent identifier >>= (bodies' Map.!?))
+    p = parent identifier >>= (bodies' Map.!?)
+    rel = maybe rot ((>>> rot) . transform) p
     rot = mkRotation (orientation revolution)
 
 
