@@ -225,11 +225,11 @@ runAction dt system c = \case
 
   Jump -> case target of
     Just target
-      | distance .<. factor * target^.magnitude_ -> c
-      | isFacing c (angleTo pc pt)               -> c & position_ %~ lerp (1 - factor * target^.magnitude_ / distance) pt
-      | otherwise                                -> face c Target -- FIXME: face *near* the target
+      | distance .<. targetDistance -> c
+      | isFacing c (angleTo pc pt)  -> c & position_ %~ lerp (1 - targetDistance / distance) pt
+      | otherwise                   -> face c Target -- FIXME: face *near* the target
       where
-      factor = 0.75
+      targetDistance = 0.75 * target^.magnitude_
       pc = projected dt c
       pt = projected dt target
       distance = norm (pt - pc)
