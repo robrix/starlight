@@ -119,7 +119,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   target <- measure "label" Label.label
 
   start <- now
-  integration <- fork . (>>= throwIO) . reportProfile . evalState start . fix $ \ loop -> do
+  integration <- fork . (>>= throwIO) . evalState start . fix $ \ loop -> do
     err <- try @SomeException (id <~> integration)
     case err of
       Left err -> pure err
