@@ -202,43 +202,45 @@ runActions c = do
   pure $! foldl' (runAction dt system) c (actions c)
 
 runAction :: HasCallStack => Seconds Double -> System StateVectors -> Character -> Action -> Character
-runAction dt system c = \case
-  Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
-
-  Brake -> c
-
-  Face dir -> case desiredAngle (c^.actor_) target dir of
-    Just t  -> c & rotation_ %~ face (angular .*. dt) t
-    Nothing -> c
-
-  Turn t -> c & rotation_ *~ axisAngle (unit _z) ((case t of
-    L -> angular
-    R -> -angular) .*. dt)
-
-  Fire Main -> c -- we don’t have to do anything here because whether or not a character is firing is derived from its actions
-
-  ChangeTarget change -> c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
-    elimChange prev next = \case { Prev -> prev ; Next -> next }
-    switchTarget dir = \case
-      Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
-        i' = elimChange (i - 1) (i + 1)  dir
-      Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
-    identifiers = System.identifiers system
-
-  Jump -> case target of
-    Just target
-      | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> c
-      | facingRel rotation targetAngle < pi/128
-      , let delta = projected dt target - projected dt c
-      -> c & position_ +~ (1 - factor * target^.magnitude_ / norm delta) *^ delta
-      | otherwise -> runAction dt system c (Face Target) -- FIXME: face *near* the target
-      where
-      factor = 0.75
-      targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)
-    _ -> c
+runAction dt system = go
   where
-  rotation = c^.rotation_
-  target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
+  go c = \case
+    Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
+
+    Brake -> c
+
+    Face dir -> case desiredAngle (c^.actor_) target dir of
+      Just t  -> c & rotation_ %~ face (angular .*. dt) t
+      Nothing -> c
+
+    Turn t -> c & rotation_ *~ axisAngle (unit _z) ((case t of
+      L -> angular
+      R -> -angular) .*. dt)
+
+    Fire Main -> c -- we don’t have to do anything here because whether or not a character is firing is derived from its actions
+
+    ChangeTarget change -> c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
+      elimChange prev next = \case { Prev -> prev ; Next -> next }
+      switchTarget dir = \case
+        Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
+          i' = elimChange (i - 1) (i + 1)  dir
+        Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
+      identifiers = System.identifiers system
+
+    Jump -> case target of
+      Just target
+        | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> c
+        | facingRel rotation targetAngle < pi/128
+        , let delta = projected dt target - projected dt c
+        -> c & position_ +~ (1 - factor * target^.magnitude_ / norm delta) *^ delta
+        | otherwise -> runAction dt system c (Face Target) -- FIXME: face *near* the target
+        where
+        factor = 0.75
+        targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)
+      _ -> c
+    where
+    rotation = c^.rotation_
+    target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
 
   desiredAngle Actor{ velocity, position } t = \case
     Forwards  -> Just (angleOf (velocity^._xy))
