@@ -202,16 +202,14 @@ runActions c = do
 
 runAction :: HasCallStack => Seconds Double -> System StateVectors -> Character -> Action -> Character
 runAction dt system c = \case
-  Thrust -> thrust c Starlight.Integration.thrust
+  Thrust -> thrust Starlight.Integration.thrust
 
   Brake
-    | isFacing c (angleOf relativeVelocity')
-    , norm relativeVelocity' > 0 -> thrust c (min (convert (c^.mass_ .*. norm relativeVelocity' ./. Seconds 1)) Starlight.Integration.thrust)
-    | otherwise                 -> face c Backwards
-    where
-    relativeVelocity' = relativeVelocity c target
+    | isFacing (angleOf relativeVelocity)
+    , norm relativeVelocity > 0 -> thrust (min (convert (c^.mass_ .*. norm relativeVelocity ./. Seconds 1)) Starlight.Integration.thrust)
+    | otherwise                 -> face Backwards
 
-  Face dir -> face c dir
+  Face dir -> face dir
 
   Turn t -> c & rotation_ *~ axisAngle (unit _z) (dt .*. case t of
     L -> angular
@@ -230,8 +228,8 @@ runAction dt system c = \case
   Jump -> case target of
     Just target
       | distance .<. targetDistance * 1.1 -> c
-      | isFacing c (angleTo pc pt)        -> c & position_ %~ lerp (1 - targetDistance / distance) pt
-      | otherwise                         -> face c Target -- FIXME: face *near* the target
+      | isFacing (angleTo pc pt)          -> c & position_ %~ lerp (1 - targetDistance / distance) pt
+      | otherwise                         -> face Target -- FIXME: face *near* the target
       where
       targetDistance = max (convert @(Kilo Metres) 100) (0.75 * target^.magnitude_)
       pc = projected dt c
@@ -241,20 +239,20 @@ runAction dt system c = \case
   where
   target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
 
-  thrust c amount = c & actor_ %~ applyImpulse (amount .*^ rotate (c^.rotation_) (unit _x)^._xy) dt
+  thrust amount = c & actor_ %~ applyImpulse (amount .*^ rotate (c^.rotation_) (unit _x)^._xy) dt
 
-  isFacing c targetAngle = facingRel (c^.rotation_) targetAngle < pi/128
+  isFacing targetAngle = facingRel (c^.rotation_) targetAngle < pi/128
 
-  face c dir = case desiredAngle c target dir of
+  face dir = case desiredAngle dir of
     Just t  -> c & rotation_ %~ L.face (angular .*. dt) t
     Nothing -> c
 
-  desiredAngle c t = fmap angleOf . \case
+  desiredAngle = fmap angleOf . \case
     Forwards  -> Just (normalizeU (c^.velocity_))
-    Backwards -> Just (normalizeU (relativeVelocity c t))
-    Target    -> t^?_Just.to ((`L.direction` (c^.position_)) . projected dt)
+    Backwards -> Just (normalizeU relativeVelocity)
+    Target    -> target^?_Just.to ((`L.direction` (c^.position_)) . projected dt)
 
-  relativeVelocity c t = fromMaybe 0 (t^?_Just.velocity_) - c^.velocity_
+  relativeVelocity = fromMaybe 0 (target^?_Just.velocity_) - c^.velocity_
 
 thrust :: Newtons Double
 thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
