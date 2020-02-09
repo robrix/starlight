@@ -139,8 +139,8 @@ actorAt Body{ radius, mass, rotation, eccentricity, semimajor, revolution, timeO
   meanMotion :: (I :/: Seconds) Double
   meanMotion = I (2 * pi) ./. period revolution
   eccentricAnomaly :: I Double
-  eccentricAnomaly = iter 10 (\ ea -> meanAnomaly + eccentricity .*. sin ea) meanAnomaly where
-    iter n f = go n where
+  eccentricAnomaly = iter (\ ea -> meanAnomaly + eccentricity .*. sin ea) 10 meanAnomaly where
+    iter f = go where
       go n a
         | n <= 0    = a
         | otherwise = go (n - 1 :: Int) (f a)
