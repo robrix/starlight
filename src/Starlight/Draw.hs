@@ -72,10 +72,9 @@ frame
      , Has (Reader Window.Window) sig m
      , Has (State Input) sig m
      , Has (State (System Body)) sig m
-     , Has (State UTCTime) sig m
      )
   => m ()
-frame = runSystem . timed $ do
+frame = runSystem $ do
   measure "input" Starlight.Input.input
   withView (local (neighbourhoodOfPlayer @StateVectors) Starlight.Draw.draw) -- draw with current readonly positions & beams
 
