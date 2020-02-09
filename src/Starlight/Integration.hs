@@ -229,7 +229,7 @@ runAction dt system c = \case
       | isFacing c (angleTo pc pt)  -> c & position_ %~ lerp (1 - targetDistance / distance) pt
       | otherwise                   -> face c Target -- FIXME: face *near* the target
       where
-      targetDistance = 0.75 * target^.magnitude_
+      targetDistance = max (convert @(Kilo Metres) 100) (0.75 * target^.magnitude_)
       pc = projected dt c
       pt = projected dt target
       distance = norm (pt - pc)
