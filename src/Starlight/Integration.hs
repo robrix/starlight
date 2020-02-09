@@ -234,8 +234,8 @@ runAction dt system c = \case
     Just target
       | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> c
       | facingRel rotation targetAngle < pi/128
-      , let distance' = distance (projected dt target) (projected dt c)
-      -> c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected dt target - projected dt c)
+      , let delta = projected dt target - projected dt c
+      -> c & position_ +~ (1 - factor * target^.magnitude_ / norm delta) *^ delta
       | otherwise -> runAction dt system c (Face Target) -- FIXME: face *near* the target
       where
       factor = 0.75
