@@ -205,7 +205,7 @@ runAction :: HasCallStack => Seconds Double -> System StateVectors -> Character 
 runAction dt system c = \case
   Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
 
-  Brake -> c
+  Brake -> face Backwards
 
   Face dir -> face dir
 
