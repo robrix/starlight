@@ -19,4 +19,6 @@
 - fixity: "infixl 7 :*:"
 - fixity: "infixl 7 :/:"
 
+- warn: { lhs: to f . to g, rhs: to (g . f), name: combine to }
+
 - ignore: {name: Reduce duplication}
