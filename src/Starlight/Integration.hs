@@ -248,6 +248,7 @@ runAction dt system c = \case
 thrust :: Newtons Double
 thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
   -- force sufficient to move 1000 kg by 10 km per second per second
+
 -- FIXME: this should be a real acceleration, i.e. a change to velocity
 angular :: (I :/: Seconds) Double
 angular = 3
