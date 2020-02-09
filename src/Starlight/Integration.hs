@@ -225,7 +225,7 @@ runAction dt system c = \case
 
   Jump -> case target of
     Just target
-      | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> c
+      | distance (projected dt c) (projected dt target) .<. factor * target^.magnitude_ -> c
       | isFacing c targetAngle
       , let delta = projected dt target - projected dt c
       -> c & position_ +~ (1 - factor * target^.magnitude_ / norm delta) *^ delta
