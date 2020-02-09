@@ -203,7 +203,7 @@ runActions c = do
 
 runAction :: HasCallStack => Seconds Double -> System StateVectors -> Character -> Action -> Character
 runAction dt system c = \case
-  Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
+  Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate (c^.rotation_) (unit _x)^._xy) dt
 
   Brake -> face c Backwards
 
@@ -226,7 +226,7 @@ runAction dt system c = \case
   Jump -> case target of
     Just target
       | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> c
-      | facingRel rotation targetAngle < pi/128
+      | facingRel (c^.rotation_) targetAngle < pi/128
       , let delta = projected dt target - projected dt c
       -> c & position_ +~ (1 - factor * target^.magnitude_ / norm delta) *^ delta
       | otherwise -> face c Target -- FIXME: face *near* the target
@@ -235,7 +235,6 @@ runAction dt system c = \case
       targetAngle = angleTo (projected dt c) (projected dt target)
     _ -> c
   where
-  rotation = c^.rotation_
   target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
 
   face c dir = case desiredAngle c target dir of
