@@ -34,4 +34,5 @@ Controls are currently hard-coded; I intend to eventually make them configurable
 - space: fire weapons in the direction you’re facing
 - t: turn to face the selected target (if any)
 - f: face in the direction the ship is moving
+- b: turn and brake (optionally relative to target)
 - j: jump to the target (if any)
