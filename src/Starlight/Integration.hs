@@ -209,9 +209,9 @@ runAction dt system c = \case
 
   Face dir -> face c dir
 
-  Turn t -> c & rotation_ *~ axisAngle (unit _z) ((case t of
+  Turn t -> c & rotation_ *~ axisAngle (unit _z) (dt .*. case t of
     L -> angular
-    R -> -angular) .*. dt)
+    R -> -angular)
 
   Fire Main -> c -- we don’t have to do anything here because whether or not a character is firing is derived from its actions
 
