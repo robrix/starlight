@@ -16,7 +16,6 @@ module Starlight.Integration
 , runActions
 ) where
 
-import Control.Applicative ((<|>))
 import Control.Carrier.State.Strict
 import Control.Effect.Lens.Exts
 import Control.Effect.Lift
@@ -206,11 +205,11 @@ runAction dt system c = \case
   Thrust -> thrust c Starlight.Integration.thrust
 
   Brake
-    | isFacing c (angleOf relativeVelocity)
-    , norm relativeVelocity > 0 -> thrust c (min (convert (c^.mass_ .*. norm relativeVelocity ./. Seconds 1)) Starlight.Integration.thrust)
+    | isFacing c (angleOf relativeVelocity')
+    , norm relativeVelocity' > 0 -> thrust c (min (convert (c^.mass_ .*. norm relativeVelocity' ./. Seconds 1)) Starlight.Integration.thrust)
     | otherwise                 -> face c Backwards
     where
-    relativeVelocity = fromMaybe 0 (target^?_Just.velocity_) - c^.velocity_
+    relativeVelocity' = relativeVelocity c target
 
   Face dir -> face c dir
 
@@ -250,10 +249,12 @@ runAction dt system c = \case
     Just t  -> c & rotation_ %~ L.face (angular .*. dt) t
     Nothing -> c
 
-  desiredAngle c t = \case
-    Forwards  -> Just (angleOf (c^.velocity_))
-    Backwards -> t^?_Just.velocity_.to (angleOf.subtract (c^.velocity_)) <|> Just (angleOf (-c^.velocity_))
-    Target    -> t^?_Just.to (angleOf . (`L.direction` (c^.position_)) . projected dt)
+  desiredAngle c t = fmap angleOf . \case
+    Forwards  -> Just (normalizeU (c^.velocity_))
+    Backwards -> Just (normalizeU (relativeVelocity c t))
+    Target    -> t^?_Just.to ((`L.direction` (c^.position_)) . projected dt)
+
+  relativeVelocity c t = fromMaybe 0 (t^?_Just.velocity_) - c^.velocity_
 
 thrust :: Newtons Double
 thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
