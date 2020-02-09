@@ -203,6 +203,8 @@ runActions c = do
   go dt system c = \case
     Thrust -> pure $! c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
 
+    Brake -> pure c
+
     Face dir -> case desiredAngle (c^.actor_) target of
       Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) t
       Nothing -> pure c

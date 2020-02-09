@@ -56,6 +56,7 @@ ship_ = field @"ship"
 
 data Action
   = Thrust                      -- ^ Fire thrusters at current heading.
+  | Brake                       -- ^ Face away from heading and thrust until stopped.
   | Turn Turn                   -- ^ Turn left or right.
   | Face Face                   -- ^ Face toward/away from heading/target.
   | Fire Weapon                 -- ^ Fire the indicated weapon.
