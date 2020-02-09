@@ -204,7 +204,7 @@ runAction :: HasCallStack => Seconds Double -> System StateVectors -> Character 
 runAction dt system c = \case
   Thrust -> thrust Starlight.Integration.thrust
 
-  Brake
+  Match
     | isFacing (angleOf relativeVelocity)
     , norm relativeVelocity > 0 -> thrust (min (convert (c^.mass_ .*. norm relativeVelocity ./. Seconds 1)) Starlight.Integration.thrust)
     | otherwise                 -> face Backwards

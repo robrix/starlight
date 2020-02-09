@@ -33,7 +33,7 @@ controlRelations =
   , expect (pressed_ SDL.KeycodeLeft)  $> (mempty, Set.singleton (Turn L))
   , expect (pressed_ SDL.KeycodeRight) $> (mempty, Set.singleton (Turn R))
   , expect (pressed_ SDL.KeycodeSpace) $> (mempty, Set.singleton (Fire Main))
-  , expect (pressed_ SDL.KeycodeB)     $> (mempty, Set.singleton Brake)
+  , expect (pressed_ SDL.KeycodeB)     $> (mempty, Set.singleton Match)
   , expect (pressed_ SDL.KeycodeF)     $> (mempty, Set.singleton (Face Forwards))
   , expect (pressed_ SDL.KeycodeT)     $> (mempty, Set.singleton (Face Target))
   , expect (pressed_ SDL.KeycodeJ)     $> (mempty, Set.singleton Jump)
