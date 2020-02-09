@@ -114,7 +114,7 @@ game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
   SDL.cursorVisible SDL.$= False
   trace "loading typeface"
   face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")
-  measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> "./:-⁻⁰¹²³⁴⁵⁶⁷⁸⁹·" -- characters to preload
+  measure "cacheCharactersForDrawing" . cacheCharactersForDrawing face $ ['0'..'9'] <> ['a'..'z'] <> ['A'..'Z'] <> ",.’/:-⁻⁰¹²³⁴⁵⁶⁷⁸⁹·" -- characters to preload
 
   target <- measure "label" Label.label
 
