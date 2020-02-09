@@ -79,7 +79,7 @@ nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Population :/: Giga Met
 nearBody sv = PDF pdf
   where
   pdf v
-    | let qdV = v `qdU` (sv^.position_._xy)
+    | let qdV = v `qdU` (sv^.position_)
     , qdV .>. sqU radius = population ./. qdV
     | otherwise          = 0
   radius = sv^.body_.radius_
@@ -137,7 +137,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   for_ playerPositions $ \ playerPos -> do
     let nearbyNPCs = Count @"population" (fromIntegral (length (Prelude.filter ((< radius) . distance playerPos . (^.position_)) (Map.elems npcs))))
     pdf <- spawnPDF
-    when (nearbyNPCs ./. area radius < runPDF pdf (playerPos^._xy)) $ do
+    when (nearbyNPCs ./. area radius < runPDF pdf playerPos) $ do
       pos <- pickSpawnPoint pdf (Interval.point playerPos + interval (-radius) radius)
       npc <- npc <$> pickName <*> pure pos <*> pickColour
       npcs_ @Body %= Map.insert (0, name npc) npc
@@ -179,7 +179,7 @@ hit i c = do
   foldl' (go dt) c <$> asks (beams @StateVectors) where
   go dt char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
-    , intersects (c^._xy) (char^.magnitude_ * 0.5) (o^._xy) (cartesian2 theta 1)
+    , intersects c (char^.magnitude_ * 0.5) o (cartesian2 theta 1)
     = char & ship_.armour_.min_ -~ damage .*. dt
     | otherwise
     = char
@@ -232,7 +232,7 @@ runAction dt system c = \case
       | otherwise -> face c Target -- FIXME: face *near* the target
       where
       factor = 0.75
-      targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)
+      targetAngle = angleTo (projected dt c) (projected dt target)
     _ -> c
   where
   rotation = c^.rotation_
@@ -243,9 +243,9 @@ runAction dt system c = \case
     Nothing -> c
 
   desiredAngle c t = \case
-    Forwards  -> Just (angleOf (c^.velocity_._xy))
-    Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract (c^.velocity_)) <|> Just (angleOf (-c^.velocity_._xy))
-    Target    -> t^?_Just.to (projected dt).to (`L.direction` (c^.position_)).to (angleOf.(^._xy))
+    Forwards  -> Just (angleOf (c^.velocity_))
+    Backwards -> t^?_Just.velocity_.to (angleOf.subtract (c^.velocity_)) <|> Just (angleOf (-c^.velocity_))
+    Target    -> t^?_Just.to (projected dt).to (`L.direction` (c^.position_)).to angleOf
 
 thrust :: Newtons Double
 thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
