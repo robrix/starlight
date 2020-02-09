@@ -139,11 +139,10 @@ actorAt parentMass Body{ radius, mass, rotation, eccentricity, semimajor, revolu
   meanMotion :: (I :/: Seconds) Double
   meanMotion = I (2 * pi) ./. period revolution
   eccentricAnomaly :: I Double
-  eccentricAnomaly = iter (\ ea -> meanAnomaly + eccentricity .*. sin ea) 10 meanAnomaly where
-    iter f = go where
-      go n a
-        | n <= 0    = a
-        | otherwise = go (n - 1 :: Int) (f a)
+  eccentricAnomaly = iter 10 meanAnomaly where
+    iter n a
+      | n <= 0    = a
+      | otherwise = iter (n - 1 :: Int) (meanAnomaly + eccentricity .*. sin a)
   trueAnomaly :: I Double
   trueAnomaly = atan2 (sqrt (1 - eccentricity ** 2) * sin eccentricAnomaly) (cos eccentricAnomaly - eccentricity)
   r :: Kilo Metres Double
