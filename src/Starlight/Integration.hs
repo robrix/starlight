@@ -246,7 +246,7 @@ runAction dt system c = \case
   desiredAngle c t = \case
     Forwards  -> Just (angleOf (c^.velocity_))
     Backwards -> t^?_Just.velocity_.to (angleOf.subtract (c^.velocity_)) <|> Just (angleOf (-c^.velocity_))
-    Target    -> t^?_Just.to (projected dt).to (`L.direction` (c^.position_)).to angleOf
+    Target    -> t^?_Just.to (angleOf . (`L.direction` (c^.position_)) . projected dt)
 
 thrust :: Newtons Double
 thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
