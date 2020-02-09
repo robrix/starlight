@@ -199,52 +199,54 @@ runActions
 runActions c = do
   dt <- ask @(Seconds Double)
   system <- ask @(System StateVectors)
-  pure $! foldl' (go dt system) c (actions c) where
-  go dt system c = \case
-    Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
+  pure $! foldl' (runAction dt system) c (actions c)
 
-    Brake -> c
+runAction :: HasCallStack => Seconds Double -> System StateVectors -> Character -> Action -> Character
+runAction dt system c = \case
+  Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
 
-    Face dir -> case desiredAngle (c^.actor_) target of
-      Just t  -> c & rotation_ %~ face (angular .*. dt) t
-      Nothing -> c
-      where
-      desiredAngle Actor{ velocity, position } t = case dir of
-        Forwards  -> Just (angleOf (velocity^._xy))
-        Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract velocity) <|> Just (angleOf (-velocity^._xy))
-        Target    -> t^?_Just.to (projected dt).to (`L.direction` position).to (angleOf.(^._xy))
+  Brake -> c
 
-    Turn t -> c & rotation_ *~ axisAngle (unit _z) ((case t of
-      L -> angular
-      R -> -angular) .*. dt)
-
-    Fire Main -> c -- we don’t have to do anything here because whether or not a character is firing is derived from its actions
-
-    ChangeTarget change -> c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
-      elimChange prev next = \case { Prev -> prev ; Next -> next }
-      switchTarget dir = \case
-        Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
-          i' = elimChange (i - 1) (i + 1)  dir
-        Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
-      identifiers = System.identifiers system
-
-    Jump -> case target of
-      Just target
-        | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> c
-        | facingRel rotation targetAngle < pi/128
-        , let distance' = distance (projected dt target) (projected dt c)
-        -> c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected dt target - projected dt c)
-        | otherwise -> go dt system c (Face Target) -- FIXME: face *near* the target
-        where
-        factor = 0.75
-        targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)
-      _ -> c
+  Face dir -> case desiredAngle (c^.actor_) target of
+    Just t  -> c & rotation_ %~ face (angular .*. dt) t
+    Nothing -> c
     where
-    thrust :: Newtons Double
-    thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
-      -- force sufficient to move 1000 kg by 10 km per second per second
-    -- FIXME: this should be a real acceleration, i.e. a change to velocity
-    angular :: (I :/: Seconds) Double
-    angular = 3
-    rotation = c^.rotation_
-    target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
+    desiredAngle Actor{ velocity, position } t = case dir of
+      Forwards  -> Just (angleOf (velocity^._xy))
+      Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract velocity) <|> Just (angleOf (-velocity^._xy))
+      Target    -> t^?_Just.to (projected dt).to (`L.direction` position).to (angleOf.(^._xy))
+
+  Turn t -> c & rotation_ *~ axisAngle (unit _z) ((case t of
+    L -> angular
+    R -> -angular) .*. dt)
+
+  Fire Main -> c -- we don’t have to do anything here because whether or not a character is firing is derived from its actions
+
+  ChangeTarget change -> c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
+    elimChange prev next = \case { Prev -> prev ; Next -> next }
+    switchTarget dir = \case
+      Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
+        i' = elimChange (i - 1) (i + 1)  dir
+      Nothing -> elimChange last head dir identifiers <$ guard (not (null identifiers))
+    identifiers = System.identifiers system
+
+  Jump -> case target of
+    Just target
+      | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> c
+      | facingRel rotation targetAngle < pi/128
+      , let distance' = distance (projected dt target) (projected dt c)
+      -> c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected dt target - projected dt c)
+      | otherwise -> runAction dt system c (Face Target) -- FIXME: face *near* the target
+      where
+      factor = 0.75
+      targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)
+    _ -> c
+  where
+  thrust :: Newtons Double
+  thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
+    -- force sufficient to move 1000 kg by 10 km per second per second
+  -- FIXME: this should be a real acceleration, i.e. a change to velocity
+  angular :: (I :/: Seconds) Double
+  angular = 3
+  rotation = c^.rotation_
+  target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
