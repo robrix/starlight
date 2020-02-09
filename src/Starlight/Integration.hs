@@ -237,12 +237,6 @@ runAction dt system c = \case
       targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)
     _ -> c
   where
-  thrust :: Newtons Double
-  thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
-    -- force sufficient to move 1000 kg by 10 km per second per second
-  -- FIXME: this should be a real acceleration, i.e. a change to velocity
-  angular :: (I :/: Seconds) Double
-  angular = 3
   rotation = c^.rotation_
   target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
 
@@ -250,3 +244,10 @@ runAction dt system c = \case
     Forwards  -> Just (angleOf (velocity^._xy))
     Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract velocity) <|> Just (angleOf (-velocity^._xy))
     Target    -> t^?_Just.to (projected dt).to (`L.direction` position).to (angleOf.(^._xy))
+
+thrust :: Newtons Double
+thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
+  -- force sufficient to move 1000 kg by 10 km per second per second
+-- FIXME: this should be a real acceleration, i.e. a change to velocity
+angular :: (I :/: Seconds) Double
+angular = 3
