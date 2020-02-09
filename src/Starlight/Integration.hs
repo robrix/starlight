@@ -225,13 +225,13 @@ runAction dt system c = \case
 
   Jump -> case target of
     Just target
-      | distance (projected dt c) (projected dt target) .<. factor * target^.magnitude_ -> c
-      | isFacing c targetAngle
-      , let delta = projected dt target - projected dt c
-      -> c & position_ +~ (1 - factor * target^.magnitude_ / norm delta) *^ delta
-      | otherwise -> face c Target -- FIXME: face *near* the target
+      | distance .<. factor * target^.magnitude_ -> c
+      | isFacing c targetAngle                   -> c & position_ +~ (1 - factor * target^.magnitude_ / norm delta) *^ delta
+      | otherwise                                -> face c Target -- FIXME: face *near* the target
       where
       factor = 0.75
+      delta = projected dt target - projected dt c
+      distance = norm delta
       targetAngle = angleTo (projected dt c) (projected dt target)
     _ -> c
   where
