@@ -24,7 +24,7 @@ import Control.Effect.Profile
 import Control.Effect.Random
 import Control.Effect.Reader
 import Control.Lens hiding (use, uses, view, views, (%=), (.=), (<~))
-import Control.Monad (foldM, guard, when, (>=>))
+import Control.Monad (guard, when, (>=>))
 import Data.Foldable (foldl', for_)
 import Data.Functor.Interval as Interval
 import Data.Ix (inRange)
@@ -199,28 +199,28 @@ runActions
 runActions c = do
   dt <- ask @(Seconds Double)
   system <- ask @(System StateVectors)
-  foldM (go dt system) c (actions c) where
+  pure $! foldl' (go dt system) c (actions c) where
   go dt system c = \case
-    Thrust -> pure $! c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
+    Thrust -> c & actor_ %~ applyImpulse (thrust .*^ rotate rotation (unit _x)^._xy) dt
 
-    Brake -> pure c
+    Brake -> c
 
     Face dir -> case desiredAngle (c^.actor_) target of
-      Just t  -> pure $! c & rotation_ %~ face (angular .*. dt) t
-      Nothing -> pure c
+      Just t  -> c & rotation_ %~ face (angular .*. dt) t
+      Nothing -> c
       where
       desiredAngle Actor{ velocity, position } t = case dir of
         Forwards  -> Just (angleOf (velocity^._xy))
         Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract velocity) <|> Just (angleOf (-velocity^._xy))
         Target    -> t^?_Just.to (projected dt).to (`L.direction` position).to (angleOf.(^._xy))
 
-    Turn t -> pure $! c & rotation_ *~ axisAngle (unit _z) ((case t of
+    Turn t -> c & rotation_ *~ axisAngle (unit _z) ((case t of
       L -> angular
       R -> -angular) .*. dt)
 
-    Fire Main -> pure c -- we don’t have to do anything here because whether or not a character is firing is derived from its actions
+    Fire Main -> c -- we don’t have to do anything here because whether or not a character is firing is derived from its actions
 
-    ChangeTarget change -> pure $! c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
+    ChangeTarget change -> c & target_ %~ maybe (const Nothing) switchTarget change . (>>= (`elemIndex` identifiers)) where
       elimChange prev next = \case { Prev -> prev ; Next -> next }
       switchTarget dir = \case
         Just i  -> identifiers !! i' <$ guard (inRange (0, pred (length identifiers)) i') where
@@ -230,15 +230,15 @@ runActions c = do
 
     Jump -> case target of
       Just target
-        | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> pure c
-        | facingRel rotation targetAngle < pi/128 -> do
-          let distance' = distance (projected dt target) (projected dt c)
-          pure $! c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected dt target - projected dt c)
-        | otherwise                               -> go dt system c (Face Target) -- FIXME: face *near* the target
+        | distance (projected dt c) (projected dt target) .<. factor * target ^.magnitude_ -> c
+        | facingRel rotation targetAngle < pi/128
+        , let distance' = distance (projected dt target) (projected dt c)
+        -> c & position_ +~ (1 - factor * target^.magnitude_ / distance') *^ (projected dt target - projected dt c)
+        | otherwise -> go dt system c (Face Target) -- FIXME: face *near* the target
         where
         factor = 0.75
         targetAngle = angleTo (projected dt c^._xy) (projected dt target^._xy)
-      _ -> pure c
+      _ -> c
     where
     thrust :: Newtons Double
     thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1
