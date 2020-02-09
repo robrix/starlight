@@ -207,14 +207,9 @@ runAction dt system c = \case
 
   Brake -> c
 
-  Face dir -> case desiredAngle (c^.actor_) target of
+  Face dir -> case desiredAngle (c^.actor_) target dir of
     Just t  -> c & rotation_ %~ face (angular .*. dt) t
     Nothing -> c
-    where
-    desiredAngle Actor{ velocity, position } t = case dir of
-      Forwards  -> Just (angleOf (velocity^._xy))
-      Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract velocity) <|> Just (angleOf (-velocity^._xy))
-      Target    -> t^?_Just.to (projected dt).to (`L.direction` position).to (angleOf.(^._xy))
 
   Turn t -> c & rotation_ *~ axisAngle (unit _z) ((case t of
     L -> angular
@@ -250,3 +245,8 @@ runAction dt system c = \case
   angular = 3
   rotation = c^.rotation_
   target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
+
+  desiredAngle Actor{ velocity, position } t = \case
+    Forwards  -> Just (angleOf (velocity^._xy))
+    Backwards -> t^?_Just.velocity_.to (angleOf.(^._xy).subtract velocity) <|> Just (angleOf (-velocity^._xy))
+    Target    -> t^?_Just.to (projected dt).to (`L.direction` position).to (angleOf.(^._xy))
