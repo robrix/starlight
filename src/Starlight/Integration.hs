@@ -210,7 +210,7 @@ runAction dt system c = \case
     , norm relativeVelocity > 0 -> thrust c (min (convert (c^.mass_ .*. norm relativeVelocity ./. Seconds 1)) Starlight.Integration.thrust)
     | otherwise                 -> face c Backwards
     where
-    relativeVelocity = fromMaybe (-c^.velocity_) (target^?_Just.velocity_.to (subtract (c^.velocity_)))
+    relativeVelocity = fromMaybe 0 (target^?_Just.velocity_) - c^.velocity_
 
   Face dir -> face c dir
 
