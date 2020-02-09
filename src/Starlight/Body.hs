@@ -33,7 +33,7 @@ module Starlight.Body
 import           Control.Carrier.Reader
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Control.Lens (Lens', coerced, view, (%~), (&), (^.))
+import           Control.Lens (Lens', coerced, view, (%~), (&), (+~), (^.))
 import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Generics.Product.Fields
@@ -160,6 +160,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     , actor = actor
       & position_.extended 0.extended 1 %~ apply rel
       & velocity_.coerced.extended 0.extended 0 %~ apply rel
+      & velocity_ +~ maybe 0 (view velocity_) p
     } where
     actor = actorAt (maybe 0 (view mass_) p) body t
     p = parent identifier >>= (bodies' Map.!?)
