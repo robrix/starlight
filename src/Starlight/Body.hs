@@ -33,7 +33,7 @@ module Starlight.Body
 import           Control.Carrier.Reader
 import           Control.Effect.Lift
 import           Control.Effect.State
-import           Control.Lens (Lens', coerced, (%~), (&), (^.))
+import           Control.Lens (Lens', coerced, view, (%~), (&), (^.))
 import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Generics.Product.Fields
@@ -121,8 +121,8 @@ orbitTimeScale :: Num a => I a
 orbitTimeScale = 1
 
 
-actorAt :: Body -> Seconds Double -> Actor
-actorAt Body{ radius, mass, rotation, eccentricity, semimajor, revolution, timeOfPeriapsis } t = Actor
+actorAt :: Kilo Grams Double -> Body -> Seconds Double -> Actor
+actorAt parentMass Body{ radius, mass, rotation, eccentricity, semimajor, revolution, timeOfPeriapsis } t = Actor
   { position = convert <$> cartesian2 trueAnomaly r
   , velocity = if r == 0 then 0 else convert . (\ coord -> sqrtU @(Length :^: 2 :/: Time) (mu .*. semimajor) ./. r .*. coord) <$> V2 (-sin eccentricAnomaly) (sqrt (1 - eccentricity ** 2) .*. cos eccentricAnomaly)
   , rotation
@@ -149,7 +149,7 @@ actorAt Body{ radius, mass, rotation, eccentricity, semimajor, revolution, timeO
   r :: Kilo Metres Double
   r = semimajor .*. (1 - eccentricity * cos eccentricAnomaly)
   mu :: (Kilo Metres :^: 3 :/: Seconds :^: 2) Double
-  mu = convert $ gravC .*. mass
+  mu = convert $ gravC .*. (parentMass + mass)
 
 
 systemAt :: System Body -> Seconds Double -> System StateVectors
@@ -162,7 +162,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
       & position_.extended 0.extended 1 %~ apply rel
       & velocity_.coerced.extended 0.extended 0 %~ apply rel
     } where
-    actor = actorAt body t
+    actor = actorAt (maybe 0 (view mass_) p) body t
     p = parent identifier >>= (bodies' Map.!?)
     rel = maybe rot ((>>> rot) . transform) p
     rot = mkRotation (orientation revolution)
