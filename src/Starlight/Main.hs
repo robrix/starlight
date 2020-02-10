@@ -20,7 +20,6 @@ import qualified Control.Carrier.Trace.Lift as Trace
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
-import qualified Control.Exception.Lift as E
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class.Lift
 import           Data.Bool (bool)
@@ -30,22 +29,9 @@ import qualified GL.Carrier.Check.IO as Check
 import           GL.Effect.Check
 import qualified Starlight.CLI as CLI
 import           Starlight.Game
-import           System.Environment
-import           System.Exit
 
 main :: IO ()
-main = handling $ CLI.execParser CLI.argumentsParser >>= runThread . (`runReader` runCheck (runProfile (runTrace game)))
-  where
-  handling m = do
-    name <- getProgName
-    -- Exceptions don’t seem to exit in the repl for unknown reasons, so we catch and log them (except for 'ExitCode')
-    if name == "<interactive>" then
-      m `E.catches`
-        [ E.Handler (const @_ @ExitCode (pure ()))
-        , E.Handler (putStrLn . E.displayException @E.SomeException)
-        ]
-    else
-      m
+main = CLI.execParser CLI.argumentsParser >>= runThread . (`runReader` runCheck (runProfile (runTrace game)))
 
 runProfile
   :: ( Has (Lift IO) sig m
