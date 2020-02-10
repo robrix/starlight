@@ -5,5 +5,5 @@ module Starlight.Faction
 import UI.Colour
 
 newtype Faction = Faction
-  { standardIssue :: Colour Float
+  { colour :: Colour Float
   }
