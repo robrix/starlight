@@ -105,6 +105,7 @@ library
     Starlight.Draw.Ship
     Starlight.Draw.Starfield
     Starlight.Draw.Weapon.Laser
+    Starlight.Faction
     Starlight.Game
     Starlight.Identifier
     Starlight.Integration
