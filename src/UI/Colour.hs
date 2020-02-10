@@ -77,7 +77,7 @@ setClearColour (fmap realToFrac -> V4 r g b a) = runLiftIO $ glClearColor r g b 
 packed :: (RealFrac a, Fractional b) => Iso (Colour a) (Colour b) Word32 Word32
 packed = iso pack unpack
   where
-  pack c = let V4 r g b a = round . (* 255) <$> c in shiftL r 24 .|. shiftL g 16 .|. shiftL b 8 .|. a :: Word32
+  pack (fmap (round . (* 255)) -> V4 r g b a) = shiftL r 24 .|. shiftL g 16 .|. shiftL b 8 .|. a :: Word32
   unpack i = (/ 255) . fromIntegral <$> V4 (0xff .&. shiftR i 24) (0xff .&. shiftR i 16) (0xff .&. shiftR i 8) (0xff .&. i)
 
 
