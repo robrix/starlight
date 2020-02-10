@@ -37,8 +37,8 @@ main = do
   runThread (runReader options (runCheck (runProfile (runTrace game))))
 
 runProfile
-  :: ( Has (Lift IO) sig m
-     , Effect sig
+  :: ( Effect sig
+     , Has (Lift IO) sig m
      , Has (Reader CLI.Options) sig m
      )
   => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Profile :+: sig) (t m)) => t m a)
