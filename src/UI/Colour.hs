@@ -1,4 +1,8 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ViewPatterns #-}
 module UI.Colour
 ( Colour
@@ -23,6 +27,7 @@ import Control.Effect.Random
 import Control.Lens
 import Control.Monad.IO.Class.Lift
 import Data.Bits
+import Data.Generics.Product.Fields
 import Data.Word
 import Graphics.GL.Core41
 import Linear.V4
@@ -83,6 +88,8 @@ packed = iso pack unpack
 
 class HasColour t where
   colour_ :: Lens' t (Colour Float)
+  default colour_ :: HasField "colour" t t (Colour Float) (Colour Float) => Lens' t (Colour Float)
+  colour_ = field @"colour"
 
 instance HasColour (V4 Float) where
   colour_ = id
