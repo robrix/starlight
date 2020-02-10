@@ -34,16 +34,18 @@ import           Starlight.Game
 main :: IO ()
 main = do
   options <- CLI.execParser CLI.argumentsParser
-  runThread (runReader options (runCheck (runProfile (runTrace game))))
+  runThread (runReader options (runCheck (runProfile (CLI.profile options) (runTrace game))))
 
 runProfile
   :: ( Effect sig
      , Has (Lift IO) sig m
-     , Has (Reader CLI.Options) sig m
      )
-  => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Profile :+: sig) (t m)) => t m a)
+  => Flag CLI.ShouldProfile
+  -> (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Profile :+: sig) (t m)) => t m a)
   -> m a
-runProfile m = view CLI.profile_ >>= bool (NoProfile.runProfile m) (Profile.reportProfile m) . fromFlag CLI.ShouldProfile
+runProfile flag
+  | fromFlag CLI.ShouldProfile flag = Profile.reportProfile
+  | otherwise                       = NoProfile.runProfile
 
 runTrace
   :: ( Has (Lift IO) sig m
