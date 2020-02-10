@@ -1,2 +1,5 @@
 module Starlight.Faction
-() where
+( Faction(..)
+) where
+
+data Faction = Faction
