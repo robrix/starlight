@@ -2,4 +2,8 @@ module Starlight.Faction
 ( Faction(..)
 ) where
 
-data Faction = Faction
+import UI.Colour
+
+newtype Faction = Faction
+  { standardIssue :: Colour Float
+  }
