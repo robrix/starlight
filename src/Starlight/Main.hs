@@ -13,7 +13,6 @@ module Starlight.Main
 import           Control.Algebra
 import qualified Control.Carrier.Profile.Identity as NoProfile
 import qualified Control.Carrier.Profile.Tree as Profile
-import           Control.Carrier.Reader
 import           Control.Carrier.Thread.IO
 import qualified Control.Carrier.Trace.Ignoring as NoTrace
 import qualified Control.Carrier.Trace.Lift as Trace
@@ -32,7 +31,7 @@ import           Starlight.Game
 main :: IO ()
 main = do
   options <- CLI.execParser CLI.argumentsParser
-  runThread (runReader options (runCheck (CLI.check options) (runProfile (CLI.profile options) (runTrace (CLI.trace options) game))))
+  runThread (runCheck (CLI.check options) (runProfile (CLI.profile options) (runTrace (CLI.trace options) game)))
 
 runProfile
   :: ( Effect sig
