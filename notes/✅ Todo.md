@@ -197,6 +197,7 @@
   - ✅ the mouse cursor should not be visible unless we can actually click on things
   - switching to another app and back on macOS improves framerate?
   - the starfield is really slow to draw
+  - the starfield is distractingly twinkly when moving at low velocities
 
 - ⤴️ Extract
   - ✅ fused-effects-profile
