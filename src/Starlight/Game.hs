@@ -59,7 +59,16 @@ runGame
      , MonadFail m
      )
   => Map.Map BodyIdentifier Body
-  -> ReaderC Epoch (StateC (Chain (V2 (Distance Double))) (TVar.StateC (System Body) (TVar.StateC Input (RandomC SMGen (LiftIO (FinallyC (GLC (ReaderC Context (ReaderC Window.Window m))))))))) a
+  -> ReaderC Epoch
+    (StateC (Chain (V2 (Distance Double)))
+    (TVar.StateC (System Body)
+    (TVar.StateC Input
+    (RandomC SMGen
+    (LiftIO
+    (FinallyC
+    (GLC
+    (ReaderC Context
+    (ReaderC Window.Window m))))))))) a
   -> m a
 runGame bodies
   = Window.runSDL
