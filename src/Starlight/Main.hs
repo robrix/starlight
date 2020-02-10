@@ -23,6 +23,7 @@ import           Control.Effect.Trace
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class.Lift
 import           Data.Bool (bool)
+import           Data.Flag
 import           Data.Kind (Constraint)
 import qualified GL.Carrier.Check.Identity as NoCheck
 import qualified GL.Carrier.Check.IO as Check
@@ -42,7 +43,7 @@ runProfile
      )
   => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Profile :+: sig) (t m)) => t m a)
   -> m a
-runProfile m = view CLI.profile_ >>= bool (NoProfile.runProfile m) (Profile.reportProfile m)
+runProfile m = view CLI.profile_ >>= bool (NoProfile.runProfile m) (Profile.reportProfile m) . fromFlag CLI.ShouldProfile
 
 runTrace
   :: ( Has (Lift IO) sig m
@@ -50,7 +51,7 @@ runTrace
      )
   => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Trace :+: sig) (t m)) => t m a)
   -> m a
-runTrace m = view CLI.trace_ >>= bool (NoTrace.runTrace m) (Trace.runTrace m)
+runTrace m = view CLI.trace_ >>= bool (NoTrace.runTrace m) (Trace.runTrace m) . fromFlag CLI.ShouldTrace
 
 runCheck
   :: ( Has (Lift IO) sig m
@@ -58,6 +59,6 @@ runCheck
      )
   => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Check :+: sig) (t m)) => t m a)
   -> m a
-runCheck m = view CLI.check_ >>= bool (NoCheck.runCheck m) (Check.runCheck m)
+runCheck m = view CLI.check_ >>= bool (NoCheck.runCheck m) (Check.runCheck m) . fromFlag CLI.ShouldCheck
 
 type Lifts (c :: (* -> *) -> Constraint) t = ((forall m' . c m' => c (t m')) :: Constraint)
