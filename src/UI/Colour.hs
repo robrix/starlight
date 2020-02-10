@@ -7,6 +7,7 @@ module UI.Colour
 , red
 , green
 , blue
+, uniformRGB
 , _r
 , _g
 , _b
@@ -17,6 +18,7 @@ module UI.Colour
 , HasColour(..)
 ) where
 
+import Control.Effect.Random
 import Control.Lens
 import Control.Monad.IO.Class.Lift
 import Data.Bits
@@ -44,6 +46,10 @@ green = V4 0 1 0 1
 
 blue :: Num a => Colour a
 blue = V4 0 0 1 1
+
+
+uniformRGB :: (RealFrac a, Has Random sig m) => m (Colour a)
+uniformRGB = review packed . (.|. 0xff) <$> uniform
 
 
 _r :: R1 t => Lens' (t a) a
