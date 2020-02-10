@@ -31,7 +31,9 @@ import qualified Starlight.CLI as CLI
 import           Starlight.Game
 
 main :: IO ()
-main = CLI.execParser CLI.argumentsParser >>= runThread . (`runReader` runCheck (runProfile (runTrace game)))
+main = do
+  options <- CLI.execParser CLI.argumentsParser
+  runThread (runReader options (runCheck (runProfile (runTrace game))))
 
 runProfile
   :: ( Has (Lift IO) sig m
