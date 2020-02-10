@@ -17,12 +17,10 @@ import           Control.Carrier.Reader
 import           Control.Carrier.Thread.IO
 import qualified Control.Carrier.Trace.Ignoring as NoTrace
 import qualified Control.Carrier.Trace.Lift as Trace
-import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Profile
 import           Control.Effect.Trace
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class.Lift
-import           Data.Bool (bool)
 import           Data.Flag
 import           Data.Kind (Constraint)
 import qualified GL.Carrier.Check.Identity as NoCheck
@@ -34,7 +32,7 @@ import           Starlight.Game
 main :: IO ()
 main = do
   options <- CLI.execParser CLI.argumentsParser
-  runThread (runReader options (runCheck (runProfile (CLI.profile options) (runTrace (CLI.trace options) game))))
+  runThread (runReader options (runCheck (CLI.check options) (runProfile (CLI.profile options) (runTrace (CLI.trace options) game))))
 
 runProfile
   :: ( Effect sig
@@ -57,11 +55,12 @@ runTrace flag
   | otherwise                     = NoTrace.runTrace
 
 runCheck
-  :: ( Has (Lift IO) sig m
-     , Has (Reader CLI.Options) sig m
-     )
-  => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Check :+: sig) (t m)) => t m a)
+  :: Has (Lift IO) sig m
+  => Flag CLI.ShouldCheck
+  -> (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Check :+: sig) (t m)) => t m a)
   -> m a
-runCheck m = view CLI.check_ >>= bool (NoCheck.runCheck m) (Check.runCheck m) . fromFlag CLI.ShouldCheck
+runCheck flag
+  | fromFlag CLI.ShouldCheck flag = Check.runCheck
+  | otherwise                     = NoCheck.runCheck
 
 type Lifts (c :: (* -> *) -> Constraint) t = ((forall m' . c m' => c (t m')) :: Constraint)
