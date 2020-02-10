@@ -58,6 +58,6 @@ runCheck
      )
   => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Check :+: sig) (t m)) => t m a)
   -> m a
-runCheck m = view CLI.trace_ >>= bool (NoCheck.runCheck m) (Check.runCheck m)
+runCheck m = view CLI.check_ >>= bool (NoCheck.runCheck m) (Check.runCheck m)
 
 type Lifts (c :: (* -> *) -> Constraint) t = ((forall m' . c m' => c (t m')) :: Constraint)
