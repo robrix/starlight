@@ -111,9 +111,6 @@ pickName = do
   i <- uniformR (0, pred (length names))
   pure $! Text.pack (names !! i)
 
-pickColour :: Has Random sig m => m (Colour Float)
-pickColour = V4 <$> uniform <*> uniform <*> uniform <*> pure 1
-
 integration
   :: ( Effect sig
      , Has (Lift IO) sig m
@@ -138,7 +135,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
     pdf <- spawnPDF
     when (nearbyNPCs ./. area radius < runPDF pdf playerPos) $ do
       pos <- pickSpawnPoint pdf (Interval.point playerPos + interval (-radius) radius)
-      npc <- npc <$> pickName <*> pure pos <*> pickColour
+      npc <- npc <$> pickName <*> pure pos <*> uniformRGB
       npcs_ @Body %= Map.insert (0, name npc) npc
 
   measure "controls" $ player_ @Body .actions_ <~ controls
