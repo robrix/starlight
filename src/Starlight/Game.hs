@@ -73,7 +73,7 @@ runGame bodies
   . TVar.evalState System
       { bodies
       , players = Map.fromList
-        [ (,) (0, "you") $ Character
+        [ ((0, "you"), Character
           { name    = "you"
           , actor   = Actor
             { position  = convert <$> start
@@ -85,7 +85,7 @@ runGame bodies
           , target  = Nothing
           , actions = mempty
           , ship    = Ship{ colour = white, armour = 1_000, radar }
-          }
+          })
         ]
       , npcs    = mempty
       }
