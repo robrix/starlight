@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ViewPatterns #-}
 module UI.Colour
 ( Colour
 , black
@@ -70,8 +71,7 @@ opaque = set _a 1
 
 
 setClearColour :: (Real a, Has (Lift IO) sig m) => Colour a -> m ()
-setClearColour v = runLiftIO $ glClearColor r g b a where
-  V4 r g b a = realToFrac <$> v
+setClearColour (fmap realToFrac -> V4 r g b a) = runLiftIO $ glClearColor r g b a
 
 
 packed :: (RealFrac a, Fractional b) => Iso (Colour a) (Colour b) Word32 Word32
