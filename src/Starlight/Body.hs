@@ -97,8 +97,7 @@ data Body = Body
   }
   deriving (Generic, Show)
 
-instance HasColour Body where
-  colour_ = field @"colour"
+instance HasColour Body
 
 radius_ :: Lens' Body (Kilo Metres Double)
 radius_ = field @"radius"

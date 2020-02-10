@@ -23,8 +23,7 @@ data Ship = Ship
   }
   deriving (Generic, Show)
 
-instance HasColour Ship where
-  colour_ = field @"colour"
+instance HasColour Ship
 
 armour_ :: Lens' Ship (Interval I Double)
 armour_ = field @"armour"
