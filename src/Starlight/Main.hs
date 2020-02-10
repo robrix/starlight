@@ -34,7 +34,7 @@ import           Starlight.Game
 main :: IO ()
 main = do
   options <- CLI.execParser CLI.argumentsParser
-  runThread (runReader options (runCheck (runProfile (CLI.profile options) (runTrace game))))
+  runThread (runReader options (runCheck (runProfile (CLI.profile options) (runTrace (CLI.trace options) game))))
 
 runProfile
   :: ( Effect sig
@@ -48,12 +48,13 @@ runProfile flag
   | otherwise                       = NoProfile.runProfile
 
 runTrace
-  :: ( Has (Lift IO) sig m
-     , Has (Reader CLI.Options) sig m
-     )
-  => (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Trace :+: sig) (t m)) => t m a)
+  :: Has (Lift IO) sig m
+  => Flag CLI.ShouldTrace
+  -> (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Trace :+: sig) (t m)) => t m a)
   -> m a
-runTrace m = view CLI.trace_ >>= bool (NoTrace.runTrace m) (Trace.runTrace m) . fromFlag CLI.ShouldTrace
+runTrace flag
+  | fromFlag CLI.ShouldTrace flag = Trace.runTrace
+  | otherwise                     = NoTrace.runTrace
 
 runCheck
   :: ( Has (Lift IO) sig m
