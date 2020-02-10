@@ -6,6 +6,7 @@ module Data.Flag
 ) where
 
 newtype Flag t = Flag { getFlag :: Bool }
+  deriving (Eq, Ord, Show)
 
 toFlag :: t -> Bool -> Flag t
 toFlag _ = Flag
