@@ -12,6 +12,6 @@ data Faction = Faction
   { name   :: Text
   , colour :: Colour Float
   }
-  deriving (Generic)
+  deriving (Eq, Generic, Ord, Show)
 
 instance HasColour Faction
