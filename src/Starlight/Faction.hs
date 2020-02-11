@@ -4,11 +4,13 @@ module Starlight.Faction
 ( Faction(..)
 ) where
 
+import Data.Text (Text)
 import GHC.Generics (Generic)
 import UI.Colour
 
-newtype Faction = Faction
-  { colour :: Colour Float
+data Faction = Faction
+  { name   :: Text
+  , colour :: Colour Float
   }
   deriving (Generic)
 
