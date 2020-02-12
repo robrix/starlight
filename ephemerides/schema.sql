@@ -17,3 +17,9 @@ create table bodies
   , orbitalPeriod real not null -- seconds
   , timeOfPeriapsis real not null -- seconds
   );
+
+-- schema for factions & their relationships
+create table factions
+  ( name text not null
+  , colour integer not null
+  );
