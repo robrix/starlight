@@ -7,11 +7,12 @@ module Control.Effect.Database
   -- * Re-exports
 , Algebra
 , Effect
-, Has
+, HasLabelled
 , run
 ) where
 
 import Control.Algebra
+import Control.Effect.Labelled
 import Data.Text (Text)
 import Database.SQLite3 (SQLData)
 
