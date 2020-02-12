@@ -25,7 +25,7 @@ import           Unit.Mass
 import           Unit.Time
 
 bodiesFromSQL :: Has (Lift IO) sig m => m (Map.Map BodyIdentifier Body)
-bodiesFromSQL = sendM (getDataFileName "ephemerides/ephemerides.db") >>= \ file -> bracket (sendM (open (pack file))) (sendM . close) $ \ db -> sendM $ do
+bodiesFromSQL = sendM (getDataFileName "data/data.db") >>= \ file -> bracket (sendM (open (pack file))) (sendM . close) $ \ db -> sendM $ do
   stmt <- prepare db "select rowid, * from bodies"
   entries <- mfix $ \ ephemerides -> fix (\ loop elems -> do
     res <- step stmt

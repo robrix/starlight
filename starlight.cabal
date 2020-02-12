@@ -15,7 +15,7 @@ build-type:          Simple
 extra-source-files:  README.md
 
 data-files:
-  ephemerides/ephemerides.db
+  data/data.db
 
 common common
   default-language: Haskell2010
