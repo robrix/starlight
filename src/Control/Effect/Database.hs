@@ -4,8 +4,14 @@
 module Control.Effect.Database
 ( -- * Database effect
   Database(..)
+  -- * Re-exports
+, Algebra
+, Effect
+, Has
+, run
 ) where
 
+import Control.Algebra
 import Data.Text (Text)
 import Database.SQLite3 (SQLData)
 
