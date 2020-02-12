@@ -22,3 +22,6 @@ deriving instance Functor m => Functor (Database m)
 
 instance HFunctor Database where
   hmap f (Execute cmd row k) = Execute cmd (f . row) (f . k)
+
+instance Effect Database where
+  thread ctx hdl (Execute cmd row k) = Execute cmd (hdl . (<$ ctx) . row) (hdl . fmap k)
