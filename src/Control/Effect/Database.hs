@@ -14,15 +14,14 @@ module Control.Effect.Database
 import Control.Algebra
 import Control.Effect.Labelled
 import Data.Text (Text)
-import Database.SQLite3 (SQLData)
 
-data Database m k
-  = forall a . Execute Text ([SQLData] -> m a) (a -> m k)
+data Database row m k
+  = Execute Text (row -> m k)
 
-deriving instance Functor m => Functor (Database m)
+deriving instance Functor m => Functor (Database row m)
 
-instance HFunctor Database where
-  hmap f (Execute cmd row k) = Execute cmd (f . row) (f . k)
+instance HFunctor (Database row) where
+  hmap f (Execute cmd k) = Execute cmd (f . k)
 
-instance Effect Database where
-  thread ctx hdl (Execute cmd row k) = Execute cmd (hdl . (<$ ctx) . row) (hdl . fmap k)
+instance Effect (Database row) where
+  thread ctx hdl (Execute cmd k) = Execute cmd (hdl . (<$ ctx) . k)
