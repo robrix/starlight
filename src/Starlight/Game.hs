@@ -21,8 +21,8 @@ import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Thread
 import           Control.Effect.Trace
 import           Control.Exception.Lift
+import           Control.Monad.Fix
 import           Control.Monad.IO.Class.Lift
-import           Data.Function (fix)
 import qualified Data.Map as Map
 import           GL
 import           GL.Effect.Check
@@ -117,6 +117,7 @@ game
      , HasLabelled Thread (Thread id) sig m
      , Has Trace sig m
      , MonadFail m
+     , MonadFix m
      )
   => m ()
 game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do

@@ -8,11 +8,11 @@ module Starlight.Sol
 ) where
 
 import           Control.Effect.Lift
-import           Control.Exception.Lift
+import           Control.Effect.Reader
 import           Control.Lens (review)
 import           Control.Monad.Fix
 import qualified Data.Map as Map
-import           Data.Text (pack)
+import           Data.SQL
 import           Database.SQLite3
 import           Linear.Exts
 import           Paths_starlight
@@ -24,18 +24,19 @@ import           Unit.Length
 import           Unit.Mass
 import           Unit.Time
 
-bodiesFromSQL :: Has (Lift IO) sig m => m (Map.Map BodyIdentifier Body)
-bodiesFromSQL = sendM (getDataFileName "data/data.db") >>= \ file -> bracket (sendM (open (pack file))) (sendM . close) $ \ db -> sendM $ do
-  stmt <- prepare db "select rowid, * from bodies"
+bodiesFromSQL :: (Has (Lift IO) sig m, MonadFail m, MonadFix m) => m (Map.Map BodyIdentifier Body)
+bodiesFromSQL = sendM (getDataFileName "data/data.db") >>= \ file -> runDatabase file $ do
+  db <- ask
+  stmt <- sendM (prepare db "select rowid, * from bodies")
   entries <- mfix $ \ ephemerides -> fix (\ loop elems -> do
-    res <- step stmt
-    cols <- columns stmt
+    res <- sendM (step stmt)
+    cols <- sendM (columns stmt)
     case res of
       Done -> pure (elems [])
       Row  -> do
         entry <- fromColumns ephemerides cols
         loop (elems . (entry:))) id
-  finalize stmt
+  sendM (finalize stmt)
   pure $! Map.fromList (map snd entries)
   where
   fromColumns ephemerides = \case
