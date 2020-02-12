@@ -2,7 +2,8 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE StandaloneDeriving #-}
 module Control.Effect.Database
-( Database(..)
+( -- * Database effect
+  Database(..)
 ) where
 
 import Data.Text (Text)
