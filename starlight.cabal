@@ -158,6 +158,7 @@ library
     Paths_starlight
   build-depends:
       base
+    , bound
     , containers
     , direct-sqlite ^>= 2.3
     , directory ^>= 1.3
