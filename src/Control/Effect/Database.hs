@@ -19,3 +19,6 @@ data Database m k
   = forall a . Execute Text ([SQLData] -> m a) (a -> m k)
 
 deriving instance Functor m => Functor (Database m)
+
+instance HFunctor Database where
+  hmap f (Execute cmd row k) = Execute cmd (f . row) (f . k)
