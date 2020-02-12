@@ -8,5 +8,5 @@ import Control.Exception.Lift
 import Data.Text (pack)
 import Database.SQLite3
 
-runDatabase :: Has (Lift IO) sig m => String -> ReaderC Database m a -> m a
+runDatabase :: Has (Lift IO) sig m => FilePath -> ReaderC Database m a -> m a
 runDatabase file m = bracket (sendM (open (pack file))) (sendM . close) (`runReader` m)
