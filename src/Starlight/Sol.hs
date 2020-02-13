@@ -70,17 +70,17 @@ loadBodies = execute "select rowid, * from bodies" $ \ stmt -> do
 
 loadFactions :: (HasLabelled Database (Database stmt) sig m, MonadFail m) => m Factions
 loadFactions = do
-  rs <- execute "select * from relationships" $ \ relationships -> fix (\ loop elems -> do
-    relationships' <- step relationships
-    case relationships' of
+  rs <- execute "select * from relationships" $ \ stmt -> fix (\ loop elems -> do
+    res <- step stmt
+    case res of
       Nothing -> pure elems
       Just [ SQLInteger faction1Id, SQLInteger faction2Id, SQLFloat rel ] ->
         loop (IntMap.insertWith (<>) (fromIntegral faction1Id) (IntMap.singleton (fromIntegral faction2Id) rel) elems)
       Just row -> fail $ "loadFactions.relationships: bad row: " <> show row) IntMap.empty
 
-  fs <- execute "select rowid, * from factions" $ \ factions -> fix (\ loop elems -> do
-    factions' <- step factions
-    case factions' of
+  fs <- execute "select rowid, * from factions" $ \ stmt -> fix (\ loop elems -> do
+    res <- step stmt
+    case res of
       Nothing -> pure elems
       Just [ SQLInteger rowid, SQLText name, SQLInteger colour ] ->
         loop (IntMap.insert (fromIntegral rowid) (Faction name (review packed (fromIntegral colour)) (IntMap.toList (rs IntMap.! fromIntegral rowid))) elems)
