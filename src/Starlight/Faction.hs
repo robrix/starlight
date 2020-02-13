@@ -14,6 +14,12 @@ import UI.Colour
 
 newtype Factions = Factions { getFactions :: [Scope Int Faction Void] }
 
+data PFaction a b
+  = Var b
+  | Mu (a -> PFaction a b)
+  | In (Faction b)
+  deriving (Functor)
+
 data Faction a = Faction
   { name          :: Text
   , colour        :: Colour Float
