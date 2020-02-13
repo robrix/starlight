@@ -7,6 +7,7 @@
 module Control.Effect.Database
 ( -- * Database effect
   execute
+, step
 , Database(..)
   -- * Re-exports
 , Algebra
@@ -22,6 +23,9 @@ import Database.SQLite3 (SQLData)
 
 execute :: HasLabelled Database (Database stmt) sig m => Text -> (stmt -> m a) -> m a
 execute cmd m = sendLabelled @Database (Labelled (Execute cmd m pure))
+
+step :: HasLabelled Database (Database stmt) sig m => stmt -> m (Maybe [SQLData])
+step stmt = sendLabelled @Database (Labelled (Step stmt pure))
 
 data Database row m k
   = forall a . Execute Text (row -> m a) (a -> m k)
