@@ -18,21 +18,19 @@ import Data.Text (Text)
 import GHC.Generics (Generic)
 import UI.Colour
 
-newtype Factions = Factions { getFactions :: forall v . [PFaction v v] }
+newtype Factions = Factions { getFactions :: forall v . [v] -> [PFaction v] }
 
-data PFaction a b
-  = Var b
-  | Mu (a -> PFaction a b)
-  | In (Faction (PFaction a b))
+data PFaction a
+  = Var a
+  | In (Faction (PFaction a))
   deriving (Functor)
 
-instance Applicative (PFaction a) where
+instance Applicative PFaction where
   pure = Var
   (<*>) = ap
 
-instance Monad (PFaction a) where
+instance Monad PFaction where
   Var a >>= f = f a
-  Mu a  >>= f = Mu ((>>= f) . a)
   In a  >>= f = In (a & relationships_.traversed._1 %~ (>>= f))
 
 data Faction a = Faction
