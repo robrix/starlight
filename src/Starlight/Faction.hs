@@ -12,6 +12,7 @@ module Starlight.Faction
 ) where
 
 import Control.Lens
+import Control.Monad (ap)
 import Data.Generics.Product.Fields
 import Data.Text (Text)
 import GHC.Generics (Generic)
@@ -27,9 +28,7 @@ data PFaction a b
 
 instance Applicative (PFaction a) where
   pure = Var
-  Var f <*> a = f <$> a
-  Mu f  <*> a = Mu ((<*> a) . f)
-  In f  <*> a = In (f & relationships_.traversed._1 %~ (<*> a))
+  (<*>) = ap
 
 instance Monad (PFaction a) where
   Var a >>= f = f a
