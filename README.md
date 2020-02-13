@@ -12,7 +12,8 @@ Initial setup:
 ```bash
 brew bundle # for sdl2 & sqlite3
 cat data/schema.sql | sqlite3 data/data.db # to create the solar system db
-cat data/ephemerides.sql | sqlite3 data/data.db # to populate the solar system db
+cat data/ephemerides.sql | sqlite3 data/data.db # to populate the solar system db with planets
+cat data/factions.sql | sqlite3 data/data.db # to populate the solar system db with factions
 cabal build # to set up dist-newstyle with the ghc package db
 ```
 
