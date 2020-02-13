@@ -30,7 +30,7 @@ instance Applicative (PFaction a) where
   pure = Var
   Var f <*> a = f <$> a
   Mu f  <*> a = Mu ((<*> a) . f)
-  In f  <*> a = In (Faction (name f) (colour f) (map (first (<*> a)) (relationships f)))
+  In f  <*> a = In (f & relationships_ %~ map (first (<*> a)))
 
 data Faction a = Faction
   { name          :: Text
