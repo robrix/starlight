@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
 module Starlight.Faction
 ( Factions(..)
 , Faction(..)
@@ -18,6 +19,6 @@ data Faction a = Faction
   , colour        :: Colour Float
   , relationships :: [(a, Float)]
   }
-  deriving (Eq, Generic, Ord, Show)
+  deriving (Eq, Foldable, Functor, Generic, Ord, Show, Traversable)
 
 instance HasColour (Faction a)
