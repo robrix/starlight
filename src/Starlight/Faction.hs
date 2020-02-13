@@ -17,7 +17,7 @@ newtype Factions = Factions { getFactions :: forall v . [PFaction v v] }
 data PFaction a b
   = Var b
   | Mu (a -> PFaction a b)
-  | In (Faction b)
+  | In (Faction (PFaction a b))
   deriving (Functor)
 
 data Faction a = Faction
