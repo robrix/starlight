@@ -18,7 +18,7 @@ import Data.Text (Text)
 import GHC.Generics (Generic)
 import UI.Colour
 
-newtype Factions = Factions { getFactions :: forall v . [v] -> [PFaction v] }
+newtype Factions = Factions { getFactions :: forall v . [v] -> [Faction v] }
 
 data PFaction a
   = Var a
