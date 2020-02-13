@@ -39,6 +39,7 @@ library
   import:              common
   hs-source-dirs:      src
   exposed-modules:
+    Control.Carrier.Database.SQLite
     Control.Carrier.Empty.Church
     Control.Carrier.Empty.CPS
     Control.Carrier.Error.IO
