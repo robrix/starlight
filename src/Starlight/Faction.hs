@@ -11,7 +11,7 @@ import Data.Void (Void)
 import GHC.Generics (Generic)
 import UI.Colour
 
-newtype Factions = Factions { getFactions :: Scope Int Faction Void }
+newtype Factions = Factions { getFactions :: [Scope Int Faction Void] }
 
 data Faction a = Faction
   { name          :: Text
