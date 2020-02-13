@@ -31,6 +31,11 @@ instance Applicative (PFaction a) where
   Mu f  <*> a = Mu ((<*> a) . f)
   In f  <*> a = In (f & relationships_.traversed._1 %~ (<*> a))
 
+instance Monad (PFaction a) where
+  Var a >>= f = f a
+  Mu a  >>= f = Mu ((>>= f) . a)
+  In a  >>= f = In (a & relationships_.traversed._1 %~ (>>= f))
+
 data Faction a = Faction
   { name          :: Text
   , colour        :: Colour Float
