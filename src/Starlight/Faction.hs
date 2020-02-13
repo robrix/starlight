@@ -8,6 +8,7 @@ module Starlight.Faction
 , PFaction(..)
 , Faction(..)
 , name_
+, relationships_
 ) where
 
 import Control.Lens
@@ -42,3 +43,6 @@ instance HasColour (Faction a)
 
 name_ :: Lens' (Faction a) Text
 name_ = field @"name"
+
+relationships_ :: Lens (Faction a) (Faction b) [(a, Float)] [(b, Float)]
+relationships_ = field @"relationships"
