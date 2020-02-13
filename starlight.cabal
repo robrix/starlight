@@ -62,7 +62,6 @@ library
     Data.Functor.I
     Data.Functor.Interval
     Data.Functor.K
-    Data.SQL
     Foreign.C.String.Lift
     Foreign.Marshal.Alloc.Lift
     Foreign.Marshal.Array.Lift
