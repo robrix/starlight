@@ -12,7 +12,6 @@ module Starlight.Faction
 ) where
 
 import Control.Lens
-import Data.Bifunctor (first)
 import Data.Generics.Product.Fields
 import Data.Text (Text)
 import GHC.Generics (Generic)
@@ -30,7 +29,7 @@ instance Applicative (PFaction a) where
   pure = Var
   Var f <*> a = f <$> a
   Mu f  <*> a = Mu ((<*> a) . f)
-  In f  <*> a = In (f & relationships_ %~ map (first (<*> a)))
+  In f  <*> a = In (f & relationships_.traversed._1 %~ (<*> a))
 
 data Faction a = Faction
   { name          :: Text
