@@ -37,36 +37,33 @@ loadBodies = execute "select rowid, * from bodies" $ \ stmt -> do
     res <- step stmt
     case res of
       Nothing   -> pure elems
-      Just cols -> do
-        (rowid, entry) <- fromColumns ephemerides cols
-        loop (IntMap.insert (fromIntegral rowid) entry elems)) IntMap.empty
+      Just [ SQLInteger rowid, parentId, SQLInteger code, SQLText name, SQLInteger population, SQLFloat radius, SQLFloat mass, SQLFloat tilt, SQLFloat rotationalPeriod, SQLInteger colour, SQLFloat eccentricity, SQLFloat semimajor, SQLFloat longitudeOfAscendingNode, SQLFloat inclination, SQLFloat argumentOfPerifocus, SQLFloat orbitalPeriod, SQLFloat timeOfPeriapsis ] -> do
+        let leaf = (fromIntegral code, name)
+            identifier = maybe (Star leaf) (:/ leaf) (lookupParent ephemerides parentId)
+            entry = Body
+              { population      = fromIntegral population
+              , radius          = pure @(Kilo Metres) radius
+              , mass            = pure @(Kilo Grams)  mass
+              , rotation        = Revolution
+                { orientation = axisAngle (unit _x) (convert @Degrees (pure tilt))
+                , period      = convert @Days @Seconds (pure rotationalPeriod)
+                }
+              , eccentricity    = I eccentricity
+              , semimajor       = pure @(Kilo Metres) semimajor
+              , revolution      = Revolution
+                { orientation = orient
+                  (convert @Degrees (pure longitudeOfAscendingNode))
+                  (convert @Degrees (pure inclination))
+                  (convert @Degrees (pure argumentOfPerifocus))
+                , period      = pure @Seconds orbitalPeriod
+                }
+              , timeOfPeriapsis = pure @Seconds timeOfPeriapsis
+              , colour          = review packed (fromIntegral colour)
+              }
+        loop (IntMap.insert (fromIntegral rowid) (identifier, entry) elems)
+      row -> fail $ "loadBodies.bodies: bad row: " <> show row) IntMap.empty
   pure $! Map.fromList (IntMap.elems entries)
   where
-  fromColumns ephemerides = \case
-    [ SQLInteger rowid, parentId, SQLInteger code, SQLText name, SQLInteger population, SQLFloat radius, SQLFloat mass, SQLFloat tilt, SQLFloat rotationalPeriod, SQLInteger colour, SQLFloat eccentricity, SQLFloat semimajor, SQLFloat longitudeOfAscendingNode, SQLFloat inclination, SQLFloat argumentOfPerifocus, SQLFloat orbitalPeriod, SQLFloat timeOfPeriapsis ] -> do
-      let leaf = (fromIntegral code, name)
-          identifier = maybe (Star leaf) (:/ leaf) (lookupParent ephemerides parentId)
-      pure (rowid, (identifier, Body
-        { population      = fromIntegral population
-        , radius          = pure @(Kilo Metres) radius
-        , mass            = pure @(Kilo Grams)  mass
-        , rotation        = Revolution
-          { orientation = axisAngle (unit _x) (convert @Degrees (pure tilt))
-          , period      = convert @Days @Seconds (pure rotationalPeriod)
-          }
-        , eccentricity    = I eccentricity
-        , semimajor       = pure @(Kilo Metres) semimajor
-        , revolution      = Revolution
-          { orientation = orient
-            (convert @Degrees (pure longitudeOfAscendingNode))
-            (convert @Degrees (pure inclination))
-            (convert @Degrees (pure argumentOfPerifocus))
-          , period      = pure @Seconds orbitalPeriod
-          }
-        , timeOfPeriapsis = pure @Seconds timeOfPeriapsis
-        , colour          = review packed (fromIntegral colour)
-        }))
-    row -> fail $ "loadBodies.fromColumns: bad row: " <> show row
   lookupParent ephemerides = \case
     SQLInteger i -> fst <$> IntMap.lookup (fromIntegral i) ephemerides
     _            -> Nothing
