@@ -3,6 +3,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 module Starlight.Faction
 ( Factions(..)
+, PFaction(..)
 , Faction(..)
 ) where
 
