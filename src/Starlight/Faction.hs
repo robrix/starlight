@@ -5,6 +5,7 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Faction
 ( Factions(..)
+, factions
 , PFaction(..)
 , Faction(..)
 , name_
@@ -14,11 +15,16 @@ module Starlight.Faction
 import Control.Lens
 import Control.Monad (ap)
 import Data.Generics.Product.Fields
+import Data.IntMap as IntMap
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import UI.Colour
 
 newtype Factions = Factions { getFactions :: forall v . [v] -> [Faction v] }
+
+factions :: IntMap (Faction Int) -> Factions
+factions fs = Factions (\ vs -> go vs <$> IntMap.elems fs) where
+  go vs f = f & relationships_.traversed._1 %~ (vs !!)
 
 data PFaction a
   = Var a
