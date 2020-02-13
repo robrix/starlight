@@ -2,13 +2,17 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 module Starlight.Faction
 ( Factions(..)
 , PFaction(..)
 , Faction(..)
+, name_
 ) where
 
+import Control.Lens
 import Data.Bifunctor (first)
+import Data.Generics.Product.Fields
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import UI.Colour
@@ -35,3 +39,6 @@ data Faction a = Faction
   deriving (Eq, Foldable, Functor, Generic, Ord, Show, Traversable)
 
 instance HasColour (Faction a)
+
+name_ :: Lens' (Faction a) Text
+name_ = field @"name"
