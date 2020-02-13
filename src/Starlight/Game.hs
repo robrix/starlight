@@ -120,7 +120,7 @@ game
      , MonadFix m
      )
   => m ()
-game = Sol.bodiesFromSQL >>= \ bodies -> runGame bodies $ do
+game = Sol.runData Sol.loadBodies >>= \ bodies -> runGame bodies $ do
   SDL.cursorVisible SDL.$= False
   trace "loading typeface"
   face <- measure "readTypeface" $ readTypeface ("fonts" </> "DejaVuSans.ttf")

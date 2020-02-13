@@ -1,10 +1,12 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 -- | A familiar star system.
 module Starlight.Sol
-( bodiesFromSQL
+( runData
+, loadBodies
 ) where
 
 import           Control.Carrier.Database.SQLite
@@ -23,8 +25,11 @@ import           Unit.Length
 import           Unit.Mass
 import           Unit.Time
 
-bodiesFromSQL :: (Has (Lift IO) sig m, MonadFail m, MonadFix m) => m (Map.Map BodyIdentifier Body)
-bodiesFromSQL = sendM (getDataFileName "data/data.db") >>= \ file -> runDatabase file . execute "select rowid, * from bodies" $ \ stmt -> do
+runData :: Has (Lift IO) sig m => DatabaseC m a -> m a
+runData m = sendM (getDataFileName "data/data.db") >>= \ file -> runDatabase file m
+
+loadBodies :: (HasLabelled Database (Database stmt) sig m, MonadFail m, MonadFix m) => m (Map.Map BodyIdentifier Body)
+loadBodies = execute "select rowid, * from bodies" $ \ stmt -> do
   entries <- mfix $ \ ephemerides -> fix (\ loop elems -> do
     res <- step stmt
     case res of
