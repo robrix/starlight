@@ -1,10 +1,13 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
 module Control.Effect.Database
 ( -- * Database effect
-  Database(..)
+  execute
+, Database(..)
   -- * Re-exports
 , Algebra
 , Effect
@@ -16,6 +19,9 @@ import Control.Algebra
 import Control.Effect.Labelled
 import Data.Text (Text)
 import Database.SQLite3 (SQLData)
+
+execute :: HasLabelled Database (Database stmt) sig m => Text -> (stmt -> m a) -> m a
+execute cmd m = sendLabelled @Database (Labelled (Execute cmd m pure))
 
 data Database row m k
   = forall a . Execute Text (row -> m a) (a -> m k)
