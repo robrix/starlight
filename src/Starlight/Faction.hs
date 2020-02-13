@@ -7,14 +7,12 @@ module Starlight.Faction
 ( Factions(..)
 , factions
 , getFactions
-, PFaction(..)
 , Faction(..)
 , name_
 , relationships_
 ) where
 
 import Control.Lens
-import Control.Monad (ap)
 import Data.Generics.Product.Fields
 import Data.IntMap as IntMap
 import Data.Text (Text)
@@ -29,20 +27,6 @@ factions fs = Factions (\ vs -> go vs <$> IntMap.elems fs) where
 
 getFactions :: Factions -> IntMap (Faction Int)
 getFactions (Factions fs) = IntMap.fromList (zip [0..] (fs [0..]))
-
-
-data PFaction a
-  = Var a
-  | In (Faction (PFaction a))
-  deriving (Functor)
-
-instance Applicative PFaction where
-  pure = Var
-  (<*>) = ap
-
-instance Monad PFaction where
-  Var a >>= f = f a
-  In a  >>= f = In (a & relationships_.traversed._1 %~ (>>= f))
 
 
 data Faction a = Faction
