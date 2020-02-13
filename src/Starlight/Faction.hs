@@ -4,7 +4,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Faction
-( Factions(..)
+( Factions
 , factions
 , getFactions
 , Faction(..)
