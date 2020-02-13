@@ -32,7 +32,7 @@ getFactions (Factions fs) = IntMap.fromList (zip [0..] (fs [0..]))
 data Faction a = Faction
   { name          :: Text
   , colour        :: Colour Float
-  , relationships :: [(a, Float)]
+  , relationships :: [(a, Double)]
   }
   deriving (Eq, Foldable, Functor, Generic, Ord, Show, Traversable)
 
@@ -41,5 +41,5 @@ instance HasColour (Faction a)
 name_ :: Lens' (Faction a) Text
 name_ = field @"name"
 
-relationships_ :: Lens (Faction a) (Faction b) [(a, Float)] [(b, Float)]
+relationships_ :: Lens (Faction a) (Faction b) [(a, Double)] [(b, Double)]
 relationships_ = field @"relationships"
