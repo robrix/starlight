@@ -5,6 +5,7 @@
 {-# LANGUAGE TypeApplications #-}
 module Starlight.Faction
 ( Factions
+, factions_
 , factions
 , getFactions
 , Faction(..)
@@ -20,6 +21,9 @@ import GHC.Generics (Generic)
 import UI.Colour
 
 newtype Factions = Factions (forall v . [v] -> [Faction v])
+
+factions_ :: Iso' Factions (IntMap (Faction Int))
+factions_ = iso getFactions factions
 
 factions :: IntMap (Faction Int) -> Factions
 factions fs = Factions (\ vs -> go vs <$> IntMap.elems fs) where
