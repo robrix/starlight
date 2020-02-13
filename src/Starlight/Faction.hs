@@ -1,19 +1,18 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE RankNTypes #-}
 module Starlight.Faction
 ( Factions(..)
 , PFaction(..)
 , Faction(..)
 ) where
 
-import Bound.Scope
 import Data.Text (Text)
-import Data.Void (Void)
 import GHC.Generics (Generic)
 import UI.Colour
 
-newtype Factions = Factions { getFactions :: [Scope Int Faction Void] }
+newtype Factions = Factions { getFactions :: forall v . [PFaction v v] }
 
 data PFaction a b
   = Var b
