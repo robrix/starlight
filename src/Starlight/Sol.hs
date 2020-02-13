@@ -7,17 +7,20 @@
 module Starlight.Sol
 ( runData
 , loadBodies
+, loadFactions
 ) where
 
 import           Control.Carrier.Database.SQLite
 import           Control.Effect.Lift
 import           Control.Lens (review)
 import           Control.Monad.Fix
+import qualified Data.IntMap as IntMap
 import qualified Data.Map as Map
 import           Database.SQLite3 (SQLData(..))
 import           Linear.Exts
 import           Paths_starlight
 import           Starlight.Body
+import           Starlight.Faction
 import           Starlight.Identifier
 import           UI.Colour
 import           Unit.Angle
@@ -67,3 +70,22 @@ loadBodies = execute "select rowid, * from bodies" $ \ stmt -> do
   lookupParent ephemerides = \case
     SQLInteger i -> fst <$> lookup i ephemerides
     _            -> Nothing
+
+loadFactions :: (HasLabelled Database (Database stmt) sig m, MonadFail m) => m Factions
+loadFactions = do
+  rs <- execute "select * from relationships" $ \ relationships -> fix (\ loop elems -> do
+    relationships' <- step relationships
+    case relationships' of
+      Nothing -> pure elems
+      Just [ SQLInteger faction1Id, SQLInteger faction2Id, SQLFloat rel ] ->
+        loop (IntMap.insertWith (<>) (fromIntegral faction1Id) (IntMap.singleton (fromIntegral faction2Id) rel) elems)
+      Just row -> fail $ "loadFactions.relationships: bad row: " <> show row) IntMap.empty
+
+  fs <- execute "select rowid, * from factions" $ \ factions -> fix (\ loop elems -> do
+    factions' <- step factions
+    case factions' of
+      Nothing -> pure elems
+      Just [ SQLInteger rowid, SQLText name, SQLInteger colour ] ->
+        loop (IntMap.insert (fromIntegral rowid) (Faction name (review packed (fromIntegral colour)) (IntMap.toList (rs IntMap.! fromIntegral rowid))) elems)
+      Just row -> fail $ "loadFactions.factions: bad row: " <> show row) IntMap.empty
+  pure $ factions fs
