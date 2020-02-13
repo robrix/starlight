@@ -30,6 +30,7 @@ factions fs = Factions (\ vs -> go vs <$> IntMap.elems fs) where
 getFactions :: Factions -> IntMap (Faction Int)
 getFactions (Factions fs) = IntMap.fromList (zip [0..] (fs [0..]))
 
+
 data PFaction a
   = Var a
   | In (Faction (PFaction a))
@@ -42,6 +43,7 @@ instance Applicative PFaction where
 instance Monad PFaction where
   Var a >>= f = f a
   In a  >>= f = In (a & relationships_.traversed._1 %~ (>>= f))
+
 
 data Faction a = Faction
   { name          :: Text
