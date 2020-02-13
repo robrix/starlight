@@ -30,7 +30,7 @@ factions fs = Factions (\ vs -> go vs <$> IntMap.elems fs) where
   go vs f = f & relationships_.traversed._1 %~ (vs !!)
 
 getFactions :: Factions -> IntMap (Faction Int)
-getFactions (Factions fs) = IntMap.fromList (zip [0..] (fs [0..]))
+getFactions (Factions fs) = IntMap.fromDistinctAscList (zip [0..] (fs [0..]))
 
 
 data Faction a = Faction
