@@ -63,7 +63,7 @@ loadBodies = execute "select rowid, * from bodies" $ \ stmt -> do
         , timeOfPeriapsis = pure @Seconds timeOfPeriapsis
         , colour          = review packed (fromIntegral colour)
         }))
-    row -> fail $ "bad row: " <> show row
+    row -> fail $ "loadBodies.fromColumns: bad row: " <> show row
   lookupParent ephemerides = \case
     SQLInteger i -> fst <$> lookup i ephemerides
     _            -> Nothing
