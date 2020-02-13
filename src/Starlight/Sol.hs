@@ -36,11 +36,11 @@ loadBodies = execute "select rowid, * from bodies" $ \ stmt -> do
   entries <- mfix $ \ ephemerides -> fix (\ loop elems -> do
     res <- step stmt
     case res of
-      Nothing   -> pure (elems [])
+      Nothing   -> pure elems
       Just cols -> do
-        entry <- fromColumns ephemerides cols
-        loop (elems . (entry:))) id
-  pure $! Map.fromList (map snd entries)
+        (rowid, entry) <- fromColumns ephemerides cols
+        loop (IntMap.insert (fromIntegral rowid) entry elems)) IntMap.empty
+  pure $! Map.fromList (IntMap.elems entries)
   where
   fromColumns ephemerides = \case
     [ SQLInteger rowid, parentId, SQLInteger code, SQLText name, SQLInteger population, SQLFloat radius, SQLFloat mass, SQLFloat tilt, SQLFloat rotationalPeriod, SQLInteger colour, SQLFloat eccentricity, SQLFloat semimajor, SQLFloat longitudeOfAscendingNode, SQLFloat inclination, SQLFloat argumentOfPerifocus, SQLFloat orbitalPeriod, SQLFloat timeOfPeriapsis ] -> do
@@ -68,7 +68,7 @@ loadBodies = execute "select rowid, * from bodies" $ \ stmt -> do
         }))
     row -> fail $ "loadBodies.fromColumns: bad row: " <> show row
   lookupParent ephemerides = \case
-    SQLInteger i -> fst <$> lookup i ephemerides
+    SQLInteger i -> fst <$> IntMap.lookup (fromIntegral i) ephemerides
     _            -> Nothing
 
 loadFactions :: (HasLabelled Database (Database stmt) sig m, MonadFail m) => m Factions
