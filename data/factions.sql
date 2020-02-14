@@ -22,6 +22,8 @@ insert into factions values
   );
 
 
+drop table if exists relationships;
+
 create table relationships
   ( factionId1 integer not null
   , factionId2 integer not null
