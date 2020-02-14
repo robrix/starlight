@@ -47,10 +47,10 @@ data Interval f a = Interval
 
 instance Applicative f => Applicative (Interval f) where
   pure = point . pure
-  Interval f1 f2 <*> Interval a1 a2 = Interval (f1 <*> a1) (f2 <*> a2)
+  f <*> a = Interval (inf f <*> inf a) (sup f <*> sup a)
 
 instance Monad f => Monad (Interval f) where
-  Interval m1 m2 >>= f = Interval (m1 >>= inf . f) (m2 >>= sup . f)
+  m >>= f = Interval (inf m >>= inf . f) (sup m >>= sup . f)
 
 instance MonadTrans Interval where
   lift = point
