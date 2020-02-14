@@ -1,4 +1,4 @@
-insert into factions where
+insert into factions values
   ( "venusian"
   , 0xffff80ff
   );
