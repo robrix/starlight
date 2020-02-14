@@ -1,3 +1,5 @@
+drop table if exists bodies;
+
 -- schema for the ephemerides table
 create table bodies
   ( parentId integer
