@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeApplications #-}
 module Data.Functor.Interval
 ( Interval(..)
-, interval
+, (...)
 , point
 , pointwise
 , size
@@ -29,7 +29,7 @@ module Data.Functor.Interval
 
 import           Control.Applicative (liftA2)
 import           Control.Effect.Random
-import           Control.Lens hiding (imap)
+import           Control.Lens hiding (imap, (...))
 import           Control.Monad (join)
 import           Control.Monad.Trans.Class
 import           Data.Coerce (coerce)
@@ -118,14 +118,16 @@ instance (Applicative f, Floating a) => Floating (Interval f a) where
   {-# INLINE acosh #-}
 
 
-interval :: Applicative f => a -> a -> Interval f a
-interval mn mx = Interval (pure mn) (pure mx)
+(...) :: Applicative f => a -> a -> Interval f a
+mn...mx = Interval (pure mn) (pure mx)
+
+infix 3 ...
 
 point :: f a -> Interval f a
 point = join Interval
 
 pointwise :: Applicative f => (Interval I a -> b) -> Interval f a -> f b
-pointwise f (Interval mn mx) = fmap f . interval <$> mn <*> mx
+pointwise f (Interval mn mx) = fmap f . (...) <$> mn <*> mx
 
 size :: (Applicative f, Num a) => Interval f a -> f a
 size (Interval min max) = liftA2 (-) max min
@@ -173,7 +175,7 @@ newtype Union f a = Union { getUnion :: Interval f a }
   deriving (Applicative, Eq, Foldable, Functor, Monad, Ord, Show, Traversable)
 
 instance (Applicative f, Ord a) => Semigroup (Union f a) where
-  Union i1 <> Union i2 = Union (interval min max <*> i1 <*> i2)
+  Union i1 <> Union i2 = Union ((min...max) <*> i1 <*> i2)
 
 union :: forall f a . (Applicative f, Ord a) => Interval f a -> Interval f a -> Interval f a
 union = coerce ((<>) :: Union f a -> Union f a -> Union f a)
@@ -183,7 +185,7 @@ newtype Intersection f a = Intersection { getIntersection :: Interval f a }
   deriving (Applicative, Eq, Foldable, Functor, Monad, Ord, Show, Traversable)
 
 instance (Applicative f, Ord a) => Semigroup (Intersection f a) where
-  Intersection i1 <> Intersection i2 = Intersection (interval max min <*> i1 <*> i2)
+  Intersection i1 <> Intersection i2 = Intersection ((max...min) <*> i1 <*> i2)
 
 intersection :: forall f a . (Applicative f, Ord a) => Interval f a -> Interval f a -> Interval f a
 intersection = coerce ((<>) :: Intersection f a -> Intersection f a -> Intersection f a)

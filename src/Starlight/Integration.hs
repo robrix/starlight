@@ -22,7 +22,7 @@ import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Random
 import Control.Effect.Reader
-import Control.Lens hiding (use, uses, view, views, (%=), (.=), (<~))
+import Control.Lens hiding (use, uses, view, views, (%=), (...), (.=), (<~))
 import Control.Monad (guard, when, (>=>))
 import Data.Foldable (foldl', for_)
 import Data.Functor.Interval as Interval
@@ -72,7 +72,7 @@ pickSpawnPoint
   => PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
   -> Interval V2 (Distance Double)
   -> m (V2 (Distance Double))
-pickSpawnPoint pdf i = sample (interval 0 0.001) i pdf
+pickSpawnPoint pdf i = sample (0...0.001) i pdf
 
 nearBody :: StateVectors -> PDF (V2 (Distance Double)) ((Population :/: Giga Metres :^: 2) Double)
 nearBody sv = PDF pdf
@@ -134,7 +134,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
     let nearbyNPCs = Count @"population" (fromIntegral (length (Prelude.filter ((< radius) . distance playerPos . (^.position_)) (Map.elems npcs))))
     pdf <- spawnPDF
     when (nearbyNPCs ./. area radius < runPDF pdf playerPos) $ do
-      pos <- pickSpawnPoint pdf (Interval.point playerPos + interval (-radius) radius)
+      pos <- pickSpawnPoint pdf (Interval.point playerPos + (-radius...radius))
       npc <- npc <$> pickName <*> pure pos <*> uniformRGB
       npcs_ @Body %= Map.insert (0, name npc) npc
 

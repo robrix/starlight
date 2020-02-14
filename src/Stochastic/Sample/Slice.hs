@@ -52,7 +52,7 @@ sample w bounds (PDF pdf) = do
         | otherwise        = i
       shrink i = uniformI i >>= \case
         x' | y < pdf x' -> x' <$ put (Chain x')
-           | otherwise  -> shrink (interval mn mx <*> point x <*> point x' <*> i)
+           | otherwise  -> shrink ((mn...mx) <*> point x <*> point x' <*> i)
       mn x x' i = if x' < x then x' else i
       mx x x' i = if x' < x then i  else x'
       (^-^) = liftA2 (-)
