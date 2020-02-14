@@ -1,3 +1,8 @@
+insert into factions where
+  ( "venusian"
+  , 0xffff80ff
+  );
+
 insert into factions values
   ( "terran"
   , 0x0000ffff
