@@ -127,7 +127,7 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
   playerPositions <- views (players_ @StateVectors) (map (^.position_) . Map.elems)
   let radius = 0.01
 
-  npcs_ @Body %= Map.filter ((&&) <$> (> 0) . (^.ship_.armour_.min_) <*> (`any` playerPositions) . fmap (< 10 * radius) . distance . (^.position_))
+  npcs_ @Body %= Map.filter ((&&) <$> (> 0) . (^.ship_.armour_.inf_) <*> (`any` playerPositions) . fmap (< 10 * radius) . distance . (^.position_))
 
   npcs <- use (npcs_ @Body)
   for_ playerPositions $ \ playerPos -> do
@@ -176,7 +176,7 @@ hit i c = do
   go dt char@Character{ actor = Actor{ position = c } } Beam{ angle = theta, position = o, firedBy = i' }
     | i /= i'
     , intersects c (char^.magnitude_ * 0.5) o (cartesian2 theta 1)
-    = char & ship_.armour_.min_ -~ damage .*. dt
+    = char & ship_.armour_.inf_ -~ damage .*. dt
     | otherwise
     = char
   -- FIXME: motivate this from the laser intensity or w/e

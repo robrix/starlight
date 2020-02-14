@@ -14,8 +14,8 @@ module Data.Functor.Interval
 , fromUnit
 , range
 , wrap
-, min_
-, max_
+, inf_
+, sup_
 , imap
 , member
 , isSubintervalOf
@@ -145,11 +145,11 @@ wrap :: (Applicative f, Real a) => Interval f a -> f a -> f a
 wrap i x = pointwise (\ i x -> getI (((I x + sup i) `mod'` size i) + inf i)) i <*> x
 
 
-min_ :: Lens' (Interval f a) (f a)
-min_ = field @"inf"
+inf_ :: Lens' (Interval f a) (f a)
+inf_ = field @"inf"
 
-max_ :: Lens' (Interval f a) (f a)
-max_ = field @"sup"
+sup_ :: Lens' (Interval f a) (f a)
+sup_ = field @"sup"
 
 
 imap :: (f a -> g b) -> Interval f a -> Interval g b
