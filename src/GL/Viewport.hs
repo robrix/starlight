@@ -1,7 +1,5 @@
 module GL.Viewport
-( min_
-, max_
-, viewport
+( viewport
 , scissor
 ) where
 
