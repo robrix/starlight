@@ -119,7 +119,7 @@ instance (Applicative f, Floating a) => Floating (Interval f a) where
 
 
 (...) :: Applicative f => a -> a -> Interval f a
-mn...mx = Interval (pure mn) (pure mx)
+inf...sup = Interval (pure inf) (pure sup)
 
 infix 3 ...
 
@@ -127,10 +127,10 @@ point :: f a -> Interval f a
 point = join Interval
 
 pointwise :: Applicative f => (Interval I a -> b) -> Interval f a -> f b
-pointwise f (Interval mn mx) = fmap f . (...) <$> mn <*> mx
+pointwise f i = fmap f . (...) <$> inf i <*> sup i
 
 size :: (Applicative f, Num a) => Interval f a -> f a
-size (Interval min max) = liftA2 (-) max min
+size = liftA2 (-) . sup <*> inf
 
 toUnit, fromUnit :: (Applicative f, Fractional a) => Interval f a -> f a -> f a
 toUnit   i x = pointwise (\ i x -> getI ((I x - inf i) / size i)) i <*> x
@@ -168,7 +168,7 @@ isProperSubintervalOf a b = and ((>) <$> inf a <*> inf b) && and ((<) <$> sup a 
 
 
 uniformI :: (R.Random a, Applicative f, Traversable f, Has Random sig m) => Interval f a -> m (f a)
-uniformI (Interval mn mx) = traverse uniformR ((,) <$> mn <*> mx)
+uniformI i = traverse uniformR ((,) <$> inf i <*> sup i)
 
 
 newtype Union f a = Union { getUnion :: Interval f a }
