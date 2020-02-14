@@ -48,7 +48,7 @@ realloc n update usage = askBuffer @ty >> runLiftIO (glBufferData (glEnum (typeV
 
 copy :: forall ty v m sig . (HasLabelled (Buffer ty) (Reader (Buffer ty v)) sig m, KnownType ty, S.Storable v, Has Check sig m, Has (Lift IO) sig m) => Int -> [v] -> m ()
 copy offset vertices = askBuffer @ty >> A.withArray vertices
-  (checking . runLiftIO . glBufferSubData (glEnum (typeVal @ty)) (fromIntegral (min' i)) (fromIntegral (size i)) . castPtr) where
+  (checking . runLiftIO . glBufferSubData (glEnum (typeVal @ty)) (fromIntegral (inf i)) (fromIntegral (size i)) . castPtr) where
   i = (Interval 0 (I (length vertices)) + pure offset) ^* S.sizeOf @v undefined
 
 

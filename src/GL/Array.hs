@@ -88,7 +88,7 @@ drawArrays
   => Type
   -> Interval I Int
   -> m ()
-drawArrays mode i = askProgram >> askArray >> checking (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i))))
+drawArrays mode i = askProgram >> askArray >> checking (runLiftIO (glDrawArrays (glEnum mode) (fromIntegral (inf i)) (fromIntegral (size i))))
 
 multiDrawArrays
   :: ( Has Check sig m
@@ -105,7 +105,7 @@ multiDrawArrays mode is
   | otherwise = do
     _ <- askProgram
     _ <- askArray
-    withArray (map (fromIntegral . min') is) $ \ firsts -> withArray (map (fromIntegral . size) is) $ \ counts ->
+    withArray (map (fromIntegral . inf) is) $ \ firsts -> withArray (map (fromIntegral . size) is) $ \ counts ->
       checking (runLiftIO (glMultiDrawArrays (glEnum mode) firsts counts (fromIntegral (length is))))
 
 drawArraysInstanced
@@ -119,7 +119,7 @@ drawArraysInstanced
   -> Interval I Int
   -> Int
   -> m ()
-drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (min' i)) (fromIntegral (size i)) (fromIntegral n)))
+drawArraysInstanced mode i n = askProgram >> askArray >> checking (runLiftIO (glDrawArraysInstanced (glEnum mode) (fromIntegral (inf i)) (fromIntegral (size i)) (fromIntegral n)))
 
 drawElements
   :: ( Has Check sig m
@@ -136,7 +136,7 @@ drawElements mode i = do
   _ <- askProgram
   _ <- askArray
   _ <- B.askBuffer @'B.ElementArray
-  checking (runLiftIO (glDrawElements (glEnum mode) (fromIntegral (size i)) GL_UNSIGNED_INT (nullPtr `plusPtr` (getI (min' i) * S.sizeOf @Word32 0))))
+  checking (runLiftIO (glDrawElements (glEnum mode) (fromIntegral (size i)) GL_UNSIGNED_INT (nullPtr `plusPtr` (getI (inf i) * S.sizeOf @Word32 0))))
 
 drawElementsInstanced
   :: ( Has Check sig m
@@ -154,7 +154,7 @@ drawElementsInstanced mode i n = do
   _ <- askProgram
   _ <- askArray
   _ <- B.askBuffer @'B.ElementArray
-  checking (runLiftIO (glDrawElementsInstanced (glEnum mode) (fromIntegral (size i)) GL_UNSIGNED_INT (nullPtr `plusPtr` (getI (min' i) * S.sizeOf @Word32 0)) (fromIntegral n)))
+  checking (runLiftIO (glDrawElementsInstanced (glEnum mode) (fromIntegral (size i)) GL_UNSIGNED_INT (nullPtr `plusPtr` (getI (inf i) * S.sizeOf @Word32 0)) (fromIntegral n)))
 
 
 load :: (Effect sig, Vars v, S.Storable (v I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [v I] -> m (B.Buffer 'B.Array (v I), Array (v I))

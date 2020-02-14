@@ -131,7 +131,7 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
           Glyph.matrix_
             ?=  translated (-1)
             !*! scaled     (V3 sx sy 1)
-            !*! translated (fromIntegral <$> negated (min' b'))
+            !*! translated (fromIntegral <$> negated (inf b'))
 
           -- FIXME: copy instance offsets into a buffer
           -- FIXME: use :*: to combine the interleaved vertex buffer with the non-interleaved offset in the vertices

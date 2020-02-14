@@ -42,13 +42,13 @@ sample w bounds (PDF pdf) = do
   u <- uniformI w
   let step i
         -- if any coordinate of the interval’s min is in-bounds…
-        | or (min' i ^>^ min' bounds)
+        | or (inf i ^>^ inf bounds)
         -- … & it still lies under the curve, step the min outwards
-        , y < pdf (min' i) = step (i & over min_ (^-^ size w))
+        , y < pdf (inf i) = step (i & over min_ (^-^ size w))
         -- if any coordinate of the interval’s max is in-bounds…
-        | or (max' i ^<^ max' bounds)
+        | or (sup i ^<^ sup bounds)
         -- … & it still lies under the curve, step the max outwards
-        , y < pdf (max' i) = step (i & over max_ (^+^ size w))
+        , y < pdf (sup i) = step (i & over max_ (^+^ size w))
         | otherwise        = i
       shrink i = uniformI i >>= \case
         x' | y < pdf x' -> x' <$ put (Chain x')

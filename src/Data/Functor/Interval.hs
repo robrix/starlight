@@ -40,8 +40,8 @@ import           GHC.Generics (Generic)
 import qualified System.Random as R
 
 data Interval f a = Interval
-  { min' :: !(f a)
-  , max' :: !(f a)
+  { inf :: !(f a)
+  , sup :: !(f a)
   }
   deriving (Eq, Foldable, Functor, Generic, Ord, Show, Traversable)
 
@@ -50,7 +50,7 @@ instance Applicative f => Applicative (Interval f) where
   Interval f1 f2 <*> Interval a1 a2 = Interval (f1 <*> a1) (f2 <*> a2)
 
 instance Monad f => Monad (Interval f) where
-  Interval m1 m2 >>= f = Interval (m1 >>= min' . f) (m2 >>= max' . f)
+  Interval m1 m2 >>= f = Interval (m1 >>= inf . f) (m2 >>= sup . f)
 
 instance MonadTrans Interval where
   lift = point
@@ -133,27 +133,27 @@ size :: (Applicative f, Num a) => Interval f a -> f a
 size (Interval min max) = liftA2 (-) max min
 
 toUnit, fromUnit :: (Applicative f, Fractional a) => Interval f a -> f a -> f a
-toUnit   i x = pointwise (\ i x -> getI ((I x - min' i) / size i)) i <*> x
-fromUnit i x = pointwise (\ i x -> getI  (I x * size i  + min' i)) i <*> x
+toUnit   i x = pointwise (\ i x -> getI ((I x - inf i) / size i)) i <*> x
+fromUnit i x = pointwise (\ i x -> getI  (I x * size i  + inf i)) i <*> x
 
 
 range :: Enum (f a) => Interval f a -> [f a]
-range = enumFromTo . min' <*> max'
+range = enumFromTo . inf <*> sup
 
 
 wrap :: (Applicative f, Real a) => Interval f a -> f a -> f a
-wrap i x = pointwise (\ i x -> getI (((I x + max' i) `mod'` size i) + min' i)) i <*> x
+wrap i x = pointwise (\ i x -> getI (((I x + sup i) `mod'` size i) + inf i)) i <*> x
 
 
 min_ :: Lens' (Interval f a) (f a)
-min_ = field @"min'"
+min_ = field @"inf"
 
 max_ :: Lens' (Interval f a) (f a)
-max_ = field @"max'"
+max_ = field @"sup"
 
 
 imap :: (f a -> g b) -> Interval f a -> Interval g b
-imap f = Interval <$>  f . min' <*> f . max'
+imap f = Interval <$>  f . inf <*> f . sup
 
 
 member :: (Applicative f, Foldable f, Ord a) => f a -> Interval f a -> Bool
@@ -161,10 +161,10 @@ member = isSubintervalOf . point
 
 
 isSubintervalOf :: (Applicative f, Foldable f, Ord a) => Interval f a -> Interval f a -> Bool
-isSubintervalOf a b = and ((>=) <$> min' a <*> min' b) && and ((<=) <$> max' a <*> max' b)
+isSubintervalOf a b = and ((>=) <$> inf a <*> inf b) && and ((<=) <$> sup a <*> sup b)
 
 isProperSubintervalOf :: (Applicative f, Foldable f, Ord a) => Interval f a -> Interval f a -> Bool
-isProperSubintervalOf a b = and ((>) <$> min' a <*> min' b) && and ((<) <$> max' a <*> max' b)
+isProperSubintervalOf a b = and ((>) <$> inf a <*> inf b) && and ((<) <$> sup a <*> sup b)
 
 
 uniformI :: (R.Random a, Applicative f, Traversable f, Has Random sig m) => Interval f a -> m (f a)

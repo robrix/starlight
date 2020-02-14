@@ -72,9 +72,9 @@ lengthToWindowPixels View{ zoom, scale } = scale .*. zoom
 -- Higher values correlate to more of the scene being visible.
 zoomForSpeed :: V2 (Window.Pixels Int) -> (Distance :/: Seconds) Double -> I Double
 zoomForSpeed size x
-  | distance < min' bounds = min' zoom
-  | distance > max' bounds = max' zoom
-  | otherwise              = fromUnit zoom (coerce easeInOutCubic (toUnit bounds distance))
+  | distance < inf bounds = inf zoom
+  | distance > sup bounds = sup zoom
+  | otherwise             = fromUnit zoom (coerce easeInOutCubic (toUnit bounds distance))
   where
   hypotenuse = norm (fmap fromIntegral <$> size)
   distance = I (convert @Distance @(Mega Metres) (x .*. Seconds 1) ./. hypotenuse) -- how much of the screen will be traversed in a second
