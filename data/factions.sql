@@ -1,3 +1,5 @@
+drop table if exists factions;
+
 -- schema for factions & their relationships
 create table factions
   ( name text not null
