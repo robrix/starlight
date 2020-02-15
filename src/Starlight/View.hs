@@ -16,7 +16,6 @@ module Starlight.View
 , withView
   -- * Transforms
 , ClipUnits(..)
-, Zoomed(..)
 , transformToWindow
 , transformToZoomed
 , transformToSystem
@@ -110,13 +109,6 @@ newtype ClipUnits a = ClipUnits { getClipUnits :: a }
 
 instance Unit Length ClipUnits where
   suffix = K ("clip"++)
-
-newtype Zoomed a = Zoomed { getZoomed :: a }
-  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via I
-
-instance Unit Length Zoomed where
-  suffix = K ("zoomed"++)
 
 
 transformToWindow :: View -> Transform Double ClipUnits Window.Pixels
