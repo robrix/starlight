@@ -58,7 +58,7 @@ input h = go where
 
 size :: (Num a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m (V2 (Coords a))
 size = do
-  size <- ask >>= runLiftIO . get . windowSize
+  size <- asks windowSize >>= runLiftIO . get
   pure (fromIntegral <$> size)
 
 ratio :: (Integral a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m (I a)
