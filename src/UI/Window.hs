@@ -43,7 +43,7 @@ newtype Coords a = Coords { getCoords :: a }
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Length Coords where
-  suffix = K ("wpx"++)
+  suffix = K ('w':)
 
 
 swap :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => m ()
