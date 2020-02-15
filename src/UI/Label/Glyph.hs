@@ -23,7 +23,6 @@ import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Shader.DSL
 import Prelude hiding (break)
-import UI.Window as Window (Pixels)
 
 shader :: Shader U V Frag
 shader = program $ \ u
@@ -76,7 +75,7 @@ shader = program $ \ u
 
 data U v = U
   { matrix    :: v (M33 Float)
-  , ratio     :: v (Window.Pixels Int)
+  , ratio     :: v (I Int)
   , fontScale :: v Float
   , offset    :: v Int
   }
@@ -87,7 +86,7 @@ instance Vars U
 matrix_ :: Lens' (U v) (v (M33 Float))
 matrix_ = field @"matrix"
 
-ratio_ :: Lens' (U v) (v (Window.Pixels Int))
+ratio_ :: Lens' (U v) (v (I Int))
 ratio_ = field @"ratio"
 
 fontScale_ :: Lens' (U v) (v Float)

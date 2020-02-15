@@ -43,12 +43,13 @@ import qualified UI.Label.Glyph as Glyph
 import qualified UI.Label.Text as Text
 import           UI.Typeface
 import qualified UI.Window as Window
+import           Unit.Algebra
 
 data Label = Label
   { text    :: !(Drawable Text.U Text.V Text.Frag)
   , texture :: !(Texture 'Texture2D)
   , fbuffer :: !Framebuffer
-  , ratio   :: !(Window.Pixels Int)
+  , ratio   :: !(I Int)
   , ref     :: !(IORef (Maybe LabelState))
   }
 
@@ -113,13 +114,13 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
         setParameter Texture2D MinFilter Nearest
         setParameter Texture2D WrapS ClampToEdge
         setParameter Texture2D WrapT ClampToEdge
-        setImageFormat Texture2D RGBA8 (ratio *^ size) RGBA (Packed8888 True)
+        setImageFormat Texture2D RGBA8 (ratio .*^ size) RGBA (Packed8888 True)
 
         bind (Just fbuffer)
         attachTexture (GL.Colour 0) texture
 
-        viewport $ ratio *^ Interval 0 size
-        scissor  $ ratio *^ Interval 0 size
+        viewport $ ratio .*^ Interval 0 size
+        scissor  $ ratio .*^ Interval 0 size
 
         setClearColour (transparent :: Colour Double)
         glClear GL_COLOR_BUFFER_BIT
@@ -164,8 +165,8 @@ drawLabel label@Label{ texture, ratio, ref } offset colour bcolour = runReader l
 
       let offset' = offset + V2 0 baseline
           bounds = Interval offset' (offset' + size)
-      viewport $ ratio *^ bounds
-      scissor  $ ratio *^ bounds
+      viewport $ ratio .*^ bounds
+      scissor  $ ratio .*^ bounds
 
       case bcolour of
         Just colour -> do
