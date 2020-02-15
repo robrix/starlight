@@ -52,7 +52,7 @@ import Unit.Length
 import Unit.Time
 
 data View = View
-  { ratio     :: Int    -- ^ Ratio of window pixels per context pixel.
+  { ratio     :: I Int    -- ^ Ratio of window pixels per context pixel.
   , size      :: V2 (Window.Pixels Int)
   , zoom      :: I Double
   , scale     :: (Window.Pixels :/: Distance) Double
@@ -61,7 +61,7 @@ data View = View
   }
 
 contextSize :: View -> V2 (Context.Pixels Int)
-contextSize View{ ratio, size } = fmap Context.Pixels (ratio *^ fmap Window.getPixels size)
+contextSize View{ ratio, size } = Context.Pixels . Window.getPixels <$> ratio .*^ size
 
 lengthToWindowPixels :: View -> (Window.Pixels :/: Distance) Double
 lengthToWindowPixels View{ zoom, scale } = scale .*. zoom
