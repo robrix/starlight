@@ -30,7 +30,7 @@ newtype Pixels a = Pixels { getPixels :: a }
   deriving (Additive, Applicative, Metric, Monad) via I
 
 instance Unit Length Pixels where
-  suffix = K ("cpx"++)
+  suffix = K ("px"++)
 
 runContext :: (Has (Lift IO) sig m, Has (Reader Window) sig m) => ReaderC Context m a -> m a
 runContext = E.bracket
