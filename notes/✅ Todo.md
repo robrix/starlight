@@ -219,6 +219,7 @@
   - split module hierarchies into separate packages
   - 🚫 make `Colour` monomorphic
     - it seems useful to be able to do e.g. `Colour Word8` over the network
+    - tho maybe we could just pack into `Word32` instead?
   - ✅ derive instances via `Fields` instead of using `UndecidableInstances`
   - ✅ classy-lenses–style `HasColour` class
 
