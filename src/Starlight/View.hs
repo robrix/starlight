@@ -113,7 +113,7 @@ instance Unit Length ClipUnits where
 
 transformToWindow :: View -> Transform Double ClipUnits Window.Coords
 transformToWindow View{ size }
-  = mkScale (pure 1 & _xy .~ ClipUnits 1 ./^ (fmap fromIntegral <$> size))
+  = mkScale (pure 1 & _xy .~ ClipUnits 2 ./^ (fmap fromIntegral <$> size))
 
 transformToZoomed :: View -> Transform Double ClipUnits Window.Coords
 transformToZoomed view@View{ zoom }
