@@ -118,7 +118,7 @@ transformToWindow View{ size, ratio }
 transformToZoomed :: View -> Transform Double ClipUnits Window.Pixels
 transformToZoomed view@View{ zoom }
   =   transformToWindow view
-  >>> mkScale (pure 1 & _xy .~ pure zoom)
+  >>> mkScale (pure 1 & _xy .~ pure zoom) -- FIXME: this should probably zoom in z as well
 
 transformToSystem :: View -> Transform Double ClipUnits Distance
 transformToSystem view@View{ scale, focus }
