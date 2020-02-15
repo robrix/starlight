@@ -129,6 +129,6 @@ transformToSystem view@View{ scale, focus }
 
 clipTo :: Has (Lift IO) sig m => View -> m ()
 clipTo view = do
+  let dsize = contextSize view
   viewport $ Interval 0 dsize
-  scissor  $ Interval 0 dsize where
-  dsize = contextSize view
+  scissor  $ Interval 0 dsize
