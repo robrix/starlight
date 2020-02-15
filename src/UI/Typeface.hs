@@ -15,7 +15,7 @@ module UI.Typeface
 
 import           Control.Effect.Finally
 import           Control.Effect.Trace
-import           Control.Lens
+import           Control.Lens hiding ((...))
 import           Control.Monad (guard, join, (<=<))
 import           Control.Monad.IO.Class.Lift
 import           Data.Bifunctor (first)
@@ -23,7 +23,7 @@ import           Data.Char (isPrint, isSeparator, ord)
 import           Data.Coerce (coerce)
 import           Data.Foldable (find, foldl')
 import           Data.Functor.I (I(..))
-import           Data.Functor.Interval (Interval(..))
+import           Data.Functor.Interval (Interval(..), (...))
 import           Data.IORef
 import qualified Data.Map as Map
 import           Data.Maybe (mapMaybe)
@@ -134,7 +134,7 @@ readFontOfSize path size = (`Font` size) <$> readTypeface path
 cacheCharactersForDrawing :: (Effect sig, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => Typeface -> String -> m ()
 cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { array }, glyphsB, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
-      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + I (length geometry) in (vs . (geometry ++), Map.insert char (Interval i i') cs, i')
+      combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + length geometry in (vs . (geometry ++), Map.insert char (i...i') cs, i')
       vertices = vs []
 
   bindArray array $

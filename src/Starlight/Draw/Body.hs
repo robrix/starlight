@@ -73,7 +73,7 @@ vertices :: [V I]
 vertices = coerce @[V2 (I Double)] $ circle 1 128
 
 range :: Interval I Int
-range = Interval 0 (I (length vertices))
+range = 0...length vertices
 
 
 shader :: D.Shader U V Frag

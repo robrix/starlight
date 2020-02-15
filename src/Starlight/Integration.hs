@@ -101,7 +101,7 @@ npc name position colour = Character
     }
   , target  = Nothing
   , actions = mempty
-  , ship    = Ship{ colour, armour = Interval 500 500, radar = Radar 1000 }
+  , ship    = Ship{ colour, armour = Interval.point 500, radar = Radar 1000 }
   }
 
 -- FIXME: do something clever, more generative

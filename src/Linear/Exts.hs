@@ -98,7 +98,7 @@ angleTo v1 v2 = angleOf (v2 - v1)
 --
 -- The result lies in the interval [-pi, pi].
 facingRel :: (Real a, Floating a) => Quaternion (I a) -> I a -> I a
-facingRel rotation target = abs (wrap (Interval (-pi) pi) (snd (toAxisAngle rotation) - target))
+facingRel rotation target = abs (wrap (-pi...pi) (snd (toAxisAngle rotation) - target))
 
 
 -- | Compute the axis/angle of a rotation represented as a unit quaternion.

@@ -87,7 +87,7 @@ vertices = coerce @[V2 Float]
   ]
 
 range :: Interval I Int
-range = Interval 0 4
+range = 0...4
 
 
 shader :: D.Shader U V Frag

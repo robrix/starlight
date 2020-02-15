@@ -105,7 +105,7 @@ setLabel Label{ texture, fbuffer, ratio, ref } font@(Font face _) string
 
         Run instances b <- layoutString face string
 
-        let b' = Interval (pure floor) (pure ceiling) <*> fontScale font *^ (fromIntegral <$> b)
+        let b' = (floor...ceiling) <*> fontScale font *^ (fromIntegral <$> b)
             size = Interval.size b'
             baseline = b'^.inf_._y
 
@@ -182,7 +182,7 @@ drawLabel label@Label{ texture, ratio, ref } offset colour bcolour = runReader l
         Text.sampler_ ?= textureUnit
         Text.colour_  ?= transparent
 
-        let range = Interval 0 4
+        let range = 0...4
         drawArrays TriangleStrip range
 
         when (opaque colour /= black) $ do

@@ -72,7 +72,7 @@ vertices :: [V I]
 vertices = coerce @[Float] [0, 1]
 
 range :: Interval I Int
-range = Interval 0 (I (length vertices))
+range = 0...length vertices
 
 
 shader :: Shader U V Frag

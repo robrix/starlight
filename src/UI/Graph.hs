@@ -62,8 +62,8 @@ drawGraph Graph { matrix, colour, array, points, lines, pointSize, count } = bin
     Points.matrix_    ?= matrix
     Points.pointSize_ ?= pointSize
     Points.colour_    ?= colour
-    drawArrays Points    (Interval 0 (I count))
+    drawArrays Points    (0...count)
   use lines $ do
     Lines.matrix_ ?= matrix
     Lines.colour_ ?= colour
-    drawArrays LineStrip (Interval 0 (I count))
+    drawArrays LineStrip (0...count)

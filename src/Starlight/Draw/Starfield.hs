@@ -77,7 +77,7 @@ vertices = coerce @[V2 Float]
   ]
 
 range :: Interval I Int
-range = Interval 0 (I (length vertices))
+range = 0...length vertices
 
 
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
