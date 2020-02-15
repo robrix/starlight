@@ -155,7 +155,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
   go identifier body@Body{ revolution } = StateVectors
     { body
-    , transform = rel >>> mkTranslation (position actor)
+    , transform = rel >>> mkTranslation (ext (position actor) 0)
     , actor = actor
       & position_.extended 0.extended 1 %~ apply rel
       & velocity_.coerced.extended 0.extended 0 %~ apply rel

@@ -19,8 +19,7 @@ import Data.Generics.Product.Fields
 import Geometry.Transform
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
-import Linear.Quaternion
-import Linear.V2
+import Linear.Exts
 import Starlight.Physics
 import Unit.Algebra
 import Unit.Force
@@ -38,7 +37,7 @@ data Actor = Actor
   deriving (Generic, Show)
 
 transformToActor :: Actor -> Transform Double Distance Distance
-transformToActor Actor{ position, rotation } = mkTranslation position >>> mkRotation rotation
+transformToActor Actor{ position, rotation } = mkTranslation (ext position 0) >>> mkRotation rotation
 
 applyImpulse :: HasCallStack => V2 (Newtons Double) -> Seconds Double -> Actor -> Actor
 applyImpulse force dt a = a & momentum_ +~ force ^*. dt

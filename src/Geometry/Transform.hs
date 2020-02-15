@@ -32,8 +32,8 @@ instance Num c => Category (Transform c) where
   id = Transform identity
   Transform a . Transform b = Transform (b !*! a)
 
-mkTranslation :: (Num c, Unit d u) => V2 (u c) -> Transform c u u
-mkTranslation v = Transform (identity & translation .~ ext (prj <$> v) 0)
+mkTranslation :: (Num c, Unit d u) => V3 (u c) -> Transform c u u
+mkTranslation v = Transform (identity & translation .~ fmap prj v)
 
 mkScale :: forall u v c du dv d' . (Num c, Unit du u, Unit dv v, Unit d' (Div u v)) => V3 (Div u v c) -> Transform c u v
 mkScale v = Transform (scaled (point (prj <$> v)))

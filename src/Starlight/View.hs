@@ -124,7 +124,7 @@ transformToSystem :: View -> Transform Double ClipUnits Distance
 transformToSystem view@View{ scale, focus }
   =   transformToZoomed view
   >>> mkScale (pure scale)
-  >>> mkTranslation (negated focus)
+  >>> mkTranslation (ext (negated focus) 0)
 
 
 clipTo :: Has (Lift IO) sig m => View -> m ()
