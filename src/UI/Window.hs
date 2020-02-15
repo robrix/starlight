@@ -61,7 +61,7 @@ size = do
   size <- ask >>= runLiftIO . get . windowSize
   pure (fromIntegral <$> size)
 
-ratio :: (Integral a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m a
+ratio :: (Integral a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m (I a)
 ratio = runLiftIO $ do
   window <- ask
   drawableSize <- glGetDrawableSize window
