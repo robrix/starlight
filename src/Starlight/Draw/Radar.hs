@@ -85,14 +85,14 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
     -- FIXME: fade colour with distance
     -- FIXME: IFF
     measure "bodies & npcs" $
-      drawArrays Points (Interval 0 (I (length vertices)))
+      drawArrays Points (0...length vertices)
 
   use targetProgram $ do
     put vars
 
     measure "targets" $
       for_ (system^.player_.target_ >>= (`findIndex` blips) . (. identifier) . (==)) $ \ index ->
-        drawArrays Points (Interval (I index) (I index + 1))
+        drawArrays Points (index...index + 1)
 
 run :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
 run m = do
