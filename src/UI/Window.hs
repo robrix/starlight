@@ -5,7 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 module UI.Window
-( Pixels(..)
+( Coords(..)
 , swap
 , poll
 , input
@@ -38,11 +38,11 @@ import           System.Random (Random)
 import           Unit.Length
 
 -- FIXME: can we embed the ratio into this? maybe at the type level?
-newtype Pixels a = Pixels { getPixels :: a }
+newtype Coords a = Coords { getCoords :: a }
   deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
-instance Unit Length Pixels where
+instance Unit Length Coords where
   suffix = K ("wpx"++)
 
 
@@ -56,7 +56,7 @@ input :: Has (Lift IO) sig m => (Event -> m ()) -> m ()
 input h = go where
   go = poll >>= maybe (pure ()) (const go <=< h)
 
-size :: (Num a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m (V2 (Pixels a))
+size :: (Num a, Has (Lift IO) sig m, Has (Reader Window) sig m) => m (V2 (Coords a))
 size = do
   size <- ask >>= runLiftIO . get . windowSize
   pure (fromIntegral <$> size)
@@ -72,7 +72,7 @@ ratio = runLiftIO $ do
 runSDL :: Has (Lift IO) sig m => m a -> m a
 runSDL = CC.runInBoundThread . E.bracket_ (runLiftIO initializeAll) (runLiftIO quit)
 
-runWindow :: Has (Lift IO) sig m => Text -> V2 (Pixels Int) -> ReaderC Window m a -> m a
+runWindow :: Has (Lift IO) sig m => Text -> V2 (Coords Int) -> ReaderC Window m a -> m a
 runWindow name size = E.bracket
   (runLiftIO (createWindow name windowConfig))
   (runLiftIO . destroyWindow)

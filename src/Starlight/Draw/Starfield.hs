@@ -139,7 +139,7 @@ shader = program $ \ U{ resolution, focus, zoom }
 
 
 data U v = U
-  { resolution :: v (V2 (Window.Pixels Float))
+  { resolution :: v (V2 (Window.Coords Float))
   , focus      :: v (V2 (Giga Metres Double))
   , zoom       :: v Float
   }
@@ -147,7 +147,7 @@ data U v = U
 
 instance Vars U
 
-resolution_ :: Lens' (U v) (v (V2 (Window.Pixels Float)))
+resolution_ :: Lens' (U v) (v (V2 (Window.Coords Float)))
 resolution_ = field @"resolution"
 
 focus_ :: Lens' (U v) (v (V2 (Giga Metres Double)))

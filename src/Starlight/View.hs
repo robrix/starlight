@@ -53,23 +53,23 @@ import Unit.Time
 
 data View = View
   { ratio     :: I Int    -- ^ Ratio of window pixels per context pixel.
-  , size      :: V2 (Window.Pixels Int)
+  , size      :: V2 (Window.Coords Int)
   , zoom      :: I Double
-  , scale     :: (Window.Pixels :/: Distance) Double
+  , scale     :: (Window.Coords :/: Distance) Double
   , shipScale :: I Double
   , focus     :: V2 (Distance Double)
   }
 
 contextSize :: View -> V2 (Context.Pixels Int)
-contextSize View{ ratio, size } = Context.Pixels . Window.getPixels <$> ratio .*^ size
+contextSize View{ ratio, size } = Context.Pixels . Window.getCoords <$> ratio .*^ size
 
-lengthToWindowPixels :: View -> (Window.Pixels :/: Distance) Double
+lengthToWindowPixels :: View -> (Window.Coords :/: Distance) Double
 lengthToWindowPixels View{ zoom, scale } = scale .*. zoom
 
 -- | Compute the zoom factor for the given velocity.
 --
 -- Higher values correlate to more of the scene being visible.
-zoomForSpeed :: V2 (Window.Pixels Int) -> (Distance :/: Seconds) Double -> I Double
+zoomForSpeed :: V2 (Window.Coords Int) -> (Distance :/: Seconds) Double -> I Double
 zoomForSpeed size x
   | distance < inf bounds = inf zoom
   | distance > sup bounds = sup zoom
@@ -96,7 +96,7 @@ withView m = do
 
   let zoom = zoomForSpeed size (norm velocity)
       -- how many pixels to draw something / the radius of the sun
-      scale = Window.Pixels 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
+      scale = Window.Coords 695_500 ./. convert @(Kilo Metres) @Distance 695_500.0
       -- FIXME: this is really stupid; there *has* to be a better way to say “I want a 500 m ship to be 30 px long” or w/e
       shipScale = 30
 
@@ -111,11 +111,11 @@ instance Unit Length ClipUnits where
   suffix = K ("clip"++)
 
 
-transformToWindow :: View -> Transform Double ClipUnits Window.Pixels
+transformToWindow :: View -> Transform Double ClipUnits Window.Coords
 transformToWindow View{ size }
   = mkScale (pure 1 & _xy .~ ClipUnits 1 ./^ (fmap fromIntegral <$> size))
 
-transformToZoomed :: View -> Transform Double ClipUnits Window.Pixels
+transformToZoomed :: View -> Transform Double ClipUnits Window.Coords
 transformToZoomed view@View{ zoom }
   =   transformToWindow view
   >>> mkScale (pure 1 & _xy .~ pure zoom) -- FIXME: this should probably zoom in z as well
