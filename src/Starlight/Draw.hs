@@ -121,4 +121,4 @@ draw = measure "draw" . runLiftIO $ do
     identifier <- system^.player_.target_
     pos <- (^.choosing position_ position_) <$> system !? identifier
     pure $! describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (system^.player_.position_)))
-  measure "drawLabel" $ drawLabel target (V2 10 10) white Nothing
+  measure "drawLabel" $ drawLabel target 10 white Nothing
