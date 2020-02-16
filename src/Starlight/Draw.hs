@@ -17,9 +17,9 @@ import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Trace
 import Control.Lens (choosing, filtered, traversed, (^.), (^..))
-import Control.Monad (join)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
+import Data.Maybe (fromMaybe)
 import Data.Time.Clock
 import GL.Effect.Check
 import GL.Framebuffer
@@ -119,8 +119,8 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "radar" Radar.draw
 
-  measure "setLabel" . setLabel target font $ case player^.target_ >>= traverse (fmap (^.choosing position_ position_) . (system !?)) . join (,) of
-    Just (identifier, pos)
-      -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
-    _ -> ""
+  measure "setLabel" . setLabel target font . fromMaybe "" $ do
+    identifier <- player^.target_
+    pos <- (^.choosing position_ position_) <$> system !? identifier
+    pure $! describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
   measure "drawLabel" $ drawLabel target (V2 10 10) white Nothing
