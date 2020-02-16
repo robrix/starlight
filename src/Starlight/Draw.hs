@@ -12,7 +12,6 @@ import Control.Carrier.Empty.Church
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
 import Control.Effect.Finally
-import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Trace
@@ -100,10 +99,9 @@ draw = measure "draw" . runLiftIO $ do
 
   v@View{ size } <- ask
   system <- ask @(System StateVectors)
-  player <- view (player_ @StateVectors)
 
   let hypotenuse = norm (fromIntegral <$> size) * 0.5
-      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) (player^.position_) - a^.magnitude_ * 0.5) < hypotenuse
+      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) (system^.player_.position_) - a^.magnitude_ * 0.5) < hypotenuse
 
   clipTo v
 
@@ -120,7 +118,7 @@ draw = measure "draw" . runLiftIO $ do
   measure "radar" Radar.draw
 
   measure "setLabel" . setLabel target font . fromMaybe "" $ do
-    identifier <- player^.target_
+    identifier <- system^.player_.target_
     pos <- (^.choosing position_ position_) <$> system !? identifier
-    pure $! describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
+    pure $! describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (system^.player_.position_)))
   measure "drawLabel" $ drawLabel target (V2 10 10) white Nothing
