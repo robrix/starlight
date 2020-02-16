@@ -118,10 +118,10 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "radar" Radar.draw
 
-  let describeTarget = case player^?target_._Just.to (fmap . (,) <*> (^?to (system !?)._Just.choosing position_ position_))._Just of
+  let description = case player^?target_._Just.to (fmap . (,) <*> (^?to (system !?)._Just.choosing position_ position_))._Just of
         Just (identifier, pos)
           -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
         _ -> ""
 
-  measure "setLabel" $ setLabel target font describeTarget
+  measure "setLabel" $ setLabel target font description
   measure "drawLabel" $ drawLabel target (V2 10 10) white Nothing
