@@ -99,10 +99,10 @@ draw = measure "draw" . runLiftIO $ do
 
   v@View{ size } <- ask
   system <- ask @(System StateVectors)
-  c@Character{ target } <- view (player_ @StateVectors)
+  player <- view (player_ @StateVectors)
 
   let hypotenuse = norm (fromIntegral <$> size) * 0.5
-      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) (c^.position_) - a^.magnitude_ * 0.5) < hypotenuse
+      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) (player^.position_) - a^.magnitude_ * 0.5) < hypotenuse
 
   clipTo v
 
@@ -118,10 +118,10 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "radar" Radar.draw
 
-  let describeTarget target = case target >>= fmap . (,) <*> (^?to (system !?)._Just.choosing position_ position_) of
+  let describeTarget = case player^?target_._Just.to (fmap . (,) <*> (^?to (system !?)._Just.choosing position_ position_))._Just of
         Just (identifier, pos)
-          -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (c^.position_)))
+          -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
         _ -> ""
 
-  measure "setLabel" $ setLabel targetLabel font (describeTarget target)
+  measure "setLabel" $ setLabel targetLabel font describeTarget
   measure "drawLabel" $ drawLabel targetLabel (V2 10 10) white Nothing
