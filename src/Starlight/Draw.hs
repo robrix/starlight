@@ -119,7 +119,7 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "radar" Radar.draw
 
-  measure "setLabel" . setLabel target font $ case player^?target_._Just.to (traverse (^?to (system !?)._Just.choosing position_ position_) . join (,))._Just of
+  measure "setLabel" . setLabel target font $ case player^.target_ >>= traverse (^?to (system !?)._Just.choosing position_ position_) . join (,) of
     Just (identifier, pos)
       -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
     _ -> ""
