@@ -99,10 +99,10 @@ draw = measure "draw" . runLiftIO $ do
 
   v@View{ size } <- ask
   system <- ask @(System StateVectors)
-  Character{ actor = Actor{ position }, target } <- view (player_ @StateVectors)
+  c@Character{ target } <- view (player_ @StateVectors)
 
   let hypotenuse = norm (fromIntegral <$> size) * 0.5
-      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) position - a^.magnitude_ * 0.5) < hypotenuse
+      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) (c^.position_) - a^.magnitude_ * 0.5) < hypotenuse
 
   clipTo v
 
@@ -120,7 +120,7 @@ draw = measure "draw" . runLiftIO $ do
 
   let describeTarget target = case target >>= fmap . (,) <*> (^?to (system !?)._Just.choosing position_ position_) of
         Just (identifier, pos)
-          -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos position))
+          -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (c^.position_)))
         _ -> ""
 
   measure "setLabel" $ setLabel targetLabel font (describeTarget target)
