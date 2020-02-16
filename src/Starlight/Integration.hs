@@ -234,7 +234,7 @@ runAction dt system c = \case
       distance = norm (pt - pc)
     _ -> c
   where
-  target = c^?target_._Just.to (system !?)._Just.choosing actor_ actor_
+  target = c^.target_ >>= fmap (^.choosing actor_ actor_) . (system !?)
 
   thrust amount = c & actor_ %~ applyImpulse (amount .*^ rotate (c^.rotation_) (unit _x)^._xy) dt
 
@@ -247,9 +247,9 @@ runAction dt system c = \case
   desiredAngle = fmap angleOf . \case
     Forwards  -> Just (normalizeU (c^.velocity_))
     Backwards -> Just (normalizeU relativeVelocity)
-    Target    -> target^?_Just.to ((`L.direction` (c^.position_)) . projected dt)
+    Target    -> (`L.direction` (c^.position_)) . projected dt <$> target
 
-  relativeVelocity = fromMaybe 0 (target^?_Just.velocity_) - c^.velocity_
+  relativeVelocity = maybe 0 (^.velocity_) target - c^.velocity_
 
 thrust :: Newtons Double
 thrust = convert $ Kilo (Grams 1000) .*. Kilo (Metres 10) ./. Seconds (1/60) ./. Seconds 1

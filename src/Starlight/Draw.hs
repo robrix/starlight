@@ -16,7 +16,7 @@ import Control.Effect.Lens (view)
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Trace
-import Control.Lens (choosing, filtered, to, traversed, (^.), (^..), (^?), _Just)
+import Control.Lens (choosing, filtered, traversed, (^.), (^..))
 import Control.Monad (join)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
@@ -119,7 +119,7 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "radar" Radar.draw
 
-  measure "setLabel" . setLabel target font $ case player^.target_ >>= traverse (^?to (system !?)._Just.choosing position_ position_) . join (,) of
+  measure "setLabel" . setLabel target font $ case player^.target_ >>= traverse (fmap (^.choosing position_ position_) . (system !?)) . join (,) of
     Just (identifier, pos)
       -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
     _ -> ""
