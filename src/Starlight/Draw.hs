@@ -17,6 +17,7 @@ import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Trace
 import Control.Lens (choosing, filtered, to, traversed, (^.), (^..), (^?), _Just)
+import Control.Monad (join)
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Time.Clock
@@ -118,7 +119,7 @@ draw = measure "draw" . runLiftIO $ do
 
   measure "radar" Radar.draw
 
-  measure "setLabel" . setLabel target font $ case player^?target_._Just.to (fmap . (,) <*> (^?to (system !?)._Just.choosing position_ position_))._Just of
+  measure "setLabel" . setLabel target font $ case player^?target_._Just.to (traverse (^?to (system !?)._Just.choosing position_ position_) . join (,))._Just of
     Just (identifier, pos)
       -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
     _ -> ""
