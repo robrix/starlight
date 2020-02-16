@@ -93,7 +93,7 @@ draw
      )
   => m ()
 draw = measure "draw" . runLiftIO $ do
-  UI{ target = targetLabel, face } <- ask
+  UI{ target, face } <- ask
   let font = Font face 18
   bind @Framebuffer Nothing
 
@@ -123,5 +123,5 @@ draw = measure "draw" . runLiftIO $ do
           -> describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (player^.position_)))
         _ -> ""
 
-  measure "setLabel" $ setLabel targetLabel font describeTarget
-  measure "drawLabel" $ drawLabel targetLabel (V2 10 10) white Nothing
+  measure "setLabel" $ setLabel target font describeTarget
+  measure "drawLabel" $ drawLabel target (V2 10 10) white Nothing
