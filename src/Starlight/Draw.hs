@@ -15,7 +15,7 @@ import Control.Effect.Finally
 import Control.Effect.Lift
 import Control.Effect.Profile
 import Control.Effect.Trace
-import Control.Lens (choosing, filtered, traversed, (^.), (^..))
+import Control.Lens (choosing, filtered, forOf_, traversed, (^.))
 import Control.Monad.IO.Class.Lift
 import Data.Foldable (for_)
 import Data.Maybe (fromMaybe)
@@ -93,11 +93,11 @@ frame = runSystem $ do
 
     measure "starfield" Starfield.draw
 
-    measure "ship" $ for_ (system^..characters_.traversed.filtered onScreen) Ship.draw
+    measure "ship" $ forOf_ (characters_.traversed.filtered onScreen) system Ship.draw
 
     measure "laser" $ for_ (beams system) Laser.draw
 
-    measure "body" $ for_ (system^..bodies_.traversed.filtered onScreen) Body.draw
+    measure "body" $ forOf_ (bodies_.traversed.filtered onScreen) system Body.draw
 
     measure "radar" Radar.draw
 
