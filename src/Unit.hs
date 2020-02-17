@@ -34,6 +34,7 @@ module Unit
 import Control.Lens.Iso
 import Data.Char
 import Data.Coerce
+import Data.Foldable (foldl')
 import Data.Functor.I
 import Data.Functor.Identity
 import Data.Functor.K
@@ -131,7 +132,7 @@ formatExpR = formatWith (\ prec x -> if
   | otherwise                 -> go prec (floatToDigits 10 x)) where
   go _    ([0], _) = showString "10⁰·0"
   go prec (is,  e) = showString "10" . superscript (e - 1) . showChar '·' . showDigits (take 1 is) . showChar '.' . showDigits (maybe id (fmap roundingLast . take . (+1)) prec (drop 1 is))
-  showDigits = foldr ((.) . showChar . intToDigit) id
+  showDigits = foldl' (\ s -> fmap s . showChar . intToDigit) id
 
   roundingLast is
     | _:_:_ <- is
