@@ -144,7 +144,7 @@ superscript i
   | signum i /= -1 = go id i
   | otherwise      = ('⁻':) . go id (abs i) where
   go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
-          | otherwise = (supAt n:) . s
+         | otherwise = (supAt n:) . s
   supAt i
     | inRange (0, 9) i = sup !! i
     | otherwise        = error $ "digit " <> show i <> " out of bounds (0, 9)"
