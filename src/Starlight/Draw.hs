@@ -76,49 +76,33 @@ frame
   => m ()
 frame = runSystem $ do
   measure "input" Starlight.Input.input
-  withView (local (neighbourhoodOfPlayer @StateVectors) Starlight.Draw.draw) -- draw with current readonly positions & beams
+  withView . local (neighbourhoodOfPlayer @StateVectors) . measure "draw" . runLiftIO $ do
+    UI{ target, face } <- ask
+    let font = Font face 18
+    bind @Framebuffer Nothing
 
-draw
-  :: ( Has Check sig m
-     , Has (Lift IO) sig m
-     , Has Profile sig m
-     , Has (Reader Body.Drawable) sig m
-     , Has (Reader Laser.Drawable) sig m
-     , Has (Reader Radar.Drawable) sig m
-     , Has (Reader Ship.Drawable) sig m
-     , Has (Reader Starfield.Drawable) sig m
-     , Has (Reader (System StateVectors)) sig m
-     , Has (Reader UI) sig m
-     , Has (Reader View) sig m
-     )
-  => m ()
-draw = measure "draw" . runLiftIO $ do
-  UI{ target, face } <- ask
-  let font = Font face 18
-  bind @Framebuffer Nothing
+    v@View{ size } <- ask
+    system <- ask @(System StateVectors)
 
-  v@View{ size } <- ask
-  system <- ask @(System StateVectors)
+    let hypotenuse = norm (fromIntegral <$> size) * 0.5
+        onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) (system^.player_.position_) - a^.magnitude_ * 0.5) < hypotenuse
 
-  let hypotenuse = norm (fromIntegral <$> size) * 0.5
-      onScreen a = lengthToWindowPixels v .*. (distance (a^.position_) (system^.player_.position_) - a^.magnitude_ * 0.5) < hypotenuse
+    clipTo v
 
-  clipTo v
+    glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 
-  glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+    measure "starfield" Starfield.draw
 
-  measure "starfield" Starfield.draw
+    measure "ship" $ for_ (system^..characters_.traversed.filtered onScreen) Ship.draw
 
-  measure "ship" $ for_ (system^..characters_.traversed.filtered onScreen) Ship.draw
+    measure "laser" $ for_ (beams system) Laser.draw
 
-  measure "laser" $ for_ (beams system) Laser.draw
+    measure "body" $ for_ (system^..bodies_.traversed.filtered onScreen) Body.draw
 
-  measure "body" $ for_ (system^..bodies_.traversed.filtered onScreen) Body.draw
+    measure "radar" Radar.draw
 
-  measure "radar" Radar.draw
-
-  measure "setLabel" . setLabel target font . fromMaybe "" $ do
-    identifier <- system^.player_.target_
-    pos <- (^.choosing position_ position_) <$> system !? identifier
-    pure $! describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (system^.player_.position_)))
-  measure "drawLabel" $ drawLabel target 10 white Nothing
+    measure "setLabel" . setLabel target font . fromMaybe "" $ do
+      identifier <- system^.player_.target_
+      pos <- (^.choosing position_ position_) <$> system !? identifier
+      pure $! describeIdentifier identifier ++ ": " ++ formatExpR (Just 1) (convert @_ @(Kilo Metres) (distance pos (system^.player_.position_)))
+    measure "drawLabel" $ drawLabel target 10 white Nothing
