@@ -151,9 +151,9 @@ integration = timed . flip (execState @(System Body)) (measure "integration" (ru
 
 
 inertia :: (Has (Reader (Seconds Double)) sig m, HasCallStack) => Actor -> m Actor
-inertia a@Actor{ velocity } = do
+inertia a = do
   dt <- ask @(Seconds _)
-  pure $! a & position_ +~ velocity ^*. dt
+  pure $! a & position_ +~ a^.velocity_ ^*. dt
 
 gravity :: (Has (Reader (Seconds Double)) sig m, Has (Reader (System StateVectors)) sig m, HasCallStack) => Actor -> m Actor
 gravity a = do
