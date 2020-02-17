@@ -159,7 +159,7 @@ library
   autogen-modules:
     Paths_starlight
   build-depends:
-      base
+    , base
     , containers
     , direct-sqlite ^>= 2.3
     , directory ^>= 1.3
