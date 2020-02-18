@@ -70,6 +70,7 @@ module GL.Shader.Expr
 , lerp
 , lerp2
 , dFdx
+, dFdy
 , mod'
 , min'
 , max'
@@ -229,6 +230,7 @@ data Expr (k :: Type) a where
   Lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
   Lerp2 :: Expr k (v a) -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
   Dfdx :: Expr k a -> Expr k a
+  Dfdy :: Expr k a -> Expr k a
   Mod :: Expr k a -> Expr k a -> Expr k a
   Min :: Expr k a -> Expr k a -> Expr k a
   Max :: Expr k a -> Expr k a -> Expr k a
@@ -392,6 +394,9 @@ lerp2 = Lerp2
 dFdx :: Expr k a -> Expr k a
 dFdx = Dfdx
 
+dFdy :: Expr k a -> Expr k a
+dFdy = Dfdy
+
 mod' :: Expr k v -> Expr k v -> Expr k v
 mod' = Mod
 
@@ -492,6 +497,7 @@ renderExpr = \case
   Lerp t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Lerp2 t a b -> fn "mix" [renderExpr a, renderExpr b, renderExpr t]
   Dfdx a -> fn "dFdx" [renderExpr a]
+  Dfdy a -> fn "dFdy" [renderExpr a]
   Mod a b -> fn "mod" [renderExpr a, renderExpr b]
   Min a b -> fn "min" [renderExpr a, renderExpr b]
   Max a b -> fn "max" [renderExpr a, renderExpr b]
