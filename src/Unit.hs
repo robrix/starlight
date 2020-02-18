@@ -143,8 +143,7 @@ digits = go id where
 
 superscript :: Int -> ShowS
 superscript i
-  | signum i == -1 = ('⁻':) . go id (abs i)
-  | otherwise      = go id i where
-  go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r:) . s) q
-         | otherwise = (sup !! n:) . s
+  | signum i == -1 = ('⁻':) . go (abs i)
+  | otherwise      = go i where
+  go = foldl' (\ s -> fmap s . (:) . (sup !!)) id . digits
   sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
