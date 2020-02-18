@@ -2,6 +2,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
@@ -130,8 +131,10 @@ formatExpR = formatWith (\ prec x -> if
   | isInfinite x              -> showString $ if x < 0 then "-Infinity" else "Infinity"
   | x < 0 || isNegativeZero x -> showChar '-' . go prec (floatToDigits 10 (-x))
   | otherwise                 -> go prec (floatToDigits 10 x)) where
-  go _    ([0], _) = showString "10⁰·0"
-  go prec (is,  e) | let is' = maybe is (\ ds -> digits (round (mul (take (ds + 1) is)))) prec = showString "10" . superscript (e - 1) . showChar '·' . showDigits (take 1 is') . showChar '.' . showDigits (drop 1 is')
+  go prec = \case
+    ([0], _) -> showString "10⁰·0"
+    (is,  e) | let is' = maybe is (\ ds -> digits (round (mul (take (ds + 1) is)))) prec
+             -> showString "10" . superscript (e - 1) . showChar '·' . showDigits (take 1 is') . showChar '.' . showDigits (drop 1 is')
   showDigits = foldl' (\ s -> fmap s . showChar . intToDigit) id
   mul = foldl' (\ s d -> s * 10 + fromIntegral d) (0 :: Double)
 
