@@ -145,8 +145,8 @@ digits = go id where
 
 superscript :: HasCallStack => Int -> ShowS
 superscript i
-  | signum i /= -1 = go id i
-  | otherwise      = ('⁻':) . go id (abs i) where
+  | signum i == -1 = ('⁻':) . go id (abs i)
+  | otherwise      = go id i where
   go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
          | otherwise = (supAt n:) . s
   supAt i
