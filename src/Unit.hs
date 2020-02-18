@@ -39,8 +39,6 @@ import Data.Foldable (foldl')
 import Data.Functor.I
 import Data.Functor.Identity
 import Data.Functor.K
-import Data.Ix
-import GHC.Stack
 import Numeric
 
 -- * Units
@@ -125,7 +123,7 @@ formatDec = formatWith showFFloat
 formatExp :: forall u d a . (Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExp = formatWith showEFloat
 
-formatExpR :: forall u d a . (HasCallStack, Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
+formatExpR :: forall u d a . (Unit d u, RealFloat (u a)) => Maybe Int -> u a -> String
 formatExpR = formatWith (\ prec x -> if
   | isNaN x                   -> showString "NaN"
   | isInfinite x              -> showString $ if x < 0 then "-Infinity" else "Infinity"
@@ -143,13 +141,10 @@ digits = go id where
   go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((r:) . s) q
          | otherwise = n:s []
 
-superscript :: HasCallStack => Int -> ShowS
+superscript :: Int -> ShowS
 superscript i
   | signum i == -1 = ('⁻':) . go id (abs i)
   | otherwise      = go id i where
-  go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((supAt r:) . s) q
-         | otherwise = (supAt n:) . s
-  supAt i
-    | inRange (0, 9) i = sup !! i
-    | otherwise        = error $ "digit " <> show i <> " out of bounds (0, 9)"
+  go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((sup !! r:) . s) q
+         | otherwise = (sup !! n:) . s
   sup = "⁰¹²³⁴⁵⁶⁷⁸⁹"
