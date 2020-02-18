@@ -131,14 +131,14 @@ formatExpR = formatWith (\ prec x -> if
   | x < 0 || isNegativeZero x -> showChar '-' . go prec (floatToDigits 10 (-x))
   | otherwise                 -> go prec (floatToDigits 10 x)) where
   go _    ([0], _) = showString "10⁰·0"
-  go prec (is,  e) = showString "10" . superscript (e - 1) . showChar '·' . showDigits (take 1 is) . showChar '.' . showDigits (maybe id (fmap roundingLast . take . (+1)) prec (drop 1 is))
+  go prec (is,  e) | let is' = maybe is (\ ds -> digits (round (mul (take (ds + 1) is)))) prec = showString "10" . superscript (e - 1) . showChar '·' . showDigits (take 1 is') . showChar '.' . showDigits (drop 1 is')
   showDigits = foldl' (\ s -> fmap s . showChar . intToDigit) id
+  mul = foldl' (\ s d -> s * 10 + fromIntegral d) (0 :: Double)
 
-  roundingLast is
-    | _:_:_ <- is
-    , is' <- init is
-    , il <- last is' = init is' ++ [ if last is >= 5 then il + 1 else il ]
-    | otherwise      = is
+digits :: Int -> [Int]
+digits = go id where
+  go s n | n >= 10   = let (q, r) = n `quotRem` 10 in go ((r:) . s) q
+         | otherwise = n:s []
 
 superscript :: HasCallStack => Int -> ShowS
 superscript i
