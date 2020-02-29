@@ -128,6 +128,7 @@
   - split the target label into distance & name
   - label planets
   - label ships
+  - multiple screen support
 
 - 🤦🏻‍♀️ Features
   - ✅ “warp”
