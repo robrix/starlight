@@ -22,8 +22,5 @@ data Bind t m k
 
 deriving instance Functor m => Functor (Bind t m)
 
-instance HFunctor (Bind t) where
-  hmap f (Bind t m k) = Bind t (f m) (f . k)
-
 instance Effect (Bind t) where
   thread ctx hdl (Bind t m k) = Bind t (hdl (m <$ ctx)) (hdl . fmap k)
