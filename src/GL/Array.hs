@@ -175,6 +175,6 @@ bindArray array m = do
   a <$ bind @(Array _) Nothing
 
 askArray :: HasLabelled Array (Reader (Array (v I))) sig m => m (Array (v I))
-askArray = runUnderLabel @_ @Array ask
+askArray = runUnderLabel @Array ask
 
 type ArrayC v = Labelled Array (ReaderC (Array (v I)))
