@@ -21,6 +21,7 @@ import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Finally
 import           Control.Effect.Labelled
+import           Control.Effect.Sum
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
@@ -79,12 +80,12 @@ newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) 
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
 
 instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: Labelled Program (Reader (Program u v o)) :+: sig) (ProgramC u v o m) where
-  alg = \case
-    L (Get   k) -> k (makeVars (const Nothing))
+  alg ctx hdl = \case
+    L (Get   k) -> hdl (k (makeVars (const Nothing)) <$ ctx)
     L (Put s k) -> do
       Program ls prog <- askProgram
       foldVarsM (\ Field{ location, value } ->
         maybe (pure ()) (checking . uniform prog (ls IntMap.! location)) value) s
-      k
-    R (L other) -> ProgramC (send (handleCoercible (runLabelled other)))
-    R (R other) -> ProgramC (send (handleCoercible other))
+      hdl (k <$ ctx)
+    R (L other) -> ProgramC (alg ctx (runProgramC . hdl) (inj (runLabelled other)))
+    R (R other) -> ProgramC (alg ctx (runProgramC . hdl) (R other))
