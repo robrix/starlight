@@ -47,8 +47,7 @@ import Unit.Count
 import Unit.Length
 
 runFrame
-  :: ( Effect sig
-     , Has Check sig m
+  :: ( Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
      , Has Trace sig m

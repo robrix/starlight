@@ -112,8 +112,7 @@ pickName = do
   pure $! Text.pack (names !! i)
 
 integration
-  :: ( Effect sig
-     , Has (Lift IO) sig m
+  :: ( Has (Lift IO) sig m
      , Has Profile sig m
      , Has Random sig m
      , Has (Reader Epoch) sig m

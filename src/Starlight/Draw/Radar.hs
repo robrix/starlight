@@ -94,7 +94,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
       for_ (system^.player_.target_ >>= (`findIndex` blips) . (. identifier) . (==)) $ \ index ->
         drawArrays Points (index...index + 1)
 
-run :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
+run :: (Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => ReaderC Drawable m a -> m a
 run m = do
   radarProgram  <- build radarShader
   targetProgram <- build targetShader

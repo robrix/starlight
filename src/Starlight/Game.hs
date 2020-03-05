@@ -54,8 +54,7 @@ import           Unit.Count
 import           Unit.Length
 
 runGame
-  :: ( Effect sig
-     , Has (Lift IO) sig m
+  :: ( Has (Lift IO) sig m
      , MonadFail m
      )
   => Map.Map BodyIdentifier Body
@@ -110,8 +109,7 @@ runGame bodies
   radar = Radar 1000 -- GW radar
 
 game
-  :: ( Effect sig
-     , Has Check sig m
+  :: ( Has Check sig m
      , Has (Lift IO) sig m
      , Has Profile sig m
      , HasLabelled Thread (Thread id) sig m

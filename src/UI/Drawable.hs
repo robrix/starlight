@@ -39,7 +39,7 @@ using getDrawable m = do
 runDrawable :: (Drawable u v o -> b) -> Drawable u v o -> ReaderC b m a -> m a
 runDrawable makeDrawable = runReader . makeDrawable
 
-loadingDrawable :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m, Storable (v I), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v I] -> ReaderC b m a -> m a
+loadingDrawable :: (Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m, Storable (v I), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v I] -> ReaderC b m a -> m a
 loadingDrawable drawable shader vertices m = do
   program <- build shader
   (_, array) <- load vertices

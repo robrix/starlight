@@ -33,9 +33,7 @@ main = do
   runThread (runCheck (CLI.check options) (runProfile (CLI.profile options) (runTrace (CLI.trace options) game)))
 
 runProfile
-  :: ( Effect sig
-     , Has (Lift IO) sig m
-     )
+  :: Has (Lift IO) sig m
   => Flag CLI.ShouldProfile
   -> (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Profile :+: sig) (t m)) => t m a)
   -> m a
