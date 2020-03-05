@@ -27,13 +27,13 @@ newtype CheckC m a = CheckC { runCheck :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Check :+: sig) (CheckC m) where
-  alg = \case
+  alg ctx hdl = \case
     L (Check loc k) -> do
       err <- runLiftIO glGetError
       case err of
-        GL_NO_ERROR -> k
-        other       -> withCallStack (fromCallSiteList (toList loc)) (withFrozenCallStack (throwGLError other)) >> k
-    R other -> CheckC (send (handleCoercible other))
+        GL_NO_ERROR -> hdl (k <$ ctx)
+        other       -> withCallStack (fromCallSiteList (toList loc)) (withFrozenCallStack (throwGLError other)) >> hdl (k <$ ctx)
+    R other -> CheckC (alg ctx (runCheck . hdl) other)
 
 withCallStack :: CallStack -> (HasCallStack => a) -> a
 withCallStack callStack a = let ?callStack = callStack in a
