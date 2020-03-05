@@ -50,7 +50,7 @@ instance MonadIO m => MonadIO (EmptyC m) where
 instance MonadTrans EmptyC where
   lift m = EmptyC (\ just _ -> m >>= just)
 
-instance (Algebra sig m, Effect sig) => Algebra (Empty :+: sig) (EmptyC m) where
-  alg = \case
+instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
+  alg ctx hdl = \case
     L Empty -> EmptyC (const id)
-    R other -> EmptyC (\ just nothing -> alg (thread (Just ()) (maybe (pure Nothing) runEmpty) other) >>= maybe nothing just)
+    R other -> EmptyC (\ just nothing -> thread (Just ctx) (maybe (pure Nothing) (runEmpty . hdl)) other >>= maybe nothing just)
