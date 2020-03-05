@@ -18,9 +18,6 @@ data Finally m k
 
 deriving instance Functor m => Functor (Finally m)
 
-instance Effect Finally where
-  thread ctx hdl (OnExit m k) = OnExit (hdl (m <$ ctx)) (hdl (k <$ ctx))
-
 
 onExit :: Has Finally sig m => m () -> m ()
 onExit m = send (OnExit m (pure ()))
