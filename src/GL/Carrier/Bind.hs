@@ -27,11 +27,11 @@ newtype BindC t m a = BindC { runBindC :: ReaderC (Maybe t) m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (Has Check sig m, Has (Lift IO) sig m, GL.Bind t) => Algebra (Bind t :+: sig) (BindC t m) where
-  alg = \case
+  alg ctx hdl = \case
     L (Bind t m k) -> do
       prev <- BindC ask
       GL.bind (Just t)
-      a <- BindC (local (const (Just t)) (runBindC m))
+      a <- BindC (local (const (Just t)) (runBindC (hdl (m <$ ctx))))
       GL.bind (prev `asTypeOf` Just t)
-      k a
-    R other -> BindC (send (handleCoercible other))
+      hdl (fmap k a)
+    R other -> BindC (alg ctx (runBindC . hdl) (R other))
