@@ -47,8 +47,8 @@ instance Monad (StateC s) where
   StateC m >>= f = StateC (m >>= (\ (StateC m) -> m) . f)
 
 instance Algebra (State s) (StateC s) where
-  alg = \case
+  alg ctx hdl = \case
     Get   k -> do
       s <- StateC (ReaderC (\ ref -> readSTRef ref))
-      k s
-    Put s k -> StateC (ReaderC (\ ref -> writeSTRef ref s)) >> k
+      hdl (k s <$ ctx)
+    Put s k -> StateC (ReaderC (\ ref -> writeSTRef ref s)) >> hdl (k <$ ctx)
