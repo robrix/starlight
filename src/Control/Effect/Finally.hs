@@ -18,9 +18,6 @@ data Finally m k
 
 deriving instance Functor m => Functor (Finally m)
 
-instance HFunctor Finally where
-  hmap f (OnExit m k) = OnExit (f m) (f k)
-
 instance Effect Finally where
   thread ctx hdl (OnExit m k) = OnExit (hdl (m <$ ctx)) (hdl (k <$ ctx))
 
