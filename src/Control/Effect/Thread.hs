@@ -21,13 +21,13 @@ import Control.Algebra
 import Control.Effect.Labelled
 
 fork :: HasLabelled Thread (Thread id) sig m => m () -> m id
-fork m = sendLabelled @Thread (Labelled (Fork m pure))
+fork m = sendLabelled @Thread (Fork m pure)
 
 kill :: HasLabelled Thread (Thread id) sig m => id -> m ()
-kill i = sendLabelled @Thread (Labelled (Kill i (pure ())))
+kill i = sendLabelled @Thread (Kill i (pure ()))
 
 yield :: HasLabelled Thread (Thread id) sig m => m ()
-yield = sendLabelled @Thread (Labelled (Yield (pure ())))
+yield = sendLabelled @Thread (Yield (pure ()))
 
 data Thread id m k
   = forall a . Fork (m a) (id -> m k)

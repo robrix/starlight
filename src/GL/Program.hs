@@ -72,7 +72,7 @@ use (Program ls p) m = do
 
 
 askProgram :: HasLabelled Program (Reader (Program u v o)) sig m => m (Program u v o)
-askProgram = runUnderLabel @_ @Program ask
+askProgram = runUnderLabel @Program ask
 
 
 newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramC :: ReaderC (Program u v o) m a }

@@ -4,7 +4,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Monad.IO.Class.Lift
 ( LiftIO(..)
-, sendIO
 , module Control.Carrier.Lift
 , MonadIO(..)
 ) where
@@ -21,7 +20,3 @@ instance Has (Lift IO) sig m => MonadIO (LiftIO m) where
 
 instance Algebra sig m => Algebra sig (LiftIO m) where
   alg = LiftIO . alg . handleCoercible
-
-
-sendIO :: Has (Lift IO) sig m => IO a -> m a
-sendIO = sendM

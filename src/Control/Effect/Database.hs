@@ -22,10 +22,10 @@ import Data.Text (Text)
 import Database.SQLite3 (SQLData)
 
 execute :: HasLabelled Database (Database stmt) sig m => Text -> (stmt -> m a) -> m a
-execute cmd m = sendLabelled @Database (Labelled (Execute cmd m pure))
+execute cmd m = sendLabelled @Database (Execute cmd m pure)
 
 step :: HasLabelled Database (Database stmt) sig m => stmt -> m (Maybe [SQLData])
-step stmt = sendLabelled @Database (Labelled (Step stmt pure))
+step stmt = sendLabelled @Database (Step stmt pure)
 
 data Database stmt m k
   = forall a . Execute Text (stmt -> m a) (a -> m k)

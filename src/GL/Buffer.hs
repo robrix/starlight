@@ -106,6 +106,6 @@ bindBuffer buffer m = do
   a <$ bind (Nothing `asTypeOf` Just buffer)
 
 askBuffer :: forall ty v m sig . HasLabelled (Buffer ty) (Reader (Buffer ty v)) sig m => m (Buffer ty v)
-askBuffer = runUnderLabel @_ @(Buffer ty) ask
+askBuffer = runUnderLabel @(Buffer ty) ask
 
 type BufferC ty v = Labelled (Buffer ty) (ReaderC (Buffer ty v))
