@@ -7,7 +7,6 @@ module GL.Effect.Bind
 , Bind(..)
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where
@@ -21,6 +20,3 @@ data Bind t m k
   = forall a . Bind t (m a) (a -> m k)
 
 deriving instance Functor m => Functor (Bind t m)
-
-instance Effect (Bind t) where
-  thread ctx hdl (Bind t m k) = Bind t (hdl (m <$ ctx)) (hdl . fmap k)
