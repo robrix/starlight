@@ -7,7 +7,6 @@ module GL.Effect.Check
 , Check(..)
   -- * Re-export
 , Algebra
-, Effect
 , Has
 , run
 ) where
@@ -26,5 +25,3 @@ checking action = withFrozenCallStack $ action <* check
 data Check m k
   = Check (Maybe (String, SrcLoc)) (m k)
   deriving (Functor, Generic1)
-
-instance Effect Check
