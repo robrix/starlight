@@ -59,7 +59,7 @@ instance MonadTrans EmptyC where
   lift m = EmptyC (m >>=)
   {-# INLINABLE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (Empty :+: sig) (EmptyC m) where
-  alg = \case
+instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
+  alg ctx hdl = \case
     L Empty -> EmptyC (const (pure Nothing))
-    R other -> EmptyC (\ k -> alg (thread (Just ()) (maybe (pure Nothing) runEmpty) other) >>= maybe (pure Nothing) k)
+    R other -> EmptyC (\ k -> thread (Just ctx) (maybe (pure Nothing) (runEmpty . hdl)) other >>= maybe (pure Nothing) k)
