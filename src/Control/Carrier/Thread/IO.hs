@@ -24,9 +24,9 @@ newtype ThreadC m a = ThreadC { runThread :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Labelled Thread (Thread CC.ThreadId) :+: sig) (ThreadC m) where
-  alg = \case
+  alg ctx hdl = \case
     -- NB: this discards state changes in the other thread
-    L (Labelled (Fork m k)) -> liftWith (\ ctx run -> (<$ ctx) <$> CC.forkIO (void (run (m <$ ctx)))) >>= k
-    L (Labelled (Kill i k)) -> sendM (CC.killThread i) >> k
-    L (Labelled (Yield  k)) -> sendM CC.yield >> k
-    R other                 -> ThreadC (send (handleCoercible other))
+    L (Labelled (Fork m k)) -> liftWith (\ ctx2 hdl2 -> (<$ ctx2) . (<$ ctx) <$> CC.forkIO (void (hdl2 (hdl (m <$ ctx) <$ ctx2)))) >>= hdl . fmap k
+    L (Labelled (Kill i k)) -> sendM (CC.killThread i) >> hdl (k <$ ctx)
+    L (Labelled (Yield  k)) -> sendM CC.yield >> hdl (k <$ ctx)
+    R other                 -> ThreadC (alg ctx (runThread . hdl) other)
