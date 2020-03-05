@@ -33,11 +33,6 @@ data Database stmt m k
 
 deriving instance Functor m => Functor (Database stmt m)
 
-instance HFunctor (Database stmt) where
-  hmap f = \case
-    Execute cmd m k -> Execute cmd (f . m) (f . k)
-    Step stmt k -> Step stmt (f . k)
-
 instance Effect (Database stmt) where
   thread ctx hdl = \case
     Execute cmd m k -> Execute cmd (hdl . (<$ ctx) . m) (hdl . fmap k)
