@@ -1,5 +1,4 @@
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveGeneric #-}
 module GL.Effect.Check
 ( -- * Check effect
   check
@@ -13,7 +12,6 @@ module GL.Effect.Check
 
 import Control.Algebra
 import Data.Maybe (listToMaybe)
-import GHC.Generics (Generic1)
 import GHC.Stack
 
 check :: (Has Check sig m, HasCallStack) => m ()
@@ -24,4 +22,4 @@ checking action = withFrozenCallStack $ action <* check
 
 data Check m k
   = Check (Maybe (String, SrcLoc)) (m k)
-  deriving (Functor, Generic1)
+  deriving (Functor)
