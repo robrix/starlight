@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 module Control.Effect.Database
@@ -11,7 +10,6 @@ module Control.Effect.Database
 , Database(..)
   -- * Re-exports
 , Algebra
-, Effect
 , HasLabelled
 , run
 ) where
@@ -32,8 +30,3 @@ data Database stmt m k
   | Step stmt (Maybe [SQLData] -> m k)
 
 deriving instance Functor m => Functor (Database stmt m)
-
-instance Effect (Database stmt) where
-  thread ctx hdl = \case
-    Execute cmd m k -> Execute cmd (hdl . (<$ ctx) . m) (hdl . fmap k)
-    Step stmt k -> Step stmt (hdl . (<$ ctx) . k)
