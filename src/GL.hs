@@ -93,10 +93,10 @@ newtype GLC m a = GLC (m a)
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (State Capabilities :+: sig) (GLC m) where
-  alg = \case
-    L (Get   k) -> k (Capabilities mempty)
+  alg ctx hdl = \case
+    L (Get   k) -> hdl (k (Capabilities mempty) <$ ctx)
     L (Put s k) -> do
       for_ (Map.toList (getCapabilities s)) $ \ (cap, b) ->
         runLiftIO $ (if b then glEnable else glDisable) (glEnum cap)
-      k
-    R other -> GLC (send (handleCoercible other))
+      hdl (k <$ ctx)
+    R other -> GLC (alg ctx (runGLC . hdl) other)
