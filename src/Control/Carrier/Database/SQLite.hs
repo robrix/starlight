@@ -7,7 +7,7 @@
 module Control.Carrier.Database.SQLite
 ( -- * Database carrier
   runDatabase
-, DatabaseC(..)
+, DatabaseC(DatabaseC)
   -- * Database effect
 , module Control.Effect.Database
 ) where
@@ -26,20 +26,20 @@ import qualified Database.SQLite3 as SQLite
 runDatabase :: Has (Lift IO) sig m => FilePath -> DatabaseC m a -> m a
 runDatabase file (DatabaseC m) = bracket (sendM (SQLite.open (pack file))) (sendM . SQLite.close) (`runReader` m)
 
-newtype DatabaseC m a = DatabaseC (ReaderC SQLite.Database m a)
+newtype DatabaseC m a = DatabaseC { runDatabaseC :: ReaderC SQLite.Database m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (Labelled Database (Database SQLite.Statement) :+: sig) (DatabaseC m) where
-  alg = \case
+  alg ctx hdl = \case
     L (Labelled (Execute cmd m k)) -> do
       db <- DatabaseC ask
       stmt <- sendM (SQLite.prepare db cmd)
-      a <- m stmt
+      a <- hdl (m stmt <$ ctx)
       sendM (SQLite.finalize stmt)
-      k a
+      hdl (fmap k a)
     L (Labelled (Step stmt k)) -> do
       res <- sendM (SQLite.step stmt)
       case res of
-        SQLite.Done -> k Nothing
-        SQLite.Row  -> sendM (SQLite.columns stmt) >>= k . Just
-    R other -> DatabaseC (send (handleCoercible other))
+        SQLite.Done -> hdl (k Nothing <$ ctx)
+        SQLite.Row  -> sendM (SQLite.columns stmt) >>= hdl . (<$ ctx) . k . Just
+    R other -> DatabaseC (alg ctx (runDatabaseC . hdl) (R other))
