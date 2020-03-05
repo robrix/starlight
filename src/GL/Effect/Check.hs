@@ -27,5 +27,4 @@ data Check m k
   = Check (Maybe (String, SrcLoc)) (m k)
   deriving (Functor, Generic1)
 
-instance HFunctor Check
 instance Effect Check
