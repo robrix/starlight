@@ -40,11 +40,11 @@ evalState s = fmap snd . runState s
 execState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 
-newtype StateC s m a = StateC (ReaderC (IORef s) m a)
+newtype StateC s m a = StateC { runStateC :: ReaderC (IORef s) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (State s :+: sig) (StateC s m) where
-  alg = \case
-    L (Get   k) -> StateC ask >>= sendM . readIORef         >>= k
-    L (Put s k) -> StateC ask >>= sendM . flip writeIORef s >>  k
-    R other     -> StateC (send (handleCoercible other))
+  alg ctx hdl = \case
+    L (Get   k) -> StateC ask >>= sendM . readIORef         >>= hdl . (<$ ctx) . k
+    L (Put s k) -> StateC ask >>= sendM . flip writeIORef s >>  hdl (k <$ ctx)
+    R other     -> StateC (alg ctx (runStateC . hdl) (R other))
