@@ -23,6 +23,6 @@ newtype TraceC m a = TraceC { runTrace :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Trace :+: sig) (TraceC m) where
-  alg = \case
-    L (Trace s k) -> sendM (hPutStrLn stderr s) *> k
-    R other       -> TraceC (send (handleCoercible other))
+  alg ctx hdl = \case
+    L (Trace s k) -> sendM (hPutStrLn stderr s) *> hdl (k <$ ctx)
+    R other       -> TraceC (alg ctx (runTrace . hdl) other)
