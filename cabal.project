@@ -3,17 +3,17 @@ packages: .
 source-repository-package
   type: git
   location: https://github.com/fused-effects/fused-effects.git
-  tag: 24be5b4dc0a969aa5e67dd3f49b4612a2c3688bc
+  tag: ead3648ad1195c49fd266c100429051591791c2a
 
 source-repository-package
   type: git
   location: https://github.com/fused-effects/fused-effects-profile.git
-  tag: 4d76606776f04add624135ad1b94072f15b004d8
+  tag: d897811056009de4b68ab0a724163a706a8937b2
 
 source-repository-package
   type: git
   location: https://github.com/fused-effects/fused-effects-random.git
-  tag: cda9ff9c5c2f2823d27ca938a3a8cc995bbe13c3
+  tag: 2abca77754c7e63070a245889cf23724cb0e3ad0
 
 source-repository-package
   type: git

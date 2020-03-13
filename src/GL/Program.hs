@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -80,12 +80,12 @@ newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) 
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
 
 instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: Labelled Program (Reader (Program u v o)) :+: sig) (ProgramC u v o m) where
-  alg ctx hdl = \case
-    L (Get   k) -> hdl (k (makeVars (const Nothing)) <$ ctx)
-    L (Put s k) -> do
+  alg hdl sig ctx = case sig of
+    L Get      -> pure (makeVars (const Nothing) <$ ctx)
+    L (Put s)  -> do
       Program ls prog <- askProgram
       foldVarsM (\ Field{ location, value } ->
         maybe (pure ()) (checking . uniform prog (ls IntMap.! location)) value) s
-      hdl (k <$ ctx)
-    R (L other) -> ProgramC (alg ctx (runProgramC . hdl) (inj (runLabelled other)))
-    R (R other) -> ProgramC (alg ctx (runProgramC . hdl) (R other))
+      pure ctx
+    R (L other) -> ProgramC (alg (runProgramC . hdl) (inj (runLabelled other)) ctx)
+    R (R other) -> ProgramC (alg (runProgramC . hdl) (R other) ctx)

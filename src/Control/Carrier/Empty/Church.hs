@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
@@ -51,6 +50,6 @@ instance MonadTrans EmptyC where
   lift m = EmptyC (\ just _ -> m >>= just)
 
 instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
-  alg ctx hdl = \case
+  alg hdl sig ctx = case sig of
     L Empty -> EmptyC (const id)
-    R other -> EmptyC (\ just nothing -> thread (Just ctx) (maybe (pure Nothing) (runEmpty . hdl)) other >>= maybe nothing just)
+    R other -> EmptyC (\ just nothing -> thread (maybe (pure Nothing) runEmpty) hdl other (Just ctx) >>= maybe nothing just)

@@ -22,7 +22,7 @@ newtype Relation i a = Relation { runRelationC :: ReaderC i Maybe a }
   deriving (Alternative, Applicative, Functor, Monad)
 
 instance Algebra (Reader i) (Relation i) where
-  alg ctx hdl = Relation . alg ctx (runRelationC . hdl) . inj
+  alg hdl sig = Relation . alg (runRelationC . hdl) (inj sig)
 
 
 expect :: (Alternative m, Has (Reader r) sig m) => Getting Bool r Bool -> m ()

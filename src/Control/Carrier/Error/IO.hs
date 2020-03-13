@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -29,7 +28,7 @@ instance MonadTrans (ErrorC e) where
   lift = ErrorC
 
 instance (Exception e, Has (Lift IO) sig m) => Algebra (Error e :+: sig) (ErrorC e m) where
-  alg ctx hdl = \case
-    L (L (Throw e))     -> throwIO e
-    L (R (Catch m h k)) -> (hdl (m <$ ctx) `catch` (hdl . (<$ ctx) . h)) >>= hdl . fmap k
-    R other             -> ErrorC (alg ctx (runErrorC . hdl) other)
+  alg hdl sig ctx = case sig of
+    L (L (Throw e))   -> throwIO e
+    L (R (Catch m h)) -> hdl (m <$ ctx) `catch` (hdl . (<$ ctx) . h)
+    R other           -> ErrorC (alg (runErrorC . hdl) other ctx)

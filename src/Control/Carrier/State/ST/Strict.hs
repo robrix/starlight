@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.State.ST.Strict
@@ -47,8 +47,6 @@ instance Monad (StateC s) where
   StateC m >>= f = StateC (m >>= (\ (StateC m) -> m) . f)
 
 instance Algebra (State s) (StateC s) where
-  alg ctx hdl = \case
-    Get   k -> do
-      s <- StateC (ReaderC (\ ref -> readSTRef ref))
-      hdl (k s <$ ctx)
-    Put s k -> StateC (ReaderC (\ ref -> writeSTRef ref s)) >> hdl (k <$ ctx)
+  alg _ sig ctx = case sig of
+    Get   -> StateC (ReaderC (fmap (<$ ctx) . readSTRef))
+    Put s -> StateC (ReaderC (\ ref -> ctx <$ writeSTRef ref s))

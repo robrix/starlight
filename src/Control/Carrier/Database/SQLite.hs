@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -30,7 +29,7 @@ newtype DatabaseC m a = DatabaseC { runDatabaseC :: ReaderC SQLite.Database m a 
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (Labelled Database (Database SQLite.Statement) :+: sig) (DatabaseC m) where
-  alg ctx hdl = \case
+  alg hdl sig ctx = case sig of
     L (Labelled (Execute cmd m k)) -> do
       db <- DatabaseC ask
       stmt <- sendM (SQLite.prepare db cmd)
@@ -42,4 +41,4 @@ instance Has (Lift IO) sig m => Algebra (Labelled Database (Database SQLite.Stat
       case res of
         SQLite.Done -> hdl (k Nothing <$ ctx)
         SQLite.Row  -> sendM (SQLite.columns stmt) >>= hdl . (<$ ctx) . k . Just
-    R other -> DatabaseC (alg ctx (runDatabaseC . hdl) (R other))
+    R other -> DatabaseC (alg (runDatabaseC . hdl) (R other) ctx)

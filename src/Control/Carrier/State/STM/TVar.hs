@@ -1,7 +1,7 @@
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -47,10 +47,9 @@ newtype StateC s m a = StateC { runStateC :: ReaderC (TVar s) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (State s :+: sig) (StateC s m) where
-  alg ctx hdl = \case
-    L (Get   k) -> StateC ask >>= sendM . readTVarIO >>= hdl . (<$ ctx) . k
-    L (Put s k) -> do
+  alg hdl sig ctx = case sig of
+    L Get     -> (<$ ctx) <$> (StateC ask >>= sendM . readTVarIO)
+    L (Put s) -> do
       var <- StateC ask
-      StateC (sendM (atomically (writeTVar var s)))
-      hdl (k <$ ctx)
-    R other     -> StateC (alg ctx (runStateC . hdl) (R other))
+      ctx <$ StateC (sendM (atomically (writeTVar var s)))
+    R other   -> StateC (alg (runStateC . hdl) (R other) ctx)

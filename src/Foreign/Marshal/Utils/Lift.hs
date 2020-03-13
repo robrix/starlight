@@ -8,4 +8,4 @@ import           Foreign.Ptr
 import           Foreign.Storable
 
 with :: (Has (Lift IO) sig m, Storable a) => a -> (Ptr a -> m b) -> m b
-with a action = liftWith $ \ ctx hdl -> U.with a (hdl . (<$ ctx) . action)
+with a action = liftWith $ \ hdl ctx -> U.with a (hdl . (<$ ctx) . action)

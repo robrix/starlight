@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -23,6 +23,6 @@ newtype TraceC m a = TraceC { runTrace :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Trace :+: sig) (TraceC m) where
-  alg ctx hdl = \case
-    L (Trace s k) -> sendM (hPutStrLn stderr s) *> hdl (k <$ ctx)
-    R other       -> TraceC (alg ctx (runTrace . hdl) other)
+  alg hdl sig ctx = case sig of
+    L (Trace s) -> ctx <$ sendM (hPutStrLn stderr s)
+    R other     -> TraceC (alg (runTrace . hdl) other ctx)
