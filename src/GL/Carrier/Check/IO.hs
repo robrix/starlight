@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE ImplicitParams #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -27,11 +28,11 @@ newtype CheckC m a = CheckC { runCheck :: m a }
 
 instance Has (Lift IO) sig m => Algebra (Check :+: sig) (CheckC m) where
   alg hdl sig ctx = case sig of
-    L (Check loc k) -> do
+    L (Check loc) -> do
       err <- runLiftIO glGetError
-      case err of
-        GL_NO_ERROR -> hdl (k <$ ctx)
-        other       -> withCallStack (fromCallSiteList (toList loc)) (withFrozenCallStack (throwGLError other)) >> hdl (k <$ ctx)
+      ctx <$ case err of
+        GL_NO_ERROR -> pure ()
+        other       -> withCallStack (fromCallSiteList (toList loc)) (withFrozenCallStack (throwGLError other))
     R other -> CheckC (alg (runCheck . hdl) other ctx)
 
 withCallStack :: CallStack -> (HasCallStack => a) -> a

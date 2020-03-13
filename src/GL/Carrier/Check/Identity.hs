@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -20,6 +22,6 @@ newtype CheckC m a = CheckC { runCheck :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Algebra sig m => Algebra (Check :+: sig) (CheckC m) where
-  alg hdl sig ctx = case sig of
-    L (Check _ k) -> hdl (k <$ ctx)
-    R other       -> CheckC (alg (runCheck . hdl) other ctx)
+  alg hdl = \case
+    L (Check _) -> pure
+    R other     -> CheckC . alg (runCheck . hdl) other
