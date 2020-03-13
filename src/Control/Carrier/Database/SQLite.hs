@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -30,15 +31,14 @@ newtype DatabaseC m a = DatabaseC { runDatabaseC :: ReaderC SQLite.Database m a 
 
 instance Has (Lift IO) sig m => Algebra (Labelled Database (Database SQLite.Statement) :+: sig) (DatabaseC m) where
   alg hdl sig ctx = case sig of
-    L (Labelled (Execute cmd m k)) -> do
+    L (Labelled (Execute cmd m)) -> do
       db <- DatabaseC ask
       stmt <- sendM (SQLite.prepare db cmd)
       a <- hdl (m stmt <$ ctx)
-      sendM (SQLite.finalize stmt)
-      hdl (fmap k a)
-    L (Labelled (Step stmt k)) -> do
+      a <$ sendM (SQLite.finalize stmt)
+    L (Labelled (Step stmt)) -> do
       res <- sendM (SQLite.step stmt)
       case res of
-        SQLite.Done -> hdl (k Nothing <$ ctx)
-        SQLite.Row  -> sendM (SQLite.columns stmt) >>= hdl . (<$ ctx) . k . Just
+        SQLite.Done -> pure (Nothing <$ ctx)
+        SQLite.Row  -> (<$ ctx) . Just <$> sendM (SQLite.columns stmt)
     R other -> DatabaseC (alg (runDatabaseC . hdl) (R other) ctx)
