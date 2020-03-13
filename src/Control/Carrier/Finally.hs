@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -31,5 +32,5 @@ newtype FinallyC m a = FinallyC { runFinallyC :: StateC [FinallyC m ()] m a }
 
 instance Has (Lift IO) sig m => Algebra (Finally :+: sig) (FinallyC m) where
   alg hdl sig ctx = case sig of
-    L (OnExit m k) -> FinallyC (modify (void (hdl (m <$ ctx)) :)) >> hdl (k <$ ctx)
-    R other        -> FinallyC (alg (runFinallyC . hdl) (R other) ctx)
+    L (OnExit m) -> ctx <$ FinallyC (modify (void (hdl (m <$ ctx)) :))
+    R other      -> FinallyC (alg (runFinallyC . hdl) (R other) ctx)

@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE GADTs #-}
 module Control.Effect.Finally
 ( -- * Finally effect
   Finally(..)
@@ -13,11 +11,9 @@ module Control.Effect.Finally
 
 import Control.Algebra
 
-data Finally m k
-  = forall a . OnExit (m a) (m k)
-
-deriving instance Functor m => Functor (Finally m)
+data Finally m k where
+  OnExit :: m a -> Finally m ()
 
 
 onExit :: Has Finally sig m => m () -> m ()
-onExit m = send (OnExit m (pure ()))
+onExit m = send (OnExit m)
