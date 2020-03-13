@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -27,10 +28,9 @@ newtype BindC t m a = BindC { runBindC :: ReaderC (Maybe t) m a }
 
 instance (Has Check sig m, Has (Lift IO) sig m, GL.Bind t) => Algebra (Bind t :+: sig) (BindC t m) where
   alg hdl sig ctx = case sig of
-    L (Bind t m k) -> do
+    L (Bind t m) -> do
       prev <- BindC ask
       GL.bind (Just t)
       a <- BindC (local (const (Just t)) (runBindC (hdl (m <$ ctx))))
-      GL.bind (prev `asTypeOf` Just t)
-      hdl (fmap k a)
+      a <$ GL.bind (prev `asTypeOf` Just t)
     R other -> BindC (alg (runBindC . hdl) (R other) ctx)
