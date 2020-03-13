@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -25,7 +26,7 @@ newtype ThreadC m a = ThreadC { runThread :: m a }
 instance Has (Lift IO) sig m => Algebra (Labelled Thread (Thread CC.ThreadId) :+: sig) (ThreadC m) where
   alg hdl sig ctx = case sig of
     -- NB: this discards state changes in the other thread
-    L (Labelled (Fork m k)) -> liftWith (\ hdl2 ctx2 -> (<$ ctx2) . (<$ ctx) <$> CC.forkIO (void (hdl2 (hdl (m <$ ctx) <$ ctx2)))) >>= hdl . fmap k
-    L (Labelled (Kill i k)) -> sendM (CC.killThread i) >> hdl (k <$ ctx)
-    L (Labelled (Yield  k)) -> sendM CC.yield >> hdl (k <$ ctx)
-    R other                 -> ThreadC (alg (runThread . hdl) other ctx)
+    L (Labelled (Fork m)) -> liftWith (\ hdl2 ctx2 -> (<$ ctx2) . (<$ ctx) <$> CC.forkIO (void (hdl2 (hdl (m <$ ctx) <$ ctx2))))
+    L (Labelled (Kill i)) -> ctx <$ sendM (CC.killThread i)
+    L (Labelled Yield)    -> ctx <$ sendM CC.yield
+    R other               -> ThreadC (alg (runThread . hdl) other ctx)
