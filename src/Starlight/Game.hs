@@ -16,7 +16,7 @@ import           Control.Carrier.Profile.Tree
 import           Control.Carrier.Random.Gen
 import           Control.Carrier.Reader
 import qualified Control.Carrier.State.STM.TVar as TVar
-import           Control.Carrier.State.Strict
+import           Control.Carrier.State.Church
 import           Control.Effect.Lens.Exts as Lens
 import           Control.Effect.Thread
 import           Control.Effect.Trace
