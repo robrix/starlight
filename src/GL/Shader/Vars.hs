@@ -32,7 +32,7 @@ module GL.Shader.Vars
 
 import           Control.Applicative (liftA2)
 import           Control.Carrier.Fresh.Strict
-import           Control.Carrier.State.Strict
+import           Control.Carrier.State.Church
 import           Control.Effect.Lift
 import           Data.Function (fix)
 import           Data.Functor.I

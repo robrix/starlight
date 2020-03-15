@@ -18,7 +18,7 @@ module GL.Program
 ) where
 
 import           Control.Carrier.Reader
-import           Control.Carrier.State.Strict
+import           Control.Carrier.State.Church
 import           Control.Effect.Finally
 import           Control.Effect.Labelled
 import           Control.Effect.Sum

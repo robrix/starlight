@@ -7,7 +7,7 @@ module Stochastic.Sample.Slice
 
 import           Control.Applicative (liftA2)
 import           Control.Carrier.Random.Gen
-import           Control.Carrier.State.Strict
+import           Control.Effect.State
 import           Control.Lens (over, (&))
 import           Data.Functor.Interval
 import           Stochastic.PDF

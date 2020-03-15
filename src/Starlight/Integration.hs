@@ -16,7 +16,7 @@ module Starlight.Integration
 , runActions
 ) where
 
-import Control.Carrier.State.Strict
+import Control.Carrier.State.Church
 import Control.Effect.Lens.Exts
 import Control.Effect.Lift
 import Control.Effect.Profile
