@@ -203,15 +203,16 @@
 
 - ⤴️ Extract
   - ✅ fused-effects-profile
-  - Control.Carrier.Empty.Church
-  - Control.Carrier.Empty.CPS
+  - ✅Control.Carrier.Empty.Church
+  - 🚫 Control.Carrier.Empty.CPS
+    - it’s bad
   - execEmpty
     execEmpty :: Functor m => EmptyC m a -> m Bool
     execEmpty = fmap isJust . runEmpty
   - evalEmpty
     evalEmpty :: Functor m => EmptyC m a -> m ()
     evalEmpty = void . runEmpty
-  - Control.Effect.Labelled
+  - ✅ Control.Effect.Labelled
   - locally
 
 - 🧹 Housekeeping
