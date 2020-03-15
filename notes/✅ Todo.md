@@ -206,12 +206,8 @@
   - ✅Control.Carrier.Empty.Church
   - 🚫 Control.Carrier.Empty.CPS
     - it’s bad
-  - execEmpty
-    execEmpty :: Functor m => EmptyC m a -> m Bool
-    execEmpty = fmap isJust . runEmpty
-  - evalEmpty
-    evalEmpty :: Functor m => EmptyC m a -> m ()
-    evalEmpty = void . runEmpty
+  - ✅ execEmpty
+  - ✅ evalEmpty
   - ✅ Control.Effect.Labelled
   - locally
 
