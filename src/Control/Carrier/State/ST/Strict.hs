@@ -2,6 +2,9 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use execState" #-}
+{-# HLINT ignore "Use evalState" #-}
 module Control.Carrier.State.ST.Strict
 ( -- * State carrier
   runStateRef
