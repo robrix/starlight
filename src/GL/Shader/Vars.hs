@@ -31,7 +31,7 @@ module GL.Shader.Vars
 ) where
 
 import           Control.Applicative (liftA2)
-import           Control.Carrier.Fresh.Strict
+import           Control.Carrier.Fresh.Church
 import           Control.Carrier.State.Church
 import           Control.Effect.Lift
 import           Data.Function (fix)

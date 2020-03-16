@@ -21,7 +21,7 @@ module GL.Array
 , ArrayC
 ) where
 
-import           Control.Carrier.Fresh.Strict
+import           Control.Carrier.Fresh.Church
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Church
 import           Control.Effect.Finally
