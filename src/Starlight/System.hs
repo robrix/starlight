@@ -91,7 +91,6 @@ neighbourhoodOf c sys@System{ bodies, players, npcs } = sys
   -- FIXME: ghosts
   -- FIXME: doppler effect
   -- FIXME: radar cross-section, rather than just size
-  -- FIXME: laser power, not radar power, determines laser range
   -- FIXME: radar reflections
   -- FIXME: sharing radar with allies
   -- FIXME: dimensional analysis
