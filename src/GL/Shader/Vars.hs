@@ -54,12 +54,7 @@ data Field v a = Field
 
 newtype Offset = Offset { getOffset :: Int }
   deriving (Eq, Num, Ord, Show)
-
-instance Semigroup Offset where
-  (<>) = (+)
-
-instance Monoid Offset where
-  mempty = 0
+  deriving (Monoid, Semigroup) via Sum Int
 
 
 newtype Fields v = Fields (v I)
