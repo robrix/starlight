@@ -34,11 +34,12 @@ module GL.Shader.DSL
 import qualified Control.Category as Cat
 import           Data.Function (fix)
 import           Data.Functor.K
+import           Data.Kind (Type)
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
 import           GHC.Generics
 import qualified GL.Shader as Shader
-import           GL.Shader.Decl
+import           GL.Shader.Decl hiding (Type)
 import           GL.Shader.Expr
 import           GL.Shader.Stmt
 import           GL.Shader.Vars
@@ -51,7 +52,7 @@ import           Linear.V4 (V4(..))
 import           Prelude hiding (break)
 import           UI.Colour (Colour)
 
-data Shader (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) where
+data Shader (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) where
   Shader :: Vars u => ((forall k . u (Expr k)) -> Stage i o) -> Shader u i o
 
 program :: Vars u => ((forall k . u (Expr k)) -> Stage i o) -> Shader u i o
@@ -79,7 +80,7 @@ instance Cat.Category Stage where
   (.) = flip (:>>>)
 
 
-data None (v :: * -> *) = None
+data None (v :: Type -> Type) = None
   deriving (Generic)
 
 instance Vars None
