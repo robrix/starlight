@@ -29,8 +29,8 @@ import           Control.Effect.Labelled
 import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
 import           Data.Functor.I
-import           Data.Functor.K
 import           Data.Functor.Interval
+import           Data.Functor.K
 import           Data.Word (Word32)
 import           Foreign.Marshal.Array.Lift
 import           Foreign.Ptr
