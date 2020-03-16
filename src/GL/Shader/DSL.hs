@@ -21,7 +21,6 @@ module GL.Shader.DSL
   -- * Re-exports
 , Fields(..)
 , Vars
-, Type(..)
 , Colour
 , M22
 , M33
