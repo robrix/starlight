@@ -36,8 +36,8 @@ common common
     ghc-options: -Wno-missing-deriving-strategies
 
 library
-  import:              common
-  hs-source-dirs:      src
+  import: common
+  hs-source-dirs: src
   exposed-modules:
     Control.Carrier.Database.SQLite
     Control.Carrier.Error.IO
@@ -185,10 +185,10 @@ library
     , vector ^>= 0.12
 
 executable starlight
-  import:              common
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  import: common
+  hs-source-dirs: app
+  main-is: Main.hs
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
     , base
     , starlight
