@@ -37,6 +37,7 @@ import           Control.Effect.Lift
 import           Data.Function (fix)
 import           Data.Functor.I
 import           Data.Functor.K
+import           Data.Kind (Type)
 import           Data.List (intersperse)
 import           Data.Maybe (fromMaybe)
 import           Data.Monoid (Ap(..), First(..), Sum(..))
@@ -83,7 +84,7 @@ undefinedAtFieldType :: Field v a -> a
 undefinedAtFieldType _ = undefined
 
 
-data ((l :: (* -> *) -> *) :**: (r :: (* -> *) -> *)) (v :: * -> *)
+data ((l :: (Type -> Type) -> Type) :**: (r :: (Type -> Type) -> Type)) (v :: Type -> Type)
   = l v :**: r v
 
 deriving via Fields (l :**: r) instance (Vars l, Vars r) => F.Storable ((l :**: r) I)
