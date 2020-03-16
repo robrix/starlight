@@ -13,19 +13,20 @@ module Geometry.Transform
 , (>>>)
 ) where
 
-import Control.Category
-import Control.Lens ((&), (.~))
-import Data.Coerce
-import Data.Functor.I
-import Foreign.Storable
-import GL.Type as GL
-import GL.Uniform
-import Linear.Exts
-import Prelude hiding ((.))
-import Unit
-import Unit.Algebra
+import           Control.Category
+import           Control.Lens ((&), (.~))
+import           Data.Coerce
+import           Data.Functor.I
+import           Data.Kind (Type)
+import           Foreign.Storable
+import qualified GL.Type as GL
+import           GL.Uniform
+import           Linear.Exts
+import           Prelude hiding ((.))
+import           Unit
+import           Unit.Algebra
 
-newtype Transform c (a :: * -> *) (b :: * -> *) = Transform { getTransform :: M44 c }
+newtype Transform c (a :: Type -> Type) (b :: Type -> Type) = Transform { getTransform :: M44 c }
   deriving (Show, Storable, GL.Type, Uniform)
 
 instance Num c => Category (Transform c) where
