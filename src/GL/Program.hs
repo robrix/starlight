@@ -25,20 +25,21 @@ import           Control.Effect.Sum
 import           Control.Monad.IO.Class.Lift
 import           Control.Monad.Trans.Class
 import           Data.Foldable (for_)
+import           Data.Kind (Type)
 import qualified Data.IntMap as IntMap
 import           Data.Traversable (for)
 import qualified Foreign.C.String.Lift as C
 import           GHC.Stack
 import           GL.Effect.Check
 import           GL.Error
-import           GL.Shader
+import           GL.Shader hiding (Type)
 import qualified GL.Shader.DSL as DSL
 import           GL.Shader.Vars
 import           GL.Uniform
 import           Graphics.GL.Core41
 import           Graphics.GL.Types
 
-data Program (u :: (* -> *) -> *) (i :: (* -> *) -> *) (o :: (* -> *) -> *) = Program
+data Program (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) = Program
   { locations :: IntMap.IntMap GLint
   , unProgram :: GLuint
   }
@@ -76,7 +77,7 @@ askProgram :: HasLabelled Program (Reader (Program u v o)) sig m => m (Program u
 askProgram = runUnderLabel @Program ask
 
 
-newtype ProgramC (u :: (* -> *) -> *) (v :: (* -> *) -> *) (o :: (* -> *) -> *) m a = ProgramC { runProgramC :: ReaderC (Program u v o) m a }
+newtype ProgramC (u :: (Type -> Type) -> Type) (v :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) m a = ProgramC { runProgramC :: ReaderC (Program u v o) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
 
 instance (Has Check sig m, Has (Lift IO) sig m, Vars u) => Algebra (State (u Maybe) :+: Labelled Program (Reader (Program u v o)) :+: sig) (ProgramC u v o m) where
