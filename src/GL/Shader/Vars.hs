@@ -66,15 +66,23 @@ newtype Fields v = Fields (v I)
 
 instance Vars v => F.Storable (Fields v) where
   alignment _ = fromMaybe 0 (getFirst (foldVars @v (First . Just . F.alignment . undefinedAtFieldType) defaultVars))
+  {-# INLINE alignment #-}
+
   sizeOf _ = getSum (foldVars @v (Sum . F.sizeOf . undefinedAtFieldType) defaultVars)
+  {-# INLINE sizeOf #-}
+
   peek ptr = Fields <$> evalState (Offset 0) (makeVarsM @v (\ field -> do
     offset <- get
     put (offset <> Offset (F.sizeOf (undefinedAtFieldType field)))
     sendM (F.peek (ptr `F.plusPtr` getOffset offset))))
+  {-# INLINE peek #-}
+
   poke ptr (Fields fields) = evalState (Offset 0) (foldVarsM @v (\ field -> do
     offset <- get
     put (offset <> Offset (F.sizeOf (undefinedAtFieldType field)))
     sendM (F.poke (ptr `F.plusPtr` getOffset offset) (value field))) fields)
+  {-# INLINE poke #-}
+
 
 undefinedAtFieldType :: Field v a -> a
 undefinedAtFieldType _ = undefined
@@ -113,12 +121,15 @@ instance (Vars l, Vars r) => Vars (l :**: r) where
 
 makeVars :: Vars t => (forall a . GL.Uniform a => Field Proxy a -> v a) -> t v
 makeVars f = run (evalFresh 0 (makeVars' f))
+{-# INLINABLE makeVars #-}
 
 traverseVars :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field v a -> m (v' a)) -> t v -> m (t v')
 traverseVars f t = run (evalFresh 0 (traverseVars' f t))
+{-# INLINABLE traverseVars #-}
 
 makeVarsM :: (Vars t, Applicative m) => (forall a . GL.Uniform a => Field Proxy a -> m (v a)) -> m (t v)
 makeVarsM f = traverseVars (unComp1 . value) (makeVars (Comp1 . f))
+{-# INLINABLE makeVarsM #-}
 
 foldVars :: (Vars t, Monoid b) => (forall a . GL.Uniform a => Field v a -> b) -> t v -> b
 foldVars f t = getK $ traverseVars (K . f) t
