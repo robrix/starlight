@@ -93,7 +93,6 @@ neighbourhoodOf c sys@System{ bodies, players, npcs } = sys
   -- FIXME: radar cross-section, rather than just size
   -- FIXME: radar reflections
   -- FIXME: sharing radar with allies
-  -- FIXME: dimensional analysis
   visible i a = case i of
     B (Star _) -> True
     _          -> received .>. threshold
