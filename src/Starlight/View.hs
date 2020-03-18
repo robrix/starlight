@@ -33,6 +33,7 @@ import Data.Coerce
 import Data.Functor.I
 import Data.Functor.Interval
 import Data.Functor.K
+import Data.Functor.Rep
 import Foreign.Storable
 import Geometry.Transform
 import GL.Type as GL
@@ -111,17 +112,17 @@ instance Unit Length ClipUnits where
   suffix = K ("clip"++)
 
 
-transformToWindow :: View -> Transform Double ClipUnits Window.Coords
+transformToWindow :: (Applicative m, R2 m, Traversable m) => View -> Transform m Double ClipUnits Window.Coords
 transformToWindow View{ size }
   -- NB: we *always* use 2/size, rather than ratio/size, because clip space always extends from -1...1, i.e. it always has diameter 2. this is true irrespective of the DPI ratio.
   = mkScale (pure 1 & _xy .~ ClipUnits 2 ./^ (fmap fromIntegral <$> size))
 
-transformToZoomed :: View -> Transform Double ClipUnits Window.Coords
+transformToZoomed :: (Additive m, Applicative m, R2 m, Traversable m) => View -> Transform m Double ClipUnits Window.Coords
 transformToZoomed view@View{ zoom }
   =   transformToWindow view
   >>> mkScale (pure zoom)
 
-transformToSystem :: View -> Transform Double ClipUnits Distance
+transformToSystem :: (Additive m, Applicative m, R4 m, Representable m, Traversable m) => View -> Transform m Double ClipUnits Distance
 transformToSystem view@View{ scale, focus }
   =   transformToZoomed view
   >>> mkScale (pure scale)

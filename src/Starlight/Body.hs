@@ -61,7 +61,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform Double Distance Distance)
+  , transform :: !(Transform V4 Double Distance Distance)
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -75,7 +75,7 @@ instance HasColour StateVectors where
 body_ :: Lens' StateVectors Body
 body_ = field @"body"
 
-toBodySpace :: StateVectors -> Transform Double Distance BodyUnits
+toBodySpace :: StateVectors -> Transform V4 Double Distance BodyUnits
 toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (actor v^.rotation_)
 
 data Revolution = Revolution

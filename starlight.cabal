@@ -155,6 +155,7 @@ library
   autogen-modules:
     Paths_starlight
   build-depends:
+    , adjunctions
     , base
     , containers
     , direct-sqlite ^>= 2.3

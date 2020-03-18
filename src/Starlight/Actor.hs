@@ -36,7 +36,7 @@ data Actor = Actor
   }
   deriving (Generic, Show)
 
-transformToActor :: Actor -> Transform Double Distance Distance
+transformToActor :: Actor -> Transform V4 Double Distance Distance
 transformToActor Actor{ position, rotation } = mkTranslation (ext position 0) >>> mkRotation rotation
 
 applyImpulse :: HasCallStack => V2 (Newtons Double) -> Seconds Double -> Actor -> Actor

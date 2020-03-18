@@ -99,14 +99,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform Float ClipUnits Distance)
+  { matrix :: v (Transform V4 Float ClipUnits Distance)
   , colour :: v (UI.Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Distance))
+matrix_ :: Lens' (U v) (v (Transform V4 Float ClipUnits Distance))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (UI.Colour Float))
