@@ -62,6 +62,8 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
 
   (.*.) :: expr (u a) -> expr (v a) -> expr (Mul u v a)
 
+  infixl 7 .*.
+
   -- general syntax
 
   let' :: expr a -> (expr a -> expr b) -> expr b
