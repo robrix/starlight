@@ -37,6 +37,10 @@ class ( forall a b s . Coercible a b => Coercible (expr s a) (expr s b)
 
   -- vector
 
+  v2 :: expr s a -> expr s a -> expr s (V2 a)
+  v3 :: expr s a -> expr s a -> expr s a -> expr s (V3 a)
+  v4 :: expr s a -> expr s a -> expr s a -> expr s a -> expr s (V4 a)
+
   ext3 :: expr s (V2 a) -> expr s a -> expr s (V3 a)
   ext4 :: expr s (V3 a) -> expr s a -> expr s (V4 a)
 
