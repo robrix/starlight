@@ -52,6 +52,8 @@ class ( forall a b s . Coercible a b => Coercible (expr s a) (expr s b)
 
   atan2 :: expr s a -> expr s a -> expr s a
 
+  float :: expr s a -> expr s Float
+
   -- general syntax
 
   let' :: expr s a -> (expr s a -> expr s b) -> expr s b
