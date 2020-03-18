@@ -73,7 +73,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
       vars     = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
         & here_   ?~ here
-        & scale_  ?~ realToFrac (lengthToWindowPixels view)
+        & scale_  ?~ fmap realToFrac (lengthToWindowPixels view)
 
   measure "realloc/copy" $ do
     B.realloc @'B.Array (length vertices) B.Static B.Draw
