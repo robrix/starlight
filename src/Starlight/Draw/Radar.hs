@@ -37,7 +37,7 @@ import           GL.Array
 import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
-import           GL.Shader (Type(..))
+import           GL.Shader (Stage(..))
 import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
 import           GL.Shader.Vars (makeVars)
@@ -135,7 +135,7 @@ verticesForBlips bs =
   ]
 
 
-vertex' :: U (Expr 'Vertex) -> Stage V IG
+vertex' :: U (Expr 'Vertex) -> D.Stage V IG
 vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
   there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
@@ -152,7 +152,7 @@ vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ colour2, sweep } 
   minBlipSize = 16
   radius = 300
 
-fragment' :: Stage IF Frag
+fragment' :: D.Stage IF Frag
 fragment' = fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
 
 radarShader :: Shader U V Frag

@@ -32,7 +32,7 @@ import qualified Foreign.C.String.Lift as C
 import           GHC.Stack
 import           GL.Effect.Check
 import           GL.Error
-import           GL.Shader hiding (Type)
+import           GL.Shader
 import qualified GL.Shader.DSL as DSL
 import           GL.Shader.Vars
 import           GL.Uniform

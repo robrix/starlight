@@ -91,14 +91,14 @@ module GL.Shader.Expr
 
 import qualified Data.Coerce as C
 import           Data.Text.Prettyprint.Doc hiding (dot)
-import           GL.Shader (Type(..))
+import           GL.Shader (Stage(..))
 import           GL.TextureUnit
 import           Linear.Matrix (M22, M33, M44)
 import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
 
-data Ref (k :: Type) t
+data Ref (k :: Stage) t
   = Ref String
   | forall s . Ref k s :^^. Prj s t
 
@@ -174,7 +174,7 @@ ix :: Int -> Prj [a] a
 ix i = Prj ("[" <> show i <> "]")
 
 
-data Expr (k :: Type) a where
+data Expr (k :: Stage) a where
   Var :: String -> Expr k a
   Lit :: Double -> Expr k a
 

@@ -4,8 +4,8 @@
 {-# LANGUAGE LambdaCase #-}
 module GL.Shader
 ( Shader(..)
-, Type(..)
-, KnownType(..)
+, Stage(..)
+, KnownStage(..)
 , createShader
 , compile
 , checkShader
@@ -24,30 +24,30 @@ import           Graphics.GL.Types
 
 newtype Shader = Shader { unShader :: GLuint }
 
-data Type
+data Stage
   = Vertex
   | Geometry
   | Fragment
   deriving (Eq, Ord, Show)
 
-instance GL.Enum Type where
+instance GL.Enum Stage where
   glEnum = \case
     Vertex   -> GL_VERTEX_SHADER
     Geometry -> GL_GEOMETRY_SHADER
     Fragment -> GL_FRAGMENT_SHADER
 
 
-class KnownType (k :: Type) where
-  typeVal :: proxy k -> Type
+class KnownStage (k :: Stage) where
+  typeVal :: proxy k -> Stage
 
-instance KnownType 'Vertex where
+instance KnownStage 'Vertex where
   typeVal _ = Vertex
 
-instance KnownType 'Fragment where
+instance KnownStage 'Fragment where
   typeVal _ = Fragment
 
 
-createShader :: (Has Finally sig m, Has (Lift IO) sig m) => Type -> m Shader
+createShader :: (Has Finally sig m, Has (Lift IO) sig m) => Stage -> m Shader
 createShader type' = do
   shader <- runLiftIO (glCreateShader (GL.glEnum type'))
   Shader shader <$ onExit (runLiftIO (glDeleteShader shader))

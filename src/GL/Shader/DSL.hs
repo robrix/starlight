@@ -85,12 +85,12 @@ data None (v :: Type -> Type) = None
 
 instance Vars None
 
-shaderSources :: Shader u i o -> [(Shader.Type, String)]
+shaderSources :: Shader u i o -> [(Shader.Stage, String)]
 shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> stageSources u' (f u) where
   u = makeVars (Var . name)
   u' = foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
 
-stageSources :: Doc () -> Stage i o -> [(Shader.Type, Doc ())]
+stageSources :: Doc () -> Stage i o -> [(Shader.Stage, Doc ())]
 stageSources u = \case
   Id  -> []
   V s -> [renderStage Shader.Vertex   s]
@@ -98,7 +98,7 @@ stageSources u = \case
   F s -> [renderStage Shader.Fragment s]
   l :>>> r -> stageSources u l <> stageSources u r
   where
-  renderStage :: (Vars i, Vars o) => Shader.Type -> (i (Expr k) -> o (Ref k) -> Decl k ()) -> (Shader.Type, Doc ())
+  renderStage :: (Vars i, Vars o) => Shader.Stage -> (i (Expr k) -> o (Ref k) -> Decl k ()) -> (Shader.Stage, Doc ())
   renderStage t f = (,) t
     $  pretty "#version 410" <> hardline
     <> u

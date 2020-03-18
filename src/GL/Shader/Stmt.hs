@@ -33,12 +33,12 @@ module GL.Shader.Stmt
 import           Control.Monad (ap, liftM, (<=<))
 import           Data.Functor.K
 import           Data.Text.Prettyprint.Doc hiding (dot)
-import           GL.Shader (Type(..))
+import           GL.Shader (Stage(..))
 import           GL.Shader.Expr
 import qualified GL.Uniform as GL
 import           Prelude hiding (break)
 
-data Stmt (k :: Type) a where
+data Stmt (k :: Stage) a where
   Pure :: a -> Stmt k a
   Let :: GL.Uniform b => String -> Expr k b -> (K String b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a

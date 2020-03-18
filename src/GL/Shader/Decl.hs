@@ -14,13 +14,13 @@ module GL.Shader.Decl
 import           Control.Monad (ap, liftM)
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import qualified GL.Primitive as P
-import           GL.Shader (Type(..))
+import           GL.Shader (Stage(..))
 import           GL.Shader.Stmt
 
 runDecl :: (a -> Doc ()) -> Decl k a -> Doc ()
 runDecl k (Decl run) = run k
 
-newtype Decl (k :: Type) a = Decl ((a -> Doc ()) -> Doc ())
+newtype Decl (k :: Stage) a = Decl ((a -> Doc ()) -> Doc ())
 
 instance Functor (Decl k) where
   fmap = liftM
