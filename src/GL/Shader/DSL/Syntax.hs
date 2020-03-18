@@ -25,8 +25,10 @@ class ( forall a b s . Coercible a b => Coercible (expr s a) (expr s b)
   -- matrix
 
   (>>>) :: expr s (Transform m a u v) -> expr s (Transform m a v w) -> expr s (Transform m a u w)
+  (>*) :: expr s (Transform m a u v) -> expr s (m (v a)) -> expr s (m (u a))
 
   infixr 1 >>>
+  infixl 7 >*
 
   (!*!) :: expr s (u (v a)) -> expr s (v (w a)) -> expr s (u (w a))
   (!*) :: expr s (u (v a)) -> expr s (v a) -> expr s (u a)
