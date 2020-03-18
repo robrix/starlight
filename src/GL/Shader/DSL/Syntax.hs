@@ -54,6 +54,8 @@ class ( forall a b s . Coercible a b => Coercible (expr s a) (expr s b)
 
   float :: expr s a -> expr s Float
 
+  min, max :: expr s a -> expr s a -> expr s a
+
   -- general syntax
 
   let' :: expr s a -> (expr s a -> expr s b) -> expr s b
