@@ -60,6 +60,8 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
 
   (<), (>), (<=), (>=), (==) :: expr a -> expr a -> expr Bool
 
+  infix 4 <, >, <=, >=, ==
+
   (.*.) :: expr (u a) -> expr (v a) -> expr (Mul u v a)
 
   infixl 7 .*.
