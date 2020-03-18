@@ -28,6 +28,10 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
 
   norm :: expr (v a) -> expr a
 
+  -- scalar
+
+  atan2 :: expr a -> expr a -> expr a
+
   -- general syntax
 
   let' :: expr a -> (expr a -> expr b) -> expr b
