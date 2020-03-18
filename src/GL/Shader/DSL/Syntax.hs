@@ -22,3 +22,6 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
   ext4 :: expr (V3 a) -> expr a -> expr (V4 a)
 
   let' :: expr a -> (expr a -> expr b) -> expr b
+
+  bool :: Bool -> expr Bool
+  iff :: expr Bool -> expr a -> expr a -> expr a
