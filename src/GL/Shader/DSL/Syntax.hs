@@ -8,7 +8,10 @@ import Linear.V2
 import Linear.V3
 import Linear.V4
 
-class (forall a b . Coercible a b => Coercible (expr a) (expr b), forall a . Num a => Num (expr a)) => Expr expr where
+class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
+      , forall a . Num a => Num (expr a)
+      )
+   => Expr expr where
   (!*!) :: expr (u (v a)) -> expr (v (w a)) -> expr (u (w a))
 
   (!*) :: expr (u (v a)) -> expr (v a) -> expr (u a)
