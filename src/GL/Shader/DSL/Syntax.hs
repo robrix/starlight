@@ -9,6 +9,7 @@ module GL.Shader.DSL.Syntax
 
 import Data.Coerce
 import Data.Kind (Type)
+import Geometry.Transform
 import GL.Shader (Stage(..))
 import Linear.V2
 import Linear.V3
