@@ -12,7 +12,7 @@ import Geometry.Transform
 import Linear.V2
 import Linear.V3
 import Linear.V4
-import Unit.Algebra (Mul)
+import Unit.Algebra (Div, Mul)
 
 class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
       , forall a . Num a => Num (expr a)
@@ -67,8 +67,9 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
   (.*.) :: expr (u a) -> expr (v a) -> expr (Mul u v a)
   (^*.) :: expr (f (u a)) -> expr (v a) -> expr (f (Mul u v a))
   (.*^) :: expr (u a) -> expr (f (v a)) -> expr (f (Mul u v a))
+  (./.) :: expr (u a) -> expr (v a) -> expr (Div u v a)
 
-  infixl 7 .*., ^*., .*^
+  infixl 7 .*., ^*., .*^, ./.
 
   -- general syntax
 
