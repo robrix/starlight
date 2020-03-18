@@ -61,9 +61,9 @@ class ( forall a b s . Coercible a b => Coercible (expr s a) (expr s b)
   case' :: expr s a -> [(a, expr s b)] -> expr s b
 
 class Boolean expr where
-  bool :: Bool -> expr Bool
+  fromBool :: Bool -> expr Bool
   iff :: expr Bool -> expr a -> expr a -> expr a
 
 false, true :: Boolean expr => expr Bool
-false = bool False
-true  = bool True
+false = fromBool False
+true  = fromBool True
