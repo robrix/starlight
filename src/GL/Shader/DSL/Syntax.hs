@@ -13,6 +13,7 @@ import Linear.V4
 class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
       , forall a . Num a => Num (expr a)
       , forall a . Fractional a => Fractional (expr a)
+      , forall a . Floating a => Floating (expr a)
       )
    => Expr expr where
   -- matrix
