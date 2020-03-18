@@ -3,6 +3,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module GL.Shader.DSL.Syntax
 ( Expr(..)
+, Boolean(..)
 , false
 , true
 ) where
@@ -55,11 +56,10 @@ class ( forall a b s . Coercible a b => Coercible (expr s a) (expr s b)
 
   case' :: expr s a -> [(a, expr s b)] -> expr s b
 
-  -- booleans
+class Boolean expr where
+  bool :: Bool -> expr Bool
+  iff :: expr Bool -> expr a -> expr a -> expr a
 
-  bool :: Bool -> expr s Bool
-  iff :: expr s Bool -> expr s a -> expr s a -> expr s a
-
-false, true :: Expr expr => expr s Bool
+false, true :: Boolean expr => expr Bool
 false = bool False
 true  = bool True
