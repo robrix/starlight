@@ -141,7 +141,7 @@ vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ colour2, sweep } 
   d     <- let' "d"     (D.norm there)
   let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
   angle <- let' "angle" (angleOf (vec2 [there]))
-  radius <- let' "radius" (min' (scale * float d) radius)
+  radius <- let' "radius" (min' (scale * D.coerce (float d)) radius)
   minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
   iff (r `gt` d)
     (sweep .= pi/2)
@@ -210,7 +210,7 @@ targetShader = program $ \ u
 data U v = U
   { matrix :: v (Transform V4 Float ClipUnits Window.Coords)
   , here   :: v (V2 (Distance Double))
-  , scale  :: v Float
+  , scale  :: v ((Window.Coords :/: Distance) Float)
   }
   deriving (Generic)
 
@@ -222,7 +222,7 @@ matrix_ = field @"matrix"
 here_ :: Lens' (U v) (v (V2 (Distance Double)))
 here_ = field @"here"
 
-scale_ :: Lens' (U v) (v Float)
+scale_ :: Lens' (U v) (v ((Window.Coords :/: Distance) Float))
 scale_ = field @"scale"
 
 
