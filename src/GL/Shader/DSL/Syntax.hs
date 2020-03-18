@@ -32,8 +32,9 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
 
   (^*) :: expr (v a) -> expr a -> expr (v a)
   (*^) :: expr a -> expr (v a) -> expr (v a)
+  (^/) :: expr (v a) -> expr a -> expr (v a)
 
-  infixl 7 ^*, *^
+  infixl 7 ^*, *^, ^/
 
   -- scalar
 
