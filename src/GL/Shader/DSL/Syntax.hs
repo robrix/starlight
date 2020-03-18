@@ -12,6 +12,7 @@ import Geometry.Transform
 import Linear.V2
 import Linear.V3
 import Linear.V4
+import Unit.Algebra (Mul)
 
 class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
       , forall a . Num a => Num (expr a)
@@ -58,6 +59,8 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
   min, max :: expr a -> expr a -> expr a
 
   (<), (>), (<=), (>=), (==) :: expr a -> expr a -> expr Bool
+
+  (.*.) :: expr (u a) -> expr (v a) -> expr (Mul u v a)
 
   -- general syntax
 
