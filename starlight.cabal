@@ -81,6 +81,7 @@ library
     GL.Shader
     GL.Shader.Decl
     GL.Shader.DSL
+    GL.Shader.DSL.Syntax
     GL.Shader.Expr
     GL.Shader.Stmt
     GL.Shader.Vars
