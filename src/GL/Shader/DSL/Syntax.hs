@@ -52,6 +52,8 @@ class ( forall a b s . Coercible a b => Coercible (expr s a) (expr s b)
 
   let' :: expr s a -> (expr s a -> expr s b) -> expr s b
 
+  case' :: expr s a -> [(a, expr s b)] -> expr s b
+
   -- booleans
 
   bool :: Bool -> expr s Bool
