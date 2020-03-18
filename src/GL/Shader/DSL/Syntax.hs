@@ -9,3 +9,5 @@ class (forall a b . Coercible a b => Coercible (expr a) (expr b)) => Expr expr w
   (!*!) :: expr (u (v a)) -> expr (v (w a)) -> expr (u (w a))
 
   (!*) :: expr (u (v a)) -> expr (v a) -> expr (u a)
+
+  infixl 7 !*!, !*
