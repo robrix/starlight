@@ -53,6 +53,7 @@ import           UI.Colour
 import qualified UI.Window as Window
 import           Unit.Algebra
 import           Unit.Angle
+import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -136,7 +137,7 @@ verticesForBlips bs =
 
 
 vertex' :: U (Expr 'Vertex) -> D.Stage V IG
-vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
+vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ pos, colour2, sweep } -> main $ do
   there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
   let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
@@ -146,9 +147,9 @@ vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ colour2, sweep } 
   iff (r `gt` d)
     (sweep .= pi/2)
     (sweep .= (minSweep `max'` abs (D.coerce (asin (float (r/d))))))
-  pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
-  colour2 .= colour
-  gl_Position .= ext4 (ext3 pos 0) 1) where
+  pos .= D.coerce (ext4 (ext3 (vec2 [cos angle, sin angle] D.^* D.coerce radius) 0) 1)
+  colour2 .= colour)
+  where
   minBlipSize = 16
   radius = 300
 
@@ -172,7 +173,7 @@ radarShader = program $ \ u
         while (get i `lt` (fromIntegral count + 1)) $ do
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
-            gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
+            gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "pos[0]"
             colour3 .= Var "colour2[0]"
           i += 1)
 
@@ -199,7 +200,7 @@ targetShader = program $ \ u
           gl_Position .= ext4 (vec3 [0]) 1
           colour3 .= Var "colour2[0]"
         emitVertex $ do
-          gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
+          gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "pos[0]"
           colour3 .= Var "colour2[0]"
         i += 1)
 
@@ -227,7 +228,8 @@ scale_ = field @"scale"
 
 
 data IG v = IG
-  { colour2 :: v (Colour Float)
+  { pos     :: v (V4 (Distance Float))
+  , colour2 :: v (Colour Float)
   , sweep   :: v (Radians Float)
   }
   deriving (Generic)
