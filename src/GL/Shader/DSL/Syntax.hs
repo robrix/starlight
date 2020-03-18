@@ -1,6 +1,8 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module GL.Shader.DSL.Syntax
 ( Expr(..)
+, false
+, true
 ) where
 
 import Data.Coerce
@@ -25,3 +27,7 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
 
   bool :: Bool -> expr Bool
   iff :: expr Bool -> expr a -> expr a -> expr a
+
+false, true :: Expr expr => expr Bool
+false = bool False
+true  = bool True
