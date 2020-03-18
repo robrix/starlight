@@ -44,20 +44,21 @@ module Unit.Algebra
 , Plus
 ) where
 
-import Control.Monad (join)
-import Data.Functor.I
-import Data.Functor.K
-import Data.Proxy
-import Foreign.Storable
-import GHC.TypeLits hiding (Div)
-import GL.Type as GL
-import GL.Uniform
-import Linear.Conjugate
-import Linear.Epsilon
-import Linear.Metric
-import Linear.Vector
-import System.Random (Random)
-import Unit
+import           Control.Monad (join)
+import           Data.Functor.I
+import           Data.Functor.K
+import           Data.Kind (Type)
+import           Data.Proxy
+import           Foreign.Storable
+import           GHC.TypeLits hiding (Div)
+import qualified GL.Type as GL
+import           GL.Uniform
+import           Linear.Conjugate
+import           Linear.Epsilon
+import           Linear.Metric
+import           Linear.Vector
+import           System.Random (Random)
+import           Unit
 
 -- * Algebra
 
@@ -130,7 +131,7 @@ type family Exp u n where
   Exp u n = u :^: n
 
 
-class Dimension (dim :: * -> *)
+class Dimension (dim :: Type -> Type)
 
 instance Dimension I
 
@@ -172,7 +173,7 @@ normalizeU = fmap I . normalize . fmap prj
 
 -- * Combinators
 
-newtype ((u :: * -> *) :*: (v :: * -> *)) a = Prd { getPrd :: a }
+newtype ((u :: Type -> Type) :*: (v :: Type -> Type)) a = Prd { getPrd :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
@@ -187,7 +188,7 @@ instance (Unit du u, Unit dv v) => Unit (du :*: dv) (u :*: v) where
   suffix = K (getK (suffix @_ @u) . ('·' :) . getK (suffix @_ @v))
 
 
-newtype ((u :: * -> *) :/: (v :: * -> *)) a = Per { getPer :: a }
+newtype ((u :: Type -> Type) :/: (v :: Type -> Type)) a = Per { getPer :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 
@@ -202,7 +203,7 @@ instance (Unit du u, Unit dv v) => Unit (du :/: dv) (u :/: v) where
   suffix = K (getK (suffix @_ @u) . ('/' :) . getK (suffix @_ @v))
 
 
-newtype ((u :: * -> *) :^: (n :: Nat)) a = Exp { getExp :: a }
+newtype ((u :: Type -> Type) :^: (n :: Nat)) a = Exp { getExp :: a }
   deriving (Column, Conjugate, Epsilon, Enum, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
   deriving (Additive, Applicative, Metric, Monad) via I
 

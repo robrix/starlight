@@ -1,7 +1,10 @@
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use execState" #-}
+{-# HLINT ignore "Use evalState" #-}
 module Control.Carrier.State.ST.Strict
 ( -- * State carrier
   runStateRef
@@ -47,8 +50,6 @@ instance Monad (StateC s) where
   StateC m >>= f = StateC (m >>= (\ (StateC m) -> m) . f)
 
 instance Algebra (State s) (StateC s) where
-  alg = \case
-    Get   k -> do
-      s <- StateC (ReaderC (\ ref -> readSTRef ref))
-      k s
-    Put s k -> StateC (ReaderC (\ ref -> writeSTRef ref s)) >> k
+  alg _ sig ctx = case sig of
+    Get   -> StateC (ReaderC (fmap (<$ ctx) . readSTRef))
+    Put s -> StateC (ReaderC (\ ref -> ctx <$ writeSTRef ref s))

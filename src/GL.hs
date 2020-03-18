@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -93,10 +94,10 @@ newtype GLC m a = GLC (m a)
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (State Capabilities :+: sig) (GLC m) where
-  alg = \case
-    L (Get   k) -> k (Capabilities mempty)
-    L (Put s k) -> do
+  alg hdl sig ctx = case sig of
+    L Get     -> pure (Capabilities mempty <$ ctx)
+    L (Put s) -> do
       for_ (Map.toList (getCapabilities s)) $ \ (cap, b) ->
         runLiftIO $ (if b then glEnable else glDisable) (glEnum cap)
-      k
-    R other -> GLC (send (handleCoercible other))
+      pure ctx
+    R other   -> GLC (alg (runGLC . hdl) other ctx)

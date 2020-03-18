@@ -39,6 +39,7 @@ import Data.Foldable (foldl')
 import Data.Functor.I
 import Data.Functor.Identity
 import Data.Functor.K
+import Data.Kind (Type)
 import Numeric
 
 -- * Units
@@ -52,7 +53,7 @@ class ( Applicative u
       , forall a . Ord a => Ord (u a)
       , forall a . Real a => Real (u a)
       )
-   => Unit (dim :: * -> *) u | u -> dim where
+   => Unit (dim :: Type -> Type) u | u -> dim where
   prj :: u a -> a
   default prj :: Coercible (u a) a => u a -> a
   prj = coerce

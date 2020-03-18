@@ -27,12 +27,12 @@ throwIO = sendM . E.throwIO
 
 -- | See @"Control.Exception".'E.catch'@.
 catch :: (E.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
-catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `E.catch` (run . (<$ ctx) . h)
+catch m h = liftWith $ \ hdl ctx -> hdl (m <$ ctx) `E.catch` (hdl . (<$ ctx) . h)
 
 -- | See @"Control.Exception".'E.catches'@.
 catches :: Has (Lift IO) sig m => m a -> [Handler m a] -> m a
-catches m hs = liftWith $ \ ctx run ->
-  E.catches (run (m <$ ctx)) (map (\ (Handler h) -> E.Handler (run . (<$ ctx) . h)) hs)
+catches m hs = liftWith $ \ hdl ctx ->
+  E.catches (hdl (m <$ ctx)) (map (\ (Handler h) -> E.Handler (hdl . (<$ ctx) . h)) hs)
 
 -- | See @"Control.Exception".'E.Handler'@.
 data Handler m a
@@ -42,7 +42,7 @@ deriving instance Functor m => Functor (Handler m)
 
 -- | See @"Control.Exception".'E.handle'@.
 handle :: (E.Exception e, Has (Lift IO) sig m) => (e -> m a) -> m a -> m a
-handle h m = liftWith $ \ ctx run -> (run . (<$ ctx) . h) `E.handle` run (m <$ ctx)
+handle h m = liftWith $ \ hdl ctx -> (hdl . (<$ ctx) . h) `E.handle` hdl (m <$ ctx)
 
 -- | See @"Control.Exception".'E.try'@.
 try :: (E.Exception e, Has (Lift IO) sig m) => m a -> m (Either e a)
@@ -50,8 +50,8 @@ try = handle (pure . Left) . fmap Right
 
 -- | See @"Control.Exception".'E.mask'@.
 mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
-mask with = liftWith $ \ ctx run -> E.mask $ \ restore ->
-  run (with (\ m -> liftWith $ \ ctx' run' -> restore (run' (m <$ ctx'))) <$ ctx)
+mask with = liftWith $ \ hdl ctx -> E.mask $ \ restore ->
+  hdl (with (\ m -> liftWith $ \ hdl' ctx' -> restore (hdl' (m <$ ctx'))) <$ ctx)
 
 -- | See @"Control.Exception".'E.bracket'@.
 bracket

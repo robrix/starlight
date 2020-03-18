@@ -6,7 +6,7 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-cabal v2-build all --only-dependencies
+# cabal v2-build all --only-dependencies
 
 cores=$(sysctl -n machdep.cpu.core_count || echo 4)
 env starlight_datadir=. cabal v2-exec env -- -u GHC_ENVIRONMENT ghci +RTS -N$((cores + 1)) -RTS -ghci-script=.ghci.repl $(script/ghci-flags) -no-ignore-dot-ghci $@

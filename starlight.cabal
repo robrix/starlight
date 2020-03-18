@@ -30,18 +30,14 @@ common common
     -Wno-name-shadowing
     -Wno-safe
     -Wno-unsafe
-  if (impl(ghc >= 8.6))
-    ghc-options: -Wno-star-is-type
   if (impl(ghc >= 8.8))
     ghc-options: -Wno-missing-deriving-strategies
 
 library
-  import:              common
-  hs-source-dirs:      src
+  import: common
+  hs-source-dirs: src
   exposed-modules:
     Control.Carrier.Database.SQLite
-    Control.Carrier.Empty.Church
-    Control.Carrier.Empty.CPS
     Control.Carrier.Error.IO
     Control.Carrier.Finally
     Control.Carrier.Reader.Relation
@@ -187,12 +183,12 @@ library
     , vector ^>= 0.12
 
 executable starlight
-  import:              common
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  import: common
+  hs-source-dirs: app
+  main-is: Main.hs
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base
+    , base
     , starlight
 
 source-repository head

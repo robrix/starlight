@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -27,10 +27,10 @@ runFinally (FinallyC m) = do
   ref <- sendM (newIORef [])
   runStateRef ref m `E.finally` (sendM (readIORef ref) >>= traverse_ runFinally)
 
-newtype FinallyC m a = FinallyC (StateC [FinallyC m ()] m a)
+newtype FinallyC m a = FinallyC { runFinallyC :: StateC [FinallyC m ()] m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Has (Lift IO) sig m => Algebra (Finally :+: sig) (FinallyC m) where
-  alg = \case
-    L (OnExit m k) -> FinallyC (modify (void m :)) >> k
-    R other        -> FinallyC (send (handleCoercible other))
+  alg hdl sig ctx = case sig of
+    L (OnExit m) -> ctx <$ FinallyC (modify (void (hdl (m <$ ctx)) :))
+    R other      -> FinallyC (alg (runFinallyC . hdl) (R other) ctx)

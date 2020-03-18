@@ -9,7 +9,7 @@ import           Foreign.Ptr
 import           Foreign.Storable
 
 alloca :: (Has (Lift IO) sig m, Storable a) => (Ptr a -> m b) -> m b
-alloca with = liftWith $ \ ctx hdl -> A.alloca (hdl . (<$ ctx) . with)
+alloca with = liftWith $ \ hdl ctx -> A.alloca (hdl . (<$ ctx) . with)
 
 allocaBytes :: Has (Lift IO) sig m => Int -> (Ptr a -> m b) -> m b
-allocaBytes n with = liftWith $ \ ctx hdl -> A.allocaBytes n (hdl . (<$ ctx) . with)
+allocaBytes n with = liftWith $ \ hdl ctx -> A.allocaBytes n (hdl . (<$ ctx) . with)

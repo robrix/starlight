@@ -20,7 +20,7 @@ import           Control.Effect.Trace
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class.Lift
 import           Data.Flag
-import           Data.Kind (Constraint)
+import           Data.Kind (Constraint, Type)
 import qualified GL.Carrier.Check.Identity as NoCheck
 import qualified GL.Carrier.Check.IO as Check
 import           GL.Effect.Check
@@ -33,9 +33,7 @@ main = do
   runThread (runCheck (CLI.check options) (runProfile (CLI.profile options) (runTrace (CLI.trace options) game)))
 
 runProfile
-  :: ( Effect sig
-     , Has (Lift IO) sig m
-     )
+  :: Has (Lift IO) sig m
   => Flag CLI.ShouldProfile
   -> (forall t . (Lifts MonadFail t, Lifts MonadFix t, Lifts MonadIO t, Algebra (Profile :+: sig) (t m)) => t m a)
   -> m a
@@ -61,4 +59,4 @@ runCheck flag
   | fromFlag CLI.ShouldCheck flag = Check.runCheck
   | otherwise                     = NoCheck.runCheck
 
-type Lifts (c :: (* -> *) -> Constraint) t = ((forall m' . c m' => c (t m')) :: Constraint)
+type Lifts (c :: (Type -> Type) -> Constraint) t = ((forall m' . c m' => c (t m')) :: Constraint)

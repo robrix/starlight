@@ -10,7 +10,7 @@ module Starlight.Draw
 
 import Control.Carrier.Empty.Church
 import Control.Carrier.Reader
-import Control.Carrier.State.Strict
+import Control.Carrier.State.Church
 import Control.Effect.Finally
 import Control.Effect.Lift
 import Control.Effect.Profile
@@ -47,8 +47,7 @@ import Unit.Count
 import Unit.Length
 
 runFrame
-  :: ( Effect sig
-     , Has Check sig m
+  :: ( Has Check sig m
      , Has Finally sig m
      , Has (Lift IO) sig m
      , Has Trace sig m

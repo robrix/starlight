@@ -1,7 +1,7 @@
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -43,14 +43,13 @@ evalState s = fmap snd . runState s
 execState :: forall s m a sig . Has (Lift IO) sig m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 
-newtype StateC s m a = StateC (ReaderC (TVar s) m a)
+newtype StateC s m a = StateC { runStateC :: ReaderC (TVar s) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (State s :+: sig) (StateC s m) where
-  alg = \case
-    L (Get   k) -> StateC ask >>= sendM . readTVarIO >>= k
-    L (Put s k) -> do
+  alg hdl sig ctx = case sig of
+    L Get     -> (<$ ctx) <$> (StateC ask >>= sendM . readTVarIO)
+    L (Put s) -> do
       var <- StateC ask
-      StateC (sendM (atomically (writeTVar var s)))
-      k
-    R other     -> StateC (send (handleCoercible other))
+      ctx <$ StateC (sendM (atomically (writeTVar var s)))
+    R other   -> StateC (alg (runStateC . hdl) (R other) ctx)

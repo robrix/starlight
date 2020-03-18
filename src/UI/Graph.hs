@@ -37,7 +37,7 @@ data Graph = Graph
   , count     :: !Int
   }
 
-mkGraph :: (Effect sig, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
+mkGraph :: (Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => (Float -> Float) -> Int -> Float -> Float -> m Graph
 mkGraph f n from to = do
   let vertex = V2 <*> f
       count = max n 0 + 2

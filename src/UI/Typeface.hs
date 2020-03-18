@@ -131,7 +131,7 @@ readFontOfSize
 readFontOfSize path size = (`Font` size) <$> readTypeface path
 
 
-cacheCharactersForDrawing :: (Effect sig, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => Typeface -> String -> m ()
+cacheCharactersForDrawing :: (Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => Typeface -> String -> m ()
 cacheCharactersForDrawing Typeface{ allGlyphs, glyphs = Drawable { array }, glyphsB, rangesRef } string = do
   let (vs, ranges, _) = foldl' combine (id, Map.empty, 0) (glyphsForString allGlyphs string)
       combine (vs, cs, i) Glyph{ char, geometry } = let i' = i + length geometry in (vs . (geometry ++), Map.insert char (i...i') cs, i')

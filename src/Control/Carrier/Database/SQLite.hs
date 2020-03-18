@@ -1,13 +1,13 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Database.SQLite
 ( -- * Database carrier
   runDatabase
-, DatabaseC(..)
+, DatabaseC(DatabaseC)
   -- * Database effect
 , module Control.Effect.Database
 ) where
@@ -26,20 +26,19 @@ import qualified Database.SQLite3 as SQLite
 runDatabase :: Has (Lift IO) sig m => FilePath -> DatabaseC m a -> m a
 runDatabase file (DatabaseC m) = bracket (sendM (SQLite.open (pack file))) (sendM . SQLite.close) (`runReader` m)
 
-newtype DatabaseC m a = DatabaseC (ReaderC SQLite.Database m a)
+newtype DatabaseC m a = DatabaseC { runDatabaseC :: ReaderC SQLite.Database m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadTrans)
 
 instance Has (Lift IO) sig m => Algebra (Labelled Database (Database SQLite.Statement) :+: sig) (DatabaseC m) where
-  alg = \case
-    L (Labelled (Execute cmd m k)) -> do
+  alg hdl sig ctx = case sig of
+    L (Labelled (Execute cmd m)) -> do
       db <- DatabaseC ask
       stmt <- sendM (SQLite.prepare db cmd)
-      a <- m stmt
-      sendM (SQLite.finalize stmt)
-      k a
-    L (Labelled (Step stmt k)) -> do
+      a <- hdl (m stmt <$ ctx)
+      a <$ sendM (SQLite.finalize stmt)
+    L (Labelled (Step stmt)) -> do
       res <- sendM (SQLite.step stmt)
       case res of
-        SQLite.Done -> k Nothing
-        SQLite.Row  -> sendM (SQLite.columns stmt) >>= k . Just
-    R other -> DatabaseC (send (handleCoercible other))
+        SQLite.Done -> pure (Nothing <$ ctx)
+        SQLite.Row  -> (<$ ctx) . Just <$> sendM (SQLite.columns stmt)
+    R other -> DatabaseC (alg (runDatabaseC . hdl) (R other) ctx)

@@ -58,7 +58,6 @@ run
      , Has Finally sig m
      , Has (Lift IO) sig m
      , Has Trace sig m
-     , Effect sig
      )
   => ReaderC Drawable m a
   -> m a

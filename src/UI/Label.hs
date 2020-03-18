@@ -67,7 +67,6 @@ label
      , Has (Reader Window.Window) sig m
      , Has Trace sig m
      , HasCallStack
-     , Effect sig
      )
   => m Label
 label = do

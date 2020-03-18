@@ -21,16 +21,16 @@ module GL.Array
 , ArrayC
 ) where
 
-import           Control.Carrier.Fresh.Strict
+import           Control.Carrier.Fresh.Church
 import           Control.Carrier.Reader
-import           Control.Carrier.State.Strict
+import           Control.Carrier.State.Church
 import           Control.Effect.Finally
 import           Control.Effect.Labelled
 import           Control.Effect.Trace
 import           Control.Monad.IO.Class.Lift
 import           Data.Functor.I
-import           Data.Functor.K
 import           Data.Functor.Interval
+import           Data.Functor.K
 import           Data.Word (Word32)
 import           Foreign.Marshal.Array.Lift
 import           Foreign.Ptr
@@ -57,10 +57,10 @@ instance Bind (Array n) where
   bind = checking . runLiftIO . glBindVertexArray . maybe 0 unArray
 
 
-configureInterleaved :: forall v m sig . (Effect sig, HasLabelled Array (Reader (Array (v I))) sig m, HasLabelled (B.Buffer 'B.Array) (Reader (B.Buffer 'B.Array (v I))) sig m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
+configureInterleaved :: forall v m sig . (HasLabelled Array (Reader (Array (v I))) sig m, HasLabelled (B.Buffer 'B.Array) (Reader (B.Buffer 'B.Array (v I))) sig m, Vars v, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => m ()
 configureInterleaved = askArray >> B.askBuffer @'B.Array >> evalState (Offset 0) (evalFresh 0 (configureVars @v (S.sizeOf @(Fields v) undefined) (defaultVars @v)))
 
-configureSeparate :: forall v1 v2 m sig . (Effect sig, HasLabelled Array (Reader (Array ((v1 :**: v2) I))) sig m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
+configureSeparate :: forall v1 v2 m sig . (HasLabelled Array (Reader (Array ((v1 :**: v2) I))) sig m, Vars v1, Vars v2, Has Check sig m, Has (Lift IO) sig m, Has Trace sig m) => B.Buffer 'B.Array (v1 I) -> B.Buffer 'B.Array (v2 I) -> m ()
 configureSeparate b1 b2 = evalState (Offset 0) (evalFresh 0 (askArray >> B.bindBuffer b1 (configureVars @v1 stride (defaultVars @v1)) >> B.bindBuffer b2 (configureVars @v2 stride (defaultVars @v2)))) where
   stride = S.sizeOf @((v1 :**: v2) I) undefined
 
@@ -157,7 +157,7 @@ drawElementsInstanced mode i n = do
   checking (runLiftIO (glDrawElementsInstanced (glEnum mode) (fromIntegral (size i)) GL_UNSIGNED_INT (nullPtr `plusPtr` (getI (inf i) * S.sizeOf @Word32 0)) (fromIntegral n)))
 
 
-load :: (Effect sig, Vars v, S.Storable (v I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [v I] -> m (B.Buffer 'B.Array (v I), Array (v I))
+load :: (Vars v, S.Storable (v I), Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m) => [v I] -> m (B.Buffer 'B.Array (v I), Array (v I))
 load is = do
   b <- gen1 @(B.Buffer 'B.Array _)
   a <- gen1
