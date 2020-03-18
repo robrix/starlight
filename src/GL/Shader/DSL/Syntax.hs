@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 module GL.Shader.DSL.Syntax
 ( Expr(..)
@@ -8,11 +9,14 @@ module GL.Shader.DSL.Syntax
 ) where
 
 import Data.Coerce
+import Data.Functor.I
 import Geometry.Transform
 import Linear.V2
 import Linear.V3
 import Linear.V4
 import Unit.Algebra (Div, Mul)
+import Unit (Unit)
+import Unit.Length (Length)
 
 class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
       , forall a . Num a => Num (expr a)
@@ -52,9 +56,9 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
 
   -- scalar
 
-  atan2 :: expr a -> expr a -> expr a
+  atan2 :: Unit Length length => expr (length Float) -> expr (length Float) -> expr (I Float)
 
-  float :: expr a -> expr Float
+  float :: expr (scalar a) -> expr (scalar Float)
 
   min, max :: expr a -> expr a -> expr a
 
