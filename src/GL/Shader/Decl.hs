@@ -11,29 +11,19 @@ module GL.Shader.Decl
 , renderDecl
 ) where
 
-import           Control.Monad (ap, liftM)
+import           Control.Monad.Trans.Cont
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import qualified GL.Primitive as P
 import           GL.Shader (Stage(..))
 import           GL.Shader.Stmt
 
 runDecl :: (a -> Doc ()) -> Decl k a -> Doc ()
-runDecl k (Decl run) = run k
+runDecl = flip runCont
 
-newtype Decl (k :: Stage) a = Decl ((a -> Doc ()) -> Doc ())
-
-instance Functor (Decl k) where
-  fmap = liftM
-
-instance Applicative (Decl k) where
-  pure a = Decl (\ k -> k a)
-  (<*>) = ap
-
-instance Monad (Decl k) where
-  Decl m >>= f = Decl (\ k -> m (runDecl k . f))
+type Decl (k :: Stage) = Cont (Doc ())
 
 raw :: Doc () -> Decl k ()
-raw d = Decl (\ k -> d <> k ())
+raw d = cont $ \ k -> d <> k ()
 
 main :: Stmt k () -> Decl k ()
 main body = raw (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
