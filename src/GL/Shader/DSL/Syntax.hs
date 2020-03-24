@@ -11,7 +11,7 @@ module GL.Shader.DSL.Syntax
 import Data.Functor.C
 import Data.Functor.I
 import Data.Text.Prettyprint.Doc hiding (dot)
-import Geometry.Transform
+import Geometry.Transform (Transform)
 import Linear.Matrix
 import Linear.V2
 import Linear.V3
