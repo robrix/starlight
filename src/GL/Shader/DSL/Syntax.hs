@@ -4,6 +4,7 @@ module GL.Shader.DSL.Syntax
 ( Expr(..)
 , false
 , true
+, Geom(..)
 , GLSL(..)
 ) where
 
@@ -104,6 +105,10 @@ class Expr expr where
 false, true :: Expr expr => expr Bool
 false = fromBool False
 true  = fromBool True
+
+class Expr expr => Geom expr where
+  primitive :: expr a -> expr a
+  vertex :: expr a -> expr a
 
 
 newtype GLSL a = GLSL { renderGLSL :: Doc () }
