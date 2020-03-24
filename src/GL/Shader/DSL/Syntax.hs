@@ -98,3 +98,15 @@ true  = fromBool True
 
 
 newtype GLSL a = GLSL { renderGLSL :: Doc () }
+
+instance Num (GLSL a) where
+  a + b = GLSL . parens $ renderGLSL a <+> pretty '+' <+> renderGLSL b
+  a * b = GLSL . parens $ renderGLSL a <+> pretty '*' <+> renderGLSL b
+  a - b = GLSL . parens $ renderGLSL a <+> pretty '-' <+> renderGLSL b
+  signum a = fn "sign" [ renderGLSL a ]
+  negate a = GLSL . parens $ pretty "-" <> renderGLSL a
+  abs a = fn "abs" [ renderGLSL a ]
+  fromInteger i = GLSL $ pretty i
+
+fn :: String -> [Doc ()] -> GLSL b
+fn n as = GLSL $ pretty n <> tupled as
