@@ -108,5 +108,12 @@ instance Num (GLSL a) where
   abs a = fn "abs" [ renderGLSL a ]
   fromInteger i = GLSL $ pretty i
 
+instance Fractional (GLSL a) where
+  a / b = GLSL $ parens $ renderGLSL a <+> pretty '/' <+> renderGLSL b
+  fromRational = lit . fromRational
+
 fn :: String -> [Doc ()] -> GLSL b
 fn n as = GLSL $ pretty n <> tupled as
+
+lit :: Double -> GLSL a
+lit = GLSL . pretty
