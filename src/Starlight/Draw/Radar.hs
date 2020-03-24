@@ -32,6 +32,7 @@ import           Data.Generics.Product.Fields
 import           Data.List (findIndex, sortOn)
 import qualified Data.Map as Map
 import           Data.Ord (Down(..))
+import qualified Data.Text.Prettyprint.Doc as Doc
 import           Foreign.Storable (Storable(..))
 import           GHC.Generics (Generic)
 import           GL.Array
@@ -41,7 +42,6 @@ import           GL.Program
 import           GL.Shader (Stage(..))
 import           GL.Shader.DSL hiding (norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
-import qualified GL.Shader.Expr as Expr
 import           GL.Shader.Vars (makeVars)
 import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
@@ -137,7 +137,7 @@ verticesForBlips bs =
   ]
 
 
-vertex' :: U (Expr.Render 'Vertex) -> D.Stage V IG
+vertex' :: U (Expr 'Vertex) -> D.Stage V IG
 vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ pos, colour2, sweep } -> main $ do
   there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
@@ -173,9 +173,9 @@ radarShader = program $ \ u
         i <- var @Int "i" (-fromIntegral count)
         while (get i `lt` (fromIntegral count + 1)) $ do
           emitVertex $ do
-            theta <- let' "theta" (float (get i) / float (fromIntegral count) * Expr.var "sweep[0]")
-            gl_Position .= coerce (matrix u) D.!*! mat4 [rot theta] !* Expr.var "pos[0]"
-            colour3 .= Expr.var "colour2[0]"
+            theta <- let' "theta" (float (get i) / float (fromIntegral count) * raw "sweep[0]")
+            gl_Position .= coerce (matrix u) D.!*! mat4 [rot theta] !* raw "pos[0]"
+            colour3 .= raw "colour2[0]"
           i += 1)
 
   >>> fragment' where
@@ -196,17 +196,21 @@ targetShader = program $ \ u
             ]
       i <- var @Int "i" (-fromIntegral count)
       while (get i `lt` (fromIntegral count + 1)) . emitPrimitive $ do
-        theta <- let' "theta" (float (get i) / float (fromIntegral count) * Expr.var "sweep[0]")
+        theta <- let' "theta" (float (get i) / float (fromIntegral count) * raw "sweep[0]")
         emitVertex $ do
           gl_Position .= ext4 (vec3 [0]) 1
-          colour3 .= Expr.var "colour2[0]"
+          colour3 .= raw "colour2[0]"
         emitVertex $ do
-          gl_Position .= coerce (matrix u) D.!*! mat4 [rot theta] !* Expr.var "pos[0]"
-          colour3 .= Expr.var "colour2[0]"
+          gl_Position .= coerce (matrix u) D.!*! mat4 [rot theta] !* raw "pos[0]"
+          colour3 .= raw "colour2[0]"
         i += 1)
 
   >>> fragment' where
   count = 1
+
+
+raw :: String -> Expr k a
+raw = Expr . Doc.pretty
 
 
 data U v = U

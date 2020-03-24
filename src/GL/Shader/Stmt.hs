@@ -43,20 +43,20 @@ renderStmt = runStmt (const mempty)
 
 type Stmt (k :: Stage) = Cont (Doc ())
 
-let' :: GL.Uniform a => String -> Render k a -> Stmt k (Render k a)
+let' :: GL.Uniform a => String -> Expr k a -> Stmt k (Expr k a)
 let' n v = cont $ \ k
   -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-  <> k (Render (pretty n))
+  <> k (Expr (pretty n))
 
-var :: GL.Uniform a => String -> Render k a -> Stmt k (Ref k a)
+var :: GL.Uniform a => String -> Expr k a -> Stmt k (Ref k a)
 var n v = cont $ \ k
   -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
   <> k (Ref n)
 
-iff :: Render k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
+iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
 iff c t e = stmt $ pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
 
-switch :: Render k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
+switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
 switch s cs = stmt $ pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
   where
   renderCase (i, s) = maybe (pretty "default:" <> hardline) (\ i -> pretty "case" <+> pretty i <> pretty ':') i  <> hardline <> renderStmt s
@@ -64,19 +64,19 @@ switch s cs = stmt $ pretty "switch" <+> parens (renderExpr s) <+> braces (nest 
 break :: Stmt k ()
 break = stmt $ pretty "break" <+> pretty ';' <> hardline
 
-while :: Render k Bool -> Stmt k () -> Stmt k ()
+while :: Expr k Bool -> Stmt k () -> Stmt k ()
 while c t = stmt $ pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
 
-(.=) :: Ref k a -> Render k a -> Stmt k ()
+(.=) :: Ref k a -> Expr k a -> Stmt k ()
 r .= v = stmt $ renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
 
-(+=) :: Ref k a -> Render k a -> Stmt k ()
+(+=) :: Ref k a -> Expr k a -> Stmt k ()
 r += v = stmt $ renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
 
-(*=) :: Ref k a -> Render k a -> Stmt k ()
+(*=) :: Ref k a -> Expr k a -> Stmt k ()
 r *= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
 
-(*!=) :: Ref k (v a) -> Render k (v (v a)) -> Stmt k ()
+(*!=) :: Ref k (v a) -> Expr k (v (v a)) -> Stmt k ()
 r *!= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
 
 infixr 4 .=, +=, *=, *!=
