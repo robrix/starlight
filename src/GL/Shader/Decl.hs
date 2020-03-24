@@ -43,23 +43,23 @@ primitiveIn :: P.Type -> Decl 'Geometry ()
 primitiveIn ty = raw doc where
   doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
   render = \case
-    P.Points -> pretty "points"
-    P.Lines -> pretty "lines"
-    P.LineStrip -> pretty "lines"
-    P.LineLoop -> pretty "lines"
+    P.Points        -> pretty "points"
+    P.Lines         -> pretty "lines"
+    P.LineStrip     -> pretty "lines"
+    P.LineLoop      -> pretty "lines"
     P.TriangleStrip -> pretty "triangles"
-    P.Triangles -> pretty "triangles"
+    P.Triangles     -> pretty "triangles"
 
 primitiveOut :: P.Type -> Int -> Decl 'Geometry ()
 primitiveOut ty mx = raw doc where
   doc = pretty "layout" <+> parens (render ty <> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) <+> pretty "out;" <> hardline
   render = \case
-    P.Points -> pretty "points"
-    P.Lines -> pretty "line_strip"
-    P.LineStrip -> pretty "line_strip"
-    P.LineLoop -> pretty "line_strip"
+    P.Points        -> pretty "points"
+    P.Lines         -> pretty "line_strip"
+    P.LineStrip     -> pretty "line_strip"
+    P.LineLoop      -> pretty "line_strip"
     P.TriangleStrip -> pretty "triangle_strip"
-    P.Triangles -> pretty "triangle_strip"
+    P.Triangles     -> pretty "triangle_strip"
 
 
 renderDecl :: Decl k a -> Doc ()
