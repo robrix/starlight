@@ -6,7 +6,7 @@ module GL.Shader.GLSL
 
 import qualified Data.Text.Prettyprint.Doc as Doc
 
-newtype GLSL a = GLSL { renderGLSL :: Doc.Doc () }
+newtype GLSL a = GLSL (Doc.Doc ())
   deriving (Monoid, Semigroup)
 
 instance Num (GLSL a) where
