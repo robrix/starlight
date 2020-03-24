@@ -11,6 +11,7 @@ module GL.Shader.DSL.Syntax
 import Data.Coerce
 import Data.Functor.I
 import Geometry.Transform
+import Linear.Matrix
 import Linear.V2
 import Linear.V3
 import Linear.V4
@@ -25,6 +26,10 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
       )
    => Expr expr where
   -- matrix
+
+  m2 :: expr (V2 a) -> expr (V2 a) -> expr (M22 a)
+  m3 :: expr (V3 a) -> expr (V3 a) -> expr (V3 a) -> expr (M33 a)
+  m4 :: expr (V4 a) -> expr (V4 a) -> expr (V4 a) -> expr (V4 a) -> expr (M44 a)
 
   (>>>) :: expr (Transform m a u v) -> expr (Transform m a v w) -> expr (Transform m a u w)
   (>*) :: expr (Transform m a u v) -> expr (m (v a)) -> expr (m (u a))
