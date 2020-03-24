@@ -26,7 +26,7 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _z)
+import           GL.Shader.DSL hiding ((!*), (!*!), (^.), _z)
 import qualified GL.Shader.DSL as D
 import           Starlight.Actor
 import           Starlight.Physics
@@ -77,7 +77,7 @@ range = 0...length vertices
 shader :: Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ r } None -> main $
-    gl_Position .= D.coerce (matrix u) D.!* vec4 [r, 0, 0, 1])
+    gl_Position .= coerce (matrix u) D.!* vec4 [r, 0, 0, 1])
   >>> fragment (\ None Frag{ fragColour } -> main $
     fragColour .= colour u)
 

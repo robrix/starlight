@@ -24,6 +24,7 @@ import           Control.Effect.Profile
 import           Control.Effect.State (put)
 import           Control.Effect.Trace
 import           Control.Lens (Lens', (&), (?~), (^.))
+import           Data.Coerce (coerce)
 import           Data.Foldable (for_, toList)
 import           Data.Functor.I
 import           Data.Functor.Interval
@@ -38,8 +39,9 @@ import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
 import           GL.Shader (Stage(..))
-import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
+import           GL.Shader.DSL hiding (norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
+import qualified GL.Shader.Expr as Expr
 import           GL.Shader.Vars (makeVars)
 import           Linear.Exts as Linear hiding ((!*))
 import           Starlight.Actor
@@ -53,7 +55,6 @@ import           UI.Colour
 import qualified UI.Window as Window
 import           Unit.Algebra
 import           Unit.Angle
-import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -136,18 +137,18 @@ verticesForBlips bs =
   ]
 
 
-vertex' :: U (Expr 'Vertex) -> D.Stage V IG
+vertex' :: U (Expr.Render 'Vertex) -> D.Stage V IG
 vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ pos, colour2, sweep } -> main $ do
   there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
   let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
   angle <- let' "angle" (angleOf (vec2 [there]))
-  radius <- let' "radius" (min' (scale * D.coerce (float d)) radius)
-  minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
+  radius <- let' "radius" (min' (scale * coerce (float d)) radius)
+  minSweep <- let' "minSweep" (minBlipSize / (2 * pi * coerce radius))
   iff (r `gt` d)
     (sweep .= pi/2)
-    (sweep .= (minSweep `max'` abs (D.coerce (asin (float (r/d))))))
-  pos .= D.coerce (ext4 (ext3 (vec2 [cos angle, sin angle] D.^* D.coerce radius) 0) 1)
+    (sweep .= (minSweep `max'` abs (coerce (asin (float (r/d))))))
+  pos .= coerce (ext4 (ext3 (vec2 [cos angle, sin angle] D.^* coerce radius) 0) 1)
   colour2 .= colour)
   where
   minBlipSize = 16
@@ -172,9 +173,9 @@ radarShader = program $ \ u
         i <- var @Int "i" (-fromIntegral count)
         while (get i `lt` (fromIntegral count + 1)) $ do
           emitVertex $ do
-            theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
-            gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "pos[0]"
-            colour3 .= Var "colour2[0]"
+            theta <- let' "theta" (float (get i) / float (fromIntegral count) * Expr.var "sweep[0]")
+            gl_Position .= coerce (matrix u) D.!*! mat4 [rot theta] !* Expr.var "pos[0]"
+            colour3 .= Expr.var "colour2[0]"
           i += 1)
 
   >>> fragment' where
@@ -195,13 +196,13 @@ targetShader = program $ \ u
             ]
       i <- var @Int "i" (-fromIntegral count)
       while (get i `lt` (fromIntegral count + 1)) . emitPrimitive $ do
-        theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
+        theta <- let' "theta" (float (get i) / float (fromIntegral count) * Expr.var "sweep[0]")
         emitVertex $ do
           gl_Position .= ext4 (vec3 [0]) 1
-          colour3 .= Var "colour2[0]"
+          colour3 .= Expr.var "colour2[0]"
         emitVertex $ do
-          gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "pos[0]"
-          colour3 .= Var "colour2[0]"
+          gl_Position .= coerce (matrix u) D.!*! mat4 [rot theta] !* Expr.var "pos[0]"
+          colour3 .= Expr.var "colour2[0]"
         i += 1)
 
   >>> fragment' where

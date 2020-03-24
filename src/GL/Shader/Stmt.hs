@@ -9,7 +9,7 @@ module GL.Shader.Stmt
   Stmt
   -- * Variables
 , let'
-, var
+, GL.Shader.Stmt.var
   -- * Control flow
 , iff
 , switch
@@ -34,22 +34,22 @@ import           Control.Monad (ap, liftM, (<=<))
 import           Data.Functor.K
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           GL.Shader (Stage(..))
-import           GL.Shader.Expr
+import           GL.Shader.Expr as Expr
 import qualified GL.Uniform as GL
 import           Prelude hiding (break)
 
 data Stmt (k :: Stage) a where
   Pure :: a -> Stmt k a
-  Let :: GL.Uniform b => String -> Expr k b -> (K String b -> Stmt k a) -> Stmt k a
+  Let :: GL.Uniform b => String -> Render k b -> (K String b -> Stmt k a) -> Stmt k a
   Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
-  If :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
-  Switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k a -> Stmt k a
+  If :: Render k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
+  Switch :: Render k Int -> [(Maybe Int, Stmt k ())] -> Stmt k a -> Stmt k a
   Break :: Stmt k a -> Stmt k a
-  While :: Expr k Bool -> Stmt k () -> Stmt k a -> Stmt k a
-  (:.=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
-  (:+=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
-  (:*=) :: Ref k b -> Expr k b -> Stmt k a -> Stmt k a
-  (:*!=) :: Ref k (v b) -> Expr k (v (v b)) -> Stmt k a -> Stmt k a
+  While :: Render k Bool -> Stmt k () -> Stmt k a -> Stmt k a
+  (:.=) :: Ref k b -> Render k b -> Stmt k a -> Stmt k a
+  (:+=) :: Ref k b -> Render k b -> Stmt k a -> Stmt k a
+  (:*=) :: Ref k b -> Render k b -> Stmt k a -> Stmt k a
+  (:*!=) :: Ref k (v b) -> Render k (v (v b)) -> Stmt k a -> Stmt k a
   EmitVertex :: Stmt 'Geometry () -> Stmt 'Geometry a -> Stmt 'Geometry a
   EmitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry a -> Stmt 'Geometry a
   Raw :: Doc () -> Stmt k a -> Stmt k a
@@ -85,42 +85,42 @@ instance Monad (Stmt k) where
   Stmt a          k >>= f = Stmt a (f <=< k)
 
 
-let' :: GL.Uniform a => String -> Expr k a -> Stmt k (Expr k a)
-let' n v = Let n v (pure . Var . getK)
+let' :: GL.Uniform a => String -> Render k a -> Stmt k (Render k a)
+let' n v = Let n v (pure . Expr.var . getK)
 
-var :: GL.Uniform a => String -> Expr k a -> Stmt k (Ref k a)
+var :: GL.Uniform a => String -> Render k a -> Stmt k (Ref k a)
 var n v = Let n v (pure . Ref . getK)
 
 
-iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
+iff :: Render k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
 iff c t e = If c t e (pure ())
 
-switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
+switch :: Render k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
 switch s cs = Switch s cs (pure ())
 
 break :: Stmt k ()
 break = Break (pure ())
 
-while :: Expr k Bool -> Stmt k () -> Stmt k ()
+while :: Render k Bool -> Stmt k () -> Stmt k ()
 while c t = While c t (pure ())
 
 
-(.=) :: Ref k a -> Expr k a -> Stmt k ()
+(.=) :: Ref k a -> Render k a -> Stmt k ()
 r .= v = (r :.= v) (pure ())
 
 infixr 4 .=
 
-(+=) :: Ref k a -> Expr k a -> Stmt k ()
+(+=) :: Ref k a -> Render k a -> Stmt k ()
 r += v = (r :+= v) (pure ())
 
 infixr 4 +=
 
-(*=) :: Ref k a -> Expr k a -> Stmt k ()
+(*=) :: Ref k a -> Render k a -> Stmt k ()
 r *= v = (r :*= v) (pure ())
 
 infixr 4 *=
 
-(*!=) :: Ref k (v a) -> Expr k (v (v a)) -> Stmt k ()
+(*!=) :: Ref k (v a) -> Render k (v (v a)) -> Stmt k ()
 r *!= v = (r :*!= v) (pure ())
 
 infixr 4 *!=

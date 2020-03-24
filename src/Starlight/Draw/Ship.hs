@@ -30,7 +30,7 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), (^/), _a)
+import           GL.Shader.DSL hiding ((!*), (!*!), (^.), (^/), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
@@ -92,7 +92,7 @@ range = 0...4
 shader :: D.Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ pos } None -> main $
-    gl_Position .= D.coerce (matrix u) D.!* ext4 (ext3 pos 1) 1)
+    gl_Position .= coerce (matrix u) D.!* ext4 (ext3 pos 1) 1)
 
   >>> fragment (\ None Frag{ fragColour } -> main $
     fragColour .= colour u)

@@ -28,7 +28,7 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, (!*!), (^*))
+import           GL.Shader.DSL hiding ((!*!), (^*))
 import qualified GL.Shader.DSL as D
 import           Linear.V2 hiding (R1(..), R2(..))
 import           Starlight.View
@@ -87,7 +87,7 @@ shader = program $ \ U{ resolution, focus, zoom }
     gl_Position .= ext4 (ext3 pos 0) 1)
 
   >>> fragment (\ None Frag{ fragColour } -> main $ do
-    resolution <- let' @(V2 Float) "resolution" (D.coerce resolution)
+    resolution <- let' @(V2 Float) "resolution" (coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var "focus" $ dext3 focus 1

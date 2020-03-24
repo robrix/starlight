@@ -28,7 +28,7 @@ import           Geometry.Circle
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, norm, (!*), (!*!))
+import           GL.Shader.DSL hiding (norm, (!*), (!*!))
 import qualified GL.Shader.DSL as D
 import           Prelude hiding (break)
 import qualified Starlight.Body as Body
@@ -79,7 +79,7 @@ shader :: D.Shader U V Frag
 shader = program $ \ u
   ->  vertex (\ V{ pos } D.None -> main $ do
     let cos90 = 6.123233995736766e-17
-    m <- var "m" (D.coerce (matrix u))
+    m <- var "m" (coerce (matrix u))
     switch gl_InstanceID
       [ (Just 1, m *= dmat4 [dvec4 [1, 0, 0, 0], dvec4 [0, cos90, -1, 0], dvec4 [0, 1, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
       , (Just 2, m *= dmat4 [dvec4 [cos90, 0, 1, 0], dvec4 [0, 1, 0, 0], dvec4 [-1, 0, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)

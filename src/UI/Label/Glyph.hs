@@ -55,12 +55,10 @@ shader = program $ \ u
         t .= vec2 [ 9/12.0,  3/12.0]
         break)
       ]
-    let trans2 t = mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 t 1]
-        scale2 s = mat3 [vec3 [s, 0, 0], vec3 [0, s, 0], vec3 [0, 0, 1]]
-        m =   matrix u
-          !*! trans2 (get t ^* (1/float (ratio u)))
-          !*! scale2 (fontScale u)
-          !*! trans2 (vec2 [offset u, 0])
+    let m =   matrix u
+          !*! mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 (get t ^* (1/float (ratio u))) 1]
+          !*! mat3 [vec3 [fontScale u, 0, 0], vec3 [0, fontScale u, 0], vec3 [0, 0, 1]]
+          !*! mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 (vec2 [offset u, 0]) 1]
     gl_Position .= ext4 (m !* ext3 (pos^._xy) 1) 0^._xywz)
 
   >>> fragment (\ IF{ _coord2, colour } Frag{ fragColour } -> main $
