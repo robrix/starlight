@@ -4,6 +4,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
 , program
@@ -32,12 +33,14 @@ module GL.Shader.DSL
 ) where
 
 import qualified Control.Category as Cat
+import           Data.Coerce
 import           Data.Function (fix)
+import           Data.Functor.C
 import           Data.Functor.K
 import           Data.Kind (Type)
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
-import           GHC.Generics
+import           GHC.Generics hiding ((:.:))
 import qualified GL.Shader as Shader
 import           GL.Shader.Decl hiding (Type)
 import           GL.Shader.Expr
@@ -63,13 +66,13 @@ data Stage i o where
   Id :: Stage i i
   (:>>>) :: Stage i x -> Stage x o -> Stage i o
   V :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Decl 'Shader.Vertex   ()) -> Stage i o
-  G :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry) -> o (Ref 'Shader.Geometry) -> Decl 'Shader.Geometry ()) -> Stage i o
+  G :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> Decl 'Shader.Geometry ()) -> Stage i o
   F :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Decl 'Shader.Fragment ()) -> Stage i o
 
 vertex   :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Decl 'Shader.Vertex   ()) -> Stage i o
 vertex = V
 
-geometry :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry) -> o (Ref 'Shader.Geometry) -> Decl 'Shader.Geometry ()) -> Stage i o
+geometry :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> Decl 'Shader.Geometry ()) -> Stage i o
 geometry = G
 
 fragment :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Decl 'Shader.Fragment ()) -> Stage i o
@@ -93,13 +96,13 @@ shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOption
 stageSources :: Doc () -> Stage i o -> [(Shader.Stage, Doc ())]
 stageSources u = \case
   Id  -> []
-  V s -> [renderStage Shader.Vertex   s]
-  G s -> [renderStage Shader.Geometry s]
-  F s -> [renderStage Shader.Fragment s]
+  V s -> [renderStage Shader.Vertex   id s]
+  G s -> [renderStage Shader.Geometry (coerce :: forall x . Expr 'Shader.Geometry x -> (Expr 'Shader.Geometry :.: []) x) s]
+  F s -> [renderStage Shader.Fragment id s]
   l :>>> r -> stageSources u l <> stageSources u r
   where
-  renderStage :: (Vars i, Vars o) => Shader.Stage -> (i (Expr k) -> o (Ref k) -> Decl k ()) -> (Shader.Stage, Doc ())
-  renderStage t f = (,) t
+  renderStage :: (Vars i, Vars o) => Shader.Stage -> (forall a . Expr k a -> f a) -> (i f -> o (Ref k) -> Decl k ()) -> (Shader.Stage, Doc ())
+  renderStage t g f = (,) t
     $  pretty "#version 410" <> hardline
     <> u
     <> case t of
@@ -107,7 +110,7 @@ stageSources u = \case
       _               -> foldVars (getK . value) (makeVars (pvar "in"      . name) `like` i)
     <> foldVars (getK . value) (makeVars (pvar "out"     . name) `like` o)
     <> renderDecl (f i o) where
-    i = makeVars (Expr . pretty . name)
+    i = makeVars (g . Expr . pretty . name)
     o = makeVars (Ref . name)
 
 like :: t (K a) -> t b -> t (K a)
