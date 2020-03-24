@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE TypeOperators #-}
 module GL.Shader.DSL.Syntax
 ( Expr(..)
@@ -8,7 +7,6 @@ module GL.Shader.DSL.Syntax
 , GLSL(..)
 ) where
 
-import Data.Coerce
 import Data.Functor.C
 import Data.Functor.I
 import Data.Text.Prettyprint.Doc hiding (dot)
@@ -21,12 +19,7 @@ import Unit.Algebra (Div, Mul)
 import Unit (Unit)
 import Unit.Length (Length)
 
-class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
-      , forall a . Num a => Num (expr a)
-      , forall a . Fractional a => Fractional (expr a)
-      , forall a . Floating a => Floating (expr a)
-      )
-   => Expr expr where
+class Expr expr where
   -- matrix
 
   m2 :: expr (V2 a) -> expr (V2 a) -> expr (M22 a)
