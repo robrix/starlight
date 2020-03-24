@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Shader.GLSL
@@ -14,7 +15,7 @@ renderGLSL :: GLSL a -> Doc.Doc ()
 renderGLSL (GLSL m) = run (evalFresh 0 (getAp m))
 
 newtype GLSL a = GLSL (Ap (FreshC Identity) (Doc.Doc ()))
-  deriving (Monoid, Semigroup)
+  deriving (Functor, Monoid, Semigroup)
 
 instance Num (GLSL a) where
   a + b = parens $ a <+> pretty '+' <+> b
