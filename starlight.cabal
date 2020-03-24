@@ -84,6 +84,7 @@ library
     GL.Shader.DSL
     GL.Shader.DSL.Syntax
     GL.Shader.Expr
+    GL.Shader.GLSL
     GL.Shader.Stmt
     GL.Shader.Vars
     GL.Texture
