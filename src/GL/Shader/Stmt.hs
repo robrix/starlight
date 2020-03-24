@@ -28,7 +28,7 @@ module GL.Shader.Stmt
 , renderTypeOf
 ) where
 
-import           Control.Monad (ap, liftM)
+import           Control.Monad.Trans.Cont
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           GL.Shader (Stage(..))
 import           GL.Shader.Expr as Expr
@@ -36,30 +36,20 @@ import qualified GL.Uniform as GL
 import           Prelude hiding (break)
 
 runStmt :: (a -> Doc ()) -> Stmt k a -> Doc ()
-runStmt k (Stmt run) = run k
+runStmt = flip runCont
 
 renderStmt :: Stmt k () -> Doc ()
 renderStmt = runStmt (const mempty)
 
-newtype Stmt (k :: Stage) a = Stmt ((a -> Doc ()) -> Doc ())
-
-instance Functor (Stmt k) where
-  fmap = liftM
-
-instance Applicative (Stmt k) where
-  pure a = Stmt $ \ k -> k a
-  (<*>) = ap
-
-instance Monad (Stmt k) where
-  Stmt m >>= f = Stmt $ \ k -> m (runStmt k . f)
+type Stmt (k :: Stage) = Cont (Doc ())
 
 let' :: GL.Uniform a => String -> Render k a -> Stmt k (Render k a)
-let' n v = Stmt $ \ k
+let' n v = cont $ \ k
   -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
   <> k (Render (pretty n))
 
 var :: GL.Uniform a => String -> Render k a -> Stmt k (Ref k a)
-var n v = Stmt $ \ k
+var n v = cont $ \ k
   -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
   <> k (Ref n)
 
@@ -109,4 +99,4 @@ renderTypeOf _ = pretty (GL.glslType @a)
 
 
 stmt :: Doc () -> Stmt k ()
-stmt d = Stmt $ \ k -> d <> k ()
+stmt d = cont $ \ k -> d <> k ()
