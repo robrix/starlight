@@ -1,7 +1,5 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 module GL.Shader.Stmt
@@ -30,162 +28,101 @@ module GL.Shader.Stmt
 , renderTypeOf
 ) where
 
-import           Control.Monad (ap, liftM, (<=<))
-import           Data.Functor.K
+import           Control.Monad (ap, liftM)
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           GL.Shader (Stage(..))
 import           GL.Shader.Expr as Expr
 import qualified GL.Uniform as GL
 import           Prelude hiding (break)
 
-data Stmt (k :: Stage) a where
-  Pure :: a -> Stmt k a
-  Let :: GL.Uniform b => String -> Render k b -> (K String b -> Stmt k a) -> Stmt k a
-  Discard :: Stmt 'Fragment a -> Stmt 'Fragment a
-  If :: Render k Bool -> Stmt k () -> Stmt k () -> Stmt k a -> Stmt k a
-  Switch :: Render k Int -> [(Maybe Int, Stmt k ())] -> Stmt k a -> Stmt k a
-  Break :: Stmt k a -> Stmt k a
-  While :: Render k Bool -> Stmt k () -> Stmt k a -> Stmt k a
-  (:.=) :: Ref k b -> Render k b -> Stmt k a -> Stmt k a
-  (:+=) :: Ref k b -> Render k b -> Stmt k a -> Stmt k a
-  (:*=) :: Ref k b -> Render k b -> Stmt k a -> Stmt k a
-  (:*!=) :: Ref k (v b) -> Render k (v (v b)) -> Stmt k a -> Stmt k a
-  EmitVertex :: Stmt 'Geometry () -> Stmt 'Geometry a -> Stmt 'Geometry a
-  EmitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry a -> Stmt 'Geometry a
-  Raw :: Doc () -> Stmt k a -> Stmt k a
-  Stmt :: Pretty b => b -> (b -> Stmt k a) -> Stmt k a
+runStmt :: (a -> Doc ()) -> Stmt k a -> Doc ()
+runStmt k (Stmt run) = run k
 
-infixr 4 :.=
-infixr 4 :+=
-infixr 4 :*=
-infixr 4 :*!=
+renderStmt :: Stmt k () -> Doc ()
+renderStmt = runStmt (const mempty)
+
+newtype Stmt (k :: Stage) a = Stmt ((a -> Doc ()) -> Doc ())
 
 instance Functor (Stmt k) where
   fmap = liftM
 
 instance Applicative (Stmt k) where
-  pure = Pure
+  pure a = Stmt $ \ k -> k a
   (<*>) = ap
 
 instance Monad (Stmt k) where
-  Pure a            >>= f = f a
-  Let n v         k >>= f = Let n v (f <=< k)
-  Discard         k >>= f = Discard (k >>= f)
-  If c t e        k >>= f = If c t e (k >>= f)
-  Switch s c      k >>= f = Switch s c (k >>= f)
-  Break           k >>= f = Break (k >>= f)
-  While c t       k >>= f = While c t (k >>= f)
-  (:.=) r v       k >>= f = (r :.= v) (k >>= f)
-  (:+=) r v       k >>= f = (r :+= v) (k >>= f)
-  (:*=) r v       k >>= f = (r :*= v) (k >>= f)
-  (:*!=) r v      k >>= f = (r :*!= v) (k >>= f)
-  EmitVertex    m k >>= f = EmitVertex m (k >>= f)
-  EmitPrimitive m k >>= f = EmitPrimitive m (k >>= f)
-  Raw d           k >>= f = Raw d (k >>= f)
-  Stmt a          k >>= f = Stmt a (f <=< k)
-
+  Stmt m >>= f = Stmt $ \ k -> m (runStmt k . f)
 
 let' :: GL.Uniform a => String -> Render k a -> Stmt k (Render k a)
-let' n v = Let n v (pure . Expr.var . getK)
+let' n v = Stmt $ \ k
+  -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+  <> k (Render (pretty n))
 
 var :: GL.Uniform a => String -> Render k a -> Stmt k (Ref k a)
-var n v = Let n v (pure . Ref . getK)
-
+var n v = Stmt $ \ k
+  -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+  <> k (Ref n)
 
 iff :: Render k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
-iff c t e = If c t e (pure ())
+iff c t e = Stmt $ \ k
+  -> pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
+  <> k ()
 
 switch :: Render k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
-switch s cs = Switch s cs (pure ())
-
-break :: Stmt k ()
-break = Break (pure ())
-
-while :: Render k Bool -> Stmt k () -> Stmt k ()
-while c t = While c t (pure ())
-
-
-(.=) :: Ref k a -> Render k a -> Stmt k ()
-r .= v = (r :.= v) (pure ())
-
-infixr 4 .=
-
-(+=) :: Ref k a -> Render k a -> Stmt k ()
-r += v = (r :+= v) (pure ())
-
-infixr 4 +=
-
-(*=) :: Ref k a -> Render k a -> Stmt k ()
-r *= v = (r :*= v) (pure ())
-
-infixr 4 *=
-
-(*!=) :: Ref k (v a) -> Render k (v (v a)) -> Stmt k ()
-r *!= v = (r :*!= v) (pure ())
-
-infixr 4 *!=
-
-
-emitVertex :: Stmt 'Geometry () -> Stmt 'Geometry ()
-emitVertex m = EmitVertex m (pure ())
-
-emitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry ()
-emitPrimitive m = EmitPrimitive m (pure ())
-
-
-discard :: Stmt 'Fragment ()
-discard = Discard (pure ())
-
-
-renderStmt :: Stmt k a -> Doc ()
-renderStmt = \case
-  Pure _ -> mempty
-  Let n v k
-    -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-    <> renderStmt (k (K n))
-  Discard k
-    -> pretty "discard" <> pretty ';' <> hardline
-    <> renderStmt k
-  If c t e k
-    -> pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
-    <> renderStmt k
-  Switch s cs k
-    -> pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
-    <> renderStmt k
-  Break k
-    -> pretty "break" <+> pretty ';' <> hardline
-    <> renderStmt k
-  While c t k
-    -> pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
-    <> renderStmt k
-  (:.=) r v k
-    -> renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-    <> renderStmt k
-  (:+=) r v k
-    -> renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
-    <> renderStmt k
-  (:*=) r v k
-    -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
-    <> renderStmt k
-  (:*!=) r v k
-    -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
-    <> renderStmt k
-  EmitVertex m k
-    -> renderStmt m <> hardline
-    <> pretty "EmitVertex();" <> hardline
-    <> renderStmt k
-  EmitPrimitive m k
-    -> renderStmt m <> hardline
-    <> pretty "EndPrimitive();" <> hardline
-    <> renderStmt k
-  Raw d k
-    -> d
-    <> renderStmt k
-  Stmt b k
-    -> pretty b <> pretty ';' <> hardline
-    <> renderStmt (k b)
+switch s cs = Stmt $ \ k
+  -> pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
+  <> k ()
   where
   renderCase (i, s) = maybe (pretty "default:" <> hardline) (\ i -> pretty "case" <+> pretty i <> pretty ':') i  <> hardline <> renderStmt s
+
+break :: Stmt k ()
+break = Stmt $ \ k
+  -> pretty "break" <+> pretty ';' <> hardline
+  <> k ()
+
+while :: Render k Bool -> Stmt k () -> Stmt k ()
+while c t = Stmt $ \ k
+  -> pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
+  <> k ()
+
+(.=) :: Ref k a -> Render k a -> Stmt k ()
+r .= v = Stmt $ \ k
+  -> renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+  <> k ()
+
+(+=) :: Ref k a -> Render k a -> Stmt k ()
+r += v = Stmt $ \ k
+  -> renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
+  <> k ()
+
+(*=) :: Ref k a -> Render k a -> Stmt k ()
+r *= v = Stmt $ \ k
+  -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+  <> k ()
+
+(*!=) :: Ref k (v a) -> Render k (v (v a)) -> Stmt k ()
+r *!= v = Stmt $ \ k
+  -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+  <> k ()
+
+infixr 4 .=, +=, *=, *!=
+
+emitVertex :: Stmt 'Geometry () -> Stmt 'Geometry ()
+emitVertex m = Stmt $ \ k
+  -> renderStmt m <> hardline
+  <> pretty "EmitVertex();" <> hardline
+  <> k ()
+
+emitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry ()
+emitPrimitive m = Stmt $ \ k
+  -> renderStmt m <> hardline
+  <> pretty "EndPrimitive();" <> hardline
+  <> k ()
+
+discard :: Stmt 'Fragment ()
+discard = Stmt $ \ k
+  -> pretty "discard" <> pretty ';' <> hardline
+  <> k ()
 
 renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
 renderTypeOf _ = pretty (GL.glslType @a)
