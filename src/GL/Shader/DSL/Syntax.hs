@@ -88,6 +88,8 @@ class Expr expr where
 
   infixl 9 $$
 
+  loop :: (expr a, expr a) -> (expr a -> expr b) -> expr b
+
   -- booleans
 
   fromBool :: Bool -> expr Bool
