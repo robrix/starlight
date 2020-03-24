@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE TypeOperators #-}
 module GL.Shader.DSL.Syntax
 ( Expr(..)
 , false
@@ -8,6 +9,7 @@ module GL.Shader.DSL.Syntax
 ) where
 
 import Data.Coerce
+import Data.Functor.C
 import Data.Functor.I
 import Data.Text.Prettyprint.Doc hiding (dot)
 import Geometry.Transform
@@ -92,6 +94,12 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
 
   fromBool :: Bool -> expr Bool
   iff :: expr Bool -> expr a -> expr a -> expr a
+
+  -- arrays
+
+  (!) :: (expr :.: []) a -> expr Int -> expr a
+
+  infixl 9 !
 
 false, true :: Expr expr => expr Bool
 false = fromBool False
