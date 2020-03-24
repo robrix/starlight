@@ -30,7 +30,7 @@ class Expr expr where
   mkRotation :: expr (m (m (I a))) -> expr (Transform m a u v)
   (<<<) :: expr (Transform m a v w) -> expr (Transform m a u v) -> expr (Transform m a u w)
   (>>>) :: expr (Transform m a u v) -> expr (Transform m a v w) -> expr (Transform m a u w)
-  (>*) :: expr (Transform m a u v) -> expr (m (v a)) -> expr (m (u a))
+  (>*) :: expr (Transform m a u v) -> expr (m (u a)) -> expr (m (v a))
 
   infixr 1 <<<, >>>
   infixl 7 >*
