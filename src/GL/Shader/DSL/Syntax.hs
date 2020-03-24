@@ -32,7 +32,7 @@ class Expr expr where
   (>*>) :: expr (Transform m a u v) -> expr (Transform m a v w) -> expr (Transform m a u w)
   (>*) :: expr (Transform m a u v) -> expr (m (u a)) -> expr (m (v a))
 
-  infixr 1 <*<, >*>
+  infixl 7 <*<, >*>
   infixl 7 >*
 
   (!*!) :: expr (u (v a)) -> expr (v (w a)) -> expr (u (w a))
