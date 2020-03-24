@@ -1,13 +1,17 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Shader.GLSL
-( GLSL(..)
+( renderGLSL
+, GLSL(..)
 ) where
 
 import           Control.Carrier.Fresh.Church
 import           Data.Functor.Identity
 import           Data.Monoid (Ap(..))
 import qualified Data.Text.Prettyprint.Doc as Doc
+
+renderGLSL :: GLSL a -> Doc.Doc ()
+renderGLSL (GLSL m) = run (evalFresh 0 (getAp m))
 
 newtype GLSL a = GLSL (Ap (FreshC Identity) (Doc.Doc ()))
   deriving (Monoid, Semigroup)
