@@ -64,65 +64,49 @@ var n v = Stmt $ \ k
   <> k (Ref n)
 
 iff :: Render k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
-iff c t e = Stmt $ \ k
-  -> pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
-  <> k ()
+iff c t e = stmt $ pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
 
 switch :: Render k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
-switch s cs = Stmt $ \ k
-  -> pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
-  <> k ()
+switch s cs = stmt $ pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
   where
   renderCase (i, s) = maybe (pretty "default:" <> hardline) (\ i -> pretty "case" <+> pretty i <> pretty ':') i  <> hardline <> renderStmt s
 
 break :: Stmt k ()
-break = Stmt $ \ k
-  -> pretty "break" <+> pretty ';' <> hardline
-  <> k ()
+break = stmt $ pretty "break" <+> pretty ';' <> hardline
 
 while :: Render k Bool -> Stmt k () -> Stmt k ()
-while c t = Stmt $ \ k
-  -> pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
-  <> k ()
+while c t = stmt $ pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
 
 (.=) :: Ref k a -> Render k a -> Stmt k ()
-r .= v = Stmt $ \ k
-  -> renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-  <> k ()
+r .= v = stmt $ renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
 
 (+=) :: Ref k a -> Render k a -> Stmt k ()
-r += v = Stmt $ \ k
-  -> renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
-  <> k ()
+r += v = stmt $ renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
 
 (*=) :: Ref k a -> Render k a -> Stmt k ()
-r *= v = Stmt $ \ k
-  -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
-  <> k ()
+r *= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
 
 (*!=) :: Ref k (v a) -> Render k (v (v a)) -> Stmt k ()
-r *!= v = Stmt $ \ k
-  -> renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
-  <> k ()
+r *!= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
 
 infixr 4 .=, +=, *=, *!=
 
 emitVertex :: Stmt 'Geometry () -> Stmt 'Geometry ()
-emitVertex m = Stmt $ \ k
-  -> renderStmt m <> hardline
+emitVertex m = stmt
+  $  renderStmt m <> hardline
   <> pretty "EmitVertex();" <> hardline
-  <> k ()
 
 emitPrimitive :: Stmt 'Geometry () -> Stmt 'Geometry ()
-emitPrimitive m = Stmt $ \ k
-  -> renderStmt m <> hardline
+emitPrimitive m = stmt
+  $  renderStmt m <> hardline
   <> pretty "EndPrimitive();" <> hardline
-  <> k ()
 
 discard :: Stmt 'Fragment ()
-discard = Stmt $ \ k
-  -> pretty "discard" <> pretty ';' <> hardline
-  <> k ()
+discard = stmt $ pretty "discard" <> pretty ';' <> hardline
 
 renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
 renderTypeOf _ = pretty (GL.glslType @a)
+
+
+stmt :: Doc () -> Stmt k ()
+stmt d = Stmt $ \ k -> d <> k ()
