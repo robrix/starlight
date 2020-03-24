@@ -1,23 +1,24 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module GL.Shader.GLSL
 ( GLSL(..)
 ) where
 
-import           Data.Text.Prettyprint.Doc (parens, pretty, tupled, (<+>))
 import qualified Data.Text.Prettyprint.Doc as Doc
 
 newtype GLSL a = GLSL { renderGLSL :: Doc.Doc () }
+  deriving (Monoid, Semigroup)
 
 instance Num (GLSL a) where
-  a + b = GLSL . parens $ renderGLSL a <+> pretty '+' <+> renderGLSL b
-  a * b = GLSL . parens $ renderGLSL a <+> pretty '*' <+> renderGLSL b
-  a - b = GLSL . parens $ renderGLSL a <+> pretty '-' <+> renderGLSL b
+  a + b = parens $ a <+> pretty '+' <+> b
+  a * b = parens $ a <+> pretty '*' <+> b
+  a - b = parens $ a <+> pretty '-' <+> b
   signum a = fn "sign" [ renderGLSL a ]
-  negate a = GLSL . parens $ pretty "-" <> renderGLSL a
+  negate a = parens $ pretty "-" <> a
   abs a = fn "abs" [ renderGLSL a ]
-  fromInteger i = GLSL $ pretty i
+  fromInteger = pretty
 
 instance Fractional (GLSL a) where
-  a / b = GLSL $ parens $ renderGLSL a <+> pretty '/' <+> renderGLSL b
+  a / b = parens $ a <+> pretty '/' <+> b
   fromRational = lit . fromRational
 
 instance Floating (GLSL a) where
@@ -40,7 +41,18 @@ instance Floating (GLSL a) where
   pi = lit pi
 
 fn :: String -> [Doc.Doc ()] -> GLSL b
-fn n as = GLSL $ pretty n <> tupled as
+fn n as = pretty n <> GLSL (Doc.tupled as)
 
 lit :: Double -> GLSL a
-lit = GLSL . pretty
+lit = pretty
+
+pretty :: Doc.Pretty a => a -> GLSL b
+pretty = GLSL . Doc.pretty
+
+parens :: GLSL a -> GLSL a
+parens (GLSL a) = GLSL (Doc.parens a)
+
+(<+>) :: GLSL a -> GLSL b -> GLSL c
+GLSL a <+> GLSL b = GLSL (a Doc.<+> b)
+
+infixr 6 <+>
