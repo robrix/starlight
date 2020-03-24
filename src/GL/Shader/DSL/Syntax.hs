@@ -4,10 +4,12 @@ module GL.Shader.DSL.Syntax
 ( Expr(..)
 , false
 , true
+, GLSL(..)
 ) where
 
 import Data.Coerce
 import Data.Functor.I
+import Data.Text.Prettyprint.Doc hiding (dot)
 import Geometry.Transform
 import Linear.Matrix
 import Linear.V2
@@ -93,3 +95,6 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
 false, true :: Expr expr => expr Bool
 false = fromBool False
 true  = fromBool True
+
+
+newtype GLSL a = GLSL { renderGLSL :: Doc () }
