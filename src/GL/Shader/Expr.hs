@@ -2,6 +2,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TypeOperators #-}
 {-# HLINT ignore "Use camelCase" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 module GL.Shader.Expr
@@ -78,9 +79,11 @@ module GL.Shader.Expr
 , max'
 , atan2'
 , texture
+, (!)
 ) where
 
 import Data.Coerce
+import Data.Functor.C
 import Data.Text.Prettyprint.Doc hiding (dot)
 import GL.Shader (Stage(..))
 import GL.TextureUnit
@@ -236,6 +239,11 @@ gt :: Expr k a -> Expr k a -> Expr k Bool
 infix 4 `eq`, `lt`, `gt`
 
 (^.) :: Expr k a -> Prj a b -> Expr k b
+
+(!) :: (Expr k :.: []) a -> Expr k Int -> Expr k a
+C v ! n = Expr $ renderExpr v <> brackets (renderExpr n)
+
+infixl 9 !
 
 
 newtype Expr (k :: Stage) a = Expr { renderExpr :: Doc () }
