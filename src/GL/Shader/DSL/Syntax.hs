@@ -89,6 +89,7 @@ class ( forall a b . Coercible a b => Coercible (expr a) (expr b)
   case' :: expr a -> [(a, expr b)] -> expr b
 
   -- booleans
+
   fromBool :: Bool -> expr Bool
   iff :: expr Bool -> expr a -> expr a -> expr a
 
