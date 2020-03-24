@@ -28,11 +28,11 @@ class Expr expr where
   m4 :: expr (V4 a) -> expr (V4 a) -> expr (V4 a) -> expr (V4 a) -> expr (M44 a)
 
   mkRotation :: expr (m (m (I a))) -> expr (Transform m a u v)
-  (<<<) :: expr (Transform m a v w) -> expr (Transform m a u v) -> expr (Transform m a u w)
-  (>>>) :: expr (Transform m a u v) -> expr (Transform m a v w) -> expr (Transform m a u w)
+  (<*<) :: expr (Transform m a v w) -> expr (Transform m a u v) -> expr (Transform m a u w)
+  (>*>) :: expr (Transform m a u v) -> expr (Transform m a v w) -> expr (Transform m a u w)
   (>*) :: expr (Transform m a u v) -> expr (m (u a)) -> expr (m (v a))
 
-  infixr 1 <<<, >>>
+  infixr 1 <*<, >*>
   infixl 7 >*
 
   (!*!) :: expr (u (v a)) -> expr (v (w a)) -> expr (u (w a))
