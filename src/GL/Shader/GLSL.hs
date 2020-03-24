@@ -4,9 +4,12 @@ module GL.Shader.GLSL
 ( GLSL(..)
 ) where
 
+import           Control.Carrier.Fresh.Church
+import           Data.Functor.Identity
+import           Data.Monoid (Ap(..))
 import qualified Data.Text.Prettyprint.Doc as Doc
 
-newtype GLSL a = GLSL (Doc.Doc ())
+newtype GLSL a = GLSL (Ap (FreshC Identity) (Doc.Doc ()))
   deriving (Monoid, Semigroup)
 
 instance Num (GLSL a) where
@@ -48,22 +51,22 @@ lit :: Double -> GLSL a
 lit = pretty
 
 pretty :: Doc.Pretty a => a -> GLSL b
-pretty = GLSL . Doc.pretty
+pretty = GLSL . pure . Doc.pretty
 
 parens :: GLSL a -> GLSL a
-parens (GLSL a) = GLSL (Doc.parens a)
+parens (GLSL a) = GLSL (Doc.parens <$> a)
 
 (<+>) :: GLSL a -> GLSL b -> GLSL c
-GLSL a <+> GLSL b = GLSL (a Doc.<+> b)
+GLSL a <+> GLSL b = GLSL ((Doc.<+>) <$> a <*> b)
 
 infixr 6 <+>
 
 
 class Fn a where
-  fn' :: String -> ([Doc.Doc ()] -> [Doc.Doc ()]) -> a
+  fn' :: String -> ([Ap (FreshC Identity) (Doc.Doc ())] -> [Ap (FreshC Identity) (Doc.Doc ())]) -> a
 
 instance Fn b => Fn (GLSL a -> b) where
   fn' s accum (GLSL a) = fn' s (accum . (a:))
 
 instance Fn (GLSL a) where
-  fn' s accum = pretty s <> GLSL (Doc.tupled (accum []))
+  fn' s accum = pretty s <> GLSL (Doc.tupled <$> sequenceA (accum []))
