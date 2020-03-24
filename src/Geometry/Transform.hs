@@ -13,6 +13,7 @@ module Geometry.Transform
 , apply
 , tmap
 , (>>>)
+, (<<<)
 ) where
 
 import           Control.Category
