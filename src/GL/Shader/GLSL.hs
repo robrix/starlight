@@ -2,9 +2,10 @@ module GL.Shader.GLSL
 ( GLSL(..)
 ) where
 
-import Data.Text.Prettyprint.Doc hiding (dot)
+import           Data.Text.Prettyprint.Doc (parens, pretty, tupled, (<+>))
+import qualified Data.Text.Prettyprint.Doc as Doc
 
-newtype GLSL a = GLSL { renderGLSL :: Doc () }
+newtype GLSL a = GLSL { renderGLSL :: Doc.Doc () }
 
 instance Num (GLSL a) where
   a + b = GLSL . parens $ renderGLSL a <+> pretty '+' <+> renderGLSL b
@@ -38,7 +39,7 @@ instance Floating (GLSL a) where
   atanh a = fn "atanh" [ renderGLSL a ]
   pi = lit pi
 
-fn :: String -> [Doc ()] -> GLSL b
+fn :: String -> [Doc.Doc ()] -> GLSL b
 fn n as = GLSL $ pretty n <> tupled as
 
 lit :: Double -> GLSL a
