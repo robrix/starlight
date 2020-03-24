@@ -83,6 +83,11 @@ class Expr expr where
 
   case' :: expr a -> [(a, expr b)] -> expr b
 
+  lam :: (expr a -> expr b) -> expr (a -> b)
+  ($$) :: expr (a -> b) -> (expr a -> expr b)
+
+  infixl 9 $$
+
   -- booleans
 
   fromBool :: Bool -> expr Bool
