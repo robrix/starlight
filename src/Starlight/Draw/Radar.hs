@@ -213,7 +213,7 @@ targetShader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform V4 Float ClipUnits Window.Coords)
+  { matrix :: v (Transform V4 Float Window.Coords ClipUnits)
   , here   :: v (V2 (Distance Double))
   , scale  :: v ((Window.Coords :/: Distance) Float)
   }
@@ -221,7 +221,7 @@ data U v = U
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (Transform V4 Float ClipUnits Window.Coords))
+matrix_ :: Lens' (U v) (v (Transform V4 Float Window.Coords ClipUnits))
 matrix_ = field @"matrix"
 
 here_ :: Lens' (U v) (v (V2 (Distance Double)))

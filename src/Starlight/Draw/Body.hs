@@ -58,8 +58,8 @@ draw v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ 
   view <- ask
   matrix_ ?=
     (   transformToSystem view
-    >>> Body.transform v
-    >>> Body.toBodySpace v)
+    <<< Body.transform v
+    <<< Body.toBodySpace v)
   colour_ ?= colour
 
   drawArraysInstanced LineLoop range 3
@@ -91,14 +91,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform V4 Double ClipUnits Body.BodyUnits)
+  { matrix :: v (Transform V4 Double Body.BodyUnits ClipUnits)
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform V4 Double ClipUnits Body.BodyUnits))
+matrix_ :: Lens' (U v) (v (Transform V4 Double Body.BodyUnits ClipUnits))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))

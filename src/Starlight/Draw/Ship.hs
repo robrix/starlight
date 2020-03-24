@@ -54,9 +54,9 @@ draw Character{ actor, ship = S.Ship{ colour, armour }, actions } = UI.using get
   view@View{ shipScale } <- ask
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
-    >>> transformToActor actor
-    >>> mkScale @_ @Distance (pure shipScale)
-    >>> mkScale (pure (actor^.magnitude_ ./. (1 :: Distance Double))))
+    <<< transformToActor actor
+    <<< mkScale @_ @Distance (pure shipScale)
+    <<< mkScale (pure (actor^.magnitude_ ./. (1 :: Distance Double))))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
     & UI._a .~ realToFrac (armour^.inf_.to getI / armour^.sup_.to getI))
@@ -99,14 +99,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform V4 Float ClipUnits Distance)
+  { matrix :: v (Transform V4 Float Distance ClipUnits)
   , colour :: v (UI.Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform V4 Float ClipUnits Distance))
+matrix_ :: Lens' (U v) (v (Transform V4 Float Distance ClipUnits))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (UI.Colour Float))

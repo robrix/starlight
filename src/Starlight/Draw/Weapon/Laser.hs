@@ -57,8 +57,8 @@ draw beam@S.Beam{ colour } = UI.using getDrawable $ do
   view <- ask
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
-    >>> transformToActor (beam^.actor_)
-    >>> mkScale (pure 1000))
+    <<< transformToActor (beam^.actor_)
+    <<< mkScale (pure 1000))
   colour_ ?= colour
 
   drawArrays Lines range
@@ -83,14 +83,14 @@ shader = program $ \ u
 
 
 data U v = U
-  { matrix :: v (Transform V4 Float ClipUnits Distance)
+  { matrix :: v (Transform V4 Float Distance ClipUnits)
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (Transform V4 Float ClipUnits Distance))
+matrix_ :: Lens' (U v) (v (Transform V4 Float Distance ClipUnits))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))

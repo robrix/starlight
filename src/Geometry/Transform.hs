@@ -39,18 +39,18 @@ deriving instance Uniform (m (m c)) => Uniform (Transform m c a b)
 
 instance (Num c, Additive m, Applicative m, Traversable m) => Category (Transform m c) where
   id = Transform identity
-  Transform a . Transform b = Transform (b !*! a)
+  Transform a . Transform b = Transform (a !*! b)
 
 mkTranslation :: (Num c, Unit d u, Applicative m, R4 m, Representable m, Traversable m) => V3 (u c) -> Transform m c u u
 mkTranslation v = Transform (identity & translation .~ fmap prj v)
 
-mkScale :: forall u v c du dv d' . (Num c, Unit du u, Unit dv v, Unit d' (Div u v)) => V3 (Div u v c) -> Transform V4 c u v
+mkScale :: forall u v c du dv d' . (Num c, Unit du u, Unit dv v, Unit d' (Div u v)) => V3 (Div u v c) -> Transform V4 c v u
 mkScale v = Transform (scaled (point (prj <$> v)))
 
 mkRotation :: Num c => Quaternion (I c) -> Transform V4 c a a
 mkRotation q = Transform (identity !*! mkTransformation (coerce q) 0)
 
-apply :: (Num c, Unit d a, Unit d b, Additive m, Foldable m) => Transform m c a b -> m (b c) -> m (a c)
+apply :: (Num c, Unit d a, Unit d b, Additive m, Foldable m) => Transform m c a b -> m (a c) -> m (b c)
 apply (Transform m) v = pure <$> (m !* fmap prj v)
 
 tmap :: Functor m => (c -> c') -> Transform m c a b -> Transform m c' a b

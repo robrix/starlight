@@ -111,21 +111,21 @@ instance Unit Length ClipUnits where
   suffix = K ("clip"++)
 
 
-transformToWindow :: View -> Transform V4 Double ClipUnits Window.Coords
+transformToWindow :: View -> Transform V4 Double Window.Coords ClipUnits
 transformToWindow View{ size }
   -- NB: we *always* use 2/size, rather than ratio/size, because clip space always extends from -1...1, i.e. it always has diameter 2. this is true irrespective of the DPI ratio.
   = mkScale (pure 1 & _xy .~ ClipUnits 2 ./^ (fmap fromIntegral <$> size))
 
-transformToZoomed :: View -> Transform V4 Double ClipUnits Window.Coords
+transformToZoomed :: View -> Transform V4 Double Window.Coords ClipUnits
 transformToZoomed view@View{ zoom }
   =   transformToWindow view
-  >>> mkScale (pure zoom)
+  <<< mkScale (pure zoom)
 
-transformToSystem :: View -> Transform V4 Double ClipUnits Distance
+transformToSystem :: View -> Transform V4 Double Distance ClipUnits
 transformToSystem view@View{ scale, focus }
   =   transformToZoomed view
-  >>> mkScale (pure scale)
-  >>> mkTranslation (ext (negated focus) 0)
+  <<< mkScale (pure scale)
+  <<< mkTranslation (ext (negated focus) 0)
 
 
 clipTo :: Has (Lift IO) sig m => View -> m ()
