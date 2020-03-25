@@ -58,6 +58,7 @@ module GL.Shader.DSL
 , Mat(..)
 , Expr(..)
 , cast
+, float
 , VertexExpr(..)
 , GeometryExpr
 , FragmentExpr(..)
@@ -405,7 +406,6 @@ class ( Ref ref
    => Expr ref expr | expr -> ref where
   get :: ref a -> expr a
 
-  float :: expr a -> expr Float
   cast' :: GL.Uniform b => K (expr a) b -> expr b
 
   log2 :: expr a -> expr a
@@ -437,6 +437,9 @@ class ( Ref ref
 
 cast :: forall a b expr ref . (Expr ref expr, GL.Uniform b) => expr a -> expr b
 cast = cast' . K
+
+float :: Expr ref expr => expr a -> expr Float
+float = cast @_ @Float
 
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
   gl_InstanceID :: expr Int
@@ -534,7 +537,6 @@ instance Expr RRef RExpr where
   lt a b = RExpr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
   gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
 
-  float a = fn "float" [ renderExpr a ]
   cast' (K a :: K (expr a) b) = fn (GL.glslType @b) [ renderExpr a ]
 
   log2 = fn "log2" . pure . coerce
