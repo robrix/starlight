@@ -1,6 +1,8 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE RankNTypes #-}
 module GL.Shader.GLSL.Syntax
 ( Ref
+, Expr(..)
 , Stmt(..)
 ) where
 
@@ -8,5 +10,10 @@ import GL.Shader.GLSL.Type
 
 newtype Ref a = Ref { getRef :: String }
 
-class Stmt stmt where
-  var :: (forall ty . (Type ty, FType ty, VType ty, MType ty) => ty a) -> stmt (Ref a)
+class Expr expr where
+  bool :: Bool -> expr Bool
+
+class Stmt expr ty stmt | stmt -> expr ty where
+  var :: ty -> stmt (Ref a)
+
+  if_ :: expr Bool -> stmt () -> stmt () -> stmt ()
