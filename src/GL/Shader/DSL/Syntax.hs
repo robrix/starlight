@@ -9,6 +9,7 @@ module GL.Shader.DSL.Syntax
 , Boolean(..)
 , false
 , true
+, Array(..)
 , Geom(..)
 ) where
 
@@ -94,15 +95,13 @@ class Boolean expr where
   fromBool :: Bool -> expr Bool
   iff :: expr Bool -> expr a -> expr a -> expr a
 
-  -- arrays
-
-  (!) :: (expr :.: []) a -> expr Int -> expr a
-
-  infixl 9 !
-
 false, true :: Boolean expr => expr Bool
 false = fromBool False
 true  = fromBool True
+
+class Array expr where
+  (!) :: (expr :.: []) a -> expr Int -> expr a
+  infixl 9 !
 
 class Expr expr => Geom expr where
   primitive :: expr a -> expr a
