@@ -156,6 +156,7 @@ data None (v :: Type -> Type) = None
 
 instance Vars None
 
+
 shaderSources :: Shader u i o -> [(Shader.Stage, String)]
 shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions . prefix) <$> stageSources (f u)
   where
