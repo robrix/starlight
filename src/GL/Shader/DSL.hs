@@ -413,9 +413,6 @@ class ( Ref ref
   lerp :: expr a -> expr (v a) -> expr (v a) -> expr (v a)
   lerp2 :: expr (v a) -> expr (v a) -> expr (v a) -> expr (v a)
 
-  dFdx :: expr a -> expr a
-  dFdy :: expr a -> expr a
-
   mod' :: expr v -> expr v -> expr v
 
   min' :: expr a -> expr a -> expr a
@@ -446,6 +443,9 @@ class (FragmentRef ref, Expr ref expr) => FragmentExpr ref expr where
   gl_FragCoord :: expr (V2 Float)
   gl_FrontFacing :: expr Bool
   gl_PointCoord :: expr (V2 Float)
+
+  dFdx :: expr a -> expr a
+  dFdy :: expr a -> expr a
 
 newtype RExpr a = RExpr { renderExpr :: Doc () }
 
@@ -540,9 +540,6 @@ instance Expr RRef RExpr where
   lerp  t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
   lerp2 t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
 
-  dFdx a = fn "dFdx" [ renderExpr a ]
-  dFdy a = fn "dFdy" [ renderExpr a ]
-
   mod' a b = fn "mod" [ renderExpr a, renderExpr b ]
   min' a b = fn "min" [ renderExpr a, renderExpr b ]
   max' a b = fn "max" [ renderExpr a, renderExpr b ]
@@ -561,6 +558,9 @@ instance FragmentExpr RRef RExpr where
   gl_FragCoord = RExpr $ pretty "gl_FragCoord"
   gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
   gl_PointCoord = RExpr $ pretty "gl_PointCoord"
+
+  dFdx a = fn "dFdx" [ renderExpr a ]
+  dFdy a = fn "dFdy" [ renderExpr a ]
 
 fn :: String -> [Doc ()] -> RExpr b
 fn n as = RExpr $ pretty n <> tupled as
