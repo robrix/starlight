@@ -51,7 +51,6 @@ module GL.Shader.DSL
 , _xyz
 , _xywz
 , _a
-, ix
 
   -- * Expressions
 , RExpr(..)
@@ -351,9 +350,6 @@ _xywz = Prj ".xywz"
 
 _a :: Prj (v a) a
 _a = Prj ".a"
-
-ix :: Int -> Prj [a] a
-ix i = Prj ("[" <> show i <> "]")
 
 
 class ( Ref ref
