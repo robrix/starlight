@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -16,6 +17,7 @@ module GL.Shader.DSL
 ( Shader
 , program
 , Stage
+, Stage'(..)
 , vertex
 , geometry
 , fragment
@@ -121,6 +123,16 @@ geometry = G
 
 fragment :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (RRef 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
 fragment = F
+
+class Cat.Category stage => Stage' stage where
+  vertex_ :: (Vars i, Vars o) => (forall ref expr stmt decl . VertexDecl ref expr stmt decl => i (expr 'Shader.Vertex) -> o (ref 'Shader.Vertex) -> decl 'Shader.Vertex ()) -> stage i o
+  geometry_ :: (Vars i, Vars o) => (forall ref expr stmt decl . GeometryDecl ref expr stmt decl => i (expr 'Shader.Geometry :.: []) -> o (ref 'Shader.Geometry) -> decl 'Shader.Geometry ()) -> stage i o
+  fragment_ :: (Vars i, Vars o) => (forall ref expr stmt decl . FragmentDecl ref expr stmt decl => i (expr 'Shader.Fragment) -> o (ref 'Shader.Fragment) -> decl 'Shader.Fragment ()) -> stage i o
+
+instance Stage' (Stage RDecl) where
+  vertex_ = V
+  geometry_ = G
+  fragment_ = F
 
 instance Cat.Category (Stage d) where
   id = Id
