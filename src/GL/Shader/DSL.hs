@@ -56,29 +56,29 @@ import           Prelude hiding (break)
 import           UI.Colour (Colour)
 
 data Shader (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) where
-  Shader :: Vars u => ((forall k . u (Expr k)) -> Stage i o) -> Shader u i o
+  Shader :: Vars u => ((forall k . u (Expr k)) -> Stage Decl i o) -> Shader u i o
 
-program :: Vars u => ((forall k . u (Expr k)) -> Stage i o) -> Shader u i o
+program :: Vars u => ((forall k . u (Expr k)) -> Stage Decl i o) -> Shader u i o
 program = Shader
 
 
-data Stage i o where
-  Id :: Stage i i
-  (:>>>) :: Stage i x -> Stage x o -> Stage i o
-  V :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Decl 'Shader.Vertex   ()) -> Stage i o
-  G :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> Decl 'Shader.Geometry ()) -> Stage i o
-  F :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Decl 'Shader.Fragment ()) -> Stage i o
+data Stage d i o where
+  Id :: Stage d i i
+  (:>>>) :: Stage d i x -> Stage d x o -> Stage d i o
+  V :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
+  G :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
+  F :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
 
-vertex   :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> Decl 'Shader.Vertex   ()) -> Stage i o
+vertex   :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
 vertex = V
 
-geometry :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> Decl 'Shader.Geometry ()) -> Stage i o
+geometry :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
 geometry = G
 
-fragment :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> Decl 'Shader.Fragment ()) -> Stage i o
+fragment :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
 fragment = F
 
-instance Cat.Category Stage where
+instance Cat.Category (Stage d) where
   id = Id
   (.) = flip (:>>>)
 
@@ -93,7 +93,7 @@ shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOption
   u = makeVars (Expr . pretty . name)
   u' = foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
 
-stageSources :: Doc () -> Stage i o -> [(Shader.Stage, Doc ())]
+stageSources :: Doc () -> Stage Decl i o -> [(Shader.Stage, Doc ())]
 stageSources u = \case
   Id  -> []
   V s -> [renderStage Shader.Vertex   id s]
