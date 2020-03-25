@@ -139,7 +139,7 @@ instance Cat.Category (Stage d) where
   id = Id
   (.) = flip (:>>>)
 
-newtype RStage (i :: Type -> Type) (o :: Type -> Type) = RStage { renderStage :: [(Shader.Stage, Doc ())] }
+newtype RStage (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) = RStage { renderStage :: [(Shader.Stage, Doc ())] }
 
 instance Cat.Category RStage where
   id = RStage []
