@@ -6,8 +6,6 @@ module GL.Shader.GLSL.Syntax
 , Stmt(..)
 ) where
 
-import GL.Shader.GLSL.Type
-
 newtype Ref a = Ref { getRef :: String }
 
 class Expr expr where
