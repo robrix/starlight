@@ -255,19 +255,19 @@ renderStmt = (`runCont` const mempty) . getStmt
 newtype RStmt (k :: Shader.Stage) a = RStmt { getStmt :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-class Stmt stmt where
-  let' :: GL.Uniform a => String -> RExpr k a -> stmt k (RExpr k a)
-  var :: GL.Uniform a => String -> RExpr k a -> stmt k (Ref k a)
+class Stmt expr stmt | stmt -> expr where
+  let' :: GL.Uniform a => String -> expr k a -> stmt k (expr k a)
+  var :: GL.Uniform a => String -> expr k a -> stmt k (Ref k a)
 
-  iff :: RExpr k Bool -> stmt k () -> stmt k () -> stmt k ()
-  switch :: RExpr k Int -> [(Maybe Int, stmt k ())] -> stmt k ()
+  iff :: expr k Bool -> stmt k () -> stmt k () -> stmt k ()
+  switch :: expr k Int -> [(Maybe Int, stmt k ())] -> stmt k ()
   break :: stmt k ()
-  while :: RExpr k Bool -> stmt k () -> stmt k ()
+  while :: expr k Bool -> stmt k () -> stmt k ()
 
-  (.=) :: Ref k a -> RExpr k a -> stmt k ()
-  (+=) :: Ref k a -> RExpr k a -> stmt k ()
-  (*=) :: Ref k a -> RExpr k a -> stmt k ()
-  (*!=) :: Ref k (v a) -> RExpr k (v (v a)) -> stmt k ()
+  (.=) :: Ref k a -> expr k a -> stmt k ()
+  (+=) :: Ref k a -> expr k a -> stmt k ()
+  (*=) :: Ref k a -> expr k a -> stmt k ()
+  (*!=) :: Ref k (v a) -> expr k (v (v a)) -> stmt k ()
 
   infixr 4 .=, +=, *=, *!=
 
@@ -275,7 +275,7 @@ class Stmt stmt where
   emitPrimitive :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
   discard :: stmt 'Shader.Fragment ()
 
-instance Stmt RStmt where
+instance Stmt RExpr RStmt where
   let' n v = RStmt . cont $ \ k
     -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
     <> k (RExpr (pretty n))
