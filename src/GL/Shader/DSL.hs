@@ -233,15 +233,15 @@ runDecl k = (`runCont` k) . getDecl
 newtype Decl (k :: Shader.Stage) a = Decl { getDecl :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-raw :: Doc () -> Decl k ()
-raw d = Decl . cont $ \ k -> d <> k ()
+decl :: Doc () -> Decl k ()
+decl d = Decl . cont $ \ k -> d <> k ()
 
 main :: Stmt k () -> Decl k ()
-main body = raw (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
+main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
 
 primitiveIn :: P.Type -> Decl 'Shader.Geometry ()
-primitiveIn ty = raw doc where
+primitiveIn ty = decl doc where
   doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
   render = \case
     P.Points        -> pretty "points"
@@ -252,7 +252,7 @@ primitiveIn ty = raw doc where
     P.Triangles     -> pretty "triangles"
 
 primitiveOut :: P.Type -> Int -> Decl 'Shader.Geometry ()
-primitiveOut ty mx = raw doc where
+primitiveOut ty mx = decl doc where
   doc = pretty "layout" <+> parens (render ty <> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) <+> pretty "out;" <> hardline
   render = \case
     P.Points        -> pretty "points"
