@@ -360,14 +360,6 @@ class Vec expr where
   dv3 :: V3 (expr Double) -> expr (V3 Double)
   dv4 :: V4 (expr Double) -> expr (V4 Double)
 
-  vec2 :: [expr a] -> expr (V2 Float)
-  vec3 :: [expr a] -> expr (V3 Float)
-  vec4 :: [expr a] -> expr (V4 Float)
-
-  dvec2 :: [expr a] -> expr (V2 Double)
-  dvec3 :: [expr a] -> expr (V3 Double)
-  dvec4 :: [expr a] -> expr (V4 Double)
-
   ext3 :: expr (V2 a) -> expr a -> expr (V3 Float)
   ext4 :: expr (V3 a) -> expr a -> expr (V4 Float)
 
@@ -496,14 +488,6 @@ instance Vec RExpr where
   dv2 = fn "dvec2" . coerce . toList
   dv3 = fn "dvec3" . coerce . toList
   dv4 = fn "dvec4" . coerce . toList
-
-  vec2 = fn "vec2" . coerce
-  vec3 = fn "vec3" . coerce
-  vec4 = fn "vec4" . coerce
-
-  dvec2 = fn "dvec2" . coerce
-  dvec3 = fn "dvec3" . coerce
-  dvec4 = fn "dvec4" . coerce
 
   ext3 a b = fn "vec3" [ renderExpr a, renderExpr b ]
   ext4 a b = fn "vec4" [ renderExpr a, renderExpr b ]

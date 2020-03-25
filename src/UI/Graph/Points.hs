@@ -30,7 +30,7 @@ shader
       discard
       (do
         mag <- let' "mag" (norm p * 2)
-        fragColour .= ext4 (colour ^. _xyz) (1 - mag * mag * mag / 2)))
+        fragColour .= ext4 (colour ^. _xyz) (1 - mag ** 3 / 2)))
 
 
 data U v = U

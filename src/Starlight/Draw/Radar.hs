@@ -141,13 +141,13 @@ vertex' = vertex (\ U{ here, scale } V{ there, r, colour } IG{ pos, colour2, swe
   there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
   let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
-  angle <- let' "angle" (angleOf (vec2 [there]))
+  angle <- let' "angle" (angleOf (cast @_ @(V2 Float) there))
   radius <- let' "radius" (min' (scale * coerce (float d)) radius)
   minSweep <- let' "minSweep" (minBlipSize / (2 * pi * coerce radius))
   iff (r `gt` d)
     (sweep .= pi/2)
     (sweep .= (minSweep `max'` abs (coerce (asin (float (r/d))))))
-  pos .= coerce (ext4 (ext3 (vec2 [cos angle, sin angle] D.^* coerce radius) 0) 1)
+  pos .= coerce (ext4 (ext3 (v2 (V2 (cos angle) (sin angle)) D.^* coerce radius) 0) 1)
   colour2 .= colour)
   where
   minBlipSize :: Num a => a
@@ -167,8 +167,8 @@ radarShader
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
       let rot theta = mat2
-            [ vec2 [ cos theta, -sin theta ]
-            , vec2 [ sin theta,  cos theta ]
+            [ v2 (V2 (cos theta) (-sin theta))
+            , v2 (V2 (sin theta) ( cos theta))
             ]
       emitPrimitive $ do
         i <- var @_ @_ @_ @Int "i" (-count)
@@ -194,14 +194,14 @@ targetShader
     primitiveOut LineStrip ((count * 2 + 1) * 2)
     main $ do
       let rot theta = mat2
-            [ vec2 [ cos theta, -sin theta ]
-            , vec2 [ sin theta,  cos theta ]
+            [ v2 (V2 (cos theta) (-sin theta))
+            , v2 (V2 (sin theta) ( cos theta))
             ]
       i <- var @_ @_ @_ @Int "i" (-count @(_ Int))
       while (get i `lt` count @(_ Int) + 1) . emitPrimitive $ do
         theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
         emitVertex $ do
-          gl_Position .= ext4 (vec3 [fromInteger @(_ Int) 0]) 1
+          gl_Position .= ext4 (v3 (pure 0)) 1
           colour3 .= colour2 ! 0
         emitVertex $ do
           gl_Position .= coerce matrix D.!*! mat4 [rot theta] !* coerce (pos ! 0)

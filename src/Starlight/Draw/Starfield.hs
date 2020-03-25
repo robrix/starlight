@@ -87,7 +87,7 @@ shader
 
   >>> fragment (\ U{ resolution, focus, zoom } None Frag{ fragColour } -> main $ do
     resolution <- let' @_ @_ @_ @(V2 Float) "resolution" (coerce resolution)
-    uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
+    uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * v2 (V2 1 (resolution^._y / resolution^._x))
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var "focus" $ dext3 focus 1
     let wrap x = ((x + pi) `mod'` (pi * 2)) - pi
@@ -95,16 +95,16 @@ shader
     a1 <- let' "a1" (wrap (0.3 + nf))
     cos_a1 <- let' "cos_a1" (cos a1)
     sin_a1 <- let' "sin_a1" (sin a1)
-    rot1 <- let' "rot1" $ mat2 [vec2 [cos_a1, sin_a1], vec2 [-sin_a1, cos_a1]]
+    rot1 <- let' "rot1" $ mat2 [v2 (V2 cos_a1 sin_a1), v2 (V2 (-sin_a1) cos_a1)]
     a2 <- let' "a2" (wrap (0.2 + nf))
     cos_a2 <- let' "cos_a2" (cos a2)
     sin_a2 <- let' "sin_a2" (sin a2)
-    rot2 <- let' "rot2" $ mat2 [vec2 [cos_a2, sin_a2], vec2 [-sin_a2, cos_a2]]
+    rot2 <- let' "rot2" $ mat2 [v2 (V2 cos_a2 sin_a2), v2 (V2 (-sin_a2) cos_a2)]
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
     focus^^._xz *!= dmat2 [rot1]
     focus^^._xy *!= dmat2 [rot2]
-    focus <- let' "focus2" $ vec3 [ get focus `mod'` dv3 (pure (tile * 2)) ] * 10
+    focus <- let' "focus2" $ cast @_ @(V3 Float) (get focus `mod'` dv3 (pure (tile * 2))) * 10
     v <- var "v" $ v3 0
     r <- var @_ @_ @_ @Int "r" 2
     while (get r `lt` volsteps) $ do
@@ -121,10 +121,10 @@ shader
         a += abs (get pa - prev)
         i += 1
       a .= get a ** 3
-      v += vec3 [s, s ** 2, s ** 2] D.^* get a D.^* brightness D.^* (0.5 * distfading ** float (get r))
+      v += v3 (V3 s (s ** 2) (s ** 2)) D.^* get a D.^* brightness D.^* (0.5 * distfading ** float (get r))
       r += 1
     mag <- let' "mag" (norm (get v))
-    v .= lerp saturation (vec3 [mag]) (get v)
+    v .= lerp saturation (v3 (pure mag)) (get v)
     fragColour .= ext4 (get v D.^* 0.01) 1)
   where
   iterations :: Num a => a

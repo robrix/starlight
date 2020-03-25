@@ -29,7 +29,7 @@ shader
 
   >>> fragment (\ U{ sampler, colour } IF{ uv } Frag{ fragColour } -> main $ do
     -- Get samples for -2/3 and -1/3
-    valueL <- let' "valueL" $ texture sampler (vec2 [uv^._x + dFdx (uv^._x), uv^._y])^._yz * 255
+    valueL <- let' "valueL" $ texture sampler (v2 (V2 (uv^._x + dFdx (uv^._x)) (uv^._y)))^._yz * 255
     lowerL <- let' "lowerL" $ mod' valueL 16
     upperL <- let' "upperL" $ (valueL - lowerL) / 16
     alphaL <- let' "alphaL" $ min' (abs (upperL - lowerL)) 2

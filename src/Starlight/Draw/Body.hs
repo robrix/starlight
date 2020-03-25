@@ -84,7 +84,7 @@ shader
       [ (Just 1, m *= dmat4 [dv4 (V4 1 0 0 0), dv4 (V4 0 cos90 (-1) 0), dv4 (V4 0 1 cos90 0), dv4 (V4 0 0 0 1)] >> break)
       , (Just 2, m *= dmat4 [dv4 (V4 cos90 0 1 0), dv4 (V4 0 1 0 0), dv4 (V4 (-1) 0 cos90 0), dv4 (V4 0 0 0 1)] >> break)
       ]
-    gl_Position .= vec4 [get m D.!* dext4 (dext3 pos 0) 1])
+    gl_Position .= cast @_ @(V4 Float) (get m D.!* dext4 (dext3 pos 0) 1))
 
   >>> fragment (\ U{ colour } D.None Frag{ fragColour } -> main $
     fragColour .= colour)
