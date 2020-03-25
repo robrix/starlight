@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeOperators #-}
 module GL.Shader.DSL.Syntax
-( Expr(..)
+( Mat(..)
+, Expr(..)
 , false
 , true
 , Geom(..)
@@ -18,9 +19,7 @@ import Unit.Algebra (Div, Mul)
 import Unit (Unit)
 import Unit.Length (Length)
 
-class Expr expr where
-  -- matrix
-
+class Mat expr where
   m2 :: expr (V2 a) -> expr (V2 a) -> expr (M22 a)
   m3 :: expr (V3 a) -> expr (V3 a) -> expr (V3 a) -> expr (M33 a)
   m4 :: expr (V4 a) -> expr (V4 a) -> expr (V4 a) -> expr (V4 a) -> expr (M44 a)
@@ -38,6 +37,7 @@ class Expr expr where
 
   infixl 7 !*!, !*
 
+class Expr expr where
   -- vector
 
   v2 :: expr a -> expr a -> expr (V2 a)
