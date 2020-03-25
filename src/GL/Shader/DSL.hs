@@ -30,7 +30,7 @@ module GL.Shader.DSL
 , RStmt
 , Stmt(..)
   -- * References (mutable variables)
-, Ref(..)
+, RRef(..)
 , gl_Position
 , gl_PointSize
 , (^^.)
@@ -99,17 +99,17 @@ program = Shader
 data Stage d i o where
   Id :: Stage d i i
   (:>>>) :: Stage d i x -> Stage d x o -> Stage d i o
-  V :: (Vars i, Vars o) => (i (RExpr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
-  G :: (Vars i, Vars o) => (i (RExpr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
-  F :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
+  V :: (Vars i, Vars o) => (i (RExpr 'Shader.Vertex)   -> o (RRef 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
+  G :: (Vars i, Vars o) => (i (RExpr 'Shader.Geometry :.: []) -> o (RRef 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
+  F :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (RRef 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
 
-vertex   :: (Vars i, Vars o) => (i (RExpr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
+vertex   :: (Vars i, Vars o) => (i (RExpr 'Shader.Vertex)   -> o (RRef 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
 vertex = V
 
-geometry :: (Vars i, Vars o) => (i (RExpr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
+geometry :: (Vars i, Vars o) => (i (RExpr 'Shader.Geometry :.: []) -> o (RRef 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
 geometry = G
 
-fragment :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
+fragment :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (RRef 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
 fragment = F
 
 instance Cat.Category (Stage d) where
@@ -135,7 +135,7 @@ stageSources u = \case
   F s -> [renderStage Shader.Fragment id s]
   l :>>> r -> stageSources u l <> stageSources u r
   where
-  renderStage :: (Vars i, Vars o) => Shader.Stage -> (forall a . RExpr k a -> f a) -> (i f -> o (Ref k) -> RDecl k ()) -> (Shader.Stage, Doc ())
+  renderStage :: (Vars i, Vars o) => Shader.Stage -> (forall a . RExpr k a -> f a) -> (i f -> o (RRef k) -> RDecl k ()) -> (Shader.Stage, Doc ())
   renderStage t g f = (,) t
     $  pretty "#version 410" <> hardline
     <> u
@@ -210,17 +210,17 @@ newtype RStmt (k :: Shader.Stage) a = RStmt { getStmt :: Cont (Doc ()) a }
 
 class Stmt expr stmt | stmt -> expr where
   let' :: GL.Uniform a => String -> expr k a -> stmt k (expr k a)
-  var :: GL.Uniform a => String -> expr k a -> stmt k (Ref k a)
+  var :: GL.Uniform a => String -> expr k a -> stmt k (RRef k a)
 
   iff :: expr k Bool -> stmt k () -> stmt k () -> stmt k ()
   switch :: expr k Int -> [(Maybe Int, stmt k ())] -> stmt k ()
   break :: stmt k ()
   while :: expr k Bool -> stmt k () -> stmt k ()
 
-  (.=) :: Ref k a -> expr k a -> stmt k ()
-  (+=) :: Ref k a -> expr k a -> stmt k ()
-  (*=) :: Ref k a -> expr k a -> stmt k ()
-  (*!=) :: Ref k (v a) -> expr k (v (v a)) -> stmt k ()
+  (.=) :: RRef k a -> expr k a -> stmt k ()
+  (+=) :: RRef k a -> expr k a -> stmt k ()
+  (*=) :: RRef k a -> expr k a -> stmt k ()
+  (*!=) :: RRef k (v a) -> expr k (v (v a)) -> stmt k ()
 
   infixr 4 .=, +=, *=, *!=
 
@@ -275,24 +275,24 @@ stmt d = RStmt . cont $ \ k -> d <> k ()
 
 -- Exprs
 
-data Ref (k :: Shader.Stage) t
+data RRef (k :: Shader.Stage) t
   = Ref String
-  | forall s . Ref k s :^^. Prj s t
+  | forall s . RRef k s :^^. Prj s t
 
-gl_Position :: Ref k (V4 Float)
+gl_Position :: RRef k (V4 Float)
 gl_Position = Ref "gl_Position"
 
-gl_PointSize :: Ref 'Shader.Vertex Float
+gl_PointSize :: RRef 'Shader.Vertex Float
 gl_PointSize = Ref "gl_PointSize"
 
 
-(^^.) :: Ref k a -> Prj a b -> Ref k b
+(^^.) :: RRef k a -> Prj a b -> RRef k b
 (^^.) = (:^^.)
 
 infixl 8 ^^.
 
 
-renderRef :: Ref k a -> Doc ()
+renderRef :: RRef k a -> Doc ()
 renderRef = \case
   Ref n        -> pretty n
   r :^^. Prj p -> renderRef r <> pretty p
@@ -341,7 +341,7 @@ ix i = Prj ("[" <> show i <> "]")
 
 
 class Expr expr where
-  get :: Ref k a -> expr k a
+  get :: RRef k a -> expr k a
 
   gl_InstanceID :: expr 'Shader.Vertex Int
   gl_Positions :: expr 'Shader.Geometry [V4 Float]
