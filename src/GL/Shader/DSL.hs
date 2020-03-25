@@ -435,7 +435,7 @@ class ( Ref ref
   (!) :: (expr :.: []) a -> expr Int -> expr a
   infixl 9 !
 
-cast :: (Expr ref expr, GL.Uniform b) => expr a -> expr b
+cast :: forall a b expr ref . (Expr ref expr, GL.Uniform b) => expr a -> expr b
 cast = cast' . K
 
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
