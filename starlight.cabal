@@ -82,7 +82,6 @@ library
     GL.Shader
     GL.Shader.DSL
     GL.Shader.DSL.Syntax
-    GL.Shader.Expr
     GL.Shader.GLSL
     GL.Shader.GLSL.Syntax
     GL.Shader.GLSL.Type
