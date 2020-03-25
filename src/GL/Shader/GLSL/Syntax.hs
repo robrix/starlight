@@ -6,8 +6,7 @@ module GL.Shader.GLSL.Syntax
 ) where
 
 data Type
-  = Void
-  | Bool
+  = Bool
   | Int
   | UInt
   | Float
