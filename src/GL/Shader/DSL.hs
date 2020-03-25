@@ -348,8 +348,6 @@ ix i = Prj ("[" <> show i <> "]")
 class Ref ref => Expr ref expr | expr -> ref where
   get :: ref k a -> expr k a
 
-  gl_Positions :: expr 'Shader.Geometry [V4 Float]
-
   float :: expr k a -> expr k Float
   double :: expr k a -> expr k Double
 
@@ -459,8 +457,6 @@ instance Floating (RExpr k a) where
 
 instance Expr RRef RExpr where
   get = RExpr . renderRef
-
-  gl_Positions = RExpr $ pretty "gl_Position"
 
   a ^. Prj s = RExpr $ renderExpr a <> pretty s
   a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
