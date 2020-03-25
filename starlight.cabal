@@ -80,7 +80,6 @@ library
     GL.Primitive
     GL.Program
     GL.Shader
-    GL.Shader.Decl
     GL.Shader.DSL
     GL.Shader.DSL.Syntax
     GL.Shader.Expr
