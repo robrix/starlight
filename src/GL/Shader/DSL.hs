@@ -360,11 +360,11 @@ class Vec expr where
   dv3 :: V3 (expr Double) -> expr (V3 Double)
   dv4 :: V4 (expr Double) -> expr (V4 Double)
 
-  ext3 :: expr (V2 a) -> expr a -> expr (V3 Float)
-  ext4 :: expr (V3 a) -> expr a -> expr (V4 Float)
+  ext3 :: expr (V2 Float) -> expr Float -> expr (V3 Float)
+  ext4 :: expr (V3 Float) -> expr Float -> expr (V4 Float)
 
-  dext3 :: expr (V2 a) -> expr a -> expr (V3 Double)
-  dext4 :: expr (V3 a) -> expr a -> expr (V4 Double)
+  dext3 :: expr (V2 Double) -> expr Double -> expr (V3 Double)
+  dext4 :: expr (V3 Double) -> expr Double -> expr (V4 Double)
 
   norm :: expr (v a) -> expr a
   dot :: expr (v a) -> expr (v a) -> expr a

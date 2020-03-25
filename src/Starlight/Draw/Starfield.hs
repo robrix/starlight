@@ -89,7 +89,7 @@ shader
     resolution <- let' @_ @_ @_ @(V2 Float) "resolution" (coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * v2 (V2 1 (resolution^._y / resolution^._x))
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
-    focus <- var "focus" $ dext3 focus 1
+    focus <- var "focus" $ dext3 (coerce focus) 1
     let wrap x = ((x + pi) `mod'` (pi * 2)) - pi
     nf <- let' "nf" (float (0.01 / norm (get focus)))
     a1 <- let' "a1" (wrap (0.3 + nf))
