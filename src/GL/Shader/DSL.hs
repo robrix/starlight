@@ -5,6 +5,8 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module GL.Shader.DSL
 ( Shader
@@ -22,8 +24,28 @@ module GL.Shader.DSL
 , main
 , primitiveIn
 , primitiveOut
+  -- * Stmts
+, Stmt
+  -- ** Variables
+, let'
+, var
+  -- ** Control flow
+, iff
+, switch
+, break
+, while
+  -- ** Assignment
+, (.=)
+, (+=)
+, (*=)
+, (*!=)
+  -- ** Geometry shaders
+, emitVertex
+, emitPrimitive
+  -- ** Fragment shaders
+, discard
+  -- * Exprs
 , module GL.Shader.Expr
-, module GL.Shader.Stmt
   -- * Re-exports
 , Fields(..)
 , Vars
@@ -50,7 +72,6 @@ import           GHC.Generics hiding ((:.:))
 import qualified GL.Primitive as P
 import qualified GL.Shader as Shader
 import           GL.Shader.Expr
-import           GL.Shader.Stmt
 import           GL.Shader.Vars
 import           GL.TextureUnit
 import qualified GL.Uniform as GL
@@ -172,3 +193,73 @@ primitiveOut ty mx = raw doc where
 
 renderDecl :: Decl k a -> Doc ()
 renderDecl = runDecl (const mempty)
+
+
+-- Stmts
+
+runStmt :: (a -> Doc ()) -> Stmt k a -> Doc ()
+runStmt k = (`runCont` k) . getStmt
+
+renderStmt :: Stmt k () -> Doc ()
+renderStmt = runStmt (const mempty)
+
+newtype Stmt (k :: Shader.Stage) a = Stmt { getStmt :: Cont (Doc ()) a }
+  deriving (Applicative, Functor, Monad)
+
+let' :: GL.Uniform a => String -> Expr k a -> Stmt k (Expr k a)
+let' n v = Stmt . cont $ \ k
+  -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+  <> k (Expr (pretty n))
+
+var :: GL.Uniform a => String -> Expr k a -> Stmt k (Ref k a)
+var n v = Stmt . cont $ \ k
+  -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+  <> k (Ref n)
+
+iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
+iff c t e = stmt $ pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
+
+switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
+switch s cs = stmt $ pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
+  where
+  renderCase (i, s) = maybe (pretty "default:" <> hardline) (\ i -> pretty "case" <+> pretty i <> pretty ':') i  <> hardline <> renderStmt s
+
+break :: Stmt k ()
+break = stmt $ pretty "break" <+> pretty ';' <> hardline
+
+while :: Expr k Bool -> Stmt k () -> Stmt k ()
+while c t = stmt $ pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
+
+(.=) :: Ref k a -> Expr k a -> Stmt k ()
+r .= v = stmt $ renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+
+(+=) :: Ref k a -> Expr k a -> Stmt k ()
+r += v = stmt $ renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
+
+(*=) :: Ref k a -> Expr k a -> Stmt k ()
+r *= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+
+(*!=) :: Ref k (v a) -> Expr k (v (v a)) -> Stmt k ()
+r *!= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+
+infixr 4 .=, +=, *=, *!=
+
+emitVertex :: Stmt 'Shader.Geometry () -> Stmt 'Shader.Geometry ()
+emitVertex m = stmt
+  $  renderStmt m <> hardline
+  <> pretty "EmitVertex();" <> hardline
+
+emitPrimitive :: Stmt 'Shader.Geometry () -> Stmt 'Shader.Geometry ()
+emitPrimitive m = stmt
+  $  renderStmt m <> hardline
+  <> pretty "EndPrimitive();" <> hardline
+
+discard :: Stmt 'Shader.Fragment ()
+discard = stmt $ pretty "discard" <> pretty ';' <> hardline
+
+renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
+renderTypeOf _ = pretty (GL.glslType @a)
+
+
+stmt :: Doc () -> Stmt k ()
+stmt d = Stmt . cont $ \ k -> d <> k ()
