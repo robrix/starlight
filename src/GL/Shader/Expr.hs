@@ -175,6 +175,7 @@ ix i = Prj ("[" <> show i <> "]")
 
 
 var :: String -> Expr k a
+var = Expr . pretty
 
 get :: Ref k a -> Expr k a
 
@@ -281,7 +282,6 @@ instance Floating (Expr k a) where
   pi = lit pi
 
 
-var = Expr . pretty
 get = Expr . renderRef
 
 a ^. Prj s = Expr $ renderExpr a <> pretty s
