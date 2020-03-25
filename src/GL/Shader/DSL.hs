@@ -206,7 +206,7 @@ renderStmt = (`runCont` const mempty) . getStmt
 newtype RStmt (k :: Shader.Stage) a = RStmt { getStmt :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-class Ref ref => Stmt ref expr stmt | stmt -> expr ref where
+class Expr ref expr => Stmt ref expr stmt | stmt -> expr ref where
   let' :: GL.Uniform a => String -> expr k a -> stmt k (expr k a)
   var :: GL.Uniform a => String -> expr k a -> stmt k (ref k a)
 
