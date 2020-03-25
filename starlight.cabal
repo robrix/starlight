@@ -82,9 +82,6 @@ library
     GL.Shader
     GL.Shader.DSL
     GL.Shader.DSL.Syntax
-    GL.Shader.GLSL
-    GL.Shader.GLSL.Syntax
-    GL.Shader.GLSL.Type
     GL.Shader.Vars
     GL.Texture
     GL.TextureUnit
