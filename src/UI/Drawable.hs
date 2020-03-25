@@ -15,7 +15,7 @@ import           Foreign.Storable (Storable)
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Program
-import           GL.Shader.DSL (Shader, Vars)
+import           GL.Shader.DSL (RShader, Vars)
 
 data Drawable u v o = Drawable
   { program :: Program u v o
@@ -39,7 +39,7 @@ using getDrawable m = do
 runDrawable :: (Drawable u v o -> b) -> Drawable u v o -> ReaderC b m a -> m a
 runDrawable makeDrawable = runReader . makeDrawable
 
-loadingDrawable :: (Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m, Storable (v I), Vars u, Vars v) => (Drawable u v o -> b) -> Shader u v o -> [v I] -> ReaderC b m a -> m a
+loadingDrawable :: (Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Has Trace sig m, Storable (v I), Vars u, Vars v) => (Drawable u v o -> b) -> RShader u v o -> [v I] -> ReaderC b m a -> m a
 loadingDrawable drawable shader vertices m = do
   program <- build shader
   (_, array) <- load vertices

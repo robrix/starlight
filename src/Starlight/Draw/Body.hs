@@ -75,19 +75,19 @@ range :: Interval I Int
 range = 0...length vertices
 
 
-shader :: D.Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ pos } D.None -> main $ do
+shader :: D.Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix } V{ pos } D.None -> main $ do
     let cos90 = 6.123233995736766e-17
-    m <- var "m" (coerce (matrix u))
+    m <- var "m" (coerce matrix)
     switch gl_InstanceID
       [ (Just 1, m *= dmat4 [dvec4 [1, 0, 0, 0], dvec4 [0, cos90, -1, 0], dvec4 [0, 1, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
       , (Just 2, m *= dmat4 [dvec4 [cos90, 0, 1, 0], dvec4 [0, 1, 0, 0], dvec4 [-1, 0, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
       ]
     gl_Position .= vec4 [get m D.!* dext4 (dext3 pos 0) 1])
 
-  >>> fragment (\ D.None Frag{ fragColour } -> main $
-    fragColour .= colour u)
+  >>> fragment (\ U{ colour } D.None Frag{ fragColour } -> main $
+    fragColour .= colour)
 
 
 data U v = U

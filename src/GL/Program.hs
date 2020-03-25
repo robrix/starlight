@@ -45,7 +45,7 @@ data Program (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (
   }
 
 
-build :: forall u v o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars v) => DSL.Shader u v o -> m (Program u v o)
+build :: forall u v o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars v) => DSL.RShader u v o -> m (Program u v o)
 build p = runLiftIO $ do
   program <- glCreateProgram
   onExit (glDeleteProgram program)

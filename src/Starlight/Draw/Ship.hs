@@ -89,13 +89,13 @@ range :: Interval I Int
 range = 0...4
 
 
-shader :: D.Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ pos } None -> main $
-    gl_Position .= coerce (matrix u) D.!* ext4 (ext3 pos 1) 1)
+shader :: D.Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix } V{ pos } None -> main $
+    gl_Position .= coerce matrix D.!* ext4 (ext3 pos 1) 1)
 
-  >>> fragment (\ None Frag{ fragColour } -> main $
-    fragColour .= colour u)
+  >>> fragment (\ U{ colour } None Frag{ fragColour } -> main $
+    fragColour .= colour)
 
 
 data U v = U

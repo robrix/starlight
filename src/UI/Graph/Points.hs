@@ -18,19 +18,19 @@ import GHC.Generics (Generic)
 import GL.Shader.DSL
 import UI.Graph.Vertex
 
-shader :: Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ pos } None -> main $ do
-    gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) ^. _xy) 0) 1
-    gl_PointSize .= pointSize u)
+shader :: Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix, pointSize } V{ pos } None -> main $ do
+    gl_Position .= ext4 (ext3 ((matrix !* ext3 pos 1) ^. _xy) 0) 1
+    gl_PointSize .= pointSize)
 
-  >>> fragment (\ None Frag{ fragColour } -> main $ do
+  >>> fragment (\ U{ colour } None Frag{ fragColour } -> main $ do
     p <- let' "p" (gl_PointCoord - vec2 [0.5])
     iff (norm p `gt` 1)
       discard
       (do
         mag <- let' "mag" (norm p * 2)
-        fragColour .= ext4 (colour u ^. _xyz) (1 - mag * mag * mag / 2)))
+        fragColour .= ext4 (colour ^. _xyz) (1 - mag * mag * mag / 2)))
 
 
 data U v = U

@@ -24,9 +24,9 @@ import GHC.Generics (Generic)
 import GL.Shader.DSL
 import Prelude hiding (break)
 
-shader :: Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ pos } IF{ _coord2, colour } -> main $ do
+shader :: Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix, ratio, fontScale, offset } V{ pos } IF{ _coord2, colour } -> main $ do
     _coord2 .= pos^._zw ^* 0.5
     t <- var "t" (vec2 [0])
     switch gl_InstanceID
@@ -55,13 +55,13 @@ shader = program $ \ u
         t .= vec2 [ 9/12.0,  3/12.0]
         break)
       ]
-    let m =   matrix u
-          !*! mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 (get t ^* (1/float (ratio u))) 1]
-          !*! mat3 [vec3 [fontScale u, 0, 0], vec3 [0, fontScale u, 0], vec3 [0, 0, 1]]
-          !*! mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 (vec2 [offset u, 0]) 1]
+    let m =   matrix
+          !*! mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 (get t ^* (1/float ratio)) 1]
+          !*! mat3 [vec3 [fontScale, 0, 0], vec3 [0, fontScale, 0], vec3 [0, 0, 1]]
+          !*! mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 (vec2 [offset, 0]) 1]
     gl_Position .= ext4 (m !* ext3 (pos^._xy) 1) 0^._xywz)
 
-  >>> fragment (\ IF{ _coord2, colour } Frag{ fragColour } -> main $
+  >>> fragment (\ _ IF{ _coord2, colour } Frag{ fragColour } -> main $
     iff (_coord2^._x * _coord2^._x - _coord2^._y `gt` 0)
       discard
       (iff gl_FrontFacing

@@ -38,7 +38,6 @@ import           GL.Array
 import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
-import           GL.Shader (Stage(..))
 import           GL.Shader.DSL hiding (norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
 import           GL.Shader.Vars (makeVars)
@@ -54,6 +53,7 @@ import           UI.Colour
 import qualified UI.Window as Window
 import           Unit.Algebra
 import           Unit.Angle
+import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -136,8 +136,8 @@ verticesForBlips bs =
   ]
 
 
-vertex' :: U (RExpr 'Vertex) -> D.Stage RDecl V IG
-vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ pos, colour2, sweep } -> main $ do
+vertex' :: Shader shader => shader U V IG
+vertex' = vertex (\ U{ here, scale } V{ there, r, colour } IG{ pos, colour2, sweep } -> main $ do
   there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
   let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
@@ -150,17 +150,19 @@ vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ pos, colour2, swe
   pos .= coerce (ext4 (ext3 (vec2 [cos angle, sin angle] D.^* coerce radius) 0) 1)
   colour2 .= colour)
   where
+  minBlipSize :: Num a => a
   minBlipSize = 16
+  radius :: Num a => a
   radius = 300
 
-fragment' :: D.Stage RDecl IF Frag
-fragment' = fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
+fragment' :: Shader shader => shader U IF Frag
+fragment' = fragment (\ _ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
 
-radarShader :: Shader U V Frag
-radarShader = program $ \ u
-  ->  vertex' u
+radarShader :: Shader shader => shader U V Frag
+radarShader
+  =   vertex'
 
-  >>> geometry (\ IG{ pos, sweep, colour2 } IF{ colour3 } -> do
+  >>> geometry (\ U{ matrix } IG{ pos, sweep, colour2 } IF{ colour3 } -> do
     primitiveIn Points
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
@@ -173,7 +175,7 @@ radarShader = program $ \ u
         while (get i `lt` (count + 1)) $ do
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float count * coerce (sweep ! 0))
-            gl_Position .= coerce (matrix u) D.!*! mat4 [rot theta] !* coerce (pos ! 0)
+            gl_Position .= coerce matrix D.!*! mat4 [rot theta] !* coerce (pos ! 0)
             colour3 .= colour2 ! 0
           i += 1)
 
@@ -183,11 +185,11 @@ radarShader = program $ \ u
   count = 16
 
 
-targetShader :: Shader U V Frag
-targetShader = program $ \ u
-  ->  vertex' u
+targetShader :: Shader shader => shader U V Frag
+targetShader
+  =   vertex'
 
-  >>> geometry (\ IG{ pos, colour2, sweep } IF{ colour3 } -> do
+  >>> geometry (\ U{ matrix } IG{ pos, colour2, sweep } IF{ colour3 } -> do
     primitiveIn Points
     primitiveOut LineStrip ((count * 2 + 1) * 2)
     main $ do
@@ -202,7 +204,7 @@ targetShader = program $ \ u
           gl_Position .= ext4 (vec3 [0]) 1
           colour3 .= colour2 ! 0
         emitVertex $ do
-          gl_Position .= coerce (matrix u) D.!*! mat4 [rot theta] !* coerce (pos ! 0)
+          gl_Position .= coerce matrix D.!*! mat4 [rot theta] !* coerce (pos ! 0)
           colour3 .= colour2 ! 0
         i += 1)
 

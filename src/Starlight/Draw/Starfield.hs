@@ -81,12 +81,12 @@ range = 0...length vertices
 
 -- based on Star Nest by Pablo Roman Andrioli: https://www.shadertoy.com/view/XlfGRj
 
-shader :: Shader U V Frag
-shader = program $ \ U{ resolution, focus, zoom }
-  ->  vertex (\ V{ pos } None -> main $
+shader :: Shader shader => shader U V Frag
+shader
+  =   vertex (\ _ V{ pos } None -> main $
     gl_Position .= ext4 (ext3 pos 0) 1)
 
-  >>> fragment (\ None Frag{ fragColour } -> main $ do
+  >>> fragment (\ U{ resolution, focus, zoom } None Frag{ fragColour } -> main $ do
     resolution <- let' @_ @_ @_ @(V2 Float) "resolution" (coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
@@ -128,12 +128,19 @@ shader = program $ \ U{ resolution, focus, zoom }
     v .= lerp saturation (vec3 [mag]) (get v)
     fragColour .= ext4 (get v D.^* 0.01) 1)
   where
+  iterations :: Num a => a
   iterations = 17
+  formuparam :: Fractional a => a
   formuparam = 0.53
+  volsteps :: Num a => a
   volsteps = 8
+  tile :: Fractional a => a
   tile = 1/1.61803398875
+  brightness :: Fractional a => a
   brightness = 0.0015
+  distfading :: Fractional a => a
   distfading = 0.65
+  saturation :: Fractional a => a
   saturation = 0.65
 
 

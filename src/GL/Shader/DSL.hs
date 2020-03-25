@@ -1,12 +1,11 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -14,14 +13,8 @@
 {-# HLINT ignore "Use camelCase" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 module GL.Shader.DSL
-( Shader
-, program
-, Stage
-, Stage'(..)
-, RStage(..)
-, vertex
-, geometry
-, fragment
+( Shader(..)
+, RShader(..)
 , (Cat.>>>)
 , None(..)
 , shaderSources
@@ -102,53 +95,21 @@ import           Linear.V4 (V4(..))
 import           Prelude hiding (break)
 import           UI.Colour (Colour)
 
-data Shader (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) where
-  Shader :: Vars u => ((forall k . u (RExpr k)) -> Stage RDecl i o) -> Shader u i o
+class (forall u . Cat.Category (shader u)) => Shader shader where
+  vertex :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . VertexDecl ref expr stmt decl => u expr -> i expr -> o ref -> decl ()) -> shader u i o
+  geometry :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . GeometryDecl ref expr stmt decl => u expr -> i (expr :.: []) -> o ref -> decl ()) -> shader u i o
+  fragment :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . FragmentDecl ref expr stmt decl => u expr -> i expr -> o ref -> decl ()) -> shader u i o
 
-program :: Vars u => ((forall k . u (RExpr k)) -> Stage RDecl i o) -> Shader u i o
-program = Shader
+newtype RShader (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) = RShader { renderShader :: [(Shader.Stage, Doc ())] }
 
+instance Cat.Category (RShader u) where
+  id = RShader []
+  RShader l . RShader r = RShader $ r ++ l
 
-data Stage d i o where
-  Id :: Stage d i i
-  (:>>>) :: Stage d i x -> Stage d x o -> Stage d i o
-  V :: (Vars i, Vars o) => (i (RExpr 'Shader.Vertex)   -> o (RRef 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
-  G :: (Vars i, Vars o) => (i (RExpr 'Shader.Geometry :.: []) -> o (RRef 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
-  F :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (RRef 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
-
-vertex   :: (Vars i, Vars o) => (i (RExpr 'Shader.Vertex)   -> o (RRef 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
-vertex = V
-
-geometry :: (Vars i, Vars o) => (i (RExpr 'Shader.Geometry :.: []) -> o (RRef 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
-geometry = G
-
-fragment :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (RRef 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
-fragment = F
-
-class Cat.Category stage => Stage' stage where
-  vertex_ :: (Vars i, Vars o) => (forall ref expr stmt decl . VertexDecl ref expr stmt decl => i (expr 'Shader.Vertex) -> o (ref 'Shader.Vertex) -> decl 'Shader.Vertex ()) -> stage i o
-  geometry_ :: (Vars i, Vars o) => (forall ref expr stmt decl . GeometryDecl ref expr stmt decl => i (expr 'Shader.Geometry :.: []) -> o (ref 'Shader.Geometry) -> decl 'Shader.Geometry ()) -> stage i o
-  fragment_ :: (Vars i, Vars o) => (forall ref expr stmt decl . FragmentDecl ref expr stmt decl => i (expr 'Shader.Fragment) -> o (ref 'Shader.Fragment) -> decl 'Shader.Fragment ()) -> stage i o
-
-instance Stage' (Stage RDecl) where
-  vertex_ = V
-  geometry_ = G
-  fragment_ = F
-
-instance Cat.Category (Stage d) where
-  id = Id
-  (.) = flip (:>>>)
-
-newtype RStage (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) = RStage { renderStage :: [(Shader.Stage, Doc ())] }
-
-instance Cat.Category RStage where
-  id = RStage []
-  RStage l . RStage r = RStage $ r ++ l
-
-instance Stage' RStage where
-  vertex_   s = RStage $ renderStage_ Shader.Vertex   id s
-  geometry_ s = RStage $ renderStage_ Shader.Geometry (coerce :: forall x . RExpr 'Shader.Geometry x -> (RExpr 'Shader.Geometry :.: []) x) s
-  fragment_ s = RStage $ renderStage_ Shader.Fragment id s
+instance Shader RShader where
+  vertex   s = RShader $ renderStage Shader.Vertex   id (makeVars (RExpr . pretty . name)) s
+  geometry s = RShader $ renderStage Shader.Geometry (coerce :: forall x . RExpr x -> (RExpr :.: []) x) (makeVars (RExpr . pretty . name)) s
+  fragment s = RShader $ renderStage Shader.Fragment id (makeVars (RExpr . pretty . name)) s
 
 
 data None (v :: Type -> Type) = None
@@ -157,30 +118,24 @@ data None (v :: Type -> Type) = None
 instance Vars None
 
 
-shaderSources :: Shader u i o -> [(Shader.Stage, String)]
-shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions . prefix) <$> stageSources (f u)
-  where
-  u = makeVars (RExpr . pretty . name)
-  prefix x
-    =  pretty "#version 410" <> hardline
-    <> foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
-    <> x
+shaderSources :: RShader u i o -> [(Shader.Stage, String)]
+shaderSources (RShader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> f
+--   where
+--   u = makeVars (RExpr . pretty . name)
+  -- prefix x
+  --   =  pretty "#version 410" <> hardline
+  --   <> foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
+  --   <> x
 
-stageSources :: Stage RDecl i o -> [(Shader.Stage, Doc ())]
-stageSources = \case
-  Id  -> []
-  V s -> renderStage_ Shader.Vertex   id s
-  G s -> renderStage_ Shader.Geometry (coerce :: forall x . RExpr 'Shader.Geometry x -> (RExpr 'Shader.Geometry :.: []) x) s
-  F s -> renderStage_ Shader.Fragment id s
-  l :>>> r -> stageSources l <> stageSources r
-
-renderStage_ :: (Vars i, Vars o) => Shader.Stage -> (forall a . RExpr k a -> f a) -> (i f -> o (RRef k) -> RDecl k ()) -> [(Shader.Stage, Doc ())]
-renderStage_ t g f = pure . (,) t
-  $  case t of
+renderStage :: (Vars u, Vars i, Vars o) => Shader.Stage -> (forall a . RExpr a -> f a) -> u RExpr -> (u RExpr -> i f -> o RRef -> RDecl ()) -> [(Shader.Stage, Doc ())]
+renderStage t g u f = pure . (,) t
+  $  pretty "#version 410" <> hardline
+  <> foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
+  <> case t of
     Shader.Geometry -> foldVars (getK . value) (makeVars (pvar "in" . (<> "[]") . name) `like` i)
     _               -> foldVars (getK . value) (makeVars (pvar "in"      . name) `like` i)
   <> foldVars (getK . value) (makeVars (pvar "out"     . name) `like` o)
-  <> renderDecl (f i o) where
+  <> renderDecl (f u i o) where
   i = makeVars (g . RExpr . pretty . name)
   o = makeVars (Ref . name)
 
@@ -199,23 +154,23 @@ instance Vars Frag
 
 -- Decls
 
-renderDecl :: RDecl k a -> Doc ()
+renderDecl :: RDecl a -> Doc ()
 renderDecl = (`runCont` const mempty) . getDecl
 
-newtype RDecl (k :: Shader.Stage) a = RDecl { getDecl :: Cont (Doc ()) a }
+newtype RDecl a = RDecl { getDecl :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-decl :: Doc () -> RDecl k ()
+decl :: Doc () -> RDecl ()
 decl d = RDecl . cont $ \ k -> d <> k ()
 
-class Stmt ref expr stmt => Decl ref expr stmt decl | decl -> stmt where
-  main :: stmt k () -> decl k ()
+class (Stmt ref expr stmt, Monad decl) => Decl ref expr stmt decl | decl -> ref expr stmt where
+  main :: stmt () -> decl ()
 
 class (VertexStmt ref expr stmt, Decl ref expr stmt decl) => VertexDecl ref expr stmt decl where
 
 class (GeometryStmt ref expr stmt, Decl ref expr stmt decl) => GeometryDecl ref expr stmt decl where
-  primitiveIn :: P.Type -> decl 'Shader.Geometry ()
-  primitiveOut :: P.Type -> Int -> decl 'Shader.Geometry ()
+  primitiveIn :: P.Type -> decl ()
+  primitiveOut :: P.Type -> Int -> decl ()
 
 class (FragmentStmt ref expr stmt, Decl ref expr stmt decl) => FragmentDecl ref expr stmt decl where
 
@@ -250,36 +205,36 @@ instance FragmentDecl RRef RExpr RStmt RDecl where
 
 -- Stmts
 
-renderStmt :: RStmt k () -> Doc ()
+renderStmt :: RStmt () -> Doc ()
 renderStmt = (`runCont` const mempty) . getStmt
 
-newtype RStmt (k :: Shader.Stage) a = RStmt { getStmt :: Cont (Doc ()) a }
+newtype RStmt a = RStmt { getStmt :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-class Expr ref expr => Stmt ref expr stmt | stmt -> expr ref where
-  let' :: GL.Uniform a => String -> expr k a -> stmt k (expr k a)
-  var :: GL.Uniform a => String -> expr k a -> stmt k (ref k a)
+class (Expr ref expr, Monad stmt) => Stmt ref expr stmt | stmt -> ref expr where
+  let' :: GL.Uniform a => String -> expr a -> stmt (expr a)
+  var :: GL.Uniform a => String -> expr a -> stmt (ref a)
 
-  iff :: expr k Bool -> stmt k () -> stmt k () -> stmt k ()
-  switch :: expr k Int -> [(Maybe Int, stmt k ())] -> stmt k ()
-  break :: stmt k ()
-  while :: expr k Bool -> stmt k () -> stmt k ()
+  iff :: expr Bool -> stmt () -> stmt () -> stmt ()
+  switch :: expr Int -> [(Maybe Int, stmt ())] -> stmt ()
+  break :: stmt ()
+  while :: expr Bool -> stmt () -> stmt ()
 
-  (.=) :: ref k a -> expr k a -> stmt k ()
-  (+=) :: ref k a -> expr k a -> stmt k ()
-  (*=) :: ref k a -> expr k a -> stmt k ()
-  (*!=) :: ref k (v a) -> expr k (v (v a)) -> stmt k ()
+  (.=) :: ref a -> expr a -> stmt ()
+  (+=) :: ref a -> expr a -> stmt ()
+  (*=) :: ref a -> expr a -> stmt ()
+  (*!=) :: ref (v a) -> expr (v (v a)) -> stmt ()
 
   infixr 4 .=, +=, *=, *!=
 
 class (VertexExpr ref expr, Stmt ref expr stmt) => VertexStmt ref expr stmt where
 
 class (GeometryExpr ref expr, Stmt ref expr stmt) => GeometryStmt ref expr stmt where
-  emitVertex :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
-  emitPrimitive :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
+  emitVertex :: stmt () -> stmt ()
+  emitPrimitive :: stmt () -> stmt ()
 
 class (FragmentExpr ref expr, Stmt ref expr stmt) => FragmentStmt ref expr stmt where
-  discard :: stmt 'Shader.Fragment ()
+  discard :: stmt ()
 
 instance Stmt RRef RExpr RStmt where
   let' n v = RStmt . cont $ \ k
@@ -326,24 +281,24 @@ renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
 renderTypeOf _ = pretty (GL.glslType @a)
 
 
-stmt :: Doc () -> RStmt k ()
+stmt :: Doc () -> RStmt ()
 stmt d = RStmt . cont $ \ k -> d <> k ()
 
 
 -- Exprs
 
-data RRef (k :: Shader.Stage) t
+data RRef t
   = Ref String
-  | forall s . RRef k s :^^. Prj s t
+  | forall s . RRef s :^^. Prj s t
 
-class Ref (ref :: Shader.Stage -> Type -> Type) where
-  gl_Position :: ref k (V4 Float)
+class Ref ref where
+  gl_Position :: ref (V4 Float)
 
-  (^^.) :: ref k a -> Prj a b -> ref k b
+  (^^.) :: ref a -> Prj a b -> ref b
   infixl 8 ^^.
 
 class Ref ref => VertexRef ref where
-  gl_PointSize :: ref 'Shader.Vertex Float
+  gl_PointSize :: ref Float
 
 class Ref ref => GeometryRef ref where
 
@@ -361,7 +316,7 @@ instance GeometryRef RRef where
 
 instance FragmentRef RRef where
 
-renderRef :: RRef k a -> Doc ()
+renderRef :: RRef a -> Doc ()
 renderRef = \case
   Ref n        -> pretty n
   r :^^. Prj p -> renderRef r <> pretty p
@@ -409,87 +364,93 @@ ix :: Int -> Prj [a] a
 ix i = Prj ("[" <> show i <> "]")
 
 
-class Ref ref => Expr ref expr | expr -> ref where
-  get :: ref k a -> expr k a
+class ( Ref ref
+      , forall a . Num a => Num (expr a)
+      , forall a . Fractional a => Fractional (expr a)
+      , forall a . Floating a => Floating (expr a)
+      , forall a b . Coercible a b => Coercible (expr a) (expr b)
+      )
+   => Expr ref expr | expr -> ref where
+  get :: ref a -> expr a
 
-  float :: expr k a -> expr k Float
-  double :: expr k a -> expr k Double
+  float :: expr a -> expr Float
+  double :: expr a -> expr Double
 
-  vec2 :: [expr k a] -> expr k (V2 Float)
-  vec3 :: [expr k a] -> expr k (V3 Float)
-  vec4 :: [expr k a] -> expr k (V4 Float)
+  vec2 :: [expr a] -> expr (V2 Float)
+  vec3 :: [expr a] -> expr (V3 Float)
+  vec4 :: [expr a] -> expr (V4 Float)
 
-  dvec2 :: [expr k a] -> expr k (V2 Double)
-  dvec3 :: [expr k a] -> expr k (V3 Double)
-  dvec4 :: [expr k a] -> expr k (V4 Double)
+  dvec2 :: [expr a] -> expr (V2 Double)
+  dvec3 :: [expr a] -> expr (V3 Double)
+  dvec4 :: [expr a] -> expr (V4 Double)
 
-  mat2 :: [expr k a] -> expr k (M22 Float)
-  mat3 :: [expr k a] -> expr k (M33 Float)
-  mat4 :: [expr k a] -> expr k (M44 Float)
+  mat2 :: [expr a] -> expr (M22 Float)
+  mat3 :: [expr a] -> expr (M33 Float)
+  mat4 :: [expr a] -> expr (M44 Float)
 
-  dmat2 :: [expr k a] -> expr k (M22 Double)
-  dmat3 :: [expr k a] -> expr k (M33 Double)
-  dmat4 :: [expr k a] -> expr k (M44 Double)
+  dmat2 :: [expr a] -> expr (M22 Double)
+  dmat3 :: [expr a] -> expr (M33 Double)
+  dmat4 :: [expr a] -> expr (M44 Double)
 
-  ext3 :: expr k (V2 a) -> expr k a -> expr k (V3 Float)
-  ext4 :: expr k (V3 a) -> expr k a -> expr k (V4 Float)
+  ext3 :: expr (V2 a) -> expr a -> expr (V3 Float)
+  ext4 :: expr (V3 a) -> expr a -> expr (V4 Float)
 
-  dext3 :: expr k (V2 a) -> expr k a -> expr k (V3 Double)
-  dext4 :: expr k (V3 a) -> expr k a -> expr k (V4 Double)
+  dext3 :: expr (V2 a) -> expr a -> expr (V3 Double)
+  dext4 :: expr (V3 a) -> expr a -> expr (V4 Double)
 
-  norm :: expr k (v a) -> expr k a
-  dot :: expr k (v a) -> expr k (v a) -> expr k a
+  norm :: expr (v a) -> expr a
+  dot :: expr (v a) -> expr (v a) -> expr a
 
-  (^*) :: expr k (v a) -> expr k a -> expr k (v a)
-  (^/) :: expr k (v a) -> expr k a -> expr k (v a)
-  (!*) :: expr k (v (v a)) -> expr k (v a) -> expr k (v a)
-  (!!*) :: expr k (v (v a)) -> expr k a -> expr k (v (v a))
-  (!*!) :: expr k (v (v a)) -> expr k (v (v a)) -> expr k (v (v a))
+  (^*) :: expr (v a) -> expr a -> expr (v a)
+  (^/) :: expr (v a) -> expr a -> expr (v a)
+  (!*) :: expr (v (v a)) -> expr (v a) -> expr (v a)
+  (!!*) :: expr (v (v a)) -> expr a -> expr (v (v a))
+  (!*!) :: expr (v (v a)) -> expr (v (v a)) -> expr (v (v a))
   infixl 7 ^*, ^/, !*, !!*, !*!
 
-  log2 :: expr k a -> expr k a
-  exp2 :: expr k a -> expr k a
+  log2 :: expr a -> expr a
+  exp2 :: expr a -> expr a
 
-  lerp :: expr k a -> expr k (v a) -> expr k (v a) -> expr k (v a)
-  lerp2 :: expr k (v a) -> expr k (v a) -> expr k (v a) -> expr k (v a)
+  lerp :: expr a -> expr (v a) -> expr (v a) -> expr (v a)
+  lerp2 :: expr (v a) -> expr (v a) -> expr (v a) -> expr (v a)
 
-  dFdx :: expr k a -> expr k a
-  dFdy :: expr k a -> expr k a
+  dFdx :: expr a -> expr a
+  dFdy :: expr a -> expr a
 
-  mod' :: expr k v -> expr k v -> expr k v
+  mod' :: expr v -> expr v -> expr v
 
-  min' :: expr k a -> expr k a -> expr k a
-  max' :: expr k a -> expr k a -> expr k a
+  min' :: expr a -> expr a -> expr a
+  max' :: expr a -> expr a -> expr a
 
-  atan2' :: expr k a -> expr k a -> expr k a
+  atan2' :: expr a -> expr a -> expr a
 
-  texture :: expr k TextureUnit -> expr k (v Float) -> expr k (v Float)
+  texture :: expr TextureUnit -> expr (v Float) -> expr (v Float)
 
-  fract :: expr k a -> expr k a
+  fract :: expr a -> expr a
 
-  eq :: expr k a -> expr k a -> expr k Bool
-  lt :: expr k a -> expr k a -> expr k Bool
-  gt :: expr k a -> expr k a -> expr k Bool
+  eq :: expr a -> expr a -> expr Bool
+  lt :: expr a -> expr a -> expr Bool
+  gt :: expr a -> expr a -> expr Bool
   infix 4 `eq`, `lt`, `gt`
 
-  (^.) :: expr k a -> Prj a b -> expr k b
+  (^.) :: expr a -> Prj a b -> expr b
 
-  (!) :: (expr k :.: []) a -> expr k Int -> expr k a
+  (!) :: (expr :.: []) a -> expr Int -> expr a
   infixl 9 !
 
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
-  gl_InstanceID :: expr 'Shader.Vertex Int
+  gl_InstanceID :: expr Int
 
 class (GeometryRef ref, Expr ref expr) => GeometryExpr ref expr where
 
 class (FragmentRef ref, Expr ref expr) => FragmentExpr ref expr where
-  gl_FragCoord :: expr 'Shader.Fragment (V2 Float)
-  gl_FrontFacing :: expr 'Shader.Fragment Bool
-  gl_PointCoord :: expr 'Shader.Fragment (V2 Float)
+  gl_FragCoord :: expr (V2 Float)
+  gl_FrontFacing :: expr Bool
+  gl_PointCoord :: expr (V2 Float)
 
-newtype RExpr (k :: Shader.Stage) a = RExpr { renderExpr :: Doc () }
+newtype RExpr a = RExpr { renderExpr :: Doc () }
 
-instance Num (RExpr k a) where
+instance Num (RExpr a) where
   a + b = RExpr . parens $ renderExpr a <+> pretty '+' <+> renderExpr b
   a * b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a - b = RExpr . parens $ renderExpr a <+> pretty '-' <+> renderExpr b
@@ -498,11 +459,11 @@ instance Num (RExpr k a) where
   abs a = fn "abs" [ renderExpr a ]
   fromInteger i = RExpr $ pretty i
 
-instance Fractional (RExpr k a) where
+instance Fractional (RExpr a) where
   a / b = RExpr $ parens $ renderExpr a <+> pretty '/' <+> renderExpr b
   fromRational = lit . fromRational
 
-instance Floating (RExpr k a) where
+instance Floating (RExpr a) where
   exp a = fn "exp" [ renderExpr a ]
   log a = fn "log" [ renderExpr a ]
   sqrt a = fn "sqrt" [ renderExpr a ]
@@ -591,8 +552,8 @@ instance FragmentExpr RRef RExpr where
   gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
   gl_PointCoord = RExpr $ pretty "gl_PointCoord"
 
-fn :: String -> [Doc ()] -> RExpr k b
+fn :: String -> [Doc ()] -> RExpr b
 fn n as = RExpr $ pretty n <> tupled as
 
-lit :: Double -> RExpr k a
+lit :: Double -> RExpr a
 lit = RExpr . pretty
