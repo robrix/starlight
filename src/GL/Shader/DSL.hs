@@ -58,49 +58,7 @@ module GL.Shader.DSL
 
   -- * Expressions
 , RExpr(..)
-, get
-, (^.)
-, (^*)
-, (^/)
-, (!*)
-, (!!*)
-, (!*!)
-, eq
-, lt
-, gt
-, float
-, double
-, log2
-, exp2
-, fract
-, vec2
-, vec3
-, vec4
-, dvec2
-, dvec3
-, dvec4
-, mat2
-, mat3
-, mat4
-, dmat2
-, dmat3
-, dmat4
-, ext3
-, ext4
-, dext3
-, dext4
-, norm
-, dot
-, lerp
-, lerp2
-, dFdx
-, dFdy
-, mod'
-, min'
-, max'
-, atan2'
-, texture
-, (!)
+, Expr(..)
   -- * Re-exports
 , Fields(..)
 , Vars
@@ -404,75 +362,73 @@ ix :: Int -> Prj [a] a
 ix i = Prj ("[" <> show i <> "]")
 
 
-get :: Ref k a -> RExpr k a
+class Expr expr where
+  get :: Ref k a -> expr k a
 
-float :: RExpr k a -> RExpr k Float
-double :: RExpr k a -> RExpr k Double
+  float :: expr k a -> expr k Float
+  double :: expr k a -> expr k Double
 
-vec2 :: [RExpr k a] -> RExpr k (V2 Float)
-vec3 :: [RExpr k a] -> RExpr k (V3 Float)
-vec4 :: [RExpr k a] -> RExpr k (V4 Float)
+  vec2 :: [expr k a] -> expr k (V2 Float)
+  vec3 :: [expr k a] -> expr k (V3 Float)
+  vec4 :: [expr k a] -> expr k (V4 Float)
 
-dvec2 :: [RExpr k a] -> RExpr k (V2 Double)
-dvec3 :: [RExpr k a] -> RExpr k (V3 Double)
-dvec4 :: [RExpr k a] -> RExpr k (V4 Double)
+  dvec2 :: [expr k a] -> expr k (V2 Double)
+  dvec3 :: [expr k a] -> expr k (V3 Double)
+  dvec4 :: [expr k a] -> expr k (V4 Double)
 
-mat2 :: [RExpr k a] -> RExpr k (M22 Float)
-mat3 :: [RExpr k a] -> RExpr k (M33 Float)
-mat4 :: [RExpr k a] -> RExpr k (M44 Float)
+  mat2 :: [expr k a] -> expr k (M22 Float)
+  mat3 :: [expr k a] -> expr k (M33 Float)
+  mat4 :: [expr k a] -> expr k (M44 Float)
 
-dmat2 :: [RExpr k a] -> RExpr k (M22 Double)
-dmat3 :: [RExpr k a] -> RExpr k (M33 Double)
-dmat4 :: [RExpr k a] -> RExpr k (M44 Double)
+  dmat2 :: [expr k a] -> expr k (M22 Double)
+  dmat3 :: [expr k a] -> expr k (M33 Double)
+  dmat4 :: [expr k a] -> expr k (M44 Double)
 
-ext3 :: RExpr k (V2 a) -> RExpr k a -> RExpr k (V3 Float)
-ext4 :: RExpr k (V3 a) -> RExpr k a -> RExpr k (V4 Float)
+  ext3 :: expr k (V2 a) -> expr k a -> expr k (V3 Float)
+  ext4 :: expr k (V3 a) -> expr k a -> expr k (V4 Float)
 
-dext3 :: RExpr k (V2 a) -> RExpr k a -> RExpr k (V3 Double)
-dext4 :: RExpr k (V3 a) -> RExpr k a -> RExpr k (V4 Double)
+  dext3 :: expr k (V2 a) -> expr k a -> expr k (V3 Double)
+  dext4 :: expr k (V3 a) -> expr k a -> expr k (V4 Double)
 
-norm :: RExpr k (v a) -> RExpr k a
-dot :: RExpr k (v a) -> RExpr k (v a) -> RExpr k a
+  norm :: expr k (v a) -> expr k a
+  dot :: expr k (v a) -> expr k (v a) -> expr k a
 
-(^*) :: RExpr k (v a) -> RExpr k a -> RExpr k (v a)
-(^/) :: RExpr k (v a) -> RExpr k a -> RExpr k (v a)
-(!*) :: RExpr k (v (v a)) -> RExpr k (v a) -> RExpr k (v a)
-(!!*) :: RExpr k (v (v a)) -> RExpr k a -> RExpr k (v (v a))
-(!*!) :: RExpr k (v (v a)) -> RExpr k (v (v a)) -> RExpr k (v (v a))
-infixl 7 ^*, ^/, !*, !!*, !*!
+  (^*) :: expr k (v a) -> expr k a -> expr k (v a)
+  (^/) :: expr k (v a) -> expr k a -> expr k (v a)
+  (!*) :: expr k (v (v a)) -> expr k (v a) -> expr k (v a)
+  (!!*) :: expr k (v (v a)) -> expr k a -> expr k (v (v a))
+  (!*!) :: expr k (v (v a)) -> expr k (v (v a)) -> expr k (v (v a))
+  infixl 7 ^*, ^/, !*, !!*, !*!
 
-log2 :: RExpr k a -> RExpr k a
-exp2 :: RExpr k a -> RExpr k a
+  log2 :: expr k a -> expr k a
+  exp2 :: expr k a -> expr k a
 
-lerp :: RExpr k a -> RExpr k (v a) -> RExpr k (v a) -> RExpr k (v a)
-lerp2 :: RExpr k (v a) -> RExpr k (v a) -> RExpr k (v a) -> RExpr k (v a)
+  lerp :: expr k a -> expr k (v a) -> expr k (v a) -> expr k (v a)
+  lerp2 :: expr k (v a) -> expr k (v a) -> expr k (v a) -> expr k (v a)
 
-dFdx :: RExpr k a -> RExpr k a
-dFdy :: RExpr k a -> RExpr k a
+  dFdx :: expr k a -> expr k a
+  dFdy :: expr k a -> expr k a
 
-mod' :: RExpr k v -> RExpr k v -> RExpr k v
+  mod' :: expr k v -> expr k v -> expr k v
 
-min' :: RExpr k a -> RExpr k a -> RExpr k a
-max' :: RExpr k a -> RExpr k a -> RExpr k a
+  min' :: expr k a -> expr k a -> expr k a
+  max' :: expr k a -> expr k a -> expr k a
 
-atan2' :: RExpr k a -> RExpr k a -> RExpr k a
+  atan2' :: expr k a -> expr k a -> expr k a
 
-texture :: RExpr k TextureUnit -> RExpr k (v Float) -> RExpr k (v Float)
+  texture :: expr k TextureUnit -> expr k (v Float) -> expr k (v Float)
 
-fract :: RExpr k a -> RExpr k a
+  fract :: expr k a -> expr k a
 
-eq :: RExpr k a -> RExpr k a -> RExpr k Bool
-lt :: RExpr k a -> RExpr k a -> RExpr k Bool
-gt :: RExpr k a -> RExpr k a -> RExpr k Bool
-infix 4 `eq`, `lt`, `gt`
+  eq :: expr k a -> expr k a -> expr k Bool
+  lt :: expr k a -> expr k a -> expr k Bool
+  gt :: expr k a -> expr k a -> expr k Bool
+  infix 4 `eq`, `lt`, `gt`
 
-(^.) :: RExpr k a -> Prj a b -> RExpr k b
+  (^.) :: expr k a -> Prj a b -> expr k b
 
-(!) :: (RExpr k :.: []) a -> RExpr k Int -> RExpr k a
-C v ! n = RExpr $ renderExpr v <> brackets (renderExpr n)
-
-infixl 9 !
-
+  (!) :: (expr k :.: []) a -> expr k Int -> expr k a
+  infixl 9 !
 
 newtype RExpr (k :: Shader.Stage) a = RExpr { renderExpr :: Doc () }
 
@@ -508,64 +464,65 @@ instance Floating (RExpr k a) where
   atanh a = fn "atanh" [ renderExpr a ]
   pi = lit pi
 
+instance Expr RExpr where
+  get = RExpr . renderRef
 
-get = RExpr . renderRef
+  a ^. Prj s = RExpr $ renderExpr a <> pretty s
+  a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a ^/  b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
+  a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  eq a b = RExpr . parens $ renderExpr a <+> pretty "==" <+> renderExpr b
+  lt a b = RExpr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
+  gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
 
-a ^. Prj s = RExpr $ renderExpr a <> pretty s
-a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-a ^/  b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
-a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-eq a b = RExpr . parens $ renderExpr a <+> pretty "==" <+> renderExpr b
-lt a b = RExpr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
-gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
+  float a = fn "float" [ renderExpr a ]
+  double a = fn "double" [ renderExpr a ]
 
-float a = fn "float" [ renderExpr a ]
-double a = fn "double" [ renderExpr a ]
+  log2 = fn "log2" . pure . coerce
+  exp2 = fn "exp2" . pure . coerce
+  fract = fn "fract" . pure . coerce
 
-log2 = fn "log2" . pure . coerce
-exp2 = fn "exp2" . pure . coerce
-fract = fn "fract" . pure . coerce
+  vec2 = fn "vec2" . coerce
+  vec3 = fn "vec3" . coerce
+  vec4 = fn "vec4" . coerce
 
-vec2 = fn "vec2" . coerce
-vec3 = fn "vec3" . coerce
-vec4 = fn "vec4" . coerce
+  dvec2 = fn "dvec2" . coerce
+  dvec3 = fn "dvec3" . coerce
+  dvec4 = fn "dvec4" . coerce
 
-dvec2 = fn "dvec2" . coerce
-dvec3 = fn "dvec3" . coerce
-dvec4 = fn "dvec4" . coerce
+  mat2 = fn "mat2" . coerce
+  mat3 = fn "mat3" . coerce
+  mat4 = fn "mat4" . coerce
 
-mat2 = fn "mat2" . coerce
-mat3 = fn "mat3" . coerce
-mat4 = fn "mat4" . coerce
+  dmat2 = fn "dmat2" . coerce
+  dmat3 = fn "dmat3" . coerce
+  dmat4 = fn "dmat4" . coerce
 
-dmat2 = fn "dmat2" . coerce
-dmat3 = fn "dmat3" . coerce
-dmat4 = fn "dmat4" . coerce
+  ext3 a b = fn "vec3" [ renderExpr a, renderExpr b ]
+  ext4 a b = fn "vec4" [ renderExpr a, renderExpr b ]
 
-ext3 a b = fn "vec3" [ renderExpr a, renderExpr b ]
-ext4 a b = fn "vec4" [ renderExpr a, renderExpr b ]
+  dext3 a b = fn "dvec3" [ renderExpr a, renderExpr b ]
+  dext4 a b = fn "dvec4" [ renderExpr a, renderExpr b ]
 
-dext3 a b = fn "dvec3" [ renderExpr a, renderExpr b ]
-dext4 a b = fn "dvec4" [ renderExpr a, renderExpr b ]
+  norm a = fn "length" [ renderExpr a ]
+  dot a b = fn "dot" [ renderExpr a, renderExpr b ]
 
-norm a = fn "length" [ renderExpr a ]
-dot a b = fn "dot" [ renderExpr a, renderExpr b ]
+  lerp  t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
+  lerp2 t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
 
-lerp  t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
-lerp2 t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
+  dFdx a = fn "dFdx" [ renderExpr a ]
+  dFdy a = fn "dFdy" [ renderExpr a ]
 
-dFdx a = fn "dFdx" [ renderExpr a ]
-dFdy a = fn "dFdy" [ renderExpr a ]
+  mod' a b = fn "mod" [ renderExpr a, renderExpr b ]
+  min' a b = fn "min" [ renderExpr a, renderExpr b ]
+  max' a b = fn "max" [ renderExpr a, renderExpr b ]
+  atan2' a b = fn "atan" [ renderExpr a, renderExpr b ]
 
-mod' a b = fn "mod" [ renderExpr a, renderExpr b ]
-min' a b = fn "min" [ renderExpr a, renderExpr b ]
-max' a b = fn "max" [ renderExpr a, renderExpr b ]
-atan2' a b = fn "atan" [ renderExpr a, renderExpr b ]
+  texture a b = fn "texture" [ renderExpr a, renderExpr b ]
 
-texture a b = fn "texture" [ renderExpr a, renderExpr b ]
-
+  C v ! n = RExpr $ renderExpr v <> brackets (renderExpr n)
 
 fn :: String -> [Doc ()] -> RExpr k b
 fn n as = RExpr $ pretty n <> tupled as
