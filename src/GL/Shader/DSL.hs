@@ -338,7 +338,7 @@ ix :: Int -> Prj [a] a
 ix i = Prj ("[" <> show i <> "]")
 
 
-class Expr ref expr | expr -> ref where
+class Ref ref => Expr ref expr | expr -> ref where
   get :: ref k a -> expr k a
 
   gl_InstanceID :: expr 'Shader.Vertex Int
