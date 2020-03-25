@@ -265,11 +265,8 @@ primitiveOut ty mx = decl doc where
 
 -- Stmts
 
-runStmt :: (a -> Doc ()) -> Stmt k a -> Doc ()
-runStmt k = (`runCont` k) . getStmt
-
 renderStmt :: Stmt k () -> Doc ()
-renderStmt = runStmt (const mempty)
+renderStmt = (`runCont` const mempty) . getStmt
 
 newtype Stmt (k :: Shader.Stage) a = Stmt { getStmt :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
