@@ -141,6 +141,10 @@ instance Cat.Category (Stage d) where
 
 newtype RStage (i :: Type -> Type) (o :: Type -> Type) = RStage { renderStage :: [(Shader.Stage, Doc ())] }
 
+instance Cat.Category RStage where
+  id = RStage []
+  RStage l . RStage r = RStage $ r ++ l
+
 
 data None (v :: Type -> Type) = None
   deriving (Generic)
