@@ -406,7 +406,6 @@ class ( Ref ref
   get :: ref a -> expr a
 
   float :: expr a -> expr Float
-  double :: expr a -> expr Double
   cast' :: GL.Uniform b => K (expr a) b -> expr b
 
   log2 :: expr a -> expr a
@@ -536,7 +535,6 @@ instance Expr RRef RExpr where
   gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
 
   float a = fn "float" [ renderExpr a ]
-  double a = fn "double" [ renderExpr a ]
   cast' (K a :: K (expr a) b) = fn (GL.glslType @b) [ renderExpr a ]
 
   log2 = fn "log2" . pure . coerce
