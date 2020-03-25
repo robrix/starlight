@@ -58,6 +58,7 @@ module GL.Shader.DSL
 , RExpr(..)
 , Expr(..)
 , VertexExpr(..)
+, GeometryExpr
 , FragmentExpr(..)
   -- * Re-exports
 , Fields(..)
@@ -229,7 +230,7 @@ class Expr ref expr => Stmt ref expr stmt | stmt -> expr ref where
 
   infixr 4 .=, +=, *=, *!=
 
-class Stmt ref expr stmt => GeometryStmt ref expr stmt where
+class (GeometryExpr ref expr, Stmt ref expr stmt) => GeometryStmt ref expr stmt where
   emitVertex :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
   emitPrimitive :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
 
@@ -433,6 +434,8 @@ class Ref ref => Expr ref expr | expr -> ref where
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
   gl_InstanceID :: expr 'Shader.Vertex Int
 
+class (GeometryRef ref, Expr ref expr) => GeometryExpr ref expr where
+
 class (FragmentRef ref, Expr ref expr) => FragmentExpr ref expr where
   gl_FragCoord :: expr 'Shader.Fragment (V2 Float)
   gl_FrontFacing :: expr 'Shader.Fragment Bool
@@ -534,6 +537,8 @@ instance Expr RRef RExpr where
 
 instance VertexExpr RRef RExpr where
   gl_InstanceID = RExpr $ pretty "gl_InstanceID"
+
+instance GeometryExpr RRef RExpr where
 
 instance FragmentExpr RRef RExpr where
   gl_FragCoord = RExpr $ pretty "gl_FragCoord"
