@@ -29,6 +29,7 @@ module GL.Shader.DSL
   -- * Stmts
 , RStmt
 , Stmt(..)
+, FragmentStmt(..)
   -- * References (mutable variables)
 , RRef(..)
 , Ref(..)
@@ -227,6 +228,8 @@ class Expr ref expr => Stmt ref expr stmt | stmt -> expr ref where
 
   emitVertex :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
   emitPrimitive :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
+
+class (FragmentExpr ref expr, Stmt ref expr stmt) => FragmentStmt ref expr stmt where
   discard :: stmt 'Shader.Fragment ()
 
 instance Stmt RRef RExpr RStmt where
@@ -264,6 +267,7 @@ instance Stmt RRef RExpr RStmt where
     $  renderStmt m <> hardline
     <> pretty "EndPrimitive();" <> hardline
 
+instance FragmentStmt RRef RExpr RStmt where
   discard = stmt $ pretty "discard" <> pretty ';' <> hardline
 
 renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
