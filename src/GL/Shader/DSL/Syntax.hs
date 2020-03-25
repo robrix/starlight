@@ -83,7 +83,7 @@ class Dim expr where
 class Expr expr where
   let' :: Uniform a => expr a -> (expr a -> expr b) -> expr b
 
-  case' :: expr a -> [(a, expr b)] -> expr b
+  case' :: expr a -> [(expr a, expr b)] -> expr b
 
   lam :: Uniform a => (expr a -> expr b) -> expr (a -> b)
   ($$) :: expr (a -> b) -> (expr a -> expr b)
