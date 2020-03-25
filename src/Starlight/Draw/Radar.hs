@@ -198,7 +198,7 @@ targetShader
             , vec2 [ sin theta,  cos theta ]
             ]
       i <- var @_ @_ @_ @Int "i" (-count)
-      while (get i `lt` (count + 1)) . emitPrimitive $ do
+      while (get i `lt` count + 1) . emitPrimitive $ do
         theta <- let' "theta" (float (get i) / float count * coerce (sweep ! 0))
         emitVertex $ do
           gl_Position .= ext4 (vec3 [0]) 1
