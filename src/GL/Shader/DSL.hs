@@ -28,6 +28,7 @@ module GL.Shader.DSL
 , Decl(..)
 , VertexDecl
 , GeometryDecl(..)
+, FragmentDecl
   -- * Stmts
 , RStmt
 , Stmt(..)
@@ -189,6 +190,8 @@ class (GeometryStmt ref expr stmt, Decl ref expr stmt decl) => GeometryDecl ref 
   primitiveIn :: P.Type -> decl 'Shader.Geometry ()
   primitiveOut :: P.Type -> Int -> decl 'Shader.Geometry ()
 
+class (FragmentStmt ref expr stmt, Decl ref expr stmt decl) => FragmentDecl ref expr stmt decl where
+
 instance Decl RRef RExpr RStmt RDecl where
   main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
@@ -214,6 +217,8 @@ instance GeometryDecl RRef RExpr RStmt RDecl where
       P.LineLoop      -> pretty "line_strip"
       P.TriangleStrip -> pretty "triangle_strip"
       P.Triangles     -> pretty "triangle_strip"
+
+instance FragmentDecl RRef RExpr RStmt RDecl where
 
 
 -- Stmts
