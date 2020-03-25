@@ -26,6 +26,7 @@ module GL.Shader.DSL
   -- * Decls
 , RDecl
 , Decl(..)
+, GeometryDecl(..)
   -- * Stmts
 , RStmt
 , Stmt(..)
@@ -179,12 +180,15 @@ decl d = RDecl . cont $ \ k -> d <> k ()
 
 class Stmt ref expr stmt => Decl ref expr stmt decl | decl -> stmt where
   main :: stmt k () -> decl k ()
+
+class (GeometryStmt ref expr stmt, Decl ref expr stmt decl) => GeometryDecl ref expr stmt decl where
   primitiveIn :: P.Type -> decl 'Shader.Geometry ()
   primitiveOut :: P.Type -> Int -> decl 'Shader.Geometry ()
 
 instance Decl RRef RExpr RStmt RDecl where
   main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
+instance GeometryDecl RRef RExpr RStmt RDecl where
   primitiveIn ty = decl doc where
     doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
     render = \case
