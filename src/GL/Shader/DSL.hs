@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
@@ -27,24 +28,7 @@ module GL.Shader.DSL
 , Decl(..)
   -- * Stmts
 , RStmt
-  -- ** Variables
-, let'
-, var
-  -- ** Control flow
-, iff
-, switch
-, break
-, while
-  -- ** Assignment
-, (.=)
-, (+=)
-, (*=)
-, (*!=)
-  -- ** Geometry shaders
-, emitVertex
-, emitPrimitive
-  -- ** Fragment shaders
-, discard
+, Stmt(..)
   -- * References (mutable variables)
 , Ref(..)
 , gl_Position
@@ -234,12 +218,12 @@ newtype RDecl (k :: Shader.Stage) a = RDecl { getDecl :: Cont (Doc ()) a }
 decl :: Doc () -> RDecl k ()
 decl d = RDecl . cont $ \ k -> d <> k ()
 
-class Decl decl where
-  main :: RStmt k () -> decl k ()
+class Decl stmt decl | decl -> stmt where
+  main :: stmt k () -> decl k ()
   primitiveIn :: P.Type -> decl 'Shader.Geometry ()
   primitiveOut :: P.Type -> Int -> decl 'Shader.Geometry ()
 
-instance Decl RDecl where
+instance Decl RStmt RDecl where
   main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
   primitiveIn ty = decl doc where
@@ -271,56 +255,62 @@ renderStmt = (`runCont` const mempty) . getStmt
 newtype RStmt (k :: Shader.Stage) a = RStmt { getStmt :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-let' :: GL.Uniform a => String -> RExpr k a -> RStmt k (RExpr k a)
-let' n v = RStmt . cont $ \ k
-  -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-  <> k (RExpr (pretty n))
+class Stmt stmt where
+  let' :: GL.Uniform a => String -> RExpr k a -> stmt k (RExpr k a)
+  var :: GL.Uniform a => String -> RExpr k a -> stmt k (Ref k a)
 
-var :: GL.Uniform a => String -> RExpr k a -> RStmt k (Ref k a)
-var n v = RStmt . cont $ \ k
-  -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-  <> k (Ref n)
+  iff :: RExpr k Bool -> stmt k () -> stmt k () -> stmt k ()
+  switch :: RExpr k Int -> [(Maybe Int, stmt k ())] -> stmt k ()
+  break :: stmt k ()
+  while :: RExpr k Bool -> stmt k () -> stmt k ()
 
-iff :: RExpr k Bool -> RStmt k () -> RStmt k () -> RStmt k ()
-iff c t e = stmt $ pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
+  (.=) :: Ref k a -> RExpr k a -> stmt k ()
+  (+=) :: Ref k a -> RExpr k a -> stmt k ()
+  (*=) :: Ref k a -> RExpr k a -> stmt k ()
+  (*!=) :: Ref k (v a) -> RExpr k (v (v a)) -> stmt k ()
 
-switch :: RExpr k Int -> [(Maybe Int, RStmt k ())] -> RStmt k ()
-switch s cs = stmt $ pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
-  where
-  renderCase (i, s) = maybe (pretty "default:" <> hardline) (\ i -> pretty "case" <+> pretty i <> pretty ':') i  <> hardline <> renderStmt s
+  infixr 4 .=, +=, *=, *!=
 
-break :: RStmt k ()
-break = stmt $ pretty "break" <+> pretty ';' <> hardline
+  emitVertex :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
+  emitPrimitive :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
+  discard :: stmt 'Shader.Fragment ()
 
-while :: RExpr k Bool -> RStmt k () -> RStmt k ()
-while c t = stmt $ pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
+instance Stmt RStmt where
+  let' n v = RStmt . cont $ \ k
+    -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+    <> k (RExpr (pretty n))
 
-(.=) :: Ref k a -> RExpr k a -> RStmt k ()
-r .= v = stmt $ renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+  var n v = RStmt . cont $ \ k
+    -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
+    <> k (Ref n)
 
-(+=) :: Ref k a -> RExpr k a -> RStmt k ()
-r += v = stmt $ renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
+  iff c t e = stmt $ pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
 
-(*=) :: Ref k a -> RExpr k a -> RStmt k ()
-r *= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+  switch s cs = stmt $ pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
+    where
+    renderCase (i, s) = maybe (pretty "default:" <> hardline) (\ i -> pretty "case" <+> pretty i <> pretty ':') i  <> hardline <> renderStmt s
 
-(*!=) :: Ref k (v a) -> RExpr k (v (v a)) -> RStmt k ()
-r *!= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+  break = stmt $ pretty "break" <+> pretty ';' <> hardline
 
-infixr 4 .=, +=, *=, *!=
+  while c t = stmt $ pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
 
-emitVertex :: RStmt 'Shader.Geometry () -> RStmt 'Shader.Geometry ()
-emitVertex m = stmt
-  $  renderStmt m <> hardline
-  <> pretty "EmitVertex();" <> hardline
+  r .= v = stmt $ renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
 
-emitPrimitive :: RStmt 'Shader.Geometry () -> RStmt 'Shader.Geometry ()
-emitPrimitive m = stmt
-  $  renderStmt m <> hardline
-  <> pretty "EndPrimitive();" <> hardline
+  r += v = stmt $ renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
 
-discard :: RStmt 'Shader.Fragment ()
-discard = stmt $ pretty "discard" <> pretty ';' <> hardline
+  r *= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+
+  r *!= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
+
+  emitVertex m = stmt
+    $  renderStmt m <> hardline
+    <> pretty "EmitVertex();" <> hardline
+
+  emitPrimitive m = stmt
+    $  renderStmt m <> hardline
+    <> pretty "EndPrimitive();" <> hardline
+
+  discard = stmt $ pretty "discard" <> pretty ';' <> hardline
 
 renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
 renderTypeOf _ = pretty (GL.glslType @a)
