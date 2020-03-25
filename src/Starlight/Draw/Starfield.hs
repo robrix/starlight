@@ -104,7 +104,7 @@ shader
     dir^^._xy *!= rot2
     focus^^._xz *!= dmat2 [rot1]
     focus^^._xy *!= dmat2 [rot2]
-    focus <- let' "focus2" $ cast @_ @(V3 Float) (get focus `mod'` dv3 (pure (tile * 2))) * 10
+    focus <- let' "focus2" $ cast @_ @(V3 Float) (get focus `mod'` v3 (pure (tile * 2))) * 10
     v <- var "v" $ v3 0
     r <- var @_ @_ @_ @Int "r" 2
     while (get r `lt` volsteps) $ do

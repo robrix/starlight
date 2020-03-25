@@ -352,13 +352,9 @@ _a = Prj ".a"
 
 
 class Vec expr where
-  v2 :: V2 (expr Float) -> expr (V2 Float)
-  v3 :: V3 (expr Float) -> expr (V3 Float)
-  v4 :: V4 (expr Float) -> expr (V4 Float)
-
-  dv2 :: V2 (expr Double) -> expr (V2 Double)
-  dv3 :: V3 (expr Double) -> expr (V3 Double)
-  dv4 :: V4 (expr Double) -> expr (V4 Double)
+  v2 :: GL.Row a => V2 (expr a) -> expr (V2 a)
+  v3 :: GL.Row a => V3 (expr a) -> expr (V3 a)
+  v4 :: GL.Row a => V4 (expr a) -> expr (V4 a)
 
   ext3 :: expr (V2 Float) -> expr Float -> expr (V3 Float)
   ext4 :: expr (V3 Float) -> expr Float -> expr (V4 Float)
@@ -481,13 +477,9 @@ instance Floating (RExpr a) where
   pi = lit pi
 
 instance Vec RExpr where
-  v2 = fn "vec2" . coerce . toList
-  v3 = fn "vec3" . coerce . toList
-  v4 = fn "vec4" . coerce . toList
-
-  dv2 = fn "dvec2" . coerce . toList
-  dv3 = fn "dvec3" . coerce . toList
-  dv4 = fn "dvec4" . coerce . toList
+  v2 (v :: V2 (expr a)) = fn (GL.glslType @(V2 a)) (coerce (toList v))
+  v3 (v :: V3 (expr a)) = fn (GL.glslType @(V3 a)) (coerce (toList v))
+  v4 (v :: V4 (expr a)) = fn (GL.glslType @(V4 a)) (coerce (toList v))
 
   ext3 a b = fn "vec3" [ renderExpr a, renderExpr b ]
   ext4 a b = fn "vec4" [ renderExpr a, renderExpr b ]
