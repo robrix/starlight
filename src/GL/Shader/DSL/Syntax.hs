@@ -16,6 +16,7 @@ module GL.Shader.DSL.Syntax
 import Data.Functor.C
 import Data.Functor.I
 import Geometry.Transform (Transform)
+import GL.Uniform
 import Linear.Matrix
 import Linear.V2
 import Linear.V3
@@ -80,7 +81,7 @@ class Dim expr where
   infixl 7 .*., ^*., .*^, ./., ^/., ./^
 
 class Expr expr where
-  let' :: expr a -> (expr a -> expr b) -> expr b
+  let' :: Uniform a => expr a -> (expr a -> expr b) -> expr b
 
   case' :: expr a -> [(a, expr b)] -> expr b
 
