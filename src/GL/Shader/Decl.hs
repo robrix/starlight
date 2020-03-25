@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 module GL.Shader.Decl
@@ -18,12 +19,13 @@ import           GL.Shader (Stage(..))
 import           GL.Shader.Stmt
 
 runDecl :: (a -> Doc ()) -> Decl k a -> Doc ()
-runDecl = flip runCont
+runDecl k = (`runCont` k) . getDecl
 
-type Decl (k :: Stage) = Cont (Doc ())
+newtype Decl (k :: Stage) a = Decl { getDecl :: Cont (Doc ()) a }
+  deriving (Applicative, Functor, Monad)
 
 raw :: Doc () -> Decl k ()
-raw d = cont $ \ k -> d <> k ()
+raw d = Decl . cont $ \ k -> d <> k ()
 
 main :: Stmt k () -> Decl k ()
 main body = raw (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
