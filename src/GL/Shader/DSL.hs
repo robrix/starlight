@@ -17,7 +17,7 @@ module GL.Shader.DSL
 , None(..)
 , shaderSources
 , Frag(..)
-  -- * Declarations
+  -- * Decls
 , Decl
 , main
 , primitiveIn
@@ -131,6 +131,8 @@ newtype Frag v = Frag { fragColour :: v (Colour Float) }
 
 instance Vars Frag
 
+
+-- Decls
 
 runDecl :: (a -> Doc ()) -> Decl k a -> Doc ()
 runDecl k = (`runCont` k) . getDecl
