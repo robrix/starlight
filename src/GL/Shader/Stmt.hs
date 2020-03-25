@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -36,20 +37,21 @@ import qualified GL.Uniform as GL
 import           Prelude hiding (break)
 
 runStmt :: (a -> Doc ()) -> Stmt k a -> Doc ()
-runStmt = flip runCont
+runStmt k = (`runCont` k) . getStmt
 
 renderStmt :: Stmt k () -> Doc ()
 renderStmt = runStmt (const mempty)
 
-type Stmt (k :: Stage) = Cont (Doc ())
+newtype Stmt (k :: Stage) a = Stmt { getStmt :: Cont (Doc ()) a }
+  deriving (Applicative, Functor, Monad)
 
 let' :: GL.Uniform a => String -> Expr k a -> Stmt k (Expr k a)
-let' n v = cont $ \ k
+let' n v = Stmt . cont $ \ k
   -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
   <> k (Expr (pretty n))
 
 var :: GL.Uniform a => String -> Expr k a -> Stmt k (Ref k a)
-var n v = cont $ \ k
+var n v = Stmt . cont $ \ k
   -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
   <> k (Ref n)
 
@@ -99,4 +101,4 @@ renderTypeOf _ = pretty (GL.glslType @a)
 
 
 stmt :: Doc () -> Stmt k ()
-stmt d = cont $ \ k -> d <> k ()
+stmt d = Stmt . cont $ \ k -> d <> k ()
