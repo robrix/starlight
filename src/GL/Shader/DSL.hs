@@ -24,9 +24,7 @@ module GL.Shader.DSL
 , Frag(..)
   -- * Decls
 , RDecl
-, main
-, primitiveIn
-, primitiveOut
+, Decl(..)
   -- * Stmts
 , RStmt
   -- ** Variables
@@ -236,31 +234,33 @@ newtype RDecl (k :: Shader.Stage) a = RDecl { getDecl :: Cont (Doc ()) a }
 decl :: Doc () -> RDecl k ()
 decl d = RDecl . cont $ \ k -> d <> k ()
 
-main :: RStmt k () -> RDecl k ()
-main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
+class Decl decl where
+  main :: RStmt k () -> decl k ()
+  primitiveIn :: P.Type -> decl 'Shader.Geometry ()
+  primitiveOut :: P.Type -> Int -> decl 'Shader.Geometry ()
 
+instance Decl RDecl where
+  main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
-primitiveIn :: P.Type -> RDecl 'Shader.Geometry ()
-primitiveIn ty = decl doc where
-  doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
-  render = \case
-    P.Points        -> pretty "points"
-    P.Lines         -> pretty "lines"
-    P.LineStrip     -> pretty "lines"
-    P.LineLoop      -> pretty "lines"
-    P.TriangleStrip -> pretty "triangles"
-    P.Triangles     -> pretty "triangles"
+  primitiveIn ty = decl doc where
+    doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
+    render = \case
+      P.Points        -> pretty "points"
+      P.Lines         -> pretty "lines"
+      P.LineStrip     -> pretty "lines"
+      P.LineLoop      -> pretty "lines"
+      P.TriangleStrip -> pretty "triangles"
+      P.Triangles     -> pretty "triangles"
 
-primitiveOut :: P.Type -> Int -> RDecl 'Shader.Geometry ()
-primitiveOut ty mx = decl doc where
-  doc = pretty "layout" <+> parens (render ty <> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) <+> pretty "out;" <> hardline
-  render = \case
-    P.Points        -> pretty "points"
-    P.Lines         -> pretty "line_strip"
-    P.LineStrip     -> pretty "line_strip"
-    P.LineLoop      -> pretty "line_strip"
-    P.TriangleStrip -> pretty "triangle_strip"
-    P.Triangles     -> pretty "triangle_strip"
+  primitiveOut ty mx = decl doc where
+    doc = pretty "layout" <+> parens (render ty <> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) <+> pretty "out;" <> hardline
+    render = \case
+      P.Points        -> pretty "points"
+      P.Lines         -> pretty "line_strip"
+      P.LineStrip     -> pretty "line_strip"
+      P.LineLoop      -> pretty "line_strip"
+      P.TriangleStrip -> pretty "triangle_strip"
+      P.Triangles     -> pretty "triangle_strip"
 
 
 -- Stmts
