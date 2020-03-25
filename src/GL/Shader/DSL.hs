@@ -31,9 +31,7 @@ module GL.Shader.DSL
 , Stmt(..)
   -- * References (mutable variables)
 , RRef(..)
-, gl_Position
-, gl_PointSize
-, (^^.)
+, Ref(..)
 
   -- * Projections
 , Prj
@@ -279,18 +277,18 @@ data RRef (k :: Shader.Stage) t
   = Ref String
   | forall s . RRef k s :^^. Prj s t
 
-gl_Position :: RRef k (V4 Float)
-gl_Position = Ref "gl_Position"
+class Ref ref where
+  gl_Position :: ref k (V4 Float)
+  gl_PointSize :: ref 'Shader.Vertex Float
 
-gl_PointSize :: RRef 'Shader.Vertex Float
-gl_PointSize = Ref "gl_PointSize"
+  (^^.) :: ref k a -> Prj a b -> ref k b
+  infixl 8 ^^.
 
+instance Ref RRef where
+  gl_Position = Ref "gl_Position"
+  gl_PointSize = Ref "gl_PointSize"
 
-(^^.) :: RRef k a -> Prj a b -> RRef k b
-(^^.) = (:^^.)
-
-infixl 8 ^^.
-
+  (^^.) = (:^^.)
 
 renderRef :: RRef k a -> Doc ()
 renderRef = \case
