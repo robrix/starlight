@@ -54,6 +54,7 @@ module GL.Shader.DSL
 , RExpr(..)
 , Expr(..)
 , VertexExpr(..)
+, FragmentExpr(..)
   -- * Re-exports
 , Fields(..)
 , Vars
@@ -348,9 +349,6 @@ class Ref ref => Expr ref expr | expr -> ref where
   get :: ref k a -> expr k a
 
   gl_Positions :: expr 'Shader.Geometry [V4 Float]
-  gl_FragCoord :: expr 'Shader.Fragment (V2 Float)
-  gl_FrontFacing :: expr 'Shader.Fragment Bool
-  gl_PointCoord :: expr 'Shader.Fragment (V2 Float)
 
   float :: expr k a -> expr k Float
   double :: expr k a -> expr k Double
@@ -420,6 +418,11 @@ class Ref ref => Expr ref expr | expr -> ref where
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
   gl_InstanceID :: expr 'Shader.Vertex Int
 
+class Expr ref expr => FragmentExpr ref expr where
+  gl_FragCoord :: expr 'Shader.Fragment (V2 Float)
+  gl_FrontFacing :: expr 'Shader.Fragment Bool
+  gl_PointCoord :: expr 'Shader.Fragment (V2 Float)
+
 newtype RExpr (k :: Shader.Stage) a = RExpr { renderExpr :: Doc () }
 
 instance Num (RExpr k a) where
@@ -458,9 +461,6 @@ instance Expr RRef RExpr where
   get = RExpr . renderRef
 
   gl_Positions = RExpr $ pretty "gl_Position"
-  gl_FragCoord = RExpr $ pretty "gl_FragCoord"
-  gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
-  gl_PointCoord = RExpr $ pretty "gl_PointCoord"
 
   a ^. Prj s = RExpr $ renderExpr a <> pretty s
   a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
@@ -521,6 +521,11 @@ instance Expr RRef RExpr where
 
 instance VertexExpr RRef RExpr where
   gl_InstanceID = RExpr $ pretty "gl_InstanceID"
+
+instance FragmentExpr RRef RExpr where
+  gl_FragCoord = RExpr $ pretty "gl_FragCoord"
+  gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
+  gl_PointCoord = RExpr $ pretty "gl_PointCoord"
 
 fn :: String -> [Doc ()] -> RExpr k b
 fn n as = RExpr $ pretty n <> tupled as
