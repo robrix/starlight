@@ -227,11 +227,8 @@ instance Vars Frag
 
 -- Decls
 
-runDecl :: (a -> Doc ()) -> Decl k a -> Doc ()
-runDecl k = (`runCont` k) . getDecl
-
 renderDecl :: Decl k a -> Doc ()
-renderDecl = runDecl (const mempty)
+renderDecl = (`runCont` const mempty) . getDecl
 
 newtype Decl (k :: Shader.Stage) a = Decl { getDecl :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
