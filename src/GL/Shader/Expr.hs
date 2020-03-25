@@ -103,21 +103,21 @@ gl_PointSize :: Ref 'Vertex Float
 gl_PointSize = Ref "gl_PointSize"
 
 gl_InstanceID :: Expr 'Vertex Int
-gl_InstanceID = var "gl_InstanceID"
+gl_InstanceID = Expr $ pretty "gl_InstanceID"
 
 
 gl_Positions :: Expr 'Geometry [V4 Float]
-gl_Positions = var "gl_Position"
+gl_Positions = Expr $ pretty "gl_Position"
 
 
 gl_FragCoord :: Expr 'Fragment (V2 Float)
-gl_FragCoord = var "gl_FragCoord"
+gl_FragCoord = Expr $ pretty "gl_FragCoord"
 
 gl_FrontFacing :: Expr 'Fragment Bool
-gl_FrontFacing = var "gl_FrontFacing"
+gl_FrontFacing = Expr $ pretty "gl_FrontFacing"
 
 gl_PointCoord :: Expr 'Fragment (V2 Float)
-gl_PointCoord = var "gl_PointCoord"
+gl_PointCoord = Expr $ pretty "gl_PointCoord"
 
 
 (^^.) :: Ref k a -> Prj a b -> Ref k b
@@ -173,9 +173,6 @@ _a = Prj ".a"
 ix :: Int -> Prj [a] a
 ix i = Prj ("[" <> show i <> "]")
 
-
-var :: String -> Expr k a
-var = Expr . pretty
 
 get :: Ref k a -> Expr k a
 
