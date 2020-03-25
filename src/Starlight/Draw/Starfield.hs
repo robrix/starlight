@@ -87,7 +87,7 @@ shader = program $ \ U{ resolution, focus, zoom }
     gl_Position .= ext4 (ext3 pos 0) 1)
 
   >>> fragment (\ None Frag{ fragColour } -> main $ do
-    resolution <- let' @_ @_ @(V2 Float) "resolution" (coerce resolution)
+    resolution <- let' @_ @_ @_ @(V2 Float) "resolution" (coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * vec2 [1, resolution^._y / resolution^._x]
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var "focus" $ dext3 focus 1
@@ -107,14 +107,14 @@ shader = program $ \ U{ resolution, focus, zoom }
     focus^^._xy *!= dmat2 [rot2]
     focus <- let' "focus2" $ vec3 [ get focus `mod'` dvec3 [tile * 2] ] * 10
     v <- var "v" $ vec3 [0]
-    r <- var @_ @_ @Int "r" 2
+    r <- var @_ @_ @_ @Int "r" 2
     while (get r `lt` volsteps) $ do
       s <- let' "s" (0.1 + 0.125 * float (get r))
       p <- var "p" $ focus + get dir D.^* s
       p .= abs (vec3 [tile] - (get p `mod'` vec3 [tile * 2]))
       pa <- var "pa" 0
       a <- var "a" 0
-      i <- var @_ @_ @Int "i" 0
+      i <- var @_ @_ @_ @Int "i" 0
       while (get i `lt` iterations) $ do
         p .= abs (get p) ^/ dot (get p) (get p) - formuparam
         prev <- let' "prev" (get pa)
