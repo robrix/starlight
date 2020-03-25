@@ -4,8 +4,9 @@ module GL.Shader.DSL.Syntax
 ( Mat(..)
 , Vec(..)
 , Scalar(..)
-, Expr(..)
 , Dim(..)
+, Expr(..)
+, Boolean(..)
 , false
 , true
 , Geom(..)
@@ -78,8 +79,6 @@ class Dim expr where
   infixl 7 .*., ^*., .*^, ./., ^/., ./^
 
 class Expr expr where
-  -- general syntax
-
   let' :: expr a -> (expr a -> expr b) -> expr b
 
   case' :: expr a -> [(a, expr b)] -> expr b
@@ -91,8 +90,7 @@ class Expr expr where
 
   loop :: Integral a => (expr a, expr a) -> (expr a -> expr b) -> expr b
 
-  -- booleans
-
+class Boolean expr where
   fromBool :: Bool -> expr Bool
   iff :: expr Bool -> expr a -> expr a -> expr a
 
@@ -102,7 +100,7 @@ class Expr expr where
 
   infixl 9 !
 
-false, true :: Expr expr => expr Bool
+false, true :: Boolean expr => expr Bool
 false = fromBool False
 true  = fromBool True
 
