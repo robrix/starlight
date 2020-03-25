@@ -1,5 +1,4 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -137,7 +136,7 @@ renderStage t g u f = pure . (,) t
   <> foldVars (getK . value) (makeVars (pvar "out"     . name) `like` o)
   <> renderDecl (f u i o) where
   i = makeVars (g . RExpr . pretty . name)
-  o = makeVars (Ref . name)
+  o = makeVars (RRef . pretty . name)
 
 like :: t (K a) -> t b -> t (K a)
 like = const
@@ -243,7 +242,7 @@ instance Stmt RRef RExpr RStmt where
 
   var n v = RStmt . cont $ \ k
     -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-    <> k (Ref n)
+    <> k (RRef (pretty n))
 
   iff c t e = stmt $ pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
 
@@ -287,9 +286,7 @@ stmt d = RStmt . cont $ \ k -> d <> k ()
 
 -- Exprs
 
-data RRef t
-  = Ref String
-  | forall s . RRef s :^^. Prj s t
+newtype RRef a = RRef { renderRef :: Doc () }
 
 class Ref ref where
   gl_Position :: ref (V4 Float)
@@ -305,21 +302,16 @@ class Ref ref => GeometryRef ref where
 class Ref ref => FragmentRef ref where
 
 instance Ref RRef where
-  gl_Position = Ref "gl_Position"
+  gl_Position = RRef $ pretty "gl_Position"
 
-  (^^.) = (:^^.)
+  r ^^. Prj p = RRef $ renderRef r <> pretty p
 
 instance VertexRef RRef where
-  gl_PointSize = Ref "gl_PointSize"
+  gl_PointSize = RRef $ pretty "gl_PointSize"
 
 instance GeometryRef RRef where
 
 instance FragmentRef RRef where
-
-renderRef :: RRef a -> Doc ()
-renderRef = \case
-  Ref n        -> pretty n
-  r :^^. Prj p -> renderRef r <> pretty p
 
 
 newtype Prj s t = Prj String
