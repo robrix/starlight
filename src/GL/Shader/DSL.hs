@@ -118,12 +118,6 @@ instance Vars None
 
 shaderSources :: RShader u i o -> [(Shader.Stage, String)]
 shaderSources (RShader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> f
---   where
---   u = makeVars (RExpr . pretty . name)
-  -- prefix x
-  --   =  pretty "#version 410" <> hardline
-  --   <> foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
-  --   <> x
 
 renderStage :: (Vars u, Vars i, Vars o) => Shader.Stage -> (forall a . RExpr a -> f a) -> u RExpr -> (u RExpr -> i f -> o RRef -> RDecl ()) -> [(Shader.Stage, Doc ())]
 renderStage t g u f = pure . (,) t
