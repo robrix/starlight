@@ -172,7 +172,7 @@ radarShader
             ]
       emitPrimitive $ do
         i <- var @_ @_ @_ @Int "i" (-count)
-        while (get i `lt` (count + 1)) $ do
+        while (get i `lt` count + 1) $ do
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float count * coerce (sweep ! 0))
             gl_Position .= coerce matrix D.!*! mat4 [rot theta] !* coerce (pos ! 0)
