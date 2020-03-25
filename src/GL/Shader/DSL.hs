@@ -30,6 +30,7 @@ module GL.Shader.DSL
 , RStmt
 , Stmt(..)
 , FragmentStmt(..)
+, GeometryStmt(..)
   -- * References (mutable variables)
 , RRef(..)
 , Ref(..)
@@ -226,6 +227,7 @@ class Expr ref expr => Stmt ref expr stmt | stmt -> expr ref where
 
   infixr 4 .=, +=, *=, *!=
 
+class Stmt ref expr stmt => GeometryStmt ref expr stmt where
   emitVertex :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
   emitPrimitive :: stmt 'Shader.Geometry () -> stmt 'Shader.Geometry ()
 
@@ -259,6 +261,7 @@ instance Stmt RRef RExpr RStmt where
 
   r *!= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
 
+instance GeometryStmt RRef RExpr RStmt where
   emitVertex m = stmt
     $  renderStmt m <> hardline
     <> pretty "EmitVertex();" <> hardline
