@@ -3,6 +3,7 @@
 module GL.Shader.DSL.Syntax
 ( Mat(..)
 , Vec(..)
+, Scalar(..)
 , Expr(..)
 , false
 , true
@@ -54,9 +55,7 @@ class Vec expr where
 
   infixl 7 ^*, *^, ^/
 
-class Expr expr where
-  -- scalar
-
+class Scalar expr where
   atan2 :: Unit Length length => expr (length Float) -> expr (length Float) -> expr (I Float)
 
   float :: expr (scalar a) -> expr (scalar Float)
@@ -67,6 +66,7 @@ class Expr expr where
 
   infix 4 <, >, <=, >=, ==
 
+class Expr expr where
   -- units
 
   (.*.) :: expr (u a) -> expr (v a) -> expr (Mul u v a)
