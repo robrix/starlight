@@ -33,11 +33,6 @@ module GL.Shader.DSL
 , Ref(..)
 , gl_Position
 , gl_PointSize
-, gl_InstanceID
-, gl_Positions
-, gl_FragCoord
-, gl_FrontFacing
-, gl_PointCoord
 , (^^.)
 
   -- * Projections
@@ -290,23 +285,6 @@ gl_Position = Ref "gl_Position"
 gl_PointSize :: Ref 'Shader.Vertex Float
 gl_PointSize = Ref "gl_PointSize"
 
-gl_InstanceID :: RExpr 'Shader.Vertex Int
-gl_InstanceID = RExpr $ pretty "gl_InstanceID"
-
-
-gl_Positions :: RExpr 'Shader.Geometry [V4 Float]
-gl_Positions = RExpr $ pretty "gl_Position"
-
-
-gl_FragCoord :: RExpr 'Shader.Fragment (V2 Float)
-gl_FragCoord = RExpr $ pretty "gl_FragCoord"
-
-gl_FrontFacing :: RExpr 'Shader.Fragment Bool
-gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
-
-gl_PointCoord :: RExpr 'Shader.Fragment (V2 Float)
-gl_PointCoord = RExpr $ pretty "gl_PointCoord"
-
 
 (^^.) :: Ref k a -> Prj a b -> Ref k b
 (^^.) = (:^^.)
@@ -364,6 +342,12 @@ ix i = Prj ("[" <> show i <> "]")
 
 class Expr expr where
   get :: Ref k a -> expr k a
+
+  gl_InstanceID :: expr 'Shader.Vertex Int
+  gl_Positions :: expr 'Shader.Geometry [V4 Float]
+  gl_FragCoord :: expr 'Shader.Fragment (V2 Float)
+  gl_FrontFacing :: expr 'Shader.Fragment Bool
+  gl_PointCoord :: expr 'Shader.Fragment (V2 Float)
 
   float :: expr k a -> expr k Float
   double :: expr k a -> expr k Double
@@ -466,6 +450,12 @@ instance Floating (RExpr k a) where
 
 instance Expr RExpr where
   get = RExpr . renderRef
+
+  gl_InstanceID = RExpr $ pretty "gl_InstanceID"
+  gl_Positions = RExpr $ pretty "gl_Position"
+  gl_FragCoord = RExpr $ pretty "gl_FragCoord"
+  gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
+  gl_PointCoord = RExpr $ pretty "gl_PointCoord"
 
   a ^. Prj s = RExpr $ renderExpr a <> pretty s
   a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
