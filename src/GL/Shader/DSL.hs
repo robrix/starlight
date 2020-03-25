@@ -66,14 +66,15 @@ module GL.Shader.DSL
 , M33
 , M44
 , TextureUnit
-, V2
-, V3
-, V4
+, V2(..)
+, V3(..)
+, V4(..)
 ) where
 
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Cont
 import           Data.Coerce
+import           Data.Foldable (toList)
 import           Data.Function (fix)
 import           Data.Functor.C
 import           Data.Functor.K
@@ -358,6 +359,14 @@ class ( Ref ref
   float :: expr a -> expr Float
   double :: expr a -> expr Double
 
+  v2 :: V2 (expr Float) -> expr (V2 Float)
+  v3 :: V3 (expr Float) -> expr (V3 Float)
+  v4 :: V4 (expr Float) -> expr (V4 Float)
+
+  dv2 :: V2 (expr Double) -> expr (V2 Double)
+  dv3 :: V3 (expr Double) -> expr (V3 Double)
+  dv4 :: V4 (expr Double) -> expr (V4 Double)
+
   vec2 :: [expr a] -> expr (V2 Float)
   vec3 :: [expr a] -> expr (V3 Float)
   vec4 :: [expr a] -> expr (V4 Float)
@@ -483,6 +492,14 @@ instance Expr RRef RExpr where
   log2 = fn "log2" . pure . coerce
   exp2 = fn "exp2" . pure . coerce
   fract = fn "fract" . pure . coerce
+
+  v2 = fn "vec2" . coerce . toList
+  v3 = fn "vec3" . coerce . toList
+  v4 = fn "vec4" . coerce . toList
+
+  dv2 = fn "dvec2" . coerce . toList
+  dv3 = fn "dvec3" . coerce . toList
+  dv4 = fn "dvec4" . coerce . toList
 
   vec2 = fn "vec2" . coerce
   vec3 = fn "vec3" . coerce

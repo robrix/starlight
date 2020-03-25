@@ -28,37 +28,37 @@ shader :: Shader shader => shader U V Frag
 shader
   =   vertex (\ U{ matrix, ratio, fontScale, offset } V{ pos } IF{ _coord2, colour } -> main $ do
     _coord2 .= pos^._zw ^* 0.5
-    t <- var "t" (vec2 [0])
+    t <- var "t" (v2 0)
     switch gl_InstanceID
       [ (Just 0, do
-        colour .= vec4 [1, 0, 0, 1]
-        t .= vec2 [-1/12.0, -5/12.0]
+        colour .= v4 (V4 1 0 0 1)
+        t .= v2 (V2 (-1/12.0) (-5/12.0))
         break)
       , (Just 1, do
-        colour .= vec4 [1, 0, 0, 1]
-        t .= vec2 [ 1/12.0,  1/12.0]
+        colour .= v4 (V4 1 0 0 1)
+        t .= v2 (V2  (1/12.0)  (1/12.0))
         break)
       , (Just 2, do
-        colour .= vec4 [0, 1, 0, 1]
-        t .= vec2 [ 3/12.0, -1/12.0]
+        colour .= v4 (V4 0 1 0 1)
+        t .= v2 (V2  (3/12.0) (-1/12.0))
         break)
       , (Just 3, do
-        colour .= vec4 [0, 1, 0, 1]
-        t .= vec2 [ 5/12.0,  5/12.0]
+        colour .= v4 (V4 0 1 0 1)
+        t .= v2 (V2  (5/12.0)  (5/12.0))
         break)
       , (Just 4, do
-        colour .= vec4 [0, 0, 1, 1]
-        t .= vec2 [ 7/12.0, -3/12.0]
+        colour .= v4 (V4 0 0 1 1)
+        t .= v2 (V2  (7/12.0) (-3/12.0))
         break)
       , (Just 5, do
-        colour .= vec4 [0, 0, 1, 1]
-        t .= vec2 [ 9/12.0,  3/12.0]
+        colour .= v4 (V4 0 0 1 1)
+        t .= v2 (V2  (9/12.0)  (3/12.0))
         break)
       ]
     let m =   matrix
-          !*! mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 (get t ^* (1/float ratio)) 1]
-          !*! mat3 [vec3 [fontScale, 0, 0], vec3 [0, fontScale, 0], vec3 [0, 0, 1]]
-          !*! mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 (vec2 [offset, 0]) 1]
+          !*! mat3 [v3 (V3 1 0 0), v3 (V3 0 1 0), ext3 (get t ^* (1/float ratio)) 1]
+          !*! mat3 [v3 (V3 fontScale 0 0), v3 (V3 0 fontScale 0), v3 (V3 0 0 1)]
+          !*! mat3 [v3 (V3 1 0 0), v3 (V3 0 1 0), v3 (V3 (float offset) 0 1)]
     gl_Position .= ext4 (m !* ext3 (pos^._xy) 1) 0^._xywz)
 
   >>> fragment (\ _ IF{ _coord2, colour } Frag{ fragColour } -> main $

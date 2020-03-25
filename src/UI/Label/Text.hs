@@ -24,8 +24,8 @@ import GL.Shader.DSL
 shader :: Shader shader => shader U V Frag
 shader
   =   vertex (\ _ V{ pos } IF{ uv } -> main $ do
-    uv .= (pos * vec2 [1, -1]) * 0.5 + 0.5
-    gl_Position .= ext4 (ext3 (pos * vec2 [1, -1]) 0) 1)
+    uv .= (pos * v2 (V2 1 (-1))) * 0.5 + 0.5
+    gl_Position .= ext4 (ext3 (pos * v2 (V2 1 (-1))) 0) 1)
 
   >>> fragment (\ U{ sampler, colour } IF{ uv } Frag{ fragColour } -> main $ do
     -- Get samples for -2/3 and -1/3
@@ -41,12 +41,11 @@ shader
     alphaR <- let' "alphaR" $ min' (abs (upperR - lowerR)) 2
 
     -- Average the energy over the pixels on either side
-    rgba <- let' "rgba" $ vec4
-      [ (alphaR ^. _x + alphaR ^. _y + alphaR ^. _z) / 6
-      , (alphaL ^. _y + alphaR ^. _x + alphaR ^. _y) / 6
-      , (alphaL ^. _x + alphaL ^. _y + alphaR ^. _x) / 6
-      , 0
-      ]
+    rgba <- let' "rgba" . v4 $ V4
+      ((alphaR ^. _x + alphaR ^. _y + alphaR ^. _z) / 6)
+      ((alphaL ^. _y + alphaR ^. _x + alphaR ^. _y) / 6)
+      ((alphaL ^. _x + alphaL ^. _y + alphaR ^. _x) / 6)
+      0
 
     iff (colour ^. _x `eq` 0)
       (fragColour .= 1 - rgba)
