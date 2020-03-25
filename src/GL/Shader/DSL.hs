@@ -53,6 +53,7 @@ module GL.Shader.DSL
   -- * Expressions
 , RExpr(..)
 , Expr(..)
+, VertexExpr(..)
   -- * Re-exports
 , Fields(..)
 , Vars
@@ -346,7 +347,6 @@ ix i = Prj ("[" <> show i <> "]")
 class Ref ref => Expr ref expr | expr -> ref where
   get :: ref k a -> expr k a
 
-  gl_InstanceID :: expr 'Shader.Vertex Int
   gl_Positions :: expr 'Shader.Geometry [V4 Float]
   gl_FragCoord :: expr 'Shader.Fragment (V2 Float)
   gl_FrontFacing :: expr 'Shader.Fragment Bool
@@ -417,6 +417,9 @@ class Ref ref => Expr ref expr | expr -> ref where
   (!) :: (expr k :.: []) a -> expr k Int -> expr k a
   infixl 9 !
 
+class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
+  gl_InstanceID :: expr 'Shader.Vertex Int
+
 newtype RExpr (k :: Shader.Stage) a = RExpr { renderExpr :: Doc () }
 
 instance Num (RExpr k a) where
@@ -454,7 +457,6 @@ instance Floating (RExpr k a) where
 instance Expr RRef RExpr where
   get = RExpr . renderRef
 
-  gl_InstanceID = RExpr $ pretty "gl_InstanceID"
   gl_Positions = RExpr $ pretty "gl_Position"
   gl_FragCoord = RExpr $ pretty "gl_FragCoord"
   gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
@@ -516,6 +518,9 @@ instance Expr RRef RExpr where
   texture a b = fn "texture" [ renderExpr a, renderExpr b ]
 
   (!) (C v) n = RExpr $ renderExpr v <> brackets (renderExpr n)
+
+instance VertexExpr RRef RExpr where
+  gl_InstanceID = RExpr $ pretty "gl_InstanceID"
 
 fn :: String -> [Doc ()] -> RExpr k b
 fn n as = RExpr $ pretty n <> tupled as
