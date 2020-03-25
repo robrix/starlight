@@ -55,6 +55,7 @@ module GL.Shader.DSL
   -- * Expressions
 , RExpr(..)
 , Vec(..)
+, Mat(..)
 , Expr(..)
 , VertexExpr(..)
 , GeometryExpr
@@ -379,19 +380,7 @@ class Vec expr where
 
   infixl 7 ^*, ^/
 
-class ( Ref ref
-      , forall a . Num a => Num (expr a)
-      , forall a . Fractional a => Fractional (expr a)
-      , forall a . Floating a => Floating (expr a)
-      , forall a b . Coercible a b => Coercible (expr a) (expr b)
-      , Vec expr
-      )
-   => Expr ref expr | expr -> ref where
-  get :: ref a -> expr a
-
-  float :: expr a -> expr Float
-  double :: expr a -> expr Double
-
+class Vec expr => Mat expr where
   mat2 :: [expr a] -> expr (M22 Float)
   mat3 :: [expr a] -> expr (M33 Float)
   mat4 :: [expr a] -> expr (M44 Float)
@@ -404,6 +393,19 @@ class ( Ref ref
   (!!*) :: expr (v (v a)) -> expr a -> expr (v (v a))
   (!*!) :: expr (v (v a)) -> expr (v (v a)) -> expr (v (v a))
   infixl 7 !*, !!*, !*!
+
+class ( Ref ref
+      , forall a . Num a => Num (expr a)
+      , forall a . Fractional a => Fractional (expr a)
+      , forall a . Floating a => Floating (expr a)
+      , forall a b . Coercible a b => Coercible (expr a) (expr b)
+      , Mat expr
+      )
+   => Expr ref expr | expr -> ref where
+  get :: ref a -> expr a
+
+  float :: expr a -> expr Float
+  double :: expr a -> expr Double
 
   log2 :: expr a -> expr a
   exp2 :: expr a -> expr a
@@ -507,13 +509,23 @@ instance Vec RExpr where
   a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a ^/  b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
 
+instance Mat RExpr where
+  mat2 = fn "mat2" . coerce
+  mat3 = fn "mat3" . coerce
+  mat4 = fn "mat4" . coerce
+
+  dmat2 = fn "dmat2" . coerce
+  dmat3 = fn "dmat3" . coerce
+  dmat4 = fn "dmat4" . coerce
+
+  a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+
 instance Expr RRef RExpr where
   get = RExpr . renderRef
 
   a ^. Prj s = RExpr $ renderExpr a <> pretty s
-  a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   eq a b = RExpr . parens $ renderExpr a <+> pretty "==" <+> renderExpr b
   lt a b = RExpr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
   gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
@@ -524,14 +536,6 @@ instance Expr RRef RExpr where
   log2 = fn "log2" . pure . coerce
   exp2 = fn "exp2" . pure . coerce
   fract = fn "fract" . pure . coerce
-
-  mat2 = fn "mat2" . coerce
-  mat3 = fn "mat3" . coerce
-  mat4 = fn "mat4" . coerce
-
-  dmat2 = fn "dmat2" . coerce
-  dmat3 = fn "dmat3" . coerce
-  dmat4 = fn "dmat4" . coerce
 
   lerp  t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
   lerp2 t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
