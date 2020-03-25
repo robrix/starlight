@@ -20,4 +20,4 @@ class Stmt expr ty stmt | stmt -> expr ty where
   switch :: expr Int -> [(Int, stmt ())] -> stmt ()
 
 class Decl ty stmt decl | decl -> stmt ty where
-  def :: ty b -> String -> ty a -> stmt b -> decl (a -> b)
+  def :: ty b -> String -> ty a -> (stmt a -> stmt b) -> decl (a -> b)
