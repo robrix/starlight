@@ -375,14 +375,6 @@ class Vec expr => Mat expr where
   m3 :: GL.Column a => V3 (V3 (expr a)) -> expr (M33 a)
   m4 :: GL.Column a => V4 (V4 (expr a)) -> expr (M44 a)
 
-  mat2 :: [expr a] -> expr (M22 Float)
-  mat3 :: [expr a] -> expr (M33 Float)
-  mat4 :: [expr a] -> expr (M44 Float)
-
-  dmat2 :: [expr a] -> expr (M22 Double)
-  dmat3 :: [expr a] -> expr (M33 Double)
-  dmat4 :: [expr a] -> expr (M44 Double)
-
   (!*) :: expr (v (v a)) -> expr (v a) -> expr (v a)
   (!!*) :: expr (v (v a)) -> expr a -> expr (v (v a))
   (!*!) :: expr (v (v a)) -> expr (v (v a)) -> expr (v (v a))
@@ -500,14 +492,6 @@ instance Mat RExpr where
   m2 (m :: V2 (V2 (expr a))) = fn (GL.glslType @(V2 (V2 a))) (coerce (map v2 (toList m)))
   m3 (m :: V3 (V3 (expr a))) = fn (GL.glslType @(V3 (V3 a))) (coerce (map v3 (toList m)))
   m4 (m :: V4 (V4 (expr a))) = fn (GL.glslType @(V4 (V4 a))) (coerce (map v4 (toList m)))
-
-  mat2 = fn "mat2" . coerce
-  mat3 = fn "mat3" . coerce
-  mat4 = fn "mat4" . coerce
-
-  dmat2 = fn "dmat2" . coerce
-  dmat3 = fn "dmat3" . coerce
-  dmat4 = fn "dmat4" . coerce
 
   a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b

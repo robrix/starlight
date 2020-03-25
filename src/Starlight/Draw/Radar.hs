@@ -166,16 +166,15 @@ radarShader
     primitiveIn Points
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
-      let rot theta = mat2
-            [ v2 (V2 (cos theta) (-sin theta))
-            , v2 (V2 (sin theta) ( cos theta))
-            ]
+      let rot theta = m2 (V2
+            (V2 (cos theta) (-sin theta))
+            (V2 (sin theta) ( cos theta)))
       emitPrimitive $ do
         i <- var @_ @_ @_ @Int "i" (-count)
         while (get i `lt` count + 1) $ do
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
-            gl_Position .= coerce matrix D.!*! mat4 [rot theta] !* coerce (pos ! 0)
+            gl_Position .= coerce matrix D.!*! cast @_ @(M44 Float) (rot theta) !* coerce (pos ! 0)
             colour3 .= colour2 ! 0
           i += 1)
 
@@ -193,10 +192,9 @@ targetShader
     primitiveIn Points
     primitiveOut LineStrip ((count * 2 + 1) * 2)
     main $ do
-      let rot theta = mat2
-            [ v2 (V2 (cos theta) (-sin theta))
-            , v2 (V2 (sin theta) ( cos theta))
-            ]
+      let rot theta = m2 (V2
+            (V2 (cos theta) (-sin theta))
+            (V2 (sin theta) ( cos theta)))
       i <- var @_ @_ @_ @Int "i" (-count @(_ Int))
       while (get i `lt` count @(_ Int) + 1) . emitPrimitive $ do
         theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
@@ -204,7 +202,7 @@ targetShader
           gl_Position .= ext4 (v3 (pure 0)) 1
           colour3 .= colour2 ! 0
         emitVertex $ do
-          gl_Position .= coerce matrix D.!*! mat4 [rot theta] !* coerce (pos ! 0)
+          gl_Position .= coerce matrix D.!*! cast @_ @(M44 Float) (rot theta) !* coerce (pos ! 0)
           colour3 .= colour2 ! 0
         i += 1)
 

@@ -95,15 +95,15 @@ shader
     a1 <- let' "a1" (wrap (0.3 + nf))
     cos_a1 <- let' "cos_a1" (cos a1)
     sin_a1 <- let' "sin_a1" (sin a1)
-    rot1 <- let' "rot1" $ mat2 [v2 (V2 cos_a1 sin_a1), v2 (V2 (-sin_a1) cos_a1)]
+    rot1 <- let' "rot1" $ m2 (V2 (V2 cos_a1 sin_a1) (V2 (-sin_a1) cos_a1))
     a2 <- let' "a2" (wrap (0.2 + nf))
     cos_a2 <- let' "cos_a2" (cos a2)
     sin_a2 <- let' "sin_a2" (sin a2)
-    rot2 <- let' "rot2" $ mat2 [v2 (V2 cos_a2 sin_a2), v2 (V2 (-sin_a2) cos_a2)]
+    rot2 <- let' "rot2" $ m2 (V2 (V2 cos_a2 sin_a2) (V2 (-sin_a2) cos_a2))
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
-    focus^^._xz *!= dmat2 [rot1]
-    focus^^._xy *!= dmat2 [rot2]
+    focus^^._xz *!= cast @_ @(M22 Double) rot1
+    focus^^._xy *!= cast @_ @(M22 Double) rot2
     focus <- let' "focus2" $ cast @_ @(V3 Float) (get focus `mod'` v3 (pure (tile * 2))) * 10
     v <- var "v" $ v3 0
     r <- var @_ @_ @_ @Int "r" 2
