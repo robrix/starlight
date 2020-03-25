@@ -145,6 +145,11 @@ instance Cat.Category RStage where
   id = RStage []
   RStage l . RStage r = RStage $ r ++ l
 
+instance Stage' RStage where
+  vertex_   s = RStage [renderStage_ Shader.Vertex   id s]
+  geometry_ s = RStage [renderStage_ Shader.Geometry (coerce :: forall x . RExpr 'Shader.Geometry x -> (RExpr 'Shader.Geometry :.: []) x) s]
+  fragment_ s = RStage [renderStage_ Shader.Fragment id s]
+
 
 data None (v :: Type -> Type) = None
   deriving (Generic)
