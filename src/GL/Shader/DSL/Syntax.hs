@@ -5,6 +5,7 @@ module GL.Shader.DSL.Syntax
 , Vec(..)
 , Scalar(..)
 , Expr(..)
+, Dim(..)
 , false
 , true
 , Geom(..)
@@ -66,9 +67,7 @@ class Scalar expr where
 
   infix 4 <, >, <=, >=, ==
 
-class Expr expr where
-  -- units
-
+class Dim expr where
   (.*.) :: expr (u a) -> expr (v a) -> expr (Mul u v a)
   (^*.) :: expr (f (u a)) -> expr (v a) -> expr (f (Mul u v a))
   (.*^) :: expr (u a) -> expr (f (v a)) -> expr (f (Mul u v a))
@@ -78,6 +77,7 @@ class Expr expr where
 
   infixl 7 .*., ^*., .*^, ./., ^/., ./^
 
+class Expr expr where
   -- general syntax
 
   let' :: expr a -> (expr a -> expr b) -> expr b
