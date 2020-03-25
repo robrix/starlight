@@ -152,23 +152,24 @@ data None (v :: Type -> Type) = None
 instance Vars None
 
 shaderSources :: Shader u i o -> [(Shader.Stage, String)]
-shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> stageSources u' (f u) where
+shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions . prefix) <$> stageSources (f u) where
   u = makeVars (RExpr . pretty . name)
-  u' = foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
+  prefix x
+    =  pretty "#version 410" <> hardline
+    <> foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
+    <> x
 
-stageSources :: Doc () -> Stage RDecl i o -> [(Shader.Stage, Doc ())]
-stageSources u = \case
+stageSources :: Stage RDecl i o -> [(Shader.Stage, Doc ())]
+stageSources = \case
   Id  -> []
-  V s -> [renderStage_ u Shader.Vertex   id s]
-  G s -> [renderStage_ u Shader.Geometry (coerce :: forall x . RExpr 'Shader.Geometry x -> (RExpr 'Shader.Geometry :.: []) x) s]
-  F s -> [renderStage_ u Shader.Fragment id s]
-  l :>>> r -> stageSources u l <> stageSources u r
+  V s -> [renderStage_ Shader.Vertex   id s]
+  G s -> [renderStage_ Shader.Geometry (coerce :: forall x . RExpr 'Shader.Geometry x -> (RExpr 'Shader.Geometry :.: []) x) s]
+  F s -> [renderStage_ Shader.Fragment id s]
+  l :>>> r -> stageSources l <> stageSources r
 
-renderStage_ :: (Vars i, Vars o) => Doc () -> Shader.Stage -> (forall a . RExpr k a -> f a) -> (i f -> o (RRef k) -> RDecl k ()) -> (Shader.Stage, Doc ())
-renderStage_ u t g f = (,) t
-  $  pretty "#version 410" <> hardline
-  <> u
-  <> case t of
+renderStage_ :: (Vars i, Vars o) => Shader.Stage -> (forall a . RExpr k a -> f a) -> (i f -> o (RRef k) -> RDecl k ()) -> (Shader.Stage, Doc ())
+renderStage_ t g f = (,) t
+  $  case t of
     Shader.Geometry -> foldVars (getK . value) (makeVars (pvar "in" . (<> "[]") . name) `like` i)
     _               -> foldVars (getK . value) (makeVars (pvar "in"      . name) `like` i)
   <> foldVars (getK . value) (makeVars (pvar "out"     . name) `like` o)
