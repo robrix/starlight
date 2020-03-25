@@ -230,6 +230,9 @@ instance Vars Frag
 runDecl :: (a -> Doc ()) -> Decl k a -> Doc ()
 runDecl k = (`runCont` k) . getDecl
 
+renderDecl :: Decl k a -> Doc ()
+renderDecl = runDecl (const mempty)
+
 newtype Decl (k :: Shader.Stage) a = Decl { getDecl :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
@@ -261,10 +264,6 @@ primitiveOut ty mx = decl doc where
     P.LineLoop      -> pretty "line_strip"
     P.TriangleStrip -> pretty "triangle_strip"
     P.Triangles     -> pretty "triangle_strip"
-
-
-renderDecl :: Decl k a -> Doc ()
-renderDecl = runDecl (const mempty)
 
 
 -- Stmts
