@@ -159,22 +159,22 @@ shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOption
 stageSources :: Doc () -> Stage RDecl i o -> [(Shader.Stage, Doc ())]
 stageSources u = \case
   Id  -> []
-  V s -> [renderStage Shader.Vertex   id s]
-  G s -> [renderStage Shader.Geometry (coerce :: forall x . RExpr 'Shader.Geometry x -> (RExpr 'Shader.Geometry :.: []) x) s]
-  F s -> [renderStage Shader.Fragment id s]
+  V s -> [renderStage_ u Shader.Vertex   id s]
+  G s -> [renderStage_ u Shader.Geometry (coerce :: forall x . RExpr 'Shader.Geometry x -> (RExpr 'Shader.Geometry :.: []) x) s]
+  F s -> [renderStage_ u Shader.Fragment id s]
   l :>>> r -> stageSources u l <> stageSources u r
-  where
-  renderStage :: (Vars i, Vars o) => Shader.Stage -> (forall a . RExpr k a -> f a) -> (i f -> o (RRef k) -> RDecl k ()) -> (Shader.Stage, Doc ())
-  renderStage t g f = (,) t
-    $  pretty "#version 410" <> hardline
-    <> u
-    <> case t of
-      Shader.Geometry -> foldVars (getK . value) (makeVars (pvar "in" . (<> "[]") . name) `like` i)
-      _               -> foldVars (getK . value) (makeVars (pvar "in"      . name) `like` i)
-    <> foldVars (getK . value) (makeVars (pvar "out"     . name) `like` o)
-    <> renderDecl (f i o) where
-    i = makeVars (g . RExpr . pretty . name)
-    o = makeVars (Ref . name)
+
+renderStage_ :: (Vars i, Vars o) => Doc () -> Shader.Stage -> (forall a . RExpr k a -> f a) -> (i f -> o (RRef k) -> RDecl k ()) -> (Shader.Stage, Doc ())
+renderStage_ u t g f = (,) t
+  $  pretty "#version 410" <> hardline
+  <> u
+  <> case t of
+    Shader.Geometry -> foldVars (getK . value) (makeVars (pvar "in" . (<> "[]") . name) `like` i)
+    _               -> foldVars (getK . value) (makeVars (pvar "in"      . name) `like` i)
+  <> foldVars (getK . value) (makeVars (pvar "out"     . name) `like` o)
+  <> renderDecl (f i o) where
+  i = makeVars (g . RExpr . pretty . name)
+  o = makeVars (Ref . name)
 
 like :: t (K a) -> t b -> t (K a)
 like = const
