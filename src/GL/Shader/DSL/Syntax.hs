@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeOperators #-}
 module GL.Shader.DSL.Syntax
 ( Mat(..)
+, Vec(..)
 , Expr(..)
 , false
 , true
@@ -37,9 +38,7 @@ class Mat expr where
 
   infixl 7 !*!, !*
 
-class Expr expr where
-  -- vector
-
+class Vec expr where
   v2 :: expr a -> expr a -> expr (V2 a)
   v3 :: expr a -> expr a -> expr a -> expr (V3 a)
   v4 :: expr a -> expr a -> expr a -> expr a -> expr (V4 a)
@@ -55,6 +54,7 @@ class Expr expr where
 
   infixl 7 ^*, *^, ^/
 
+class Expr expr where
   -- scalar
 
   atan2 :: Unit Length length => expr (length Float) -> expr (length Float) -> expr (I Float)
