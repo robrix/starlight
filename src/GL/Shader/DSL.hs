@@ -338,8 +338,8 @@ ix :: Int -> Prj [a] a
 ix i = Prj ("[" <> show i <> "]")
 
 
-class Expr expr where
-  get :: RRef k a -> expr k a
+class Expr ref expr | expr -> ref where
+  get :: ref k a -> expr k a
 
   gl_InstanceID :: expr 'Shader.Vertex Int
   gl_Positions :: expr 'Shader.Geometry [V4 Float]
@@ -446,7 +446,7 @@ instance Floating (RExpr k a) where
   atanh a = fn "atanh" [ renderExpr a ]
   pi = lit pi
 
-instance Expr RExpr where
+instance Expr RRef RExpr where
   get = RExpr . renderRef
 
   gl_InstanceID = RExpr $ pretty "gl_InstanceID"
