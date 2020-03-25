@@ -522,7 +522,7 @@ instance Expr RExpr where
 
   texture a b = fn "texture" [ renderExpr a, renderExpr b ]
 
-  C v ! n = RExpr $ renderExpr v <> brackets (renderExpr n)
+  (!) (C v) n = RExpr $ renderExpr v <> brackets (renderExpr n)
 
 fn :: String -> [Doc ()] -> RExpr k b
 fn n as = RExpr $ pretty n <> tupled as
