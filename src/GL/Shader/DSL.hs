@@ -23,12 +23,12 @@ module GL.Shader.DSL
 , shaderSources
 , Frag(..)
   -- * Decls
-, Decl
+, RDecl
 , main
 , primitiveIn
 , primitiveOut
   -- * Stmts
-, Stmt
+, RStmt
   -- ** Variables
 , let'
 , var
@@ -75,7 +75,7 @@ module GL.Shader.DSL
 , ix
 
   -- * Expressions
-, Expr(..)
+, RExpr(..)
 , get
 , (^.)
 , (^*)
@@ -155,26 +155,26 @@ import           Prelude hiding (break)
 import           UI.Colour (Colour)
 
 data Shader (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) where
-  Shader :: Vars u => ((forall k . u (Expr k)) -> Stage Decl i o) -> Shader u i o
+  Shader :: Vars u => ((forall k . u (RExpr k)) -> Stage RDecl i o) -> Shader u i o
 
-program :: Vars u => ((forall k . u (Expr k)) -> Stage Decl i o) -> Shader u i o
+program :: Vars u => ((forall k . u (RExpr k)) -> Stage RDecl i o) -> Shader u i o
 program = Shader
 
 
 data Stage d i o where
   Id :: Stage d i i
   (:>>>) :: Stage d i x -> Stage d x o -> Stage d i o
-  V :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
-  G :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
-  F :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
+  V :: (Vars i, Vars o) => (i (RExpr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
+  G :: (Vars i, Vars o) => (i (RExpr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
+  F :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
 
-vertex   :: (Vars i, Vars o) => (i (Expr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
+vertex   :: (Vars i, Vars o) => (i (RExpr 'Shader.Vertex)   -> o (Ref 'Shader.Vertex)   -> d 'Shader.Vertex   ()) -> Stage d i o
 vertex = V
 
-geometry :: (Vars i, Vars o) => (i (Expr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
+geometry :: (Vars i, Vars o) => (i (RExpr 'Shader.Geometry :.: []) -> o (Ref 'Shader.Geometry) -> d 'Shader.Geometry ()) -> Stage d i o
 geometry = G
 
-fragment :: (Vars i, Vars o) => (i (Expr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
+fragment :: (Vars i, Vars o) => (i (RExpr 'Shader.Fragment) -> o (Ref 'Shader.Fragment) -> d 'Shader.Fragment ()) -> Stage d i o
 fragment = F
 
 instance Cat.Category (Stage d) where
@@ -189,18 +189,18 @@ instance Vars None
 
 shaderSources :: Shader u i o -> [(Shader.Stage, String)]
 shaderSources (Shader f) = fmap (renderString . layoutPretty defaultLayoutOptions) <$> stageSources u' (f u) where
-  u = makeVars (Expr . pretty . name)
+  u = makeVars (RExpr . pretty . name)
   u' = foldVars (getK . value) (makeVars (pvar "uniform" . name) `like` u)
 
-stageSources :: Doc () -> Stage Decl i o -> [(Shader.Stage, Doc ())]
+stageSources :: Doc () -> Stage RDecl i o -> [(Shader.Stage, Doc ())]
 stageSources u = \case
   Id  -> []
   V s -> [renderStage Shader.Vertex   id s]
-  G s -> [renderStage Shader.Geometry (coerce :: forall x . Expr 'Shader.Geometry x -> (Expr 'Shader.Geometry :.: []) x) s]
+  G s -> [renderStage Shader.Geometry (coerce :: forall x . RExpr 'Shader.Geometry x -> (RExpr 'Shader.Geometry :.: []) x) s]
   F s -> [renderStage Shader.Fragment id s]
   l :>>> r -> stageSources u l <> stageSources u r
   where
-  renderStage :: (Vars i, Vars o) => Shader.Stage -> (forall a . Expr k a -> f a) -> (i f -> o (Ref k) -> Decl k ()) -> (Shader.Stage, Doc ())
+  renderStage :: (Vars i, Vars o) => Shader.Stage -> (forall a . RExpr k a -> f a) -> (i f -> o (Ref k) -> RDecl k ()) -> (Shader.Stage, Doc ())
   renderStage t g f = (,) t
     $  pretty "#version 410" <> hardline
     <> u
@@ -209,7 +209,7 @@ stageSources u = \case
       _               -> foldVars (getK . value) (makeVars (pvar "in"      . name) `like` i)
     <> foldVars (getK . value) (makeVars (pvar "out"     . name) `like` o)
     <> renderDecl (f i o) where
-    i = makeVars (g . Expr . pretty . name)
+    i = makeVars (g . RExpr . pretty . name)
     o = makeVars (Ref . name)
 
 like :: t (K a) -> t b -> t (K a)
@@ -227,20 +227,20 @@ instance Vars Frag
 
 -- Decls
 
-renderDecl :: Decl k a -> Doc ()
+renderDecl :: RDecl k a -> Doc ()
 renderDecl = (`runCont` const mempty) . getDecl
 
-newtype Decl (k :: Shader.Stage) a = Decl { getDecl :: Cont (Doc ()) a }
+newtype RDecl (k :: Shader.Stage) a = RDecl { getDecl :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-decl :: Doc () -> Decl k ()
-decl d = Decl . cont $ \ k -> d <> k ()
+decl :: Doc () -> RDecl k ()
+decl d = RDecl . cont $ \ k -> d <> k ()
 
-main :: Stmt k () -> Decl k ()
+main :: RStmt k () -> RDecl k ()
 main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
 
-primitiveIn :: P.Type -> Decl 'Shader.Geometry ()
+primitiveIn :: P.Type -> RDecl 'Shader.Geometry ()
 primitiveIn ty = decl doc where
   doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
   render = \case
@@ -251,7 +251,7 @@ primitiveIn ty = decl doc where
     P.TriangleStrip -> pretty "triangles"
     P.Triangles     -> pretty "triangles"
 
-primitiveOut :: P.Type -> Int -> Decl 'Shader.Geometry ()
+primitiveOut :: P.Type -> Int -> RDecl 'Shader.Geometry ()
 primitiveOut ty mx = decl doc where
   doc = pretty "layout" <+> parens (render ty <> comma <+> pretty "max_vertices" <+> equals <+> pretty mx) <+> pretty "out;" <> hardline
   render = \case
@@ -265,69 +265,69 @@ primitiveOut ty mx = decl doc where
 
 -- Stmts
 
-renderStmt :: Stmt k () -> Doc ()
+renderStmt :: RStmt k () -> Doc ()
 renderStmt = (`runCont` const mempty) . getStmt
 
-newtype Stmt (k :: Shader.Stage) a = Stmt { getStmt :: Cont (Doc ()) a }
+newtype RStmt (k :: Shader.Stage) a = RStmt { getStmt :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-let' :: GL.Uniform a => String -> Expr k a -> Stmt k (Expr k a)
-let' n v = Stmt . cont $ \ k
+let' :: GL.Uniform a => String -> RExpr k a -> RStmt k (RExpr k a)
+let' n v = RStmt . cont $ \ k
   -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
-  <> k (Expr (pretty n))
+  <> k (RExpr (pretty n))
 
-var :: GL.Uniform a => String -> Expr k a -> Stmt k (Ref k a)
-var n v = Stmt . cont $ \ k
+var :: GL.Uniform a => String -> RExpr k a -> RStmt k (Ref k a)
+var n v = RStmt . cont $ \ k
   -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
   <> k (Ref n)
 
-iff :: Expr k Bool -> Stmt k () -> Stmt k () -> Stmt k ()
+iff :: RExpr k Bool -> RStmt k () -> RStmt k () -> RStmt k ()
 iff c t e = stmt $ pretty "if" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <+> pretty "else" <+> braces (nest 2 (line <> renderStmt e <> line)) <> hardline
 
-switch :: Expr k Int -> [(Maybe Int, Stmt k ())] -> Stmt k ()
+switch :: RExpr k Int -> [(Maybe Int, RStmt k ())] -> RStmt k ()
 switch s cs = stmt $ pretty "switch" <+> parens (renderExpr s) <+> braces (nest 2 (line <> vsep (map renderCase cs) <> line)) <> hardline
   where
   renderCase (i, s) = maybe (pretty "default:" <> hardline) (\ i -> pretty "case" <+> pretty i <> pretty ':') i  <> hardline <> renderStmt s
 
-break :: Stmt k ()
+break :: RStmt k ()
 break = stmt $ pretty "break" <+> pretty ';' <> hardline
 
-while :: Expr k Bool -> Stmt k () -> Stmt k ()
+while :: RExpr k Bool -> RStmt k () -> RStmt k ()
 while c t = stmt $ pretty "while" <+> parens (renderExpr c) <+> braces (nest 2 (line <> renderStmt t <> line)) <> hardline
 
-(.=) :: Ref k a -> Expr k a -> Stmt k ()
+(.=) :: Ref k a -> RExpr k a -> RStmt k ()
 r .= v = stmt $ renderRef r <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
 
-(+=) :: Ref k a -> Expr k a -> Stmt k ()
+(+=) :: Ref k a -> RExpr k a -> RStmt k ()
 r += v = stmt $ renderRef r <+> pretty "+=" <+> renderExpr v <> pretty ';' <> hardline
 
-(*=) :: Ref k a -> Expr k a -> Stmt k ()
+(*=) :: Ref k a -> RExpr k a -> RStmt k ()
 r *= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
 
-(*!=) :: Ref k (v a) -> Expr k (v (v a)) -> Stmt k ()
+(*!=) :: Ref k (v a) -> RExpr k (v (v a)) -> RStmt k ()
 r *!= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
 
 infixr 4 .=, +=, *=, *!=
 
-emitVertex :: Stmt 'Shader.Geometry () -> Stmt 'Shader.Geometry ()
+emitVertex :: RStmt 'Shader.Geometry () -> RStmt 'Shader.Geometry ()
 emitVertex m = stmt
   $  renderStmt m <> hardline
   <> pretty "EmitVertex();" <> hardline
 
-emitPrimitive :: Stmt 'Shader.Geometry () -> Stmt 'Shader.Geometry ()
+emitPrimitive :: RStmt 'Shader.Geometry () -> RStmt 'Shader.Geometry ()
 emitPrimitive m = stmt
   $  renderStmt m <> hardline
   <> pretty "EndPrimitive();" <> hardline
 
-discard :: Stmt 'Shader.Fragment ()
+discard :: RStmt 'Shader.Fragment ()
 discard = stmt $ pretty "discard" <> pretty ';' <> hardline
 
 renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
 renderTypeOf _ = pretty (GL.glslType @a)
 
 
-stmt :: Doc () -> Stmt k ()
-stmt d = Stmt . cont $ \ k -> d <> k ()
+stmt :: Doc () -> RStmt k ()
+stmt d = RStmt . cont $ \ k -> d <> k ()
 
 
 -- Exprs
@@ -342,22 +342,22 @@ gl_Position = Ref "gl_Position"
 gl_PointSize :: Ref 'Shader.Vertex Float
 gl_PointSize = Ref "gl_PointSize"
 
-gl_InstanceID :: Expr 'Shader.Vertex Int
-gl_InstanceID = Expr $ pretty "gl_InstanceID"
+gl_InstanceID :: RExpr 'Shader.Vertex Int
+gl_InstanceID = RExpr $ pretty "gl_InstanceID"
 
 
-gl_Positions :: Expr 'Shader.Geometry [V4 Float]
-gl_Positions = Expr $ pretty "gl_Position"
+gl_Positions :: RExpr 'Shader.Geometry [V4 Float]
+gl_Positions = RExpr $ pretty "gl_Position"
 
 
-gl_FragCoord :: Expr 'Shader.Fragment (V2 Float)
-gl_FragCoord = Expr $ pretty "gl_FragCoord"
+gl_FragCoord :: RExpr 'Shader.Fragment (V2 Float)
+gl_FragCoord = RExpr $ pretty "gl_FragCoord"
 
-gl_FrontFacing :: Expr 'Shader.Fragment Bool
-gl_FrontFacing = Expr $ pretty "gl_FrontFacing"
+gl_FrontFacing :: RExpr 'Shader.Fragment Bool
+gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
 
-gl_PointCoord :: Expr 'Shader.Fragment (V2 Float)
-gl_PointCoord = Expr $ pretty "gl_PointCoord"
+gl_PointCoord :: RExpr 'Shader.Fragment (V2 Float)
+gl_PointCoord = RExpr $ pretty "gl_PointCoord"
 
 
 (^^.) :: Ref k a -> Prj a b -> Ref k b
@@ -414,92 +414,92 @@ ix :: Int -> Prj [a] a
 ix i = Prj ("[" <> show i <> "]")
 
 
-get :: Ref k a -> Expr k a
+get :: Ref k a -> RExpr k a
 
-float :: Expr k a -> Expr k Float
-double :: Expr k a -> Expr k Double
+float :: RExpr k a -> RExpr k Float
+double :: RExpr k a -> RExpr k Double
 
-vec2 :: [Expr k a] -> Expr k (V2 Float)
-vec3 :: [Expr k a] -> Expr k (V3 Float)
-vec4 :: [Expr k a] -> Expr k (V4 Float)
+vec2 :: [RExpr k a] -> RExpr k (V2 Float)
+vec3 :: [RExpr k a] -> RExpr k (V3 Float)
+vec4 :: [RExpr k a] -> RExpr k (V4 Float)
 
-dvec2 :: [Expr k a] -> Expr k (V2 Double)
-dvec3 :: [Expr k a] -> Expr k (V3 Double)
-dvec4 :: [Expr k a] -> Expr k (V4 Double)
+dvec2 :: [RExpr k a] -> RExpr k (V2 Double)
+dvec3 :: [RExpr k a] -> RExpr k (V3 Double)
+dvec4 :: [RExpr k a] -> RExpr k (V4 Double)
 
-mat2 :: [Expr k a] -> Expr k (M22 Float)
-mat3 :: [Expr k a] -> Expr k (M33 Float)
-mat4 :: [Expr k a] -> Expr k (M44 Float)
+mat2 :: [RExpr k a] -> RExpr k (M22 Float)
+mat3 :: [RExpr k a] -> RExpr k (M33 Float)
+mat4 :: [RExpr k a] -> RExpr k (M44 Float)
 
-dmat2 :: [Expr k a] -> Expr k (M22 Double)
-dmat3 :: [Expr k a] -> Expr k (M33 Double)
-dmat4 :: [Expr k a] -> Expr k (M44 Double)
+dmat2 :: [RExpr k a] -> RExpr k (M22 Double)
+dmat3 :: [RExpr k a] -> RExpr k (M33 Double)
+dmat4 :: [RExpr k a] -> RExpr k (M44 Double)
 
-ext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 Float)
-ext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 Float)
+ext3 :: RExpr k (V2 a) -> RExpr k a -> RExpr k (V3 Float)
+ext4 :: RExpr k (V3 a) -> RExpr k a -> RExpr k (V4 Float)
 
-dext3 :: Expr k (V2 a) -> Expr k a -> Expr k (V3 Double)
-dext4 :: Expr k (V3 a) -> Expr k a -> Expr k (V4 Double)
+dext3 :: RExpr k (V2 a) -> RExpr k a -> RExpr k (V3 Double)
+dext4 :: RExpr k (V3 a) -> RExpr k a -> RExpr k (V4 Double)
 
-norm :: Expr k (v a) -> Expr k a
-dot :: Expr k (v a) -> Expr k (v a) -> Expr k a
+norm :: RExpr k (v a) -> RExpr k a
+dot :: RExpr k (v a) -> RExpr k (v a) -> RExpr k a
 
-(^*) :: Expr k (v a) -> Expr k a -> Expr k (v a)
-(^/) :: Expr k (v a) -> Expr k a -> Expr k (v a)
-(!*) :: Expr k (v (v a)) -> Expr k (v a) -> Expr k (v a)
-(!!*) :: Expr k (v (v a)) -> Expr k a -> Expr k (v (v a))
-(!*!) :: Expr k (v (v a)) -> Expr k (v (v a)) -> Expr k (v (v a))
+(^*) :: RExpr k (v a) -> RExpr k a -> RExpr k (v a)
+(^/) :: RExpr k (v a) -> RExpr k a -> RExpr k (v a)
+(!*) :: RExpr k (v (v a)) -> RExpr k (v a) -> RExpr k (v a)
+(!!*) :: RExpr k (v (v a)) -> RExpr k a -> RExpr k (v (v a))
+(!*!) :: RExpr k (v (v a)) -> RExpr k (v (v a)) -> RExpr k (v (v a))
 infixl 7 ^*, ^/, !*, !!*, !*!
 
-log2 :: Expr k a -> Expr k a
-exp2 :: Expr k a -> Expr k a
+log2 :: RExpr k a -> RExpr k a
+exp2 :: RExpr k a -> RExpr k a
 
-lerp :: Expr k a -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
-lerp2 :: Expr k (v a) -> Expr k (v a) -> Expr k (v a) -> Expr k (v a)
+lerp :: RExpr k a -> RExpr k (v a) -> RExpr k (v a) -> RExpr k (v a)
+lerp2 :: RExpr k (v a) -> RExpr k (v a) -> RExpr k (v a) -> RExpr k (v a)
 
-dFdx :: Expr k a -> Expr k a
-dFdy :: Expr k a -> Expr k a
+dFdx :: RExpr k a -> RExpr k a
+dFdy :: RExpr k a -> RExpr k a
 
-mod' :: Expr k v -> Expr k v -> Expr k v
+mod' :: RExpr k v -> RExpr k v -> RExpr k v
 
-min' :: Expr k a -> Expr k a -> Expr k a
-max' :: Expr k a -> Expr k a -> Expr k a
+min' :: RExpr k a -> RExpr k a -> RExpr k a
+max' :: RExpr k a -> RExpr k a -> RExpr k a
 
-atan2' :: Expr k a -> Expr k a -> Expr k a
+atan2' :: RExpr k a -> RExpr k a -> RExpr k a
 
-texture :: Expr k TextureUnit -> Expr k (v Float) -> Expr k (v Float)
+texture :: RExpr k TextureUnit -> RExpr k (v Float) -> RExpr k (v Float)
 
-fract :: Expr k a -> Expr k a
+fract :: RExpr k a -> RExpr k a
 
-eq :: Expr k a -> Expr k a -> Expr k Bool
-lt :: Expr k a -> Expr k a -> Expr k Bool
-gt :: Expr k a -> Expr k a -> Expr k Bool
+eq :: RExpr k a -> RExpr k a -> RExpr k Bool
+lt :: RExpr k a -> RExpr k a -> RExpr k Bool
+gt :: RExpr k a -> RExpr k a -> RExpr k Bool
 infix 4 `eq`, `lt`, `gt`
 
-(^.) :: Expr k a -> Prj a b -> Expr k b
+(^.) :: RExpr k a -> Prj a b -> RExpr k b
 
-(!) :: (Expr k :.: []) a -> Expr k Int -> Expr k a
-C v ! n = Expr $ renderExpr v <> brackets (renderExpr n)
+(!) :: (RExpr k :.: []) a -> RExpr k Int -> RExpr k a
+C v ! n = RExpr $ renderExpr v <> brackets (renderExpr n)
 
 infixl 9 !
 
 
-newtype Expr (k :: Shader.Stage) a = Expr { renderExpr :: Doc () }
+newtype RExpr (k :: Shader.Stage) a = RExpr { renderExpr :: Doc () }
 
-instance Num (Expr k a) where
-  a + b = Expr . parens $ renderExpr a <+> pretty '+' <+> renderExpr b
-  a * b = Expr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a - b = Expr . parens $ renderExpr a <+> pretty '-' <+> renderExpr b
+instance Num (RExpr k a) where
+  a + b = RExpr . parens $ renderExpr a <+> pretty '+' <+> renderExpr b
+  a * b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  a - b = RExpr . parens $ renderExpr a <+> pretty '-' <+> renderExpr b
   signum a = fn "sign" [ renderExpr a ]
-  negate a = Expr . parens $ pretty "-" <> renderExpr a
+  negate a = RExpr . parens $ pretty "-" <> renderExpr a
   abs a = fn "abs" [ renderExpr a ]
-  fromInteger i = Expr $ pretty i
+  fromInteger i = RExpr $ pretty i
 
-instance Fractional (Expr k a) where
-  a / b = Expr $ parens $ renderExpr a <+> pretty '/' <+> renderExpr b
+instance Fractional (RExpr k a) where
+  a / b = RExpr $ parens $ renderExpr a <+> pretty '/' <+> renderExpr b
   fromRational = lit . fromRational
 
-instance Floating (Expr k a) where
+instance Floating (RExpr k a) where
   exp a = fn "exp" [ renderExpr a ]
   log a = fn "log" [ renderExpr a ]
   sqrt a = fn "sqrt" [ renderExpr a ]
@@ -519,17 +519,17 @@ instance Floating (Expr k a) where
   pi = lit pi
 
 
-get = Expr . renderRef
+get = RExpr . renderRef
 
-a ^. Prj s = Expr $ renderExpr a <> pretty s
-a ^*  b = Expr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-a ^/  b = Expr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
-a !*  b = Expr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-a !!*  b = Expr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-a !*! b = Expr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-eq a b = Expr . parens $ renderExpr a <+> pretty "==" <+> renderExpr b
-lt a b = Expr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
-gt a b = Expr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
+a ^. Prj s = RExpr $ renderExpr a <> pretty s
+a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+a ^/  b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
+a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+eq a b = RExpr . parens $ renderExpr a <+> pretty "==" <+> renderExpr b
+lt a b = RExpr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
+gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
 
 float a = fn "float" [ renderExpr a ]
 double a = fn "double" [ renderExpr a ]
@@ -577,8 +577,8 @@ atan2' a b = fn "atan" [ renderExpr a, renderExpr b ]
 texture a b = fn "texture" [ renderExpr a, renderExpr b ]
 
 
-fn :: String -> [Doc ()] -> Expr k b
-fn n as = Expr $ pretty n <> tupled as
+fn :: String -> [Doc ()] -> RExpr k b
+fn n as = RExpr $ pretty n <> tupled as
 
-lit :: Double -> Expr k a
-lit = Expr . pretty
+lit :: Double -> RExpr k a
+lit = RExpr . pretty

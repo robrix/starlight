@@ -136,7 +136,7 @@ verticesForBlips bs =
   ]
 
 
-vertex' :: U (Expr 'Vertex) -> D.Stage Decl V IG
+vertex' :: U (RExpr 'Vertex) -> D.Stage RDecl V IG
 vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ pos, colour2, sweep } -> main $ do
   there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
@@ -153,7 +153,7 @@ vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ pos, colour2, swe
   minBlipSize = 16
   radius = 300
 
-fragment' :: D.Stage Decl IF Frag
+fragment' :: D.Stage RDecl IF Frag
 fragment' = fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
 
 radarShader :: Shader U V Frag
