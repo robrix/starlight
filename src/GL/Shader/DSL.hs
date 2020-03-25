@@ -459,7 +459,7 @@ instance Num (RExpr a) where
   fromInteger i = RExpr $ pretty i
 
 instance Fractional (RExpr a) where
-  a / b = RExpr $ parens $ renderExpr a <+> pretty '/' <+> renderExpr b
+  a / b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
   fromRational = lit . fromRational
 
 instance Floating (RExpr a) where
