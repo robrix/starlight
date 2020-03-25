@@ -169,12 +169,12 @@ newtype RDecl (k :: Shader.Stage) a = RDecl { getDecl :: Cont (Doc ()) a }
 decl :: Doc () -> RDecl k ()
 decl d = RDecl . cont $ \ k -> d <> k ()
 
-class Decl stmt decl | decl -> stmt where
+class Stmt ref expr stmt => Decl ref expr stmt decl | decl -> stmt where
   main :: stmt k () -> decl k ()
   primitiveIn :: P.Type -> decl 'Shader.Geometry ()
   primitiveOut :: P.Type -> Int -> decl 'Shader.Geometry ()
 
-instance Decl RStmt RDecl where
+instance Decl RRef RExpr RStmt RDecl where
   main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
   primitiveIn ty = decl doc where
