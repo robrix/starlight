@@ -35,6 +35,8 @@ module GL.Shader.DSL
 , RRef(..)
 , Ref(..)
 , VertexRef(..)
+, GeometryRef
+, FragmentRef
 
   -- * Projections
 , Prj
@@ -296,6 +298,10 @@ class Ref (ref :: Shader.Stage -> Type -> Type) where
 class Ref ref => VertexRef ref where
   gl_PointSize :: ref 'Shader.Vertex Float
 
+class Ref ref => GeometryRef ref where
+
+class Ref ref => FragmentRef ref where
+
 instance Ref RRef where
   gl_Position = Ref "gl_Position"
 
@@ -303,6 +309,10 @@ instance Ref RRef where
 
 instance VertexRef RRef where
   gl_PointSize = Ref "gl_PointSize"
+
+instance GeometryRef RRef where
+
+instance FragmentRef RRef where
 
 renderRef :: RRef k a -> Doc ()
 renderRef = \case
@@ -423,7 +433,7 @@ class Ref ref => Expr ref expr | expr -> ref where
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
   gl_InstanceID :: expr 'Shader.Vertex Int
 
-class Expr ref expr => FragmentExpr ref expr where
+class (FragmentRef ref, Expr ref expr) => FragmentExpr ref expr where
   gl_FragCoord :: expr 'Shader.Fragment (V2 Float)
   gl_FrontFacing :: expr 'Shader.Fragment Bool
   gl_PointCoord :: expr 'Shader.Fragment (V2 Float)
