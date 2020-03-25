@@ -4,6 +4,7 @@ module GL.Shader.GLSL.Type
 , FType(..)
 , VType(..)
 , MType(..)
+, FunType(..)
 ) where
 
 import Data.Int
@@ -31,3 +32,6 @@ class MType ty where
   mat2 :: (forall ty . FType ty => ty a) -> ty (M22 a)
   mat3 :: (forall ty . FType ty => ty a) -> ty (M33 a)
   mat4 :: (forall ty . FType ty => ty a) -> ty (M44 a)
+
+class FunType ty where
+  void :: ty ()
