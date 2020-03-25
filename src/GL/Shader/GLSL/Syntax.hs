@@ -15,3 +15,5 @@ class Stmt expr ty stmt | stmt -> expr ty where
   var :: ty -> stmt (Ref a)
 
   if_ :: expr Bool -> stmt () -> stmt () -> stmt ()
+
+  switch :: expr Int -> [(Int, stmt ())] -> stmt ()
