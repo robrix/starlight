@@ -18,6 +18,7 @@ module GL.Shader.DSL
 , program
 , Stage
 , Stage'(..)
+, RStage(..)
 , vertex
 , geometry
 , fragment
@@ -137,6 +138,8 @@ instance Stage' (Stage RDecl) where
 instance Cat.Category (Stage d) where
   id = Id
   (.) = flip (:>>>)
+
+newtype RStage (i :: Type -> Type) (o :: Type -> Type) = RStage { renderStage :: [(Shader.Stage, Doc ())] }
 
 
 data None (v :: Type -> Type) = None
