@@ -3,6 +3,8 @@ module GL.Shader.GLSL.Syntax
 , VType(..)
 , MType(..)
 , N(..)
+, Ref
+, Stmt(..)
 ) where
 
 data Type
@@ -30,3 +32,8 @@ data N
   | N2
   | N3
   | N4
+
+newtype Ref a = Ref { getRef :: String }
+
+class Stmt stmt where
+  var :: Type -> stmt (Ref a)
