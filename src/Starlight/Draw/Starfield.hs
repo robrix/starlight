@@ -86,7 +86,7 @@ shader
     gl_Position .= ext4 (ext3 pos 0) 1)
 
   >>> fragment (\ U{ resolution, focus, zoom } None Frag{ fragColour } -> main $ do
-    resolution <- let' @_ @_ @(V2 Float) "resolution" (coerce resolution)
+    resolution <- let' @_ @_ @_ @(V2 Float) "resolution" (coerce resolution)
     uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * xy 1 (resolution^._y / resolution^._x)
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var "focus" $ dext3 (coerce focus) 1
@@ -106,14 +106,14 @@ shader
     focus^^._xy *!= cast @_ @(M22 Double) rot2
     focus <- let' "focus2" $ cast @_ @(V3 Float) (get focus `mod'` v3 (pure (tile * 2))) * 10
     v <- var "v" $ v3 0
-    r <- var @_ @_ @Int "r" 2
+    r <- var @_ @_ @_ @Int "r" 2
     while (get r `lt` volsteps) $ do
       s <- let' "s" (0.1 + 0.125 * float (get r))
       p <- var "p" $ focus + get dir D.^* s
       p .= abs (v3 (pure tile) - (get p `mod'` v3 (pure (tile * 2))))
       pa <- var "pa" 0
       a <- var "a" 0
-      i <- var @_ @_ @Int "i" 0
+      i <- var @_ @_ @_ @Int "i" 0
       while (get i `lt` iterations) $ do
         p .= abs (get p) ^/ dot (get p) (get p) - formuparam
         prev <- let' "prev" (get pa)

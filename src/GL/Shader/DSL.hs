@@ -1,14 +1,13 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# HLINT ignore "Use camelCase" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
@@ -104,9 +103,9 @@ import           Prelude hiding (break)
 import           UI.Colour (Colour)
 
 class (forall u . Cat.Category (shader u)) => Shader shader where
-  vertex :: (Vars u, Vars i, Vars o) => (forall expr stmt decl . VertexDecl expr stmt decl => u expr -> i expr -> o (ExprRef expr) -> decl ()) -> shader u i o
-  geometry :: (Vars u, Vars i, Vars o) => (forall expr stmt decl . GeometryDecl expr stmt decl => u expr -> i (expr :.: []) -> o (ExprRef expr) -> decl ()) -> shader u i o
-  fragment :: (Vars u, Vars i, Vars o) => (forall expr stmt decl . FragmentDecl expr stmt decl => u expr -> i expr -> o (ExprRef expr) -> decl ()) -> shader u i o
+  vertex :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . VertexDecl ref expr stmt decl => u expr -> i expr -> o ref -> decl ()) -> shader u i o
+  geometry :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . GeometryDecl ref expr stmt decl => u expr -> i (expr :.: []) -> o ref -> decl ()) -> shader u i o
+  fragment :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . FragmentDecl ref expr stmt decl => u expr -> i expr -> o ref -> decl ()) -> shader u i o
 
 newtype RShader (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (Type -> Type) -> Type) = RShader { renderShader :: [(Shader.Stage, Doc ())] }
 
@@ -165,23 +164,23 @@ newtype RDecl a = RDecl { getDecl :: Cont (Doc ()) a }
 decl :: Doc () -> RDecl ()
 decl d = RDecl . cont $ \ k -> d <> k ()
 
-class (Stmt expr stmt, Monad decl) => Decl expr stmt decl | decl -> expr stmt where
+class (Stmt ref expr stmt, Monad decl) => Decl ref expr stmt decl | decl -> ref expr stmt where
   main :: stmt () -> decl ()
 
-class (VertexStmt expr stmt, Decl expr stmt decl) => VertexDecl expr stmt decl where
+class (VertexStmt ref expr stmt, Decl ref expr stmt decl) => VertexDecl ref expr stmt decl where
 
-class (GeometryStmt expr stmt, Decl expr stmt decl) => GeometryDecl expr stmt decl where
+class (GeometryStmt ref expr stmt, Decl ref expr stmt decl) => GeometryDecl ref expr stmt decl where
   primitiveIn :: P.Type -> decl ()
   primitiveOut :: P.Type -> Int -> decl ()
 
-class (FragmentStmt expr stmt, Decl expr stmt decl) => FragmentDecl expr stmt decl where
+class (FragmentStmt ref expr stmt, Decl ref expr stmt decl) => FragmentDecl ref expr stmt decl where
 
-instance Decl RExpr RStmt RDecl where
+instance Decl RRef RExpr RStmt RDecl where
   main body = decl (pretty "void" <+> pretty "main" <> parens mempty <+> braces (nest 2 (line <> renderStmt body <> line)))
 
-instance VertexDecl RExpr RStmt RDecl where
+instance VertexDecl RRef RExpr RStmt RDecl where
 
-instance GeometryDecl RExpr RStmt RDecl where
+instance GeometryDecl RRef RExpr RStmt RDecl where
   primitiveIn ty = decl doc where
     doc = pretty "layout" <+> parens (render ty) <+> pretty "in;" <> hardline
     render = \case
@@ -202,7 +201,7 @@ instance GeometryDecl RExpr RStmt RDecl where
       P.TriangleStrip -> pretty "triangle_strip"
       P.Triangles     -> pretty "triangle_strip"
 
-instance FragmentDecl RExpr RStmt RDecl where
+instance FragmentDecl RRef RExpr RStmt RDecl where
 
 
 -- Stmts
@@ -213,32 +212,32 @@ renderStmt = (`runCont` const mempty) . getStmt
 newtype RStmt a = RStmt { getStmt :: Cont (Doc ()) a }
   deriving (Applicative, Functor, Monad)
 
-class (Expr expr, Monad stmt) => Stmt expr stmt | stmt -> expr where
+class (Expr ref expr, Monad stmt) => Stmt ref expr stmt | stmt -> ref expr where
   let' :: GL.Uniform a => String -> expr a -> stmt (expr a)
-  var :: GL.Uniform a => String -> expr a -> stmt (ExprRef expr a)
+  var :: GL.Uniform a => String -> expr a -> stmt (ref a)
 
   iff :: expr Bool -> stmt () -> stmt () -> stmt ()
   switch :: expr Int -> [(Maybe Int, stmt ())] -> stmt ()
   break :: stmt ()
   while :: expr Bool -> stmt () -> stmt ()
 
-  (.=) :: ExprRef expr a -> expr a -> stmt ()
-  (+=) :: ExprRef expr a -> expr a -> stmt ()
-  (*=) :: ExprRef expr a -> expr a -> stmt ()
-  (*!=) :: ExprRef expr (v a) -> expr (v (v a)) -> stmt ()
+  (.=) :: ref a -> expr a -> stmt ()
+  (+=) :: ref a -> expr a -> stmt ()
+  (*=) :: ref a -> expr a -> stmt ()
+  (*!=) :: ref (v a) -> expr (v (v a)) -> stmt ()
 
   infixr 4 .=, +=, *=, *!=
 
-class (VertexExpr expr, Stmt expr stmt) => VertexStmt expr stmt where
+class (VertexExpr ref expr, Stmt ref expr stmt) => VertexStmt ref expr stmt where
 
-class (GeometryExpr expr, Stmt expr stmt) => GeometryStmt expr stmt where
+class (GeometryExpr ref expr, Stmt ref expr stmt) => GeometryStmt ref expr stmt where
   emitVertex :: stmt () -> stmt ()
   emitPrimitive :: stmt () -> stmt ()
 
-class (FragmentExpr expr, Stmt expr stmt) => FragmentStmt expr stmt where
+class (FragmentExpr ref expr, Stmt ref expr stmt) => FragmentStmt ref expr stmt where
   discard :: stmt ()
 
-instance Stmt RExpr RStmt where
+instance Stmt RRef RExpr RStmt where
   let' n v = RStmt . cont $ \ k
     -> renderTypeOf v <+> pretty n <+> pretty '=' <+> renderExpr v <> pretty ';' <> hardline
     <> k (RExpr (pretty n))
@@ -265,9 +264,9 @@ instance Stmt RExpr RStmt where
 
   r *!= v = stmt $ renderRef r <+> pretty "*=" <+> renderExpr v <> pretty ';' <> hardline
 
-instance VertexStmt RExpr RStmt where
+instance VertexStmt RRef RExpr RStmt where
 
-instance GeometryStmt RExpr RStmt where
+instance GeometryStmt RRef RExpr RStmt where
   emitVertex m = stmt
     $  renderStmt m <> hardline
     <> pretty "EmitVertex();" <> hardline
@@ -276,7 +275,7 @@ instance GeometryStmt RExpr RStmt where
     $  renderStmt m <> hardline
     <> pretty "EndPrimitive();" <> hardline
 
-instance FragmentStmt RExpr RStmt where
+instance FragmentStmt RRef RExpr RStmt where
   discard = stmt $ pretty "discard" <> pretty ';' <> hardline
 
 renderTypeOf :: forall a expr . GL.Uniform a => expr a -> Doc ()
@@ -397,16 +396,15 @@ class Vec expr => Mat expr where
   (!*!) :: expr (v (v a)) -> expr (v (v a)) -> expr (v (v a))
   infixl 7 !*, !!*, !*!
 
-class ( Ref (ExprRef expr)
+class ( Ref ref
       , forall a . Num a => Num (expr a)
       , forall a . Fractional a => Fractional (expr a)
       , forall a . Floating a => Floating (expr a)
       , forall a b . Coercible a b => Coercible (expr a) (expr b)
       , Mat expr
       )
-   => Expr expr where
-  type ExprRef expr :: Type -> Type
-  get :: ExprRef expr a -> expr a
+   => Expr ref expr | expr -> ref where
+  get :: ref a -> expr a
 
   cast' :: GL.Uniform b => K (expr a) b -> expr b
 
@@ -437,18 +435,18 @@ class ( Ref (ExprRef expr)
   (!) :: (expr :.: []) a -> expr Int -> expr a
   infixl 9 !
 
-cast :: forall a b expr . (Expr expr, GL.Uniform b) => expr a -> expr b
+cast :: forall a b expr ref . (Expr ref expr, GL.Uniform b) => expr a -> expr b
 cast = cast' . K
 
-float :: Expr expr => expr a -> expr Float
+float :: Expr ref expr => expr a -> expr Float
 float = cast @_ @Float
 
-class (VertexRef (ExprRef expr), Expr expr) => VertexExpr expr where
+class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
   gl_InstanceID :: expr Int
 
-class (GeometryRef (ExprRef expr), Expr expr) => GeometryExpr expr where
+class (GeometryRef ref, Expr ref expr) => GeometryExpr ref expr where
 
-class (FragmentRef (ExprRef expr), Expr expr) => FragmentExpr expr where
+class (FragmentRef ref, Expr ref expr) => FragmentExpr ref expr where
   gl_FragCoord :: expr (V2 Float)
   gl_FrontFacing :: expr Bool
   gl_PointCoord :: expr (V2 Float)
@@ -515,8 +513,7 @@ instance Mat RExpr where
   a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
 
-instance Expr RExpr where
-  type ExprRef RExpr = RRef
+instance Expr RRef RExpr where
   get = RExpr . renderRef
 
   a ^. Prj s = RExpr $ renderExpr a <> pretty s
@@ -542,12 +539,12 @@ instance Expr RExpr where
 
   (!) (C v) n = RExpr $ renderExpr v <> brackets (renderExpr n)
 
-instance VertexExpr RExpr where
+instance VertexExpr RRef RExpr where
   gl_InstanceID = RExpr $ pretty "gl_InstanceID"
 
-instance GeometryExpr RExpr where
+instance GeometryExpr RRef RExpr where
 
-instance FragmentExpr RExpr where
+instance FragmentExpr RRef RExpr where
   gl_FragCoord = RExpr $ pretty "gl_FragCoord"
   gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
   gl_PointCoord = RExpr $ pretty "gl_PointCoord"
