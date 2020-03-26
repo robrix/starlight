@@ -95,6 +95,7 @@ import           Data.Functor.K
 import           Data.Kind (Type)
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
+import           Geometry.Transform (Transform)
 import           GHC.Generics hiding ((:.:))
 import qualified GL.Primitive as P
 import qualified GL.Shader as Shader
@@ -394,6 +395,12 @@ rgba :: (Vec expr, GL.Row a) => expr a -> expr a -> expr a -> expr a -> expr (V4
 rgba r g b a = v4 (V4 r g b a)
 
 class Vec expr => Mat expr where
+  (<*<) :: expr (Transform m a v w) -> expr (Transform m a u v) -> expr (Transform m a u w)
+  (>*>) :: expr (Transform m a u v) -> expr (Transform m a v w) -> expr (Transform m a u w)
+  (>*) :: expr (Transform m a u v) -> expr (m (u a)) -> expr (m (v a))
+
+  infixl 7 <*<, >*>, >*
+
   (!*) :: expr (v (v a)) -> expr (v a) -> expr (v a)
   (!!*) :: expr (v (v a)) -> expr a -> expr (v (v a))
   (!*!) :: expr (v (v a)) -> expr (v (v a)) -> expr (v (v a))
@@ -550,6 +557,10 @@ instance Vec RExpr where
   (^/) = infix' "/"
 
 instance Mat RExpr where
+  (<*<) = infix' "*"
+  (>*>) = infix' "*"
+  (>*)  = infix' "*"
+
   (!*)  = infix' "*"
   (!!*) = infix' "*"
   (!*!) = infix' "*"
