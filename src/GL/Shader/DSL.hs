@@ -82,7 +82,6 @@ module GL.Shader.DSL
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Cont
 import           Data.Coerce
-import           Data.Foldable (toList)
 import           Data.Function (fix)
 import           Data.Functor.C
 import           Data.Functor.K
@@ -460,9 +459,9 @@ instance Num (RExpr a) where
   a + b = RExpr . parens $ renderExpr a <+> pretty '+' <+> renderExpr b
   a * b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a - b = RExpr . parens $ renderExpr a <+> pretty '-' <+> renderExpr b
-  signum a = fn "sign" [ renderExpr a ]
+  signum = fn "sign"
   negate a = RExpr . parens $ pretty "-" <> renderExpr a
-  abs a = fn "abs" [ renderExpr a ]
+  abs = fn "abs"
   fromInteger i = RExpr $ pretty i
 
 instance Fractional (RExpr a) where
@@ -470,44 +469,44 @@ instance Fractional (RExpr a) where
   fromRational = lit . fromRational
 
 instance Floating (RExpr a) where
-  exp a = fn "exp" [ renderExpr a ]
-  log a = fn "log" [ renderExpr a ]
-  sqrt a = fn "sqrt" [ renderExpr a ]
-  a ** b = fn "pow" [ renderExpr a, renderExpr b ]
-  sin a = fn "sin" [ renderExpr a ]
-  cos a = fn "cos" [ renderExpr a ]
-  tan a = fn "tan" [ renderExpr a ]
-  asin a = fn "asin" [ renderExpr a ]
-  acos a = fn "acos" [ renderExpr a ]
-  atan a = fn "atan" [ renderExpr a ]
-  sinh a = fn "sinh" [ renderExpr a ]
-  cosh a = fn "cosh" [ renderExpr a ]
-  tanh a = fn "tanh" [ renderExpr a ]
-  asinh a = fn "asinh" [ renderExpr a ]
-  acosh a = fn "acosh" [ renderExpr a ]
-  atanh a = fn "atanh" [ renderExpr a ]
+  exp = fn "exp"
+  log = fn "log"
+  sqrt = fn "sqrt"
+  a ** b = fn "pow" a b
+  sin = fn "sin"
+  cos = fn "cos"
+  tan = fn "tan"
+  asin = fn "asin"
+  acos = fn "acos"
+  atan = fn "atan"
+  sinh = fn "sinh"
+  cosh = fn "cosh"
+  tanh = fn "tanh"
+  asinh = fn "asinh"
+  acosh = fn "acosh"
+  atanh = fn "atanh"
   pi = lit pi
 
 instance Vec RExpr where
-  v2 (v :: V2 (expr a)) = fn (GL.glslType @(V2 a)) (coerce (toList v))
-  v3 (v :: V3 (expr a)) = fn (GL.glslType @(V3 a)) (coerce (toList v))
-  v4 (v :: V4 (expr a)) = fn (GL.glslType @(V4 a)) (coerce (toList v))
+  v2 (V2 x y :: V2 (expr a)) = fn (GL.glslType @(V2 a)) x y
+  v3 (V3 x y z :: V3 (expr a)) = fn (GL.glslType @(V3 a)) x y z
+  v4 (V4 x y z w :: V4 (expr a)) = fn (GL.glslType @(V4 a)) x y z w
 
-  ext3 a b = fn "vec3" [ renderExpr a, renderExpr b ]
-  ext4 a b = fn "vec4" [ renderExpr a, renderExpr b ]
+  ext3 = fn "vec3"
+  ext4 = fn "vec4"
 
-  dext3 a b = fn "dvec3" [ renderExpr a, renderExpr b ]
-  dext4 a b = fn "dvec4" [ renderExpr a, renderExpr b ]
+  dext3 = fn "dvec3"
+  dext4 = fn "dvec4"
 
-  norm a = fn "length" [ renderExpr a ]
-  dot a b = fn "dot" [ renderExpr a, renderExpr b ]
+  norm = fn "length"
+  dot = fn "dot"
   a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a ^/  b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
 
 instance Mat RExpr where
-  m2 (m :: V2 (V2 (expr a))) = fn (GL.glslType @(V2 (V2 a))) (coerce (map v2 (toList m)))
-  m3 (m :: V3 (V3 (expr a))) = fn (GL.glslType @(V3 (V3 a))) (coerce (map v3 (toList m)))
-  m4 (m :: V4 (V4 (expr a))) = fn (GL.glslType @(V4 (V4 a))) (coerce (map v4 (toList m)))
+  m2 (V2 x y :: V2 (V2 (expr a))) = fn (GL.glslType @(V2 (V2 a))) (v2 x) (v2 y)
+  m3 (V3 x y z :: V3 (V3 (expr a))) = fn (GL.glslType @(V3 (V3 a))) (v3 x) (v3 y) (v3 z)
+  m4 (V4 x y z w :: V4 (V4 (expr a))) = fn (GL.glslType @(V4 (V4 a))) (v4 x) (v4 y) (v4 z) (v4 w)
 
   a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
@@ -521,21 +520,21 @@ instance Expr RRef RExpr where
   lt a b = RExpr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
   gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
 
-  cast' (K a :: K (expr a) b) = fn (GL.glslType @b) [ renderExpr a ]
+  cast' (K a :: K (expr a) b) = fn (GL.glslType @b) a
 
-  log2 = fn "log2" . pure . coerce
-  exp2 = fn "exp2" . pure . coerce
-  fract = fn "fract" . pure . coerce
+  log2 = fn "log2"
+  exp2 = fn "exp2"
+  fract = fn "fract"
 
-  lerp  t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
-  lerp2 t a b = fn "mix" [ renderExpr a, renderExpr b, renderExpr t ]
+  lerp  t a b = fn "mix" a b t
+  lerp2 t a b = fn "mix" a b t
 
-  mod' a b = fn "mod" [ renderExpr a, renderExpr b ]
-  min' a b = fn "min" [ renderExpr a, renderExpr b ]
-  max' a b = fn "max" [ renderExpr a, renderExpr b ]
-  atan2' a b = fn "atan" [ renderExpr a, renderExpr b ]
+  mod' = fn "mod"
+  min' = fn "min"
+  max' = fn "max"
+  atan2' = fn "atan"
 
-  texture a b = fn "texture" [ renderExpr a, renderExpr b ]
+  texture = fn "texture"
 
   (!) (C v) n = RExpr $ renderExpr v <> brackets (renderExpr n)
 
@@ -549,11 +548,21 @@ instance FragmentExpr RRef RExpr where
   gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
   gl_PointCoord = RExpr $ pretty "gl_PointCoord"
 
-  dFdx a = fn "dFdx" [ renderExpr a ]
-  dFdy a = fn "dFdy" [ renderExpr a ]
+  dFdx a = fn "dFdx" a
+  dFdy a = fn "dFdy" a
 
-fn :: String -> [Doc ()] -> RExpr b
-fn n as = RExpr $ pretty n <> tupled as
+fn :: Fn t => String -> t
+fn n = fn' n id
+
+class Fn t where
+  fn' :: String -> ([Doc ()] -> [Doc ()]) -> t
+
+instance Fn (RExpr a) where
+  fn' n as = RExpr $ pretty n <> tupled (as [])
+
+instance Fn t => Fn (RExpr a -> t) where
+  fn' n as a = fn' n (as . (coerce a :))
+
 
 lit :: Double -> RExpr a
 lit = RExpr . pretty
