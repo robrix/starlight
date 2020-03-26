@@ -30,7 +30,7 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding ((!*), (!*!), (^.), (^/), _a)
+import           GL.Shader.DSL hiding ((!*), (!*!), (./.), (^.), (^/), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor

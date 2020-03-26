@@ -38,7 +38,7 @@ import           GL.Array
 import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
-import           GL.Shader.DSL hiding (norm, (!*!), (^*), (^.), _a, _xy, _xyz)
+import           GL.Shader.DSL hiding (norm, (!*!), (.*.), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
 import           GL.Shader.Vars (makeVars)
 import           Linear.Exts as Linear hiding ((!*))

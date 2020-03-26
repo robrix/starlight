@@ -63,6 +63,7 @@ module GL.Shader.DSL
 , m2
 , m3
 , m4
+, Dim(..)
 , Expr(..)
 , cast
 , float
@@ -103,6 +104,7 @@ import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
 import           Prelude hiding (break)
 import           UI.Colour (Colour)
+import           Unit.Algebra (Div, Mul)
 
 class (forall u . Cat.Category (shader u)) => Shader shader where
   vertex :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . VertexDecl ref expr stmt decl => u expr -> i expr -> o ref -> decl ()) -> shader u i o
@@ -418,12 +420,23 @@ m4
   -> expr (M44 a)
 m4 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 = xyzw (xyzw a1 a2 a3 a4) (xyzw a5 a6 a7 a8) (xyzw a9 a10 a11 a12) (xyzw a13 a14 a15 a16)
 
+class Dim expr where
+  (.*.) :: expr (u a) -> expr (v a) -> expr (Mul u v a)
+  (^*.) :: expr (f (u a)) -> expr (v a) -> expr (f (Mul u v a))
+  (.*^) :: expr (u a) -> expr (f (v a)) -> expr (f (Mul u v a))
+  (./.) :: expr (u a) -> expr (v a) -> expr (Div u v a)
+  (^/.) :: expr (f (u a)) -> expr (v a) -> expr (f (Div u v a))
+  (./^) :: expr (u a) -> expr (f (v a)) -> expr (f (Div u v a))
+
+  infixl 7 .*., ^*., .*^, ./., ^/., ./^
+
 class ( Ref ref
       , forall a . Num a => Num (expr a)
       , forall a . Fractional a => Fractional (expr a)
       , forall a . Floating a => Floating (expr a)
       , forall a b . Coercible a b => Coercible (expr a) (expr b)
       , Mat expr
+      , Dim expr
       )
    => Expr ref expr | expr -> ref where
   get :: ref a -> expr a
@@ -531,6 +544,14 @@ instance Mat RExpr where
   (!*)  = infix' "*"
   (!!*) = infix' "*"
   (!*!) = infix' "*"
+
+instance Dim RExpr where
+  (.*.) = infix' "*"
+  (^*.) = infix' "*"
+  (.*^) = infix' "*"
+  (./.) = infix' "/"
+  (^/.) = infix' "/"
+  (./^) = infix' "/"
 
 instance Expr RRef RExpr where
   get = RExpr . renderRef
