@@ -170,7 +170,7 @@ radarShader
             (V2 (cos theta) (-sin theta))
             (V2 (sin theta) ( cos theta)))
       emitPrimitive $ do
-        i <- var @_ @_ @_ @Int "i" (-count)
+        i <- var @_ @_ @Int "i" (-count)
         while (get i `lt` count + 1) $ do
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
@@ -195,7 +195,7 @@ targetShader
       let rot theta = m2 (V2
             (V2 (cos theta) (-sin theta))
             (V2 (sin theta) ( cos theta)))
-      i <- var @_ @_ @_ @Int "i" (-count @(_ Int))
+      i <- var @_ @_ @Int "i" (-count @(_ Int))
       while (get i `lt` count @(_ Int) + 1) . emitPrimitive $ do
         theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
         emitVertex $ do
