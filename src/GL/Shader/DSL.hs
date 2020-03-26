@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
@@ -16,6 +18,7 @@ module GL.Shader.DSL
 ( Shader(..)
 , RShader(..)
 , (Cat.>>>)
+, ClipUnits(..)
 , None(..)
 , shaderSources
 , Frag(..)
@@ -91,24 +94,34 @@ import           Control.Monad.Trans.Cont
 import           Data.Coerce
 import           Data.Function (fix)
 import           Data.Functor.C
+import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Kind (Type)
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
+import           Foreign.Storable (Storable)
 import           Geometry.Transform (Transform)
 import           GHC.Generics hiding ((:.:))
 import qualified GL.Primitive as P
 import qualified GL.Shader as Shader
 import           GL.Shader.Vars
 import           GL.TextureUnit
+import qualified GL.Type as GL
 import qualified GL.Uniform as GL
+import           Linear.Conjugate
+import           Linear.Epsilon
 import           Linear.Matrix (M22, M33, M44)
+import           Linear.Metric
 import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
+import           Linear.Vector
 import           Prelude hiding (break)
+import           System.Random (Random)
 import           UI.Colour (Colour)
+import           Unit
 import           Unit.Algebra (Div, Mul)
+import           Unit.Length (Length)
 
 class (forall u . Cat.Category (shader u)) => Shader shader where
   vertex :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . VertexDecl ref expr stmt decl => u expr -> i expr -> o ref -> decl ()) -> shader u i o
@@ -125,6 +138,14 @@ instance Shader RShader where
   vertex   s = RShader $ renderStage Shader.Vertex   id (makeVars (RExpr . pretty . name)) s
   geometry s = RShader $ renderStage Shader.Geometry (coerce :: forall x . RExpr x -> (RExpr :.: []) x) (makeVars (RExpr . pretty . name)) s
   fragment s = RShader $ renderStage Shader.Fragment id (makeVars (RExpr . pretty . name)) s
+
+
+newtype ClipUnits a = ClipUnits { getClipUnits :: a }
+  deriving (GL.Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, GL.Row, Show, Storable, Traversable, GL.Type, GL.Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
+instance Unit Length ClipUnits where
+  suffix = K ("clip"++)
 
 
 data None (v :: Type -> Type) = None
