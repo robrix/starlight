@@ -199,7 +199,7 @@ targetShader
       while (get i `lt` count @(_ Int) + 1) . emitPrimitive $ do
         theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
         emitVertex $ do
-          gl_Position .= ext4 (v3 (pure 0)) 1
+          gl_Position .= ext4 (v3 0) 1
           colour3 .= colour2 ! 0
         emitVertex $ do
           gl_Position .= coerce matrix D.!*! cast @_ @(M44 Float) (rot theta) !* coerce (pos ! 0)
