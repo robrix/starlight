@@ -56,19 +56,20 @@ shader
         t .= xy  (9/12.0)  (3/12.0)
         break)
       ]
-    let m =   matrix
-          !*! xyz
-            (xyz 1 0 0)
-            (xyz 0 1 0)
-            (ext3 (get t ^* r) 1)
-          !*! xyz
-            (xyz fontScale 0         0)
-            (xyz 0         fontScale 0)
-            (xyz 0         0         1)
-          !*! xyz
-            (xyz 1              0 0)
-            (xyz 0              1 0)
-            (xyz (float offset) 0 1)
+    let t' p = get t ^. p * r
+        m =   matrix
+          !*! m3
+            1       0       0
+            0       1       0
+            (t' _x) (t' _y) 1
+          !*! m3
+            fontScale 0         0
+            0         fontScale 0
+            0         0         1
+          !*! m3
+            1              0 0
+            0              1 0
+            (float offset) 0 1
     gl_Position .= ext4 (m !* ext3 (pos^._xy) 1) 0^._xywz)
 
   >>> fragment (\ _ IF{ _coord2, colour } Frag{ fragColour } -> main $

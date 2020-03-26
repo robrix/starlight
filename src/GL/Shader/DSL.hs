@@ -60,6 +60,9 @@ module GL.Shader.DSL
 , xyzw
 , rgba
 , Mat(..)
+, m2
+, m3
+, m4
 , Expr(..)
 , cast
 , float
@@ -390,6 +393,30 @@ class Vec expr => Mat expr where
   (!!*) :: expr (v (v a)) -> expr a -> expr (v (v a))
   (!*!) :: expr (v (v a)) -> expr (v (v a)) -> expr (v (v a))
   infixl 7 !*, !!*, !*!
+
+m2
+  :: (Vec expr, GL.Column a)
+  => expr a -> expr a
+  -> expr a -> expr a
+  -> expr (M22 a)
+m2 a1 a2 a3 a4 = xy (xy a1 a2) (xy a3 a4)
+
+m3
+  :: (Vec expr, GL.Column a)
+  => expr a -> expr a -> expr a
+  -> expr a -> expr a -> expr a
+  -> expr a -> expr a -> expr a
+  -> expr (M33 a)
+m3 a1 a2 a3 a4 a5 a6 a7 a8 a9 = xyz (xyz a1 a2 a3) (xyz a4 a5 a6) (xyz a7 a8 a9)
+
+m4
+  :: (Vec expr, GL.Column a)
+  => expr a -> expr a -> expr a -> expr a
+  -> expr a -> expr a -> expr a -> expr a
+  -> expr a -> expr a -> expr a -> expr a
+  -> expr a -> expr a -> expr a -> expr a
+  -> expr (M44 a)
+m4 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 = xyzw (xyzw a1 a2 a3 a4) (xyzw a5 a6 a7 a8) (xyzw a9 a10 a11 a12) (xyzw a13 a14 a15 a16)
 
 class ( Ref ref
       , forall a . Num a => Num (expr a)

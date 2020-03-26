@@ -95,11 +95,15 @@ shader
     a1 <- let' "a1" (wrap (0.3 + nf))
     cos_a1 <- let' "cos_a1" (cos a1)
     sin_a1 <- let' "sin_a1" (sin a1)
-    rot1 <- let' "rot1" $ xy (xy cos_a1 sin_a1) (xy (-sin_a1) cos_a1)
+    rot1 <- let' "rot1" $ m2
+      cos_a1    sin_a1
+      (-sin_a1) cos_a1
     a2 <- let' "a2" (wrap (0.2 + nf))
     cos_a2 <- let' "cos_a2" (cos a2)
     sin_a2 <- let' "sin_a2" (sin a2)
-    rot2 <- let' "rot2" $ xy (xy cos_a2 sin_a2) (xy (-sin_a2) cos_a2)
+    rot2 <- let' "rot2" $ m2
+      cos_a2    sin_a2
+      (-sin_a2) cos_a2
     dir^^._xz *!= rot1
     dir^^._xy *!= rot2
     focus^^._xz *!= cast @_ @(M22 Double) rot1
