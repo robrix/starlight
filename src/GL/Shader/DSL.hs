@@ -548,8 +548,8 @@ instance FragmentExpr RRef RExpr where
   gl_FrontFacing = RExpr $ pretty "gl_FrontFacing"
   gl_PointCoord = RExpr $ pretty "gl_PointCoord"
 
-  dFdx a = fn "dFdx" a
-  dFdy a = fn "dFdy" a
+  dFdx = fn "dFdx"
+  dFdy = fn "dFdy"
 
 fn :: Fn t => String -> t
 fn n = fn' n id
