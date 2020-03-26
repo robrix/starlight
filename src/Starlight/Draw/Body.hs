@@ -83,17 +83,17 @@ shader
     switch gl_InstanceID
       [ (Just 1, do
         m *= m4 (V4
-          (V4 1 0     0     0)
-          (V4 0 cos90 (-1)  0)
-          (V4 0 1     cos90 0)
-          (V4 0 0     0     1))
+          (xyzw 1 0     0     0)
+          (xyzw 0 cos90 (-1)  0)
+          (xyzw 0 1     cos90 0)
+          (xyzw 0 0     0     1))
         break)
       , (Just 2, do
         m *= m4 (V4
-          (V4 cos90 0 1     0)
-          (V4 0     1 0     0)
-          (V4 (-1)  0 cos90 0)
-          (V4 0     0 0     1))
+          (xyzw cos90 0 1     0)
+          (xyzw 0     1 0     0)
+          (xyzw (-1)  0 cos90 0)
+          (xyzw 0     0 0     1))
         break)
       ]
     gl_Position .= cast @_ @(V4 Float) (get m D.!* dext4 (dext3 pos 0) 1))
