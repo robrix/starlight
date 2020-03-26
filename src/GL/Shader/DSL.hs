@@ -406,7 +406,6 @@ class ( Ref (ExprRef expr)
       )
    => Expr expr where
   type ExprRef expr :: Type -> Type
-
   get :: ExprRef expr a -> expr a
 
   cast' :: GL.Uniform b => K (expr a) b -> expr b
