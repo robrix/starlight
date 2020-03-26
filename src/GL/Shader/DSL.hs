@@ -476,13 +476,13 @@ class ( Ref ref
 cast :: forall a b expr ref . (Expr ref expr, GL.Uniform b) => expr a -> expr b
 cast = cast'' . K
 
-cast' :: forall a b expr u ref . (Expr ref expr, Coercible b (u b), GL.Uniform b) => expr (u a) -> expr (u b)
-cast' = coerce @(expr b) @(expr (u b)) . cast'' . K
+cast' :: forall a b expr u ref . (Expr ref expr, GL.Uniform (u b)) => expr (u a) -> expr (u b)
+cast' = cast'' . K
 
 float :: Expr ref expr => expr a -> expr Float
 float = cast @_ @Float
 
-float' :: (Expr ref expr, Coercible Float (u Float)) => expr (u a) -> expr (u Float)
+float' :: (Expr ref expr, GL.Uniform (u Float)) => expr (u a) -> expr (u Float)
 float' = cast' @_ @Float
 
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
