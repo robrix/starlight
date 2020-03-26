@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -66,7 +67,9 @@ module GL.Shader.DSL
 , Dim(..)
 , Expr(..)
 , cast
+, cast'
 , float
+, float'
 , VertexExpr(..)
 , GeometryExpr
 , FragmentExpr(..)
@@ -441,7 +444,7 @@ class ( Ref ref
    => Expr ref expr | expr -> ref where
   get :: ref a -> expr a
 
-  cast' :: GL.Uniform b => K (expr a) b -> expr b
+  cast'' :: GL.Uniform b => K (expr a) b -> expr b
 
   log2 :: expr a -> expr a
   exp2 :: expr a -> expr a
@@ -471,10 +474,16 @@ class ( Ref ref
   infixl 9 !
 
 cast :: forall a b expr ref . (Expr ref expr, GL.Uniform b) => expr a -> expr b
-cast = cast' . K
+cast = cast'' . K
+
+cast' :: forall a b expr u ref . (Expr ref expr, Coercible b (u b), GL.Uniform b) => expr (u a) -> expr (u b)
+cast' = coerce @(expr b) @(expr (u b)) . cast'' . K
 
 float :: Expr ref expr => expr a -> expr Float
 float = cast @_ @Float
+
+float' :: (Expr ref expr, Coercible Float (u Float)) => expr (u a) -> expr (u Float)
+float' = cast' @_ @Float
 
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
   gl_InstanceID :: expr Int
@@ -561,7 +570,7 @@ instance Expr RRef RExpr where
   lt = infix' "<"
   gt = infix' ">"
 
-  cast' (K a :: K (expr a) b) = fn (GL.glslType @b) a
+  cast'' (K a :: K (expr a) b) = fn (GL.glslType @b) a
 
   log2 = fn "log2"
   exp2 = fn "exp2"
