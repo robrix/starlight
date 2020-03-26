@@ -77,7 +77,7 @@ range = 0...length vertices
 shader :: Shader shader => shader U V Frag
 shader
   =   vertex (\ U{ matrix } V{ r } None -> main $
-    gl_Position .= coerce matrix D.!* v4 (V4 r 0 0 1))
+    gl_Position .= coerce matrix D.!* xyzw r 0 0 1)
   >>> fragment (\ U{ colour } None Frag{ fragColour } -> main $
     fragColour .= colour)
 

@@ -87,7 +87,7 @@ shader
 
   >>> fragment (\ U{ resolution, focus, zoom } None Frag{ fragColour } -> main $ do
     resolution <- let' @_ @_ @_ @(V2 Float) "resolution" (coerce resolution)
-    uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * v2 (V2 1 (resolution^._y / resolution^._x))
+    uv <- let' "uv" $ (gl_FragCoord^._xy / resolution^._xy - 0.5) * xy 1 (resolution^._y / resolution^._x)
     dir <- var "dir" $ ext3 (uv D.^* zoom) 1 D.^* 0.5
     focus <- var "focus" $ dext3 (coerce focus) 1
     let wrap x = ((x + pi) `mod'` (pi * 2)) - pi
@@ -121,7 +121,7 @@ shader
         a += abs (get pa - prev)
         i += 1
       a .= get a ** 3
-      v += v3 (V3 s (s ** 2) (s ** 2)) D.^* get a D.^* brightness D.^* (0.5 * distfading ** float (get r))
+      v += xyz s (s ** 2) (s ** 2) D.^* get a D.^* brightness D.^* (0.5 * distfading ** float (get r))
       r += 1
     mag <- let' "mag" (norm (get v))
     v .= lerp saturation (v3 (pure mag)) (get v)

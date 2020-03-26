@@ -147,7 +147,7 @@ vertex' = vertex (\ U{ here, scale } V{ there, r, colour } IG{ pos, colour2, swe
   iff (r `gt` d)
     (sweep .= pi/2)
     (sweep .= (minSweep `max'` abs (coerce (asin (float (r/d))))))
-  pos .= coerce (ext4 (ext3 (v2 (V2 (cos angle) (sin angle)) D.^* coerce radius) 0) 1)
+  pos .= coerce (xyzw (cos angle * coerce radius) (sin angle * coerce radius) 0 1)
   colour2 .= colour)
   where
   minBlipSize :: Num a => a
@@ -199,7 +199,7 @@ targetShader
       while (get i `lt` count @(_ Int) + 1) . emitPrimitive $ do
         theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
         emitVertex $ do
-          gl_Position .= ext4 (v3 0) 1
+          gl_Position .= xyzw 0 0 0 1
           colour3 .= colour2 ! 0
         emitVertex $ do
           gl_Position .= coerce matrix D.!*! cast @_ @(M44 Float) (rot theta) !* coerce (pos ! 0)

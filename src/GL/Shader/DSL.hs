@@ -55,6 +55,10 @@ module GL.Shader.DSL
   -- * Expressions
 , RExpr(..)
 , Vec(..)
+, xy
+, xyz
+, xyzw
+, rgba
 , Mat(..)
 , Expr(..)
 , cast
@@ -369,6 +373,18 @@ class Vec expr where
   (^/) :: expr (v a) -> expr a -> expr (v a)
 
   infixl 7 ^*, ^/
+
+xy :: (Vec expr, GL.Row a) => expr a -> expr a -> expr (V2 a)
+xy x y = v2 (V2 x y)
+
+xyz :: (Vec expr, GL.Row a) => expr a -> expr a -> expr a -> expr (V3 a)
+xyz x y z = v3 (V3 x y z)
+
+xyzw :: (Vec expr, GL.Row a) => expr a -> expr a -> expr a -> expr a -> expr (V4 a)
+xyzw x y z w = v4 (V4 x y z w)
+
+rgba :: (Vec expr, GL.Row a) => expr a -> expr a -> expr a -> expr a -> expr (V4 a)
+rgba r g b a = v4 (V4 r g b a)
 
 class Vec expr => Mat expr where
   m2 :: GL.Column a => V2 (V2 (expr a)) -> expr (M22 a)

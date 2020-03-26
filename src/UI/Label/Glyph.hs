@@ -32,28 +32,28 @@ shader
     r <- let' "r" (1/float ratio)
     switch gl_InstanceID
       [ (Just 0, do
-        colour .= v4 (V4 1 0 0 1)
-        t .= v2 (V2 (-1/12.0) (-5/12.0))
+        colour .= rgba 1 0 0 1
+        t .= xy (-1/12.0) (-5/12.0)
         break)
       , (Just 1, do
-        colour .= v4 (V4 1 0 0 1)
-        t .= v2 (V2  (1/12.0)  (1/12.0))
+        colour .= rgba 1 0 0 1
+        t .= xy  (1/12.0)  (1/12.0)
         break)
       , (Just 2, do
-        colour .= v4 (V4 0 1 0 1)
-        t .= v2 (V2  (3/12.0) (-1/12.0))
+        colour .= rgba 0 1 0 1
+        t .= xy  (3/12.0) (-1/12.0)
         break)
       , (Just 3, do
-        colour .= v4 (V4 0 1 0 1)
-        t .= v2 (V2  (5/12.0)  (5/12.0))
+        colour .= rgba 0 1 0 1
+        t .= xy  (5/12.0)  (5/12.0)
         break)
       , (Just 4, do
-        colour .= v4 (V4 0 0 1 1)
-        t .= v2 (V2  (7/12.0) (-3/12.0))
+        colour .= rgba 0 0 1 1
+        t .= xy  (7/12.0) (-3/12.0)
         break)
       , (Just 5, do
-        colour .= v4 (V4 0 0 1 1)
-        t .= v2 (V2  (9/12.0)  (3/12.0))
+        colour .= rgba 0 0 1 1
+        t .= xy  (9/12.0)  (3/12.0)
         break)
       ]
     let m =   matrix
