@@ -28,7 +28,7 @@ import           Geometry.Circle
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, norm, (!*), (!*!))
+import           GL.Shader.DSL hiding (norm, (!*), (!*!))
 import qualified GL.Shader.DSL as D
 import           Prelude hiding (break)
 import qualified Starlight.Body as Body
@@ -58,8 +58,8 @@ draw v@Body.StateVectors{ body = Body.Body{ colour } } = UI.using getDrawable $ 
   view <- ask
   matrix_ ?=
     (   transformToSystem view
-    >>> Body.transform v
-    >>> Body.toBodySpace v)
+    <<< Body.transform v
+    <<< Body.toBodySpace v)
   colour_ ?= colour
 
   drawArraysInstanced LineLoop range 3
@@ -75,30 +75,42 @@ range :: Interval I Int
 range = 0...length vertices
 
 
-shader :: D.Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ pos } D.None -> main $ do
+shader :: D.Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix } V{ pos } D.None -> main $ do
     let cos90 = 6.123233995736766e-17
-    m <- var "m" (D.coerce (matrix u))
+    m <- var "m" (coerce matrix)
     switch gl_InstanceID
-      [ (Just 1, m *= dmat4 [dvec4 [1, 0, 0, 0], dvec4 [0, cos90, -1, 0], dvec4 [0, 1, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
-      , (Just 2, m *= dmat4 [dvec4 [cos90, 0, 1, 0], dvec4 [0, 1, 0, 0], dvec4 [-1, 0, cos90, 0], dvec4 [0, 0, 0, 1]] >> break)
+      [ (Just 1, do
+        m *= m4
+          1 0     0     0
+          0 cos90 (-1)  0
+          0 1     cos90 0
+          0 0     0     1
+        break)
+      , (Just 2, do
+        m *= m4
+          cos90 0 1     0
+          0     1 0     0
+          (-1)  0 cos90 0
+          0     0 0     1
+        break)
       ]
-    gl_Position .= vec4 [get m D.!* dext4 (dext3 pos 0) 1])
+    gl_Position .= cast @_ @(V4 Float) (get m D.!* dext4 (dext3 pos 0) 1))
 
-  >>> fragment (\ D.None Frag{ fragColour } -> main $
-    fragColour .= colour u)
+  >>> fragment (\ U{ colour } D.None Frag{ fragColour } -> main $
+    fragColour .= colour)
 
 
 data U v = U
-  { matrix :: v (Transform Double ClipUnits Body.BodyUnits)
+  { matrix :: v (Transform V4 Double Body.BodyUnits ClipUnits)
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Double ClipUnits Body.BodyUnits))
+matrix_ :: Lens' (U v) (v (Transform V4 Double Body.BodyUnits ClipUnits))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))

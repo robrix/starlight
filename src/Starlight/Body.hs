@@ -61,7 +61,7 @@ import           Unit.Time
 
 data StateVectors = StateVectors
   { body      :: !Body
-  , transform :: !(Transform Double Distance Distance)
+  , transform :: !(Transform V4 Double Distance Distance)
   , actor     :: !Actor
   }
   deriving (Generic, Show)
@@ -75,8 +75,8 @@ instance HasColour StateVectors where
 body_ :: Lens' StateVectors Body
 body_ = field @"body"
 
-toBodySpace :: StateVectors -> Transform Double Distance BodyUnits
-toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) >>> mkRotation (actor v^.rotation_)
+toBodySpace :: StateVectors -> Transform V4 Double BodyUnits Distance
+toBodySpace v = mkScale (pure (convert @_ @Distance (radius (body v)) ./. BodyUnits 1)) <<< mkRotation (actor v^.rotation_)
 
 data Revolution = Revolution
   { orientation :: !(Quaternion (I Double))
@@ -155,7 +155,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
   bodies' = Map.mapWithKey go bodies
   go identifier body@Body{ revolution } = StateVectors
     { body
-    , transform = rel >>> mkTranslation (ext (position actor) 0)
+    , transform = rel <<< mkTranslation (ext (position actor) 0)
     , actor = actor
       & position_.extended 0.extended 1 %~ apply rel
       & velocity_.coerced.extended 0.extended 0 %~ apply rel
@@ -163,7 +163,7 @@ systemAt sys@System{ bodies } t = sys { bodies = bodies' } where
     } where
     actor = actorAt (maybe 0 (view mass_) p) body t
     p = parent identifier >>= (bodies' Map.!?)
-    rel = maybe rot ((>>> rot) . transform) p
+    rel = maybe rot ((<<< rot) . transform) p
     rot = mkRotation (orientation revolution)
 
 

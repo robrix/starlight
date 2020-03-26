@@ -24,6 +24,7 @@ import           Control.Effect.Profile
 import           Control.Effect.State (put)
 import           Control.Effect.Trace
 import           Control.Lens (Lens', (&), (?~), (^.))
+import           Data.Coerce (coerce)
 import           Data.Foldable (for_, toList)
 import           Data.Functor.I
 import           Data.Functor.Interval
@@ -37,8 +38,7 @@ import           GL.Array
 import           GL.Buffer as B
 import           GL.Effect.Check
 import           GL.Program
-import           GL.Shader (Type(..))
-import           GL.Shader.DSL hiding (coerce, norm, (!*!), (^*), (^.), _a, _xy, _xyz)
+import           GL.Shader.DSL hiding (norm, (!*!), (^*), (^.), _a, _xy, _xyz)
 import qualified GL.Shader.DSL as D
 import           GL.Shader.Vars (makeVars)
 import           Linear.Exts as Linear hiding ((!*))
@@ -53,6 +53,7 @@ import           UI.Colour
 import qualified UI.Window as Window
 import           Unit.Algebra
 import           Unit.Angle
+import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -73,7 +74,7 @@ draw = ask >>= \ Drawable{ radarProgram, targetProgram, array, buffer } -> bindA
       vars     = makeVars (const Nothing)
         & matrix_ ?~ tmap realToFrac (transformToWindow view)
         & here_   ?~ here
-        & scale_  ?~ realToFrac (lengthToWindowPixels view)
+        & scale_  ?~ fmap realToFrac (lengthToWindowPixels view)
 
   measure "realloc/copy" $ do
     B.realloc @'B.Array (length vertices) B.Static B.Draw
@@ -135,99 +136,104 @@ verticesForBlips bs =
   ]
 
 
-vertex' :: U (Expr 'Vertex) -> Stage V IG
-vertex' U{ here, scale } = vertex (\ V{ there, r, colour } IG{ colour2, sweep } -> main $ do
+vertex' :: Shader shader => shader U V IG
+vertex' = vertex (\ U{ here, scale } V{ there, r, colour } IG{ pos, colour2, sweep } -> main $ do
   there <- let' "there" (there - here)
   d     <- let' "d"     (D.norm there)
   let angleOf vec = atan2' (vec D.^.D._y) (vec D.^.D._x)
-  angle <- let' "angle" (angleOf (vec2 [there]))
-  radius <- let' "radius" (D.min' (scale * float d) radius)
-  minSweep <- let' "minSweep" (minBlipSize / (2 * pi * D.coerce radius))
+  angle <- let' "angle" (angleOf (cast @_ @(V2 Float) there))
+  radius <- let' "radius" (min' (scale * coerce (float d)) radius)
+  minSweep <- let' "minSweep" (minBlipSize / (2 * pi * coerce radius))
   iff (r `gt` d)
     (sweep .= pi/2)
-    (sweep .= (minSweep `D.max'` abs (D.coerce (asin (float (r/d))))))
-  pos   <- let' "pos"   (vec2 [cos angle, sin angle] D.^* D.coerce radius)
-  colour2 .= colour
-  gl_Position .= ext4 (ext3 pos 0) 1) where
+    (sweep .= (minSweep `max'` abs (coerce (asin (float (r/d))))))
+  pos .= coerce (xyzw (cos angle * coerce radius) (sin angle * coerce radius) 0 1)
+  colour2 .= colour)
+  where
+  minBlipSize :: Num a => a
   minBlipSize = 16
+  radius :: Num a => a
   radius = 300
 
-fragment' :: Stage IF Frag
-fragment' = fragment (\ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
+fragment' :: Shader shader => shader U IF Frag
+fragment' = fragment (\ _ IF{ colour3 } Frag{ fragColour } -> main $ fragColour .= colour3)
 
-radarShader :: Shader U V Frag
-radarShader = program $ \ u
-  ->  vertex' u
+radarShader :: Shader shader => shader U V Frag
+radarShader
+  =   vertex'
 
-  >>> geometry (\ IG{} IF{ colour3 } -> do
+  >>> geometry (\ U{ matrix } IG{ pos, sweep, colour2 } IF{ colour3 } -> do
     primitiveIn Points
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
-      let rot theta = mat2
-            [ vec2 [ cos theta, -sin theta ]
-            , vec2 [ sin theta,  cos theta ]
-            ]
+      let rot theta = m2
+            (cos theta) (-sin theta)
+            (sin theta) ( cos theta)
       emitPrimitive $ do
-        i <- var @Int "i" (-fromIntegral count)
-        while (get i `lt` (fromIntegral count + 1)) $ do
+        i <- var @_ @_ @_ @Int "i" (-count)
+        while (get i `lt` count + 1) $ do
           emitVertex $ do
-            theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
-            gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
-            colour3 .= Var "colour2[0]"
+            theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
+            gl_Position .= coerce matrix D.!*! cast @_ @(M44 Float) (rot theta) !* coerce (pos ! 0)
+            colour3 .= colour2 ! 0
           i += 1)
 
-  >>> fragment' where
+  >>> fragment'
+  where
+  count :: Num a => a
   count = 16
 
 
-targetShader :: Shader U V Frag
-targetShader = program $ \ u
-  ->  vertex' u
+targetShader :: Shader shader => shader U V Frag
+targetShader
+  =   vertex'
 
-  >>> geometry (\ IG{} IF{ colour3 } -> do
+  >>> geometry (\ U{ matrix } IG{ pos, colour2, sweep } IF{ colour3 } -> do
     primitiveIn Points
     primitiveOut LineStrip ((count * 2 + 1) * 2)
     main $ do
-      let rot theta = mat2
-            [ vec2 [ cos theta, -sin theta ]
-            , vec2 [ sin theta,  cos theta ]
-            ]
-      i <- var @Int "i" (-fromIntegral count)
-      while (get i `lt` (fromIntegral count + 1)) . emitPrimitive $ do
-        theta <- let' "theta" (float (get i) / float (fromIntegral count) * Var "sweep[0]")
+      let rot theta = m2
+            (cos theta) (-sin theta)
+            (sin theta) ( cos theta)
+      i <- var @_ @_ @_ @Int "i" (-count @(_ Int))
+      while (get i `lt` count @(_ Int) + 1) . emitPrimitive $ do
+        theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
         emitVertex $ do
-          gl_Position .= ext4 (vec3 [0]) 1
-          colour3 .= Var "colour2[0]"
+          gl_Position .= xyzw 0 0 0 1
+          colour3 .= colour2 ! 0
         emitVertex $ do
-          gl_Position .= D.coerce (matrix u) D.!*! mat4 [rot theta] !* Var "gl_in[0].gl_Position"
-          colour3 .= Var "colour2[0]"
+          gl_Position .= coerce matrix D.!*! cast @_ @(M44 Float) (rot theta) !* coerce (pos ! 0)
+          colour3 .= colour2 ! 0
         i += 1)
 
-  >>> fragment' where
+  >>> fragment'
+  where
+  count :: Num a => a
   count = 1
 
 
 data U v = U
-  { matrix :: v (Transform Float ClipUnits Window.Coords)
+  { matrix :: v (Transform V4 Float Window.Coords ClipUnits)
   , here   :: v (V2 (Distance Double))
-  , scale  :: v Float
+  , scale  :: v ((Window.Coords :/: Distance) Float)
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Window.Coords))
+matrix_ :: Lens' (U v) (v (Transform V4 Float Window.Coords ClipUnits))
 matrix_ = field @"matrix"
 
 here_ :: Lens' (U v) (v (V2 (Distance Double)))
 here_ = field @"here"
 
-scale_ :: Lens' (U v) (v Float)
+scale_ :: Lens' (U v) (v ((Window.Coords :/: Distance) Float))
 scale_ = field @"scale"
 
 
 data IG v = IG
-  { colour2 :: v (Colour Float)
+  { pos     :: v (V4 (Distance Float))
+  , colour2 :: v (Colour Float)
   , sweep   :: v (Radians Float)
   }
   deriving (Generic)

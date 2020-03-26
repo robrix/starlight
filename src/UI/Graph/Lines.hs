@@ -17,13 +17,13 @@ import GHC.Generics (Generic)
 import GL.Shader.DSL
 import UI.Graph.Vertex
 
-shader :: Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ pos } None -> main $
-    gl_Position .= ext4 (ext3 ((matrix u !* ext3 pos 1) ^. _xy) 0) 1)
+shader :: Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix } V{ pos } None -> main $
+    gl_Position .= ext4 (ext3 ((matrix !* ext3 pos 1) ^. _xy) 0) 1)
 
-  >>> fragment (\ None Frag{ fragColour } -> main $
-    fragColour .= colour u)
+  >>> fragment (\ U{ colour } None Frag{ fragColour } -> main $
+    fragColour .= colour)
 
 
 data U v = U

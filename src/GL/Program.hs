@@ -32,7 +32,7 @@ import qualified Foreign.C.String.Lift as C
 import           GHC.Stack
 import           GL.Effect.Check
 import           GL.Error
-import           GL.Shader hiding (Type)
+import           GL.Shader
 import qualified GL.Shader.DSL as DSL
 import           GL.Shader.Vars
 import           GL.Uniform
@@ -45,7 +45,7 @@ data Program (u :: (Type -> Type) -> Type) (i :: (Type -> Type) -> Type) (o :: (
   }
 
 
-build :: forall u v o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars v) => DSL.Shader u v o -> m (Program u v o)
+build :: forall u v o m sig . (HasCallStack, Has Check sig m, Has Finally sig m, Has (Lift IO) sig m, Vars u, Vars v) => DSL.RShader u v o -> m (Program u v o)
 build p = runLiftIO $ do
   program <- glCreateProgram
   onExit (glDeleteProgram program)

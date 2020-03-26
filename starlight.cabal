@@ -54,6 +54,7 @@ library
     Control.Exception.Lift
     Control.Monad.IO.Class.Lift
     Data.Flag
+    Data.Functor.C
     Data.Functor.I
     Data.Functor.Interval
     Data.Functor.K
@@ -79,10 +80,7 @@ library
     GL.Primitive
     GL.Program
     GL.Shader
-    GL.Shader.Decl
     GL.Shader.DSL
-    GL.Shader.Expr
-    GL.Shader.Stmt
     GL.Shader.Vars
     GL.Texture
     GL.TextureUnit
@@ -154,6 +152,7 @@ library
   autogen-modules:
     Paths_starlight
   build-depends:
+    , adjunctions
     , base
     , containers
     , direct-sqlite ^>= 2.3

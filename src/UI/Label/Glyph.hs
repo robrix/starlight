@@ -24,46 +24,55 @@ import GHC.Generics (Generic)
 import GL.Shader.DSL
 import Prelude hiding (break)
 
-shader :: Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ pos } IF{ _coord2, colour } -> main $ do
+shader :: Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix, ratio, fontScale, offset } V{ pos } IF{ _coord2, colour } -> main $ do
     _coord2 .= pos^._zw ^* 0.5
-    t <- var "t" (vec2 [0])
+    t <- var "t" (v2 0)
+    r <- let' "r" (1/float ratio)
     switch gl_InstanceID
       [ (Just 0, do
-        colour .= vec4 [1, 0, 0, 1]
-        t .= vec2 [-1/12.0, -5/12.0]
+        colour .= rgba 1 0 0 1
+        t .= xy (-1/12.0) (-5/12.0)
         break)
       , (Just 1, do
-        colour .= vec4 [1, 0, 0, 1]
-        t .= vec2 [ 1/12.0,  1/12.0]
+        colour .= rgba 1 0 0 1
+        t .= xy  (1/12.0)  (1/12.0)
         break)
       , (Just 2, do
-        colour .= vec4 [0, 1, 0, 1]
-        t .= vec2 [ 3/12.0, -1/12.0]
+        colour .= rgba 0 1 0 1
+        t .= xy  (3/12.0) (-1/12.0)
         break)
       , (Just 3, do
-        colour .= vec4 [0, 1, 0, 1]
-        t .= vec2 [ 5/12.0,  5/12.0]
+        colour .= rgba 0 1 0 1
+        t .= xy  (5/12.0)  (5/12.0)
         break)
       , (Just 4, do
-        colour .= vec4 [0, 0, 1, 1]
-        t .= vec2 [ 7/12.0, -3/12.0]
+        colour .= rgba 0 0 1 1
+        t .= xy  (7/12.0) (-3/12.0)
         break)
       , (Just 5, do
-        colour .= vec4 [0, 0, 1, 1]
-        t .= vec2 [ 9/12.0,  3/12.0]
+        colour .= rgba 0 0 1 1
+        t .= xy  (9/12.0)  (3/12.0)
         break)
       ]
-    let trans2 t = mat3 [vec3 [1, 0, 0], vec3 [0, 1, 0], ext3 t 1]
-        scale2 s = mat3 [vec3 [s, 0, 0], vec3 [0, s, 0], vec3 [0, 0, 1]]
-        m =   matrix u
-          !*! trans2 (get t ^* (1/float (ratio u)))
-          !*! scale2 (fontScale u)
-          !*! trans2 (vec2 [offset u, 0])
+    let t' p = get t ^. p * r
+        m =   matrix
+          !*! m3
+            1       0       0
+            0       1       0
+            (t' _x) (t' _y) 1
+          !*! m3
+            fontScale 0         0
+            0         fontScale 0
+            0         0         1
+          !*! m3
+            1              0 0
+            0              1 0
+            (float offset) 0 1
     gl_Position .= ext4 (m !* ext3 (pos^._xy) 1) 0^._xywz)
 
-  >>> fragment (\ IF{ _coord2, colour } Frag{ fragColour } -> main $
+  >>> fragment (\ _ IF{ _coord2, colour } Frag{ fragColour } -> main $
     iff (_coord2^._x * _coord2^._x - _coord2^._y `gt` 0)
       discard
       (iff gl_FrontFacing

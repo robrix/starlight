@@ -54,15 +54,15 @@ instance Uniform Double where
   glslType = "double"
   uniform prog loc = runLiftIO . glProgramUniform1d prog loc
 
-instance {-# OVERLAPPABLE #-} Row t => Uniform (V2 t) where
+instance Row t => Uniform (V2 t) where
   glslType = glslTypeForRow @t R2
   uniform prog loc vec = A.with vec (sendM . uniformForRow @t R2 prog loc 1 . castPtr)
 
-instance {-# OVERLAPPABLE #-} Row t => Uniform (V3 t) where
+instance Row t => Uniform (V3 t) where
   glslType = glslTypeForRow @t R3
   uniform prog loc vec = A.with vec (sendM . uniformForRow @t R3 prog loc 1 . castPtr)
 
-instance {-# OVERLAPPABLE #-} Row t => Uniform (V4 t) where
+instance Row t => Uniform (V4 t) where
   glslType = glslTypeForRow @t R4
   uniform prog loc vec = A.with vec (sendM . uniformForRow @t R4 prog loc 1 . castPtr)
 

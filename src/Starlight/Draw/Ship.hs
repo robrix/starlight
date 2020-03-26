@@ -30,7 +30,7 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), (^/), _a)
+import           GL.Shader.DSL hiding ((!*), (!*!), (^.), (^/), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
@@ -54,9 +54,9 @@ draw Character{ actor, ship = S.Ship{ colour, armour }, actions } = UI.using get
   view@View{ shipScale } <- ask
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
-    >>> transformToActor actor
-    >>> mkScale @_ @Distance (pure shipScale)
-    >>> mkScale (pure (actor^.magnitude_ ./. (1 :: Distance Double))))
+    <<< transformToActor actor
+    <<< mkScale @_ @Distance (pure shipScale)
+    <<< mkScale (pure (actor^.magnitude_ ./. (1 :: Distance Double))))
   colour_ ?= (colour
     & (if Thrust `Set.member` actions then (\ v -> v ^/ v^.UI._r) . (UI._r +~ 0.5) . (UI._b -~ 0.25) else id)
     & UI._a .~ realToFrac (armour^.inf_.to getI / armour^.sup_.to getI))
@@ -89,24 +89,24 @@ range :: Interval I Int
 range = 0...4
 
 
-shader :: D.Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ pos } None -> main $
-    gl_Position .= D.coerce (matrix u) D.!* ext4 (ext3 pos 1) 1)
+shader :: D.Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix } V{ pos } None -> main $
+    gl_Position .= coerce matrix D.!* ext4 (ext3 pos 1) 1)
 
-  >>> fragment (\ None Frag{ fragColour } -> main $
-    fragColour .= colour u)
+  >>> fragment (\ U{ colour } None Frag{ fragColour } -> main $
+    fragColour .= colour)
 
 
 data U v = U
-  { matrix :: v (Transform Float ClipUnits Distance)
+  { matrix :: v (Transform V4 Float Distance ClipUnits)
   , colour :: v (UI.Colour Float)
   }
   deriving (Generic)
 
 instance D.Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Distance))
+matrix_ :: Lens' (U v) (v (Transform V4 Float Distance ClipUnits))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (UI.Colour Float))

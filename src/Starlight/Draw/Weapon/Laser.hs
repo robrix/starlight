@@ -26,7 +26,7 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding (coerce, (!*), (!*!), (^.), _z)
+import           GL.Shader.DSL hiding ((!*), (!*!), (^.), _z)
 import qualified GL.Shader.DSL as D
 import           Starlight.Actor
 import           Starlight.Physics
@@ -57,8 +57,8 @@ draw beam@S.Beam{ colour } = UI.using getDrawable $ do
   view <- ask
   matrix_ ?= tmap realToFrac
     (   transformToSystem view
-    >>> transformToActor (beam^.actor_)
-    >>> mkScale (pure 1000))
+    <<< transformToActor (beam^.actor_)
+    <<< mkScale (pure 1000))
   colour_ ?= colour
 
   drawArrays Lines range
@@ -74,23 +74,23 @@ range :: Interval I Int
 range = 0...length vertices
 
 
-shader :: Shader U V Frag
-shader = program $ \ u
-  ->  vertex (\ V{ r } None -> main $
-    gl_Position .= D.coerce (matrix u) D.!* vec4 [r, 0, 0, 1])
-  >>> fragment (\ None Frag{ fragColour } -> main $
-    fragColour .= colour u)
+shader :: Shader shader => shader U V Frag
+shader
+  =   vertex (\ U{ matrix } V{ r } None -> main $
+    gl_Position .= coerce matrix D.!* xyzw r 0 0 1)
+  >>> fragment (\ U{ colour } None Frag{ fragColour } -> main $
+    fragColour .= colour)
 
 
 data U v = U
-  { matrix :: v (Transform Float ClipUnits Distance)
+  { matrix :: v (Transform V4 Float Distance ClipUnits)
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (Transform Float ClipUnits Distance))
+matrix_ :: Lens' (U v) (v (Transform V4 Float Distance ClipUnits))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))

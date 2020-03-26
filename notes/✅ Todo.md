@@ -171,7 +171,7 @@
   - ✅ thrusters cast light
   - animations/manoeuvres (e.g. barrel roll when killing enemy fighters)
   - scale ships very subtly with velocity?
-  - use mat3x4 instead of mat4 to avoid copying quite so much
+  - use mat4x3 instead of mat4 to avoid copying quite so much
   - define units for colours
 
 - 🤖 AI
