@@ -386,10 +386,6 @@ rgba :: (Vec expr, GL.Row a) => expr a -> expr a -> expr a -> expr a -> expr (V4
 rgba r g b a = v4 (V4 r g b a)
 
 class Vec expr => Mat expr where
-  m2 :: GL.Column a => V2 (expr (V2 a)) -> expr (M22 a)
-  m3 :: GL.Column a => V3 (expr (V3 a)) -> expr (M33 a)
-  m4 :: GL.Column a => V4 (expr (V4 a)) -> expr (M44 a)
-
   (!*) :: expr (v (v a)) -> expr (v a) -> expr (v a)
   (!!*) :: expr (v (v a)) -> expr a -> expr (v (v a))
   (!*!) :: expr (v (v a)) -> expr (v (v a)) -> expr (v (v a))
@@ -504,10 +500,6 @@ instance Vec RExpr where
   a ^/  b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
 
 instance Mat RExpr where
-  m2 (V2 x y :: V2 (expr (V2 a))) = fn (GL.glslType @(V2 (V2 a))) x y
-  m3 (V3 x y z :: V3 (expr (V3 a))) = fn (GL.glslType @(V3 (V3 a))) x y z
-  m4 (V4 x y z w :: V4 (expr (V4 a))) = fn (GL.glslType @(V4 (V4 a))) x y z w
-
   a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
   a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b

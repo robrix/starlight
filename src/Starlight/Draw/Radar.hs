@@ -166,9 +166,9 @@ radarShader
     primitiveIn Points
     primitiveOut LineStrip (count * 2 + 1)
     main $ do
-      let rot theta = m2 (V2
+      let rot theta = xy
             (xy (cos theta) (-sin theta))
-            (xy (sin theta) ( cos theta)))
+            (xy (sin theta) ( cos theta))
       emitPrimitive $ do
         i <- var @_ @_ @_ @Int "i" (-count)
         while (get i `lt` count + 1) $ do
@@ -192,9 +192,9 @@ targetShader
     primitiveIn Points
     primitiveOut LineStrip ((count * 2 + 1) * 2)
     main $ do
-      let rot theta = m2 (V2
+      let rot theta = xy
             (xy (cos theta) (-sin theta))
-            (xy (sin theta) ( cos theta)))
+            (xy (sin theta) ( cos theta))
       i <- var @_ @_ @_ @Int "i" (-count @(_ Int))
       while (get i `lt` count @(_ Int) + 1) . emitPrimitive $ do
         theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
