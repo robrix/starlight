@@ -479,16 +479,16 @@ class (FragmentRef ref, Expr ref expr) => FragmentExpr ref expr where
 newtype RExpr a = RExpr { renderExpr :: Doc () }
 
 instance Num (RExpr a) where
-  a + b = RExpr . parens $ renderExpr a <+> pretty '+' <+> renderExpr b
-  a * b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a - b = RExpr . parens $ renderExpr a <+> pretty '-' <+> renderExpr b
+  (+) = infix' "+"
+  (*) = infix' "*"
+  (-) = infix' "-"
   signum = fn "sign"
   negate a = RExpr . parens $ pretty "-" <> renderExpr a
   abs = fn "abs"
   fromInteger i = RExpr $ pretty i
 
 instance Fractional (RExpr a) where
-  a / b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
+  (/) = infix' "/"
   fromRational = lit . fromRational
 
 instance Floating (RExpr a) where
@@ -523,21 +523,22 @@ instance Vec RExpr where
 
   norm = fn "length"
   dot = fn "dot"
-  a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a ^/  b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
+
+  (^*) = infix' "*"
+  (^/) = infix' "/"
 
 instance Mat RExpr where
-  a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  (!*)  = infix' "*"
+  (!!*) = infix' "*"
+  (!*!) = infix' "*"
 
 instance Expr RRef RExpr where
   get = RExpr . renderRef
 
   a ^. Prj s = RExpr $ renderExpr a <> pretty s
-  eq a b = RExpr . parens $ renderExpr a <+> pretty "==" <+> renderExpr b
-  lt a b = RExpr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
-  gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
+  eq = infix' "=="
+  lt = infix' "<"
+  gt = infix' ">"
 
   cast' (K a :: K (expr a) b) = fn (GL.glslType @b) a
 
@@ -585,3 +586,6 @@ instance Fn t => Fn (RExpr a -> t) where
 
 lit :: Double -> RExpr a
 lit = RExpr . pretty
+
+infix' :: String -> RExpr a -> RExpr b -> RExpr c
+infix' s a b = RExpr . parens $ renderExpr a <+> pretty s <+> renderExpr b
