@@ -1,4 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -15,6 +18,7 @@ module GL.Shader.DSL
 ( Shader(..)
 , RShader(..)
 , (Cat.>>>)
+, ClipUnits(..)
 , None(..)
 , shaderSources
 , Frag(..)
@@ -63,9 +67,12 @@ module GL.Shader.DSL
 , m2
 , m3
 , m4
+, Dim(..)
 , Expr(..)
 , cast
+, cast'
 , float
+, float'
 , VertexExpr(..)
 , GeometryExpr
 , FragmentExpr(..)
@@ -87,22 +94,34 @@ import           Control.Monad.Trans.Cont
 import           Data.Coerce
 import           Data.Function (fix)
 import           Data.Functor.C
+import           Data.Functor.I
 import           Data.Functor.K
 import           Data.Kind (Type)
 import           Data.Text.Prettyprint.Doc hiding (dot)
 import           Data.Text.Prettyprint.Doc.Render.String
+import           Foreign.Storable (Storable)
+import           Geometry.Transform (Transform)
 import           GHC.Generics hiding ((:.:))
 import qualified GL.Primitive as P
 import qualified GL.Shader as Shader
 import           GL.Shader.Vars
 import           GL.TextureUnit
+import qualified GL.Type as GL
 import qualified GL.Uniform as GL
+import           Linear.Conjugate
+import           Linear.Epsilon
 import           Linear.Matrix (M22, M33, M44)
+import           Linear.Metric
 import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
+import           Linear.Vector
 import           Prelude hiding (break)
+import           System.Random (Random)
 import           UI.Colour (Colour)
+import           Unit
+import           Unit.Algebra (Div, Mul)
+import           Unit.Length (Length)
 
 class (forall u . Cat.Category (shader u)) => Shader shader where
   vertex :: (Vars u, Vars i, Vars o) => (forall ref expr stmt decl . VertexDecl ref expr stmt decl => u expr -> i expr -> o ref -> decl ()) -> shader u i o
@@ -119,6 +138,14 @@ instance Shader RShader where
   vertex   s = RShader $ renderStage Shader.Vertex   id (makeVars (RExpr . pretty . name)) s
   geometry s = RShader $ renderStage Shader.Geometry (coerce :: forall x . RExpr x -> (RExpr :.: []) x) (makeVars (RExpr . pretty . name)) s
   fragment s = RShader $ renderStage Shader.Fragment id (makeVars (RExpr . pretty . name)) s
+
+
+newtype ClipUnits a = ClipUnits { getClipUnits :: a }
+  deriving (GL.Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, GL.Row, Show, Storable, Traversable, GL.Type, GL.Uniform)
+  deriving (Additive, Applicative, Metric, Monad) via I
+
+instance Unit Length ClipUnits where
+  suffix = K ("clip"++)
 
 
 data None (v :: Type -> Type) = None
@@ -293,7 +320,7 @@ stmt d = RStmt . cont $ \ k -> d <> k ()
 newtype RRef a = RRef { renderRef :: Doc () }
 
 class Ref ref where
-  gl_Position :: ref (V4 Float)
+  gl_Position :: ref (V4 (ClipUnits Float))
 
   (^^.) :: ref a -> Prj a b -> ref b
   infixl 8 ^^.
@@ -362,11 +389,11 @@ class Vec expr where
   v3 :: GL.Row a => V3 (expr a) -> expr (V3 a)
   v4 :: GL.Row a => V4 (expr a) -> expr (V4 a)
 
-  ext3 :: expr (V2 Float) -> expr Float -> expr (V3 Float)
-  ext4 :: expr (V3 Float) -> expr Float -> expr (V4 Float)
+  ext3 :: Coercible a Float => expr (V2 a) -> expr a -> expr (V3 a)
+  ext4 :: Coercible a Float => expr (V3 a) -> expr a -> expr (V4 a)
 
-  dext3 :: expr (V2 Double) -> expr Double -> expr (V3 Double)
-  dext4 :: expr (V3 Double) -> expr Double -> expr (V4 Double)
+  dext3 :: Coercible a Double => expr (V2 a) -> expr a -> expr (V3 a)
+  dext4 :: Coercible a Double => expr (V3 a) -> expr a -> expr (V4 a)
 
   norm :: expr (v a) -> expr a
   dot :: expr (v a) -> expr (v a) -> expr a
@@ -389,6 +416,13 @@ rgba :: (Vec expr, GL.Row a) => expr a -> expr a -> expr a -> expr a -> expr (V4
 rgba r g b a = v4 (V4 r g b a)
 
 class Vec expr => Mat expr where
+  mkRotation :: expr (m (m (I a))) -> expr (Transform m a u v)
+  (<*<) :: expr (Transform m a v w) -> expr (Transform m a u v) -> expr (Transform m a u w)
+  (>*>) :: expr (Transform m a u v) -> expr (Transform m a v w) -> expr (Transform m a u w)
+  (>*) :: expr (Transform m a u v) -> expr (m (u a)) -> expr (m (v a))
+
+  infixl 7 <*<, >*>, >*
+
   (!*) :: expr (v (v a)) -> expr (v a) -> expr (v a)
   (!!*) :: expr (v (v a)) -> expr a -> expr (v (v a))
   (!*!) :: expr (v (v a)) -> expr (v (v a)) -> expr (v (v a))
@@ -418,17 +452,28 @@ m4
   -> expr (M44 a)
 m4 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 = xyzw (xyzw a1 a2 a3 a4) (xyzw a5 a6 a7 a8) (xyzw a9 a10 a11 a12) (xyzw a13 a14 a15 a16)
 
+class Dim expr where
+  (.*.) :: expr (u a) -> expr (v a) -> expr (Mul u v a)
+  (^*.) :: expr (f (u a)) -> expr (v a) -> expr (f (Mul u v a))
+  (.*^) :: expr (u a) -> expr (f (v a)) -> expr (f (Mul u v a))
+  (./.) :: expr (u a) -> expr (v a) -> expr (Div u v a)
+  (^/.) :: expr (f (u a)) -> expr (v a) -> expr (f (Div u v a))
+  (./^) :: expr (u a) -> expr (f (v a)) -> expr (f (Div u v a))
+
+  infixl 7 .*., ^*., .*^, ./., ^/., ./^
+
 class ( Ref ref
       , forall a . Num a => Num (expr a)
       , forall a . Fractional a => Fractional (expr a)
       , forall a . Floating a => Floating (expr a)
       , forall a b . Coercible a b => Coercible (expr a) (expr b)
       , Mat expr
+      , Dim expr
       )
    => Expr ref expr | expr -> ref where
   get :: ref a -> expr a
 
-  cast' :: GL.Uniform b => K (expr a) b -> expr b
+  cast'' :: GL.Uniform b => K (expr a) b -> expr b
 
   log2 :: expr a -> expr a
   exp2 :: expr a -> expr a
@@ -458,10 +503,16 @@ class ( Ref ref
   infixl 9 !
 
 cast :: forall a b expr ref . (Expr ref expr, GL.Uniform b) => expr a -> expr b
-cast = cast' . K
+cast = cast'' . K
+
+cast' :: forall a b expr u ref . (Expr ref expr, GL.Uniform (u b)) => expr (u a) -> expr (u b)
+cast' = cast'' . K
 
 float :: Expr ref expr => expr a -> expr Float
 float = cast @_ @Float
+
+float' :: (Expr ref expr, GL.Uniform (u Float)) => expr (u a) -> expr (u Float)
+float' = cast' @_ @Float
 
 class (VertexRef ref, Expr ref expr) => VertexExpr ref expr where
   gl_InstanceID :: expr Int
@@ -479,16 +530,16 @@ class (FragmentRef ref, Expr ref expr) => FragmentExpr ref expr where
 newtype RExpr a = RExpr { renderExpr :: Doc () }
 
 instance Num (RExpr a) where
-  a + b = RExpr . parens $ renderExpr a <+> pretty '+' <+> renderExpr b
-  a * b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a - b = RExpr . parens $ renderExpr a <+> pretty '-' <+> renderExpr b
+  (+) = infix' "+"
+  (*) = infix' "*"
+  (-) = infix' "-"
   signum = fn "sign"
   negate a = RExpr . parens $ pretty "-" <> renderExpr a
   abs = fn "abs"
   fromInteger i = RExpr $ pretty i
 
 instance Fractional (RExpr a) where
-  a / b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
+  (/) = infix' "/"
   fromRational = lit . fromRational
 
 instance Floating (RExpr a) where
@@ -523,23 +574,38 @@ instance Vec RExpr where
 
   norm = fn "length"
   dot = fn "dot"
-  a ^*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a ^/  b = RExpr . parens $ renderExpr a <+> pretty '/' <+> renderExpr b
+
+  (^*) = infix' "*"
+  (^/) = infix' "/"
 
 instance Mat RExpr where
-  a !*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a !!*  b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
-  a !*! b = RExpr . parens $ renderExpr a <+> pretty '*' <+> renderExpr b
+  mkRotation = coerce
+
+  (<*<) = infix' "*"
+  (>*>) = infix' "*"
+  (>*)  = infix' "*"
+
+  (!*)  = infix' "*"
+  (!!*) = infix' "*"
+  (!*!) = infix' "*"
+
+instance Dim RExpr where
+  (.*.) = infix' "*"
+  (^*.) = infix' "*"
+  (.*^) = infix' "*"
+  (./.) = infix' "/"
+  (^/.) = infix' "/"
+  (./^) = infix' "/"
 
 instance Expr RRef RExpr where
   get = RExpr . renderRef
 
   a ^. Prj s = RExpr $ renderExpr a <> pretty s
-  eq a b = RExpr . parens $ renderExpr a <+> pretty "==" <+> renderExpr b
-  lt a b = RExpr . parens $ renderExpr a <+> pretty '<' <+> renderExpr b
-  gt a b = RExpr . parens $ renderExpr a <+> pretty '>' <+> renderExpr b
+  eq = infix' "=="
+  lt = infix' "<"
+  gt = infix' ">"
 
-  cast' (K a :: K (expr a) b) = fn (GL.glslType @b) a
+  cast'' (K a :: K (expr a) b) = fn (GL.glslType @b) a
 
   log2 = fn "log2"
   exp2 = fn "exp2"
@@ -585,3 +651,6 @@ instance Fn t => Fn (RExpr a -> t) where
 
 lit :: Double -> RExpr a
 lit = RExpr . pretty
+
+infix' :: String -> RExpr a -> RExpr b -> RExpr c
+infix' s a b = RExpr . parens $ renderExpr a <+> pretty s <+> renderExpr b

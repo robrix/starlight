@@ -14,6 +14,9 @@ module Geometry.Transform
 , tmap
 , (>>>)
 , (<<<)
+, (<*<)
+, (>*>)
+, (>*)
 ) where
 
 import           Control.Category
@@ -55,3 +58,14 @@ apply (Transform m) v = pure <$> (m !* fmap prj v)
 
 tmap :: Functor m => (c -> c') -> Transform m c a b -> Transform m c' a b
 tmap f = Transform . fmap (fmap f) . getTransform
+
+(<*<) :: (Num a, Additive m, Applicative m, Traversable m) => Transform m a v w -> Transform m a u v -> Transform m a u w
+(<*<) = (<<<)
+
+(>*>) :: (Num a, Additive m, Applicative m, Traversable m) => Transform m a u v -> Transform m a v w -> Transform m a u w
+(>*>) = (>>>)
+
+(>*) :: (Num a, Unit d u, Unit d v, Additive m, Foldable m) => Transform m a u v -> m (u a) -> m (v a)
+(>*) = apply
+
+infixl 7 <*<, >*>, >*

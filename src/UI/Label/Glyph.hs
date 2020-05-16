@@ -17,6 +17,7 @@ module UI.Label.Glyph
 ) where
 
 import Control.Lens (Lens')
+import Data.Coerce
 import Data.Functor.I
 import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
@@ -70,7 +71,7 @@ shader
             1              0 0
             0              1 0
             (float offset) 0 1
-    gl_Position .= ext4 (m !* ext3 (pos^._xy) 1) 0^._xywz)
+    gl_Position .= coerce (ext4 (m !* ext3 (pos^._xy) 1) 0^._xywz))
 
   >>> fragment (\ _ IF{ _coord2, colour } Frag{ fragColour } -> main $
     iff (_coord2^._x * _coord2^._x - _coord2^._y `gt` 0)

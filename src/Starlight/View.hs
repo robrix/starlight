@@ -1,7 +1,5 @@
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
@@ -15,7 +13,6 @@ module Starlight.View
 , zoomForSpeed
 , withView
   -- * Transforms
-, ClipUnits(..)
 , transformToWindow
 , transformToZoomed
 , transformToSystem
@@ -32,19 +29,14 @@ import Control.Lens ((&), (.~))
 import Data.Coerce
 import Data.Functor.I
 import Data.Functor.Interval
-import Data.Functor.K
-import Foreign.Storable
 import Geometry.Transform
-import GL.Type as GL
-import GL.Uniform
+import GL.Shader.DSL (ClipUnits(..))
 import GL.Viewport
-import Linear.Conjugate
 import Linear.Exts
 import Starlight.Actor
 import Starlight.Body
 import Starlight.Physics
 import Starlight.System
-import System.Random (Random)
 import UI.Context as Context
 import UI.Window as Window
 import Unit.Algebra
@@ -101,14 +93,6 @@ withView m = do
       shipScale = 30
 
   runReader View{ ratio, size, zoom, scale, shipScale, focus } m
-
-
-newtype ClipUnits a = ClipUnits { getClipUnits :: a }
-  deriving (Column, Conjugate, Enum, Epsilon, Eq, Foldable, Floating, Fractional, Functor, Integral, Num, Ord, Random, Real, RealFloat, RealFrac, Row, Show, Storable, Traversable, GL.Type, Uniform)
-  deriving (Additive, Applicative, Metric, Monad) via I
-
-instance Unit Length ClipUnits where
-  suffix = K ("clip"++)
 
 
 transformToWindow :: View -> Transform V4 Double Window.Coords ClipUnits

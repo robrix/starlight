@@ -30,7 +30,7 @@ import           Foreign.Storable (Storable)
 import           GHC.Generics (Generic)
 import           GL.Array
 import           GL.Effect.Check
-import           GL.Shader.DSL hiding ((!*), (!*!), (^.), (^/), _a)
+import           GL.Shader.DSL hiding ((!*), (!*!), (./.), (^.), (^/), _a)
 import qualified GL.Shader.DSL as D
 import           Linear.Exts
 import           Starlight.Actor
@@ -41,6 +41,7 @@ import           Starlight.View
 import qualified UI.Colour as UI
 import qualified UI.Drawable as UI
 import           Unit.Algebra
+import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -78,7 +79,7 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 vertices :: [V I]
-vertices = coerce @[V2 Float]
+vertices = coerce @[V2 (Distance Float)]
   [ V2 1      0
   , V2 0      (-0.5)
   , V2 (-0.5) 0
@@ -92,7 +93,7 @@ range = 0...4
 shader :: D.Shader shader => shader U V Frag
 shader
   =   vertex (\ U{ matrix } V{ pos } None -> main $
-    gl_Position .= coerce matrix D.!* ext4 (ext3 pos 1) 1)
+    gl_Position .= matrix D.>* ext4 (ext3 pos 1) 1)
 
   >>> fragment (\ U{ colour } None Frag{ fragColour } -> main $
     fragColour .= colour)
@@ -113,7 +114,7 @@ colour_ :: Lens' (U v) (v (UI.Colour Float))
 colour_ = field @"colour"
 
 
-newtype V v = V { pos :: v (V2 Float) }
+newtype V v = V { pos :: v (V2 (Distance Float)) }
   deriving (Generic)
 
 instance D.Vars V

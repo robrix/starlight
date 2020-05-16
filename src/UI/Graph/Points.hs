@@ -34,7 +34,7 @@ shader
 
 
 data U v = U
-  { matrix    :: v (M33 Float)
+  { matrix    :: v (M33 (ClipUnits Float))
   , pointSize :: v Float
   , colour    :: v (Colour Float)
   }
@@ -42,7 +42,7 @@ data U v = U
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (M33 Float))
+matrix_ :: Lens' (U v) (v (M33 (ClipUnits Float)))
 matrix_ = field @"matrix"
 
 pointSize_ :: Lens' (U v) (v Float)

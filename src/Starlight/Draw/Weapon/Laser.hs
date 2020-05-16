@@ -68,7 +68,7 @@ newtype Drawable = Drawable { getDrawable :: UI.Drawable U V Frag }
 
 
 vertices :: [V I]
-vertices = coerce @[Float] [0, 1]
+vertices = coerce @[Distance Float] [0, 1]
 
 range :: Interval I Int
 range = 0...length vertices
@@ -77,7 +77,7 @@ range = 0...length vertices
 shader :: Shader shader => shader U V Frag
 shader
   =   vertex (\ U{ matrix } V{ r } None -> main $
-    gl_Position .= coerce matrix D.!* xyzw r 0 0 1)
+    gl_Position .= matrix D.>* xyzw r 0 0 1)
   >>> fragment (\ U{ colour } None Frag{ fragColour } -> main $
     fragColour .= colour)
 
@@ -97,7 +97,7 @@ colour_ :: Lens' (U v) (v (Colour Float))
 colour_ = field @"colour"
 
 
-newtype V v = V { r :: v Float }
+newtype V v = V { r :: v (Distance Float) }
   deriving (Generic)
 
 instance Vars V
