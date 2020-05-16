@@ -38,5 +38,5 @@ data Component
   | Engine
   | Fuel
   | Heatsink
-  | Radar
+  | Radar Radar
   | Weapon
