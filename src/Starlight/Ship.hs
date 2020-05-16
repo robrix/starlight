@@ -6,6 +6,7 @@ module Starlight.Ship
 , colour_
 , armour_
 , radar_
+, Type(..)
 ) where
 
 import Control.Lens (Lens')
@@ -30,3 +31,12 @@ armour_ = field @"armour"
 
 radar_ :: Lens' Ship Radar
 radar_ = field @"radar"
+
+
+data Type
+  = Cargo
+  | Engine
+  | Fuel
+  | Heatsink
+  | Radar
+  | Weapon

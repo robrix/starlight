@@ -37,7 +37,7 @@ import           Starlight.Input
 import           Starlight.Integration
 import           Starlight.Physics
 import           Starlight.Radar
-import           Starlight.Ship
+import           Starlight.Ship hiding (Type(..))
 import qualified Starlight.Sol as Sol
 import           Starlight.System as System
 import           Starlight.Time
