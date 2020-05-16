@@ -11,7 +11,7 @@ import Foreign.Storable (Storable)
 import GHC.Generics (Generic)
 import GL.Shader.DSL
 
-newtype V v = V { pos :: v (V2 Float) }
+newtype V v = V { pos :: v (V2 (ClipUnits Float)) }
   deriving (Generic)
 
 instance Vars V

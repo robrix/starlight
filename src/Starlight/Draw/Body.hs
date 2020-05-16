@@ -79,24 +79,24 @@ shader :: D.Shader shader => shader U V Frag
 shader
   =   vertex (\ U{ matrix } V{ pos } D.None -> main $ do
     let cos90 = 6.123233995736766e-17
-    m <- var "m" (coerce matrix)
+    m <- var "m" matrix
     switch gl_InstanceID
       [ (Just 1, do
-        m *= m4
+        m *= D.mkRotation (m4
           1 0     0     0
           0 cos90 (-1)  0
           0 1     cos90 0
-          0 0     0     1
+          0 0     0     1)
         break)
       , (Just 2, do
-        m *= m4
+        m *= D.mkRotation (m4
           cos90 0 1     0
           0     1 0     0
           (-1)  0 cos90 0
-          0     0 0     1
+          0     0 0     1)
         break)
       ]
-    gl_Position .= cast @_ @(V4 Float) (get m D.!* dext4 (dext3 pos 0) 1))
+    gl_Position .= cast @_ @(V4 (ClipUnits Float)) (get m D.>* dext4 (dext3 pos 0) 1))
 
   >>> fragment (\ U{ colour } D.None Frag{ fragColour } -> main $
     fragColour .= colour)
@@ -117,7 +117,7 @@ colour_ :: Lens' (U v) (v (Colour Float))
 colour_ = field @"colour"
 
 
-newtype V v = V { pos :: v (V2 Double) }
+newtype V v = V { pos :: v (V2 (Body.BodyUnits Double)) }
   deriving (Generic)
 
 instance D.Vars V

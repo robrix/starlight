@@ -20,6 +20,7 @@ import           Data.Functor.Interval
 import           GL.Array
 import           GL.Effect.Check
 import           GL.Program
+import           GL.Shader.DSL (ClipUnits(..))
 import           Graphics.GL.Core41
 import           Linear.Exts
 import           UI.Colour
@@ -28,7 +29,7 @@ import qualified UI.Graph.Points as Points
 import           UI.Graph.Vertex
 
 data Graph = Graph
-  { matrix    :: !(M33 Float)
+  { matrix    :: !(M33 (ClipUnits Float))
   , colour    :: !(V4 Float)
   , array     :: !(Array (V I))
   , points    :: !(Program Points.U V Points.Frag)
@@ -45,7 +46,8 @@ mkGraph f n from to = do
       minXY = V2 from (minimum (map (^. _y) vertices))
       maxXY = V2 to   (maximum (map (^. _y) vertices))
       matrix
-        =   translated (-1)
+        =   coerce
+        $   translated (-1)
         !*! scaled     (ext (2 / (maxXY - minXY)) 1)
         !*! translated (negated minXY)
       colour = white

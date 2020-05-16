@@ -15,6 +15,7 @@ module UI.Label.Text
 ) where
 
 import Control.Lens (Lens')
+import Data.Coerce
 import Data.Functor.I
 import Data.Generics.Product.Fields
 import Foreign.Storable (Storable)
@@ -25,7 +26,7 @@ shader :: Shader shader => shader U V Frag
 shader
   =   vertex (\ _ V{ pos } IF{ uv } -> main $ do
     uv .= (pos * xy 1 (-1)) * 0.5 + 0.5
-    gl_Position .= ext4 (ext3 (pos * xy 1 (-1)) 0) 1)
+    gl_Position .= coerce (ext4 (ext3 (pos * xy 1 (-1)) 0) 1))
 
   >>> fragment (\ U{ sampler, colour } IF{ uv } Frag{ fragColour } -> main $ do
     -- Get samples for -2/3 and -1/3

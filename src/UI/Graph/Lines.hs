@@ -27,14 +27,14 @@ shader
 
 
 data U v = U
-  { matrix :: v (M33 Float)
+  { matrix :: v (M33 (ClipUnits Float))
   , colour :: v (Colour Float)
   }
   deriving (Generic)
 
 instance Vars U
 
-matrix_ :: Lens' (U v) (v (M33 Float))
+matrix_ :: Lens' (U v) (v (M33 (ClipUnits Float)))
 matrix_ = field @"matrix"
 
 colour_ :: Lens' (U v) (v (Colour Float))

@@ -83,7 +83,7 @@ range = 0...length vertices
 shader :: Shader shader => shader U V Frag
 shader
   =   vertex (\ _ V{ pos } None -> main $
-    gl_Position .= ext4 (ext3 pos 0) 1)
+    gl_Position .= coerce (ext4 (ext3 pos 0) 1))
 
   >>> fragment (\ U{ resolution, focus, zoom } None Frag{ fragColour } -> main $ do
     resolution <- let' @_ @_ @_ @(V2 Float) "resolution" (coerce resolution)

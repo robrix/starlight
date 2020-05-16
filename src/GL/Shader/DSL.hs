@@ -320,7 +320,7 @@ stmt d = RStmt . cont $ \ k -> d <> k ()
 newtype RRef a = RRef { renderRef :: Doc () }
 
 class Ref ref where
-  gl_Position :: ref (V4 Float)
+  gl_Position :: ref (V4 (ClipUnits Float))
 
   (^^.) :: ref a -> Prj a b -> ref b
   infixl 8 ^^.
@@ -389,11 +389,11 @@ class Vec expr where
   v3 :: GL.Row a => V3 (expr a) -> expr (V3 a)
   v4 :: GL.Row a => V4 (expr a) -> expr (V4 a)
 
-  ext3 :: expr (V2 Float) -> expr Float -> expr (V3 Float)
-  ext4 :: expr (V3 Float) -> expr Float -> expr (V4 Float)
+  ext3 :: Coercible a Float => expr (V2 a) -> expr a -> expr (V3 a)
+  ext4 :: Coercible a Float => expr (V3 a) -> expr a -> expr (V4 a)
 
-  dext3 :: expr (V2 Double) -> expr Double -> expr (V3 Double)
-  dext4 :: expr (V3 Double) -> expr Double -> expr (V4 Double)
+  dext3 :: Coercible a Double => expr (V2 a) -> expr a -> expr (V3 a)
+  dext4 :: Coercible a Double => expr (V3 a) -> expr a -> expr (V4 a)
 
   norm :: expr (v a) -> expr a
   dot :: expr (v a) -> expr (v a) -> expr a

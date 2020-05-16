@@ -53,7 +53,6 @@ import           UI.Colour
 import qualified UI.Window as Window
 import           Unit.Algebra
 import           Unit.Angle
-import           Unit.Length
 
 draw
   :: ( Has Check sig m
@@ -174,7 +173,7 @@ radarShader
         while (get i `lt` count + 1) $ do
           emitVertex $ do
             theta <- let' "theta" (float (get i) / float (count @(_ Int)) * coerce (sweep ! 0))
-            gl_Position .= coerce matrix D.!*! cast @_ @(M44 Float) (rot theta) !* coerce (pos ! 0)
+            gl_Position .= cast @_ @(Transform V4 Float ClipUnits ClipUnits) (rot theta) D.<*< matrix D.>* pos ! 0
             colour3 .= colour2 ! 0
           i += 1)
 
@@ -202,7 +201,7 @@ targetShader
           gl_Position .= xyzw 0 0 0 1
           colour3 .= colour2 ! 0
         emitVertex $ do
-          gl_Position .= coerce matrix D.!*! cast @_ @(M44 Float) (rot theta) !* coerce (pos ! 0)
+          gl_Position .= cast @_ @(Transform V4 Float ClipUnits ClipUnits) (rot theta) D.<*< matrix D.>* pos ! 0
           colour3 .= colour2 ! 0
         i += 1)
 
@@ -232,7 +231,7 @@ scale_ = field @"scale"
 
 
 data IG v = IG
-  { pos     :: v (V4 (Distance Float))
+  { pos     :: v (V4 (Window.Coords Float))
   , colour2 :: v (Colour Float)
   , sweep   :: v (Radians Float)
   }
