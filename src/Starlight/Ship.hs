@@ -9,10 +9,11 @@ module Starlight.Ship
 , Component(..)
 ) where
 
-import Control.Lens (Lens')
+import Control.Lens (Lens', Prism')
 import Data.Functor.I
 import Data.Functor.Interval
 import Data.Generics.Product.Fields
+import Data.Generics.Sum.Constructors
 import GHC.Generics (Generic)
 import Starlight.Radar
 import UI.Colour
@@ -41,3 +42,6 @@ data Component
   | Radar Radar
   | Weapon
   deriving (Generic, Show)
+
+_Radar :: Prism' Component Radar
+_Radar = _Ctor @"Radar"
