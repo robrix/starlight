@@ -44,7 +44,7 @@ import Starlight.Identifier
 import Starlight.Input
 import Starlight.Physics
 import Starlight.Radar
-import Starlight.Ship hiding (Type(..))
+import Starlight.Ship hiding (Component(..))
 import Starlight.System as System
 import Starlight.Time
 import Starlight.Weapon.Laser as Laser

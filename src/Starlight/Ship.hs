@@ -6,7 +6,7 @@ module Starlight.Ship
 , colour_
 , armour_
 , radar_
-, Type(..)
+, Component(..)
 ) where
 
 import Control.Lens (Lens')
@@ -33,7 +33,7 @@ radar_ :: Lens' Ship Radar
 radar_ = field @"radar"
 
 
-data Type
+data Component
   = Cargo
   | Engine
   | Fuel
