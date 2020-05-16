@@ -160,6 +160,8 @@
   - spawn characters in near planets
   - spawn player in near planets
   - jobs
+  - parts
+  - mods
 
 - 🌁 Graphics
   - shade planets
