@@ -159,6 +159,7 @@
   - doppler effect
   - spawn characters in near planets
   - spawn player in near planets
+  - jobs
 
 - 🌁 Graphics
   - shade planets
