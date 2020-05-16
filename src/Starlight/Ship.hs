@@ -40,3 +40,4 @@ data Component
   | Heatsink
   | Radar Radar
   | Weapon
+  deriving (Generic, Show)
