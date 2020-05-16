@@ -416,6 +416,7 @@ rgba :: (Vec expr, GL.Row a) => expr a -> expr a -> expr a -> expr a -> expr (V4
 rgba r g b a = v4 (V4 r g b a)
 
 class Vec expr => Mat expr where
+  mkRotation :: expr (m (m (I a))) -> expr (Transform m a u v)
   (<*<) :: expr (Transform m a v w) -> expr (Transform m a u v) -> expr (Transform m a u w)
   (>*>) :: expr (Transform m a u v) -> expr (Transform m a v w) -> expr (Transform m a u w)
   (>*) :: expr (Transform m a u v) -> expr (m (u a)) -> expr (m (v a))
@@ -578,6 +579,8 @@ instance Vec RExpr where
   (^/) = infix' "/"
 
 instance Mat RExpr where
+  mkRotation = coerce
+
   (<*<) = infix' "*"
   (>*>) = infix' "*"
   (>*)  = infix' "*"
