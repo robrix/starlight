@@ -172,7 +172,7 @@ library
     , prettyprinter-ansi-terminal
     , random
     , sdl2 ^>= 2.5
-    , splitmix
+    , splitmix ^>= 0.0.5
     , stm ^>= 2.5
     , terminal-size
     , text
